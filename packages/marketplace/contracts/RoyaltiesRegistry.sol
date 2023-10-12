@@ -203,7 +203,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             if (_checkGetRecipientsInterface(token)) {
                 royalties = _getRecipients(token, tokenId, receiver, royaltyAmount);
             } else {
-                return _calculateRoyalties(receiver, royaltyAmount);
+                Recipient[] memory newReceiver = new Recipient[](1);
+                newReceiver[0] = Recipient(payable(receiver), uint16(BASIS_POINTS));
+                return _calculateRoyalties(newReceiver, royaltyAmount);
             }
         } catch {
             return new Part[](0);
@@ -222,23 +224,23 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         address receiver,
         uint256 royaltyAmount
     ) internal view returns (Part[] memory royalties) {
-        try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
-            uint256 multiRecipientsLength = multiRecipients.length;
-            royalties = new Part[](multiRecipientsLength);
-            uint256 sum = 0;
-            for (uint256 i; i < multiRecipientsLength; i++) {
-                Recipient memory splitRecipient = multiRecipients[i];
-                royalties[i].account = splitRecipient.recipient;
-                uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
-                royalties[i].value = uint96(splitAmount);
-                sum += splitAmount;
+        Recipient[] memory multiRecipients;
+        try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory retrievedRecipients) {
+            multiRecipients = retrievedRecipients;
+
+            // Check that the sum of basis points doesn't exceed 100%
+            uint16 totalBps = 0;
+            for (uint256 i = 0; i < multiRecipients.length; i++) {
+                totalBps += multiRecipients[i].bps;
             }
-            // sum can be less than amount, otherwise small-value listings can break
-            require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
-            return royalties;
+            require(totalBps <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
         } catch {
-            return _calculateRoyalties(receiver, royaltyAmount);
+            // If retrieving multiple recipients fails, default to a single receiver
+            multiRecipients = new Recipient[](1);
+            multiRecipients[0] = Recipient(payable(receiver), uint16(BASIS_POINTS));
         }
+
+        return _calculateRoyalties(multiRecipients, royaltyAmount);
     }
 
     /// @notice check if the token supports the type(IMultiRoyaltyRecipients).interfaceId
@@ -272,20 +274,37 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     }
 
     /// @notice method for converting amount to percent and forming Part
-    /// @param to recipient of royalties
+    /// @param recipients array of royalties recipients
     /// @param amount of royalties
     /// @return Part with account and value
-    function _calculateRoyalties(address to, uint256 amount) internal pure returns (Part[] memory) {
-        Part[] memory result;
+    function _calculateRoyalties(Recipient[] memory recipients, uint256 amount) internal pure returns (Part[] memory) {
+        uint256 totalRecipients = recipients.length;
+        Part[] memory royalties;
+
         if (amount == 0) {
-            return result;
+            return royalties;
         }
-        uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
-        require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
-        result = new Part[](1);
-        result[0].account = payable(to);
-        result[0].value = percent;
-        return result;
+
+        // uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
+        // require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
+
+        uint256 sum = 0;
+        royalties = new Part[](totalRecipients);
+
+        for (uint256 i = 0; i < totalRecipients; i++) {
+            royalties[i].account = recipients[i].recipient;
+            uint256 splitAmount = (recipients[i].bps * amount) / WEIGHT_VALUE;
+            royalties[i].value = uint96(splitAmount);
+            sum += splitAmount;
+        }
+
+        // Check to ensure valid splits
+        require(sum <= amount, "RoyaltiesRegistry: Invalid split");
+
+        uint256 percent = (sum * BASIS_POINTS) / WEIGHT_VALUE;
+        require(percent <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
+
+        return royalties;
     }
 
     // slither-disable-next-line unused-state

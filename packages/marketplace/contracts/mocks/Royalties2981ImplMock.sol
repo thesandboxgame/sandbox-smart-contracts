@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {RoyaltiesRegistry} from "../RoyaltiesRegistry.sol";
+import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 
 /// @title Royalties2981ImplMock Contract
 /// @dev serves as an implementation of the IERC2981
@@ -30,10 +31,10 @@ contract Royalties2981ImplMock is RoyaltiesRegistry, IERC2981 {
     }
 
     function calculateRoyaltiesTest(
-        address payable to,
+        Recipient[] memory recipients,
         uint256 amount
     ) external pure returns (IRoyaltiesProvider.Part[] memory) {
-        return _calculateRoyalties(to, amount);
+        return _calculateRoyalties(recipients, amount);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
