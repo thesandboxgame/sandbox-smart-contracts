@@ -56,14 +56,15 @@ contract WhiteList is Initializable, IWhiteList, AccessControlEnumerableUpgradea
     ) internal onlyInitializing {
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRolesForAssetClassType(LibAsset.AssetClassType.ERC20_ASSET_CLASS, [ERC20_ROLE]);
+        bytes32[] memory roleArray = new bytes32[](1);
+        roleArray[0] = ERC20_ROLE;
+        _setRolesForAssetClassType(LibAsset.AssetClassType.ERC20_ASSET_CLASS, roleArray);
     }
 
     function setRoleToken(LibAsset.Asset calldata asset, bytes32 role) external {
         address token = abi.decode(asset.assetType.data, (address));
-        LibAsset.AssetClassType type = asset.assetType.AssetClassType;
-        require(roles[type], "type of asset not yet set");
-        bytes32[] memory listOfRoles = roles[asset.assetType.AssetClassType];
+        require((roles[asset.assetType.assetClass].length > 0), "type of asset not yet set");
+        bytes32[] memory listOfRoles = roles[asset.assetType.assetClass];
         for (uint256 i; i < listOfRoles.length; i++) {
             if (listOfRoles[i] == role) {
                 grantRole(role, token);
@@ -77,8 +78,8 @@ contract WhiteList is Initializable, IWhiteList, AccessControlEnumerableUpgradea
         _setRolesForAssetClassType(classType, newRoles);
     }
 
-    function setRoleToken(LibAsset.AssetClassType classType, bool status) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setRoleStatus(classType, status);
+    function setRoleStatus(bytes32 role, bool status) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setRoleStatus(role, status);
     }
 
     function setOpen(bool status) external {
@@ -103,7 +104,7 @@ contract WhiteList is Initializable, IWhiteList, AccessControlEnumerableUpgradea
         } else {
             //get roles associated to asset, verify is has role
             address token = abi.decode(asset.assetType.data, (address));
-            bytes32[] memory listOfRoles = roles[asset.assetType.AssetClassType];
+            bytes32[] memory listOfRoles = roles[asset.assetType.assetClass];
             for (uint256 i; i < listOfRoles.length; i++) {
                 if (hasRole(listOfRoles[i], token)) {
                     return;
