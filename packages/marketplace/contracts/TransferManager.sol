@@ -233,15 +233,15 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param to account that will receive the asset
     /// @dev this is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
-        if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC20_ASSET_CLASS) {
+        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             address token = abi.decode(asset.assetType.data, (address));
             // slither-disable-next-line arbitrary-send-erc20
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS) {
+        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             require(asset.value == 1, "erc721 value error");
             IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS) {
+        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
             (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
             IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
         } else {
