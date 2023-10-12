@@ -199,7 +199,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('RoyaltiesByToken recipient should be present');
+    ).to.be.revertedWith('recipient should be present');
   });
 
   it('should not set royalties with token with invalid royalty value', async function () {
@@ -215,7 +215,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('Royalty value for RoyaltiesByToken should be > 0');
+    ).to.be.revertedWith('royalty value should be > 0');
   });
 
   it('should not set royalties with token when setting royalties exceeding 100%', async function () {
@@ -235,7 +235,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('Set by token royalties sum more, than 100%');
+    ).to.be.revertedWith('royalties sum more, than 100%');
   });
 
   it('should set royalties by token', async function () {

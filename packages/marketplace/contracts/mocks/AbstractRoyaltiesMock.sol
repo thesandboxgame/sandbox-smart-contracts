@@ -15,7 +15,7 @@ abstract contract AbstractRoyaltiesMock {
             totalValue += _royalties[i].value;
             royalties[id].push(_royalties[i]);
         }
-        require(totalValue < 10000, "Royalty total value should be < 10000");
+        require(totalValue < 10000, "Royalty should be < 10000");
         _onRoyaltiesSet(id, _royalties);
     }
 

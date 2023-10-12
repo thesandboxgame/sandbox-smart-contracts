@@ -101,12 +101,12 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         uint256 sumRoyalties = 0;
         delete royaltiesByToken[token];
         for (uint256 i = 0; i < royalties.length; ++i) {
-            require(royalties[i].account != address(0x0), "RoyaltiesByToken recipient should be present");
-            require(royalties[i].value != 0, "Royalty value for RoyaltiesByToken should be > 0");
+            require(royalties[i].account != address(0x0), "recipient should be present");
+            require(royalties[i].value != 0, "royalty value should be > 0");
             royaltiesByToken[token].royalties.push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < BASIS_POINTS, "Set by token royalties sum more, than 100%");
+        require(sumRoyalties < BASIS_POINTS, "royalties sum more, than 100%");
         royaltiesByToken[token].initialized = true;
         emit RoyaltiesSetForContract(token, royalties);
     }

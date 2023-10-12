@@ -61,8 +61,8 @@ library LibAsset {
         AssetClass classLeft = leftType.assetClass;
         AssetClass classRight = rightType.assetClass;
 
-        require(classLeft != AssetClass.INVALID, "not found IAssetMatcher");
-        require(classRight != AssetClass.INVALID, "not found IAssetMatcher");
+        require(classLeft != AssetClass.INVALID, "invalid left asset class");
+        require(classRight != AssetClass.INVALID, "invalid right asset class");
         require(classLeft == classRight, "assets don't match");
 
         bytes32 leftHash = keccak256(leftType.data);

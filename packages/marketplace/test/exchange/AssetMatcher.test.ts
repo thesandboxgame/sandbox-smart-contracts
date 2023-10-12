@@ -31,10 +31,10 @@ describe('AssetMatcher.sol', function () {
     };
     await expect(
       assetMatcherAsUser.matchAssets(leftAssetType, rightAssetType)
-    ).to.be.revertedWith('not found IAssetMatcher');
+    ).to.be.revertedWith('invalid left asset class');
     await expect(
       assetMatcherAsUser.matchAssets(rightAssetType, leftAssetType)
-    ).to.be.revertedWith('not found IAssetMatcher');
+    ).to.be.revertedWith('invalid right asset class');
   });
 
   it('should call return the expected AssetType', async function () {

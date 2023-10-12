@@ -63,10 +63,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
         bytes32 hash = LibOrder.hash(order);
 
-        require(
-            order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature),
-            "order signature verification error"
-        );
+        require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
     /// @notice if ERC20 token is accepted

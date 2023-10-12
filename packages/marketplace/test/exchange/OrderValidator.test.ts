@@ -136,7 +136,7 @@ describe('OrderValidator.sol', function () {
 
     await expect(
       OrderValidatorAsUser.validate(order, signature, user2.address)
-    ).to.be.revertedWith('order signature verification error');
+    ).to.be.revertedWith('signature verification error');
   });
 
   it('should validate when sender is not Order maker but signature signer is Order maker', async function () {
@@ -209,7 +209,7 @@ describe('OrderValidator.sol', function () {
 
     await expect(
       OrderValidatorAsUser.validate(order, '0x', user1.address)
-    ).to.be.revertedWith('order signature verification error');
+    ).to.be.revertedWith('signature verification error');
   });
 
   it('should validate when maker is contract but not sender and isValidSignature returns magic value', async function () {
