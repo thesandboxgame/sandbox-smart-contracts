@@ -5,11 +5,11 @@ pragma solidity 0.8.19;
 /// @title library for Assets
 /// @notice contains structs for Asset and AssetType
 library LibAsset {
-    enum AssetClassType {
-        INVALID_ASSET_CLASS,
-        ERC20_ASSET_CLASS,
-        ERC721_ASSET_CLASS,
-        ERC1155_ASSET_CLASS
+    enum AssetClass {
+        INVALID,
+        ERC20,
+        ERC721,
+        ERC1155
     }
 
     enum FeeSide {
@@ -21,7 +21,7 @@ library LibAsset {
     /// @dev AssetType is a type of a specific asset. For example AssetType is specific ERC-721 token (key is token + tokenId) or specific ERC-20 token (DAI for example).
     /// @dev It consists of asset class and generic data (format of data is different for different asset classes). For example, for asset class ERC20 data holds address of the token, for ERC-721 data holds smart contract address and tokenId.
     struct AssetType {
-        AssetClassType assetClass;
+        AssetClass assetClass;
         bytes data;
     }
 
@@ -40,11 +40,11 @@ library LibAsset {
     /// @param leftClass left side asset class type
     /// @param rightClass right side asset class type
     /// @return side from which the fees will be taken or none
-    function getFeeSide(AssetClassType leftClass, AssetClassType rightClass) internal pure returns (FeeSide) {
-        if (leftClass == AssetClassType.ERC20_ASSET_CLASS && rightClass != AssetClassType.ERC20_ASSET_CLASS) {
+    function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
+        if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
             return FeeSide.LEFT;
         }
-        if (rightClass == AssetClassType.ERC20_ASSET_CLASS && leftClass != AssetClassType.ERC20_ASSET_CLASS) {
+        if (rightClass == AssetClass.ERC20 && leftClass != AssetClass.ERC20) {
             return FeeSide.RIGHT;
         }
         return FeeSide.NONE;
@@ -58,11 +58,11 @@ library LibAsset {
         AssetType calldata leftType,
         AssetType calldata rightType
     ) internal pure returns (AssetType memory) {
-        AssetClassType classLeft = leftType.assetClass;
-        AssetClassType classRight = rightType.assetClass;
+        AssetClass classLeft = leftType.assetClass;
+        AssetClass classRight = rightType.assetClass;
 
-        require(classLeft != AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
-        require(classRight != AssetClassType.INVALID_ASSET_CLASS, "not found IAssetMatcher");
+        require(classLeft != AssetClass.INVALID, "not found IAssetMatcher");
+        require(classRight != AssetClass.INVALID, "not found IAssetMatcher");
         require(classLeft == classRight, "assets don't match");
 
         bytes32 leftHash = keccak256(leftType.data);
@@ -92,8 +92,8 @@ library LibAsset {
     /// @return tokenId the decoded id of the token
     function getNFTInfo(Asset memory asset) internal pure returns (address, uint256) {
         require(
-            asset.assetType.assetClass == LibAsset.AssetClassType.ERC721_ASSET_CLASS ||
-                asset.assetType.assetClass == LibAsset.AssetClassType.ERC1155_ASSET_CLASS,
+            asset.assetType.assetClass == LibAsset.AssetClass.ERC721 ||
+                asset.assetType.assetClass == LibAsset.AssetClass.ERC1155,
             "asset is not an NFT"
         );
         return abi.decode(asset.assetType.data, (address, uint));
