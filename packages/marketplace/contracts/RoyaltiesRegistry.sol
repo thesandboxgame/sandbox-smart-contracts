@@ -198,21 +198,15 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token address of token
     /// @param tokenId id of token
     /// @return royalties 2981 royalty array
-    function _getRoyaltiesEIP2981(
-        address token,
-        uint256 tokenId
-    ) internal view returns (LibPart.Part[] memory royalties) {
-        try IERC2981(token).royaltyInfo(tokenId, LibRoyalties2981._WEIGHT_VALUE) returns (
-            address receiver,
-            uint256 royaltyAmount
-        ) {
+    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
+        try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
             if (_checkGetRecipientsInterface(token)) {
                 royalties = _getRecipients(token, tokenId, receiver, royaltyAmount);
             } else {
-                return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+                return _calculateRoyalties(receiver, royaltyAmount);
             }
         } catch {
-            return new LibPart.Part[](0);
+            return new Part[](0);
         }
     }
 
@@ -227,15 +221,15 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         uint256 tokenId,
         address receiver,
         uint256 royaltyAmount
-    ) internal view returns (LibPart.Part[] memory royalties) {
+    ) internal view returns (Part[] memory royalties) {
         try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
             uint256 multiRecipientsLength = multiRecipients.length;
-            royalties = new LibPart.Part[](multiRecipientsLength);
+            royalties = new Part[](multiRecipientsLength);
             uint256 sum = 0;
             for (uint256 i; i < multiRecipientsLength; i++) {
                 Recipient memory splitRecipient = multiRecipients[i];
                 royalties[i].account = splitRecipient.recipient;
-                uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / LibRoyalties2981._WEIGHT_VALUE;
+                uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
                 royalties[i].value = uint96(splitAmount);
                 sum += splitAmount;
             }
@@ -243,15 +237,17 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
             return royalties;
         } catch {
-            return LibRoyalties2981.calculateRoyalties(receiver, royaltyAmount);
+            return _calculateRoyalties(receiver, royaltyAmount);
         }
     }
 
-    /// @notice check if the token supports the INTERFACE_ID_GET_RECIPIENTS
+    /// @notice check if the token supports the type(IMultiRoyaltyRecipients).interfaceId
     /// @param token address of token
     /// @return true or false
     function _checkGetRecipientsInterface(address token) internal view returns (bool) {
-        try IERC165Upgradeable(token).supportsInterface(INTERFACE_ID_GET_RECIPIENTS) returns (bool result) {
+        try IERC165Upgradeable(token).supportsInterface(type(IMultiRoyaltyRecipients).interfaceId) returns (
+            bool result
+        ) {
             if (result) {
                 return true;
             }
@@ -279,10 +275,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         }
     }
 
-    /// @notice method for converting amount to percent and forming LibPart
+    /// @notice method for converting amount to percent and forming Part
     /// @param to recipient of royalties
     /// @param amount of royalties
-    /// @return LibPart with account and value
+    /// @return Part with account and value
     function _calculateRoyalties(address to, uint256 amount) internal pure returns (Part[] memory) {
         Part[] memory result;
         if (amount == 0) {
