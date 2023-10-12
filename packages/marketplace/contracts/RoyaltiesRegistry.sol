@@ -200,10 +200,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token address of token
     /// @param tokenId id of token
     /// @return royalties 2981 royalty array
-    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
+    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
             if (_checkGetRecipientsInterface(token)) {
-                royalties = _getRecipients(token, tokenId, receiver, royaltyAmount);
+                 return _getRecipients(token, tokenId, receiver, royaltyAmount);
             } else {
                 return _calculateRoyalties(receiver, royaltyAmount);
             }
@@ -223,10 +223,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         uint256 tokenId,
         address receiver,
         uint256 royaltyAmount
-    ) internal view returns (Part[] memory royalties) {
+    ) internal view returns (Part[] memory) {
         try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
             uint256 multiRecipientsLength = multiRecipients.length;
-            royalties = new Part[](multiRecipientsLength);
+            Part[] memory royalties = new Part[](multiRecipientsLength);
             uint256 sum = 0;
             for (uint256 i; i < multiRecipientsLength; i++) {
                 Recipient memory splitRecipient = multiRecipients[i];
