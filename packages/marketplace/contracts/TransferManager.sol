@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -18,6 +18,8 @@ import {LibAsset} from "./libraries/LibAsset.sol";
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
+    using ERC165CheckerUpgradeable for address;
+
     /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
 
@@ -141,13 +143,16 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 fees;
         uint256 remainder = paymentSide.asset.value;
-        if (_isPrimaryMarket(nftSide)) {
+
+        LibAsset.NFTInfo memory nftInfo = LibAsset.getNFTInfo(nftSide.asset);
+        if (_isPrimaryMarket(nftSide, nftInfo)) {
             fees = protocolFeePrimary;
             // No royalties
         } else {
             fees = protocolFeeSecondary;
-            remainder = _transferRoyalties(remainder, paymentSide, nftSide);
+            remainder = _transferRoyalties(remainder, paymentSide, nftSide, nftInfo);
         }
+
         if (fees > 0 && remainder > 0) {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
@@ -158,24 +163,29 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
     /// @notice return if this tx is on primary market
     /// @param nftSide DealSide of the nft-side order
+    /// @param nftInfo token address and token id
     /// @return creator address or zero if is not able to retrieve it
-    function _isPrimaryMarket(DealSide memory nftSide) internal view returns (bool) {
-        address creator = _getCreator(nftSide.asset.assetType);
-        return creator != address(0) && nftSide.account == creator;
+    function _isPrimaryMarket(DealSide memory nftSide, LibAsset.NFTInfo memory nftInfo) internal view returns (bool) {
+        if (nftInfo.token.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
+            address creator = IRoyaltyUGC(nftInfo.token).getCreatorAddress(nftInfo.tokenId);
+            return creator != address(0) && nftSide.account == creator;
+        }
+        return false;
     }
 
     /// @notice transfer royalties.
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
+    /// @param nftInfo tokenId and token address
     /// @return How much left after paying royalties
     function _transferRoyalties(
         uint256 remainder,
         DealSide memory paymentSide,
-        DealSide memory nftSide
+        DealSide memory nftSide,
+        LibAsset.NFTInfo memory nftInfo
     ) internal returns (uint256) {
-        (address token, uint256 tokenId) = LibAsset.getNFTInfo(nftSide.asset);
-        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
+        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(nftInfo.token, nftInfo.tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
@@ -220,36 +230,37 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         return remainder;
     }
 
-    /// @notice return the creator of the token if the token supports IRoyaltyUGC
-    /// @param assetType asset type
-    /// @return creator address or zero if is not able to retrieve it
-    function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
-        (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
-        try IERC165Upgradeable(token).supportsInterface(type(IRoyaltyUGC).interfaceId) returns (bool result) {
-            if (result) {
-                creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-            }
-            // solhint-disable-next-line no-empty-blocks
-        } catch {}
-    }
-
     /// @notice function should be able to transfer any supported Asset
     /// @param asset Asset to be transferred
     /// @param from account holding the asset
     /// @param to account that will receive the asset
-    /// @dev this is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            address token = abi.decode(asset.assetType.data, (address));
+            address token = LibAsset.getERC20Info(asset);
             // slither-disable-next-line arbitrary-send-erc20
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
-            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+        } else {
+            LibAsset.NFTInfo memory nftInfo = LibAsset.getNFTInfo(asset);
+            _transferNFT(asset, nftInfo, from, to);
+        }
+    }
+
+    /// @notice function should be able to transfer ERC1155 and ERC721
+    /// @param asset Asset to be transferred
+    /// @param nftInfo token address and token id
+    /// @param from account holding the asset
+    /// @param to account that will receive the asset
+    function _transferNFT(
+        LibAsset.Asset memory asset,
+        LibAsset.NFTInfo memory nftInfo,
+        address from,
+        address to
+    ) internal {
+        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
             require(asset.value == 1, "erc721 value error");
-            IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
+            IERC721Upgradeable(nftInfo.token).safeTransferFrom(from, to, nftInfo.tokenId);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
-            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-            IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
+            IERC1155Upgradeable(nftInfo.token).safeTransferFrom(from, to, nftInfo.tokenId, asset.value, "");
         } else {
             revert("invalid asset class");
         }

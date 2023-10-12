@@ -18,6 +18,12 @@ library LibAsset {
         RIGHT
     }
 
+    /// @dev if the asset class is ERC721 or ERC1155 we get token address and token id
+    struct NFTInfo {
+        address token;
+        uint256 tokenId;
+    }
+
     /// @dev AssetType is a type of a specific asset. For example AssetType is specific ERC-721 token (key is token + tokenId) or specific ERC-20 token (DAI for example).
     /// @dev It consists of asset class and generic data (format of data is different for different asset classes). For example, for asset class ERC20 data holds address of the token, for ERC-721 data holds smart contract address and tokenId.
     struct AssetType {
@@ -86,16 +92,24 @@ library LibAsset {
         return keccak256(abi.encode(ASSET_TYPEHASH, hash(asset.assetType), asset.value));
     }
 
-    /// @notice check and get the tokenAddress and tokenId for an ERC1155 or ERC721 token
+    /// @notice check and get the token address and tokenId for an ERC1155 or ERC721 token
     /// @param asset that will be checked
-    /// @return tokenAddress the decoded address of the token
-    /// @return tokenId the decoded id of the token
-    function getNFTInfo(Asset memory asset) internal pure returns (address, uint256) {
+    /// @return nft info the decoded address and token id of the token
+    function getNFTInfo(Asset memory asset) internal pure returns (NFTInfo memory) {
         require(
             asset.assetType.assetClass == LibAsset.AssetClass.ERC721 ||
                 asset.assetType.assetClass == LibAsset.AssetClass.ERC1155,
             "asset is not an NFT"
         );
-        return abi.decode(asset.assetType.data, (address, uint));
+        (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+        return NFTInfo(token, tokenId);
+    }
+
+    /// @notice check and get the ERC20 token address
+    /// @param asset that will be checked
+    /// @return token address
+    function getERC20Info(Asset memory asset) internal pure returns (address) {
+        require(asset.assetType.assetClass == LibAsset.AssetClass.ERC20, "asset is not an ERC20");
+        return abi.decode(asset.assetType.data, (address));
     }
 }
