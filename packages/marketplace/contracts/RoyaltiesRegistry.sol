@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
@@ -12,6 +12,7 @@ import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
+    using ERC165CheckerUpgradeable for address;
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
@@ -145,12 +146,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param royaltiesProvider address of royalty provider
     /// @return royalty type
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (RoyaltiesType) {
-        try IERC165Upgradeable(token).supportsInterface(type(IERC2981).interfaceId) returns (bool result2981) {
-            if (result2981) {
-                return RoyaltiesType.EIP2981;
-            }
-            // solhint-disable-next-line no-empty-blocks
-        } catch {}
+        if (token.supportsInterface(type(IERC2981).interfaceId)) {
+            return RoyaltiesType.EIP2981;
+        }
 
         if (royaltiesProvider != address(0)) {
             return RoyaltiesType.EXTERNAL_PROVIDER;
@@ -201,40 +199,48 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token address of token
     /// @param tokenId id of token
     /// @return royalties 2981 royalty array
-    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
+    function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
-            try IERC165Upgradeable(token).supportsInterface(type(IMultiRoyaltyRecipients).interfaceId) returns (
-                bool result
-            ) {
-                if (result) {
-                    try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
-                        Recipient[] memory multiRecipients
-                    ) {
-                        uint256 multiRecipientsLength = multiRecipients.length;
-                        royalties = new Part[](multiRecipientsLength);
-                        uint256 sum = 0;
-                        for (uint256 i; i < multiRecipientsLength; i++) {
-                            Recipient memory splitRecipient = multiRecipients[i];
-                            royalties[i].account = splitRecipient.recipient;
-                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
-                            royalties[i].value = splitAmount;
-                            sum += splitAmount;
-                        }
-                        // sum can be less than amount, otherwise small-value listings can break
-                        require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
-                        return royalties;
-                    } catch {
-                        return _calculateRoyalties(receiver, royaltyAmount);
-                    }
-                } else {
-                    return _calculateRoyalties(receiver, royaltyAmount);
-                }
-            } catch {
+            if (token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId)) {
+                return _getRecipients(token, tokenId, receiver, royaltyAmount);
+            } else {
                 return _calculateRoyalties(receiver, royaltyAmount);
             }
         } catch {
             return new Part[](0);
         }
+    }
+
+    /// @notice try to get the royalties recipients and do the royalties calculations
+    /// @param token address of token
+    /// @param tokenId Id of the token
+    /// @param receiver address of the royalty receiver
+    /// @param royaltyAmount royalty amount to be paid
+    /// @return royalties 2981 royalty array
+    function _getRecipients(
+        address token,
+        uint256 tokenId,
+        address receiver,
+        uint256 royaltyAmount
+    ) internal view returns (Part[] memory) {
+        try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
+            uint256 multiRecipientsLength = multiRecipients.length;
+            Part[] memory royalties = new Part[](multiRecipientsLength);
+            uint256 sum = 0;
+            for (uint256 i; i < multiRecipientsLength; i++) {
+                Recipient memory splitRecipient = multiRecipients[i];
+                royalties[i].account = splitRecipient.recipient;
+                uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
+                royalties[i].value = uint96(splitAmount);
+                sum += splitAmount;
+            }
+            // sum can be less than amount, otherwise small-value listings can break
+            require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
+            return royalties;
+            // solhint-disable-next-line no-empty-blocks
+        } catch {}
+
+        return _calculateRoyalties(receiver, royaltyAmount);
     }
 
     /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
@@ -254,10 +260,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         }
     }
 
-    /// @notice method for converting amount to percent and forming LibPart
+    /// @notice method for converting amount to percent and forming Part
     /// @param to recipient of royalties
     /// @param amount of royalties
-    /// @return LibPart with account and value
+    /// @return Part with account and value
     function _calculateRoyalties(address to, uint256 amount) internal pure returns (Part[] memory) {
         Part[] memory result;
         if (amount == 0) {
