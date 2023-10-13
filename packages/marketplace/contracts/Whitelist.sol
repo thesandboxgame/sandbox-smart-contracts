@@ -44,28 +44,6 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _disableInitializers();
     }
 
-    /// @notice Initializer for Whitelist
-    /// @param admin Whitelist admin
-    /// @param roles For different collections of assets
-    /// @param permissions For different roles
-    /// @param whitelistsEnabled If whitelists for assets are enabled or not
-    // solhint-disable-next-line func-name-mixedcase
-    function __Whitelist_init(
-        address admin,
-        bytes32[] calldata roles,
-        bool[] calldata permissions,
-        bool whitelistsEnabled
-    ) internal onlyInitializing {
-        __AccessControlEnumerable_init_unchained();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRolesEnabled(roles, permissions);
-        if (whitelistsEnabled) {
-            _enableWhitelists();
-        } else {
-            _disableWhitelists();
-        }
-    }
-
     /// @notice Setting permissions for tokens
     /// @param roles We want to enable or disable
     /// @param permissions Boolean
@@ -109,6 +87,28 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @return True if whitelists are enabled, false if disabled.
     function isWhitelistsEnabled() public view returns (bool) {
         return _whitelistsEnabled;
+    }
+
+    /// @notice Initializer for Whitelist
+    /// @param admin Whitelist admin
+    /// @param roles For different collections of assets
+    /// @param permissions For different roles
+    /// @param whitelistsEnabled If whitelists for assets are enabled or not
+    // solhint-disable-next-line func-name-mixedcase
+    function __Whitelist_init(
+        address admin,
+        bytes32[] calldata roles,
+        bool[] calldata permissions,
+        bool whitelistsEnabled
+    ) internal onlyInitializing {
+        __AccessControlEnumerable_init_unchained();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _setRolesEnabled(roles, permissions);
+        if (whitelistsEnabled) {
+            _enableWhitelists();
+        } else {
+            _disableWhitelists();
+        }
     }
 
     /// @notice Enable or disable roles

@@ -78,13 +78,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         return _getRoyaltiesType(royaltiesProviders[token]);
     }
 
-    /// @notice returns provider address for token contract from royaltiesProviders mapping
-    /// @param token token address
-    /// @return address of provider
-    function getProvider(address token) public view returns (address) {
-        return address(uint160(royaltiesProviders[token]));
-    }
-
     /// @notice clears and sets new royalties type for token contract
     /// @param token address of token
     /// @param royaltiesType roayalty type
@@ -122,6 +115,51 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         require(sumRoyalties < BASIS_POINTS, "royalties sum more, than 100%");
         royaltiesByToken[token].initialized = true;
         emit RoyaltiesSetForContract(token, royalties);
+    }
+
+    /// @notice returns royalties for token contract and token id
+    /// @param token address of token
+    /// @param tokenId id of token
+    /// @return royalties in form of an array of Parts
+    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
+        uint256 royaltiesProviderData = royaltiesProviders[token];
+
+        address royaltiesProvider = address(uint160(royaltiesProviderData));
+        RoyaltiesType royaltiesType = _getRoyaltiesType(royaltiesProviderData);
+
+        // case when royaltiesType is not set
+        if (royaltiesType == RoyaltiesType.UNSET) {
+            // calculating royalties type for token
+            royaltiesType = _calculateRoyaltiesType(token, royaltiesProvider);
+
+            //saving royalties type
+            _setRoyaltiesType(token, royaltiesType, royaltiesProvider);
+        }
+
+        //case royaltiesType = 1, royalties are set in royaltiesByToken
+        if (royaltiesType == RoyaltiesType.BY_TOKEN) {
+            return royaltiesByToken[token].royalties;
+        }
+
+        //case royaltiesType = 2, royalties from external provider
+        if (royaltiesType == RoyaltiesType.EXTERNAL_PROVIDER) {
+            return _providerExtractor(token, tokenId, royaltiesProvider);
+        }
+
+        //case royaltiesType = 3, royalties EIP-2981
+        if (royaltiesType == RoyaltiesType.EIP2981) {
+            return _getRoyaltiesEIP2981(token, tokenId);
+        }
+
+        // case royaltiesType = 4, unknown/empty royalties
+        return new Part[](0);
+    }
+
+    /// @notice returns provider address for token contract from royaltiesProviders mapping
+    /// @param token token address
+    /// @return address of provider
+    function getProvider(address token) public view returns (address) {
+        return address(uint160(royaltiesProviders[token]));
     }
 
     /// @notice returns royalties type from uint
@@ -168,44 +206,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         }
 
         return RoyaltiesType.UNSUPPORTED_NONEXISTENT;
-    }
-
-    /// @notice returns royalties for token contract and token id
-    /// @param token address of token
-    /// @param tokenId id of token
-    /// @return royalties in form of an array of Parts
-    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
-        uint256 royaltiesProviderData = royaltiesProviders[token];
-
-        address royaltiesProvider = address(uint160(royaltiesProviderData));
-        RoyaltiesType royaltiesType = _getRoyaltiesType(royaltiesProviderData);
-
-        // case when royaltiesType is not set
-        if (royaltiesType == RoyaltiesType.UNSET) {
-            // calculating royalties type for token
-            royaltiesType = _calculateRoyaltiesType(token, royaltiesProvider);
-
-            //saving royalties type
-            _setRoyaltiesType(token, royaltiesType, royaltiesProvider);
-        }
-
-        //case royaltiesType = 1, royalties are set in royaltiesByToken
-        if (royaltiesType == RoyaltiesType.BY_TOKEN) {
-            return royaltiesByToken[token].royalties;
-        }
-
-        //case royaltiesType = 2, royalties from external provider
-        if (royaltiesType == RoyaltiesType.EXTERNAL_PROVIDER) {
-            return _providerExtractor(token, tokenId, royaltiesProvider);
-        }
-
-        //case royaltiesType = 3, royalties EIP-2981
-        if (royaltiesType == RoyaltiesType.EIP2981) {
-            return _getRoyaltiesEIP2981(token, tokenId);
-        }
-
-        // case royaltiesType = 4, unknown/empty royalties
-        return new Part[](0);
     }
 
     /// @notice tries to get royalties EIP-2981 for token and tokenId
