@@ -46,7 +46,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
-        address makeToken = abi.decode(order.makeAsset.assetType.data, (address));
+        address makeToken = LibAsset.decodeAddress(order.makeAsset.assetType);
         if (order.makeAsset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             _verifyERC20Whitelist(makeToken);
         } else _verifyWhiteList(makeToken);

@@ -174,7 +174,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        (address token, uint256 tokenId) = LibAsset.getNFTInfo(nftSide.asset);
+        (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
         IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
@@ -224,7 +224,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param assetType asset type
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
-        (address token, uint256 tokenId) = abi.decode(assetType.data, (address, uint));
+        (address token, uint256 tokenId) = LibAsset.decodeToken(assetType);
         try IERC165Upgradeable(token).supportsInterface(type(IRoyaltyUGC).interfaceId) returns (bool result) {
             if (result) {
                 creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
@@ -240,15 +240,15 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @dev this is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            address token = abi.decode(asset.assetType.data, (address));
+            address token = LibAsset.decodeAddress(asset.assetType);
             // slither-disable-next-line arbitrary-send-erc20
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
-            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+            (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
             require(asset.value == 1, "erc721 value error");
             IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
-            (address token, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
+            (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
             IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
         } else {
             revert("invalid asset class");
