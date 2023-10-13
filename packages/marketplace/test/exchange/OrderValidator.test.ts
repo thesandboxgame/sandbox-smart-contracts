@@ -570,4 +570,19 @@ describe('OrderValidator.sol', function () {
       )
     ).to.be.equal(false);
   });
+
+  it('should support interfaces', async function () {
+    const {OrderValidatorAsAdmin} = await loadFixture(deployFixtures);
+    const interfaces = {
+      IERC165: '0x01ffc9a7',
+      IAccessControl: '0x7965db0b',
+      IAccessControlEnumerable: '0x5a05180f',
+    };
+    for (const i of Object.values(interfaces)) {
+      expect(await OrderValidatorAsAdmin.supportsInterface(i)).to.be.true;
+    }
+    // for coverage
+    expect(await OrderValidatorAsAdmin.supportsInterface('0xffffffff')).to.be
+      .false;
+  });  
 });

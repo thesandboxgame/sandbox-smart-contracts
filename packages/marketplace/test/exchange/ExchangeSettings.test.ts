@@ -253,7 +253,7 @@ describe('Exchange.sol settings', function () {
     const interfaces = {
       IERC165: '0x01ffc9a7',
       IAccessControl: '0x7965db0b',
-      // IAccessControlEnumerable: '0x5a05180f',
+      IAccessControlEnumerable: '0x5a05180f',
     };
     for (const i of Object.values(interfaces)) {
       expect(await ExchangeContractAsAdmin.supportsInterface(i)).to.be.true;
