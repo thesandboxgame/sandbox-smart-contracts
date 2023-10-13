@@ -13,7 +13,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         user1.address
       )
-    ).to.be.revertedWith('Token owner not detected');
+    ).to.be.revertedWith('token owner not detected');
   });
 
   it('should set provider by token', async function () {
@@ -89,7 +89,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         1
       )
-    ).to.be.revertedWith('Token owner not detected');
+    ).to.be.revertedWith('token owner not detected');
   });
 
   it('should not force set an invalid royalties type', async function () {
@@ -144,7 +144,7 @@ describe('RoyaltiesRegistry.sol', function () {
       RoyaltiesRegistryAsUser.clearRoyaltiesType(
         await ERC721WithRoyaltyV2981.getAddress()
       )
-    ).to.be.revertedWith('Token owner not detected');
+    ).to.be.revertedWith('token owner not detected');
   });
 
   it('should clear royalties type', async function () {
@@ -186,7 +186,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('Token owner not detected');
+    ).to.be.revertedWith('token owner not detected');
   });
 
   it('should not set royalties with token with a zero address recipient', async function () {
@@ -424,7 +424,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC1155WithRoyalty.getAddress(),
         1
       )
-    ).to.be.revertedWith('Royalties 2981 exceeds 100%');
+    ).to.be.revertedWith('royalties 2981 exceeds 100%');
   });
 
   it('should getRoyalties for token with royaltiesType 3 with partial support', async function () {

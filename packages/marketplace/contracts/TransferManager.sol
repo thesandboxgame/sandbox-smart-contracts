@@ -188,7 +188,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             }
             remainder = _transferPercentage(remainder, paymentSide, r.account, r.value, BASIS_POINTS);
         }
-        require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "Royalties are too high (>50%)");
+        require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "royalties are too high (>50%)");
         return remainder;
     }
 
