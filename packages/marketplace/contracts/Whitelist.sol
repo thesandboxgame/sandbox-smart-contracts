@@ -7,7 +7,7 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
-contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
+contract Whitelist is Initializable, AccessControlEnumerableUpgradeable {
     /// @notice role for The Sandbox tokens
     /// @return hash for TSB_ROLE
     bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
@@ -24,20 +24,17 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
 
     /// @notice event emitted when roles are enabled XXX
     /// @param role roles whose permissions were enabled
-    event RoleEnabled(bytes32 role);
+    event RoleEnabled(bytes32 indexed role);
 
     /// @notice event emitted when roles are disabled XXX
     /// @param role roles whose permissions were disabled
-    event RoleDisabled(bytes32 role);
+    event RoleDisabled(bytes32 indexed role);
 
     /// @notice event indicating that the market was open for all non ERC20 tokens
-    event Opened();
+    event WhitelistsEnabled();
 
     /// @notice event indicating that the market was closed for all non ERC20 tokens, and must refer to whitelists
-    event Closed();
-
-    /// @param permission boolean indicating that all tokens are accepted
-    event NewOpenSet(bool permission);
+    event WhitelistsDisabled();
 
     /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -60,7 +57,7 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
     ) internal onlyInitializing {
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRolePermission(roles, permissions);
+        _setRolesEnabled(roles, permissions);
         if (whitelistsEnabled) {
             _enableWhitelists();
         } else {
@@ -71,11 +68,11 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
     /// @notice setting permissions for tokens
     /// @param roles we want to enable or disable
     /// @param permissions boolan
-    function setPermissions(
+    function setRolesEnabled(
         bytes32[] calldata roles,
         bool[] calldata permissions
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setRolePermission(roles, permissions);
+        _setRolesEnabled(roles, permissions);
     }
 
     /// @notice open market place for all non ERC20 tokens
@@ -88,7 +85,7 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
         _disableWhitelists();
     }
 
-    function getRoleEnabler(bytes32 role) internal view returns (bool) {
+    function isRoleEnabled(bytes32 role) internal view returns (bool) {
         return _rolesEnabled[role];
     }
 
@@ -99,15 +96,13 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
     /// @notice setting permissions for tokens
     /// @param roles identifyers
     /// @param permissions booleans
-    function _setRolePermission(bytes32[] memory roles, bool[] memory permissions) internal {
-        bytes32[] memory enabled;
-        bytes32[] memory disabled;
+    function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
         for (uint256 i = 0; i < roles.length; ++i) {
             if (_rolesEnabled[roles[i]] != permissions[i]) {
                 if (permissions[i]) {
-                    enabled[enabled.length] = roles[i];
+                    _enableRole(roles[i]);
                 } else {
-                    disabled[disabled.length] = roles[i];
+                    _disableRole(roles[i]);
                 }
             }
         }
@@ -125,11 +120,11 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
 
     function _enableWhitelists() internal {
         _whitelistsEnabled = true;
-        emit Opened();
+        emit WhitelistsEnabled();
     }
 
     function _disableWhitelists() internal {
         _whitelistsEnabled = false;
-        emit Closed();
+        emit WhitelistsDisabled();
     }
 }
