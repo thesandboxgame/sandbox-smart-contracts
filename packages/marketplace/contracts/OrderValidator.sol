@@ -31,7 +31,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         bytes32[] calldata roles,
         bool[] calldata permissions,
         bool whitelistsEnabled
-    ) public initializer {
+    ) external initializer {
         __EIP712_init_unchained("Exchange", "1");
         __Whitelist_init(admin, roles, permissions, whitelistsEnabled);
     }
@@ -40,7 +40,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param order order to be validated
     /// @param signature signature of order
     /// @param sender order sender
-    function validate(LibOrder.Order calldata order, bytes memory signature, address sender) public view {
+    function validate(LibOrder.Order calldata order, bytes memory signature, address sender) external view {
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
