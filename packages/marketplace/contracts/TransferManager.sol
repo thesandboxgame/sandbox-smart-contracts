@@ -19,6 +19,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is Initializable, ITransferManager {
     using ERC165CheckerUpgradeable for address;
+
     /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
 

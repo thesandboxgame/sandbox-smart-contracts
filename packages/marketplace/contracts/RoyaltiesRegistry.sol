@@ -18,6 +18,16 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param royalties array of royalties
     event RoyaltiesSetForContract(address indexed token, Part[] royalties);
 
+    /// @notice emitted when royalties type is set for token
+    /// @param token token address
+    /// @param royaltiesType royalties type
+    /// @param royaltiesProvider royalties provider
+    event RoyaltiesTypeSet(
+        address indexed token,
+        RoyaltiesType indexed royaltiesType,
+        address indexed royaltiesProvider
+    );
+
     /// @dev struct to store royalties in royaltiesByToken
     struct RoyaltiesSet {
         bool initialized;
@@ -88,6 +98,8 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     function clearRoyaltiesType(address token) external {
         _checkOwner(token);
         royaltiesProviders[token] = uint256(uint160(getProvider(token)));
+
+        emit RoyaltiesTypeSet(token, RoyaltiesType.UNSET, getProvider(token));
     }
 
     /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1
@@ -131,6 +143,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     function _setRoyaltiesType(address token, RoyaltiesType royaltiesType, address royaltiesProvider) internal {
         require(royaltiesType != RoyaltiesType.UNSET, "wrong royaltiesType");
         royaltiesProviders[token] = uint256(uint160(royaltiesProvider)) + 2 ** (256 - uint256(royaltiesType));
+        emit RoyaltiesTypeSet(token, royaltiesType, royaltiesProvider);
     }
 
     /// @notice checks if msg.sender is owner of this contract or owner of the token contract

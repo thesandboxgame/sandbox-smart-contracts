@@ -151,18 +151,21 @@ describe('RoyaltiesRegistry.sol', function () {
     const {RoyaltiesRegistryAsDeployer, ERC721WithRoyaltyV2981} =
       await loadFixture(deployFixtures);
 
-    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
-      await ERC721WithRoyaltyV2981.getAddress(),
-      1
-    );
+    const tokenAddress = await ERC721WithRoyaltyV2981.getAddress();
+
+    await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(tokenAddress, 1);
     expect(
-      await RoyaltiesRegistryAsDeployer.getRoyaltiesType(
-        await ERC721WithRoyaltyV2981.getAddress()
-      )
+      await RoyaltiesRegistryAsDeployer.getRoyaltiesType(tokenAddress)
     ).to.be.equal(1);
-    await RoyaltiesRegistryAsDeployer.clearRoyaltiesType(
-      await ERC721WithRoyaltyV2981.getAddress()
+
+    const provider = await RoyaltiesRegistryAsDeployer.getProvider(
+      tokenAddress
     );
+
+    await expect(RoyaltiesRegistryAsDeployer.clearRoyaltiesType(tokenAddress))
+      .to.emit(RoyaltiesRegistryAsDeployer, 'RoyaltiesTypeSet')
+      .withArgs(tokenAddress, 0, provider);
+
     expect(
       await RoyaltiesRegistryAsDeployer.getRoyaltiesType(
         await ERC721WithRoyaltyV2981.getAddress()
@@ -241,17 +244,21 @@ describe('RoyaltiesRegistry.sol', function () {
   it('should set royalties by token', async function () {
     const {RoyaltiesRegistryAsDeployer, ERC721WithRoyaltyV2981, user1} =
       await loadFixture(deployFixtures);
+    const tokenAddress = await ERC721WithRoyaltyV2981.getAddress();
+    const provider = await RoyaltiesRegistryAsDeployer.getProvider(
+      tokenAddress
+    );
     const part = {
       account: user1.address,
       value: 1,
     };
     const royalties = [part];
     await expect(
-      RoyaltiesRegistryAsDeployer.setRoyaltiesByToken(
-        await ERC721WithRoyaltyV2981.getAddress(),
-        royalties
-      )
-    ).to.emit(RoyaltiesRegistryAsDeployer, 'RoyaltiesSetForContract');
+      RoyaltiesRegistryAsDeployer.setRoyaltiesByToken(tokenAddress, royalties)
+    )
+      .to.emit(RoyaltiesRegistryAsDeployer, 'RoyaltiesSetForContract')
+      .to.emit(RoyaltiesRegistryAsDeployer, 'RoyaltiesTypeSet')
+      .withArgs(tokenAddress, 1, provider);
   });
 
   it('should updates royaltiesType for unset token with getRoyalties', async function () {
