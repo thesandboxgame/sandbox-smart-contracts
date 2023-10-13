@@ -22,10 +22,10 @@ The protocol is divided into 5 main components:
 
 Component | Description
 ---------|----------
-[Exchange](docs/exchange/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
-[OrderValidator](docs/exchange/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
-[TransferManager](docs/transfer-manager/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
-[RoyaltiesRegistry](docs/royalties-registry/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
+[Exchange](docs/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
+[OrderValidator](docs/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
+[TransferManager](docs/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
+[RoyaltiesRegistry](docs/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
 Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
 
 The protocol is deployed on 3 different addresses:
@@ -41,16 +41,14 @@ flowchart
 
 subgraph Exchange
    TransferManager
-   TransferExecutor
 end
 subgraph OrderValidator
    Whitelist
 end
 subgraph RoyaltiesRegistry
-end   
+end
 Exchange-->OrderValidator
 Exchange-->TransferManager
-TransferManager-->TransferExecutor
 TransferManager-->RoyaltiesRegistry
 ```
 
@@ -58,13 +56,9 @@ Also, the contracts use a set of libraries as helper.
 
 Library | Description
 ---------|----------
- LibFill | Calculate the amount exchanged between 2 orders, and how orders are filled
  LibAsset | Contains the structures, constants and hash functions related to an asset (ERC20, ERC1155, ERC721)
- BpLibrary | Base Point calculation library
  LibMath | Rounding calculation library
- LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order
- LibPart | Library for the parts receiving fees or royalties
- LibRoyalties2981 | Library for constants and functions related to ERC2891
+ LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order, calculate the amount exchanged between 2 orders, and how orders are filled
 
 ## Running the project locally
 
@@ -106,6 +100,11 @@ yarn lint
 Fix static analysis errors
 ```shell
 yarn lint:fix
+```
+
+Run Slither
+```shell
+yarn analyze
 ```
 
 ## Package structure and minimum standards

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The [Exchange contract](../../contracts/exchange/Exchange.sol) is the entrypoint and main contract to the marketplace protocol.
+The [Exchange contract](../contracts/Exchange.sol) is the entrypoint and main contract to the marketplace protocol.
 It safely offers a decentralized way to exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.
 
 ## Concepts
@@ -74,7 +74,16 @@ Bob wants to buy from anybody 1 ASSET (ERC1155) with token id 1000 against 100 M
 ```
 
 The selling order can't be fully matched because the buyer can only buy 1 ASSET of 10. In that case, the `Order C` is partially filled. `Order C` can be re-matched with another order until being fully filled.
-Partial filling can be disable for an order that is executed by the maker by setting the salt to 0 in that order.
+
+### Order salt
+
+Orders contain a salt value that ensure each order is unique, even for the same user and asset.
+
+A user can decide to set the salt to 0 in its order. By doing so:
+- that order can only be used by the maker
+- the validation of the signature is also skipped
+- the order can be reuse as many time as he wants
+- and the partial filling is disabled
 
 ### Hash Key Order
 
@@ -95,7 +104,7 @@ The consequences are multiple:
 UGC collection is a collection where the tokens are created by any user, and not necessarily by the owner of the collection.
 The `creator` of a NFT represents not the ownership of the token but the creation of the NFT which is essential to distribute the royalties to the real creator.
 In a nutshell, UGC collections need a royalty per token, not per collection.
-The protocol supports the interface [IRoyaltyUGC](../../contracts/transfer-manager/interfaces/IRoyaltyUGC.sol) to get the creator of a NFT during an exchange in order to apply different fee value.
+The protocol supports the interface [IRoyaltyUGC](../../dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol) to get the creator of a NFT during an exchange in order to apply different fee value.
 
 ### Fees
 
@@ -129,7 +138,7 @@ If a collection doesn't support the interface `IRoyaltyUGC`, the secondary marke
 
 The royalties are the share returning to the creator (or owner) of the collection or token after a sale.
 The protocol handles multiple types of royalties (ERC2981, royalties registry, external provider).
-See the [RoyaltiesRegistry](../royalties-registry/RoyaltiesRegistry.md) contract for more information.
+See the [RoyaltiesRegistry](RoyaltiesRegistry.md) contract for more information.
 
 ### Payouts
 
@@ -155,7 +164,6 @@ participant Exchange
 participant OrderValidator
 participant TransferManager
 participant RoyaltiesRegistry
-participant TransferExecutor
 
 Alice->>OrderA: signs order
 Alice->>Carol: lends the order & its signature
@@ -167,9 +175,9 @@ OrderValidator->>Exchange: returns the result of the validation
 Exchange->>Exchange: match the 2 orders & calculate fillings
 Exchange->>TransferManager: executes the transfers of the exchange
 TransferManager->>RoyaltiesRegistry: gets the royalties info
-TransferManager->>TransferExecutor: transfer the royalties
-TransferManager->>TransferExecutor: transfer the fees
-TransferManager->>TransferExecutor: transfer the payouts
+TransferManager->>TransferManager: transfer the royalties
+TransferManager->>TransferManager: transfer the fees
+TransferManager->>TransferManager: transfer the payouts
 ```
 
 ### Canceling an order
@@ -233,7 +241,7 @@ The protocol offers to enable whitelists on:
 - payment tokens (ERC20) that can be traded
 - collections (ERC1155 and ERC721) that can be traded
 
-See the [OrderValidator](../exchange/OrderValidator.md) contract for more information.
+See the [OrderValidator](OrderValidator.md) contract for more information.
 
 ### Upgradeable
 
