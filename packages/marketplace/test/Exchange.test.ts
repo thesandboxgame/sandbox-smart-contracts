@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures';
+import {deployFixtures} from './fixtures.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC1155,
@@ -7,7 +7,7 @@ import {
   AssetERC721,
   FeeRecipientsData,
   LibPartData,
-} from '../utils/assets.ts';
+} from './utils/assets.ts';
 
 import {
   getSymmetricOrder,
@@ -17,7 +17,7 @@ import {
   signOrder,
   UINT256_MAX_VALUE,
   isOrderEqual,
-} from '../utils/order.ts';
+} from './utils/order.ts';
 import {ZeroAddress, AbiCoder} from 'ethers';
 
 describe('Exchange.sol', function () {

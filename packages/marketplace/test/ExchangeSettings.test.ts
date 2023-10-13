@@ -1,6 +1,6 @@
 /* eslint-disable mocha/no-setup-in-describe */
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures';
+import {deployFixtures} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
 
