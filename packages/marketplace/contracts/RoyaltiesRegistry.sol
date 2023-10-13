@@ -278,9 +278,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             return royalties;
         }
 
-        // uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
-        // require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
-
         uint256 sum = 0;
         royalties = new Part[](totalRecipients);
 
@@ -293,9 +290,6 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
 
         // Check to ensure valid splits
         require(sum <= amount, "RoyaltiesRegistry: Invalid split");
-
-        // uint256 percent = (sum * BASIS_POINTS) / WEIGHT_VALUE;
-        // require(percent <= BASIS_POINTS, "Royalties 2981 exceeds 100%");
 
         return royalties;
     }
