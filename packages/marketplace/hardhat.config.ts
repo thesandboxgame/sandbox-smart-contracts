@@ -1,6 +1,7 @@
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
 import {HardhatUserConfig} from 'hardhat/config';
+import 'hardhat-contract-sizer';
 
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required
@@ -22,6 +23,13 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: false,
     },
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    except: ['mocks', '@openzeppelin', '@sandbox-smart-contracts'],
   },
 };
 export default config;
