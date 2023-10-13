@@ -20,22 +20,21 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         _disableInitializers();
     }
 
-    /// @notice initializer for OrderValidator
+    /* /// @notice initializer for OrderValidator
     /// @param admin OrderValidator and Whiteist admin
     /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
     /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract
     /// @param newErc20 boolean to activate the white list of ERC20 tokens
-    /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract
+    /// @param newOpen boolean to indicate that all assets are accepted by the exchange contract */
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         address admin,
-        bool newTsbOnly,
-        bool newPartners,
-        bool newErc20,
+        bytes32[] calldata roles,
+        bool[] calldata permissions,
         bool newOpen
     ) public initializer {
         __EIP712_init_unchained("Exchange", "1");
-        __Whitelist_init(admin, newTsbOnly, newPartners, newErc20, newOpen);
+        __Whitelist_init(admin, roles, permissions, newOpen);
     }
 
     /// @notice verifies order
@@ -68,15 +67,15 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     function _verifyWhiteList(LibAsset.Asset calldata asset) internal view {
         address makeToken = abi.decode(asset.assetType.data, (address));
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (roleEnabled[ERC20_ROLE] && !hasRole(ERC20_ROLE, makeToken)) {
+            if (getRoleEnabler(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");
             }
         } else {
-            if (open) {
+            if (getWhitelistsEnabled()) {
                 return;
             } else if (
-                (roleEnabled[TSB_ROLE] && hasRole(TSB_ROLE, makeToken)) ||
-                (roleEnabled[PARTNER_ROLE] && hasRole(PARTNER_ROLE, makeToken))
+                (getRoleEnabler(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
+                (getRoleEnabler(PARTNER_ROLE) && hasRole(PARTNER_ROLE, makeToken))
             ) {
                 return;
             } else {
