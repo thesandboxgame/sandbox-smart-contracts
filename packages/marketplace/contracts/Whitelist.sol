@@ -115,7 +115,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @param roles Identifiers
     /// @param permissions Booleans
     function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
-        require(roles.length == permissions.length, "Ill-formed inputs");
+        require(roles.length == permissions.length, "ill-formed inputs");
         for (uint256 i = 0; i < roles.length; ++i) {
             if (isRoleEnabled(roles[i]) != permissions[i]) {
                 if (permissions[i]) {

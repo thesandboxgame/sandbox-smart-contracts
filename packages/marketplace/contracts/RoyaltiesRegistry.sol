@@ -150,7 +150,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token address of token
     function _checkOwner(address token) internal view {
         if ((owner() != _msgSender()) && (OwnableUpgradeable(token).owner() != _msgSender())) {
-            revert("Token owner not detected");
+            revert("token owner not detected");
         }
     }
 
@@ -283,7 +283,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             return result;
         }
         uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
-        require(percent < BASIS_POINTS, "Royalties 2981 exceeds 100%");
+        require(percent < BASIS_POINTS, "royalties 2981 exceeds 100%");
         result = new Part[](1);
         result[0].account = payable(to);
         result[0].value = percent;

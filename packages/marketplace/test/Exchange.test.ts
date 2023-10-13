@@ -166,7 +166,7 @@ describe('Exchange.sol', function () {
       '0x1234567890123456789012345678901234567890123456789012345678901234';
     await expect(
       ExchangeContractAsUser.connect(user1).cancel(leftOrder, invalidOrderHash)
-    ).to.be.revertedWith('Invalid orderHash');
+    ).to.be.revertedWith('invalid orderHash');
   });
 
   it('should not cancel an order if Exchange Contract is paused', async function () {
@@ -298,7 +298,7 @@ describe('Exchange.sol', function () {
     const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
     await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'ExchangeMatch cant be empty'
+      'ExchangeMatch cannot be empty'
     );
   });
 
@@ -2790,7 +2790,7 @@ describe('Exchange.sol', function () {
           signatureRight: takerSig,
         },
       ])
-    ).to.be.revertedWith('Royalties are too high (>50%)');
+    ).to.be.revertedWith('royalties are too high (>50%)');
   });
 
   it('should not execute match orders when royalties exceed 50% for token without IROYALTYUGC support', async function () {
@@ -2866,7 +2866,7 @@ describe('Exchange.sol', function () {
           signatureRight: takerSig,
         },
       ])
-    ).to.be.revertedWith('Royalties are too high (>50%)');
+    ).to.be.revertedWith('royalties are too high (>50%)');
   });
 
   it('should not execute match orders when royalties exceed 50% for token without IROYALTYUGC and royalty.length != 1', async function () {
@@ -2945,7 +2945,7 @@ describe('Exchange.sol', function () {
           signatureRight: takerSig,
         },
       ])
-    ).to.be.revertedWith('Royalties are too high (>50%)');
+    ).to.be.revertedWith('royalties are too high (>50%)');
   });
   it('should execute match orders for token without IROYALTYUGC support', async function () {
     const {

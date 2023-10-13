@@ -103,7 +103,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) internal {
         require(order.salt != 0, "0 salt can't be used");
         bytes32 _orderKeyHash = LibOrder.hashKey(order);
-        require(_orderKeyHash == orderKeyHash, "Invalid orderHash");
+        require(_orderKeyHash == orderKeyHash, "invalid orderHash");
         fills[orderKeyHash] = type(uint256).max;
         emit Cancel(orderKeyHash, order);
     }
@@ -114,7 +114,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @dev validate orders through validateOrders before matchAndTransfer
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
-        require(len > 0, "ExchangeMatch cant be empty");
+        require(len > 0, "ExchangeMatch cannot be empty");
         require(len <= matchOrdersLimit, "too many ExchangeMatch");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
