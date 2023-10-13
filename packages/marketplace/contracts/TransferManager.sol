@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
@@ -12,12 +11,13 @@ import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ER
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @title TransferManager contract
 /// @notice responsible for transferring all Assets
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
-abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
+abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
 
@@ -75,7 +75,6 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         address newDefaultFeeReceiver,
         IRoyaltiesProvider newRoyaltiesProvider
     ) internal onlyInitializing {
-        __ERC165_init();
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
         _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);

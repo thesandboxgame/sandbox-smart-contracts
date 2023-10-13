@@ -6,7 +6,6 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {TransferManager, IRoyaltiesProvider} from "./TransferManager.sol";
@@ -150,16 +149,6 @@ contract Exchange is
     /// @notice Returns to normal state.
     function unpause() external onlyRole(EXCHANGE_ADMIN_ROLE) {
         _unpause();
-    }
-
-    /// @notice See {IERC165-supportsInterface}.
-    /// @param interfaceId interface id to check
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, AccessControlEnumerableUpgradeable) returns (bool) {
-        return
-            ERC165Upgradeable.supportsInterface(interfaceId) ||
-            AccessControlEnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
     /// @dev Skip the fees & royalties only for users granted with the role EXCHANGE_ADMIN_ROLE
