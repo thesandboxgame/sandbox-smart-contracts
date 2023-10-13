@@ -29,6 +29,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: true,
+    excludeContracts: ['mocks', '@openzeppelin'],
   },
 };
 export default config;
