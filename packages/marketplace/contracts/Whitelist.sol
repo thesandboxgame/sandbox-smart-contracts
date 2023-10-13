@@ -146,7 +146,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _whitelistsEnabled = false;
         emit WhitelistsDisabled();
     }
-    
+
     // slither-disable-next-line unused-state
     uint256[50] private __gap;
 }
