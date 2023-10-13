@@ -627,6 +627,8 @@ describe('Exchange.sol', function () {
       .to.emit(ExchangeContractAsUser, 'Match')
       .withArgs(
         user.address,
+        hashKey(orderLeft),
+        hashKey(orderRight),
         verifyOrderLeft,
         verifyOrderRight,
         [123000000, 456000000],
