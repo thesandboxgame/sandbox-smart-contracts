@@ -62,7 +62,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     }
 
     /// @notice check if asset exchange is affected by the whitelist
-    /// @param asset asset to be verifyed
+    /// @param asset asset to be verified
     /// @dev if asset type is ERC20, ERC20_ROLE is checked
     /// @dev otherwisewe verify if whitelists are enabled, if so check TSB_ROLE and PARTNER_ROLE
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
