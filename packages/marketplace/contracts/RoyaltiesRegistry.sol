@@ -291,5 +291,5 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     }
 
     // slither-disable-next-line unused-state
-    uint256[46] private __gap;
+    uint256[50] private __gap;
 }
