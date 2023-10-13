@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -18,6 +18,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 /// @dev this manager supports different types of fees
 /// @dev also it supports different beneficiaries
 abstract contract TransferManager is Initializable, ITransferManager {
+    using ERC165CheckerUpgradeable for address;
     /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
 
@@ -224,12 +225,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @return creator address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
         (address token, uint256 tokenId) = LibAsset.decodeToken(assetType);
-        try IERC165Upgradeable(token).supportsInterface(type(IRoyaltyUGC).interfaceId) returns (bool result) {
-            if (result) {
-                creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
-            }
-            // solhint-disable-next-line no-empty-blocks
-        } catch {}
+        if (token.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
+            creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
+        }
     }
 
     /// @notice function should be able to transfer any supported Asset
