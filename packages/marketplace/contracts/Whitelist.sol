@@ -25,11 +25,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @dev boolean that indicates if whitelists are enabled or not
     bool private _whitelistsEnabled;
 
-    /// @notice event emitted when roles are enabled XXX
+    /// @notice event emitted when roles are enabled
     /// @param role roles whose permissions were enabled
     event RoleEnabled(bytes32 indexed role);
 
-    /// @notice event emitted when roles are disabled XXX
+    /// @notice event emitted when roles are disabled
     /// @param role roles whose permissions were disabled
     event RoleDisabled(bytes32 indexed role);
 
@@ -45,12 +45,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _disableInitializers();
     }
 
-    /* /// @notice initializer for WhiteList
+    /// @notice initializer for WhiteList
     /// @param admin whitelist admin
-    /// @param newTsbPermission allows orders with The Sandbox token
-    /// @param newPartnersPermission allows orders with partner token
-    /// @param newErc20Permission allows to pay orders with only whitelisted token
-    /// @param whitelistsEnabled allows orders with any token */
+    /// @param roles for different collections of assets
+    /// @param permissions for different roles
+    /// @param whitelistsEnabled if whitelists for assets are enabled or not
     // solhint-disable-next-line func-name-mixedcase
     function __Whitelist_init(
         address admin,
@@ -101,10 +100,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         return _whitelistsEnabled;
     }
 
-    /// @notice setting permissions for tokens
+    /// @notice enale or disable roles
     /// @param roles identifyers
     /// @param permissions booleans
     function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
+        require(roles.length == permissions.length, "ill-formed inputs");
         for (uint256 i = 0; i < roles.length; ++i) {
             if (_rolesEnabled[roles[i]] != permissions[i]) {
                 if (permissions[i]) {
