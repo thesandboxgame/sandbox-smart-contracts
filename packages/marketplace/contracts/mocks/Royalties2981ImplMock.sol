@@ -13,14 +13,6 @@ contract Royalties2981ImplMock is RoyaltiesRegistry, IERC2981 {
 
     mapping(uint256 => address) public royaltiesReceiver;
 
-    function setRoyalties(uint256 _value) public {
-        royaltiesBasePoint = _value;
-    }
-
-    function setRoyaltiesReceiver(uint256 _tokenId, address _receiver) public {
-        royaltiesReceiver[_tokenId] = _receiver;
-    }
-
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
@@ -34,6 +26,14 @@ contract Royalties2981ImplMock is RoyaltiesRegistry, IERC2981 {
         uint256 amount
     ) external pure returns (IRoyaltiesProvider.Part[] memory) {
         return _calculateRoyalties(to, amount);
+    }
+
+    function setRoyalties(uint256 _value) public {
+        royaltiesBasePoint = _value;
+    }
+
+    function setRoyaltiesReceiver(uint256 _tokenId, address _receiver) public {
+        royaltiesReceiver[_tokenId] = _receiver;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {

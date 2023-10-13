@@ -18,7 +18,7 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
 
     Recipient[] private _recipients;
 
-    function initialize() public initializer {
+    function initialize() external initializer {
         __Ownable_init();
         setRoyalties(5000);
     }
@@ -26,6 +26,16 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
     function mint(address to, uint256 tokenId, Recipient[] memory _fees) external {
         _mint(to, tokenId);
         _setRecipients(_fees);
+    }
+
+    function getRecipients(uint256 /* tokenId */) external view returns (Recipient[] memory) {
+        return _recipients;
+    }
+
+    function getCreatorAddress(uint256) external view returns (address creator) {
+        // creator = address(uint160(tokenId));
+        // return creator;
+        return owner();
     }
 
     function supportsInterface(
@@ -50,15 +60,5 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
             _recipients.push(recipients[i]);
         }
         require(totalBPS == BASIS_POINTS, "Total bps must be 10000");
-    }
-
-    function getRecipients(uint256 /* tokenId */) external view returns (Recipient[] memory) {
-        return _recipients;
-    }
-
-    function getCreatorAddress(uint256) external view returns (address creator) {
-        // creator = address(uint160(tokenId));
-        // return creator;
-        return owner();
     }
 }
