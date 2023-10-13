@@ -584,5 +584,5 @@ describe('OrderValidator.sol', function () {
     // for coverage
     expect(await OrderValidatorAsAdmin.supportsInterface('0xffffffff')).to.be
       .false;
-  });  
+  });
 });
