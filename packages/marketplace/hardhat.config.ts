@@ -2,6 +2,7 @@ import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
 import {HardhatUserConfig} from 'hardhat/config';
 import 'hardhat-contract-sizer';
+import 'hardhat-gas-reporter';
 
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required
@@ -19,17 +20,15 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  networks: {
-    hardhat: {
-      allowUnlimitedContractSize: false,
-    },
-  },
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
     except: ['mocks', '@openzeppelin', '@sandbox-smart-contracts'],
+  },
+  gasReporter: {
+    enabled: true,
   },
 };
 export default config;
