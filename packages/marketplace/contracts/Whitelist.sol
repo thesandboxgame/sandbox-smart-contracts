@@ -77,6 +77,26 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _setRolesEnabled(roles, permissions);
     }
 
+    /// @notice enable role
+    /// @param role we want to enable
+    function enableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        bytes32[] memory roleArray = new bytes32[](1);
+        roleArray[0] = role;
+        bool[] memory boolArray = new bool[](1);
+        boolArray[0] = true;
+        _setRolesEnabled(roleArray, boolArray);
+    }
+
+    /// @notice disable role
+    /// @param role we want to disable
+    function disableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        bytes32[] memory roleArray = new bytes32[](1);
+        roleArray[0] = role;
+        bool[] memory boolArray = new bool[](1);
+        boolArray[0] = false;
+        _setRolesEnabled(roleArray, boolArray);
+    }
+
     /// @notice open market place for all non ERC20 tokens
     function enableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _enableWhitelists();
@@ -106,7 +126,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
         require(roles.length == permissions.length, "ill-formed inputs");
         for (uint256 i = 0; i < roles.length; ++i) {
-            if (_rolesEnabled[roles[i]] != permissions[i]) {
+            if (isRoleEnabled(roles[i]) != permissions[i]) {
                 if (permissions[i]) {
                     _enableRole(roles[i]);
                 } else {

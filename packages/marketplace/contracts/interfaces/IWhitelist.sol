@@ -19,6 +19,14 @@ interface IWhitelist {
     /// @param permissions boolan
     function setRolesEnabled(bytes32[] calldata roles, bool[] calldata permissions) external;
 
+    /// @notice enable role
+    /// @param role we want to enable
+    function enableRole(bytes32 role) external;
+
+    /// @notice disable role
+    /// @param role we want to disable
+    function disableRole(bytes32 role) external;
+
     /// notice Enable whitelists, allowing orders with any token except for ERC20 tokens.
     function enableWhitelists() external;
 

@@ -66,7 +66,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @dev if asset type is ERC20, ERC20_ROLE is checked
     /// @dev otherwisewe verify if whitelists are enabled, if so check TSB_ROLE and PARTNER_ROLE
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
-        address makeToken = abi.decode(asset.assetType.data, (address));
+        address makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");

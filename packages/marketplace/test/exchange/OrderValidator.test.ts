@@ -250,7 +250,7 @@ describe('OrderValidator.sol', function () {
       false
     );
 
-    await OrderValidatorAsAdmin.setRolesEnabled([TSBRole], [true]);
+    await OrderValidatorAsAdmin.enableRole(TSBRole);
     await OrderValidatorAsAdmin.disableWhitelists();
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
@@ -310,7 +310,7 @@ describe('OrderValidator.sol', function () {
     );
 
     await OrderValidatorAsAdmin.disableWhitelists();
-    await OrderValidatorAsAdmin.setRolesEnabled([PartnerRole], [true]);
+    await OrderValidatorAsAdmin.enableRole(PartnerRole);
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );
@@ -356,9 +356,7 @@ describe('OrderValidator.sol', function () {
 
   it('should not set permission for token if caller is not owner', async function () {
     const {OrderValidatorAsUser, user} = await loadFixture(deployFixtures);
-    await expect(
-      OrderValidatorAsUser.setRolesEnabled([TSBRole], [true])
-    ).to.revertedWith(
+    await expect(OrderValidatorAsUser.enableRole(TSBRole)).to.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
   });
