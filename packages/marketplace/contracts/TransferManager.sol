@@ -87,9 +87,11 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
     /// @dev this is the main entry point, when used as a separated contract this method will be external
-    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
+    function doTransfers(DealSide memory left, DealSide memory right) internal override {
         DealSide memory paymentSide;
         DealSide memory nftSide;
+
+        LibAsset.FeeSide feeSide = LibAsset.getFeeSide(left.class, right.class);
         if (feeSide == LibAsset.FeeSide.LEFT) {
             paymentSide = left;
             nftSide = right;
@@ -98,10 +100,10 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
             nftSide = left;
         }
         // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSide.account);
+        _transfer(nftSide, nftSide.value, paymentSide.account);
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
-            _transfer(paymentSide.asset, paymentSide.account, nftSide.account);
+            _transfer(paymentSide, paymentSide.value, nftSide.account);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
         }
@@ -138,39 +140,33 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
     }
 
     /// @notice transfer protocol fees and royalties.
-    /// @param paymentSide DealSide of the fee-side order
-    /// @param nftSide DealSide of the nft-side order
+    /// @param paymentSide Deal of the fee-side order
+    /// @param nftSide Deal of the nft-side order
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 fees;
-        uint256 remainder = paymentSide.asset.value;
-
-        LibAsset.TokenInfo memory tokenInfo = LibAsset.decodeToken(nftSide.asset);
-        if (_isPrimaryMarket(nftSide, tokenInfo)) {
+        uint256 remainder = paymentSide.value;
+        if (_isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             // No royalties
         } else {
             fees = protocolFeeSecondary;
-            remainder = _transferRoyalties(remainder, paymentSide, nftSide, tokenInfo);
+            remainder = _transferRoyalties(remainder, paymentSide, nftSide);
         }
 
         if (fees > 0 && remainder > 0) {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
+            _transfer(paymentSide, remainder, nftSide.account);
         }
     }
 
     /// @notice return if this tx is on primary market
-    /// @param nftSide DealSide of the nft-side order
-    /// @param tokenInfo token address and token id
+    /// @param nftSide Deal of the nft-side order
     /// @return creator address or zero if is not able to retrieve it
-    function _isPrimaryMarket(
-        DealSide memory nftSide,
-        LibAsset.TokenInfo memory tokenInfo
-    ) internal view returns (bool) {
-        if (tokenInfo.tokenAddress.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
-            address creator = IRoyaltyUGC(tokenInfo.tokenAddress).getCreatorAddress(tokenInfo.tokenId);
+    function _isPrimaryMarket(DealSide memory nftSide) internal view returns (bool) {
+        if (nftSide.tokenAddress.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
+            address creator = IRoyaltyUGC(nftSide.tokenAddress).getCreatorAddress(nftSide.tokenId);
             return creator != address(0) && nftSide.account == creator;
         }
         return false;
@@ -178,19 +174,17 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
     /// @notice transfer royalties.
     /// @param remainder How much of the amount left after previous transfers
-    /// @param paymentSide DealSide of the fee-side order
-    /// @param nftSide DealSide of the nft-side order
-    /// @param tokenInfo tokenId and token address
+    /// @param paymentSide Deal of the fee-side order
+    /// @param nftSide Deal of the nft-side order
     /// @return How much left after paying royalties
     function _transferRoyalties(
         uint256 remainder,
         DealSide memory paymentSide,
-        DealSide memory nftSide,
-        LibAsset.TokenInfo memory tokenInfo
+        DealSide memory nftSide
     ) internal returns (uint256) {
         IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
-            tokenInfo.tokenAddress,
-            tokenInfo.tokenId
+            nftSide.tokenAddress,
+            nftSide.tokenId
         );
         uint256 totalRoyalties;
         uint256 len = royalties.length;
@@ -209,7 +203,7 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
 
     /// @notice do a transfer based on a percentage (in base points)
     /// @param remainder How much of the amount left after previous transfers
-    /// @param paymentSide DealSide of the fee-side order
+    /// @param paymentSide Deal of the fee-side order
     /// @param to account that will receive the asset
     /// @param percentage percentage to be transferred multiplied by the multiplier
     /// @param multiplier percentage is multiplied by this number to avoid rounding (2.5% == 0.025) * multiplier
@@ -221,52 +215,33 @@ abstract contract TransferManager is ERC165Upgradeable, ITransferManager {
         uint256 percentage,
         uint256 multiplier
     ) internal returns (uint256) {
-        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
-        uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
+        uint256 paymentValue;
+        uint256 fee = (paymentSide.value * percentage) / multiplier;
         if (remainder > fee) {
             remainder = remainder - fee;
-            payment.value = fee;
+            paymentValue = fee;
         } else {
             remainder = 0;
-            payment.value = remainder;
+            paymentValue = remainder;
         }
-        if (payment.value > 0) {
-            _transfer(payment, paymentSide.account, to);
+        if (paymentValue > 0) {
+            _transfer(paymentSide, paymentValue, to);
         }
         return remainder;
     }
 
     /// @notice function should be able to transfer any supported Asset
-    /// @param asset Asset to be transferred
-    /// @param from account holding the asset
+    /// @param deal Asset to be transferred
     /// @param to account that will receive the asset
-    function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
-        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            address token = LibAsset.decodeAddress(asset);
+    function _transfer(DealSide memory deal, uint256 value, address to) internal {
+        if (deal.class == LibAsset.AssetClass.ERC20) {
             // slither-disable-next-line arbitrary-send-erc20
-            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else {
-            LibAsset.TokenInfo memory tokenInfo = LibAsset.decodeToken(asset);
-            _transferNFT(asset, tokenInfo, from, to);
-        }
-    }
-
-    /// @notice function should be able to transfer ERC1155 and ERC721
-    /// @param asset Asset to be transferred
-    /// @param tokenInfo token address and token id
-    /// @param from account holding the asset
-    /// @param to account that will receive the asset
-    function _transferNFT(
-        LibAsset.Asset memory asset,
-        LibAsset.TokenInfo memory tokenInfo,
-        address from,
-        address to
-    ) internal {
-        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
-            require(asset.value == 1, "erc721 value error");
-            IERC721Upgradeable(tokenInfo.tokenAddress).safeTransferFrom(from, to, tokenInfo.tokenId);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
-            IERC1155Upgradeable(tokenInfo.tokenAddress).safeTransferFrom(from, to, tokenInfo.tokenId, asset.value, "");
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(deal.tokenAddress), deal.account, to, value);
+        } else if (deal.class == LibAsset.AssetClass.ERC721) {
+            require(value == 1, "erc721 value error");
+            IERC721Upgradeable(deal.tokenAddress).safeTransferFrom(deal.account, to, deal.tokenId);
+        } else if (deal.class == LibAsset.AssetClass.ERC1155) {
+            IERC1155Upgradeable(deal.tokenAddress).safeTransferFrom(deal.account, to, deal.tokenId, value, "");
         } else {
             revert("invalid asset class");
         }

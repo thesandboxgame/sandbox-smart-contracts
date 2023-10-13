@@ -162,11 +162,9 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         );
 
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
-
         doTransfers(
-            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
-            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue), orderRight.maker),
-            LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
+            _dealSide(makeMatch, newFill.leftValue, orderLeft.maker),
+            _dealSide(takeMatch, newFill.rightValue, orderRight.maker)
         );
     }
 
@@ -217,6 +215,30 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         } else {
             fill = fills[hash];
         }
+    }
+
+    /// @notice create a deal struct that packs the arguments needed to call doTransfer
+    /// @param assetType type of asset to transfer
+    /// @param value total amount to transfer
+    /// @param account destination account
+    /// @return deal struct containing all the values
+    function _dealSide(
+        LibAsset.AssetType memory assetType,
+        uint256 value,
+        address account
+    ) internal pure returns (DealSide memory) {
+        DealSide memory ret;
+        ret.class = assetType.assetClass;
+        if (ret.class == LibAsset.AssetClass.ERC721 || ret.class == LibAsset.AssetClass.ERC1155) {
+            (ret.tokenAddress, ret.tokenId) = LibAsset.decodeToken(assetType);
+        } else if (ret.class == LibAsset.AssetClass.ERC20) {
+            ret.tokenAddress = LibAsset.decodeAddress(assetType);
+        } else {
+            revert("invalid asset class");
+        }
+        ret.account = account;
+        ret.value = value;
+        return ret;
     }
 
     // slither-disable-next-line unused-state

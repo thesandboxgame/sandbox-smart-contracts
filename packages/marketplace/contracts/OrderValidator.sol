@@ -48,11 +48,11 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         LibOrder.validateOrderTime(order);
 
         if (order.makeAsset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            address tokenAddress = LibAsset.decodeAddress(order.makeAsset);
+            address tokenAddress = LibAsset.decodeAddress(order.makeAsset.assetType);
             _verifyERC20Whitelist(tokenAddress);
         } else {
-            LibAsset.TokenInfo memory tokenInfo = LibAsset.decodeToken(order.makeAsset);
-            _verifyWhiteList(tokenInfo.tokenAddress);
+            (address tokenAddress, ) = LibAsset.decodeToken(order.makeAsset.assetType);
+            _verifyWhiteList(tokenAddress);
         }
 
         if (order.salt == 0) {

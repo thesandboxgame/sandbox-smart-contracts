@@ -18,12 +18,6 @@ library LibAsset {
         RIGHT
     }
 
-    /// @dev if the asset class is ERC721 or ERC1155 we get token address and token id
-    struct TokenInfo {
-        address tokenAddress;
-        uint256 tokenId;
-    }
-
     /// @dev AssetType is a type of a specific asset. For example AssetType is specific ERC-721 token (key is token + tokenId) or specific ERC-20 token (DAI for example).
     /// @dev It consists of asset class and generic data (format of data is different for different asset classes). For example, for asset class ERC20 data holds address of the token, for ERC-721 data holds smart contract address and tokenId.
     struct AssetType {
@@ -93,23 +87,22 @@ library LibAsset {
     }
 
     /// @notice check and get the token address and tokenId for an ERC1155 or ERC721 token
-    /// @param asset that will be checked
-    /// @return nft info the decoded address and token id of the token
-    function decodeToken(Asset memory asset) internal pure returns (TokenInfo memory) {
+    /// @param assetType that will be checked
+    /// @return tokenAddress decoded token address
+    /// @return tokenId decoded token id
+    function decodeToken(AssetType memory assetType) internal pure returns (address tokenAddress, uint256 tokenId) {
         require(
-            asset.assetType.assetClass == LibAsset.AssetClass.ERC721 ||
-                asset.assetType.assetClass == LibAsset.AssetClass.ERC1155,
+            assetType.assetClass == LibAsset.AssetClass.ERC721 || assetType.assetClass == LibAsset.AssetClass.ERC1155,
             "asset is not an NFT"
         );
-        (address tokenAddress, uint256 tokenId) = abi.decode(asset.assetType.data, (address, uint256));
-        return TokenInfo(tokenAddress, tokenId);
+        return abi.decode(assetType.data, (address, uint256));
     }
 
     /// @notice check and get the ERC20 token address
-    /// @param asset that will be checked
+    /// @param assetType that will be checked
     /// @return token address
-    function decodeAddress(Asset memory asset) internal pure returns (address) {
-        require(asset.assetType.assetClass == LibAsset.AssetClass.ERC20, "asset is not an ERC20");
-        return abi.decode(asset.assetType.data, (address));
+    function decodeAddress(AssetType memory assetType) internal pure returns (address) {
+        require(assetType.assetClass == LibAsset.AssetClass.ERC20, "asset is not an ERC20");
+        return abi.decode(assetType.data, (address));
     }
 }
