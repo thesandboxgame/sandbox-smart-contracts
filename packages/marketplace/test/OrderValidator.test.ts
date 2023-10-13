@@ -1,9 +1,9 @@
-import {deployFixtures} from '../fixtures';
+import {deployFixtures} from './fixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {AssetERC20, AssetERC721} from '../utils/assets.ts';
+import {AssetERC20, AssetERC721} from './utils/assets.ts';
 
-import {OrderDefault, signOrder} from '../utils/order.ts';
+import {OrderDefault, signOrder} from './utils/order.ts';
 import {ZeroAddress} from 'ethers';
 
 // keccak256("TSB_ROLE")

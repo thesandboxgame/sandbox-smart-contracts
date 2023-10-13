@@ -1,4 +1,4 @@
-import {deployFixtures} from '../fixtures';
+import {deployFixtures} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {ZeroAddress} from 'ethers';

@@ -1,7 +1,6 @@
-import {deployLibAssetMock} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {AssetClassType} from '../utils/assets';
+import {AssetClassType} from './utils/assets';
 import {ethers} from 'hardhat';
 
 async function deployLibAssetMock() {
