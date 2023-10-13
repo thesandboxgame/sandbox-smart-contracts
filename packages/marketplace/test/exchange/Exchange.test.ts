@@ -4066,12 +4066,8 @@ describe('Exchange.sol', function () {
         0,
         0
       );
-
-      //await OrderValidatorAsAdmin.setPermissions(false, false, false, true);
-      await OrderValidatorAsAdmin.setPermissions(
-        OrderValidatorAsAdmin.ERC20_ROLE(),
-        true
-      );
+      const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+      await OrderValidatorAsAdmin.setRolesEnabled([ERC20_ROLE], [true]);
       const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       const takerSig = await signOrder(
         orderRight,
@@ -4139,7 +4135,7 @@ describe('Exchange.sol', function () {
       );
 
       const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(ERC20_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled([ERC20_ROLE], [true]);
       await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
       await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract2);
 
@@ -4224,9 +4220,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setOpen(false);
+      await OrderValidatorAsAdmin.disableWhitelists();
       const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled([TSB_ROLE], [true]);
 
       await expect(
         ExchangeContractAsUser.matchOrders([
@@ -4304,9 +4300,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setOpen(false);
+      await OrderValidatorAsAdmin.disableWhitelists();
       const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled([TSB_ROLE], [true]);
       await OrderValidatorAsAdmin.grantRole(TSB_ROLE, ERC721WithRoyaltyV2981);
 
       await ExchangeContractAsUser.matchOrders([
@@ -4383,9 +4379,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setOpen(false);
+      await OrderValidatorAsAdmin.disableWhitelists();
       const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled([PARTNER_ROLE], [true]);
 
       await expect(
         ExchangeContractAsUser.matchOrders([
@@ -4463,9 +4459,9 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.setOpen(false);
+      await OrderValidatorAsAdmin.disableWhitelists();
       const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled([PARTNER_ROLE], [true]);
       await OrderValidatorAsAdmin.grantRole(
         PARTNER_ROLE,
         ERC721WithRoyaltyV2981
@@ -4546,9 +4542,11 @@ describe('Exchange.sol', function () {
       ).to.be.equal(0);
 
       const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(PARTNER_ROLE, true);
       const TSB_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
-      await OrderValidatorAsAdmin.setPermissions(TSB_ROLE, true);
+      await OrderValidatorAsAdmin.setRolesEnabled(
+        [PARTNER_ROLE, TSB_ROLE],
+        [true, true]
+      );
 
       await ExchangeContractAsUser.matchOrders([
         {

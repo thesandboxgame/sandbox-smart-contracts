@@ -245,13 +245,19 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(false);
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
+      false
+    );
 
-    await OrderValidatorAsAdmin.setPermissions(TSBRole, true);
-    await OrderValidatorAsAdmin.setOpen(false);
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(true);
+    await OrderValidatorAsAdmin.setRolesEnabled([TSBRole], [true]);
+    await OrderValidatorAsAdmin.disableWhitelists();
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
+      true
+    );
 
     expect(
       await OrderValidatorAsUser.hasRole(
@@ -298,15 +304,17 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       false
     );
 
-    await OrderValidatorAsAdmin.setOpen(false);
-    await OrderValidatorAsAdmin.setPermissions(PartnerRole, true);
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+    await OrderValidatorAsAdmin.disableWhitelists();
+    await OrderValidatorAsAdmin.setRolesEnabled([PartnerRole], [true]);
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       true
     );
 
@@ -349,7 +357,7 @@ describe('OrderValidator.sol', function () {
   it('should not set permission for token if caller is not owner', async function () {
     const {OrderValidatorAsUser, user} = await loadFixture(deployFixtures);
     await expect(
-      OrderValidatorAsUser.setPermissions(TSBRole, true)
+      OrderValidatorAsUser.setRolesEnabled([TSBRole], [true])
     ).to.revertedWith(
       `AccessControl: account ${user.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
     );
@@ -357,26 +365,33 @@ describe('OrderValidator.sol', function () {
 
   it('should be able to set permission for token', async function () {
     const {OrderValidatorAsAdmin} = await loadFixture(deployFixtures);
-    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
       false
     );
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.roleEnabled(ERC20Role)).to.be.equal(
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
+      false
+    );
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
       false
     );
 
-    await OrderValidatorAsAdmin.setPermissions(TSBRole, true);
-    await OrderValidatorAsAdmin.setPermissions(PartnerRole, true);
-    await OrderValidatorAsAdmin.setPermissions(ERC20Role, true);
-    await OrderValidatorAsAdmin.setOpen(false);
+    await OrderValidatorAsAdmin.setRolesEnabled(
+      [TSBRole, PartnerRole, ERC20Role],
+      [true, true, true]
+    );
+    await OrderValidatorAsAdmin.disableWhitelists();
 
-    expect(await OrderValidatorAsAdmin.roleEnabled(TSBRole)).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.roleEnabled(PartnerRole)).to.be.equal(
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
       true
     );
-    expect(await OrderValidatorAsAdmin.open()).to.be.equal(false);
-    expect(await OrderValidatorAsAdmin.roleEnabled(ERC20Role)).to.be.equal(
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
+      true
+    );
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
+    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
       true
     );
   });
