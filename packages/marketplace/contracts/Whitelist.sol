@@ -1,55 +1,54 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {IWhitelist} from "./interfaces/IWhitelist.sol";
 
-/// @title WhiteList contract
-/// @dev controls which tokens are accepted in the marketplace
+/// @title Whitelist contract
+/// @dev Controls which tokens are accepted in the marketplace.
 contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradeable {
-    /// @notice role for The Sandbox tokens
-    /// @return hash for TSB_ROLE
+    /// @notice Role for The Sandbox tokens
+    /// @return Hash for TSB_ROLE
     bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
-    /// @notice role for partner tokens
-    /// @return hash for PARTNER_ROLE
+    /// @notice Role for partner tokens
+    /// @return Hash for PARTNER_ROLE
     bytes32 public constant PARTNER_ROLE = keccak256("PARTNER_ROLE");
-    /// @notice role for ERC20 tokens
-    /// @return hash for ERC20_ROLE
+    /// @notice Role for ERC20 tokens
+    /// @return Hash for ERC20_ROLE
     bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
 
-    /// @dev map for enableability of roles
+    /// @dev Mapping for enableability of roles
     mapping(bytes32 => bool) private _rolesEnabled;
 
-    /// @dev boolean that indicates if whitelists are enabled or not
+    /// @dev Boolean that indicates if whitelists are enabled or not
     bool private _whitelistsEnabled;
 
-    /// @notice event emitted when roles are enabled
-    /// @param role roles whose permissions were enabled
+    /// @notice Event emitted when roles are enabled
+    /// @param role Roles whose permissions were enabled
     event RoleEnabled(bytes32 indexed role);
 
-    /// @notice event emitted when roles are disabled
-    /// @param role roles whose permissions were disabled
+    /// @notice Event emitted when roles are disabled
+    /// @param role Roles whose permissions were disabled
     event RoleDisabled(bytes32 indexed role);
 
-    /// @notice event indicating that the market was open for all non ERC20 tokens
+    /// @notice Event indicating that the market was open for all non-ERC20 tokens
     event WhitelistsEnabled();
 
-    /// @notice event indicating that the market was closed for all non ERC20 tokens, and must refer to whitelists
+    /// @notice Event indicating that the market was closed for all non-ERC20 tokens and must refer to whitelists
     event WhitelistsDisabled();
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice initializer for WhiteList
-    /// @param admin whitelist admin
-    /// @param roles for different collections of assets
-    /// @param permissions for different roles
-    /// @param whitelistsEnabled if whitelists for assets are enabled or not
+    /// @notice Initializer for Whitelist
+    /// @param admin Whitelist admin
+    /// @param roles For different collections of assets
+    /// @param permissions For different roles
+    /// @param whitelistsEnabled If whitelists for assets are enabled or not
     // solhint-disable-next-line func-name-mixedcase
     function __Whitelist_init(
         address admin,
@@ -67,9 +66,9 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         }
     }
 
-    /// @notice setting permissions for tokens
-    /// @param roles we want to enable or disable
-    /// @param permissions boolan
+    /// @notice Setting permissions for tokens
+    /// @param roles We want to enable or disable
+    /// @param permissions Boolean
     function setRolesEnabled(
         bytes32[] calldata roles,
         bool[] calldata permissions
@@ -77,39 +76,31 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _setRolesEnabled(roles, permissions);
     }
 
-    /// @notice enable role
-    /// @param role we want to enable
+    /// @notice Enable role
+    /// @param role We want to enable
     function enableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        bytes32[] memory roleArray = new bytes32[](1);
-        roleArray[0] = role;
-        bool[] memory boolArray = new bool[](1);
-        boolArray[0] = true;
-        _setRolesEnabled(roleArray, boolArray);
+        _enableRole(role);
     }
 
-    /// @notice disable role
-    /// @param role we want to disable
+    /// @notice Disable role
+    /// @param role We want to disable
     function disableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        bytes32[] memory roleArray = new bytes32[](1);
-        roleArray[0] = role;
-        bool[] memory boolArray = new bool[](1);
-        boolArray[0] = false;
-        _setRolesEnabled(roleArray, boolArray);
+        _disableRole(role);
     }
 
-    /// @notice open market place for all non ERC20 tokens
+    /// @notice Close marketplace for all non-ERC20 tokens
     function enableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _enableWhitelists();
     }
 
-    /// @notice setting permissions for open
+    /// @notice Disable whitelists
     function disableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _disableWhitelists();
     }
 
     /// @notice Check if a specific role is enabled or disabled.
     /// @param role The role identifier.
-    /// @return true if the role is enabled, false if disabled.
+    /// @return True if the role is enabled, false if disabled.
     function isRoleEnabled(bytes32 role) public view returns (bool) {
         return _rolesEnabled[role];
     }
@@ -120,11 +111,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         return _whitelistsEnabled;
     }
 
-    /// @notice enale or disable roles
-    /// @param roles identifyers
-    /// @param permissions booleans
+    /// @notice Enable or disable roles
+    /// @param roles Identifiers
+    /// @param permissions Booleans
     function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
-        require(roles.length == permissions.length, "ill-formed inputs");
+        require(roles.length == permissions.length, "Ill-formed inputs");
         for (uint256 i = 0; i < roles.length; ++i) {
             if (isRoleEnabled(roles[i]) != permissions[i]) {
                 if (permissions[i]) {
