@@ -257,5 +257,5 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _mustSkipFees(address from) internal virtual returns (bool);
 
     // slither-disable-next-line unused-state
-    uint256[46] private __gap;
+    uint256[50] private __gap;
 }
