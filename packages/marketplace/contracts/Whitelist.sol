@@ -88,7 +88,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _disableRole(role);
     }
 
-    /// @notice Close marketplace for all non-ERC20 tokens
+    /// @notice Enable whitelists for all non ERC20 tokens
     function enableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _enableWhitelists();
     }
