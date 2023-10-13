@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
@@ -144,12 +143,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param royaltiesProvider address of royalty provider
     /// @return royalty type
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (RoyaltiesType) {
-        try IERC165Upgradeable(token).supportsInterface(type(IERC2981).interfaceId) returns (bool result2981) {
-            if (result2981) {
-                return RoyaltiesType.EIP2981;
-            }
-            // solhint-disable-next-line no-empty-blocks
-        } catch {}
+        if (token.supportsInterface(type(IERC2981).interfaceId)) {
+            return RoyaltiesType.EIP2981;
+        }
 
         if (royaltiesProvider != address(0)) {
             return RoyaltiesType.EXTERNAL_PROVIDER;
@@ -202,8 +198,8 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @return royalties 2981 royalty array
     function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
-            if (_checkGetRecipientsInterface(token)) {
-                 return _getRecipients(token, tokenId, receiver, royaltyAmount);
+            if (token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId)) {
+                return _getRecipients(token, tokenId, receiver, royaltyAmount);
             } else {
                 return _calculateRoyalties(receiver, royaltyAmount);
             }
@@ -238,16 +234,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             // sum can be less than amount, otherwise small-value listings can break
             require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
             return royalties;
-        } catch {
-            return _calculateRoyalties(receiver, royaltyAmount);
-        }
-    }
+        } catch {}
 
-    /// @notice check if the token supports the type(IMultiRoyaltyRecipients).interfaceId
-    /// @param token address of token
-    /// @return true or false
-    function _checkGetRecipientsInterface(address token) internal view returns (bool) {
-        return token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId);
+        return _calculateRoyalties(receiver, royaltyAmount);
     }
 
     /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
