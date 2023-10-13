@@ -18,7 +18,7 @@ contract ERC1155WithRoyaltyV2981Mock is
     AbstractRoyaltiesMock,
     ERC1155Upgradeable
 {
-    function initialize() public initializer {
+    function initialize() external initializer {
         __Ownable_init();
     }
 
