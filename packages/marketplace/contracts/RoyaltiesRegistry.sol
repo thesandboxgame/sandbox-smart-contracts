@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
@@ -12,6 +12,8 @@ import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.
 /// @title royalties registry contract
 /// @notice contract allows to processing different types of royalties
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
+    using ERC165CheckerUpgradeable for address;
+
     /// @notice emitted when royalties is set for token
     /// @param token token address
     /// @param royalties array of royalties
@@ -145,12 +147,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param royaltiesProvider address of royalty provider
     /// @return royalty type
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (RoyaltiesType) {
-        try IERC165Upgradeable(token).supportsInterface(type(IERC2981).interfaceId) returns (bool result2981) {
-            if (result2981) {
-                return RoyaltiesType.EIP2981;
-            }
-            // solhint-disable-next-line no-empty-blocks
-        } catch {}
+        if (token.supportsInterface(type(IERC2981).interfaceId)) {
+            return RoyaltiesType.EIP2981;
+        }
 
         if (royaltiesProvider != address(0)) {
             return RoyaltiesType.EXTERNAL_PROVIDER;
@@ -203,35 +202,26 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @return royalties 2981 royalty array
     function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory royalties) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
-            try IERC165Upgradeable(token).supportsInterface(type(IMultiRoyaltyRecipients).interfaceId) returns (
-                bool result
-            ) {
-                if (result) {
-                    try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (
-                        Recipient[] memory multiRecipients
-                    ) {
-                        uint256 multiRecipientsLength = multiRecipients.length;
-                        royalties = new Part[](multiRecipientsLength);
-                        uint256 sum = 0;
-                        for (uint256 i; i < multiRecipientsLength; i++) {
-                            Recipient memory splitRecipient = multiRecipients[i];
-                            royalties[i].account = splitRecipient.recipient;
-                            uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
-                            royalties[i].value = splitAmount;
-                            sum += splitAmount;
-                        }
-                        // sum can be less than amount, otherwise small-value listings can break
-                        require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
-                        return royalties;
-                    } catch {
-                        return _calculateRoyalties(receiver, royaltyAmount);
+            if (token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId)) {
+                try IMultiRoyaltyRecipients(token).getRecipients(tokenId) returns (Recipient[] memory multiRecipients) {
+                    uint256 multiRecipientsLength = multiRecipients.length;
+                    royalties = new Part[](multiRecipientsLength);
+                    uint256 sum = 0;
+                    for (uint256 i; i < multiRecipientsLength; i++) {
+                        Recipient memory splitRecipient = multiRecipients[i];
+                        royalties[i].account = splitRecipient.recipient;
+                        uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
+                        royalties[i].value = splitAmount;
+                        sum += splitAmount;
                     }
-                } else {
-                    return _calculateRoyalties(receiver, royaltyAmount);
-                }
-            } catch {
-                return _calculateRoyalties(receiver, royaltyAmount);
+                    // sum can be less than amount, otherwise small-value listings can break
+                    require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
+                    return royalties;
+                    // solhint-disable-next-line no-empty-blocks
+                } catch {}
             }
+
+            return _calculateRoyalties(receiver, royaltyAmount);
         } catch {
             return new Part[](0);
         }
