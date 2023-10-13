@@ -4,10 +4,11 @@ pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {IWhitelist} from "./interfaces/IWhitelist.sol";
 
 /// @title WhiteList contract
 /// @dev controls which tokens are accepted in the marketplace
-contract Whitelist is Initializable, AccessControlEnumerableUpgradeable {
+contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradeable {
     /// @notice role for The Sandbox tokens
     /// @return hash for TSB_ROLE
     bytes32 public constant TSB_ROLE = keccak256("TSB_ROLE");
@@ -18,8 +19,10 @@ contract Whitelist is Initializable, AccessControlEnumerableUpgradeable {
     /// @return hash for ERC20_ROLE
     bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
 
+    /// @dev map for enableability of roles
     mapping(bytes32 => bool) private _rolesEnabled;
 
+    /// @dev boolean that indicates if whitelists are enabled or not
     bool private _whitelistsEnabled;
 
     /// @notice event emitted when roles are enabled XXX
@@ -47,7 +50,7 @@ contract Whitelist is Initializable, AccessControlEnumerableUpgradeable {
     /// @param newTsbPermission allows orders with The Sandbox token
     /// @param newPartnersPermission allows orders with partner token
     /// @param newErc20Permission allows to pay orders with only whitelisted token
-    /// @param newOpen allows orders with any token */
+    /// @param whitelistsEnabled allows orders with any token */
     // solhint-disable-next-line func-name-mixedcase
     function __Whitelist_init(
         address admin,
@@ -85,11 +88,16 @@ contract Whitelist is Initializable, AccessControlEnumerableUpgradeable {
         _disableWhitelists();
     }
 
-    function isRoleEnabled(bytes32 role) internal view returns (bool) {
+    /// @notice Check if a specific role is enabled or disabled.
+    /// @param role The role identifier.
+    /// @return true if the role is enabled, false if disabled.
+    function isRoleEnabled(bytes32 role) public view returns (bool) {
         return _rolesEnabled[role];
     }
 
-    function isWhitelistsEnabled() internal view returns (bool) {
+    /// @notice Check if whitelists are enabled.
+    /// @return True if whitelists are enabled, false if disabled.
+    function isWhitelistsEnabled() public view returns (bool) {
         return _whitelistsEnabled;
     }
 
