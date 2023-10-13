@@ -24,7 +24,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param admin OrderValidator and Whiteist admin
     /// @param roles of the Whitelist contract
     /// @param permissions of the roles
-    /// @param whitelistsEnabled boolean to indicate that all assets are accepted by the exchange contract
+    /// @param whitelistsEnabled boolean to indicate id whitelist is enabled 
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         address admin,
@@ -61,7 +61,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
-    /// @notice checkif asset exchane is affected by the whitelist
+    /// @notice check if asset exchange is affected by the whitelist
     /// @param asset asset to be verifyed
     /// @dev if asset type is ERC20, ERC20_ROLE is checked
     /// @dev otherwisewe verify if whitelists are enabled, if so check TSB_ROLE and PARTNER_ROLE
