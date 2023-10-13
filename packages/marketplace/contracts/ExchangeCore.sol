@@ -42,6 +42,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @param totalFillRight total fill right
     event Match(
         address indexed from,
+        bytes32 indexed orderKeyHashLeft,
+        bytes32 indexed orderKeyHashRight,
         LibOrder.Order orderLeft,
         LibOrder.Order orderRight,
         LibOrder.FillResult newFill,
@@ -180,30 +182,32 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight
     ) internal returns (LibOrder.FillResult memory newFill) {
-        bytes32 leftOrderKeyHash = LibOrder.hashKey(orderLeft);
-        bytes32 rightOrderKeyHash = LibOrder.hashKey(orderRight);
+        bytes32 orderKeyHashLeft = LibOrder.hashKey(orderLeft);
+        bytes32 orderKeyHashRight = LibOrder.hashKey(orderRight);
 
-        uint256 leftOrderFill = _getOrderFill(orderLeft.salt, leftOrderKeyHash);
-        uint256 rightOrderFill = _getOrderFill(orderRight.salt, rightOrderKeyHash);
+        uint256 leftOrderFill = _getOrderFill(orderLeft.salt, orderKeyHashLeft);
+        uint256 rightOrderFill = _getOrderFill(orderRight.salt, orderKeyHashRight);
         newFill = LibOrder.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
 
         require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
 
         if (orderLeft.salt != 0) {
-            fills[leftOrderKeyHash] = leftOrderFill + newFill.rightValue;
+            fills[orderKeyHashLeft] = leftOrderFill + newFill.rightValue;
         }
 
         if (orderRight.salt != 0) {
-            fills[rightOrderKeyHash] = rightOrderFill + newFill.leftValue;
+            fills[orderKeyHashRight] = rightOrderFill + newFill.leftValue;
         }
 
         emit Match({
             from: sender,
+            orderKeyHashLeft: orderKeyHashLeft,
+            orderKeyHashRight: orderKeyHashRight,
             orderLeft: orderLeft,
             orderRight: orderRight,
             newFill: newFill,
-            totalFillLeft: fills[leftOrderKeyHash],
-            totalFillRight: fills[rightOrderKeyHash]
+            totalFillLeft: fills[orderKeyHashLeft],
+            totalFillRight: fills[orderKeyHashRight]
         });
         return newFill;
     }
