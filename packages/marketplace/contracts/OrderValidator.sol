@@ -20,12 +20,11 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         _disableInitializers();
     }
 
-    /* /// @notice initializer for OrderValidator
+    /// @notice initializer for OrderValidator
     /// @param admin OrderValidator and Whiteist admin
-    /// @param newTsbOnly boolean to indicate that only The Sandbox tokens are accepted by the exchange contract
-    /// @param newPartners boolena to indicate that partner tokens are accepted by the exchange contract
-    /// @param newErc20 boolean to activate the white list of ERC20 tokens
-    /// @param whitelistsEnabled boolean to indicate that all assets are accepted by the exchange contract */
+    /// @param roles of the Whitelist contract
+    /// @param permissions of the roles
+    /// @param whitelistsEnabled boolean to indicate that all assets are accepted by the exchange contract
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         address admin,
@@ -45,7 +44,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
-        _verifyWhiteList(order.makeAsset);
+        _verifyWhitelists(order.makeAsset);
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
@@ -62,9 +61,11 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
-    /// @notice if token is whitelisted
-    /// @param asset make asset to be verifyed
-    function _verifyWhiteList(LibAsset.Asset calldata asset) internal view {
+    /// @notice checkif asset exchane is affected by the whitelist
+    /// @param asset asset to be verifyed
+    /// @dev if asset type is ERC20, ERC20_ROLE is checked
+    /// @dev otherwisewe verify if whitelists are enabled, if so check TSB_ROLE and PARTNER_ROLE
+    function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
         address makeToken = abi.decode(asset.assetType.data, (address));
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
