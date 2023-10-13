@@ -18,14 +18,23 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
     /// @return hash for ERC20_ROLE
     bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
 
-    mapping(bytes32 => bool) public roleEnabled;
+    mapping(bytes32 => bool) private roleEnabled;
 
-    bool public open;
+    bool private whitelistsEnabled;
 
-    /// @notice event emitted when new permissions for roles are changed
-    /// @param role role whose permission was changed
-    /// @param permission new permission of role
-    event PermissionSet(bytes32 role, bool permission);
+    /// @notice event emitted when roles are enabled
+    /// @param roles roles whose permissions were enabled
+    event RoleEnabled(bytes32[] roles);
+
+    /// @notice event emitted when roles are disabled
+    /// @param roles roles whose permissions were disabled
+    event RoleDisabled(bytes32[] roles);
+
+    /// @notice event indicating that the market was open for all non ERC20 tokens
+    event Opened();
+
+    /// @notice event indicating that the market was closed for all non ERC20 tokens, and must refer to whitelists
+    event Closed();
 
     /// @param permission boolean indicating that all tokens are accepted
     event NewOpenSet(bool permission);
@@ -36,51 +45,79 @@ contract WhiteList is Initializable, AccessControlEnumerableUpgradeable {
         _disableInitializers();
     }
 
-    /// @notice initializer for WhiteList
+    /* /// @notice initializer for WhiteList
     /// @param admin whitelist admin
     /// @param newTsbPermission allows orders with The Sandbox token
     /// @param newPartnersPermission allows orders with partner token
     /// @param newErc20Permission allows to pay orders with only whitelisted token
-    /// @param newOpen allows orders with any token
+    /// @param newOpen allows orders with any token */
     // solhint-disable-next-line func-name-mixedcase
     function __Whitelist_init(
         address admin,
-        bool newTsbPermission,
-        bool newPartnersPermission,
-        bool newErc20Permission,
-        bool newOpen
+        bytes32[] calldata roles,
+        bool[] calldata permissions,
+        bool whitelistEnabler
     ) internal onlyInitializing {
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRolePermission(TSB_ROLE, newTsbPermission);
-        _setRolePermission(PARTNER_ROLE, newPartnersPermission);
-        _setRolePermission(ERC20_ROLE, newErc20Permission);
-        _setOpen(newOpen);
+        _setRolePermission(roles, permissions);
+        _setWhitelistEnabler(whitelistEnabler);
     }
 
     /// @notice setting permissions for tokens
-    /// @param role we want to enable or disable
-    /// @param permission boolan
-    function setPermissions(bytes32 role, bool permission) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setRolePermission(role, permission);
+    /// @param roles we want to enable or disable
+    /// @param permissions boolan
+    function setPermissions(
+        bytes32[] calldata roles,
+        bool[] calldata permissions
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setRolePermission(roles, permissions);
+    }
+
+    /// @notice open market place for all non ERC20 tokens
+    function enableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setWhitelistEnabler(true);
     }
 
     /// @notice setting permissions for open
-    /// @param permission boolan
-    function setOpen(bool permission) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setOpen(permission);
+    function disableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setWhitelistEnabler(false);
+    }
+
+    function getRoleEnabler(bytes32 role) internal view returns (bool) {
+        return roleEnabled[role];
+    }
+
+    function getWhitelistsEnabled() internal view returns (bool) {
+        return whitelistsEnabled;
     }
 
     /// @notice setting permissions for tokens
-    /// @param role identifyer
-    /// @param permission boolean
-    function _setRolePermission(bytes32 role, bool permission) internal {
-        roleEnabled[role] = permission;
-        emit PermissionSet(role, permission);
+    /// @param roles identifyers
+    /// @param permissions booleans
+    function _setRolePermission(bytes32[] memory roles, bool[] memory permissions) internal {
+        bytes32[] memory enabled;
+        bytes32[] memory disabled;
+        for (uint256 i = 0; i < roles.length; ++i) {
+            roleEnabled[roles[i]] = permissions[i];
+            if (permissions[i]) {
+                enabled[enabled.length] = roles[i];
+            } else {
+                disabled[disabled.length] = roles[i];
+            }
+        }
+        if (enabled.length > 0) {
+            emit RoleEnabled(enabled);
+        }
+        if (disabled.length > 0) {
+            emit RoleDisabled(disabled);
+        }
     }
 
-    function _setOpen(bool permission) internal {
-        open = permission;
-        emit NewOpenSet(permission);
+    function _setWhitelistEnabler(bool status) internal {
+        whitelistsEnabled = status;
+        if (status) {
+            emit Opened();
+        } else emit Closed();
     }
 }
