@@ -35,6 +35,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
     /// @notice event when orders match
     /// @param from _msgSender or operator if used with approve and call
+    /// @param orderKeyHashLeft left order key hash
+    /// @param orderKeyHashRight right order key hash
     /// @param orderLeft left order
     /// @param orderRight right order
     /// @param newFill fill for left order
