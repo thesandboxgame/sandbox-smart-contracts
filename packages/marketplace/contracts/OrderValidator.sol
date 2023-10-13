@@ -7,11 +7,11 @@ import {LibAsset} from "./libraries/LibAsset.sol";
 import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
-import {WhiteList} from "./WhiteList.sol";
+import {Whitelist} from "./Whitelist.sol";
 
 /// @title contract for order validation
 /// @notice validate orders and contains a white list of tokens
-contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, WhiteList {
+contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Whitelist {
     using SignatureCheckerUpgradeable for address;
 
     /// @dev this protects the implementation contract from being initialized.
@@ -67,15 +67,15 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     function _verifyWhiteList(LibAsset.Asset calldata asset) internal view {
         address makeToken = abi.decode(asset.assetType.data, (address));
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (getRoleEnabler(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
+            if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");
             }
         } else {
             if (isWhitelistsEnabled()) {
                 return;
             } else if (
-                (getRoleEnabler(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
-                (getRoleEnabler(PARTNER_ROLE) && hasRole(PARTNER_ROLE, makeToken))
+                (isRoleEnabled(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
+                (isRoleEnabled(PARTNER_ROLE) && hasRole(PARTNER_ROLE, makeToken))
             ) {
                 return;
             } else {
