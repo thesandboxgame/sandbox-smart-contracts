@@ -71,7 +71,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
                 revert("payment token not allowed");
             }
         } else {
-            if (getWhitelistsEnabled()) {
+            if (isWhitelistsEnabled()) {
                 return;
             } else if (
                 (getRoleEnabler(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
