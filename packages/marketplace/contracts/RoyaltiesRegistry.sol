@@ -234,6 +234,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             // sum can be less than amount, otherwise small-value listings can break
             require(sum <= royaltyAmount, "RoyaltiesRegistry: Invalid split");
             return royalties;
+            // solhint-disable-next-line no-empty-blocks
         } catch {}
 
         return _calculateRoyalties(receiver, royaltyAmount);
