@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The [OrderValidator](../../contracts/exchange/OrderValidator.sol) contract is the central security component of the exchange. It checks the validity of the orders being traded: 
+The [OrderValidator](../contracts/OrderValidator.sol) contract is the central security component of the exchange. It checks the validity of the orders being traded: 
 - makers validity
 - expiration dates
 - whitelisted tokens
