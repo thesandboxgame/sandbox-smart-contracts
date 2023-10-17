@@ -7,14 +7,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
-  let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER');
-  if (!TRUSTED_FORWARDER) {
-    TRUSTED_FORWARDER = await deploy('TRUSTED_FORWARDER', {
-      from: deployer,
-      contract: 'TrustedForwarderMock',
-      log: true,
-    });
-  }
+  // let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER');
+  // if (!TRUSTED_FORWARDER) {
+  //   TRUSTED_FORWARDER = await deploy('TRUSTED_FORWARDER', {
+  //     from: deployer,
+  //     contract: 'TrustedForwarderMock',
+  //     log: true,
+  //   });
+  // }
+  const TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER_V2');
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
 

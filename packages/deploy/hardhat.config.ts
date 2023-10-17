@@ -287,6 +287,7 @@ const compilers = [
 ].map((version) => ({
   version,
   settings: {
+    evmVersion: 'istanbul',
     optimizer: {
       enabled: true,
       runs: 2000,
