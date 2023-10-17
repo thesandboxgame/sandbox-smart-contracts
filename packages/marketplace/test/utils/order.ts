@@ -1,6 +1,6 @@
 // An order represents something offered (asset + who offers) plus what we want in exchange (asset + optionally for whom or everybody)
 // SEE: LibOrder.sol
-import {Asset, AssetERC20, AssetType, hashAsset, hashAssetType} from './assets';
+import {Asset, AssetType, hashAsset, hashAssetType} from './assets';
 import {
   AbiCoder,
   Contract,
