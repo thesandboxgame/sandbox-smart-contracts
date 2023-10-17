@@ -1,6 +1,6 @@
 // An order represents something offered (asset + who offers) plus what we want in exchange (asset + optionally for whom or everybody)
 // SEE: LibOrder.sol
-import {Asset, AssetERC20, hashAsset, hashAssetType} from './assets';
+import {Asset, AssetERC20, AssetType, hashAsset, hashAssetType} from './assets';
 import {
   AbiCoder,
   Contract,
@@ -144,24 +144,22 @@ export async function signOrder(
   );
 }
 
-export async function isOrderEqual(x: Order, order: Order): boolean {
-  const makerAsset = await AssetERC20(
-    x.makeAsset.assetClass,
-    x.makeAsset.value
-  );
-  const takerAsset = await AssetERC20(
-    x.takeAsset.assetClass,
-    x.takeAsset.value
-  );
+export function isAssetTypeEqual(x: AssetType, y: AssetType): boolean {
+  return x.assetClass == y.assetClass && x.data == y.data;
+}
 
-  const eventOrder = await OrderDefault(
-    x.maker,
-    makerAsset,
-    x.taker,
-    takerAsset,
-    x.salt,
-    x.start,
-    x.end
+export function isAssetEqual(x: Asset, y: Asset): boolean {
+  return isAssetTypeEqual(x.assetType, y.assetType) && x.value == y.value;
+}
+
+export function isOrderEqual(x: Order, order: Order): boolean {
+  return (
+    x.maker === order.maker &&
+    isAssetEqual(x.makeAsset, order.makeAsset) &&
+    x.taker === order.taker &&
+    isAssetEqual(x.takeAsset, order.takeAsset) &&
+    x.salt == order.salt &&
+    x.start == order.start &&
+    x.end == order.end
   );
-  return JSON.stringify(eventOrder) === JSON.stringify(order);
 }
