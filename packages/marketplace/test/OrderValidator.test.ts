@@ -2,7 +2,7 @@ import {deployFixtures} from './fixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
-
+import {upgrades} from 'hardhat';
 import {OrderDefault, signOrder} from './utils/order.ts';
 import {ZeroAddress} from 'ethers';
 
@@ -17,6 +17,21 @@ const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
 describe('OrderValidator.sol', function () {
+  it('should upgrade the contract successfully', async function () {
+    const {OrderValidatorAsDeployer, OrderValidatorUpgradeMock} =
+      await loadFixture(deployFixtures);
+    const isWhitelistsEnabled =
+      await OrderValidatorAsDeployer.isWhitelistsEnabled();
+
+    const upgraded = await upgrades.upgradeProxy(
+      await OrderValidatorAsDeployer.getAddress(),
+      OrderValidatorUpgradeMock
+    );
+
+    expect(await upgraded.isWhitelistsEnabled()).to.be.equal(
+      isWhitelistsEnabled
+    );
+  });
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
     const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1} =
       await loadFixture(deployFixtures);
