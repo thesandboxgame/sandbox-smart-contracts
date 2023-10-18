@@ -2,8 +2,21 @@ import {deployFixtures} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {ZeroAddress} from 'ethers';
+import {upgrades} from 'hardhat';
 
 describe('RoyaltiesRegistry.sol', function () {
+  it('should upgrade the contract successfully', async function () {
+    const {RoyaltiesRegistryAsDeployer, Royalties2981ImplMock} =
+      await loadFixture(deployFixtures);
+    const WEIGHT_VALUE = await RoyaltiesRegistryAsDeployer.WEIGHT_VALUE();
+
+    const upgraded = await upgrades.upgradeProxy(
+      await RoyaltiesRegistryAsDeployer.getAddress(),
+      Royalties2981ImplMock
+    );
+
+    expect(await upgraded.WEIGHT_VALUE()).to.be.equal(WEIGHT_VALUE);
+  });
   it('should not set provider by token if caller is not owner', async function () {
     const {ERC721WithRoyaltyV2981, RoyaltiesRegistryAsUser, user1} =
       await loadFixture(deployFixtures);

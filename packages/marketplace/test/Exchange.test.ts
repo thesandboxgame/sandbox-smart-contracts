@@ -19,8 +19,29 @@ import {
   isOrderEqual,
 } from './utils/order.ts';
 import {ZeroAddress, AbiCoder} from 'ethers';
+import {upgrades} from 'hardhat';
 
 describe('Exchange.sol', function () {
+  it('should upgrade the contract successfully', async function () {
+    const {ExchangeContractAsDeployer, ExchangeUpgradeMock} = await loadFixture(
+      deployFixtures
+    );
+    const protocolFeePrimary =
+      await ExchangeContractAsDeployer.protocolFeePrimary();
+    const protocolFeeSec =
+      await ExchangeContractAsDeployer.protocolFeeSecondary();
+    const feeReceiver = await ExchangeContractAsDeployer.defaultFeeReceiver();
+
+    const upgraded = await upgrades.upgradeProxy(
+      await ExchangeContractAsDeployer.getAddress(),
+      ExchangeUpgradeMock
+    );
+
+    expect(await upgraded.protocolFeePrimary()).to.be.equal(protocolFeePrimary);
+    expect(await upgraded.protocolFeeSecondary()).to.be.equal(protocolFeeSec);
+    expect(await upgraded.defaultFeeReceiver()).to.be.equal(feeReceiver);
+  });
+
   it('should return the correct value of protocol fee', async function () {
     const {
       ExchangeContractAsDeployer,

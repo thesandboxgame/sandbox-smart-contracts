@@ -33,6 +33,11 @@ async function deploy() {
   const RoyaltiesRegistryAsUser = await RoyaltiesRegistryAsDeployer.connect(
     user
   );
+
+  const Royalties2981ImplMock = await ethers.getContractFactory(
+    'Royalties2981ImplMock'
+  );
+
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidator'
   );
@@ -48,7 +53,9 @@ async function deploy() {
       initializer: '__OrderValidator_init_unchained',
     }
   );
-
+  const OrderValidatorUpgradeMock = await ethers.getContractFactory(
+    'OrderValidatorUpgradeMock'
+  );
   const OrderValidatorAsUser = await OrderValidatorAsDeployer.connect(user);
   const OrderValidatorAsAdmin = await OrderValidatorAsDeployer.connect(admin);
   const protocolFeePrimary = 123;
@@ -70,6 +77,10 @@ async function deploy() {
     {
       initializer: '__Exchange_init',
     }
+  );
+
+  const ExchangeUpgradeMock = await ethers.getContractFactory(
+    'ExchangeUpgradeMock'
   );
 
   const ExchangeContractAsUser = await ExchangeContractAsDeployer.connect(user);
@@ -169,15 +180,19 @@ async function deploy() {
     ExchangeContractAsDeployer,
     ExchangeContractAsAdmin,
     ExchangeContractAsUser,
+    ExchangeUpgradeMock,
     TrustedForwarder,
     ERC20Contract,
     ERC20Contract2,
     ERC721Contract,
     ERC1155Contract,
+    OrderValidatorAsDeployer,
     OrderValidatorAsAdmin,
     OrderValidatorAsUser,
+    OrderValidatorUpgradeMock,
     RoyaltiesRegistryAsDeployer,
     RoyaltiesRegistryAsUser,
+    Royalties2981ImplMock,
     ERC721WithRoyaltyV2981,
     ERC721WithRoyalty,
     ERC1155WithRoyalty,
