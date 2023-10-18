@@ -1,8 +1,14 @@
 # RoyaltySplitter
 
-Implementing a clone-able and configurable royalty splitter. It allows for the distribution of royalties from NFT sales among 2 recipients. First recipient is the creator's wallet and the second recipient is common recipient in the RoyaltyManager contract.
+Implementing a clone-able and configurable royalty splitter. It allows for the
+distribution of royalties from NFT sales among 2 recipients. First recipient is
+the creator's wallet and the second recipient is common recipient in the
+RoyaltyManager contract.
 
-This contract calls the RoyaltyManager contract for the common recipient's address, common recipient's split of the Royalty and creator's split of the royalty. Just the creators wallet address is set here to send the royalty RoyaltySplitter's owner is the RoyaltyManager contract.
+This contract calls the RoyaltyManager contract for the common recipient's
+address, common recipient's split of the Royalty and creator's split of the
+royalty. Just the creators wallet address is set here to send the royalty
+RoyaltySplitter's owner is the RoyaltyManager contract.
 
 ## functions
 
@@ -13,7 +19,8 @@ This contract calls the RoyaltyManager contract for the common recipient's addre
     ) public initializer
 ```
 
-- Initializes the contract after its initial deployment by setting the recipient wallet address and royalty manager contract's addresses
+- Initializes the contract after its initial deployment by setting the recipient
+  wallet address and royalty manager contract's addresses
 - `recipient`: The address of the recipient of the funds
 - `manager`: The address of the manager contract
 
@@ -25,8 +32,10 @@ This contract calls the RoyaltyManager contract for the common recipient's addre
     ) external override onlyOwner
 ```
 
-- This function used to set the recipients wallet address. but not the split. This is done to be in compliance with the splitter interface of manifolds.
-- `recipients`: The array of recipients which should only have one recipient to be set.
+- This function used to set the recipients wallet address. but not the split.
+  This is done to be in compliance with the splitter interface of manifolds.
+- `recipients`: The array of recipients which should only have one recipient to
+  be set.
 
 ---
 
@@ -39,7 +48,9 @@ This contract calls the RoyaltyManager contract for the common recipient's addre
 ```
 
 - Retrieves an array of recipients of the royalties sent to this contract
-- `return` An array of Recipient , each containing Recipient address and a BPS value representing the share of the royalties they receive in Recipient address.
+- `return` An array of Recipient , each containing Recipient address and a BPS
+  value representing the share of the royalties they receive in Recipient
+  address.
 
 ---
 
@@ -57,8 +68,10 @@ This contract calls the RoyaltyManager contract for the common recipient's addre
 function splitERC20Tokens(IERC20 erc20Contract) public
 ```
 
-- This function allows recipients to split all available ERC20 at the provided address between the recipients
-- recipients(both creator and common) can only call this function to split all available tokens recipients.
+- This function allows recipients to split all available ERC20 at the provided
+  address between the recipients
+- recipients(both creator and common) can only call this function to split all
+  available tokens recipients.
 - `erc20Contract`: The ERC20 token contract to split
 
 ---
