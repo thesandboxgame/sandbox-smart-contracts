@@ -1,12 +1,22 @@
 # RoyaltyManager
 
-RoyaltyManager contract stores the common royalty recipient so the RoyaltySplitters can read it. it also stores the royalty split for the common royalty RoyaltySplitter so that the EIP2981 Royalty is divided between the creator and the common royalty recipient.
+RoyaltyManager contract stores the common royalty recipient so the
+RoyaltySplitters can read it. it also stores the royalty split for the common
+royalty RoyaltySplitter so that the EIP2981 Royalty is divided between the
+creator and the common royalty recipient.
 
-Common recipient gets commonSplit/Total_Total_Base_Points part of the royalty and creator get (Total_Total_Base_Points - commonSplit)/Total_Total_Base_Points part of the royalty.
+Common recipient gets commonSplit/Total_Total_Base_Points part of the royalty
+and creator get (Total_Total_Base_Points - commonSplit)/Total_Total_Base_Points
+part of the royalty.
 
-This contract also stores the EIP2981 RoyaltyBps for the contact's which don't use RoyaltySplitters for royalty distribution.
+This contract also stores the EIP2981 RoyaltyBps for the contact's which don't
+use RoyaltySplitters for royalty distribution.
 
-This contract also deploys the RoyaltySplitters for creators, which are deployed when the called by the NFT contracts. A single RoyaltySplitter would be deployed for a creator and these RoyaltySplitters are deployed through RoyaltyManager so that they could be shared across various NFT contracts to receive royalty for a creator. 
+This contract also deploys the RoyaltySplitters for creators, which are deployed
+when the called by the NFT contracts. A single RoyaltySplitter would be deployed
+for a creator and these RoyaltySplitters are deployed through RoyaltyManager so
+that they could be shared across various NFT contracts to receive royalty for a
+creator.
 
 ## External functions
 
@@ -21,10 +31,14 @@ This contract also deploys the RoyaltySplitters for creators, which are deployed
 ```
 
 - Initialization function for deploying the contract via a proxy
-- This function is called during deployment and sets the common recipient and split for all the RoyaltySplitters.
-- ` _commonRecipient`: The common recipient wallet address for all the RoyaltySplitters
-- `_commonSplit` The split percentage for the common recipient and creators split would be 10000 - commonSplit
--  `royaltySplitterCloneable` address of cloneable splitter contract for royalties distribution
+- This function is called during deployment and sets the common recipient and
+  split for all the RoyaltySplitters.
+- ` _commonRecipient`: The common recipient wallet address for all the
+  RoyaltySplitters
+- `_commonSplit` The split percentage for the common recipient and creators
+  split would be 10000 - commonSplit
+- `royaltySplitterCloneable` address of cloneable splitter contract for
+  royalties distribution
 - `managerAdmin` address of RoyaltyManager contract.
 - `contractRoyaltySetter` the address of royalty setter of contract.
 
@@ -49,9 +63,12 @@ This contract also deploys the RoyaltySplitters for creators, which are deployed
     ) external onlyRole(CONTRACT_ROYALTY_SETTER_ROLE)
 ```
 
-- This function sets the royalty split percentage for a specific contract according to the EIP 2981 standard.
-- `contractAddress`: The address of the contract for which the royalty split percentage is being set
-- `_royaltyBps`: The new royalty split percentage to be set for the specified contract
+- This function sets the royalty split percentage for a specific contract
+  according to the EIP 2981 standard.
+- `contractAddress`: The address of the contract for which the royalty split
+  percentage is being set
+- `_royaltyBps`: The new royalty split percentage to be set for the specified
+  contract
 - Emits `RoyaltySet` event.
 
 ---
@@ -64,8 +81,10 @@ This contract also deploys the RoyaltySplitters for creators, which are deployed
         returns (Recipient memory recipient)
 ```
 
-- This function returns the common recipient and split to be used by the RoyaltySplitters
-- return `recipient` A Recipient struct containing the common recipient and split information.
+- This function returns the common recipient and split to be used by the
+  RoyaltySplitters
+- return `recipient` A Recipient struct containing the common recipient and
+  split information.
 
 ---
 
@@ -76,7 +95,8 @@ function setRecipient(
 ```
 
 - Sets the common recipient wallet address for all the RoyaltySplitters
-- This function can only be called by the contract owner (or later by a RoyaltyManager)
+- This function can only be called by the contract owner (or later by a
+  RoyaltyManager)
 - `_commonRecipient`: The new common recipient wallet address to be set
 
 ---
@@ -85,13 +105,14 @@ function setRecipient(
 function deployRoyaltySplitter(
         address creator,
         address payable recipient
-    ) external returns (address payable) 
+    ) external returns (address payable)
 ```
 
 - deploys the RoyaltySplitter for a creator
-- This function should be called by the token contracts 
+- This function should be called by the token contracts
 - `creator`: the address of the creator
-- `recipient` : the wallet of the recipient where they would receive there royalty
+- `recipient` : the wallet of the recipient where they would receive there
+  royalty
 - returns `creatorRoyaltySplitterAddress` : deployed for a creator
 
 ---
@@ -104,7 +125,7 @@ function getCreatorRoyaltySplitter(
 
 - This function returns the the address of RoyaltySplitter of a creator.
 - `creator` the address of the creator
-- returns  the RoyaltySplitter of the creator.
+- returns the RoyaltySplitter of the creator.
 
 ---
 
@@ -121,18 +142,21 @@ function getCreatorSplit() external view returns (uint16)
 function getRoyaltyInfo() external view returns (address, uint16)
 ```
 
-- This function returns the common recipient and EIP2981 royalty split for the caller contract
-- External function to retrieve information on the common recipient and EIP2981 royalty split for a given contract
+- This function returns the common recipient and EIP2981 royalty split for the
+  caller contract
+- External function to retrieve information on the common recipient and EIP2981
+  royalty split for a given contract
 - returns EIP-2981 royalty receiver and royalty BPS
 
 ---
 
 ```Solidity
-    function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps) 
+    function getContractRoyalty(address _contractAddress) external view returns (uint16 royaltyBps)
 ```
 
 - This function returns EIP2981 RoyaltyBPS for a contract
-- `_contractAddress` address of the contract for the royalty has to be retrieved.
+- `_contractAddress` address of the contract for the royalty has to be
+  retrieved.
 
 ---
 
@@ -155,7 +179,8 @@ function getRoyaltyInfo() external view returns (address, uint16)
 ```
 
 - This function sets the common recipient and common split
-- `_commonSplit`: split for the common recipient and creators split would be 10000 - `_commonSplit`
+- `_commonSplit`: split for the common recipient and creators split would be
+  10000 - `_commonSplit`
 - emits `SplitSet` event.
 
 ---

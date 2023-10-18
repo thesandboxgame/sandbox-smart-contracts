@@ -11,4 +11,5 @@ This contract will launch with 6 initial catalyst tiers
 - Legendary
 - Mythic
 
-The tier 0 is reserved for TSB exclusive assets but those should not have any supply minted.
+The tier 0 is reserved for TSB exclusive assets but those should not have any
+supply minted.

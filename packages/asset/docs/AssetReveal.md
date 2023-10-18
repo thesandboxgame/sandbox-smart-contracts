@@ -1,10 +1,13 @@
 # AssetReveal Contract Documentation
 
-This is a solidity contract designed for managing the revealing of assets linked to previously hidden tokens. It is designed to be used in conjunction with the [Asset](./Asset.md) contract.
+This is a solidity contract designed for managing the revealing of assets linked
+to previously hidden tokens. It is designed to be used in conjunction with the
+[Asset](./Asset.md) contract.
 
 ## Roles in the Contract
 
-1. **DEFAULT_ADMIN_ROLE**: This role has broad administrative permissions, including the ability to set the trusted forwarder.
+1. **DEFAULT_ADMIN_ROLE**: This role has broad administrative permissions,
+   including the ability to set the trusted forwarder.
 2. **PAUSER_ROLE**: The role with permission to pause the contract.
 
 ## Public Variables
@@ -29,7 +32,8 @@ function initialize(
     ) public initializer
 ```
 
-Initializes the contract with the specified parameters at the time of deployment.
+Initializes the contract with the specified parameters at the time of
+deployment.
 
 Parameters:
 
@@ -46,7 +50,8 @@ Parameters:
 function revealBurn(uint256 tokenId, uint256 amount) external
 ```
 
-Burns an unrevealed tokens and emits an event with details needed by the backend to generate the revealed version of the token.
+Burns an unrevealed tokens and emits an event with details needed by the backend
+to generate the revealed version of the token.
 
 Parameters:
 
@@ -59,7 +64,8 @@ Parameters:
  function revealBatchBurn(uint256[] calldata tokenIds, uint256[] calldata amounts) external
 ```
 
-Burns a batch of unrevealed tokens and emits an event with details needed by the backend to generate the revealed version of the tokens.
+Burns a batch of unrevealed tokens and emits an event with details needed by the
+backend to generate the revealed version of the tokens.
 
 Parameters:
 
@@ -78,7 +84,8 @@ function revealMint(
     ) external
 ```
 
-Uses a signature to validate the mint data and the randomly generated metadata for the revealed token.
+Uses a signature to validate the mint data and the randomly generated metadata
+for the revealed token.
 
 Parameters:
 
@@ -86,7 +93,8 @@ Parameters:
 - `prevTokenId` - The ID of the token that hides the assets to be revealed.
 - `amounts` - The amounts of each new token to mint.
 - `metadataHashes` - The hashes of the metadata for each new token.
-- `revealHashes` - The reveal hashes used for revealing this particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing this particular
+  `prevTokenId`.
 
 ### revealBatchMint
 
@@ -100,15 +108,18 @@ function revealBatchMint(
     ) external
 ```
 
-Uses a signature to validate the mint data and the randomly generated metadata for the revealed tokens.
+Uses a signature to validate the mint data and the randomly generated metadata
+for the revealed tokens.
 
 Parameters:
 
 - `signature` - The signature used to validate the mint data.
 - `prevTokenIds` - The IDs of the tokens that hide the assets to be revealed.
 - `amounts` - The amounts of each new token to mint for each `prevTokenId`.
-- `metadataHashes` - The hashes of the metadata for each new token for each `prevTokenId`.
-- `revealHashes` - The reveal hashes used for revealing each particular `prevTokenId`.
+- `metadataHashes` - The hashes of the metadata for each new token for each
+  `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing each particular
+  `prevTokenId`.
 
 ### burnAndReveal
 
@@ -123,7 +134,8 @@ function burnAndReveal(
     ) external
 ```
 
-Burns and reveales a token in a single transaction, only usable for tokens that allow users to choose their revealed abilities.
+Burns and reveales a token in a single transaction, only usable for tokens that
+allow users to choose their revealed abilities.
 
 Parameters:
 
@@ -132,7 +144,8 @@ Parameters:
 - `burnAmount` - The amount of the token to burn.
 - `amounts` - The amounts of each new token to mint.
 - `metadataHashes` - The hashes of the metadata for each new token.
-- `revealHashes` - The reveal hashes used for revealing this particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing this particular
+  `prevTokenId`.
 
 ### revealHashUsed
 
@@ -194,7 +207,8 @@ Parameters:
 - `prevTokenId` - The ID of the token that hides the assets to be revealed.
 - `metadataHashes` - The hashes of the metadata for each new token.
 - `amounts` - The amounts of each new token to mint.
-- `revealHashes` - The reveal hashes used for revealing this particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing this particular
+  `prevTokenId`.
 
 ### \_burnAsset
 
@@ -228,7 +242,8 @@ Parameters:
 function _verifyBurnData(uint256 tokenId, uint256 amount) internal pure
 ```
 
-Validates that the token has not been revealed yet and that the amount is greater than 0.
+Validates that the token has not been revealed yet and that the amount is
+greater than 0.
 
 Parameters:
 
@@ -255,7 +270,8 @@ Parameters:
 - `prevTokenId` - The ID of the token that hides the assets to be revealed.
 - `amounts` - The amounts of each new token to mint.
 - `metadataHashes` - The hashes of the metadata for each new token.
-- `revealHashes` - The reveal hashes used for revealing this particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing this particular
+  `prevTokenId`.
 
 ### \_hashReveal
 
@@ -275,7 +291,8 @@ Parameters:
 - `prevTokenId` - The ID of the token that hides the assets to be revealed.
 - `amounts` - The amounts of each new token to mint.
 - `metadataHashes` - The hashes of the metadata for each new token.
-- `revealHashes` - The reveal hashes used for revealing this particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing this particular
+  `prevTokenId`.
 
 ### \_hashBatchReveal
 
@@ -294,8 +311,10 @@ Parameters:
 
 - `prevTokenIds` - The IDs of the tokens that hide the assets to be revealed.
 - `amounts` - The amounts of each new token to mint for each `prevTokenId`.
-- `metadataHashes` - The hashes of the metadata for each new token for each `prevTokenId`.
-- `revealHashes` - The reveal hashes used for revealing each particular `prevTokenId`.
+- `metadataHashes` - The hashes of the metadata for each new token for each
+  `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing each particular
+  `prevTokenId`.
 
 ### \_encodeHashes
 
@@ -319,7 +338,8 @@ Encodes the metadata hashes into a single bytes32 value.
 
 Parameters:
 
-- `metadataHashes` - The hashes of the metadata for each new token for each `prevTokenId`.
+- `metadataHashes` - The hashes of the metadata for each new token for each
+  `prevTokenId`.
 
 ### \_encodeBatchRevealHashes
 
@@ -331,7 +351,8 @@ Encodes the reveal hashes into a single bytes32 value.
 
 Parameters:
 
-- `revealHashes` - The reveal hashes used for revealing each particular `prevTokenId`.
+- `revealHashes` - The reveal hashes used for revealing each particular
+  `prevTokenId`.
 
 ### \_encodeBatchAmounts
 
@@ -354,7 +375,9 @@ function getRevealedTokenIds(
     ) internal returns (uint256[] memory)
 ```
 
-Depending on whether the asset has been previously revealed to a given metadata hash, this function will either generate a new token ID or return the existing one.
+Depending on whether the asset has been previously revealed to a given metadata
+hash, this function will either generate a new token ID or return the existing
+one.
 
 Parameters:
 

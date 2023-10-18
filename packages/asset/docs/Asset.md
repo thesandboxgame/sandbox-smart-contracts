@@ -1,17 +1,24 @@
 # Asset Contract Documentation
 
-This is the base Asset L2 contract that serves as an upgradeable, burnable ERC1155 token that includes roles for minting, burning, and administration. It includes extended functionality for managing base and token-specific URIs and maintaining a mapping between IPFS metadata hashes and token IDs.
+This is the base Asset L2 contract that serves as an upgradeable, burnable
+ERC1155 token that includes roles for minting, burning, and administration. It
+includes extended functionality for managing base and token-specific URIs and
+maintaining a mapping between IPFS metadata hashes and token IDs.
 
 ## Roles in the Contract
 
-1. **Minter**: This role can create new tokens using the `mint` or `mintBatch` functions.
-2. **Burner**: This role can destroy tokens using the `burnFrom` or `burnBatchFrom` functions.
-3. **Admin**: This role has broad administrative permissions including the ability to set URIs and change the trusted forwarder.
+1. **Minter**: This role can create new tokens using the `mint` or `mintBatch`
+   functions.
+2. **Burner**: This role can destroy tokens using the `burnFrom` or
+   `burnBatchFrom` functions.
+3. **Admin**: This role has broad administrative permissions including the
+   ability to set URIs and change the trusted forwarder.
 4. **Moderator**: This role has the ability to set URIs.
 
 ## Public Variables
 
-1. `MINTER_ROLE` - A bytes32 value representing the role that can mint new tokens.
+1. `MINTER_ROLE` - A bytes32 value representing the role that can mint new
+   tokens.
 2. `BURNER_ROLE` - A bytes32 value representing the role that can burn tokens.
 3. `MODERATOR_ROLE` - A bytes32 value representing the role that can set URIs.
 4. `hashUsed` - A mapping from string metadata hashes to uint256 token IDs.
@@ -30,7 +37,8 @@ function initialize(
 ) external initializer
 ```
 
-Initializes the contract with the specified parameters at the time of deployment.
+Initializes the contract with the specified parameters at the time of
+deployment.
 
 Parameters:
 
@@ -51,7 +59,8 @@ function mint(
 ) external onlyRole(MINTER_ROLE)
 ```
 
-Creates a given amount of a new token with a specified ID and associates a metadata hash with it.
+Creates a given amount of a new token with a specified ID and associates a
+metadata hash with it.
 
 Parameters:
 
@@ -71,14 +80,16 @@ function mintBatch(
 ) external onlyRole(MINTER_ROLE)
 ```
 
-Creates a batch of new tokens with the provided IDs and amounts and associates metadata hashes with them.
+Creates a batch of new tokens with the provided IDs and amounts and associates
+metadata hashes with them.
 
 Parameters:
 
 - `to` - The address that will receive the newly minted tokens.
 - `ids` - An array of IDs for the new tokens.
 - `amounts` - An array of the number of new tokens to create for each ID.
-- `metadataHashes` - An array of IPFS metadata hashes to associate with the new tokens.
+- `metadataHashes` - An array of IPFS metadata hashes to associate with the new
+  tokens.
 
 ### burnFrom
 
@@ -147,7 +158,8 @@ Parameters:
 function uri(uint256 tokenId) public view override returns (string memory)
 ```
 
-Returns the full URI for a specific token, including the base URI and the token-specific metadata URI.
+Returns the full URI for a specific token, including the base URI and the
+token-specific metadata URI.
 
 Parameters:
 
@@ -187,7 +199,9 @@ function setTokenRoyalties(
 ) external override onlyRole(DEFAULT_ADMIN_ROLE)
 ```
 
-Sets token royalty i.e. the creator splitter address as EIP2981 royalty recipient. deploys a splitter if there is none deployed for a creator. Only admin can call it.
+Sets token royalty i.e. the creator splitter address as EIP2981 royalty
+recipient. deploys a splitter if there is none deployed for a creator. Only
+admin can call it.
 
 Parameters:
 
@@ -294,4 +308,6 @@ Parameters:
 
 - `registry` - the address of the operator filter registry.
 
-This document is essential for developers who need to understand or contribute to the code in the future. Please make sure to keep it updated and as detailed as possible.
+This document is essential for developers who need to understand or contribute
+to the code in the future. Please make sure to keep it updated and as detailed
+as possible.
