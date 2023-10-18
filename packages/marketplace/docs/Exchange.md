@@ -12,6 +12,7 @@ It safely offers a decentralized way to exchange tokens of any nature (ERC20, ER
 An exchange consists of a trade between two parties. Each side of the trade is called an order. That order contains all the information required to define what a party is asking for. Let's consider this use case:
 
 Order A
+
 ```
 Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 SAND (ERC20).
 ```
@@ -30,6 +31,7 @@ Same reasoning, if I want to buy a NFT but I don't mind which seller is selling 
 To execute a trade, you need two parties (and so 2 orders) that match. So, the contract takes in 2 orders and check that both orders are actually a match and satisfy each party. For instance, let's take again our seller use case:
 
 `Order A`
+
 ```
 Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
 ```
@@ -37,6 +39,7 @@ Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 MA
 An order satisfying `Order A` could simply be:
 
 `Order B`
+
 ```
 Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
 ```
@@ -44,16 +47,19 @@ Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 MAT
 ### Validation
 
 In order to validate the maker of each order, the contract supports two ways to validate an order:
+
 - the sender of the transaction has to be the maker of the order
 - the sender has to provide the [signature](https://eips.ethereum.org/EIPS/eip-712) of the order signed by the order's maker
 
 It brings a powerful asynchronous system but also users should be careful when signing an order because anybody can send a transaction to match 2 orders if that user gets the signatures. For instance:
+
 - Alice signs `Order A` and lends the signature to Carol
 - Bob signs `Order B` and lends the signature to Carol
 - Carol executes the trades with the 2 orders `Order A` and `Order B` and the 2 signatures
 - Alice & Bob must trust Carol
 
 But you could save an action by not asking the signature for the `Order B`:
+
 - Alice signs `Order A`
 - Bob executes the trades with the 2 orders `Order A` and `Order B` but only the signature of the `Order A`
 
@@ -64,11 +70,13 @@ But you could save an action by not asking the signature for the `Order B`:
 For instance, let's consider `Order C` and `Order D`:
 
 `Order C`
+
 ```
 Alice wants to sell to anybody 10 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
 ```
 
 `Order D`
+
 ```
 Bob wants to buy from anybody 1 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
 ```
@@ -80,6 +88,7 @@ The selling order can't be fully matched because the buyer can only buy 1 ASSET 
 Orders contain a salt value that ensure each order is unique, even for the same user and asset.
 
 A user can decide to set the salt to 0 in its order. By doing so:
+
 - that order can only be used by the maker
 - the validation of the signature is also skipped
 - the order can be reuse as many time as he wants
@@ -88,6 +97,7 @@ A user can decide to set the salt to 0 in its order. By doing so:
 ### Hash Key Order
 
 An order is identified with a hash key composed of:
+
 - the maker address
 - the assets (type & contract address) being traded
 - a salt
@@ -95,6 +105,7 @@ An order is identified with a hash key composed of:
 As you can see, the hash key doesn't include all the fields of the order, meaning that 2 different orders with the same maker, assets and salt will have the same hash key.
 
 The consequences are multiple:
+
 - since the filling is based on the hash key, different orders can share the same filling
 - canceling an order means canceling all orders with the same hash key
 - signing a new order with the same hash key than a former order will not invalidate the latter
@@ -117,6 +128,7 @@ The fees are sent to an address (called the `Fee Receiver`) defined when deployi
 For instance, the primary market fee is set at 2% whereas the secondary market fee is set 5%.
 
 Bob is the creator of the ASSET (ERC1155) with token id 1.
+
 ```
 Bob sells 1 ASSET (ERC1155) with token id 1 to Alice for 100 SAND (ERC20)
 Bob receives 98 SAND from Alice
@@ -125,6 +137,7 @@ Alice receives 1 ASSET (ERC1155) with token id 1
 ```
 
 Carol is the creator of the ASSET (ERC1155) with token id 2.
+
 ```
 Bob sells 1 ASSET (ERC1155) with token id 2 to Alice for 100 SAND (ERC20)
 Bob receives 95 SAND from Alice
@@ -169,7 +182,7 @@ Alice->>OrderA: signs order
 Alice->>Carol: lends the order & its signature
 Bob->>OrderB: signs order
 Bob->>Carol: lends the order & its signature
-Carol->>Exchange: executes the exchange 
+Carol->>Exchange: executes the exchange
 Exchange->>OrderValidator: validate orders (dates, whitelist, signatures)
 OrderValidator->>Exchange: returns the result of the validation
 Exchange->>Exchange: match the 2 orders & calculate fillings
@@ -198,6 +211,7 @@ The contract supports the ERC2771 standard to enable meta transactions.
 The protocol is secured with the Open Zeppelin access control component.
 
 4 roles are defined:
+
 - `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings (trusted forwarder, order validator contract addresses)
 - `EXCHANGE_ADMIN_ROLE`: handle the business decisions of the marketplace, for instance defining the fees, the wallet receiving the fees or if the fees apply
 - `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of a sender
@@ -238,6 +252,7 @@ If a maker is granted the role `EXCHANGE_ADMIN_ROLE`, the fees and royalties are
 ### Whitelisting
 
 The protocol offers to enable whitelists on:
+
 - payment tokens (ERC20) that can be traded
 - collections (ERC1155 and ERC721) that can be traded
 

@@ -5,6 +5,7 @@ The Sandbox allows its users to buy or sell assets (NFTs) through a dedicated ma
 In that regard, this package enables an exchange of any kind of tokens (ERC20, ERC1155, ERC721) between two users. Each side of the exchange initializes an order to declare what he wants to buy or sell, signs it and the contract will try to match the two orders in order to execute the exchange.
 
 In top of that, the protocol features:
+
 - protocol fees for primary or secondary market
 - royalties management through ERC2981
 - custom royalties per collection and token
@@ -20,15 +21,16 @@ In top of that, the protocol features:
 
 The protocol is divided into 5 main components:
 
-Component | Description
----------|----------
-[Exchange](docs/Exchange.md) | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges
-[OrderValidator](docs/OrderValidator.md) | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists
-[TransferManager](docs/TransferManager.md) | Manages the transfers of the payouts, fees & royalties
-[RoyaltiesRegistry](docs/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider)
-Libraries | Compilation of helpers to handle orders, assets, transfers, royalties
+| Component                                      | Description                                                                                                                              |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [Exchange](docs/Exchange.md)                   | The main entry point for the users to the protocol, handling the matching of orders and orchestration of the exchanges                   |
+| [OrderValidator](docs/OrderValidator.md)       | This component handles the validation process of the orders based on theirs signatures and also checks the token whitelists              |
+| [TransferManager](docs/TransferManager.md)     | Manages the transfers of the payouts, fees & royalties                                                                                   |
+| [RoyaltiesRegistry](docs/RoyaltiesRegistry.md) | This registry enables the support of multiple types of royalties (ERC2981, custom royalties per collection and token, external provider) |
+| Libraries                                      | Compilation of helpers to handle orders, assets, transfers, royalties                                                                    |
 
 The protocol is deployed on 3 different addresses:
+
 - Exchange
 - OrderValidator
 - RoyaltiesRegistry
@@ -54,55 +56,64 @@ TransferManager-->RoyaltiesRegistry
 
 Also, the contracts use a set of libraries as helper.
 
-Library | Description
----------|----------
- LibAsset | Contains the structures, constants and hash functions related to an asset (ERC20, ERC1155, ERC721)
- LibMath | Rounding calculation library
- LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order, calculate the amount exchanged between 2 orders, and how orders are filled
+| Library  | Description                                                                                                                                         |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LibAsset | Contains the structures, constants and hash functions related to an asset (ERC20, ERC1155, ERC721)                                                  |
+| LibMath  | Rounding calculation library                                                                                                                        |
+| LibOrder | Helpers to calculate EIP-712 hash, key hash, remaining fill of an order, calculate the amount exchanged between 2 orders, and how orders are filled |
 
 ## Running the project locally
 
 Install dependencies with
+
 ```shell
 yarn
 ```
 
 Testing inside `packages/marketplace` to run tests locally inside this package
+
 ```shell
 yarn test
 ```
 
 For testing from root (with workspace feature) use
+
 ```shell
 yarn workspace @sandbox-smart-contracts/marketplace test
 ```
 
 Run coverage
+
 ```shell
 yarn coverage
 ```
 
 Check formatting
+
 ```shell
 yarn format
 ```
 
 Fix formatting errors
+
 ```shell
 yarn format:fix
 ```
 
 Check linting
+
 ```shell
 yarn lint
 ```
 
 Fix static analysis errors
+
 ```shell
 yarn lint:fix
 ```
 
 Run Slither
+
 ```shell
 yarn analyze
 ```
