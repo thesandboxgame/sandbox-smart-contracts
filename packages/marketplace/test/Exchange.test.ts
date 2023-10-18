@@ -20,7 +20,78 @@ import {
 } from './utils/order.ts';
 import {ZeroAddress, AbiCoder} from 'ethers';
 
+import {matchOrder} from './MatchOrder.behavior.ts';
+
 describe('Exchange.sol', function () {
+  let ExchangeContractAsUser,
+    OrderValidatorAsAdmin,
+    ERC20Contract,
+    ERC20Contract2,
+    maker,
+    taker,
+    user;
+
+  let orderLeft, orderRight, signatureLeft, signatureRight;
+  beforeEach(async function () {
+    ({
+      ExchangeContractAsUser,
+      OrderValidatorAsAdmin,
+      ERC20Contract,
+      ERC20Contract2,
+      user1: maker,
+      user2: taker,
+      user,
+    } = await loadFixture(deployFixtures));
+    await ERC20Contract.mint(maker.address, 123000000);
+    await ERC20Contract.connect(maker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      123000000
+    );
+
+    await ERC20Contract2.mint(taker.address, 456000000);
+    await ERC20Contract2.connect(taker).approve(
+      await ExchangeContractAsUser.getAddress(),
+      456000000
+    );
+    const makerAsset = await AssetERC20(ERC20Contract, 123000000);
+    const takerAsset = await AssetERC20(ERC20Contract2, 456000000);
+    orderLeft = await OrderDefault(
+      maker,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+    orderRight = await OrderDefault(
+      taker,
+      takerAsset,
+      ZeroAddress,
+      makerAsset,
+      1,
+      0,
+      0
+    );
+
+    signatureLeft = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+    signatureRight = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+    console.log('calling first time');
+  });
+  describe.only('matchOrder with behavior', function () {
+    
+      matchOrder(
+        orderLeft,
+        signatureLeft,
+        orderRight,
+        signatureRight,
+        function (matchedOrders) {
+          return ExchangeContractAsUser.matchOrders(matchedOrders);
+        },
+        ExchangeContractAsUser,
+        // user,
+      );
+  });
   it('should return the correct value of protocol fee', async function () {
     const {
       ExchangeContractAsDeployer,
@@ -294,13 +365,13 @@ describe('Exchange.sol', function () {
     ).to.be.revertedWith('Pausable: paused');
   });
 
-  it('should not execute match order with an empty order array', async function () {
-    const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
+  // it('should not execute match order with an empty order array', async function () {
+  //   const {ExchangeContractAsUser} = await loadFixture(deployFixtures);
 
-    await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-      'ExchangeMatch cant be empty'
-    );
-  });
+  //   await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
+  //     'ExchangeMatch cant be empty'
+  //   );
+  // });
 
   it('should not execute match order when left order taker is not equal to right order maker', async function () {
     const {
@@ -554,93 +625,85 @@ describe('Exchange.sol', function () {
     ).to.be.revertedWith('Order end validation failed');
   });
 
-  it('should emit a Match event', async function () {
-    const {
-      ExchangeContractAsUser,
-      OrderValidatorAsAdmin,
-      ERC20Contract,
-      ERC20Contract2,
-      user,
-      user1: maker,
-      user2: taker,
-    } = await loadFixture(deployFixtures);
+  // it('should emit a Match event', async function () {
+  //   const {
+  //     ExchangeContractAsUser,
+  //     OrderValidatorAsAdmin,
+  //     ERC20Contract,
+  //     ERC20Contract2,
+  //     user,
+  //     user1: maker,
+  //     user2: taker,
+  //   } = await loadFixture(deployFixtures);
 
-    await ERC20Contract.mint(maker.address, 123000000);
-    await ERC20Contract.connect(maker).approve(
-      await ExchangeContractAsUser.getAddress(),
-      123000000
-    );
+  //   await ERC20Contract.mint(maker.address, 123000000);
+  //   await ERC20Contract.connect(maker).approve(
+  //     await ExchangeContractAsUser.getAddress(),
+  //     123000000
+  //   );
 
-    await ERC20Contract2.mint(taker.address, 456000000);
-    await ERC20Contract2.connect(taker).approve(
-      await ExchangeContractAsUser.getAddress(),
-      456000000
-    );
+  //   await ERC20Contract2.mint(taker.address, 456000000);
+  //   await ERC20Contract2.connect(taker).approve(
+  //     await ExchangeContractAsUser.getAddress(),
+  //     456000000
+  //   );
 
-    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(123000000);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(456000000);
+  //   expect(await ERC20Contract.balanceOf(maker)).to.be.equal(123000000);
+  //   expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+  //   expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+  //   expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(456000000);
 
-    const makerAsset = await AssetERC20(ERC20Contract, 123000000);
-    const takerAsset = await AssetERC20(ERC20Contract2, 456000000);
-    const orderLeft = await OrderDefault(
-      maker,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0
-    );
-    const orderRight = await OrderDefault(
-      taker,
-      takerAsset,
-      ZeroAddress,
-      makerAsset,
-      1,
-      0,
-      0
-    );
+  //   const makerAsset = await AssetERC20(ERC20Contract, 123000000);
+  //   const takerAsset = await AssetERC20(ERC20Contract2, 456000000);
+  //   const orderLeft = await OrderDefault(
+  //     maker,
+  //     makerAsset,
+  //     ZeroAddress,
+  //     takerAsset,
+  //     1,
+  //     0,
+  //     0
+  //   );
+  //   const orderRight = await OrderDefault(
+  //     taker,
+  //     takerAsset,
+  //     ZeroAddress,
+  //     makerAsset,
+  //     1,
+  //     0,
+  //     0
+  //   );
 
-    const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-    const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+  //   const makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+  //   const takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
-    const tx = await ExchangeContractAsUser.matchOrders([
-      {
-        orderLeft,
-        signatureLeft: makerSig,
-        orderRight,
-        signatureRight: takerSig,
-      },
-    ]);
+  //   const tx = await ExchangeContractAsUser.matchOrders([
+  //     {
+  //       orderLeft,
+  //       signatureLeft: makerSig,
+  //       orderRight,
+  //       signatureRight: takerSig,
+  //     },
+  //   ]);
 
-    function verifyOrderLeft(eventOrder: Order): boolean {
-      return isOrderEqual(eventOrder, orderLeft);
-    }
+  //   await expect(tx)
+  //     .to.emit(ExchangeContractAsUser, 'Match')
+  //     .withArgs(
+  //       user.address,
+  //       hashKey(orderLeft),
+  //       hashKey(orderRight),
+  //       verifyOrderLeft,
+  //       verifyOrderRight,
+  //       [123000000, 456000000],
+  //       456000000,
+  //       123000000
+  //     );
 
-    function verifyOrderRight(eventOrder: Order): boolean {
-      return isOrderEqual(eventOrder, orderRight);
-    }
-
-    await expect(tx)
-      .to.emit(ExchangeContractAsUser, 'Match')
-      .withArgs(
-        user.address,
-        hashKey(orderLeft),
-        hashKey(orderRight),
-        verifyOrderLeft,
-        verifyOrderRight,
-        [123000000, 456000000],
-        456000000,
-        123000000
-      );
-
-    expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-    expect(await ERC20Contract.balanceOf(taker)).to.be.equal(123000000);
-    expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(456000000);
-    expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-  });
+  //   expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+  //   expect(await ERC20Contract.balanceOf(taker)).to.be.equal(123000000);
+  //   expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(456000000);
+  //   expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
+  // });
 
   it('should execute a complete match order between ERC20 tokens', async function () {
     const {

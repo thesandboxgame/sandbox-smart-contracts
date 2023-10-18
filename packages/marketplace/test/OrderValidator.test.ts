@@ -17,12 +17,14 @@ const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
 describe('OrderValidator.sol', function () {
-  it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1} =
-      await loadFixture(deployFixtures);
-    const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetERC721(ERC721Contract, 100);
-    const order = await OrderDefault(
+  let OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2;
+  let makerAsset, takerAsset, order, signature;
+  beforeEach(async function () {
+    ({OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
+      await loadFixture(deployFixtures));
+    makerAsset = await AssetERC20(ERC20Contract, 100);
+    takerAsset = await AssetERC721(ERC721Contract, 100);
+    order = await OrderDefault(
       user1,
       makerAsset,
       ZeroAddress,
@@ -31,18 +33,33 @@ describe('OrderValidator.sol', function () {
       0,
       0
     );
-    const signature = await signOrder(order, user1, OrderValidatorAsUser);
+    signature = await signOrder(order, user1, OrderValidatorAsUser);
+  });
+  it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
+    // const makerAsset = await AssetERC20(ERC20Contract, 100);
+    // const takerAsset = await AssetERC721(ERC721Contract, 100);
+    // const order = await OrderDefault(
+    //   user1,
+    //   makerAsset,
+    //   ZeroAddress,
+    //   takerAsset,
+    //   1,
+    //   0,
+    //   0
+    // );
+    // const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(OrderValidatorAsUser.validate(order, signature, user1.address))
       .to.not.be.reverted;
   });
 
   it('should revert validate when salt is zero and Order maker is not sender', async function () {
-    const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
-      await loadFixture(deployFixtures);
-    const makerAsset = await AssetERC721(ERC721Contract, 100);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
-    const order = await OrderDefault(
+    // const {OrderValidatorAsUser, ERC20Contract, ERC721Contract, user1, user2} =
+    //   await loadFixture(deployFixtures);
+    // const makerAsset = await AssetERC721(ERC721Contract, 100);
+    // const takerAsset = await AssetERC20(ERC20Contract, 100);
+    // const
+    order = await OrderDefault(
       user1,
       makerAsset,
       ZeroAddress,
@@ -51,7 +68,8 @@ describe('OrderValidator.sol', function () {
       0,
       0
     );
-    const signature = await signOrder(order, user1, OrderValidatorAsUser);
+    // const
+    signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
       OrderValidatorAsUser.validate(order, signature, user2.address)
