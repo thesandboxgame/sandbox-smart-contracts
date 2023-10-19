@@ -640,7 +640,10 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
         expect(id).to.be.equal(gameId);
         expect(eventAssets).to.be.eql([assetId, assetId2]);
-        expect(values).to.be.eql([BigNumber.from(3), BigNumber.from(2)]);
+        expect(values.map((x) => BigNumber.from(x))).to.be.eql([
+          BigNumber.from(3),
+          BigNumber.from(2),
+        ]);
         expect(eventAssets721).to.be.eql([asset721Id, asset721Id2]);
       });
 
