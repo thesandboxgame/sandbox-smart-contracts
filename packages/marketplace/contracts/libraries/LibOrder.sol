@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {LibAsset} from "./LibAsset.sol";
 import {LibMath} from "./LibMath.sol";
 
+/// @author The Sandbox
 /// @title Order Handling Library
 /// @notice Provides tools for constructing, hashing, and validating orders.
 library LibOrder {

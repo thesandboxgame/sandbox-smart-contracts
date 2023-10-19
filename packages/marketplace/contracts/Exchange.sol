@@ -12,6 +12,7 @@ import {TransferManager, IRoyaltiesProvider} from "./TransferManager.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
+/// @author The Sandbox
 /// @title Exchange contract with meta transactions
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
@@ -24,7 +25,7 @@ contract Exchange is
     ERC2771HandlerUpgradeable,
     PausableUpgradeable
 {
-    /// @notice Role for ERC1776 trusted meta transaction contracts (like Sand).
+    /// @notice Role for ERC1776 trusted meta transaction contracts (like SAND).
     /// @return Hash for ERC1776_OPERATOR_ROLE.
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
 

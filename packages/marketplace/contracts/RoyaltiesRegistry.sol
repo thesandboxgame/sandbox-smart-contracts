@@ -9,6 +9,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 
+/// @author The Sandbox
 /// @title RoyaltiesRegistry
 /// @dev Contract managing the registry of royalties.
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {

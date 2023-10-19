@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.19;
 
+/// @author The Sandbox
+/// @title LibMath: A library for handling specific math operations.
 library LibMath {
     uint256 internal constant ACCEPTABLE_RELATIVE_ERROR = 1000;
 

@@ -8,6 +8,7 @@ import {LibOrder} from "./libraries/LibOrder.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
+/// @author The Sandbox
 /// @title ExchangeCore Contract
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.

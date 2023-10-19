@@ -9,6 +9,7 @@ import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradea
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {Whitelist} from "./Whitelist.sol";
 
+/// @author The Sandbox
 /// @title OrderValidator
 /// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Whitelist {

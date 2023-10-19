@@ -13,6 +13,7 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+/// @author The Sandbox
 /// @title TransferManager
 /// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.

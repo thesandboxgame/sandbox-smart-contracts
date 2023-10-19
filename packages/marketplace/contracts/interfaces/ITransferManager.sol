@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 
 import {LibAsset} from "../libraries/LibAsset.sol";
 
+/// @author The Sandbox
 /// @title ITransferManager Interface
 /// @notice Provides an interface for managing transfers of assets between matched orders.
 abstract contract ITransferManager {
