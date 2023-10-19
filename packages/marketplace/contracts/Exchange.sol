@@ -24,32 +24,32 @@ contract Exchange is
     ERC2771HandlerUpgradeable,
     PausableUpgradeable
 {
-    /// @notice role erc1776 trusted meta transaction contracts (Sand for example).
-    /// @return hash for ERC1776_OPERATOR_ROLE
+    /// @notice Role for ERC1776 trusted meta transaction contracts (like Sand).
+    /// @return Hash for ERC1776_OPERATOR_ROLE.
     bytes32 public constant ERC1776_OPERATOR_ROLE = keccak256("ERC1776_OPERATOR_ROLE");
 
-    /// @notice role business addresses that can change for example: fees and royalties
-    /// @return hash for EXCHANGE_ADMIN_ROLE
+    /// @notice Role for business addresses that can change values like fees and royalties.
+    /// @return Hash for EXCHANGE_ADMIN_ROLE.
     bytes32 public constant EXCHANGE_ADMIN_ROLE = keccak256("EXCHANGE_ADMIN_ROLE");
 
-    /// @notice role business addresses that can react on an emergency, pause
-    /// @return hash for PAUSER_ROLE
+    /// @notice Role for business addresses that can react to emergencies and pause.
+    /// @return Hash for PAUSER_ROLE.
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice Exchange contract initializer
-    /// @param admin the admin user that can grant/revoke roles, etc.
-    /// @param newTrustedForwarder address for trusted forwarder that will execute meta transactions
-    /// @param newProtocolFeePrimary protocol fee applied for primary markets
-    /// @param newProtocolFeeSecondary protocol fee applied for secondary markets
-    /// @param newDefaultFeeReceiver market fee receiver
-    /// @param newRoyaltiesProvider registry for the different types of royalties
-    /// @param orderValidatorAddress new OrderValidator contract address
+    /// @notice Exchange contract initializer.
+    /// @param admin The admin user that can grant/revoke roles, etc.
+    /// @param newTrustedForwarder Address for the trusted forwarder that will execute meta transactions.
+    /// @param newProtocolFeePrimary Protocol fee applied to primary markets.
+    /// @param newProtocolFeeSecondary Protocol fee applied to secondary markets.
+    /// @param newDefaultFeeReceiver Market fee receiver.
+    /// @param newRoyaltiesProvider Registry for the different types of royalties.
+    /// @param orderValidatorAddress New OrderValidator contract address.
     // solhint-disable-next-line func-name-mixedcase
     function __Exchange_init(
         address admin,
@@ -74,16 +74,16 @@ contract Exchange is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
-    /// @notice Match orders and transact
-    /// @param matchedOrders a list of left/right orders that match each other
+    /// @notice Match orders and transact.
+    /// @param matchedOrders A list of left/right orders that match each other.
     function matchOrders(ExchangeMatch[] calldata matchedOrders) external whenNotPaused {
         _matchOrders(_msgSender(), matchedOrders);
     }
 
-    /// @notice Match orders and transact
-    /// @param sender the original sender of the transaction
-    /// @param matchedOrders a list of left/right orders that match each other
-    /// @dev this method is used to support ERC1776 native meta transactions
+    /// @notice Match orders and transact.
+    /// @param sender The original sender of the transaction.
+    /// @param matchedOrders A list of left/right orders that match each other.
+    /// @dev This method supports ERC1776 native meta transactions.
     function matchOrdersFrom(
         address sender,
         ExchangeMatch[] calldata matchedOrders
@@ -92,42 +92,41 @@ contract Exchange is
         _matchOrders(sender, matchedOrders);
     }
 
-    /// @notice cancel order
-    /// @param order to be canceled
-    /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
-    /// @dev require msg sender to be order maker and salt different from 0
+    /// @notice Cancel an order.
+    /// @param order The order to be canceled.
+    /// @param orderKeyHash Used as a checksum to avoid mistakes in the order values.
     function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external whenNotPaused {
         require(_msgSender() == order.maker, "not maker");
         _cancel(order, orderKeyHash);
     }
 
-    /// @notice setter for royalty registry
-    /// @param newRoyaltiesRegistry address of new royalties registry
+    /// @notice Set the royalty registry.
+    /// @param newRoyaltiesRegistry Address of the new royalties registry.
     function setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRoyaltiesRegistry(newRoyaltiesRegistry);
     }
 
-    /// @notice set OrderValidator address
-    /// @param contractAddress new OrderValidator contract address
+    /// @notice Set the OrderValidator address.
+    /// @param contractAddress New OrderValidator contract address.
     function setOrderValidatorContract(IOrderValidator contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOrderValidatorContract(contractAddress);
     }
 
-    /// @notice setter for max transfer value
-    /// @param newMatchOrdersLimit new vaue of max orders that can be matched
+    /// @notice Set the limit for matching orders.
+    /// @param newMatchOrdersLimit New value for max orders that can be matched.
     function setMatchOrdersLimit(uint256 newMatchOrdersLimit) external onlyRole(EXCHANGE_ADMIN_ROLE) {
         _setMatchOrdersLimit(newMatchOrdersLimit);
     }
 
-    /// @notice Change the address of the trusted forwarder for meta-transactions
-    /// @param newTrustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address newTrustedForwarder) external virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    /// @notice Change the address of the trusted forwarder for meta-transactions.
+    /// @param newTrustedForwarder The new trusted forwarder address.
+    function setTrustedForwarder(address newTrustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setTrustedForwarder(newTrustedForwarder);
     }
 
-    /// @notice setter for protocol fees
-    /// @param newProtocolFeePrimary fee for primary market
-    /// @param newProtocolFeeSecondary fee for secondary market
+    /// @notice Set the protocol fees.
+    /// @param newProtocolFeePrimary Fee for the primary market.
+    /// @param newProtocolFeeSecondary Fee for the secondary market.
     function setProtocolFee(
         uint256 newProtocolFeePrimary,
         uint256 newProtocolFeeSecondary
@@ -135,24 +134,25 @@ contract Exchange is
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
     }
 
-    /// @notice setter for default fee receiver
-    /// @param newDefaultFeeReceiver address that gets the fees
+    /// @notice Set the default fee receiver.
+    /// @param newDefaultFeeReceiver Address to receive the fees.
     function setDefaultFeeReceiver(address newDefaultFeeReceiver) external onlyRole(EXCHANGE_ADMIN_ROLE) {
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
-    // @notice Triggers stopped state.
+    /// @notice Pause the contract operations.
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    /// @notice Returns to normal state.
+    /// @notice Resume the contract operations.
     function unpause() external onlyRole(EXCHANGE_ADMIN_ROLE) {
         _unpause();
     }
 
-    /// @dev Skip the fees & royalties only for users granted with the role EXCHANGE_ADMIN_ROLE
-    /// @param from address to check
+    /// @dev Check if fees & royalties should be skipped for users with the EXCHANGE_ADMIN_ROLE.
+    /// @param from Address to check.
+    /// @return True if fees should be skipped, false otherwise.
     function _mustSkipFees(address from) internal view override returns (bool) {
         return hasRole(EXCHANGE_ADMIN_ROLE, from);
     }

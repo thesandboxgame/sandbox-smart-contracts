@@ -9,31 +9,32 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 
-/// @title royalties registry contract
-/// @notice contract allows to processing different types of royalties
+/// @title RoyaltiesRegistry
+/// @dev Contract managing the registry of royalties.
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     using ERC165CheckerUpgradeable for address;
-    /// @notice emitted when royalties is set for token
-    /// @param token token address
-    /// @param royalties array of royalties
+    /// @notice Emitted when royalties are set for a token.
+    /// @param token The token address for which royalties are set.
+    /// @param royalties An array of royalties set for the token.
     event RoyaltiesSetForContract(address indexed token, Part[] royalties);
 
-    /// @notice emitted when royalties type is set for token
-    /// @param token token address
-    /// @param royaltiesType royalties type
-    /// @param royaltiesProvider royalties provider
+    /// @notice Emitted when the royalties type and provider are defined for a token.
+    /// @param token The token address.
+    /// @param royaltiesType The type of royalties set.
+    /// @param royaltiesProvider The address of the royalties provider.
     event RoyaltiesTypeSet(
         address indexed token,
         RoyaltiesType indexed royaltiesType,
         address indexed royaltiesProvider
     );
 
-    /// @dev struct to store royalties in royaltiesByToken
+    /// @dev Stores royalty information for tokens.
     struct RoyaltiesSet {
         bool initialized;
         Part[] royalties;
     }
 
+    /// @dev Represents a type of royalties.
     enum RoyaltiesType {
         UNSET,
         BY_TOKEN,
@@ -42,16 +43,16 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         UNSUPPORTED_NONEXISTENT
     }
 
-    /// used to call EIP2981 royaltyInfo to calculate the royalties percentage
+    /// @dev Used to call EIP2981 royaltyInfo to calculate the royalties percentage
     uint256 public constant WEIGHT_VALUE = 1e6;
 
-    /// @notice stores royalties for token contract, set in setRoyaltiesByToken() method
+    /// @notice Stores royalties for token contract, set in setRoyaltiesByToken() method
     mapping(address token => RoyaltiesSet royalties) public royaltiesByToken;
 
-    /// @notice stores external provider and royalties type for token contract
+    /// @notice Stores external provider and royalties type for token contract
     mapping(address token => uint256 provider) public royaltiesProviders;
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -63,31 +64,31 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         __Ownable_init();
     }
 
-    /// @notice sets external provider for token contract, and royalties type = 4
-    /// @param token token address
-    /// @param provider address of provider
+    /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (4).
+    /// @param token Address of the token.
+    /// @param provider Address of the external royalties provider.
     function setProviderByToken(address token, address provider) external {
         _checkOwner(token);
         _setRoyaltiesType(token, RoyaltiesType.EXTERNAL_PROVIDER, provider);
     }
 
-    /// @notice returns royalties type for token contract
-    /// @param token token address
-    /// @return royalty type
+    /// @notice Fetches the royalty type for a given token.
+    /// @param token Address of the token.
+    /// @return The type of royalty associated with the token.
     function getRoyaltiesType(address token) external view returns (RoyaltiesType) {
         return _getRoyaltiesType(royaltiesProviders[token]);
     }
 
-    /// @notice clears and sets new royalties type for token contract
-    /// @param token address of token
-    /// @param royaltiesType roayalty type
+    /// @notice Overwrites the royalty type for a given token.
+    /// @param token Address of the token.
+    /// @param royaltiesType The new royalty type to be set.
     function forceSetRoyaltiesType(address token, RoyaltiesType royaltiesType) external {
         _checkOwner(token);
         _setRoyaltiesType(token, royaltiesType, getProvider(token));
     }
 
-    /// @notice clears royalties type for token contract
-    /// @param token address of token
+    /// @notice Resets the royalty type for a token to 'UNSET'.
+    /// @param token Address of the token.
     function clearRoyaltiesType(address token) external {
         _checkOwner(token);
         royaltiesProviders[token] = uint256(uint160(getProvider(token)));
@@ -95,9 +96,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         emit RoyaltiesTypeSet(token, RoyaltiesType.UNSET, getProvider(token));
     }
 
-    /// @notice sets royalties for token contract in royaltiesByToken mapping and royalties type = 1
-    /// @param token address of token
-    /// @param royalties array of royalties
+    /// @notice Defines royalties for a token and sets the royalty type as 'BY_TOKEN'.
+    /// @param token Address of the token.
+    /// @param royalties Array of royalty parts to be set for the token.
     function setRoyaltiesByToken(address token, Part[] memory royalties) external {
         _checkOwner(token);
         //clearing royaltiesProviders value for the token
@@ -117,10 +118,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         emit RoyaltiesSetForContract(token, royalties);
     }
 
-    /// @notice returns royalties for token contract and token id
-    /// @param token address of token
-    /// @param tokenId id of token
-    /// @return royalties in form of an array of Parts
+    /// @notice Fetches royalties for a given token and token ID.
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token.
+    /// @return An array containing royalty parts.
     function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
         uint256 royaltiesProviderData = royaltiesProviders[token];
 
@@ -155,16 +156,16 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         return new Part[](0);
     }
 
-    /// @notice returns provider address for token contract from royaltiesProviders mapping
+    /// @notice Returns provider address for token contract from royaltiesProviders mapping
     /// @param token token address
     /// @return address of provider
     function getProvider(address token) public view returns (address) {
         return address(uint160(royaltiesProviders[token]));
     }
 
-    /// @notice returns royalties type from uint
-    /// @param data in uint256
-    /// @return royalty type
+    /// @notice Returns the royalties type for a given raw data value.
+    /// @param data The raw data (uint256).
+    /// @return The derived royalties type.
     function _getRoyaltiesType(uint256 data) internal pure returns (RoyaltiesType) {
         for (uint256 i = 1; i <= uint256(type(RoyaltiesType).max); ++i) {
             if (data / 2 ** (256 - i) == 1) {
@@ -174,28 +175,28 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         return RoyaltiesType.UNSET;
     }
 
-    /// @notice sets royalties type for token contract
-    /// @param token address of token
-    /// @param royaltiesType uint256 of royalty type
-    /// @param royaltiesProvider address of royalty provider
+    /// @notice Sets the royalties type and provider for a given token contract.
+    /// @param token The address of the token.
+    /// @param royaltiesType The type of royalties to be set.
+    /// @param royaltiesProvider The address of the royalties provider.
     function _setRoyaltiesType(address token, RoyaltiesType royaltiesType, address royaltiesProvider) internal {
         require(royaltiesType != RoyaltiesType.UNSET, "wrong royaltiesType");
         royaltiesProviders[token] = uint256(uint160(royaltiesProvider)) + 2 ** (256 - uint256(royaltiesType));
         emit RoyaltiesTypeSet(token, royaltiesType, royaltiesProvider);
     }
 
-    /// @notice checks if msg.sender is owner of this contract or owner of the token contract
-    /// @param token address of token
+    /// @notice Validates if the message sender is the owner of the contract or the given token.
+    /// @param token Address of the token to check against.
     function _checkOwner(address token) internal view {
         if ((owner() != _msgSender()) && (OwnableUpgradeable(token).owner() != _msgSender())) {
             revert("token owner not detected");
         }
     }
 
-    /// @notice calculates royalties type for token contract
-    /// @param token address of token
-    /// @param royaltiesProvider address of royalty provider
-    /// @return royalty type
+    /// @notice Determines the royalties type for a given token.
+    /// @param token Address of the token.
+    /// @param royaltiesProvider Address of the royalties provider.
+    /// @return The determined royalties type.
     function _calculateRoyaltiesType(address token, address royaltiesProvider) internal view returns (RoyaltiesType) {
         if (token.supportsInterface(type(IERC2981).interfaceId)) {
             return RoyaltiesType.EIP2981;
@@ -208,10 +209,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         return RoyaltiesType.UNSUPPORTED_NONEXISTENT;
     }
 
-    /// @notice tries to get royalties EIP-2981 for token and tokenId
-    /// @param token address of token
-    /// @param tokenId id of token
-    /// @return royalties 2981 royalty array
+    /// @notice Fetches EIP-2981 royalties for a given token ID.
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token for which royalties are to be fetched.
+    /// @return An array of parts representing the royalties.
     function _getRoyaltiesEIP2981(address token, uint256 tokenId) internal view returns (Part[] memory) {
         try IERC2981(token).royaltyInfo(tokenId, WEIGHT_VALUE) returns (address receiver, uint256 royaltyAmount) {
             if (token.supportsInterface(type(IMultiRoyaltyRecipients).interfaceId)) {
@@ -224,12 +225,12 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         }
     }
 
-    /// @notice try to get the royalties recipients and do the royalties calculations
-    /// @param token address of token
-    /// @param tokenId Id of the token
-    /// @param receiver address of the royalty receiver
-    /// @param royaltyAmount royalty amount to be paid
-    /// @return royalties 2981 royalty array
+    /// @notice Fetches the recipients and calculates the royalties.
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token.
+    /// @param receiver Address of the royalty receiver.
+    /// @param royaltyAmount The total royalty amount.
+    /// @return An array of parts representing the royalties.
     function _getRecipients(
         address token,
         uint256 tokenId,
@@ -256,11 +257,11 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         return _calculateRoyalties(receiver, royaltyAmount);
     }
 
-    /// @notice tries to get royalties for token and tokenId from external provider set in royaltiesProviders
-    /// @param token address of token
-    /// @param tokenId id of token
-    /// @param providerAddress address of external provider
-    /// @return external royalties
+    /// @notice Fetches royalties for a given token ID from an external provider.
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token for which royalties are to be fetched.
+    /// @param providerAddress Address of the external provider.
+    /// @return An array of parts representing the royalties.
     function _providerExtractor(
         address token,
         uint256 tokenId,
@@ -273,10 +274,10 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         }
     }
 
-    /// @notice method for converting amount to percent and forming Part
-    /// @param to recipient of royalties
-    /// @param amount of royalties
-    /// @return Part with account and value
+    /// @notice Converts a given amount to its percentage representation and forms a royalty part.
+    /// @param to Address of the royalty recipient.
+    /// @param amount Amount of the royalty.
+    /// @return An array containing the formed royalty part.
     function _calculateRoyalties(address to, uint256 amount) internal pure returns (Part[] memory) {
         Part[] memory result;
         if (amount == 0) {

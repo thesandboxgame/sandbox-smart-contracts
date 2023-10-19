@@ -8,40 +8,42 @@ import {LibOrder} from "./libraries/LibOrder.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
-/// @notice ExchangeCore contract
-/// @dev contains the main functions for the marketplace
+/// @title ExchangeCore Contract
+/// @notice Contains the main functions for the marketplace.
+/// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
-    // a list of left/right orders that match each other
-    // left and right are symmetrical except for fees that are taken from left side first.
+    /// @dev Stores left and right orders that match each other.
+    /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
-        LibOrder.Order orderLeft; // left order
-        bytes signatureLeft; // signature for the left order
-        LibOrder.Order orderRight; // right order
-        bytes signatureRight; // signature for the right order
+        LibOrder.Order orderLeft; // Left order details
+        bytes signatureLeft; // Signature of the left order
+        LibOrder.Order orderRight; // Right order details
+        bytes signatureRight; // Signature of the right order
     }
 
-    /// @notice OrderValidator contract
-    /// @return OrderValidator address
+    /// @dev Address of the OrderValidator contract.
     IOrderValidator public orderValidator;
 
+    /// @dev Limit for the number of orders that can be matched in a single transaction.
     uint256 private matchOrdersLimit;
 
-    /// @notice stores the fills for orders
+    /// @dev Mapping to store the fill amount for each order, identified by its hash.
     mapping(bytes32 orderKeyHash => uint256 orderFillValue) public fills;
 
-    /// @notice event signaling that an order was canceled
-    /// @param  orderKeyHash order hash
+    /// @notice Event emitted when an order is canceled.
+    /// @param orderKeyHash The hash of the order being canceled.
+    /// @param order The details of the order being canceled.
     event Cancel(bytes32 indexed orderKeyHash, LibOrder.Order order);
 
-    /// @notice event when orders match
-    /// @param from _msgSender or operator if used with approve and call
-    /// @param orderKeyHashLeft left order key hash
-    /// @param orderKeyHashRight right order key hash
-    /// @param orderLeft left order
-    /// @param orderRight right order
-    /// @param newFill fill for left order
-    /// @param totalFillLeft total fill left
-    /// @param totalFillRight total fill right
+    /// @notice Event emitted when two orders are matched.
+    /// @param from Address that initiated the match.
+    /// @param orderKeyHashLeft Hash of the left order.
+    /// @param orderKeyHashRight Hash of the right order.
+    /// @param orderLeft Details of the left order.
+    /// @param orderRight Details of the right order.
+    /// @param newFill Fill details resulting from the order match.
+    /// @param totalFillLeft Total fill amount for the left order.
+    /// @param totalFillRight Total fill amount for the right order.
     event Match(
         address indexed from,
         bytes32 indexed orderKeyHashLeft,
@@ -53,24 +55,23 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 totalFillRight
     );
 
-    /// @notice event for setting a new order validator contract
-    /// @param contractAddress new contract address
+    /// @notice Event emitted when a new OrderValidator contract is set.
+    /// @param contractAddress Address of the new OrderValidator contract.
     event OrderValidatorSet(IOrderValidator indexed contractAddress);
 
-    /// @notice event for setting a new limit for orders that can be matched in one transaction
-    /// @param newMatchOrdersLimit new limit
+    /// @notice Event emitted when the match orders limit is updated.
+    /// @param newMatchOrdersLimit The new limit for matching orders in one transaction.
     event MatchOrdersLimitSet(uint256 indexed newMatchOrdersLimit);
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev Constructor to disable initializers for this contract.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice initializer for ExchangeCore
-    /// @param newOrderValidatorAddress new OrderValidator contract address
-    /// @param newMatchOrdersLimit limit of orders that can be matched in one transaction
-    /// @dev initialize permissions for native token exchange
+    /// @notice Initializes the ExchangeCore contract.
+    /// @param newOrderValidatorAddress Address of the new OrderValidator contract.
+    /// @param newMatchOrdersLimit The limit for matching orders in one transaction.
     // solhint-disable-next-line func-name-mixedcase
     function __ExchangeCoreInitialize(
         IOrderValidator newOrderValidatorAddress,
@@ -80,26 +81,25 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         _setMatchOrdersLimit(newMatchOrdersLimit);
     }
 
-    /// @notice set OrderValidator address
-    /// @param contractAddress new OrderValidator contract address
+    /// @notice Updates the OrderValidator contract address.
+    /// @param contractAddress Address of the new OrderValidator contract.
     function _setOrderValidatorContract(IOrderValidator contractAddress) internal {
         require(address(contractAddress) != address(0), "invalid order validator");
         orderValidator = contractAddress;
         emit OrderValidatorSet(contractAddress);
     }
 
-    /// @notice setter for limit of orders that can be matched in one transaction
-    /// @param newMatchOrdersLimit new limit
+    /// @notice Updates the limit for the number of orders that can be matched in a single transaction.
+    /// @param newMatchOrdersLimit The new limit for matching orders.
     function _setMatchOrdersLimit(uint256 newMatchOrdersLimit) internal {
         require(newMatchOrdersLimit > 0, "invalid quantity");
         matchOrdersLimit = newMatchOrdersLimit;
         emit MatchOrdersLimitSet(matchOrdersLimit);
     }
 
-    /// @notice cancel order
-    /// @param order to be canceled
-    /// @param orderKeyHash used as a checksum to avoid mistakes in the values of order
-    /// @dev require msg sender to be order maker and salt different from 0
+    /// @notice Cancels a specified order.
+    /// @param order Details of the order to be canceled.
+    /// @param orderKeyHash The hash of the order, used for verification.
     function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) internal {
         require(order.salt != 0, "0 salt can't be used");
         bytes32 _orderKeyHash = LibOrder.hashKey(order);
@@ -108,10 +108,9 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         emit Cancel(orderKeyHash, order);
     }
 
-    /// @notice Match orders and transact
-    /// @param sender the original sender of the transaction
-    /// @param matchedOrders a list of left/right orders that match each other
-    /// @dev validate orders through validateOrders before matchAndTransfer
+    /// @notice Matches provided orders and performs the transaction.
+    /// @param sender The original sender of the transaction.
+    /// @param matchedOrders Array of orders that are matched with each other.
     function _matchOrders(address sender, ExchangeMatch[] calldata matchedOrders) internal {
         uint256 len = matchedOrders.length;
         require(len > 0, "ExchangeMatch cannot be empty");
@@ -123,12 +122,12 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         }
     }
 
-    /// @dev function, validate orders
-    /// @param sender the message sender
-    /// @param orderLeft left order
-    /// @param signatureLeft order left signature
-    /// @param orderRight right order
-    /// @param signatureRight order right signature
+    /// @dev Validates the provided orders.
+    /// @param sender Address of the sender.
+    /// @param orderLeft Details of the left order.
+    /// @param signatureLeft Signature of the left order.
+    /// @param orderRight Details of the right order.
+    /// @param signatureRight Signature of the right order.
     function _validateOrders(
         address sender,
         LibOrder.Order memory orderLeft,
@@ -147,10 +146,10 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         }
     }
 
-    /// @notice matches valid orders and transfers their assets
-    /// @param sender the message sender
-    /// @param orderLeft the left order of the match
-    /// @param orderRight the right order of the match
+    /// @notice Matches valid orders and transfers the associated assets.
+    /// @param sender Address initiating the match.
+    /// @param orderLeft The left order.
+    /// @param orderRight The right order.
     function _matchAndTransfer(
         address sender,
         LibOrder.Order calldata orderLeft,
@@ -174,11 +173,11 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         );
     }
 
-    /// @notice parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
-    /// @param sender the message sender
-    /// @param orderLeft left order
-    /// @param orderRight right order
-    /// @return newFill fill result
+    /// @notice Parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
+    /// @param sender The message sender
+    /// @param orderLeft Left order
+    /// @param orderRight Right order
+    /// @return newFill Fill result
     function _parseOrdersSetFillEmitMatch(
         address sender,
         LibOrder.Order calldata orderLeft,
@@ -214,9 +213,9 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         return newFill;
     }
 
-    /// @notice return fill corresponding to order hash
-    /// @param salt if salt 0, fill = 0
-    /// @param hash order hash
+    /// @notice Return fill corresponding to order hash
+    /// @param salt If salt 0, fill = 0
+    /// @param hash Order hash
     function _getOrderFill(uint256 salt, bytes32 hash) internal view returns (uint256 fill) {
         if (salt == 0) {
             fill = 0;

@@ -6,17 +6,17 @@ pragma solidity 0.8.19;
 // We expect external contracts to return the values with this precision.
 uint256 constant BASIS_POINTS = 10000;
 
-/// @title interface for the RoyaltiesProvider contract
-/// @notice contains the signature for the getRoyalties function
+/// @title RoyaltiesProvider contract interface
+/// @notice Contains the signature for the getRoyalties function
 interface IRoyaltiesProvider {
     struct Part {
         address account;
         uint256 value;
     }
 
-    /// @notice calculates all roaylties in token for tokenId
-    /// @param token address of token
+    /// @notice Calculates all roaylties in token for tokenId
+    /// @param token Address of token
     /// @param tokenId of the token we want to calculate royalites
-    /// @return a LibPart.Part with allroyalties for token
+    /// @return A LibPart.Part with allroyalties for token
     function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
 }
