@@ -9,22 +9,22 @@ import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradea
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {Whitelist} from "./Whitelist.sol";
 
-/// @title contract for order validation
-/// @notice validate orders and contains a white list of tokens
+/// @title OrderValidator
+/// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Whitelist {
     using SignatureCheckerUpgradeable for address;
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev Internal mechanism to protect the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice initializer for OrderValidator
-    /// @param admin OrderValidator and Whiteist admin
-    /// @param roles of the Whitelist contract
-    /// @param permissions of the roles
-    /// @param whitelistsEnabled boolean to indicate if whitelists is enabled
+    /// @notice Initializes the OrderValidator contract.
+    /// @param admin The admin address for the OrderValidator and Whitelist.
+    /// @param roles Array of role identifiers for the Whitelist contract.
+    /// @param permissions Array of permissions associated with each role.
+    /// @param whitelistsEnabled Boolean to indicate if whitelist functionality is enabled.
     // solhint-disable-next-line func-name-mixedcase
     function __OrderValidator_init_unchained(
         address admin,
@@ -36,10 +36,10 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         __Whitelist_init(admin, roles, permissions, whitelistsEnabled);
     }
 
-    /// @notice verifies order
-    /// @param order order to be validated
-    /// @param signature signature of order
-    /// @param sender order sender
+    /// @notice Validates the given order.
+    /// @param order The order details to be validated.
+    /// @param signature The signature associated with the order.
+    /// @param sender Address of the order sender.
     function validate(LibOrder.Order calldata order, bytes memory signature, address sender) external view {
         require(order.maker != address(0), "no maker");
 
@@ -48,7 +48,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
-            // No partial fill the order is reusable forever
+            // No partial fill, the order is reusable forever
             return;
         }
 
@@ -61,10 +61,10 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
-    /// @notice check if asset exchange is affected by the whitelist
-    /// @param asset asset to be verified
-    /// @dev if asset type is ERC20, ERC20_ROLE is checked
-    /// @dev otherwise if whitelists are enabled, check TSB_ROLE and PARTNER_ROLE
+    /// @notice Verifies if the asset exchange is affected by the whitelist.
+    /// @param asset Details of the asset to be verified.
+    /// @dev If the asset type is ERC20, the ERC20_ROLE is checked.
+    /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
         address makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {

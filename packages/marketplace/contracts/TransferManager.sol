@@ -13,28 +13,27 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-/// @title TransferManager contract
-/// @notice responsible for transferring all Assets
-/// @dev this manager supports different types of fees
-/// @dev also it supports different beneficiaries
+/// @title TransferManager
+/// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
+/// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {
     using ERC165CheckerUpgradeable for address;
 
-    /// @notice We represent fees in this base to avoid rounding: 50% == 0.5 * 10000 == 5000
+    /// @notice Defines the base for representing fees to avoid rounding: 50% == 0.5 * 10000 == 5000.
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
 
-    /// @notice Fees cannot exceed 50%
+    /// @notice The maximum allowable fee which cannot exceed 50%.
     uint256 internal constant PROTOCOL_FEE_SHARE_LIMIT = 5000;
 
     /// @notice Royalties are represented in IRoyaltiesProvider.BASE_POINT, they
     /// @notice cannot exceed 50% == 0.5 * BASE_POINTS == 5000
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
-    /// @notice fee for primary sales
+    /// @notice Fee applied to primary sales.
     /// @return uint256 of primary sale fee in PROTOCOL_FEE_MULTIPLIER units
     uint256 public protocolFeePrimary;
 
-    /// @notice fee for secondary sales
+    /// @notice Fee applied to secondary sales.
     /// @return uint256 of secondary sale fee in PROTOCOL_FEE_MULTIPLIER units
     uint256 public protocolFeeSecondary;
 
@@ -46,30 +45,30 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @return address of defaultFeeReceiver
     address public defaultFeeReceiver;
 
-    /// @notice event for when protocol fees are set
+    /// @notice Emitted when protocol fees are updated.
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
     event ProtocolFeeSet(uint256 indexed newProtocolFeePrimary, uint256 indexed newProtocolFeeSecondary);
 
-    /// @notice event for when a royalties registry is set
+    //// @notice Emitted when the royalties registry is updated.
     /// @param newRoyaltiesRegistry address of new royalties registry
     event RoyaltiesRegistrySet(IRoyaltiesProvider indexed newRoyaltiesRegistry);
 
-    /// @notice event for when a default fee receiver is set
+    /// @notice Emitted when the default fee receiver is updated.
     /// @param newDefaultFeeReceiver address that gets the fees
     event DefaultFeeReceiverSet(address indexed newDefaultFeeReceiver);
 
-    /// @dev this protects the implementation contract from being initialized.
+    /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice initializer for TransferExecutor
-    /// @param newProtocolFeePrimary fee for primary market
-    /// @param newProtocolFeeSecondary fee for secondary market
-    /// @param newDefaultFeeReceiver address for account receiving fees
-    /// @param newRoyaltiesProvider address of royalties registry
+    /// @notice Initializer for TransferExecutor
+    /// @param newProtocolFeePrimary Fee for the primary market
+    /// @param newProtocolFeeSecondary Fee for the secondary market
+    /// @param newDefaultFeeReceiver Address for account receiving fees
+    /// @param newRoyaltiesProvider Address of royalties registry
     // solhint-disable-next-line func-name-mixedcase
     function __TransferManager_init_unchained(
         uint256 newProtocolFeePrimary,
@@ -82,10 +81,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
     }
 
-    /// @notice executes transfers for 2 matched orders
+    /// @notice Executes transfers for 2 matched orders
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
-    /// @dev this is the main entry point, when used as a separated contract this method will be external
+    /// @dev This is the main entry point, when used as a separated contract this method will be external
     function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
         DealSide memory paymentSide;
         DealSide memory nftSide;
@@ -106,8 +105,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
     }
 
-    /// @notice setter for royalty registry
-    /// @param newRoyaltiesRegistry address of new royalties registry
+    /// @notice Sets the royalties registry.
+    /// @param newRoyaltiesRegistry Address of new royalties registry
     function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
         require(address(newRoyaltiesRegistry) != address(0), "invalid Royalties Registry");
         royaltiesRegistry = newRoyaltiesRegistry;
@@ -115,9 +114,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
         emit RoyaltiesRegistrySet(newRoyaltiesRegistry);
     }
 
-    /// @notice setter for protocol fees
-    /// @param newProtocolFeePrimary fee for primary market
-    /// @param newProtocolFeeSecondary fee for secondary market
+    /// @notice Sets the protocol fees.
+    /// @param newProtocolFeePrimary Fee for the primary market
+    /// @param newProtocolFeeSecondary Fee for the secondary market
     function _setProtocolFee(uint256 newProtocolFeePrimary, uint256 newProtocolFeeSecondary) internal {
         require(newProtocolFeePrimary < PROTOCOL_FEE_SHARE_LIMIT, "invalid primary fee");
         require(newProtocolFeeSecondary < PROTOCOL_FEE_SHARE_LIMIT, "invalid secondary fee");
@@ -127,8 +126,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         emit ProtocolFeeSet(newProtocolFeePrimary, newProtocolFeeSecondary);
     }
 
-    /// @notice setter for default fee receiver
-    /// @param newDefaultFeeReceiver address that gets the fees
+    /// @notice Sets the default fee receiver.
+    /// @param newDefaultFeeReceiver Address that gets the fees
     function _setDefaultFeeReceiver(address newDefaultFeeReceiver) internal {
         require(newDefaultFeeReceiver != address(0), "invalid default fee receiver");
         defaultFeeReceiver = newDefaultFeeReceiver;
@@ -136,7 +135,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
     }
 
-    /// @notice transfer protocol fees and royalties.
+    /// @notice Transfer protocol fees and royalties.
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
@@ -157,15 +156,15 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
     }
 
-    /// @notice return if this tx is on primary market
+    /// @notice Return if this tx is on primary market
     /// @param nftSide DealSide of the nft-side order
-    /// @return creator address or zero if is not able to retrieve it
+    /// @return creator Address or zero if is not able to retrieve it
     function _isPrimaryMarket(DealSide memory nftSide) internal view returns (bool) {
         address creator = _getCreator(nftSide.asset.assetType);
         return creator != address(0) && nftSide.account == creator;
     }
 
-    /// @notice transfer royalties.
+    /// @notice Transfer royalties.
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
@@ -192,12 +191,12 @@ abstract contract TransferManager is Initializable, ITransferManager {
         return remainder;
     }
 
-    /// @notice do a transfer based on a percentage (in base points)
+    /// @notice Do a transfer based on a percentage (in base points)
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
-    /// @param to account that will receive the asset
-    /// @param percentage percentage to be transferred multiplied by the multiplier
-    /// @param multiplier percentage is multiplied by this number to avoid rounding (2.5% == 0.025) * multiplier
+    /// @param to Account that will receive the asset
+    /// @param percentage Percentage to be transferred multiplied by the multiplier
+    /// @param multiplier Percentage is multiplied by this number to avoid rounding (2.5% == 0.025) * multiplier
     /// @return How much left after current transfer
     function _transferPercentage(
         uint256 remainder,
@@ -221,9 +220,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
         return remainder;
     }
 
-    /// @notice return the creator of the token if the token supports IRoyaltyUGC
-    /// @param assetType asset type
-    /// @return creator address or zero if is not able to retrieve it
+    /// @notice Return the creator of the token if the token supports IRoyaltyUGC
+    /// @param assetType Asset type
+    /// @return creator Address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
         (address token, uint256 tokenId) = LibAsset.decodeToken(assetType);
         if (token.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
@@ -231,11 +230,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
     }
 
-    /// @notice function should be able to transfer any supported Asset
+    /// @notice Function should be able to transfer any supported Asset
     /// @param asset Asset to be transferred
-    /// @param from account holding the asset
-    /// @param to account that will receive the asset
-    /// @dev this is the main entry point, when used as a separated contract this method will be external
+    /// @param from Account holding the asset
+    /// @param to Account that will receive the asset
+    /// @dev This is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             address token = LibAsset.decodeAddress(asset.assetType);
@@ -253,8 +252,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
     }
 
-    /// @notice function deciding if the fees are applied or not, to be override
-    /// @param from address to check
+    /// @notice Function deciding if the fees are applied or not, to be override
+    /// @param from Address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
 
     // slither-disable-next-line unused-state

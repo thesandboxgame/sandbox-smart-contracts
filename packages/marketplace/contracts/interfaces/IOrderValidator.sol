@@ -4,12 +4,12 @@ pragma solidity 0.8.19;
 
 import {LibOrder} from "../libraries/LibOrder.sol";
 
-/// @title interface for the OrderValidator contract
-/// @notice contains the signature for validate, isPurchaseValid and verifyERC20Whitelist functions
+/// @title OrderValidator contract interface
+/// @notice Contains the signature for validate, isPurchaseValid and verifyERC20Whitelist functions
 interface IOrderValidator {
-    /// @notice verifies order
-    /// @param order order to be validated
-    /// @param signature signature of order
-    /// @param sender order sender
+    /// @notice Verifies order
+    /// @param order Order to be validated
+    /// @param signature Signature of order
+    /// @param sender Order sender
     function validate(LibOrder.Order memory order, bytes memory signature, address sender) external view;
 }
