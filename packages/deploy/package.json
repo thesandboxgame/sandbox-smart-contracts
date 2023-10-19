@@ -32,8 +32,8 @@
         "hardhat": "hardhat",
         "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\"",
         "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
-        "format": "prettier --check \"**/*.{ts,js}\"",
-        "format:fix": "prettier --write \"**/*.{ts,js}\"",
+        "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
+        "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
         "verify": "yarn hardhat etherscan-verify --network",
         "live:deploy": "node ./utils/npmScriptHelper.js deploy",
         "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
@@ -69,6 +69,7 @@
         "hardhat-contract-sizer": "^2.10.0",
         "hardhat-deploy": "^0.11.30",
         "prettier": "^2.8.8",
+        "prettier-plugin-solidity": "^1.1.3",
         "ts-node": "^10.9.1",
         "typechain": "^8.2.0",
         "typescript": "5.0.4"
