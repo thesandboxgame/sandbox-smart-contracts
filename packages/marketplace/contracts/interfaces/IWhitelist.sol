@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+/// @author The Sandbox
 /// @title Interface for the Whitelist contract
 /// @notice Contains the function signatures for the contract.
 interface IWhitelist {

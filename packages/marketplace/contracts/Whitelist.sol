@@ -5,6 +5,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {IWhitelist} from "./interfaces/IWhitelist.sol";
 
+/// @author The Sandbox
 /// @title Whitelist contract
 /// @dev A contract to control which tokens are accepted in the marketplace.
 contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradeable {

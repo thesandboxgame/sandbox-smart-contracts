@@ -6,6 +6,7 @@ pragma solidity 0.8.19;
 // We expect external contracts to return the values with this precision.
 uint256 constant BASIS_POINTS = 10000;
 
+/// @author The Sandbox
 /// @title RoyaltiesProvider contract interface
 /// @notice Contains the signature for the getRoyalties function
 interface IRoyaltiesProvider {
