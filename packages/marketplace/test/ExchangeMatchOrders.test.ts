@@ -1,31 +1,31 @@
 import {expect} from 'chai';
 import {deployFixtures} from './fixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, AssetERC721, AssetERC1155} from './utils/assets.ts';
+import {AssetERC20, AssetERC721, AssetERC1155, Asset} from './utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder} from './utils/order.ts';
-import {ZeroAddress, AbiCoder} from 'ethers';
+import {hashKey, OrderDefault, signOrder, Order} from './utils/order.ts';
+import {ZeroAddress, AbiCoder, Contract, Signer} from 'ethers';
 
 describe('Exchange MatchOrders', function () {
-  let ExchangeContractAsUser,
-    OrderValidatorAsAdmin,
-    ERC20Contract,
-    ERC20Contract2,
-    ERC721Contract,
-    ERC1155Contract,
-    protocolFeeSecondary,
-    defaultFeeReceiver,
-    maker,
-    taker,
-    makerAsset,
-    takerAsset,
-    orderLeft,
-    orderRight,
-    makerSig,
-    takerSig,
-    ERC20Asset,
-    ERC721Asset,
-    ERC1155Asset;
+  let ExchangeContractAsUser: Contract,
+    OrderValidatorAsAdmin: Contract,
+    ERC20Contract: Contract,
+    ERC20Contract2: Contract,
+    ERC721Contract: Contract,
+    ERC1155Contract: Contract,
+    protocolFeeSecondary: number,
+    defaultFeeReceiver: Signer,
+    maker: Signer,
+    taker: Signer,
+    makerAsset: Asset,
+    takerAsset: Asset,
+    ERC20Asset: Asset,
+    ERC721Asset: Asset,
+    ERC1155Asset: Asset,
+    orderLeft: Order,
+    orderRight: Order,
+    makerSig: string,
+    takerSig: string;
 
   beforeEach(async function () {
     ({
