@@ -23,6 +23,9 @@
       "test/**/*.ts"
     ]
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "release-it": {
     "git": {
       "commitMessage": "chore: @sandbox-smart-contracts/dependency-royalty-management release v${version}",
