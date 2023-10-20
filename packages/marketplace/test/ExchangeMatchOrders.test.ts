@@ -40,7 +40,7 @@ describe('Exchange MatchOrders', function () {
       user1: maker,
       user2: taker,
     } = await loadFixture(deployFixtures));
-    await ERC20Contract.mint(maker.address, 10000000000);
+    await ERC20Contract.mint(maker.getAddress(), 10000000000);
     await ERC20Contract.connect(maker).approve(
       await ExchangeContractAsUser.getAddress(),
       10000000000
@@ -50,7 +50,7 @@ describe('Exchange MatchOrders', function () {
 
   describe('ERC20 x ERC20 token', function () {
     beforeEach(async function () {
-      await ERC20Contract2.mint(taker.address, 20000000000);
+      await ERC20Contract2.mint(taker.getAddress(), 20000000000);
       await ERC20Contract2.connect(taker).approve(
         await ExchangeContractAsUser.getAddress(),
         20000000000
@@ -295,7 +295,7 @@ describe('Exchange MatchOrders', function () {
 
   describe('ERC20 x ERC721 token', function () {
     beforeEach(async function () {
-      await ERC721Contract.mint(taker.address, 1);
+      await ERC721Contract.mint(taker.getAddress(), 1);
       await ERC721Contract.connect(taker).approve(
         await ExchangeContractAsUser.getAddress(),
         1
@@ -331,10 +331,12 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
+      expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+        await taker.getAddress()
+      );
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -351,14 +353,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(10000000000);
-      expect(await ERC721Contract.ownerOf(1)).to.be.equal(maker.address);
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+        await maker.getAddress()
+      );
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         9750000000 // 10000000000 - protocolFee
       );
 
       // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
       expect(
-        await ERC20Contract.balanceOf(defaultFeeReceiver.address)
+        await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
       ).to.be.equal(
         (Number(protocolFeeSecondary) * Number(ERC20Asset.value)) / 10000
       );
@@ -371,10 +375,12 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
+      expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+        await taker.getAddress()
+      );
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -391,8 +397,10 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(10000000000);
-      expect(await ERC721Contract.ownerOf(1)).to.be.equal(maker.address);
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+        await maker.getAddress()
+      );
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         9750000000 // 10000000000 - protocolFee
       );
     });
@@ -436,10 +444,12 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC721Contract.ownerOf(1)).to.be.equal(taker.address);
+      expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+        await taker.getAddress()
+      );
 
       await expect(
         ExchangeContractAsUser.matchOrders([
@@ -456,7 +466,7 @@ describe('Exchange MatchOrders', function () {
 
   describe('ERC20 x ERC1155 token', function () {
     beforeEach(async function () {
-      await ERC1155Contract.mint(taker.address, 1, 10);
+      await ERC1155Contract.mint(taker.getAddress(), 1, 10);
       await ERC1155Contract.connect(taker).setApprovalForAll(
         await ExchangeContractAsUser.getAddress(),
         true
@@ -492,12 +502,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(0);
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -514,16 +528,20 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(10000000000);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         9750000000 // 10000000000 - protocolFee
       );
 
       // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
       expect(
-        await ERC20Contract.balanceOf(defaultFeeReceiver.address)
+        await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
       ).to.be.equal(
         (Number(protocolFeeSecondary) * Number(ERC20Asset.value)) / 10000
       );
@@ -536,12 +554,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(0);
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -558,10 +580,14 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(10000000000);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         9750000000 // 10000000000 - protocolFee
       );
     });
@@ -615,12 +641,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(0);
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -637,14 +667,18 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(5000000000);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         5000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         4875000000 // 5000000000 - protocolFee
       );
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(5);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(5);
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(5);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(5);
     });
 
     it('should fully fill a order using partial matches between ERC20 and ERC1155 tokens', async function () {
@@ -703,12 +737,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(rightOrderForFirstMatch))
       ).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(0);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(10);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         10000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(0);
 
       await ExchangeContractAsUser.matchOrders([
         {
@@ -725,12 +763,16 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(rightOrderForFirstMatch))
       ).to.be.equal(5000000000);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(5);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(5);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(5);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(5);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
         5000000000
       );
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         4875000000 // 5000000000 - protocolFee
       );
       // right order for second partial fill
@@ -762,17 +804,21 @@ describe('Exchange MatchOrders', function () {
       expect(
         await ExchangeContractAsUser.fills(hashKey(rightOrderForSecondMatch))
       ).to.be.equal(5000000000);
-      expect(await ERC1155Contract.balanceOf(maker.address, 1)).to.be.equal(10);
-      expect(await ERC1155Contract.balanceOf(taker.address, 1)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker.address)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker.address)).to.be.equal(
+      expect(
+        await ERC1155Contract.balanceOf(maker.getAddress(), 1)
+      ).to.be.equal(10);
+      expect(
+        await ERC1155Contract.balanceOf(taker.getAddress(), 1)
+      ).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
         9750000000 // 10000000000 - protocolFee
       );
     });
   });
 
   it('should not execute match order for already matched orders', async function () {
-    await ERC20Contract2.mint(taker.address, 20000000000);
+    await ERC20Contract2.mint(taker.getAddress(), 20000000000);
     await ERC20Contract2.connect(taker).approve(
       await ExchangeContractAsUser.getAddress(),
       20000000000
