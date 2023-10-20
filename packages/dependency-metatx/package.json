@@ -33,6 +33,9 @@
       "test/**/*.ts"
     ]
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "release-it": {
     "git": {
       "commitMessage": "chore: @sandbox-smart-contracts/dependency-metatx release v${version}",
