@@ -76,10 +76,9 @@ describe('Exchange.sol', function () {
 
     signatureLeft = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
     signatureRight = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-    console.log('calling first time');
   });
   describe.only('matchOrder with behavior', function () {
-    
+    // data passed to behaviour file is empty. either pass the data manually or use it block to execute it using beforeEach
       matchOrder(
         orderLeft,
         signatureLeft,

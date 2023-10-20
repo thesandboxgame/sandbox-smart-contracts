@@ -4,10 +4,10 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {hashKey, isOrderEqual} from './utils/order.ts';
 import {expectEvent} from '@openzeppelin/test-helpers';
 export async function matchOrder(
-  // orderLeft,
-  // signatureLeft,
-  // orderRight,
-  // signatureRight,
+  orderLeft,
+  signatureLeft,
+  orderRight,
+  signatureRight,
   matchOrders,
   ExchangeContract,
   // user,
