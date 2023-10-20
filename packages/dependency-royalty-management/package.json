@@ -40,10 +40,10 @@
     }
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.0",
-    "@openzeppelin/contracts-upgradeable": "^4.9.0",
     "@manifoldxyz/libraries-solidity": "^1.0.4",
-    "@manifoldxyz/royalty-registry-solidity": "^2.0.3"
+    "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
+    "@openzeppelin/contracts": "^4.9.0",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
