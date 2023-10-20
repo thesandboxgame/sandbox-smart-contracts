@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-operator-filter",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Implementation for OpenSea's operator filter",
   "files": [
     "contracts"
@@ -13,6 +13,7 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
+    "release": "release-it",
     "compile": "hardhat compile"
   },
   "mocha": {
@@ -21,6 +22,19 @@
     "_": [
       "test/**/*.ts"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/dependency-operator-filter release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/dependency-operator-filter release v${version}",
+      "tagName": "@sandbox-smart-contracts/dependency-operator-filter@v${version}"
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",

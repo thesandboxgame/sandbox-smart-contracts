@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-metatx",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "ERC2771 handler used to implement meta-tx",
   "license": "MIT",
   "main": "index.js",
@@ -15,6 +15,7 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
+    "release": "release-it",
     "compile": "hardhat compile"
   },
   "repository": {
@@ -31,6 +32,19 @@
     "_": [
       "test/**/*.ts"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagName": "@sandbox-smart-contracts/dependency-metatx@v${version}"
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
