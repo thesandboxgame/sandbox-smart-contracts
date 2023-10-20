@@ -2083,7 +2083,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/core@workspace:packages/core":
+"@sandbox-smart-contracts/core@*, @sandbox-smart-contracts/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/core@workspace:packages/core"
   dependencies:
@@ -2295,6 +2295,7 @@ __metadata:
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomiclabs/hardhat-ethers": ^2.2.3
     "@sandbox-smart-contracts/asset": "*"
+    "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@sandbox-smart-contracts/giveaway": 0.0.3
