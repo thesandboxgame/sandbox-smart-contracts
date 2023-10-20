@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-royalty-management",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The Sandbox Royalty Implementation",
   "files": [
     "contracts"
