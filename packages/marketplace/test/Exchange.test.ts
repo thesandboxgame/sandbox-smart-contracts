@@ -79,17 +79,21 @@ describe('Exchange.sol', function () {
   });
   describe.only('matchOrder with behavior', function () {
     // data passed to behaviour file is empty. either pass the data manually or use it block to execute it using beforeEach
+    it('testing',async function(){
+      
       matchOrder(
-        orderLeft,
-        signatureLeft,
-        orderRight,
-        signatureRight,
+        // orderLeft,
+        // signatureLeft,
+        // orderRight,
+        // signatureRight,
         function (matchedOrders) {
           return ExchangeContractAsUser.matchOrders(matchedOrders);
         },
         ExchangeContractAsUser,
-        // user,
+        user,
       );
+    })
+    
   });
   it('should return the correct value of protocol fee', async function () {
     const {
