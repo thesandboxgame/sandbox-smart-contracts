@@ -28,3 +28,15 @@ errors
 
 This package exports the contract source code, for deployments see:
 [@sandbox-smart-contract/deploy](../deploy) package.
+
+## Dependencies
+
+- [@openzeppelin/contracts](https://www.npmjs.com/package/@openzeppelin/contracts):
+  OpenZeppelin Contracts is a library for secure smart contract development.
+- [@openzeppelin/contracts-upgradeable](https://www.npmjs.com/package/@openzeppelin/contracts-upgradeable):
+- [@sandbox-smart-contracts/dependency-metatx](https://www.npmjs.com/package/@sandbox-smart-contracts/dependency-metatx):
+  ERC2771 Context
+- [@sandbox-smart-contracts/dependency-royalty-management](https://www.npmjs.com/package/@sandbox-smart-contracts/dependency-royalty-management):
+  Royalty Management
+- [@sandbox-smart-contracts/dependency-operator-filter](https://www.npmjs.com/package/@sandbox-smart-contracts/dependency-operator-filter):
+  Operator Filter
