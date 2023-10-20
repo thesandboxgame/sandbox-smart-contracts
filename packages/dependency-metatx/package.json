@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-metatx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ERC2771 handler used to implement meta-tx",
   "license": "MIT",
   "main": "index.js",
