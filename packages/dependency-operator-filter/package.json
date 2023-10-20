@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-operator-filter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Implementation for OpenSea's operator filter",
   "files": [
     "contracts"
