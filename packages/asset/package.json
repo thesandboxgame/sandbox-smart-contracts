@@ -38,7 +38,9 @@
       "tagName": "@sandbox-smart-contracts/asset@v${version}"
     },
     "plugins": {
-      "@release-it/keep-a-changelog": {}
+      "@release-it/keep-a-changelog": {
+        "filename": "CHANGELOG.md"
+      }
     },
     "hooks": {
       "before:init": [
