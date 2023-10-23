@@ -7,10 +7,8 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
   const {sandAdmin} = await getNamedAccounts();
-
   const ERC20_ROLE = await read('OrderValidator', 'ERC20_ROLE');
-
-  let sandContract = await deployments.get('PolygonSand');
+  const sandContract = await deployments.get('PolygonSand');
 
   if (
     !(await read('OrderValidator', 'hasRole', ERC20_ROLE, sandContract.address))
