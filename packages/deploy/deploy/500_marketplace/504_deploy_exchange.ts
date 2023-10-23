@@ -7,9 +7,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
-  let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER');
+  let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER_V2');
   if (!TRUSTED_FORWARDER) {
-    TRUSTED_FORWARDER = await deploy('TRUSTED_FORWARDER', {
+    TRUSTED_FORWARDER = await deploy('TRUSTED_FORWARDER_V2', {
       from: deployer,
       contract: 'TrustedForwarderMock',
       log: true,
