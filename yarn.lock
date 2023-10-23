@@ -1839,7 +1839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.8.2, @openzeppelin/contracts-upgradeable@npm:^4.9.0, @openzeppelin/contracts-upgradeable@npm:^4.9.2":
+"@openzeppelin/contracts-upgradeable@npm:4.9.3, @openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.8.2, @openzeppelin/contracts-upgradeable@npm:^4.9.0, @openzeppelin/contracts-upgradeable@npm:^4.9.2":
   version: 4.9.3
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.3"
   checksum: bda0240b1d44c913ec5a4e109c622f216c2bbd7b468d210822f75782a5f7fe0609d08bf03b78b253333625e99e507cf2f75212f1de3b274bd9fc64ae967aeec3
@@ -1853,17 +1853,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:4.9.3, @openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0, @openzeppelin/contracts@npm:^4.9.2":
+  version: 4.9.3
+  resolution: "@openzeppelin/contracts@npm:4.9.3"
+  checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/contracts@npm:^3.2.1-solc-0.7":
   version: 3.4.2
   resolution: "@openzeppelin/contracts@npm:3.4.2"
   checksum: 0c90f029fe50a49643588e4c8670dae3bbf31795133a6ddce9bdcbc258486332700bb732287baabf7bf807f39182fe8ea2ffa19aa5caf359b1b9c0f083280748
-  languageName: node
-  linkType: hard
-
-"@openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0, @openzeppelin/contracts@npm:^4.9.2":
-  version: 4.9.3
-  resolution: "@openzeppelin/contracts@npm:4.9.3"
-  checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
   languageName: node
   linkType: hard
 
@@ -2068,13 +2068,13 @@ __metadata:
     "@nomicfoundation/hardhat-toolbox": ^2.0.2
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13"
     "@nomiclabs/hardhat-etherscan": ^3.1.7
-    "@openzeppelin/contracts": ^4.9.0
-    "@openzeppelin/contracts-upgradeable": ^4.9.0
+    "@openzeppelin/contracts": 4.9.3
+    "@openzeppelin/contracts-upgradeable": 4.9.3
     "@openzeppelin/hardhat-upgrades": ^1.28.0
     "@release-it/keep-a-changelog": ^4.0.0
-    "@sandbox-smart-contracts/dependency-metatx": "*"
-    "@sandbox-smart-contracts/dependency-operator-filter": "*"
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@typechain/ethers-v5": ^10.2.1
     "@typechain/hardhat": ^6.1.6
     "@types/chai": ^4.3.5
@@ -2172,7 +2172,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-metatx@*, @sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx":
+"@sandbox-smart-contracts/dependency-metatx@*, @sandbox-smart-contracts/dependency-metatx@1.0.1, @sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-metatx@workspace:packages/dependency-metatx"
   dependencies:
@@ -2219,7 +2219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/dependency-operator-filter@*, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
+"@sandbox-smart-contracts/dependency-operator-filter@*, @sandbox-smart-contracts/dependency-operator-filter@1.0.1, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter"
   dependencies:
@@ -2262,7 +2262,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-royalty-management@*, @sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management":
+"@sandbox-smart-contracts/dependency-royalty-management@*, @sandbox-smart-contracts/dependency-royalty-management@1.0.2, @sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management"
   dependencies:

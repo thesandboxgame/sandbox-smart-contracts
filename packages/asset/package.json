@@ -50,11 +50,11 @@
     }
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.0",
-    "@openzeppelin/contracts-upgradeable": "^4.9.0",
-    "@sandbox-smart-contracts/dependency-metatx": "*",
-    "@sandbox-smart-contracts/dependency-operator-filter": "*",
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
+    "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
+    "@sandbox-smart-contracts/dependency-operator-filter": "1.0.1",
+    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
