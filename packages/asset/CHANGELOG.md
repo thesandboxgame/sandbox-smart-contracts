@@ -8,7 +8,7 @@ and this project adheres to
 
 ## [1.0.2] - 2023-10-20
 
-- Udate dependencies in package.json
+- Update dependencies in package.json
 
 ## [1.0.1] - 2023-10-06
 
