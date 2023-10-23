@@ -9,10 +9,13 @@ const func: DeployFunction = async function (
   const {sandAdmin} = await getNamedAccounts();
   const ERC20_ROLE = await read('OrderValidator', 'ERC20_ROLE');
   const sandContract = await deployments.get('PolygonSand');
-
-  if (
-    !(await read('OrderValidator', 'hasRole', ERC20_ROLE, sandContract.address))
-  ) {
+  const hasRole = await read(
+    'OrderValidator',
+    'hasRole',
+    ERC20_ROLE,
+    sandContract.address
+  );
+  if (!hasRole) {
     await catchUnknownSigner(
       execute(
         'OrderValidator',
@@ -26,7 +29,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['OrderValidator', 'OrderValidator_set_whitelist_roles'];
+func.tags = ['OrderValidator'];
 func.dependencies = [
   'OrderValidator_deploy',
   'PolygonSand',

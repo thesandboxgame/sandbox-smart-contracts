@@ -6,13 +6,13 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {deployer, sandAdmin} = await getNamedAccounts();
+  const {sandAdmin} = await getNamedAccounts();
   const owner = await read('RoyaltiesRegistry', 'owner');
   if (!(owner == sandAdmin)) {
     await catchUnknownSigner(
       execute(
         'RoyaltiesRegistry',
-        {from: deployer, log: true},
+        {from: owner, log: true},
         'transferOwnership',
         sandAdmin
       )
