@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         methodName: '__OrderValidator_init_unchained',
         args: [
-          sandAdmin, //is this correct?
+          sandAdmin,
           [TSB_ROLE, PARTNER_ROLE, ERC20_ROLE],
           [false, false, false],
           true,

@@ -7,7 +7,8 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
   const {deployer, sandAdmin} = await getNamedAccounts();
-  if (!((await read('RoyaltiesRegistry', 'owner')) == sandAdmin)) {
+  const owner = await read('RoyaltiesRegistry', 'owner');
+  if (!(owner == sandAdmin)) {
     await catchUnknownSigner(
       execute(
         'RoyaltiesRegistry',
