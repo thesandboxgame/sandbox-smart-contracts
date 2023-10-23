@@ -6,6 +6,11 @@ import {upgrades} from 'hardhat';
 import {OrderDefault, signOrder} from './utils/order.ts';
 import {ZeroAddress} from 'ethers';
 
+import {
+  shouldSupportsInterface,
+  shouldNotSupportsInterface,
+} from './common/supportsInterface.behavior.ts';
+
 // keccak256("TSB_ROLE")
 const TSBRole =
   '0x6278160ef7ca8a5eb8e5b274bcc0427c2cc7e12eee2a53c5989a1afb360f6404';
@@ -653,18 +658,20 @@ describe('OrderValidator.sol', function () {
     ).to.be.equal(false);
   });
 
-  it('should support interfaces', async function () {
+  it('supportsInterface', async function () {
     const {OrderValidatorAsAdmin} = await loadFixture(deployFixtures);
     const interfaces = {
       IERC165: '0x01ffc9a7',
       IAccessControl: '0x7965db0b',
       IAccessControlEnumerable: '0x5a05180f',
     };
-    for (const i of Object.values(interfaces)) {
-      expect(await OrderValidatorAsAdmin.supportsInterface(i)).to.be.true;
-    }
-    // for coverage
-    expect(await OrderValidatorAsAdmin.supportsInterface('0xffffffff')).to.be
-      .false;
+
+    await shouldSupportsInterface(function (interfaceId: string) {
+      return OrderValidatorAsAdmin.supportsInterface(interfaceId);
+    }, interfaces).then();
+
+    await shouldNotSupportsInterface(function (interfaceId: string) {
+      return OrderValidatorAsAdmin.supportsInterface(interfaceId);
+    }).then();
   });
 });

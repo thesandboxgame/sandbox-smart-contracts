@@ -3,6 +3,10 @@ import {expect} from 'chai';
 import {deployFixtures} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
+import {
+  shouldSupportsInterface,
+  shouldNotSupportsInterface,
+} from './common/supportsInterface.behavior.ts';
 
 describe('Exchange.sol settings', function () {
   it('should initialize the values correctly', async function () {
@@ -35,6 +39,7 @@ describe('Exchange.sol settings', function () {
       await defaultFeeReceiver.getAddress()
     );
   });
+
   describe('roles', function () {
     describe('default admin', function () {
       checkPermsForDefaultAdmin('setRoyaltiesRegistry', 'RoyaltiesRegistrySet');
@@ -42,6 +47,7 @@ describe('Exchange.sol settings', function () {
         'setOrderValidatorContract',
         'OrderValidatorSet'
       );
+
       it('should not set trusted forwarder if caller is not in the role', async function () {
         const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
           await loadFixture(deployFixtures);
@@ -51,6 +57,7 @@ describe('Exchange.sol settings', function () {
           `AccessControl: account ${user.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
         );
       });
+
       it('should set trusted forwarder', async function () {
         const {ExchangeContractAsAdmin, user} = await loadFixture(
           deployFixtures
@@ -61,6 +68,7 @@ describe('Exchange.sol settings', function () {
         );
       });
     });
+
     describe('pauser role', function () {
       it('should not pause if caller is not in the role', async function () {
         const {ExchangeContractAsUser, PAUSER_ROLE, user} = await loadFixture(
@@ -70,6 +78,7 @@ describe('Exchange.sol settings', function () {
           `AccessControl: account ${user.address.toLowerCase()} is missing role ${PAUSER_ROLE}`
         );
       });
+
       it('should be able to pause the contract', async function () {
         const {ExchangeContractAsAdmin, PAUSER_ROLE, user2} = await loadFixture(
           deployFixtures
@@ -80,6 +89,7 @@ describe('Exchange.sol settings', function () {
         expect(await ExchangeContractAsAdmin.paused()).to.be.true;
       });
     });
+
     describe('exchange admin', function () {
       it('should not set setProtocolFee if caller is not in the role', async function () {
         const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
@@ -95,6 +105,7 @@ describe('Exchange.sol settings', function () {
           `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
         );
       });
+
       it('should be able to set setProtocolFee', async function () {
         const {
           EXCHANGE_ADMIN_ROLE,
@@ -114,6 +125,7 @@ describe('Exchange.sol settings', function () {
           .to.emit(ExchangeContractAsAdmin, 'ProtocolFeeSet')
           .withArgs(newProtocolFeePrimary, newProtocolFeeSecondary);
       });
+
       it('should not unpause if caller is not in the role', async function () {
         const {ExchangeContractAsUser, EXCHANGE_ADMIN_ROLE, user} =
           await loadFixture(deployFixtures);
@@ -121,6 +133,7 @@ describe('Exchange.sol settings', function () {
           `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
         );
       });
+
       it('should be able to unpause the contract', async function () {
         const {
           ExchangeContractAsAdmin,
@@ -139,6 +152,7 @@ describe('Exchange.sol settings', function () {
         expect(await ExchangeContractAsAdmin.paused()).to.be.false;
       });
     });
+
     it('should not set setDefaultFeeReceiver if caller is not in the role', async function () {
       const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
         await loadFixture(deployFixtures);
@@ -148,6 +162,7 @@ describe('Exchange.sol settings', function () {
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
       );
     });
+
     it('should be able to set setDefaultFeeReceiver', async function () {
       const {
         EXCHANGE_ADMIN_ROLE,
@@ -160,6 +175,7 @@ describe('Exchange.sol settings', function () {
         .to.emit(ExchangeContractAsAdmin, 'DefaultFeeReceiverSet')
         .withArgs(user.address);
     });
+
     it('should not set setMatchOrdersLimit if caller is not in the role', async function () {
       const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
         await loadFixture(deployFixtures);
@@ -170,6 +186,7 @@ describe('Exchange.sol settings', function () {
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
       );
     });
+
     it('should be able to set setMatchOrdersLimit', async function () {
       const {
         EXCHANGE_ADMIN_ROLE,
@@ -185,6 +202,7 @@ describe('Exchange.sol settings', function () {
         .to.emit(ExchangeContractAsAdmin, 'MatchOrdersLimitSet')
         .withArgs(newMatchOrdersLimit);
     });
+
     it('MatchOrdersLimit cannot be set to zero', async function () {
       const {
         EXCHANGE_ADMIN_ROLE,
@@ -208,6 +226,7 @@ describe('Exchange.sol settings', function () {
     'setOrderValidatorContract',
     'invalid order validator'
   );
+
   it('should be able to set trusted forwarder as zero address to disable it', async function () {
     const {ExchangeContractAsAdmin, TrustedForwarder} = await loadFixture(
       deployFixtures
@@ -220,6 +239,7 @@ describe('Exchange.sol settings', function () {
       ZeroAddress
     );
   });
+
   it('should not be able to setProtocolFee > 5000', async function () {
     const {EXCHANGE_ADMIN_ROLE, ExchangeContractAsUser, user} =
       await loadFixture(deployFixtures);
@@ -236,6 +256,7 @@ describe('Exchange.sol settings', function () {
       `AccessControl: account ${user.address.toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
     );
   });
+
   it('should not set setDefaultFeeReceiver to address zero', async function () {
     const {
       EXCHANGE_ADMIN_ROLE,
@@ -248,19 +269,22 @@ describe('Exchange.sol settings', function () {
       ExchangeContractAsUser.setDefaultFeeReceiver(ZeroAddress)
     ).to.be.revertedWith('invalid default fee receiver');
   });
-  it('should support interfaces', async function () {
+
+  it('supportsInterface', async function () {
     const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
     const interfaces = {
       IERC165: '0x01ffc9a7',
       IAccessControl: '0x7965db0b',
       IAccessControlEnumerable: '0x5a05180f',
     };
-    for (const i of Object.values(interfaces)) {
-      expect(await ExchangeContractAsAdmin.supportsInterface(i)).to.be.true;
-    }
-    // for coverage
-    expect(await ExchangeContractAsAdmin.supportsInterface('0xffffffff')).to.be
-      .false;
+
+    await shouldSupportsInterface(function (interfaceId: string) {
+      return ExchangeContractAsAdmin.supportsInterface(interfaceId);
+    }, interfaces).then();
+
+    await shouldNotSupportsInterface(function (interfaceId: string) {
+      return ExchangeContractAsAdmin.supportsInterface(interfaceId);
+    }).then();
   });
 });
 
@@ -281,6 +305,7 @@ function checkPermsForDefaultAdmin(name, eventName) {
       `AccessControl: account ${user.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
     );
   });
+
   it(`should be able to ${name}`, async function () {
     const {ExchangeContractAsAdmin, user} = await loadFixture(deployFixtures);
     await expect(ExchangeContractAsAdmin[name](user.address))
