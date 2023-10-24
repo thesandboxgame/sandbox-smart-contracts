@@ -188,6 +188,7 @@ everything inside it and manage the entire deploy strategy from one place.
 We use release-it for versioning and package publishing.
 
 To install it, run:
+
 ```shell
 yarn add -D @release-it/keep-a-changelog release-it
 ```
@@ -218,11 +219,12 @@ Here is how it should be set up:
 Steps to create a new release:
 
 1. Add the changes to the CHANGELOG.md file, under the "Unreleased" tag.
-2. If necessary, update the package.json file with the release-it configuration and the release script.
+2. If necessary, update the package.json file with the release-it configuration
+   and the release script.
 3. Commit all changes.
-4. Run `yarn release –dry-run` to preview the release without making any actual changes.
+4. Run `yarn release –dry-run` to preview the release without making any actual
+   changes.
 5. Execute `yarn release` to create the release.
-
 
 # A NOTE ON MAKING PULL REQUESTS
 
