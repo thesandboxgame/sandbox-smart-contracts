@@ -22,7 +22,7 @@ const func: DeployFunction = async function (
         {from: sandAdmin, log: true},
         'grantRole',
         ERC20_ROLE,
-        sandContract?.address
+        sandContract.address
       )
     );
   }

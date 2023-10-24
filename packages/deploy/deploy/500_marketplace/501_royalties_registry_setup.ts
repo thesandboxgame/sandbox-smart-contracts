@@ -8,7 +8,7 @@ const func: DeployFunction = async function (
   const {execute, read, catchUnknownSigner} = deployments;
   const {sandAdmin} = await getNamedAccounts();
   const owner = await read('RoyaltiesRegistry', 'owner');
-  if (!(owner == sandAdmin)) {
+  if (owner != sandAdmin) {
     await catchUnknownSigner(
       execute(
         'RoyaltiesRegistry',
@@ -22,4 +22,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['RoyaltiesRegistry'];
-func.dependencies = ['RoyaltiesRegistry_deploy'];
+func.dependencies = ['RoyaltiesRegistry_deploy', 'RoyaltiesRegistry_setup'];
