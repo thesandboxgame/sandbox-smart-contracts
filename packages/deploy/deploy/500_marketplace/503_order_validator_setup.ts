@@ -29,7 +29,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['OrderValidator'];
+func.tags = ['OrderValidator', 'OrderValidator_setup'];
 func.dependencies = [
   'OrderValidator_deploy',
   'PolygonSand',
