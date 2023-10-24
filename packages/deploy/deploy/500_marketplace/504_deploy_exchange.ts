@@ -7,14 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
-  let TRUSTED_FORWARDER = await deployments.getOrNull('TRUSTED_FORWARDER_V2');
-  if (!TRUSTED_FORWARDER) {
-    TRUSTED_FORWARDER = await deploy('TRUSTED_FORWARDER_V2', {
-      from: deployer,
-      contract: 'TrustedForwarderMock',
-      log: true,
-    });
-  }
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
 
@@ -49,4 +42,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Exchange', 'Exchange_deploy'];
-func.dependencies = ['RoyaltiesRegistry_deploy', 'OrderValidator_deploy'];
+func.dependencies = [
+  'RoyaltiesRegistry_deploy',
+  'OrderValidator_deploy',
+  'TRUSTED_FORWARDER_V2',
+];
