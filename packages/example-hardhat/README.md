@@ -108,6 +108,8 @@ Add the following line to the scripts section:
   },
 ```
 
+and then, the configuration:
+
 ```json
  "release-it": {
         "git": {
