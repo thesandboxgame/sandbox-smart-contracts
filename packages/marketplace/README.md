@@ -197,6 +197,14 @@ The configuration is done in the `package.json` file.
 
 Here is how it should be set up:
 
+Add the following line to the scripts section:
+
+```json
+"scripts": {
+    "release": "release-it"
+  },
+```
+
 ```json
  "release-it": {
         "git": {
