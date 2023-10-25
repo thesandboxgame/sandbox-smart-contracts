@@ -18,6 +18,7 @@ import {shouldMatchOrders} from './exchange/matchOrders.behavior.ts';
 import {shouldMatchOrdersWithRoyalty} from './exchange/matchOrdersWithRoyalty.behavior.ts';
 import {shouldCheckForWhitelisting} from './exchange/whitelistingTokens.behavior.ts';
 import {shouldSupportInterfaces} from './common/supportsInterface.behavior.ts';
+import {exchangeConfig} from './exchange/config.behavior.ts';
 
 describe('Exchange.sol', function () {
   let ExchangeContractAsDeployer: Contract,
@@ -25,6 +26,7 @@ describe('Exchange.sol', function () {
     ExchangeContractAsAdmin: Contract,
     OrderValidatorAsAdmin: Contract,
     RoyaltiesRegistryAsDeployer: Contract,
+    TrustedForwarder: Contract,
     ERC20Contract: Contract,
     ERC20Contract2: Contract,
     ERC721Contract: Contract,
@@ -52,6 +54,7 @@ describe('Exchange.sol', function () {
       ExchangeContractAsAdmin,
       OrderValidatorAsAdmin,
       RoyaltiesRegistryAsDeployer,
+      TrustedForwarder,
       ERC20Contract,
       ERC20Contract2,
       ERC721Contract,
@@ -105,6 +108,29 @@ describe('Exchange.sol', function () {
   shouldCheckForWhitelisting();
 
   shouldMatchOrderForBatching();
+
+  exchangeConfig();
+
+  it('should initialize the values correctly', async function () {
+    expect(await ExchangeContractAsAdmin.royaltiesRegistry()).to.be.equal(
+      await RoyaltiesRegistryAsDeployer.getAddress()
+    );
+    expect(await ExchangeContractAsAdmin.orderValidator()).to.be.equal(
+      await OrderValidatorAsAdmin.getAddress()
+    );
+    expect(await ExchangeContractAsAdmin.getTrustedForwarder()).to.be.equal(
+      await TrustedForwarder.getAddress()
+    );
+    expect(await ExchangeContractAsAdmin.protocolFeePrimary()).to.be.equal(
+      protocolFeePrimary
+    );
+    expect(await ExchangeContractAsAdmin.protocolFeeSecondary()).to.be.equal(
+      protocolFeeSecondary
+    );
+    expect(await ExchangeContractAsAdmin.defaultFeeReceiver()).to.be.equal(
+      await defaultFeeReceiver.getAddress()
+    );
+  });
 
   it('should return the correct value of protocol fee', async function () {
     expect(await ExchangeContractAsDeployer.protocolFeePrimary()).to.be.equal(

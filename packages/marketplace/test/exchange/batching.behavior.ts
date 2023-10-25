@@ -6,7 +6,7 @@ import {AssetERC20, AssetERC721, Asset} from '../utils/assets.ts';
 import {getSymmetricOrder, OrderDefault, signOrder} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
-export async function shouldMatchOrderForBatching() {
+export function shouldMatchOrderForBatching() {
   describe('Exchange MatchOrders for batching', function () {
     let ExchangeContractAsUser: Contract,
       OrderValidatorAsAdmin: Contract,

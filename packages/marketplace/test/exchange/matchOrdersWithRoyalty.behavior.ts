@@ -12,7 +12,7 @@ import {
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
-export async function shouldMatchOrdersWithRoyalty() {
+export function shouldMatchOrdersWithRoyalty() {
   describe('Exchange MatchOrders with Royalty', function () {
     let ExchangeContractAsDeployer: Contract,
       ExchangeContractAsUser: Contract,

@@ -11,7 +11,7 @@ import {
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
-export async function shouldCheckForWhitelisting() {
+export function shouldCheckForWhitelisting() {
   describe('Exchange MatchOrders for Whitelisting tokens', function () {
     let ExchangeContractAsUser: Contract,
       OrderValidatorAsAdmin: Contract,

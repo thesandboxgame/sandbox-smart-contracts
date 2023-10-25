@@ -72,7 +72,7 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, await user1.address)
+      OrderValidatorAsUser.validate(order, signature, await user1.getAddress())
     ).to.not.be.reverted;
   });
 
