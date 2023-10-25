@@ -4,7 +4,7 @@ interface Interfaces {
 }
 type SupportsInterfaceFunction = (interfaceId: string) => Promise<boolean>;
 
-export async function shouldSupportsInterface(
+export function shouldSupportInterfaces(
   supportsInterface: SupportsInterfaceFunction,
   interfaces: Interfaces
 ) {
@@ -14,13 +14,7 @@ export async function shouldSupportsInterface(
         expect(await supportsInterface(i)).to.be.true;
       }
     });
-  });
-}
 
-export async function shouldNotSupportsInterface(
-  supportsInterface: SupportsInterfaceFunction
-) {
-  describe('Supports Only Declared Interfaces', function () {
     it('does not support unspecified interfaces', async function () {
       expect(await supportsInterface('0xffffffff')).to.be.false;
     });

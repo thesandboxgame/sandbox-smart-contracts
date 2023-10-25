@@ -17,6 +17,7 @@ import {shouldMatchOrderForBatching} from './exchange/batching.behavior.ts';
 import {shouldMatchOrders} from './exchange/matchOrders.behavior.ts';
 import {shouldMatchOrdersWithRoyalty} from './exchange/matchOrdersWithRoyalty.behavior.ts';
 import {shouldCheckForWhitelisting} from './exchange/whitelistingTokens.behavior.ts';
+import {shouldSupportInterfaces} from './common/supportsInterface.behavior.ts';
 
 describe('Exchange.sol', function () {
   let ExchangeContractAsDeployer: Contract,
@@ -86,21 +87,24 @@ describe('Exchange.sol', function () {
     expect(await upgraded.protocolFeeSecondary()).to.be.equal(protocolFeeSec);
     expect(await upgraded.defaultFeeReceiver()).to.be.equal(feeReceiver);
     
-  it('shouldMatchOrders', async function () {
-    await shouldMatchOrders().then();
-  });
+  shouldSupportInterfaces(
+    function (interfaceId: string) {
+      return ExchangeContractAsAdmin.supportsInterface(interfaceId);
+    },
+    {
+      IERC165: '0x01ffc9a7',
+      IAccessControl: '0x7965db0b',
+      IAccessControlEnumerable: '0x5a05180f',
+    }
+  );
 
-  it('shouldMatchOrdersWithRoyalty', async function () {
-    await shouldMatchOrdersWithRoyalty().then();
-  });
+  shouldMatchOrders();
 
-  it('shouldMatchOrderForWhitelistingToken', async function () {
-    await shouldCheckForWhitelisting().then();
-  });
+  shouldMatchOrdersWithRoyalty();
 
-  it('shouldMatchOrderForBatching', async function () {
-    await shouldMatchOrderForBatching().then();
-  });
+  shouldCheckForWhitelisting();
+
+  shouldMatchOrderForBatching();
 
   it('should return the correct value of protocol fee', async function () {
     expect(await ExchangeContractAsDeployer.protocolFeePrimary()).to.be.equal(

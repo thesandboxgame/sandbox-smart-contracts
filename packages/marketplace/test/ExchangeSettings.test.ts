@@ -3,10 +3,6 @@ import {expect} from 'chai';
 import {deployFixtures} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
-import {
-  shouldSupportsInterface,
-  shouldNotSupportsInterface,
-} from './common/supportsInterface.behavior.ts';
 
 describe('Exchange.sol settings', function () {
   it('should initialize the values correctly', async function () {
@@ -268,23 +264,6 @@ describe('Exchange.sol settings', function () {
     await expect(
       ExchangeContractAsUser.setDefaultFeeReceiver(ZeroAddress)
     ).to.be.revertedWith('invalid default fee receiver');
-  });
-
-  it('supportsInterface', async function () {
-    const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
-    const interfaces = {
-      IERC165: '0x01ffc9a7',
-      IAccessControl: '0x7965db0b',
-      IAccessControlEnumerable: '0x5a05180f',
-    };
-
-    await shouldSupportsInterface(function (interfaceId: string) {
-      return ExchangeContractAsAdmin.supportsInterface(interfaceId);
-    }, interfaces).then();
-
-    await shouldNotSupportsInterface(function (interfaceId: string) {
-      return ExchangeContractAsAdmin.supportsInterface(interfaceId);
-    }).then();
   });
 });
 
