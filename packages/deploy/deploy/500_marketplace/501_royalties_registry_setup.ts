@@ -21,5 +21,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['RoyaltiesRegistry'];
-func.dependencies = ['RoyaltiesRegistry_deploy', 'RoyaltiesRegistry_setup'];
+func.tags = ['RoyaltiesRegistry', 'RoyaltiesRegistry_setup'];
+func.dependencies = ['RoyaltiesRegistry_deploy'];

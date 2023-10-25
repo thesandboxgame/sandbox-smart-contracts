@@ -30,8 +30,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OrderValidator', 'OrderValidator_setup'];
-func.dependencies = [
-  'OrderValidator_deploy',
-  'PolygonSand',
-  'PolygonSand_deploy',
-];
+func.dependencies = ['OrderValidator_deploy', 'PolygonSand'];
