@@ -8,7 +8,7 @@ const func: DeployFunction = async function (
   const {execute, read, catchUnknownSigner} = deployments;
   const {sandAdmin} = await getNamedAccounts();
   const ERC20_ROLE = await read('OrderValidator', 'ERC20_ROLE');
-  const sandContract = await deployments.get('PolygonSand');
+  const sandContract = await deployments.get('POLYGON_SAND');
   const hasRole = await read(
     'OrderValidator',
     'hasRole',
@@ -30,4 +30,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OrderValidator', 'OrderValidator_setup'];
-func.dependencies = ['OrderValidator_deploy', 'PolygonSand'];
+func.dependencies = ['OrderValidator_deploy', 'POLYGON_SAND'];
