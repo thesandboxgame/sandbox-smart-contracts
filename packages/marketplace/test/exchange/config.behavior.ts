@@ -3,6 +3,7 @@ import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress, Contract, Signer} from 'ethers';
+import {checkAccessControl} from '../common/accessControl.behavior';
 
 export function exchangeConfig() {
   describe('Exchange settings', function () {
@@ -11,7 +12,6 @@ export function exchangeConfig() {
       TrustedForwarder: Contract,
       user: Signer,
       user2: Signer,
-      DEFAULT_ADMIN_ROLE: string,
       EXCHANGE_ADMIN_ROLE: string,
       PAUSER_ROLE: string;
 
@@ -22,7 +22,6 @@ export function exchangeConfig() {
         TrustedForwarder,
         user,
         user2,
-        DEFAULT_ADMIN_ROLE,
         EXCHANGE_ADMIN_ROLE,
         PAUSER_ROLE,
       } = await loadFixture(deployFixtures));
@@ -30,32 +29,25 @@ export function exchangeConfig() {
 
     describe('roles', function () {
       describe('default admin', function () {
-        checkPermsForDefaultAdmin(
-          'setRoyaltiesRegistry',
-          'RoyaltiesRegistrySet'
+        checkAccessControl(
+          [
+            'setRoyaltiesRegistry',
+            'setOrderValidatorContract',
+            'setTrustedForwarder',
+          ],
+          ['RoyaltiesRegistrySet', 'OrderValidatorSet', 'TrustedForwarderSet'],
+          [
+            'ExchangeContractAsUser',
+            'ExchangeContractAsUser',
+            'ExchangeContractAsUser',
+          ],
+          [
+            'ExchangeContractAsAdmin',
+            'ExchangeContractAsAdmin',
+            'ExchangeContractAsAdmin',
+          ],
+          ['0x00', '0x00', '0x00']
         );
-
-        checkPermsForDefaultAdmin(
-          'setOrderValidatorContract',
-          'OrderValidatorSet'
-        );
-
-        it('should not set trusted forwarder if caller is not in the role', async function () {
-          await expect(
-            ExchangeContractAsUser.setTrustedForwarder(user.getAddress())
-          ).to.be.revertedWith(
-            `AccessControl: account ${(
-              await user.getAddress()
-            ).toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
-          );
-        });
-
-        it('should set trusted forwarder', async function () {
-          await ExchangeContractAsAdmin.setTrustedForwarder(user.getAddress());
-          expect(
-            await ExchangeContractAsAdmin.getTrustedForwarder()
-          ).to.be.equal(await user.getAddress());
-        });
 
         it('should be able to set trusted forwarder as zero address to disable it', async function () {
           expect(
@@ -210,26 +202,5 @@ function shouldNotBeAbleToSetAsZero(name, err) {
     await expect(ExchangeContractAsAdmin[name](ZeroAddress)).to.revertedWith(
       err
     );
-  });
-}
-
-function checkPermsForDefaultAdmin(name, eventName) {
-  it(`should not set ${name} if caller is not in the role`, async function () {
-    const {DEFAULT_ADMIN_ROLE, ExchangeContractAsUser, user} =
-      await loadFixture(deployFixtures);
-    await expect(
-      ExchangeContractAsUser[name](user.getAddress())
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
-    );
-  });
-
-  it(`should be able to ${name}`, async function () {
-    const {ExchangeContractAsAdmin, user} = await loadFixture(deployFixtures);
-    await expect(ExchangeContractAsAdmin[name](user.getAddress()))
-      .to.emit(ExchangeContractAsAdmin, eventName)
-      .withArgs(await user.getAddress());
   });
 }
