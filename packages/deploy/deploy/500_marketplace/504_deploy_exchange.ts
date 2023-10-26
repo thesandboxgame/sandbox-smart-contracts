@@ -45,5 +45,5 @@ func.tags = ['Exchange', 'Exchange_deploy'];
 func.dependencies = [
   'RoyaltiesRegistry',
   'OrderValidator',
-  'TRUSTED_FORWARDER_V2'
+  'TRUSTED_FORWARDER_V2',
 ];
