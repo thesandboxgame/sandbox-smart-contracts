@@ -5,13 +5,6 @@ pragma solidity 0.8.19;
 import {LibAsset} from "../libraries/LibAsset.sol";
 
 contract LibAssetMock {
-    function getFeeSide(
-        LibAsset.AssetClass leftClass,
-        LibAsset.AssetClass rightClass
-    ) external pure returns (LibAsset.FeeSide) {
-        return LibAsset.getFeeSide(leftClass, rightClass);
-    }
-
     /// @notice calculate if Asset types match with each other
     /// @param leftType to be matched with rightAssetType
     /// @param rightType to be matched with leftAssetType

@@ -14,13 +14,6 @@ library LibAsset {
         ERC1155 // Represents an ERC1155 token.
     }
 
-    /// @dev Represents the side of the trade from which a fee should be taken, if any.
-    enum FeeSide {
-        NONE, // No fees are taken.
-        LEFT, // Fees are taken from the left side of the trade.
-        RIGHT // Fees are taken from the right side of the trade.
-    }
-
     /// @dev Represents the type of a specific asset.
     /// AssetType can represent a specific ERC-721 token (defined by the token contract address and tokenId) or
     /// a specific ERC-20 token (like DAI).
@@ -39,20 +32,6 @@ library LibAsset {
 
     bytes32 internal constant ASSET_TYPEHASH =
         keccak256("Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)");
-
-    /// @notice Determine which side of a trade should bear the fee, based on the asset types.
-    /// @param leftClass The asset class type of the left side of the trade.
-    /// @param rightClass The asset class type of the right side of the trade.
-    /// @return FeeSide representing which side should bear the fee, if any.
-    function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
-        if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
-            return FeeSide.LEFT;
-        }
-        if (rightClass == AssetClass.ERC20 && leftClass != AssetClass.ERC20) {
-            return FeeSide.RIGHT;
-        }
-        return FeeSide.NONE;
-    }
 
     /// @notice Check if two asset types match.
     /// @param leftType Asset type on the left side of a trade.
@@ -103,5 +82,26 @@ library LibAsset {
     /// @return The address of the token.
     function decodeAddress(AssetType memory assetType) internal pure returns (address) {
         return abi.decode(assetType.data, (address));
+    }
+
+    /// @notice check if an asset is of type ERC20
+    /// @param assetType to check
+    /// @return true if asset is ERC20
+    function isERC20(AssetType memory assetType) internal pure returns (bool) {
+        return assetType.assetClass == AssetClass.ERC20;
+    }
+
+    /// @notice check if an asset is of type ERC721
+    /// @param assetType to check
+    /// @return true if asset is ERC721
+    function isERC721(AssetType memory assetType) internal pure returns (bool) {
+        return assetType.assetClass == AssetClass.ERC721;
+    }
+
+    /// @notice check if an asset is of type ERC1155
+    /// @param assetType to check
+    /// @return true if asset is ERC1155
+    function isERC1155(AssetType memory assetType) internal pure returns (bool) {
+        return assetType.assetClass == AssetClass.ERC1155;
     }
 }
