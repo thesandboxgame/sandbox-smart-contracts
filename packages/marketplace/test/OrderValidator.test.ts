@@ -610,6 +610,7 @@ describe('OrderValidator.sol', function () {
     ).to.be.equal(false);
   });
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldSupportInterfaces(
     function (interfaceId: string) {
       return OrderValidatorAsAdmin.supportsInterface(interfaceId);

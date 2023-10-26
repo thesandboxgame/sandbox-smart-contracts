@@ -12,6 +12,7 @@ import {
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
+// eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrdersWithRoyalty() {
   describe('Exchange MatchOrders with Royalty', function () {
     let ExchangeContractAsDeployer: Contract,

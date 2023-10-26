@@ -3,6 +3,7 @@ import {deployFixtures} from '../fixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {Contract, Signer} from 'ethers';
 
+// eslint-disable-next-line mocha/no-exports
 export function checkAccessControl(
   functionName: string[],
   eventName: string[],
@@ -33,7 +34,7 @@ export function checkAccessControl(
         '0x00': DEFAULT_ADMIN_ROLE,
       };
     });
-
+    // eslint-disable-next-line mocha/no-setup-in-describe
     for (let i = 0; i < functionName.length; i++) {
       it(`should not set ${functionName[i]} if caller is not in the role`, async function () {
         await expect(

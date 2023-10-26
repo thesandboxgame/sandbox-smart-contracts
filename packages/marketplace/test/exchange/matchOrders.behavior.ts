@@ -6,6 +6,7 @@ import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, AbiCoder, Contract, Signer} from 'ethers';
 
+// eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrders() {
   describe('Exchange MatchOrders', function () {
     let ExchangeContractAsUser: Contract,

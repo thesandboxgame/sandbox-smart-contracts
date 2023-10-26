@@ -11,6 +11,7 @@ import {
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
+// eslint-disable-next-line mocha/no-exports
 export function shouldCheckForWhitelisting() {
   describe('Exchange MatchOrders for Whitelisting tokens', function () {
     let ExchangeContractAsUser: Contract,

@@ -5,6 +5,7 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {checkAccessControl} from '../common/accessControl.behavior';
 
+// eslint-disable-next-line mocha/no-exports
 export function exchangeConfig() {
   describe('Exchange settings', function () {
     let ExchangeContractAsUser: Contract,

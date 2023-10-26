@@ -90,6 +90,7 @@ describe('Exchange.sol', function () {
     expect(await upgraded.protocolFeeSecondary()).to.be.equal(protocolFeeSec);
     expect(await upgraded.defaultFeeReceiver()).to.be.equal(feeReceiver);
     
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldSupportInterfaces(
     function (interfaceId: string) {
       return ExchangeContractAsAdmin.supportsInterface(interfaceId);
@@ -101,14 +102,19 @@ describe('Exchange.sol', function () {
     }
   );
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldMatchOrders();
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldMatchOrdersWithRoyalty();
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForWhitelisting();
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   shouldMatchOrderForBatching();
 
+  // eslint-disable-next-line mocha/no-setup-in-describe
   exchangeConfig();
 
   it('should initialize the values correctly', async function () {

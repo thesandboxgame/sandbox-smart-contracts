@@ -4,6 +4,7 @@ interface Interfaces {
 }
 type SupportsInterfaceFunction = (interfaceId: string) => Promise<boolean>;
 
+// eslint-disable-next-line mocha/no-exports
 export function shouldSupportInterfaces(
   supportsInterface: SupportsInterfaceFunction,
   interfaces: Interfaces
