@@ -16,12 +16,12 @@
     "private": true,
     "dependencies": {
         "@sandbox-smart-contracts/asset": "*",
+        "@sandbox-smart-contracts/core": "*",
         "@sandbox-smart-contracts/dependency-operator-filter": "*",
         "@sandbox-smart-contracts/dependency-royalty-management": "*",
-        "@sandbox-smart-contracts/giveaway": "0.0.3",
         "@sandbox-smart-contracts/faucets": "0.0.1",
-        "@sandbox-smart-contracts/marketplace": "*",
-        "@sandbox-smart-contracts/core": "*"
+        "@sandbox-smart-contracts/giveaway": "0.0.3",
+        "@sandbox-smart-contracts/marketplace": "*"
     },
     "files": [
         "deployments"

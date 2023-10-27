@@ -1319,18 +1319,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-network-helpers@npm:^1.0.0, @nomicfoundation/hardhat-network-helpers@npm:^1.0.8":
-  version: 1.0.9
-  resolution: "@nomicfoundation/hardhat-network-helpers@npm:1.0.9"
-  dependencies:
-    ethereumjs-util: ^7.1.4
-  peerDependencies:
-    hardhat: ^2.9.5
-  checksum: ff378795075af853aeaacb7bc0783928d947d7f9fb043c046fcaffdf1e1219c4af47b18ea7fa2c10fe0b25daef48f13ae8b103bc11ea494ecdfbe34a3dcdf936
-  languageName: node
-  linkType: hard
-
-"@nomicfoundation/hardhat-network-helpers@npm:^1.0.9":
+"@nomicfoundation/hardhat-network-helpers@npm:^1.0.0, @nomicfoundation/hardhat-network-helpers@npm:^1.0.8, @nomicfoundation/hardhat-network-helpers@npm:^1.0.9":
   version: 1.0.9
   resolution: "@nomicfoundation/hardhat-network-helpers@npm:1.0.9"
   dependencies:
@@ -1864,7 +1853,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:4.9.3, @openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0, @openzeppelin/contracts@npm:^4.9.2":
+"@openzeppelin/contracts@npm:4.9.3, @openzeppelin/contracts@npm:^4.2.0, @openzeppelin/contracts@npm:^4.7.3, @openzeppelin/contracts@npm:^4.8.0, @openzeppelin/contracts@npm:^4.9.0, @openzeppelin/contracts@npm:^4.9.2, @openzeppelin/contracts@npm:^4.9.3":
   version: 4.9.3
   resolution: "@openzeppelin/contracts@npm:4.9.3"
   checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
@@ -2330,8 +2319,8 @@ __metadata:
     "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
-    "@sandbox-smart-contracts/giveaway": 0.0.3
     "@sandbox-smart-contracts/faucets": 0.0.1
+    "@sandbox-smart-contracts/giveaway": 0.0.3
     "@sandbox-smart-contracts/marketplace": "*"
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
@@ -2877,7 +2866,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:*, @types/chai@npm:^4.2.11, @types/chai@npm:^4.3.5, @types/chai@npm:^4.3.6":
+"@types/chai@npm:*, @types/chai@npm:^4.2.11, @types/chai@npm:^4.3.5":
   version: 4.3.9
   resolution: "@types/chai@npm:4.3.9"
   checksum: 2300a2c7abd4cb590349927a759b3d0172211a69f363db06e585faf7874a47f125ef3b364cce4f6190e3668147587fc11164c791c9560cf9bce8478fb7019610
@@ -4465,7 +4454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chai@npm:^4.2.0, chai@npm:^4.3.7":
+"chai@npm:^4.2.0, chai@npm:^4.3.7, chai@npm:^4.3.8":
   version: 4.3.10
   resolution: "chai@npm:4.3.10"
   dependencies:
