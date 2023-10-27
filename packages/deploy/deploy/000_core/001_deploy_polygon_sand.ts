@@ -9,9 +9,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
-  await deploy('POLYGON_SAND', {
+  await deploy('PolygonSand', {
     from: deployer,
-    contract: 'PolygonSand',
     args: [
       CHILD_CHAIN_MANAGER.address,
       TRUSTED_FORWARDER_V2?.address,
@@ -23,5 +22,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['POLYGON_SAND', 'POLYGON_SAND_deploy', 'L2'];
+func.tags = ['PolygonSand', 'PolygonSand_deploy', 'L2'];
 func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER_V2'];
