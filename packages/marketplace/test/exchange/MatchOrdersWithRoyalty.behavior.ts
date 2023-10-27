@@ -208,7 +208,7 @@ export function shouldMatchOrdersWithRoyalty() {
             signatureRight: takerSig,
           },
         ])
-      ).to.be.revertedWith('Royalties are too high (>50%)');
+      ).to.be.revertedWith('royalties are too high (>50%)');
     });
 
     it('should execute a complete match order with external royalties provider(type 1)', async function () {
@@ -717,7 +717,7 @@ export function shouldMatchOrdersWithRoyalty() {
               signatureRight: takerSig,
             },
           ])
-        ).to.be.revertedWith('Royalties are too high (>50%)');
+        ).to.be.revertedWith('royalties are too high (>50%)');
       });
 
       it('should not execute match orders when royalties exceed 50% for token without IROYALTYUGC and royalty.length != 1', async function () {
@@ -778,7 +778,7 @@ export function shouldMatchOrdersWithRoyalty() {
               signatureRight: takerSig,
             },
           ])
-        ).to.be.revertedWith('Royalties are too high (>50%)');
+        ).to.be.revertedWith('royalties are too high (>50%)');
       });
 
       it('should execute match orders for token without IROYALTYUGC support', async function () {

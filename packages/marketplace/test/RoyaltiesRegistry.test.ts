@@ -5,21 +5,9 @@ import {ZeroAddress, Contract, Signer} from 'ethers';
 import {upgrades} from 'hardhat';
 
 describe('RoyaltiesRegistry.sol', function () {
-  it('should upgrade the contract successfully', async function () {
-    const {RoyaltiesRegistryAsDeployer, Royalties2981ImplMock} =
-      await loadFixture(deployFixtures);
-    const WEIGHT_VALUE = await RoyaltiesRegistryAsDeployer.WEIGHT_VALUE();
-
-    const upgraded = await upgrades.upgradeProxy(
-      await RoyaltiesRegistryAsDeployer.getAddress(),
-      Royalties2981ImplMock
-    );
-
-    expect(await upgraded.WEIGHT_VALUE()).to.be.equal(WEIGHT_VALUE);
-  });
-
   let RoyaltiesRegistryAsDeployer: Contract,
     RoyaltiesRegistryAsUser: Contract,
+    Royalties2981ImplMock: Contract,
     ERC721WithRoyaltyV2981: Contract,
     ERC20Contract: Contract,
     ERC1155WithRoyalty: Contract,
@@ -32,12 +20,24 @@ describe('RoyaltiesRegistry.sol', function () {
       ERC721WithRoyaltyV2981,
       RoyaltiesRegistryAsDeployer,
       RoyaltiesRegistryAsUser,
+      Royalties2981ImplMock,
       ERC20Contract,
       ERC1155WithRoyalty,
       RoyaltyInfo,
       user1,
       user2,
     } = await loadFixture(deployFixtures));
+  });
+
+  it('should upgrade the contract successfully', async function () {
+    const WEIGHT_VALUE = await RoyaltiesRegistryAsDeployer.WEIGHT_VALUE();
+
+    const upgraded = await upgrades.upgradeProxy(
+      await RoyaltiesRegistryAsDeployer.getAddress(),
+      Royalties2981ImplMock
+    );
+
+    expect(await upgraded.WEIGHT_VALUE()).to.be.equal(WEIGHT_VALUE);
   });
 
   it('should not set provider by token if caller is not owner', async function () {

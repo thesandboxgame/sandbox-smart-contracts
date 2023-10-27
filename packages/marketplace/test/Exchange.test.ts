@@ -13,6 +13,8 @@ import {
   UINT256_MAX_VALUE,
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
+import {upgrades} from 'hardhat';
+
 import {exchangeConfig} from './exchange/Config.behavior.ts';
 import {shouldMatchOrders} from './exchange/MatchOrders.behavior.ts';
 import {shouldMatchOrderForBatching} from './exchange/Batching.behavior.ts';
@@ -24,6 +26,7 @@ describe('Exchange.sol', function () {
   let ExchangeContractAsDeployer: Contract,
     ExchangeContractAsUser: Contract,
     ExchangeContractAsAdmin: Contract,
+    ExchangeUpgradeMock: Contract,
     OrderValidatorAsAdmin: Contract,
     RoyaltiesRegistryAsDeployer: Contract,
     TrustedForwarder: Contract,
@@ -52,6 +55,7 @@ describe('Exchange.sol', function () {
       ExchangeContractAsDeployer,
       ExchangeContractAsUser,
       ExchangeContractAsAdmin,
+      ExchangeUpgradeMock,
       OrderValidatorAsAdmin,
       RoyaltiesRegistryAsDeployer,
       TrustedForwarder,
@@ -71,25 +75,6 @@ describe('Exchange.sol', function () {
     } = await loadFixture(deployFixtures));
   });
 
-  it('should upgrade the contract successfully', async function () {
-    const {ExchangeContractAsDeployer, ExchangeUpgradeMock} = await loadFixture(
-      deployFixtures
-    );
-    const protocolFeePrimary =
-      await ExchangeContractAsDeployer.protocolFeePrimary();
-    const protocolFeeSec =
-      await ExchangeContractAsDeployer.protocolFeeSecondary();
-    const feeReceiver = await ExchangeContractAsDeployer.defaultFeeReceiver();
-
-    const upgraded = await upgrades.upgradeProxy(
-      await ExchangeContractAsDeployer.getAddress(),
-      ExchangeUpgradeMock
-    );
-
-    expect(await upgraded.protocolFeePrimary()).to.be.equal(protocolFeePrimary);
-    expect(await upgraded.protocolFeeSecondary()).to.be.equal(protocolFeeSec);
-    expect(await upgraded.defaultFeeReceiver()).to.be.equal(feeReceiver);
-    
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldSupportInterfaces(
     function (interfaceId: string) {
@@ -116,6 +101,21 @@ describe('Exchange.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   exchangeConfig();
+
+  it('should upgrade the contract successfully', async function () {
+    const upgraded = await upgrades.upgradeProxy(
+      await ExchangeContractAsDeployer.getAddress(),
+      ExchangeUpgradeMock
+    );
+
+    expect(await upgraded.protocolFeePrimary()).to.be.equal(protocolFeePrimary);
+    expect(await upgraded.protocolFeeSecondary()).to.be.equal(
+      protocolFeeSecondary
+    );
+    expect(await upgraded.defaultFeeReceiver()).to.be.equal(
+      await defaultFeeReceiver.getAddress()
+    );
+  });
 
   it('should initialize the values correctly', async function () {
     expect(await ExchangeContractAsAdmin.royaltiesRegistry()).to.be.equal(
@@ -243,7 +243,7 @@ describe('Exchange.sol', function () {
           orderLeft,
           invalidOrderHash
         )
-      ).to.be.revertedWith('Invalid orderHash');
+      ).to.be.revertedWith('invalid orderHash');
     });
 
     it('should cancel an order and update fills mapping', async function () {
@@ -315,7 +315,7 @@ describe('Exchange.sol', function () {
 
     it('should not execute match order with an empty order array', async function () {
       await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
-        'ExchangeMatch cant be empty'
+        'ExchangeMatch cannot be empty'
       );
     });
 

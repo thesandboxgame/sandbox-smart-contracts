@@ -19,9 +19,33 @@ const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
 describe('OrderValidator.sol', function () {
+  let OrderValidatorAsDeployer: Contract,
+    OrderValidatorAsAdmin: Contract,
+    OrderValidatorAsUser: Contract,
+    OrderValidatorUpgradeMock: Contract,
+    ERC20Contract: Contract,
+    ERC721Contract: Contract,
+    ERC1271Contract: Contract,
+    user: Signer,
+    user1: Signer,
+    user2: Signer;
+
+  beforeEach(async function () {
+    ({
+      OrderValidatorAsDeployer,
+      OrderValidatorAsAdmin,
+      OrderValidatorAsUser,
+      OrderValidatorUpgradeMock,
+      ERC20Contract,
+      ERC721Contract,
+      ERC1271Contract,
+      user,
+      user1,
+      user2,
+    } = await loadFixture(deployFixtures));
+  });
+
   it('should upgrade the contract successfully', async function () {
-    const {OrderValidatorAsDeployer, OrderValidatorUpgradeMock} =
-      await loadFixture(deployFixtures);
     const isWhitelistsEnabled =
       await OrderValidatorAsDeployer.isWhitelistsEnabled();
 
@@ -33,27 +57,6 @@ describe('OrderValidator.sol', function () {
     expect(await upgraded.isWhitelistsEnabled()).to.be.equal(
       isWhitelistsEnabled
     );
-  });
-  let OrderValidatorAsAdmin: Contract,
-    OrderValidatorAsUser: Contract,
-    ERC20Contract: Contract,
-    ERC721Contract: Contract,
-    ERC1271Contract: Contract,
-    user: Signer,
-    user1: Signer,
-    user2: Signer;
-
-  beforeEach(async function () {
-    ({
-      OrderValidatorAsAdmin,
-      OrderValidatorAsUser,
-      ERC20Contract,
-      ERC721Contract,
-      ERC1271Contract,
-      user,
-      user1,
-      user2,
-    } = await loadFixture(deployFixtures));
   });
 
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
