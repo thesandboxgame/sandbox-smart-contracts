@@ -27,7 +27,7 @@ The script will output a json where you can find the token id of the asset
 }
 ```
 
-### Through the dashbaord
+### Through the dashboard
 
 And the other one is minting an ASSET using the dashboard
 
@@ -104,7 +104,7 @@ On Mainnet
 yarn deploy mainnet
 ```
 
-### Transfering the asset to the ASSET giveaway contract
+### Transferring the asset to the ASSET giveaway contract
 
 Afterwards, the reward asset should be transferred by the owner to the deployed contract.
 The ASSET giveaway contract is an [ERC1155](https://eips.ethereum.org/EIPS/eip-1155#specification). The entrypoint safeTransferFrom can be called to transfer the asset with this input

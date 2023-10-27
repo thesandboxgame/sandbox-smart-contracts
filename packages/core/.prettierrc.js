@@ -4,6 +4,12 @@ module.exports = {
   plugins: ['prettier-plugin-solidity'],
   overrides: [
     {
+      files: '*.md',
+      options: {
+        proseWrap: 'always',
+      },
+    },
+    {
       files: '*.sol',
       options: {
         printWidth: 120,

@@ -9,7 +9,9 @@
       }
     ],
     "compiler-version": ["error", "^0.8.0"],
+    "custom-errors": "off",
     "func-visibility": ["error", {"ignoreConstructors": true}],
-    "func-named-parameters": ["error", 3]
+    "func-named-parameters": ["error", 3],
+    "reason-string": ["warn", {"maxLength": 64}]
   }
 }

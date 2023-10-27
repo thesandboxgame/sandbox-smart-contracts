@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/dependency-metatx",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "ERC2771 handler used to implement meta-tx",
   "license": "MIT",
   "main": "index.js",
@@ -10,11 +10,12 @@
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
-    "format": "prettier --check \"**/*.{ts,js,sol}\"",
-    "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
+    "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
+    "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
     "test": "hardhat test",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
+    "release": "release-it",
     "compile": "hardhat compile"
   },
   "repository": {
@@ -32,6 +33,25 @@
       "test/**/*.ts"
     ]
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/dependency-metatx release v${version}",
+      "tagName": "@sandbox-smart-contracts/dependency-metatx@v${version}"
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.9.0"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -40,7 +60,6 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts-upgradeable": "^4.9.0",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.3.5",
@@ -60,7 +79,7 @@
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "^1.1.3",
-    "solhint": "^3.4.1",
+    "solhint": "^3.6.2",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2",
     "ts-node": "^10.9.1",
