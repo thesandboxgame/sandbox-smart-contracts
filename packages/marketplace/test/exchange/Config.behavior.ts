@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress, Contract, Signer} from 'ethers';
-import {checkAccessControl} from '../common/accessControl.behavior';
+import {checkAccessControl} from '../common/AccessControl.behavior';
 
 // eslint-disable-next-line mocha/no-exports
 export function exchangeConfig() {

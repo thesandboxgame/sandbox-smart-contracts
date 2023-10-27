@@ -13,12 +13,12 @@ import {
   UINT256_MAX_VALUE,
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
-import {shouldMatchOrderForBatching} from './exchange/batching.behavior.ts';
-import {shouldMatchOrders} from './exchange/matchOrders.behavior.ts';
-import {shouldMatchOrdersWithRoyalty} from './exchange/matchOrdersWithRoyalty.behavior.ts';
-import {shouldCheckForWhitelisting} from './exchange/whitelistingTokens.behavior.ts';
-import {shouldSupportInterfaces} from './common/supportsInterface.behavior.ts';
-import {exchangeConfig} from './exchange/config.behavior.ts';
+import {exchangeConfig} from './exchange/Config.behavior.ts';
+import {shouldMatchOrders} from './exchange/MatchOrders.behavior.ts';
+import {shouldMatchOrderForBatching} from './exchange/Batching.behavior.ts';
+import {shouldSupportInterfaces} from './common/SupportsInterface.behavior.ts';
+import {shouldCheckForWhitelisting} from './exchange/WhitelistingTokens.behavior.ts';
+import {shouldMatchOrdersWithRoyalty} from './exchange/MatchOrdersWithRoyalty.behavior.ts';
 
 describe('Exchange.sol', function () {
   let ExchangeContractAsDeployer: Contract,

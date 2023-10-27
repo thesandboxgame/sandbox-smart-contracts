@@ -6,7 +6,7 @@ import {upgrades} from 'hardhat';
 import {OrderDefault, signOrder} from './utils/order.ts';
 import {Contract, Signer, ZeroAddress} from 'ethers';
 
-import {shouldSupportInterfaces} from './common/supportsInterface.behavior.ts';
+import {shouldSupportInterfaces} from './common/SupportsInterface.behavior.ts';
 
 // keccak256("TSB_ROLE")
 const TSBRole =
