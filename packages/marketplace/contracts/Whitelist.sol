@@ -22,7 +22,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @dev Internal mapping to keep track of the enablement status of each role.
     mapping(bytes32 => bool) private _rolesEnabled;
 
-    /// @dev Boolean that indicates if whitelists are enabled or not
+    /// @dev Boolean that indicates if non-ERC20 whitelists are enabled or not
     bool private _whitelistsEnabled;
 
     /// @notice Emitted when a specific role gets enabled.
@@ -32,7 +32,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @notice Emitted when a specific role gets disabled.
     event RoleDisabled(bytes32 indexed role);
 
-    /// @notice Emitted when only ERC20 tokens that are whitelisted can be allowed.
+    /// @notice Emitted when only non-ERC20 tokens that are whitelisted can be allowed.
     event WhitelistsEnabled();
 
     /// @notice Emitted when all non-ERC20 tokens are allowed in the market.
