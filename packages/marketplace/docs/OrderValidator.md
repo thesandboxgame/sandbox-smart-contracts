@@ -53,8 +53,8 @@ The tokens allowed to be traded on the exchange can be whitelisted.
 - whitelist of collections (ERC1155 or ERC721). Two lists are available (Sandbox
   and Partners), only one is sufficient for a collection to be allowed.
 
-All whitelists can be enable or disable separately or globally. The whitelisting
-is based on the Open Zeppelin Access Control component.
+Non-ERC20 whitelists can be enable or disable separately or globally. The
+whitelisting is based on the Open Zeppelin Access Control component.
 
 ### Access Control
 

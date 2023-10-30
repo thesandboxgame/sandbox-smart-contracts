@@ -32,10 +32,10 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @notice Emitted when a specific role gets disabled.
     event RoleDisabled(bytes32 indexed role);
 
-    /// @notice Emitted when all non-ERC20 tokens are allowed in the market.
+    /// @notice Emitted when only ERC20 tokens that are whitelisted can be allowed.
     event WhitelistsEnabled();
 
-    /// @notice Emitted when only ERC20 tokens that are whitelisted can be allowed.
+    /// @notice Emitted when all non-ERC20 tokens are allowed in the market.
     event WhitelistsDisabled();
 
     /// @dev This protects the implementation contract from being initialized.
@@ -71,7 +71,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         _enableWhitelists();
     }
 
-    /// @notice Deactivate whitelists, relying only on role-based permissions.
+    /// @notice Deactivate whitelists for all non-ERC20 tokens.
     function disableWhitelists() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _disableWhitelists();
     }
