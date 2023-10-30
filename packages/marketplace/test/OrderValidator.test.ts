@@ -1,4 +1,4 @@
-import {deployFixtures} from './fixtures.ts';
+import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';

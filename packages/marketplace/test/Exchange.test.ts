@@ -1,5 +1,7 @@
 import {expect} from 'chai';
-import {deployFixtures} from './fixtures.ts';
+import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
+import {runExchangeSetup} from './fixtures/exchangeFixtures.ts';
+import {runRoyaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -19,6 +21,7 @@ import {
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {upgrades} from 'hardhat';
+import {runSignerSetup} from './fixtures/signerFixtures.ts';
 
 import {exchangeConfig} from './exchange/Config.behavior.ts';
 import {shouldMatchOrders} from './exchange/MatchOrders.behavior.ts';
@@ -161,12 +164,26 @@ describe('Exchange.sol', function () {
   });
 
   it('should return the correct royalty registry address', async function () {
+    // const {ExchangeContractAsDeployer, RoyaltiesRegistryAsDeployer} =
+    //   await loadFixture(deployFixtures);
+
+    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+      runRoyaltyRegistrySetup
+    );
+    const {ExchangeContractAsDeployer} = await loadFixture(runExchangeSetup);
     expect(await ExchangeContractAsDeployer.royaltiesRegistry()).to.be.equal(
       await RoyaltiesRegistryAsDeployer.getAddress()
     );
   });
 
   it('should not allow setting protocol primary fee greater than or equal to 5000', async function () {
+    const {admin, user} = await loadFixture(runSignerSetup);
+    const {
+      ExchangeContractAsUser,
+      ExchangeContractAsDeployer,
+      EXCHANGE_ADMIN_ROLE,
+    } = await loadFixture(runExchangeSetup);
+
     // grant exchange admin role to user
     await ExchangeContractAsDeployer.connect(admin).grantRole(
       EXCHANGE_ADMIN_ROLE,
