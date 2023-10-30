@@ -4243,7 +4243,7 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.disableWhitelists();
+      await OrderValidatorAsAdmin.enableWhitelists();
       const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
       await OrderValidatorAsAdmin.enableRole(TSB_ROLE);
 
@@ -4323,7 +4323,7 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.disableWhitelists();
+      await OrderValidatorAsAdmin.enableWhitelists();
       const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
       await OrderValidatorAsAdmin.enableRole(TSB_ROLE);
       await OrderValidatorAsAdmin.grantRole(TSB_ROLE, ERC721WithRoyaltyV2981);
@@ -4402,7 +4402,7 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.fills(hashKey(orderRight))
       ).to.be.equal(0);
 
-      await OrderValidatorAsAdmin.disableWhitelists();
+      await OrderValidatorAsAdmin.enableWhitelists();
       const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
       await OrderValidatorAsAdmin.enableRole(PARTNER_ROLE);
 

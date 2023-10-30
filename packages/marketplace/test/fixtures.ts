@@ -47,7 +47,7 @@ async function deploy() {
       admin.address,
       [TSBRole, PartnerRole, ERC20Role],
       [false, false, false],
-      true,
+      false,
     ],
     {
       initializer: '__OrderValidator_init_unchained',

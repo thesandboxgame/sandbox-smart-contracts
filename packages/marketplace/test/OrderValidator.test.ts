@@ -251,7 +251,7 @@ describe('OrderValidator.sol', function () {
       .not.be.reverted;
   });
 
-  it('should validate when open is disabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
+  it('should validate when whitelist is enabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
     const {
       OrderValidatorAsUser,
       OrderValidatorAsAdmin,
@@ -260,16 +260,16 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
     expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
       false
     );
 
     await OrderValidatorAsAdmin.enableRole(TSBRole);
-    await OrderValidatorAsAdmin.disableWhitelists();
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
-      false
-    );
+    await OrderValidatorAsAdmin.enableWhitelists();
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
     expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
       true
     );
@@ -310,7 +310,7 @@ describe('OrderValidator.sol', function () {
       .to.not.be.reverted;
   });
 
-  it('should validate when open is disabled, partners is enabled and makeTokenAddress have PARTNER_ROLE', async function () {
+  it('should validate when whitelist is enabled, partners is enabled and makeTokenAddress have PARTNER_ROLE', async function () {
     const {
       OrderValidatorAsUser,
       OrderValidatorAsAdmin,
@@ -319,16 +319,16 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
     expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       false
     );
 
-    await OrderValidatorAsAdmin.disableWhitelists();
+    await OrderValidatorAsAdmin.enableWhitelists();
     await OrderValidatorAsAdmin.enableRole(PartnerRole);
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
-      false
-    );
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
     expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       true
     );
@@ -384,7 +384,9 @@ describe('OrderValidator.sol', function () {
     expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       false
     );
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
+      false
+    );
     expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
       false
     );
@@ -393,7 +395,7 @@ describe('OrderValidator.sol', function () {
       [TSBRole, PartnerRole, ERC20Role],
       [true, true, true]
     );
-    await OrderValidatorAsAdmin.disableWhitelists();
+    await OrderValidatorAsAdmin.enableWhitelists();
 
     expect(await OrderValidatorAsAdmin.isRoleEnabled(TSBRole)).to.be.equal(
       true
@@ -401,9 +403,7 @@ describe('OrderValidator.sol', function () {
     expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
       true
     );
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
-      false
-    );
+    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
     expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
       true
     );
