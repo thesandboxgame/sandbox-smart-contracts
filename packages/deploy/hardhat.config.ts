@@ -14,6 +14,7 @@ import './tasks/importedPackages';
 const importedPackages = {
   '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
+  '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
   '@sandbox-smart-contracts/marketplace': [
     'contracts/RoyaltiesRegistry.sol',
     'contracts/OrderValidator.sol',
