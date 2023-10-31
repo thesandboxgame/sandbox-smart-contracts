@@ -1,0 +1,5 @@
+[profile.ci.fuzz]
+runs = 10_000
+
+[profile.default]
+out = "artifacts"
