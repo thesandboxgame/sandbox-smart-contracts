@@ -15,7 +15,6 @@ import {
   OrderDefault,
   signOrder,
   Order,
-  isOrderEqual,
   UINT256_MAX_VALUE,
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
@@ -325,48 +324,6 @@ describe('Exchange.sol', function () {
       await expect(ExchangeContractAsUser.matchOrders([])).to.be.revertedWith(
         'ExchangeMatch cannot be empty'
       );
-    });
-
-    it('should emit a Match event', async function () {
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
-
-      const tx = await ExchangeContractAsUser.matchOrders([
-        {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
-        },
-      ]);
-
-      function verifyOrderLeft(eventOrder: Order): boolean {
-        return isOrderEqual(eventOrder, orderLeft);
-      }
-
-      function verifyOrderRight(eventOrder: Order): boolean {
-        return isOrderEqual(eventOrder, orderRight);
-      }
-
-      await expect(tx)
-        .to.emit(ExchangeContractAsUser, 'Match')
-        .withArgs(
-          await user.getAddress(),
-          hashKey(orderLeft),
-          hashKey(orderRight),
-          verifyOrderLeft,
-          verifyOrderRight,
-          [10000000000, 20000000000],
-          20000000000,
-          10000000000
-        );
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
     });
 
     it('should revert for matching a cancelled order', async function () {

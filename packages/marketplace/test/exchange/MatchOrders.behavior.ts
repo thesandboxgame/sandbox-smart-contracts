@@ -3,7 +3,13 @@ import {deployFixtures} from '../fixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
+import {
+  hashKey,
+  OrderDefault,
+  signOrder,
+  Order,
+  isOrderEqual,
+} from '../utils/order.ts';
 import {ZeroAddress, AbiCoder, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
@@ -953,6 +959,48 @@ export function shouldMatchOrders() {
         expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
         expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
       });
+    });
+
+    it('should emit a Match event', async function () {
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      const tx = await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      function verifyOrderLeft(eventOrder: Order): boolean {
+        return isOrderEqual(eventOrder, orderLeft);
+      }
+
+      function verifyOrderRight(eventOrder: Order): boolean {
+        return isOrderEqual(eventOrder, orderRight);
+      }
+
+      await expect(tx)
+        .to.emit(ExchangeContractAsUser, 'Match')
+        .withArgs(
+          await user.getAddress(),
+          hashKey(orderLeft),
+          hashKey(orderRight),
+          verifyOrderLeft,
+          verifyOrderRight,
+          [10000000000, 20000000000],
+          20000000000,
+          10000000000
+        );
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
     });
 
     it('should execute complete match when left order taker is right order maker', async function () {
