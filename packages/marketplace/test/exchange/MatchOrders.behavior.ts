@@ -50,46 +50,48 @@ export function shouldMatchOrders() {
         PAUSER_ROLE,
         ERC1776_OPERATOR_ROLE,
       } = await loadFixture(deployFixtures));
+
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
         await ExchangeContractAsUser.getAddress(),
         10000000000
       );
+
       ERC20Asset = await AssetERC20(ERC20Contract, 10000000000);
+
+      await ERC20Contract2.mint(taker.getAddress(), 20000000000);
+      await ERC20Contract2.connect(taker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        20000000000
+      );
+
+      makerAsset = await AssetERC20(ERC20Contract, 10000000000);
+      takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
+
+      orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     });
 
     describe('ERC20 x ERC20 token', function () {
-      beforeEach(async function () {
-        await ERC20Contract2.mint(taker.getAddress(), 20000000000);
-        await ERC20Contract2.connect(taker).approve(
-          await ExchangeContractAsUser.getAddress(),
-          20000000000
-        );
-        makerAsset = await AssetERC20(ERC20Contract, 10000000000);
-        takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
-        orderLeft = await OrderDefault(
-          maker,
-          makerAsset,
-          ZeroAddress,
-          takerAsset,
-          1,
-          0,
-          0
-        );
-        orderRight = await OrderDefault(
-          taker,
-          takerAsset,
-          ZeroAddress,
-          makerAsset,
-          1,
-          0,
-          0
-        );
-
-        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-      });
-
       it('should execute a complete match order between ERC20 tokens', async function () {
         expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
@@ -842,37 +844,6 @@ export function shouldMatchOrders() {
     });
 
     describe('matchOrderFrom', function () {
-      beforeEach(async function () {
-        await ERC20Contract2.mint(taker.getAddress(), 20000000000);
-        await ERC20Contract2.connect(taker).approve(
-          await ExchangeContractAsUser.getAddress(),
-          20000000000
-        );
-        makerAsset = await AssetERC20(ERC20Contract, 10000000000);
-        takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
-        orderLeft = await OrderDefault(
-          maker,
-          makerAsset,
-          ZeroAddress,
-          takerAsset,
-          1,
-          0,
-          0
-        );
-        orderRight = await OrderDefault(
-          taker,
-          takerAsset,
-          ZeroAddress,
-          makerAsset,
-          1,
-          0,
-          0
-        );
-
-        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-      });
-
       it('should not execute matchOrdersFrom if Exchange Contract is paused', async function () {
         await ExchangeContractAsAdmin.grantRole(PAUSER_ROLE, user.getAddress());
         await ExchangeContractAsAdmin.connect(user).pause();
@@ -984,18 +955,12 @@ export function shouldMatchOrders() {
       });
     });
 
-    it('should not execute match order for already matched orders', async function () {
-      await ERC20Contract2.mint(taker.getAddress(), 20000000000);
-      await ERC20Contract2.connect(taker).approve(
-        await ExchangeContractAsUser.getAddress(),
-        20000000000
-      );
-      makerAsset = await AssetERC20(ERC20Contract, 10000000000);
-      takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
+    it('should execute complete match when left order taker is right order maker', async function () {
+      // left order taker is right order maker
       orderLeft = await OrderDefault(
         maker,
         makerAsset,
-        ZeroAddress,
+        taker,
         takerAsset,
         1,
         0,
@@ -1014,6 +979,185 @@ export function shouldMatchOrders() {
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
 
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
+    });
+
+    it('should execute match order with rightTake less than leftMakerValue', async function () {
+      const makerAssetForLeftOrder = await AssetERC20(
+        ERC20Contract,
+        10000000000
+      );
+      const takerAssetForLeftOrder = await AssetERC20(
+        ERC20Contract2,
+        20000000000
+      );
+      const takerAssetForRightOrder = await AssetERC20(
+        ERC20Contract2,
+        40000000000
+      );
+      const makerAssetForRightOrder = await AssetERC20(
+        ERC20Contract,
+        20000000000
+      );
+
+      orderLeft = await OrderDefault(
+        maker,
+        makerAssetForLeftOrder,
+        ZeroAddress,
+        takerAssetForLeftOrder,
+        1,
+        0,
+        0
+      );
+      orderRight = await OrderDefault(
+        taker,
+        takerAssetForRightOrder,
+        ZeroAddress,
+        makerAssetForRightOrder,
+        1,
+        0,
+        0
+      );
+
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(20000000000);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
+    });
+
+    it('should require the message sender to be the maker for a zero-salt right order', async function () {
+      orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        1,
+        0,
+        0
+      );
+      orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        0,
+        0,
+        0
+      );
+
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      await ExchangeContractAsUser.connect(taker).matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
+    });
+
+    it('should require the message sender to be the maker for a zero-salt left order', async function () {
+      orderLeft = await OrderDefault(
+        maker,
+        makerAsset,
+        ZeroAddress,
+        takerAsset,
+        0,
+        0,
+        0
+      );
+      orderRight = await OrderDefault(
+        taker,
+        takerAsset,
+        ZeroAddress,
+        makerAsset,
+        1,
+        0,
+        0
+      );
+
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      await ExchangeContractAsUser.connect(maker).matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
+    });
+
+    it('should not execute match order for already matched orders', async function () {
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
       expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);

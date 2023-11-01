@@ -1,7 +1,13 @@
 import {expect} from 'chai';
 import {deployFixtures} from './fixtures.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, AssetERC721, AssetERC1155, Asset} from './utils/assets.ts';
+import {
+  AssetERC20,
+  AssetERC721,
+  AssetERC1155,
+  Asset,
+  AssetClassType,
+} from './utils/assets.ts';
 
 import {
   hashKey,
@@ -23,7 +29,8 @@ import {shouldCheckForWhitelisting} from './exchange/WhitelistingTokens.behavior
 import {shouldMatchOrdersWithRoyalty} from './exchange/MatchOrdersWithRoyalty.behavior.ts';
 
 describe('Exchange.sol', function () {
-  let ExchangeContractAsDeployer: Contract,
+  let AssetMatcherAsUser: Contract,
+    ExchangeContractAsDeployer: Contract,
     ExchangeContractAsUser: Contract,
     ExchangeContractAsAdmin: Contract,
     ExchangeUpgradeMock: Contract,
@@ -52,6 +59,7 @@ describe('Exchange.sol', function () {
 
   beforeEach(async function () {
     ({
+      AssetMatcherAsUser,
       ExchangeContractAsDeployer,
       ExchangeContractAsUser,
       ExchangeContractAsAdmin,
@@ -258,7 +266,7 @@ describe('Exchange.sol', function () {
     });
   });
 
-  describe('comprehensive matchOrders test', function () {
+  describe('matchOrders validation', function () {
     beforeEach(async function () {
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
@@ -639,50 +647,6 @@ describe('Exchange.sol', function () {
       expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
     });
 
-    it('should execute complete match when left order taker is right order maker', async function () {
-      // left order taker is right order maker
-      orderLeft = await OrderDefault(
-        maker,
-        makerAsset,
-        taker,
-        takerAsset,
-        1,
-        0,
-        0
-      );
-      orderRight = await OrderDefault(
-        taker,
-        takerAsset,
-        ZeroAddress,
-        makerAsset,
-        1,
-        0,
-        0
-      );
-
-      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
-
-      await ExchangeContractAsUser.matchOrders([
-        {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
-        },
-      ]);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-    });
-
     it('should not execute match order with makerValue greater than rightMakeValue', async function () {
       const makerAssetForLeftOrder = await AssetERC20(
         ERC20Contract,
@@ -920,164 +884,6 @@ describe('Exchange.sol', function () {
       ).to.be.revertedWith('fillLeft: unable to fill');
     });
 
-    it('should execute match order with rightTake less than leftMakerValue', async function () {
-      const makerAssetForLeftOrder = await AssetERC20(
-        ERC20Contract,
-        10000000000
-      );
-      const takerAssetForLeftOrder = await AssetERC20(
-        ERC20Contract2,
-        20000000000
-      );
-      const takerAssetForRightOrder = await AssetERC20(
-        ERC20Contract2,
-        40000000000
-      );
-      const makerAssetForRightOrder = await AssetERC20(
-        ERC20Contract,
-        20000000000
-      );
-
-      orderLeft = await OrderDefault(
-        maker,
-        makerAssetForLeftOrder,
-        ZeroAddress,
-        takerAssetForLeftOrder,
-        1,
-        0,
-        0
-      );
-      orderRight = await OrderDefault(
-        taker,
-        takerAssetForRightOrder,
-        ZeroAddress,
-        makerAssetForRightOrder,
-        1,
-        0,
-        0
-      );
-
-      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-
-      expect(
-        await ExchangeContractAsUser.fills(hashKey(orderLeft))
-      ).to.be.equal(0);
-      expect(
-        await ExchangeContractAsUser.fills(hashKey(orderRight))
-      ).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
-
-      await ExchangeContractAsUser.matchOrders([
-        {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
-        },
-      ]);
-
-      expect(
-        await ExchangeContractAsUser.fills(hashKey(orderLeft))
-      ).to.be.equal(20000000000);
-      expect(
-        await ExchangeContractAsUser.fills(hashKey(orderRight))
-      ).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-    });
-
-    it('should require the message sender to be the maker for a zero-salt left order', async function () {
-      orderLeft = await OrderDefault(
-        maker,
-        makerAsset,
-        ZeroAddress,
-        takerAsset,
-        0,
-        0,
-        0
-      );
-      orderRight = await OrderDefault(
-        taker,
-        takerAsset,
-        ZeroAddress,
-        makerAsset,
-        1,
-        0,
-        0
-      );
-
-      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
-
-      await ExchangeContractAsUser.connect(maker).matchOrders([
-        {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
-        },
-      ]);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-    });
-
-    it('should require the message sender to be the maker for a zero-salt right order', async function () {
-      orderLeft = await OrderDefault(
-        maker,
-        makerAsset,
-        ZeroAddress,
-        takerAsset,
-        1,
-        0,
-        0
-      );
-      orderRight = await OrderDefault(
-        taker,
-        takerAsset,
-        ZeroAddress,
-        makerAsset,
-        0,
-        0,
-        0
-      );
-
-      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
-
-      await ExchangeContractAsUser.connect(taker).matchOrders([
-        {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
-        },
-      ]);
-
-      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(0);
-      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
-      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
-      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
-    });
-
     it('should revert matchOrders on mismatched make asset types', async function () {
       await ERC721Contract.mint(maker.getAddress(), 1);
       await ERC721Contract.connect(maker).approve(
@@ -1191,6 +997,76 @@ describe('Exchange.sol', function () {
           },
         ])
       ).to.be.revertedWith("assets don't match");
+    });
+
+    it('should revert matchAsset call if asset class is invalid', async function () {
+      const leftAssetType = {
+        assetClass: AssetClassType.INVALID_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      const rightAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      await expect(
+        AssetMatcherAsUser.matchAssets(leftAssetType, rightAssetType)
+      ).to.be.revertedWith('invalid left asset class');
+      await expect(
+        AssetMatcherAsUser.matchAssets(rightAssetType, leftAssetType)
+      ).to.be.revertedWith('invalid right asset class');
+    });
+
+    it('should call return the expected AssetType', async function () {
+      const leftAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      const rightAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0x1234',
+      };
+      const result = await AssetMatcherAsUser.matchAssets(
+        leftAssetType,
+        rightAssetType
+      );
+
+      expect(result[0]).to.be.equal(leftAssetType.assetClass);
+      expect(result[1]).to.be.equal(leftAssetType.data);
+    });
+
+    it('should revert when asset class does not match', async function () {
+      const leftAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      const rightAssetType = {
+        assetClass: AssetClassType.ERC20_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      await expect(
+        AssetMatcherAsUser.matchAssets(leftAssetType, rightAssetType)
+      ).to.revertedWith("assets don't match");
+    });
+
+    it('should revert when data does not match', async function () {
+      const leftAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0x1234',
+      };
+
+      const rightAssetType = {
+        assetClass: AssetClassType.ERC721_ASSET_CLASS,
+        data: '0xFFFF',
+      };
+
+      await expect(
+        AssetMatcherAsUser.matchAssets(leftAssetType, rightAssetType)
+      ).to.revertedWith("assets don't match");
     });
   });
 });
