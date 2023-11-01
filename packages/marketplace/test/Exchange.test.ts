@@ -26,7 +26,7 @@ import {shouldMatchOrders} from './exchange/MatchOrders.behavior.ts';
 import {shouldMatchOrderForBatching} from './exchange/Batching.behavior.ts';
 import {shouldSupportInterfaces} from './common/SupportsInterface.behavior.ts';
 import {shouldCheckForWhitelisting} from './exchange/WhitelistingTokens.behavior.ts';
-import {shouldMatchOrdersWithRoyalty} from './exchange/MatchOrdersWithRoyalty.behavior.ts';
+import {shouldMatchOrdersWithRoyalty} from './exchange/MatchOrdersWithRoyalties.behavior.ts';
 
 describe('Exchange.sol', function () {
   let AssetMatcherAsUser: Contract,

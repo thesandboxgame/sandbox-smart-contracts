@@ -14,7 +14,7 @@ import {ZeroAddress, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrdersWithRoyalty() {
-  describe('Exchange MatchOrders with Royalty', function () {
+  describe('Exchange MatchOrders with Royalties', function () {
     let ExchangeContractAsDeployer: Contract,
       ExchangeContractAsUser: Contract,
       OrderValidatorAsAdmin: Contract,

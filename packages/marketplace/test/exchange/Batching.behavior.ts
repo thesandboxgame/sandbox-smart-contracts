@@ -92,9 +92,8 @@ export function shouldMatchOrderForBatching() {
       ]);
 
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
-      // 4 == fees?
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(
-        totalPayment - 4
+        196 // 200 - protocolFee
       );
 
       expect(await ERC721Contract.ownerOf(123)).to.be.equal(
