@@ -284,7 +284,7 @@ describe('RoyaltiesRegistry.sol', function () {
       )
     ).to.be.equal(0);
 
-    await RoyaltiesRegistryAsUser.getRoyalties(
+    await RoyaltiesRegistryAsUser.getRoyaltiesWithTypeCache(
       await ERC721WithRoyaltyV2981.getAddress(),
       1
     );
