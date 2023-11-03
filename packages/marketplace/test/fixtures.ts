@@ -88,6 +88,10 @@ async function deploy() {
     admin
   );
 
+  const LibAssetFactory = await ethers.getContractFactory('LibAssetMock');
+  const AssetMatcherAsDeployer = await LibAssetFactory.deploy();
+  const AssetMatcherAsUser = AssetMatcherAsDeployer.connect(user);
+
   const ERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
     'ERC721WithRoyaltyV2981MultiMock'
   );
@@ -181,6 +185,7 @@ async function deploy() {
     ExchangeContractAsAdmin,
     ExchangeContractAsUser,
     ExchangeUpgradeMock,
+    AssetMatcherAsUser,
     TrustedForwarder,
     ERC20Contract,
     ERC20Contract2,
