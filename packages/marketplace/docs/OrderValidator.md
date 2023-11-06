@@ -47,14 +47,19 @@ executed before the specified date.
 
 The tokens allowed to be traded on the exchange can be whitelisted.
 
-2 kind of whitelists exist:
+We separate tokens into 2 categories:
 
-- whitelist of the payment tokens (ERC20)
-- whitelist of collections (ERC1155 or ERC721). Two lists are available (Sandbox
-  and Partners), only one is sufficient for a collection to be allowed.
+- payment tokens (ERC20)
+- collections (ERC1155 or ERC721).
 
-All whitelists can be enable or disable separately or globally. The whitelisting
-is based on the Open Zeppelin Access Control component.
+ERC20 tokens are controlled by the ER20_ROLE, if this role is activated, only
+tokens with said role can be exchange.
+
+For collections two lists are available (Sandbox and Partners), only one is
+sufficient for a collection to be allowed. The whitelists for collections can be
+enabled or disabled separately or globally (through `enableWhitelists` and
+`disableWhitelists`). The whitelisting is based on the Open Zeppelin Access
+Control component.
 
 ### Access Control
 
