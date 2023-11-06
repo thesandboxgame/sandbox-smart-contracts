@@ -160,7 +160,7 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
-        await OrderValidatorAsAdmin.disableWhitelists();
+        await OrderValidatorAsAdmin.enableWhitelists();
         const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
         await OrderValidatorAsAdmin.enableRole(TSB_ROLE);
 
@@ -207,7 +207,7 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
-        await OrderValidatorAsAdmin.disableWhitelists();
+        await OrderValidatorAsAdmin.enableWhitelists();
         const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
         await OrderValidatorAsAdmin.enableRole(PARTNER_ROLE);
 
