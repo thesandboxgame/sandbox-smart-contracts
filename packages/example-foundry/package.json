@@ -5,9 +5,7 @@
   "scripts": {
     "test": "forge test",
     "build": "forge build",
-    "lint": "eslint contracts/**/*.sol",
     "compile": "forge compile",
-    "deploy": "node scripts/deploy.js",
     "coverage": "forge coverage"
   },
   "author": "The Sandbox",
