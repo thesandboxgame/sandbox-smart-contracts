@@ -1,0 +1,31 @@
+{
+  "name": "@sandbox-smart-contracts/example-foundry",
+  "version": "1.0.0",
+  "description": "A template project setup for Ethereum smart contract development with Foundry",
+  "scripts": {
+    "test": "forge test",
+    "build": "forge build",
+    "lint": "eslint contracts/**/*.sol",
+    "compile": "forge compile",
+    "deploy": "node scripts/deploy.js",
+    "coverage": "forge coverage"
+  },
+  "author": "The Sandbox",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesandboxgame/sandbox-smart-contracts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
+  },
+  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
+    "eslint": "^8.41.0",
+    "prettier": "^2.8.8",
+    "prettier-plugin-solidity": "1.0.0-beta.11",
+    "solhint": "^3.6.2"
+  }
+}
