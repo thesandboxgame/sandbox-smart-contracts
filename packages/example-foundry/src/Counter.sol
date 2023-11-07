@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Counter is Ownable {
     uint256 public number;
 
-    constructor() Ownable(msg.sender) {}
+    constructor() {}
 
     function setNumber(uint256 newNumber) public {
         number = newNumber;
