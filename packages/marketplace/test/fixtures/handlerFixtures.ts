@@ -1,7 +1,11 @@
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ethers, upgrades} from 'hardhat';
+import {runSignerSetup} from './signerFixtures';
 import {ZeroAddress} from 'ethers';
 
 export async function runHandlerSetup() {
+  const {user} = await loadFixture(runSignerSetup);
+
   const ERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
     'ERC721WithRoyaltyV2981MultiMock'
   );
@@ -78,6 +82,10 @@ export async function runHandlerSetup() {
   const ERC1271Contract = await ERC1271ContractFactory.deploy();
   await ERC1271Contract.waitForDeployment();
 
+  const LibAssetFactory = await ethers.getContractFactory('LibAssetMock');
+  const AssetMatcherAsDeployer = await LibAssetFactory.deploy();
+  const AssetMatcherAsUser = AssetMatcherAsDeployer.connect(user);
+
   return {
     ERC20Contract,
     ERC20Contract2,
@@ -90,6 +98,7 @@ export async function runHandlerSetup() {
     RoyaltyInfo,
     RoyaltiesProvider,
     ERC1271Contract,
+    AssetMatcherAsUser,
     ZERO_ADDRESS: ZeroAddress,
   };
 }

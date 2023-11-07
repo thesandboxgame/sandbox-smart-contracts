@@ -1,5 +1,10 @@
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures.ts';
+// import {deployFixtures} from '../fixtures.ts';
+import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {runOrderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
+import {runRoyaltyRegistrySetup} from '../fixtures/royaltiesRegistryFixture.ts';
+import {runHandlerSetup} from '../fixtures/handlerFixtures.ts';
+import {runSignerSetup} from '../fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -43,17 +48,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
     beforeEach(async function () {
       ({
-        ExchangeContractAsDeployer,
-        ExchangeContractAsUser,
-        OrderValidatorAsAdmin,
-        RoyaltiesRegistryAsDeployer,
-        ERC20Contract,
-        ERC721Contract,
-        ERC721WithRoyalty,
-        ERC721WithRoyaltyV2981,
-        ERC721WithRoyaltyWithoutIROYALTYUGC,
         defaultFeeReceiver,
-        RoyaltiesProvider,
         deployer,
         admin,
         user1: maker,
@@ -61,8 +56,28 @@ export function shouldMatchOrdersWithRoyalty() {
         admin: receiver1,
         user: receiver2,
         deployer: royaltyReceiver,
+      } = await loadFixture(runSignerSetup));
+
+      ({
+        ERC20Contract,
+        ERC721Contract,
+        ERC721WithRoyalty,
+        ERC721WithRoyaltyV2981,
+        ERC721WithRoyaltyWithoutIROYALTYUGC,
+        RoyaltiesProvider,
+      } = await loadFixture(runHandlerSetup));
+
+      ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+
+      ({RoyaltiesRegistryAsDeployer} = await loadFixture(
+        runRoyaltyRegistrySetup
+      ));
+
+      ({
+        ExchangeContractAsDeployer,
+        ExchangeContractAsUser,
         EXCHANGE_ADMIN_ROLE,
-      } = await loadFixture(deployFixtures));
+      } = await loadFixture(runExchangeSetup));
 
       await ERC20Contract.mint(taker.getAddress(), 10000000000);
       await ERC20Contract.connect(taker).approve(

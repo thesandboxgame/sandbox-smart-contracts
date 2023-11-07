@@ -18,22 +18,21 @@ describe('RoyaltiesRegistry.sol', function () {
     user2: Signer;
 
   beforeEach(async function () {
+    ({user1, user2} = await loadFixture(runSignerSetup));
+
     ({
-      ERC721WithRoyaltyV2981,
       RoyaltiesRegistryAsDeployer,
       RoyaltiesRegistryAsUser,
       Royalties2981ImplMock,
-      ERC20Contract,
-      ERC1155WithRoyalty,
-      RoyaltyInfo,
-      user1,
-      user2,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(runRoyaltyRegistrySetup));
+
+    ({ERC721WithRoyaltyV2981, ERC20Contract, ERC1155WithRoyalty, RoyaltyInfo} =
+      await loadFixture(runHandlerSetup));
   });
 
   it('should upgrade the contract successfully', async function () {
-    const {RoyaltiesRegistryAsDeployer, Royalties2981ImplMock} =
-      await loadFixture(runRoyaltyRegistrySetup);
+    // const {RoyaltiesRegistryAsDeployer, Royalties2981ImplMock} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
     const WEIGHT_VALUE = await RoyaltiesRegistryAsDeployer.WEIGHT_VALUE();
 
     const upgraded = await upgrades.upgradeProxy(
@@ -43,13 +42,14 @@ describe('RoyaltiesRegistry.sol', function () {
 
     expect(await upgraded.WEIGHT_VALUE()).to.be.equal(WEIGHT_VALUE);
   });
-  
-  it('should not set provider by token if caller is not owner', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsUser} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+
+  // it('should not set provider by token if caller is not owner', async function () {
+  // const {user1} = await loadFixture(runSignerSetup);
+  // const {RoyaltiesRegistryAsUser} = await loadFixture(
+  //   runRoyaltyRegistrySetup
+  // );
+  //   const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+  // });
 
   it('should not set provider by token if caller is not owner', async function () {
     await expect(
@@ -61,11 +61,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should set provider by token', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     expect(
       await RoyaltiesRegistryAsDeployer.royaltiesProviders(
@@ -84,11 +84,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should return provider address', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.setProviderByToken(
       await ERC721WithRoyaltyV2981.getAddress(),
@@ -102,11 +102,12 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should return default royalty type for unset provider', async function () {
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
 
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+
     // ROYALTIES_TYPE_UNSET = 0
     expect(
       await RoyaltiesRegistryAsDeployer.getRoyaltiesType(
@@ -116,11 +117,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should return royalty type', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.setProviderByToken(
       await ERC721WithRoyaltyV2981.getAddress(),
@@ -135,11 +136,12 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not force set royalties type if caller is not owner', async function () {
-    const {RoyaltiesRegistryAsUser} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
+    // const {RoyaltiesRegistryAsUser} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
 
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+
     await expect(
       RoyaltiesRegistryAsUser.forceSetRoyaltiesType(
         await ERC721WithRoyaltyV2981.getAddress(),
@@ -149,10 +151,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not force set an invalid royalties type', async function () {
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
 
     await expect(
       RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
@@ -163,10 +165,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should be able to force set royalties type', async function () {
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     expect(
       await RoyaltiesRegistryAsDeployer.getRoyaltiesType(
@@ -185,9 +187,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not clear royalties type if caller is not owner', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
       await ERC721WithRoyaltyV2981.getAddress(),
@@ -206,10 +208,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should clear royalties type', async function () {
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const tokenAddress = await ERC721WithRoyaltyV2981.getAddress();
 
@@ -234,11 +236,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not set royalties by token if caller is not owner', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsUser} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsUser} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const part = {
       account: user1.getAddress(),
@@ -254,10 +256,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not set royalties with token with a zero address recipient', async function () {
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const part = {
       account: ZeroAddress,
@@ -273,11 +275,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not set royalties with token with invalid royalty value', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const part = {
       account: user1.getAddress(),
@@ -293,11 +295,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not set royalties with token when setting royalties exceeding 100%', async function () {
-    const {user1, user2} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1, user2} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const part1 = {
       account: user1.getAddress(),
@@ -317,11 +319,11 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should set royalties by token', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const tokenAddress = await ERC721WithRoyaltyV2981.getAddress();
     const provider = await RoyaltiesRegistryAsDeployer.getProvider(
@@ -341,10 +343,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should updates royaltiesType for unset token with getRoyalties', async function () {
-    const {RoyaltiesRegistryAsUser} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsUser} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     expect(
       await RoyaltiesRegistryAsUser.getRoyaltiesType(
@@ -364,10 +366,10 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 1', async function () {
-    const {user1} = await loadFixture(runSignerSetup);
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {user1} = await loadFixture(runSignerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     const part = {
       account: user1.getAddress(),
@@ -395,10 +397,10 @@ describe('RoyaltiesRegistry.sol', function () {
 
   it('should getRoyalties for token with royaltiesType 2 when provider address does not implement getRoyalties', async function () {
     const ProviderContract = ERC20Contract;
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC721WithRoyaltyV2981, ERC20Contract: ProviderContract} =
-      await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC721WithRoyaltyV2981, ERC20Contract: ProviderContract} =
+    //   await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.setProviderByToken(
       await ERC721WithRoyaltyV2981.getAddress(),
@@ -425,9 +427,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 3 when token address do not implements royaltyInfo', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC20Contract} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC20Contract} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
       await ERC20Contract.getAddress(),
@@ -449,9 +451,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 3 that only implements royaltyInfo', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {RoyaltyInfo} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {RoyaltyInfo} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
       await RoyaltyInfo.getAddress(),
@@ -473,9 +475,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should not getRoyalties for token with royaltiesType 3 with partial support when royalties exceed 100%', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC1155WithRoyalty} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC1155WithRoyalty} = await loadFixture(runHandlerSetup);
 
     await ERC1155WithRoyalty.setRoyalties(1000000);
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
@@ -498,9 +500,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 3 with partial support', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC1155WithRoyalty} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC1155WithRoyalty} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
       await ERC1155WithRoyalty.getAddress(),
@@ -522,9 +524,9 @@ describe('RoyaltiesRegistry.sol', function () {
   });
 
   it('should getRoyalties for token with royaltiesType 4', async function () {
-    const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
-      await loadFixture(runRoyaltyRegistrySetup);
-    const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
+    // const {RoyaltiesRegistryAsDeployer, RoyaltiesRegistryAsUser} =
+    //   await loadFixture(runRoyaltyRegistrySetup);
+    // const {ERC721WithRoyaltyV2981} = await loadFixture(runHandlerSetup);
 
     await RoyaltiesRegistryAsDeployer.forceSetRoyaltiesType(
       await ERC721WithRoyaltyV2981.getAddress(),

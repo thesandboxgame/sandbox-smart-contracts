@@ -1,4 +1,6 @@
 import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
+import {runOrderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
+import {runSignerSetup} from './fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
@@ -31,18 +33,18 @@ describe('OrderValidator.sol', function () {
     user2: Signer;
 
   beforeEach(async function () {
+    ({user, user1, user2} = await loadFixture(runSignerSetup));
+
+    ({ERC20Contract, ERC721Contract, ERC1271Contract} = await loadFixture(
+      runHandlerSetup
+    ));
+
     ({
       OrderValidatorAsDeployer,
       OrderValidatorAsAdmin,
       OrderValidatorAsUser,
       OrderValidatorUpgradeMock,
-      ERC20Contract,
-      ERC721Contract,
-      ERC1271Contract,
-      user,
-      user1,
-      user2,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(runOrderValidatorSetup));
   });
 
   it('should upgrade the contract successfully', async function () {
@@ -251,14 +253,6 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when whitelist is enabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
-    const {
-      OrderValidatorAsUser,
-      OrderValidatorAsAdmin,
-      ERC20Contract,
-      ERC721Contract,
-      user1,
-    } = await loadFixture(deployFixtures);
-
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );
@@ -311,14 +305,6 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when whitelist is enabled, partners is enabled and makeTokenAddress have PARTNER_ROLE', async function () {
-    const {
-      OrderValidatorAsUser,
-      OrderValidatorAsAdmin,
-      ERC20Contract,
-      ERC721Contract,
-      user1,
-    } = await loadFixture(deployFixtures);
-
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );

@@ -1,7 +1,10 @@
 import {expect} from 'chai';
-import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
 import {runExchangeSetup} from './fixtures/exchangeFixtures.ts';
+import {runOrderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
 import {runRoyaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture.ts';
+import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
+import {runSignerSetup} from './fixtures/signerFixtures.ts';
+
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -21,7 +24,6 @@ import {
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {upgrades} from 'hardhat';
-import {runSignerSetup} from './fixtures/signerFixtures.ts';
 
 import {exchangeConfig} from './exchange/Config.behavior.ts';
 import {shouldMatchOrders} from './exchange/MatchOrders.behavior.ts';
@@ -61,28 +63,38 @@ describe('Exchange.sol', function () {
 
   beforeEach(async function () {
     ({
-      AssetMatcherAsUser,
-      ExchangeContractAsDeployer,
-      ExchangeContractAsUser,
-      ExchangeContractAsAdmin,
-      ExchangeUpgradeMock,
-      OrderValidatorAsAdmin,
-      RoyaltiesRegistryAsDeployer,
-      TrustedForwarder,
-      ERC20Contract,
-      ERC20Contract2,
-      ERC721Contract,
-      ERC1155Contract,
-      protocolFeePrimary,
-      protocolFeeSecondary,
       defaultFeeReceiver,
       user1: maker,
       user2: taker,
       admin,
       user,
+    } = await loadFixture(runSignerSetup));
+
+    ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+
+    ({RoyaltiesRegistryAsDeployer} = await loadFixture(
+      runRoyaltyRegistrySetup
+    ));
+
+    ({
+      ERC20Contract,
+      ERC20Contract2,
+      ERC721Contract,
+      ERC1155Contract,
+      AssetMatcherAsUser,
+    } = await loadFixture(runHandlerSetup));
+
+    ({
+      ExchangeContractAsDeployer,
+      ExchangeContractAsUser,
+      ExchangeContractAsAdmin,
+      ExchangeUpgradeMock,
+      TrustedForwarder,
+      protocolFeePrimary,
+      protocolFeeSecondary,
       EXCHANGE_ADMIN_ROLE,
       PAUSER_ROLE,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(runExchangeSetup));
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
@@ -167,22 +179,23 @@ describe('Exchange.sol', function () {
     // const {ExchangeContractAsDeployer, RoyaltiesRegistryAsDeployer} =
     //   await loadFixture(deployFixtures);
 
-    const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    );
-    const {ExchangeContractAsDeployer} = await loadFixture(runExchangeSetup);
+    // const {RoyaltiesRegistryAsDeployer} = await loadFixture(
+    //   runRoyaltyRegistrySetup
+    // );
+    // const {ExchangeContractAsDeployer} = await loadFixture(runExchangeSetup);
+
     expect(await ExchangeContractAsDeployer.royaltiesRegistry()).to.be.equal(
       await RoyaltiesRegistryAsDeployer.getAddress()
     );
   });
 
   it('should not allow setting protocol primary fee greater than or equal to 5000', async function () {
-    const {admin, user} = await loadFixture(runSignerSetup);
-    const {
-      ExchangeContractAsUser,
-      ExchangeContractAsDeployer,
-      EXCHANGE_ADMIN_ROLE,
-    } = await loadFixture(runExchangeSetup);
+    // const {admin, user} = await loadFixture(runSignerSetup);
+    // const {
+    //   ExchangeContractAsUser,
+    //   ExchangeContractAsDeployer,
+    //   EXCHANGE_ADMIN_ROLE,
+    // } = await loadFixture(runExchangeSetup);
 
     // grant exchange admin role to user
     await ExchangeContractAsDeployer.connect(admin).grantRole(

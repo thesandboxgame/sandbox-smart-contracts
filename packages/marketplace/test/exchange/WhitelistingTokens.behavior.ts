@@ -1,5 +1,9 @@
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures.ts';
+// import {deployFixtures} from '../fixtures.ts';
+import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {runOrderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
+import {runHandlerSetup} from '../fixtures/handlerFixtures.ts';
+import {runSignerSetup} from '../fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -29,15 +33,14 @@ export function shouldCheckForWhitelisting() {
       takerSig: string;
 
     beforeEach(async function () {
-      ({
-        ExchangeContractAsUser,
-        OrderValidatorAsAdmin,
-        ERC20Contract,
-        ERC20Contract2,
-        ERC721WithRoyaltyV2981,
-        user1: maker,
-        user2: taker,
-      } = await loadFixture(deployFixtures));
+      ({user1: maker, user2: taker} = await loadFixture(runSignerSetup));
+
+      ({ERC20Contract, ERC20Contract2, ERC721WithRoyaltyV2981} =
+        await loadFixture(runHandlerSetup));
+
+      ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+
+      ({ExchangeContractAsUser} = await loadFixture(runExchangeSetup));
     });
 
     describe('ERC20 x ERC20', function () {
