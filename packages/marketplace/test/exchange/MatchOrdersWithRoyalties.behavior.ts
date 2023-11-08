@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-// import {deployFixtures} from '../fixtures.ts';
 import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
 import {orderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
 import {royaltyRegistrySetup} from '../fixtures/royaltiesRegistryFixture.ts';

@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-// import {deployFixtures} from '../fixtures.ts';
 import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
 import {orderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
 import {handlerSetup} from '../fixtures/handlerFixtures.ts';
@@ -118,7 +117,7 @@ export function shouldCheckForWhitelisting() {
         ({
           deployer: maker, // making deployer the maker to sell in primary market
           user2: taker,
-        } = await loadFixture(deployFixtures));
+        } = await loadFixture(signerSetup));
         await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
           await FeeRecipientsData(maker.getAddress(), 10000),
         ]);

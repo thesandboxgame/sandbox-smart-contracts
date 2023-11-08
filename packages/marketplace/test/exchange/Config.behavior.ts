@@ -110,8 +110,6 @@ export function exchangeConfig() {
         });
 
         it('should not unpause if caller is not in the role', async function () {
-          const {ExchangeContractAsUser, EXCHANGE_ADMIN_ROLE, user} =
-            await loadFixture(deployFixtures);
           await expect(ExchangeContractAsUser.unpause()).to.be.revertedWith(
             `AccessControl: account ${(
               await user.getAddress()
@@ -129,6 +127,16 @@ export function exchangeConfig() {
           expect(await ExchangeContractAsAdmin.paused()).to.be.false;
         });
       });
+
+      shouldNotBeAbleToSetAsZero(
+        'setRoyaltiesRegistry',
+        'invalid Royalties Registry'
+      );
+
+      shouldNotBeAbleToSetAsZero(
+        'setOrderValidatorContract',
+        'invalid order validator'
+      );
 
       it('should not set setDefaultFeeReceiver if caller is not in the role', async function () {
         await expect(
@@ -157,7 +165,6 @@ export function exchangeConfig() {
       });
 
       it('should not set setMatchOrdersLimit if caller is not in the role', async function () {
-        await loadFixture(deployFixtures);
         const newMatchOrdersLimit = 200;
         await expect(
           ExchangeContractAsUser.setMatchOrdersLimit(newMatchOrdersLimit)
@@ -186,21 +193,12 @@ export function exchangeConfig() {
         ).to.be.revertedWith('invalid quantity');
       });
     });
-
-    shouldNotBeAbleToSetAsZero(
-      'setRoyaltiesRegistry',
-      'invalid Royalties Registry'
-    );
-    shouldNotBeAbleToSetAsZero(
-      'setOrderValidatorContract',
-      'invalid order validator'
-    );
   });
 }
 
 function shouldNotBeAbleToSetAsZero(name, err) {
-  it(`should not be able to ${name} as address zero`, async function () {
-    const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
+  it(`should not checkAccessControlbe able to ${name} as address zero`, async function () {
+    const {ExchangeContractAsAdmin} = await loadFixture(exchangeSetup);
     await expect(ExchangeContractAsAdmin[name](ZeroAddress)).to.revertedWith(
       err
     );
