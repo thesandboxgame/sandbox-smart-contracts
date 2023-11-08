@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from './fixtures.ts';
+import {deployFixtures} from './fixtures/index.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
