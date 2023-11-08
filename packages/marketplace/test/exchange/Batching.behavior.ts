@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
-import {runOrderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
-import {runSignerSetup} from '../fixtures/signerFixtures.ts';
-import {runHandlerSetup} from '../fixtures/handlerFixtures.ts';
+import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {orderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
+import {signerSetup} from '../fixtures/signerFixtures.ts';
+import {handlerSetup} from '../fixtures/handlerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {AssetERC20, AssetERC721, Asset} from '../utils/assets.ts';
 
@@ -22,13 +22,13 @@ export function shouldMatchOrderForBatching() {
       totalPayment: number;
 
     beforeEach(async function () {
-      ({user2: maker, user: taker} = await loadFixture(runSignerSetup));
+      ({user2: maker, user: taker} = await loadFixture(signerSetup));
 
-      ({ERC20Contract, ERC721Contract} = await loadFixture(runHandlerSetup));
+      ({ERC20Contract, ERC721Contract} = await loadFixture(handlerSetup));
 
-      ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+      ({OrderValidatorAsAdmin} = await loadFixture(orderValidatorSetup));
 
-      ({ExchangeContractAsUser} = await loadFixture(runExchangeSetup));
+      ({ExchangeContractAsUser} = await loadFixture(exchangeSetup));
     });
 
     it('should be able to buy 2 tokens from different orders in one txs', async function () {

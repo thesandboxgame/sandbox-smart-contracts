@@ -1,6 +1,6 @@
-import {runHandlerSetup} from './fixtures/handlerFixtures';
-import {runRoyaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture';
-import {runSignerSetup} from './fixtures/signerFixtures';
+import {handlerSetup} from './fixtures/handlerFixtures';
+import {royaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture';
+import {signerSetup} from './fixtures/signerFixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {ZeroAddress, Contract, Signer} from 'ethers';
@@ -18,16 +18,16 @@ describe('RoyaltiesRegistry.sol', function () {
     user2: Signer;
 
   beforeEach(async function () {
-    ({user1, user2} = await loadFixture(runSignerSetup));
+    ({user1, user2} = await loadFixture(signerSetup));
 
     ({
       RoyaltiesRegistryAsDeployer,
       RoyaltiesRegistryAsUser,
       Royalties2981ImplMock,
-    } = await loadFixture(runRoyaltyRegistrySetup));
+    } = await loadFixture(royaltyRegistrySetup));
 
     ({ERC721WithRoyaltyV2981, ERC20Contract, ERC1155WithRoyalty, RoyaltyInfo} =
-      await loadFixture(runHandlerSetup));
+      await loadFixture(handlerSetup));
   });
 
   it('should upgrade the contract successfully', async function () {

@@ -1,9 +1,9 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {runSignerSetup} from './signerFixtures';
+import {signerSetup} from './signerFixtures';
 import {ethers, upgrades} from 'hardhat';
 
-export async function runRoyaltyRegistrySetup() {
-  const {user} = await loadFixture(runSignerSetup);
+export async function royaltyRegistrySetup() {
+  const {user} = await loadFixture(signerSetup);
 
   const RoyaltiesRegistryFactory = await ethers.getContractFactory(
     'RoyaltiesRegistry'

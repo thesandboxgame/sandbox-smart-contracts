@@ -1,5 +1,5 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {runSignerSetup} from './signerFixtures';
+import {signerSetup} from './signerFixtures';
 import {ethers, upgrades} from 'hardhat';
 
 // keccak256("TSB_ROLE")
@@ -12,8 +12,8 @@ const PartnerRole =
 const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
-export async function runOrderValidatorSetup() {
-  const {admin, user} = await loadFixture(runSignerSetup);
+export async function orderValidatorSetup() {
+  const {admin, user} = await loadFixture(signerSetup);
 
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidator'

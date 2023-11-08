@@ -1,10 +1,10 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ethers, upgrades} from 'hardhat';
-import {runSignerSetup} from './signerFixtures';
+import {signerSetup} from './signerFixtures';
 import {ZeroAddress} from 'ethers';
 
-export async function runHandlerSetup() {
-  const {user} = await loadFixture(runSignerSetup);
+export async function handlerSetup() {
+  const {user} = await loadFixture(signerSetup);
 
   const ERC721WithRoyaltyV2981Factory = await ethers.getContractFactory(
     'ERC721WithRoyaltyV2981MultiMock'

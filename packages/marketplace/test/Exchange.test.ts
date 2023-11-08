@@ -1,9 +1,9 @@
 import {expect} from 'chai';
-import {runExchangeSetup} from './fixtures/exchangeFixtures.ts';
-import {runOrderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
-import {runRoyaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture.ts';
-import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
-import {runSignerSetup} from './fixtures/signerFixtures.ts';
+import {exchangeSetup} from './fixtures/exchangeFixtures.ts';
+import {orderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
+import {royaltyRegistrySetup} from './fixtures/royaltiesRegistryFixture.ts';
+import {handlerSetup} from './fixtures/handlerFixtures.ts';
+import {signerSetup} from './fixtures/signerFixtures.ts';
 
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
@@ -68,13 +68,11 @@ describe('Exchange.sol', function () {
       user2: taker,
       admin,
       user,
-    } = await loadFixture(runSignerSetup));
+    } = await loadFixture(signerSetup));
 
-    ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+    ({OrderValidatorAsAdmin} = await loadFixture(orderValidatorSetup));
 
-    ({RoyaltiesRegistryAsDeployer} = await loadFixture(
-      runRoyaltyRegistrySetup
-    ));
+    ({RoyaltiesRegistryAsDeployer} = await loadFixture(royaltyRegistrySetup));
 
     ({
       ERC20Contract,
@@ -82,7 +80,7 @@ describe('Exchange.sol', function () {
       ERC721Contract,
       ERC1155Contract,
       AssetMatcherAsUser,
-    } = await loadFixture(runHandlerSetup));
+    } = await loadFixture(handlerSetup));
 
     ({
       ExchangeContractAsDeployer,
@@ -94,7 +92,7 @@ describe('Exchange.sol', function () {
       protocolFeeSecondary,
       EXCHANGE_ADMIN_ROLE,
       PAUSER_ROLE,
-    } = await loadFixture(runExchangeSetup));
+    } = await loadFixture(exchangeSetup));
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe

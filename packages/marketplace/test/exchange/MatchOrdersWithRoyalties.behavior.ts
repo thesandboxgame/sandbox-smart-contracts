@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 // import {deployFixtures} from '../fixtures.ts';
-import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
-import {runOrderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
-import {runRoyaltyRegistrySetup} from '../fixtures/royaltiesRegistryFixture.ts';
-import {runHandlerSetup} from '../fixtures/handlerFixtures.ts';
-import {runSignerSetup} from '../fixtures/signerFixtures.ts';
+import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {orderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
+import {royaltyRegistrySetup} from '../fixtures/royaltiesRegistryFixture.ts';
+import {handlerSetup} from '../fixtures/handlerFixtures.ts';
+import {signerSetup} from '../fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -56,7 +56,7 @@ export function shouldMatchOrdersWithRoyalty() {
         admin: receiver1,
         user: receiver2,
         deployer: royaltyReceiver,
-      } = await loadFixture(runSignerSetup));
+      } = await loadFixture(signerSetup));
 
       ({
         ERC20Contract,
@@ -65,19 +65,17 @@ export function shouldMatchOrdersWithRoyalty() {
         ERC721WithRoyaltyV2981,
         ERC721WithRoyaltyWithoutIROYALTYUGC,
         RoyaltiesProvider,
-      } = await loadFixture(runHandlerSetup));
+      } = await loadFixture(handlerSetup));
 
-      ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+      ({OrderValidatorAsAdmin} = await loadFixture(orderValidatorSetup));
 
-      ({RoyaltiesRegistryAsDeployer} = await loadFixture(
-        runRoyaltyRegistrySetup
-      ));
+      ({RoyaltiesRegistryAsDeployer} = await loadFixture(royaltyRegistrySetup));
 
       ({
         ExchangeContractAsDeployer,
         ExchangeContractAsUser,
         EXCHANGE_ADMIN_ROLE,
-      } = await loadFixture(runExchangeSetup));
+      } = await loadFixture(exchangeSetup));
 
       await ERC20Contract.mint(taker.getAddress(), 10000000000);
       await ERC20Contract.connect(taker).approve(

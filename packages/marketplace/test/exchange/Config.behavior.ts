@@ -1,7 +1,7 @@
 /* eslint-disable mocha/no-setup-in-describe */
 import {expect} from 'chai';
-import {runExchangeSetup} from '../fixtures/exchangeFixtures';
-import {runSignerSetup} from '../fixtures/signerFixtures';
+import {exchangeSetup} from '../fixtures/exchangeFixtures';
+import {signerSetup} from '../fixtures/signerFixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {checkAccessControl} from '../common/AccessControl.behavior';
@@ -18,7 +18,7 @@ export function exchangeConfig() {
       PAUSER_ROLE: string;
 
     beforeEach(async function () {
-      ({user, user2} = await loadFixture(runSignerSetup));
+      ({user, user2} = await loadFixture(signerSetup));
 
       ({
         ExchangeContractAsUser,
@@ -26,7 +26,7 @@ export function exchangeConfig() {
         TrustedForwarder,
         EXCHANGE_ADMIN_ROLE,
         PAUSER_ROLE,
-      } = await loadFixture(runExchangeSetup));
+      } = await loadFixture(exchangeSetup));
     });
 
     describe('roles', function () {

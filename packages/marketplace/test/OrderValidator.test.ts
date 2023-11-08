@@ -1,6 +1,6 @@
-import {runHandlerSetup} from './fixtures/handlerFixtures.ts';
-import {runOrderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
-import {runSignerSetup} from './fixtures/signerFixtures.ts';
+import {handlerSetup} from './fixtures/handlerFixtures.ts';
+import {orderValidatorSetup} from './fixtures/orderValidatorFixtures.ts';
+import {signerSetup} from './fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
@@ -33,10 +33,10 @@ describe('OrderValidator.sol', function () {
     user2: Signer;
 
   beforeEach(async function () {
-    ({user, user1, user2} = await loadFixture(runSignerSetup));
+    ({user, user1, user2} = await loadFixture(signerSetup));
 
     ({ERC20Contract, ERC721Contract, ERC1271Contract} = await loadFixture(
-      runHandlerSetup
+      handlerSetup
     ));
 
     ({
@@ -44,7 +44,7 @@ describe('OrderValidator.sol', function () {
       OrderValidatorAsAdmin,
       OrderValidatorAsUser,
       OrderValidatorUpgradeMock,
-    } = await loadFixture(runOrderValidatorSetup));
+    } = await loadFixture(orderValidatorSetup));
   });
 
   it('should upgrade the contract successfully', async function () {

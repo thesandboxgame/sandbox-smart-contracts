@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
-import {runSignerSetup} from '../fixtures/signerFixtures.ts';
+import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {signerSetup} from '../fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {Contract, Signer} from 'ethers';
 
@@ -21,10 +21,10 @@ export function checkAccessControl(
       roleMap: {[key: string]: string};
 
     beforeEach(async function () {
-      ({user} = await loadFixture(runSignerSetup));
+      ({user} = await loadFixture(signerSetup));
 
       ({ExchangeContractAsAdmin, ExchangeContractAsUser, DEFAULT_ADMIN_ROLE} =
-        await loadFixture(runExchangeSetup));
+        await loadFixture(exchangeSetup));
 
       contractMap = {
         ExchangeContractAsAdmin: ExchangeContractAsAdmin,

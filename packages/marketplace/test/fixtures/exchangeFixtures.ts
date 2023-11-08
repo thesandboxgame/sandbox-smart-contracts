@@ -1,15 +1,13 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ethers, upgrades} from 'hardhat';
-import {runOrderValidatorSetup} from './orderValidatorFixtures';
-import {runRoyaltyRegistrySetup} from './royaltiesRegistryFixture';
-import {runSignerSetup} from './signerFixtures';
+import {orderValidatorSetup} from './orderValidatorFixtures';
+import {royaltyRegistrySetup} from './royaltiesRegistryFixture';
+import {signerSetup} from './signerFixtures';
 
-export async function runExchangeSetup() {
-  const {admin, user, defaultFeeReceiver} = await loadFixture(runSignerSetup);
-  const {OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup);
-  const {RoyaltiesRegistryAsDeployer} = await loadFixture(
-    runRoyaltyRegistrySetup
-  );
+export async function exchangeSetup() {
+  const {admin, user, defaultFeeReceiver} = await loadFixture(signerSetup);
+  const {OrderValidatorAsAdmin} = await loadFixture(orderValidatorSetup);
+  const {RoyaltiesRegistryAsDeployer} = await loadFixture(royaltyRegistrySetup);
 
   const TrustedForwarderFactory = await ethers.getContractFactory(
     'TrustedForwarderMock'

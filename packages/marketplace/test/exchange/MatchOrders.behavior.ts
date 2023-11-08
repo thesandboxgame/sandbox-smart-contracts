@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {runExchangeSetup} from '../fixtures/exchangeFixtures.ts';
-import {runOrderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
-import {runHandlerSetup} from '../fixtures/handlerFixtures.ts';
-import {runSignerSetup} from '../fixtures/signerFixtures.ts';
+import {exchangeSetup} from '../fixtures/exchangeFixtures.ts';
+import {orderValidatorSetup} from '../fixtures/orderValidatorFixtures.ts';
+import {handlerSetup} from '../fixtures/handlerFixtures.ts';
+import {signerSetup} from '../fixtures/signerFixtures.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
 
@@ -48,12 +48,12 @@ export function shouldMatchOrders() {
         user1: maker,
         user2: taker,
         user,
-      } = await loadFixture(runSignerSetup));
+      } = await loadFixture(signerSetup));
 
       ({ERC20Contract, ERC20Contract2, ERC721Contract, ERC1155Contract} =
-        await loadFixture(runHandlerSetup));
+        await loadFixture(handlerSetup));
 
-      ({OrderValidatorAsAdmin} = await loadFixture(runOrderValidatorSetup));
+      ({OrderValidatorAsAdmin} = await loadFixture(orderValidatorSetup));
 
       ({
         ExchangeContractAsUser,
@@ -61,7 +61,7 @@ export function shouldMatchOrders() {
         protocolFeeSecondary,
         PAUSER_ROLE,
         ERC1776_OPERATOR_ROLE,
-      } = await loadFixture(runExchangeSetup));
+      } = await loadFixture(exchangeSetup));
 
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
