@@ -24,7 +24,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           sandAdmin,
           [TSB_ROLE, PARTNER_ROLE, ERC20_ROLE],
           [false, false, false],
-          true,
+          false,
         ],
       },
       upgradeIndex: 0,

@@ -85,27 +85,101 @@ But you could save an action by not asking the signature for the `Order B`:
 
 ## Order filling
 
-`Order A` and `Order B` are completely matching, both orders are considered
-fully filled. But what happens if one party can't fully satisfy his counter
-party ?
+Filling is the process of matching the prices between two orders (left and
+right) and deciding how much to transfer to each user accordingly. To represent
+the prices each order has two fields:
 
-For instance, let's consider `Order C` and `Order D`:
+1. The make side: the maximum the user is ready to give. For example less than
+   `2000 SAND`.
+2. The take side: the minimum the user wants to get. For example more than
+   `4000 USDT`.
+
+The minimum price the user accepts is the division between the take and the make
+side, the lower bound for the price is `2 = 4000/2000 [USDT/SAND]`. An
+equivalent way of expressing it is the inverse, if you divide make side by the
+take side then you get an upper bound for the price:
+`2000/4000 = 0.5 [SAND/USDT]`.
+
+When comparing two orders the amount that the left side wants to make is
+compared against the amount that the right side wants to take and vise versa. If
+you consider the left side price as `take/make` then you must compare it against
+inverse on the right side `make/take`. Because of that the equilibrium price
+must be between the left side `take/make` and the right side `make/take` price.
+
+For example:
+
+`Order A`
+
+```
+Alice wants to sell to anybody 2000 SAND (make) against 4000 USDT (take).
+The lower bound is 4000/2000 = 2 [USDT/SAND].
+```
+
+An order satisfying `Order A` could be:
+
+`Order B`
+
+```
+Bob wants to buy from anybody 1000 SAND (take) against 3000 USDT (make).
+The upper bound is 3000/1000 = 3 [USDT/SAND]
+```
+
+The equilibrium price must be anything between `2 [USDT/SAND]` and
+`3 [USDT/SAND]`.
+
+After deciding the equilibrium price, the quantity to transfer of each asset is
+calculated. The marketplace supports partial filling, that is: respecting the
+equilibrium price the amounts chosen are different from the ones that the user
+asked initially.
+
+For example: Let's consider `Order C` and `Order D`:
 
 `Order C`
 
 ```
-Alice wants to sell to anybody 10 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
+Alice wants to sell to anybody 10 ASSET (ERC1155) against 100 MATIC (ERC20) for each token.
 ```
 
 `Order D`
 
 ```
-Bob wants to buy from anybody 1 ASSET (ERC1155) with token id 1000 against 100 MATIC (ERC20) for each token.
+Bob wants to buy from anybody 1 ASSET (ERC1155) against 100 MATIC (ERC20) for each token.
 ```
 
-The selling order can't be fully matched because the buyer can only buy 1 ASSET
-of 10. In that case, the `Order C` is partially filled. `Order C` can be
-re-matched with another order until being fully filled.
+The equilibrium price is `100 [MATIC/ASSET]`, but, the selling order can't be
+fully matched because the buyer can only buy 1 ASSET of 10. In that case, the
+`Order C` is partially filled. `Order C` can be re-matched with another order in
+a different transaction until being fully filled.
+
+When choosing the equilibrium price some advantage can be given to one side or
+the other. Let's consider `Order E` and `Order F`:
+
+`Order E`
+
+```
+Alice wants to sell 8 ASSETs at 1000 MATIC for each.
+Alice wants to get 8000 MATIC in total. The lower bound for the price is 1000 [MATIC/ASSET]
+```
+
+`Order F`
+
+```
+Bob wants to buy 6 ASSETs at 2000 MATIC each.
+Bob is ready to spend 12000 MATIC for 6 ASSETs. The upper bound for the price is 2000 [MATIC/ASSET]
+```
+
+The equilibrium price must be between 1000 and 2000 MATIC for each ASSET.  
+In the extreme cases:
+
+- Equilibrium price 1000 MATIC/ASSET: Bob buys 8 ASSETS at 1000 MATIC each,
+  Alice gets 8000 MATIC and sells everything, Bob buys partially. Both sides are
+  happy and Bob has an extra benefit because he is paying 1000 MATIC instead of
+  2000 MATIC each ASSET. Bob gets more assets than expected.
+- Equilibrium price 2000 MATIC/ASSET: Bob buys 6 ASSETS at 2000 MATIC spending
+  12000 MATIC and fully fill his order. Alice gets 12000 MATIC for 6 ASSETS
+  filling partially his order. Both sides are happy, but, in this case Alice
+  gets the benefit because she sells at 2000 MATIC each ASSET. Alice gets more
+  MATIC than expected.
 
 ### Order salt
 
@@ -268,8 +342,8 @@ The protocol is secured with the Open Zeppelin access control component.
 
 In order to support the former native meta transactions standard which is used
 by the
-[SAND contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/packages/core/src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol#L15),
-the Exchange contract can be the receiver of ERC1776 meta transactions on the
+[SAND contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/packages/core/src/solc_0.8/common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol#L15)
+, the Exchange contract can be the receiver of ERC1776 meta transactions on the
 function `matchOrdersFrom`. The latter is protected with the role
 `ERC1776_OPERATOR_ROLE`.
 
