@@ -9,18 +9,12 @@ export async function exchangeSetup() {
   const {admin, user, defaultFeeReceiver} = await signerSetup();
 
   const {TrustedForwarder} = await TrustedForwarderSetup();
-  const {
-    RoyaltiesRegistryAsUser,
-    Royalties2981ImplMock,
-    RoyaltiesRegistryAsDeployer,
-  } = await royaltiesRegistrySetup();
 
-  const {
-    OrderValidatorAsAdmin,
-    OrderValidatorAsDeployer,
-    OrderValidatorAsUser,
-    OrderValidatorUpgradeMock,
-  } = await orderValidatorSetup();
+  const royaltiesRegistry = await royaltiesRegistrySetup();
+  const {RoyaltiesRegistryAsDeployer} = royaltiesRegistry;
+
+  const orderValidator = await orderValidatorSetup();
+  const {OrderValidatorAsAdmin} = orderValidator;
 
   const protocolFeePrimary = 123;
   const protocolFeeSecondary = 250;
@@ -57,13 +51,8 @@ export async function exchangeSetup() {
   const AssetMatcherAsUser = AssetMatcherAsDeployer.connect(user);
 
   return {
-    RoyaltiesRegistryAsUser,
-    Royalties2981ImplMock,
-    RoyaltiesRegistryAsDeployer,
-    OrderValidatorAsDeployer,
-    OrderValidatorUpgradeMock,
-    OrderValidatorAsUser,
-    OrderValidatorAsAdmin,
+    ...royaltiesRegistry,
+    ...orderValidator,
     protocolFeePrimary,
     protocolFeeSecondary,
     ExchangeUpgradeMock,
