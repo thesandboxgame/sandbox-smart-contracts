@@ -1,7 +1,7 @@
 # TSB contracts deploy
 
 This package is used to compile, deploy, test and keep track of the contracts we
-use in our environments.
+use in our environments. Check [Contract releases](./RELEASES.mc) for details.
 
 ## Compilation
 

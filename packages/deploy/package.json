@@ -26,7 +26,8 @@
     "files": [
         "deployments",
         "README.md",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "Releases.md"
     ],
     "publishConfig": {
         "access": "public"
@@ -45,7 +46,8 @@
         "live:deploy": "node ./utils/npmScriptHelper.js deploy",
         "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
         "fork:test": "node ./utils/npmScriptHelper.js fork:test",
-        "release": "release-it"
+        "release": "release-it",
+        "report": "hardhat report --file-name RELEASES.md"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
@@ -77,6 +79,7 @@
         "hardhat": "^2.19.0",
         "hardhat-contract-sizer": "^2.10.0",
         "hardhat-deploy": "^0.11.43",
+        "markdown-table-ts": "^1.0.3",
         "prettier": "^2.8.8",
         "prettier-plugin-solidity": "^1.1.3",
         "release-it": "^16.1.5",
@@ -102,6 +105,7 @@
         },
         "hooks": {
             "before:init": [
+                "yarn report",
                 "yarn lint",
                 "yarn test"
             ]

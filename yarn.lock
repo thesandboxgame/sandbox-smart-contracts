@@ -2370,6 +2370,7 @@ __metadata:
     hardhat: ^2.19.0
     hardhat-contract-sizer: ^2.10.0
     hardhat-deploy: ^0.11.43
+    markdown-table-ts: ^1.0.3
     prettier: ^2.8.8
     prettier-plugin-solidity: ^1.1.3
     release-it: ^16.1.5
@@ -9676,6 +9677,13 @@ __metadata:
     socks-proxy-agent: ^7.0.0
     ssri: ^10.0.0
   checksum: 7268bf274a0f6dcf0343829489a4506603ff34bd0649c12058753900b0eb29191dce5dba12680719a5d0a983d3e57810f594a12f3c18494e93a1fbc6348a4540
+  languageName: node
+  linkType: hard
+
+"markdown-table-ts@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "markdown-table-ts@npm:1.0.3"
+  checksum: af684c664f14d628cec0b554d3accc12309be02d25c7fc455bfd962e04484d2d2781c4d58dd1bfe07f5e895962b137ddbdae43e05f95ed3190f31f4035174840
   languageName: node
   linkType: hard
 
