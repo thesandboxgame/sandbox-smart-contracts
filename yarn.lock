@@ -2055,7 +2055,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@workspace:packages/asset":
+"@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@1.0.2, @sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
   dependencies:
@@ -2500,8 +2500,9 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^4.9.2
     "@openzeppelin/hardhat-upgrades": ^2.2.1
     "@release-it/keep-a-changelog": ^4.0.0
+    "@sandbox-smart-contracts/asset": 1.0.2
     "@sandbox-smart-contracts/dependency-metatx": 0.0.3
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.6
