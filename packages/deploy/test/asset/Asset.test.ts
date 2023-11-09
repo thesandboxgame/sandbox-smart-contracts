@@ -7,8 +7,7 @@ import {OperatorFilterRegistry_ABI} from '../../utils/abi';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const {deployer, assetAdmin, filterOperatorSubscription, sandAdmin} =
-      await getNamedAccounts();
+    const {deployer, assetAdmin, sandAdmin} = await getNamedAccounts();
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryBytecode,
@@ -23,7 +22,12 @@ const setupTest = deployments.createFixture(
       'MockERC1155MarketPlace2',
       'MockERC1155MarketPlace3',
       'MockERC1155MarketPlace4',
+      'OperatorFilterAssetSubscription',
     ]);
+
+    const OperatorFilterAssetSubscription = await deployments.get(
+      'OperatorFilterAssetSubscription'
+    );
 
     const MockERC1155MarketPlace1 = await deployments.get(
       'MockERC1155MarketPlace1'
@@ -42,7 +46,7 @@ const setupTest = deployments.createFixture(
 
     const tx1 = await OperatorFilterRegistryContract.connect(
       deployerSigner
-    ).register(filterOperatorSubscription);
+    ).register(OperatorFilterAssetSubscription.address);
 
     await tx1.wait();
 
@@ -71,12 +75,12 @@ const setupTest = deployments.createFixture(
       );
 
     const subscriptionSigner = await ethers.getSigner(
-      filterOperatorSubscription
+      OperatorFilterAssetSubscription.address
     );
     const tx2 = await OperatorFilterRegistryContract.connect(
       subscriptionSigner
     ).updateOperators(
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription.address,
       [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
       true
     );
@@ -84,7 +88,7 @@ const setupTest = deployments.createFixture(
     const tx3 = await OperatorFilterRegistryContract.connect(
       subscriptionSigner
     ).updateCodeHashes(
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription.address,
       [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
       true
     );
@@ -133,7 +137,7 @@ const setupTest = deployments.createFixture(
       RoyaltyManagerContract,
       deployer,
       sandAdmin,
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
@@ -205,13 +209,13 @@ describe('Asset', function () {
       const {
         OperatorFilterRegistryContract,
         AssetContract,
-        filterOperatorSubscription,
+        OperatorFilterAssetSubscription,
       } = await setupTest();
       expect(
         await OperatorFilterRegistryContract.subscriptionOf(
           AssetContract.address
         )
-      ).to.be.equal(filterOperatorSubscription);
+      ).to.be.equal(OperatorFilterAssetSubscription.address);
     });
     it('asset contract has correct market places black listed', async function () {
       const {
