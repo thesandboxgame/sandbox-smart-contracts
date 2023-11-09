@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {BigNumber, Event, ethers} from 'ethers';
 import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 
-describe.only('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
+describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should deploy successfully', async function () {
       const {AssetCreateContract} = await runCreateTestSetup();
