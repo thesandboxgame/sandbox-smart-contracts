@@ -42,6 +42,21 @@ const setupTest = deployments.createFixture(
       'MockERC1155MarketPlace4'
     );
 
+    await network.provider.send('hardhat_setBalance', [
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      '0xDE0B6B3A7640000',
+    ]);
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
+    });
+    const defaultSub = await ethers.getSigner(
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
+    );
+    const tx = await OperatorFilterRegistryContract.connect(defaultSub).register(
+      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
+    );
+
     const deployerSigner = await ethers.getSigner(deployer);
 
     const tx1 = await OperatorFilterRegistryContract.connect(
@@ -61,7 +76,7 @@ const setupTest = deployments.createFixture(
     const signer = await ethers.getSigner(
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
     );
-    const tx = await OperatorFilterRegistryContract.connect(signer).register(
+    const regTx = await OperatorFilterRegistryContract.connect(signer).register(
       '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
     );
     await tx.wait();
@@ -73,6 +88,7 @@ const setupTest = deployments.createFixture(
       await OperatorFilterRegistryContract.connect(signer).codeHashOf(
         MockERC1155MarketPlace2.address
       );
+    await regTx.wait();
 
     const subscriptionSigner = await ethers.getSigner(
       OperatorFilterAssetSubscription.address
