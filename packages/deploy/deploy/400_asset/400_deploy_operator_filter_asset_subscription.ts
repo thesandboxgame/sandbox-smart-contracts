@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('OperatorFilterAssetSubscription', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFilterSubscription.sol:OperatorFilterAssetSubscription',
+      '@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFilterAssetSubscription.sol:OperatorFilterAssetSubscription',
     log: true,
     skipIfAlreadyDeployed: true,
   });
