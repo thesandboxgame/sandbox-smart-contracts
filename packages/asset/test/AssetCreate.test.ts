@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {BigNumber, Event, ethers} from 'ethers';
 import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 
-describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
+describe.only('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should deploy successfully', async function () {
       const {AssetCreateContract} = await runCreateTestSetup();
@@ -543,6 +543,25 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await expect(
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
+        ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+      });
+      it('should not allow minting tier 0 assets using createAsset', async function () {
+        const {
+          user,
+          mintSingleAsset,
+          generateSingleMintSignature,
+          metadataHashes,
+        } = await runCreateTestSetup();
+        const signature = await generateSingleMintSignature(
+          user.address,
+          0,
+          1,
+          true,
+          metadataHashes[0]
+        );
+
+        await expect(
+          mintSingleAsset(signature, 0, 1, true, metadataHashes[0])
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
       it('should NOT allow minting with the same metadata twice', async function () {
@@ -1101,6 +1120,32 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
+      it('should revert when minting tier 0 assets using createMultipleAssets', async function () {
+        const {
+          mintMultipleAssets,
+          generateMultipleMintSignature,
+          mintCatalyst,
+          metadataHashes,
+          user,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [0, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          mintMultipleAssets(
+            signature,
+            [0, 4],
+            [1, 1],
+            [true, true],
+            metadataHashes
+          )
+        ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+      });
       it('should NOT allow minting with the same metadataHash twice', async function () {
         const {
           mintMultipleAssets,
@@ -1297,6 +1342,27 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
         );
       });
+      it('should not allow miniting tiers other than 0 (TSB Exclusive) using createSpecialAsset', async function () {
+        const {
+          mintSpecialAsset,
+          generateSingleMintSignature,
+          user,
+          metadataHashes,
+          grantSpecialMinterRole,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateSingleMintSignature(
+          user.address,
+          4,
+          1,
+          true,
+          metadataHashes[0]
+        );
+        await expect(
+          mintSpecialAsset(signature, 1, metadataHashes[0])
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
     });
     describe('Event', function () {
       it('should emit a SpecialAssetMinted event', async function () {
@@ -1358,6 +1424,145 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         expect(eventData.metadataHash).to.equal(metadataHashes[0]);
         // revealed should be true
         expect(eventData.revealed).to.be.true;
+      });
+    });
+  });
+  describe('Multiple special assets mint', function () {
+    describe('Success', function () {
+      it('should allow special minter role to mint multiple special assets with tier 0 (TSB Exclusive)', async function () {
+        const {
+          mintMultipleSpecialAssets,
+          generateMultipleMintSignature,
+          user,
+          metadataHashes,
+          grantSpecialMinterRole,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [0, 0],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          mintMultipleSpecialAssets(signature, [1, 1], metadataHashes)
+        ).to.not.be.reverted;
+      });
+    });
+    describe('Revert', function () {
+      it('should NOT ALLOW unauthorized wallets to mint multiple special assets', async function () {
+        const {
+          mintMultipleSpecialAssets,
+          generateMultipleMintSignature,
+          user,
+          metadataHashes,
+        } = await runCreateTestSetup();
+
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [0, 0],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          mintMultipleSpecialAssets(signature, [1, 1], metadataHashes)
+        ).to.be.revertedWith(
+          `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
+        );
+      });
+      it('should NOT ALLOW minting tiers other than 0 (TSB Exclusive) using createMultipleSpecialAssets', async function () {
+        const {
+          mintMultipleSpecialAssets,
+          generateMultipleMintSignature,
+          user,
+          metadataHashes,
+          grantSpecialMinterRole,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [4, 0],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          mintMultipleSpecialAssets(signature, [1, 1], metadataHashes)
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+    });
+    describe('Event', function () {
+      it('should emit a SpecialAssetBatchMinted event', async function () {
+        const {
+          generateMultipleMintSignature,
+          user,
+          metadataHashes,
+          AssetCreateContractAsUser,
+          grantSpecialMinterRole,
+          AssetCreateContract,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [0, 0],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          AssetCreateContractAsUser.createMultipleSpecialAssets(
+            signature,
+            [1, 1],
+            metadataHashes,
+            user.address
+          )
+        ).to.emit(AssetCreateContract, 'SpecialAssetBatchMinted');
+      });
+      it('should emit SpecialAssetBatchMinted event with the correct data', async function () {
+        const {
+          mintMultipleSpecialAssets,
+          generateMultipleMintSignature,
+          user,
+          metadataHashes,
+          grantSpecialMinterRole,
+        } = await runCreateTestSetup();
+
+        await grantSpecialMinterRole(user.address);
+        const signature = await generateMultipleMintSignature(
+          user.address,
+          [0, 0],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        const result = await mintMultipleSpecialAssets(
+          signature,
+          [1, 1],
+          metadataHashes
+        );
+        const eventData = result.events.filter(
+          (e: Event) => e.event == 'SpecialAssetBatchMinted'
+        )[0].args;
+
+        // creator should be user
+        expect(eventData.creator).to.equal(user.address);
+        // tiers should be [0, 0]
+        expect(eventData.tiers[0]).to.equal(0);
+        expect(eventData.tiers[1]).to.equal(0);
+        // amounts should be [1, 1]
+        expect(eventData.amounts[0]).to.equal(1);
+        expect(eventData.amounts[1]).to.equal(1);
+        // metadataHashes should be metadataHashes
+        expect(eventData.metadataHashes[0]).to.equal(metadataHashes[0]);
+        expect(eventData.metadataHashes[1]).to.equal(metadataHashes[1]);
+        // revealed should be [true, true]
+        expect(eventData.revealed[0]).to.be.true;
+        expect(eventData.revealed[1]).to.be.true;
       });
     });
   });
