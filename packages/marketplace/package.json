@@ -79,7 +79,8 @@
     "@openzeppelin/contracts": "^4.9.2",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
     "@openzeppelin/hardhat-upgrades": "^2.2.1",
+    "@sandbox-smart-contracts/asset": "1.0.2",
     "@sandbox-smart-contracts/dependency-metatx": "0.0.3",
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
   }
 }
