@@ -15,10 +15,10 @@
     "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
     "private": true,
     "dependencies": {
-        "@sandbox-smart-contracts/asset": "1.0.2",
+        "@sandbox-smart-contracts/asset": "*",
         "@sandbox-smart-contracts/core": "*",
         "@sandbox-smart-contracts/dependency-operator-filter": "*",
-        "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
+        "@sandbox-smart-contracts/dependency-royalty-management": "*",
         "@sandbox-smart-contracts/faucets": "0.0.1",
         "@sandbox-smart-contracts/giveaway": "0.0.3",
         "@sandbox-smart-contracts/marketplace": "*"
