@@ -212,8 +212,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = remainder - fee;
             payment.value = fee;
         } else {
-            remainder = 0;
             payment.value = remainder;
+            remainder = 0;
         }
         if (payment.value > 0) {
             _transfer(payment, paymentSide.account, to);
