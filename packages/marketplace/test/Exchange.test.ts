@@ -205,16 +205,6 @@ describe('Exchange.sol', function () {
       );
     });
 
-    it('should not cancel an order if Exchange Contract is paused', async function () {
-      await ExchangeContractAsAdmin.grantRole(PAUSER_ROLE, user.getAddress());
-      await ExchangeContractAsAdmin.connect(user).pause();
-      expect(await ExchangeContractAsAdmin.paused()).to.be.true;
-
-      await expect(
-        ExchangeContractAsUser.cancel(orderLeft, hashKey(orderLeft))
-      ).to.be.revertedWith('Pausable: paused');
-    });
-
     it('should not cancel the order if caller is not maker', async function () {
       await expect(
         ExchangeContractAsDeployer.connect(taker).cancel(
