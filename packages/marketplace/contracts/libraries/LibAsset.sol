@@ -95,7 +95,7 @@ library LibAsset {
     /// @return Address of the token
     /// @return Id of the token
     function decodeToken(AssetType memory assetType) internal pure returns (address, uint256) {
-        return abi.decode(assetType.data, (address, uint));
+        return abi.decode(assetType.data, (address, uint256));
     }
 
     /// @notice Decode the token address from an AssetType.
