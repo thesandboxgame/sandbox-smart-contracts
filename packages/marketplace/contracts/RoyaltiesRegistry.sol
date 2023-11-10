@@ -246,7 +246,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
                 Recipient memory splitRecipient = multiRecipients[i];
                 royalties[i].account = splitRecipient.recipient;
                 uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
-                royalties[i].value = uint96(splitAmount);
+                royalties[i].value = splitAmount;
                 sum += splitAmount;
             }
             // sum can be less than amount, otherwise small-value listings can break
@@ -287,7 +287,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
         require(percent < BASIS_POINTS, "royalties 2981 exceeds 100%");
         result = new Part[](1);
-        result[0].account = payable(to);
+        result[0].account = to;
         result[0].value = percent;
         return result;
     }
