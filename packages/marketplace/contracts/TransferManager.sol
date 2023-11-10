@@ -19,6 +19,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {
     using ERC165CheckerUpgradeable for address;
+    using LibAsset for LibAsset.AssetType;
 
     /// @notice Defines the base for representing fees to avoid rounding: 50% == 0.5 * 10000 == 5000.
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
@@ -86,24 +87,21 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param left DealSide from the left order (see LibDeal.sol)
     /// @param right DealSide from the right order (see LibDeal.sol)
     /// @dev This is the main entry point, when used as a separated contract this method will be external
-    function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
-        DealSide memory paymentSide;
-        DealSide memory nftSide;
-        if (feeSide == LibAsset.FeeSide.LEFT) {
-            paymentSide = left;
-            nftSide = right;
-        } else {
-            paymentSide = right;
-            nftSide = left;
+    function doTransfers(DealSide memory left, DealSide memory right) internal override {
+        if (left.assetType.isERC20() && !_mustSkipFees(left.account) && !right.assetType.isERC20()) {
+            _doTransfersWithFeesAndRoyalties(left, right);
+            _transfer(right, left.account);
+            return;
         }
-        // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSide.account);
-        // Transfer ERC20 or right side if FeeSide.NONE
-        if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
-            _transfer(paymentSide.asset, paymentSide.account, nftSide.account);
-        } else {
-            _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
+
+        if (right.assetType.isERC20() && !_mustSkipFees(right.account) && !left.assetType.isERC20()) {
+            _doTransfersWithFeesAndRoyalties(right, left);
+            _transfer(left, right.account);
+            return;
         }
+
+        _transfer(right, left.account);
+        _transfer(left, right.account);
     }
 
     /// @notice Sets the royalties registry.
@@ -141,7 +139,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param nftSide DealSide of the nft-side order
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 fees;
-        uint256 remainder = paymentSide.asset.value;
+        uint256 remainder = paymentSide.value;
         if (_isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             // No royalties
@@ -153,7 +151,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
+            _transfer(DealSide(paymentSide.assetType, remainder, paymentSide.account), nftSide.account);
         }
     }
 
@@ -161,7 +159,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param nftSide DealSide of the nft-side order
     /// @return creator Address or zero if is not able to retrieve it
     function _isPrimaryMarket(DealSide memory nftSide) internal view returns (bool) {
-        address creator = _getCreator(nftSide.asset.assetType);
+        address creator = _getCreator(nftSide.assetType);
         return creator != address(0) && nftSide.account == creator;
     }
 
@@ -175,7 +173,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
+        (address token, uint256 tokenId) = nftSide.assetType.decodeToken();
         IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
@@ -206,17 +204,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 percentage,
         uint256 multiplier
     ) internal returns (uint256) {
-        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
-        uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
+        uint256 value;
+        uint256 fee = (paymentSide.value * percentage) / multiplier;
         if (remainder > fee) {
             remainder = remainder - fee;
-            payment.value = fee;
+            value = fee;
         } else {
             remainder = 0;
-            payment.value = remainder;
+            value = remainder;
         }
-        if (payment.value > 0) {
-            _transfer(payment, paymentSide.account, to);
+        if (value > 0) {
+            _transfer(DealSide(paymentSide.assetType, value, paymentSide.account), to);
         }
         return remainder;
     }
@@ -225,32 +223,35 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param assetType Asset type
     /// @return creator Address or zero if is not able to retrieve it
     function _getCreator(LibAsset.AssetType memory assetType) internal view returns (address creator) {
-        (address token, uint256 tokenId) = LibAsset.decodeToken(assetType);
+        (address token, uint256 tokenId) = assetType.decodeToken();
         if (token.supportsInterface(type(IRoyaltyUGC).interfaceId)) {
             creator = IRoyaltyUGC(token).getCreatorAddress(tokenId);
         }
     }
 
     /// @notice Function should be able to transfer any supported Asset
-    /// @param asset Asset to be transferred
-    /// @param from Account holding the asset
+    /// @param payment the source of the assets to transfer
     /// @param to Account that will receive the asset
-    /// @dev This is the main entry point, when used as a separated contract this method will be external
-    function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
-        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            address token = LibAsset.decodeAddress(asset.assetType);
+    function _transfer(DealSide memory payment, address to) internal {
+        if (payment.assetType.isERC20()) {
+            address token = payment.assetType.decodeAddress();
             // slither-disable-next-line arbitrary-send-erc20
-            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
-            (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
-            require(asset.value == 1, "erc721 value error");
-            IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
-        } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
-            (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
-            IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
-        } else {
-            revert("invalid asset class");
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), payment.account, to, payment.value);
+            return;
         }
+
+        if (payment.assetType.isERC721() || payment.assetType.isERC1155()) {
+            (address token, uint256 tokenId) = payment.assetType.decodeToken();
+            if (payment.assetType.isERC721()) {
+                require(payment.value == 1, "erc721 value error");
+                IERC721Upgradeable(token).safeTransferFrom(payment.account, to, tokenId);
+            } else {
+                IERC1155Upgradeable(token).safeTransferFrom(payment.account, to, tokenId, payment.value, "");
+            }
+            return;
+        }
+
+        revert("invalid asset class");
     }
 
     /// @notice Function deciding if the fees are applied or not, to be override
