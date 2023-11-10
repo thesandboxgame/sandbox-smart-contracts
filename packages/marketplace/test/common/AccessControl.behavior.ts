@@ -48,7 +48,9 @@ export function checkAccessControl(
 
       it(`should be able to ${functionName[i]}`, async function () {
         await expect(
-          contractMap[adminContract[i]][functionName[i]](user.getAddress())
+          contractMap[adminContract[i]][functionName[i]](
+            contractMap[adminContract[i]].getAddress()
+          )
         ).to.emit(ExchangeContractAsAdmin, eventName[i]);
       });
     }

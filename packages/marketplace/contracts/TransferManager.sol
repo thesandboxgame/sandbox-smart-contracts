@@ -6,6 +6,7 @@ import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/util
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
@@ -18,6 +19,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 /// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {
+    using AddressUpgradeable for address;
     using ERC165CheckerUpgradeable for address;
 
     /// @notice Defines the base for representing fees to avoid rounding: 50% == 0.5 * 10000 == 5000.
@@ -109,7 +111,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Sets the royalties registry.
     /// @param newRoyaltiesRegistry Address of new royalties registry
     function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
-        require(address(newRoyaltiesRegistry) != address(0), "invalid Royalties Registry");
+        require(address(newRoyaltiesRegistry).isContract(), "invalid Royalties Registry");
         royaltiesRegistry = newRoyaltiesRegistry;
 
         emit RoyaltiesRegistrySet(newRoyaltiesRegistry);
