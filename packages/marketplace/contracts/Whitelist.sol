@@ -101,7 +101,6 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
         bool[] calldata permissions,
         bool whitelistsEnabled
     ) internal onlyInitializing {
-        require(roles.length == permissions.length, "length role & permission differ");
         __AccessControlEnumerable_init_unchained();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _setRolesEnabled(roles, permissions);
