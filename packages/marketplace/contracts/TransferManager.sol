@@ -80,8 +80,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         IRoyaltiesProvider newRoyaltiesProvider
     ) internal onlyInitializing {
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
-        _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
+        _setRoyaltiesRegistry(newRoyaltiesProvider);
     }
 
     /// @notice Executes transfers for 2 matched orders
