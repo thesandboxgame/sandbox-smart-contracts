@@ -69,7 +69,7 @@
         "ethers": "5",
         "hardhat": "~2.15.0",
         "hardhat-contract-sizer": "^2.10.0",
-        "hardhat-deploy": "^0.11.30",
+        "hardhat-deploy": "^0.10.5",
         "prettier": "^2.8.8",
         "prettier-plugin-solidity": "^1.1.3",
         "ts-node": "^10.9.1",
