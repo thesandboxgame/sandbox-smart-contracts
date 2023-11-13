@@ -15,6 +15,7 @@
     "./deploy_mocks",
     "./utils",
     "./tasks",
-    "./test"
+    "./test",
+    "./ignition"
   ]
 }

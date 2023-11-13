@@ -39,12 +39,15 @@
         "verify": "yarn hardhat etherscan-verify --network",
         "live:deploy": "node ./utils/npmScriptHelper.js deploy",
         "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
-        "fork:test": "node ./utils/npmScriptHelper.js fork:test"
+        "fork:test": "node ./utils/npmScriptHelper.js fork:test",
+        "ignition": "hardhat ignition deploy"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
         "@ethersproject/providers": "^5.7.2",
         "@nomicfoundation/hardhat-chai-matchers": "1",
+        "@nomicfoundation/hardhat-ethers": "^3.0.4",
+        "@nomicfoundation/hardhat-ignition": "^0.11.2",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
         "@nomiclabs/hardhat-ethers": "^2.2.3",
         "@typechain/ethers-v5": "^11.0.0",
@@ -66,8 +69,8 @@
         "eslint-plugin-json": "^3.1.0",
         "eslint-plugin-mocha": "^10.1.0",
         "eslint-plugin-prettier": "^4.2.1",
-        "ethers": "5",
-        "hardhat": "~2.15.0",
+        "ethers": "6",
+        "hardhat": "~2.18.0",
         "hardhat-contract-sizer": "^2.10.0",
         "hardhat-deploy": "^0.11.30",
         "prettier": "^2.8.8",

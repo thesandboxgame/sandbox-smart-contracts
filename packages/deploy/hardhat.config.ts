@@ -2,6 +2,7 @@ import 'dotenv/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
 import '@nomiclabs/hardhat-ethers';
+import "@nomicfoundation/hardhat-ignition";
 import 'hardhat-deploy';
 import {
   addForkingSupport,
@@ -299,8 +300,16 @@ const compilers = [
   },
 }));
 
+const ignition = {
+  blockPollingInterval: 1_000,
+  timeBeforeBumpingFees: 3 * 60 * 1_000,
+  maxFeeBumps: 4,
+  requiredConfirmations: 5,
+};
+
 const config = skipDeploymentsOnLiveNetworks(
   addForkingSupport({
+    ignition,
     importedPackages,
     namedAccounts,
     networks: addNodeAndMnemonic(networks),
