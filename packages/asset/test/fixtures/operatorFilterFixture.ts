@@ -12,7 +12,6 @@ export async function setupOperatorFilter() {
   const [
     deployer,
     upgradeAdmin,
-    filterOperatorSubscription,
     catalystAdmin,
     catalystMinter,
     assetAdmin,
@@ -64,15 +63,17 @@ export async function setupOperatorFilter() {
     DEFAULT_SUBSCRIPTION,
     [mockMarketPlace1.address, mockMarketPlace2.address]
   );
+
+  const assetOperatorFilterSubscriptionFactory =
+    await ethers.getContractFactory('MockOperatorFilterSubscription');
+
+  const assetOperatorFilterSubscription =
+    await assetOperatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
+
   await operatorFilterRegistry.deployed();
-  const operatorFilterRegistryAsSubscription = operatorFilterRegistry.connect(
-    await ethers.getSigner(filterOperatorSubscription.address)
-  );
-  const tnx = await operatorFilterRegistryAsSubscription.registerAndCopyEntries(
-    filterOperatorSubscription.address,
-    DEFAULT_SUBSCRIPTION
-  );
-  await tnx.wait();
 
   const RoyaltySplitterFactory = await ethers.getContractFactory(
     'RoyaltySplitter'
@@ -105,7 +106,7 @@ export async function setupOperatorFilter() {
       TrustedForwarder.address,
       assetAdmin.address,
       'ipfs://',
-      filterOperatorSubscription.address,
+      assetOperatorFilterSubscription.address,
       RoyaltyManagerContract.address,
     ],
     {
@@ -152,7 +153,7 @@ export async function setupOperatorFilter() {
 
   const tnx2 = await Asset.setRegistryAndSubscribe(
     operatorFilterRegistry.address,
-    filterOperatorSubscription.address
+    assetOperatorFilterSubscription.address
   );
   await tnx2.wait();
 
@@ -175,8 +176,7 @@ export async function setupOperatorFilter() {
     mockMarketPlace3,
     mockMarketPlace4,
     operatorFilterRegistry,
-    operatorFilterRegistryAsSubscription,
-    filterOperatorSubscription,
+    assetOperatorFilterSubscription,
     users,
     deployer,
     upgradeAdmin,
