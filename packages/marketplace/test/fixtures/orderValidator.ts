@@ -11,6 +11,21 @@ const PartnerRole =
 const ERC20Role =
   '0x839f6f26c78a3e8185d8004defa846bd7b66fef8def9b9f16459a6ebf2502162';
 
+export async function orderValidatorFailSetup() {
+  const {admin} = await signerSetup();
+
+  const OrderValidatorFactory = await ethers.getContractFactory(
+    'OrderValidator'
+  );
+  await upgrades.deployProxy(
+    OrderValidatorFactory,
+    [admin.address, [TSBRole, PartnerRole], [false, false, false], false],
+    {
+      initializer: '__OrderValidator_init_unchained',
+    }
+  );
+}
+
 export async function orderValidatorSetup() {
   const {user, admin} = await signerSetup();
 

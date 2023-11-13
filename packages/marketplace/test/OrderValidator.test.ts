@@ -1,4 +1,5 @@
 import {deployFixtures} from './fixtures/index.ts';
+import {orderValidatorFailSetup} from './fixtures/orderValidator';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
@@ -43,6 +44,12 @@ describe('OrderValidator.sol', function () {
       user1,
       user2,
     } = await loadFixture(deployFixtures));
+  });
+
+  it('initialization should fail if roles and permissions lenghts are different', async function () {
+    await expect(orderValidatorFailSetup()).to.be.revertedWith(
+      'Mismatched input lengths'
+    );
   });
 
   it('should upgrade the contract successfully', async function () {
