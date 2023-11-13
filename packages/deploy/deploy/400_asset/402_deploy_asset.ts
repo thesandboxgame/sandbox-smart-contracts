@@ -40,5 +40,4 @@ func.dependencies = [
   'OperatorFilterAssetSubscription_deploy',
   'TRUSTED_FORWARDER_V2',
   'RoyaltyManager_deploy',
-  'OperatorFilter_setup',
 ];
