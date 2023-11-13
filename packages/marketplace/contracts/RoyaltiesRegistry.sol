@@ -123,7 +123,21 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token Address of the token.
     /// @param tokenId ID of the token.
     /// @return An array containing royalty parts.
-    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
+    function getRoyalties(address token, uint256 tokenId) external view override returns (Part[] memory) {
+        uint256 royaltiesProviderData = royaltiesProviders[token];
+        address royaltiesProvider = address(uint160(royaltiesProviderData));
+        RoyaltiesType royaltiesType = _getRoyaltiesType(royaltiesProviderData);
+        if (royaltiesType == RoyaltiesType.UNSET) {
+            royaltiesType = _calculateRoyaltiesType(token, royaltiesProvider);
+        }
+        return _getRoyalties(royaltiesType, token, tokenId, royaltiesProvider);
+    }
+
+    /// @notice Fetches royalties for a given token and token ID (cache the type if needed).
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token.
+    /// @return An array containing royalty parts.
+    function getRoyaltiesWithTypeCache(address token, uint256 tokenId) external override returns (Part[] memory) {
         uint256 royaltiesProviderData = royaltiesProviders[token];
 
         address royaltiesProvider = address(uint160(royaltiesProviderData));
@@ -137,24 +151,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             //saving royalties type
             _setRoyaltiesType(token, royaltiesType, royaltiesProvider);
         }
-
-        //case royaltiesType = 1, royalties are set in royaltiesByToken
-        if (royaltiesType == RoyaltiesType.BY_TOKEN) {
-            return royaltiesByToken[token].royalties;
-        }
-
-        //case royaltiesType = 2, royalties from external provider
-        if (royaltiesType == RoyaltiesType.EXTERNAL_PROVIDER) {
-            return _providerExtractor(token, tokenId, royaltiesProvider);
-        }
-
-        //case royaltiesType = 3, royalties EIP-2981
-        if (royaltiesType == RoyaltiesType.EIP2981) {
-            return _getRoyaltiesEIP2981(token, tokenId);
-        }
-
-        // case royaltiesType = 4, unknown/empty royalties
-        return new Part[](0);
+        return _getRoyalties(royaltiesType, token, tokenId, royaltiesProvider);
     }
 
     /// @notice Returns provider address for token contract from royaltiesProviders mapping
@@ -267,7 +264,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         address token,
         uint256 tokenId,
         address providerAddress
-    ) internal returns (Part[] memory) {
+    ) internal view returns (Part[] memory) {
         try IRoyaltiesProvider(providerAddress).getRoyalties(token, tokenId) returns (Part[] memory result) {
             return result;
         } catch {
@@ -290,6 +287,31 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         result[0].account = to;
         result[0].value = percent;
         return result;
+    }
+
+    /// @notice Fetches royalties for a given token and token ID.
+    /// @param royaltiesType type of royalty
+    /// @param token Address of the token.
+    /// @param tokenId ID of the token.
+    /// @param royaltiesProvider The address of the royalties provider.
+    /// @return An array containing royalty parts.
+    function _getRoyalties(
+        RoyaltiesType royaltiesType,
+        address token,
+        uint256 tokenId,
+        address royaltiesProvider
+    ) internal view returns (Part[] memory) {
+        if (royaltiesType == RoyaltiesType.BY_TOKEN) {
+            return royaltiesByToken[token].royalties;
+        }
+        if (royaltiesType == RoyaltiesType.EXTERNAL_PROVIDER) {
+            return _providerExtractor(token, tokenId, royaltiesProvider);
+        }
+        if (royaltiesType == RoyaltiesType.EIP2981) {
+            return _getRoyaltiesEIP2981(token, tokenId);
+        }
+        // case royaltiesType = 4, unknown/empty royalties
+        return new Part[](0);
     }
 
     // slither-disable-next-line unused-state

@@ -11,6 +11,10 @@ contract RoyaltiesProviderMock is IRoyaltiesProvider {
         return royaltiesTest[token][tokenId];
     }
 
+    function getRoyaltiesWithTypeCache(address token, uint256 tokenId) external view override returns (Part[] memory) {
+        return royaltiesTest[token][tokenId];
+    }
+
     function initializeProvider(address token, uint256 tokenId, Part[] memory royalties) public {
         delete royaltiesTest[token][tokenId];
         for (uint256 i = 0; i < royalties.length; ++i) {

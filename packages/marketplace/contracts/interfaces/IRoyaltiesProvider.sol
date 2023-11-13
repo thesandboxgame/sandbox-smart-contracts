@@ -15,9 +15,15 @@ interface IRoyaltiesProvider {
         uint256 value;
     }
 
-    /// @notice Calculates all roaylties in token for tokenId
+    /// @notice Calculates all royalties in token for tokenId
     /// @param token Address of token
-    /// @param tokenId of the token we want to calculate royalites
-    /// @return A LibPart.Part with allroyalties for token
-    function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
+    /// @param tokenId of the token we want to calculate royalties
+    /// @return A LibPart.Part with all royalties for token
+    function getRoyalties(address token, uint256 tokenId) external view returns (Part[] memory);
+
+    /// @notice Calculates all royalties in token for tokenId as getRoyalties caching the royalty type
+    /// @param token Address of token
+    /// @param tokenId of the token we want to calculate royalties
+    /// @return A LibPart.Part with all royalties for token
+    function getRoyaltiesWithTypeCache(address token, uint256 tokenId) external returns (Part[] memory);
 }

@@ -178,7 +178,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory nftSide
     ) internal returns (uint256) {
         (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
-        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
+        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyaltiesWithTypeCache(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
