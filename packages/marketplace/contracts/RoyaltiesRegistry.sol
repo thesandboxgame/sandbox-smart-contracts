@@ -114,7 +114,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             royaltiesByToken[token].royalties.push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < BASIS_POINTS, "royalties sum more, than 100%");
+        require(sumRoyalties < BASIS_POINTS, "royalties sum is more than 100%");
         royaltiesByToken[token].initialized = true;
         emit RoyaltiesSetForContract(token, royalties);
     }

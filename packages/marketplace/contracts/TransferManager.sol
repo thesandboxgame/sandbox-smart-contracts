@@ -194,7 +194,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         return remainder;
     }
 
-    /// @notice Do a transfer based on a percentage (in base points)
+    /// @notice Do a transfer based on a percentage (in basis points)
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
     /// @param to Account that will receive the asset
