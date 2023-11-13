@@ -17,7 +17,7 @@ export async function orderValidatorFailSetup() {
   const OrderValidatorFactory = await ethers.getContractFactory(
     'OrderValidator'
   );
-  const OrderValidatorAsDeployer = await upgrades.deployProxy(
+  await upgrades.deployProxy(
     OrderValidatorFactory,
     [admin.address, [TSBRole, PartnerRole], [false, false, false], false],
     {
