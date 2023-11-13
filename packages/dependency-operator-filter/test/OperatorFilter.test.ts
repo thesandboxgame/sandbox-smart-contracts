@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {setupOperatorFilter} from './fixtures/testFixture';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-describe.only('OperatorFilterer', function () {
+describe('OperatorFilterer', function () {
   describe('common contract subscription setup', function () {
     it('should be registered', async function () {
       const {operatorFilterRegistry, ERC1155} = await setupOperatorFilter();
