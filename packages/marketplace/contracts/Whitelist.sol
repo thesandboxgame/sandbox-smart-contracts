@@ -20,7 +20,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
 
     /// @dev Internal mapping to keep track of the enablement status of each role.
-    mapping(bytes32 => bool) private _rolesEnabled;
+    mapping(bytes32 role => bool isEnabled) private _rolesEnabled;
 
     /// @dev Boolean that indicates if non-ERC20 whitelists are enabled or not
     bool private _whitelistsEnabled;
