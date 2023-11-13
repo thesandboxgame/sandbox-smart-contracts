@@ -48,7 +48,7 @@ describe('OrderValidator.sol', function () {
 
   it('initialization should fail if roles and permissions lenghts are different', async function () {
     await expect(orderValidatorFailSetup()).to.be.revertedWith(
-      'the lengths of roles and permissions should be equal'
+      'length role & permission differ'
     );
   });
 
