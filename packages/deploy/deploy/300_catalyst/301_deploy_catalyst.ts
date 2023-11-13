@@ -23,8 +23,8 @@ const func: DeployFunction = async function (
     await getNamedAccounts();
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
-  const OperatorFilterSubscription = await deployments.get(
-    'OperatorFilterSubscription'
+  const OperatorFilterCatalystSubscription = await deployments.get(
+    'OperatorFilterCatalystSubscription'
   );
   const RoyaltyManager = await deployments.get('RoyaltyManager');
 
@@ -40,7 +40,7 @@ const func: DeployFunction = async function (
         args: [
           CATALYST_BASE_URI,
           TRUSTED_FORWARDER.address,
-          OperatorFilterSubscription.address,
+          OperatorFilterCatalystSubscription.address,
           catalystAdmin, // DEFAULT_ADMIN_ROLE
           catalystMinter, // MINTER_ROLE
           CATALYST_IPFS_CID_PER_TIER,
@@ -55,7 +55,7 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['Catalyst', 'Catalyst_deploy', 'L2'];
 func.dependencies = [
-  'OperatorFilterSubscription_deploy',
+  'OperatorFilterCatalystSubscription_deploy',
   'RoyaltyManager_deploy',
   'TRUSTED_FORWARDER_V2',
 ];
