@@ -123,7 +123,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token Address of the token.
     /// @param tokenId ID of the token.
     /// @return An array containing royalty parts.
-    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
+    function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory) {
         uint256 royaltiesProviderData = royaltiesProviders[token];
 
         address royaltiesProvider = address(uint160(royaltiesProviderData));
