@@ -179,12 +179,12 @@ describe('LibOrder.sol fill', function () {
 
         await expect(
           libOrderMock.fillOrder(leftOrder, rightOrder, 2n, 0n)
-        ).to.be.revertedWithPanic(0x11);
+        ).to.be.revertedWith('takeAsset.value underflow');
 
         // swap orders
         await expect(
           libOrderMock.fillOrder(rightOrder, leftOrder, 0n, 2n)
-        ).to.be.revertedWithPanic(0x11);
+        ).to.be.revertedWith('takeAsset.value underflow');
       });
     });
     describe('zero', function () {
