@@ -232,7 +232,7 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('royalties sum more, than 100%');
+    ).to.be.revertedWith('royalties sum is more than 100%');
   });
 
   it('should set royalties by token', async function () {
