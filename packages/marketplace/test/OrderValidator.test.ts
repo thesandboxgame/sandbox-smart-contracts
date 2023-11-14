@@ -1,5 +1,5 @@
 import {
-  simpleDeployFixture,
+  simpleDeployFixtures,
   deployFixturesGrantRoleERC20,
 } from './fixtures/index.ts';
 import {orderValidatorFailSetup} from './fixtures/orderValidator';
@@ -46,7 +46,7 @@ describe('OrderValidator.sol', function () {
       user,
       user1,
       user2,
-    } = await loadFixture(simpleDeployFixture));
+    } = await loadFixture(simpleDeployFixtures));
   });
 
   it('initialization should fail if roles and permissions lenghts are different', async function () {
