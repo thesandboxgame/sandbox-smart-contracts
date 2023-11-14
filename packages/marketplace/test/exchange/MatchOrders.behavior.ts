@@ -57,6 +57,18 @@ export function shouldMatchOrders() {
         ERC1776_OPERATOR_ROLE,
       } = await loadFixture(deployFixtures));
 
+      const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
+
+      await OrderValidatorAsAdmin.grantRole(
+        ERC20Role,
+        await ERC20Contract.getAddress()
+      );
+
+      await OrderValidatorAsAdmin.grantRole(
+        ERC20Role,
+        await ERC20Contract2.getAddress()
+      );
+
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
         await ExchangeContractAsUser.getAddress(),

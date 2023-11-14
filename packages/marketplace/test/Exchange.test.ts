@@ -80,6 +80,17 @@ describe('Exchange.sol', function () {
       EXCHANGE_ADMIN_ROLE,
       PAUSER_ROLE,
     } = await loadFixture(deployFixtures));
+    const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
+
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
+
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract2.getAddress()
+    );
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe

@@ -78,9 +78,7 @@ export function shouldCheckForWhitelisting() {
         takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
       });
 
-      it('should NOT execute a complete match order between ERC20 tokens if whitelisting for ERC20 is ON', async function () {
-        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
-        await OrderValidatorAsAdmin.enableRole(ERC20_ROLE);
+      it('should NOT execute a complete match order between ERC20 tokens', async function () {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
@@ -93,9 +91,8 @@ export function shouldCheckForWhitelisting() {
         ).to.be.revertedWith('payment token not allowed');
       });
 
-      it('should execute a complete match order between ERC20 tokens if added to whitelist and ERC20 is ON', async function () {
+      it('should execute a complete match order between ERC20 tokens if added to whitelist', async function () {
         const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
-        await OrderValidatorAsAdmin.enableRole(ERC20_ROLE);
         await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract2);
 
@@ -160,6 +157,8 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
+        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+        await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         await OrderValidatorAsAdmin.enableWhitelists();
         const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
         await OrderValidatorAsAdmin.enableRole(TSB_ROLE);
@@ -184,6 +183,8 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
+        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+        await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         await OrderValidatorAsAdmin.disableWhitelists();
         const TSB_ROLE = await OrderValidatorAsAdmin.TSB_ROLE();
         await OrderValidatorAsAdmin.enableRole(TSB_ROLE);
@@ -207,6 +208,8 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
+        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+        await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         await OrderValidatorAsAdmin.enableWhitelists();
         const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
         await OrderValidatorAsAdmin.enableRole(PARTNER_ROLE);
@@ -231,6 +234,8 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
+        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+        await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         await OrderValidatorAsAdmin.disableWhitelists();
         const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
         await OrderValidatorAsAdmin.enableRole(PARTNER_ROLE);
@@ -249,7 +254,7 @@ export function shouldCheckForWhitelisting() {
         ]);
       });
 
-      it('should allow ERC721 tokens exchange if TSB_ROLE and PARTNER_ROLE are activated but so is open', async function () {
+      it('should allow ERC721 tokens exchange if TSB_ROLE and PARTNER_ROLE are activated but whitelist is disabled', async function () {
         expect(
           await ExchangeContractAsUser.fills(hashKey(orderLeft))
         ).to.be.equal(0);
@@ -257,12 +262,15 @@ export function shouldCheckForWhitelisting() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(0);
 
+        const ERC20_ROLE = await OrderValidatorAsAdmin.ERC20_ROLE();
+        await OrderValidatorAsAdmin.grantRole(ERC20_ROLE, ERC20Contract);
         const PARTNER_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
         const TSB_ROLE = await OrderValidatorAsAdmin.PARTNER_ROLE();
         await OrderValidatorAsAdmin.setRolesEnabled(
           [PARTNER_ROLE, TSB_ROLE],
           [true, true]
         );
+        await OrderValidatorAsAdmin.disableWhitelists();
 
         await ExchangeContractAsUser.matchOrders([
           {

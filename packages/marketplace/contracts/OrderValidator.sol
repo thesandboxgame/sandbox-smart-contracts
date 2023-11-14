@@ -70,7 +70,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
         address makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
+            if (!hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");
             }
         } else {

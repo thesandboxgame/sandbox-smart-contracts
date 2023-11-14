@@ -70,6 +70,13 @@ export function shouldMatchOrdersWithRoyalty() {
         10000000000
       );
       ERC20Asset = await AssetERC20(ERC20Contract, 10000000000);
+
+      const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
+
+      await OrderValidatorAsAdmin.grantRole(
+        ERC20Role,
+        await ERC20Contract.getAddress()
+      );
     });
 
     it('should execute a complete match order between ERC721 and ERC20 tokens in primary market', async function () {
