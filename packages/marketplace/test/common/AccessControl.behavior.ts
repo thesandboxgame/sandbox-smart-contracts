@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {simpleDeployFixtures} from '../fixtures/index.ts';
+import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {Contract, Signer} from 'ethers';
 
@@ -25,7 +25,7 @@ export function checkAccessControl(
         ExchangeContractAsUser,
         user,
         DEFAULT_ADMIN_ROLE,
-      } = await loadFixture(simpleDeployFixtures));
+      } = await loadFixture(deployFixtures));
       contractMap = {
         ExchangeContractAsAdmin: ExchangeContractAsAdmin,
         ExchangeContractAsUser: ExchangeContractAsUser,

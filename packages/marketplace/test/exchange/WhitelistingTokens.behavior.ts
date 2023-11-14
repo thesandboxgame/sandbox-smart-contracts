@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {simpleDeployFixtures} from '../fixtures/index.ts';
+import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -37,7 +37,7 @@ export function shouldCheckForWhitelisting() {
         ERC721WithRoyaltyV2981,
         user1: maker,
         user2: taker,
-      } = await loadFixture(simpleDeployFixtures));
+      } = await loadFixture(deployFixtures));
     });
 
     describe('ERC20 x ERC20', function () {
@@ -112,7 +112,7 @@ export function shouldCheckForWhitelisting() {
         ({
           deployer: maker, // making deployer the maker to sell in primary market
           user2: taker,
-        } = await loadFixture(simpleDeployFixtures));
+        } = await loadFixture(deployFixtures));
         await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
           await FeeRecipientsData(maker.getAddress(), 10000),
         ]);
