@@ -4,7 +4,7 @@ import {ZeroAddress} from 'ethers';
 import {exchangeSetup} from './exchange';
 import {mockAssetsSetup} from './assets';
 
-export async function simpleDeployFixture() {
+export async function simpleDeployFixtures() {
   const contracts = await deployFixtures();
   return {...contracts};
 }
