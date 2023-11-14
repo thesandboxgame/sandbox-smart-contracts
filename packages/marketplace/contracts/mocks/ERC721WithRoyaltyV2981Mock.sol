@@ -9,10 +9,6 @@ import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
 import {AbstractRoyaltiesMock} from "./AbstractRoyaltiesMock.sol";
 
 contract ERC721WithRoyaltyV2981Mock is Initializable, Royalties2981ImplMock, AbstractRoyaltiesMock, ERC721Upgradeable {
-    function initialize() public initializer {
-        __Ownable_init();
-    }
-
     function mint(address to, uint256 tokenId, Part[] memory _fees) external {
         _mint(to, tokenId);
         _saveRoyalties(tokenId, _fees);

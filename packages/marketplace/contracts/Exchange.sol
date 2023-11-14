@@ -51,8 +51,7 @@ contract Exchange is
     /// @param newDefaultFeeReceiver Market fee receiver.
     /// @param newRoyaltiesProvider Registry for the different types of royalties.
     /// @param orderValidatorAddress New OrderValidator contract address.
-    // solhint-disable-next-line func-name-mixedcase
-    function __Exchange_init(
+    function initialize(
         address admin,
         address newTrustedForwarder,
         uint256 newProtocolFeePrimary,

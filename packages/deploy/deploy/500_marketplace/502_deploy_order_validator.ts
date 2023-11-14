@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: '__OrderValidator_init_unchained',
+        methodName: 'initialize',
         args: [sandAdmin, [TSB_ROLE, PARTNER_ROLE], [false, false], false],
       },
       upgradeIndex: 0,

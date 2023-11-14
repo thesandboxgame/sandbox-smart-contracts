@@ -33,7 +33,7 @@ export async function exchangeSetup() {
       matchOrdersLimit,
     ],
     {
-      initializer: '__Exchange_init',
+      initializer: 'initialize',
     }
   );
 

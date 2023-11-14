@@ -18,7 +18,7 @@ export async function orderValidatorFailSetup() {
     OrderValidatorFactory,
     [admin.address, [TSBRole, PartnerRole], [false], false],
     {
-      initializer: '__OrderValidator_init_unchained',
+      initializer: 'initialize',
     }
   );
 }
@@ -33,7 +33,7 @@ export async function orderValidatorSetup() {
     OrderValidatorFactory,
     [admin.address, [TSBRole, PartnerRole], [false, false], false],
     {
-      initializer: '__OrderValidator_init_unchained',
+      initializer: 'initialize',
     }
   );
   const OrderValidatorUpgradeMock = await ethers.getContractFactory(

@@ -480,6 +480,7 @@ export function shouldMatchOrdersWithRoyalty() {
     });
 
     it('should execute a complete match order with royalties 2981(type 3) transferred to fee recipients', async function () {
+      await ERC721WithRoyaltyV2981.setRoyalties(5000);
       await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
         await FeeRecipientsData(receiver1.getAddress(), 3000),
         await FeeRecipientsData(receiver2.getAddress(), 7000),

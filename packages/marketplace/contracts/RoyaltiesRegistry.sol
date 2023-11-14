@@ -60,8 +60,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     }
 
     /// @notice Royalties registry initializer
-    // solhint-disable-next-line func-name-mixedcase
-    function __RoyaltiesRegistry_init() external initializer {
+    function initialize() external initializer {
         __Ownable_init();
     }
 

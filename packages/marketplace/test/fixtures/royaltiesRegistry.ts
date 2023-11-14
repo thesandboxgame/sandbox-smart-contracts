@@ -11,7 +11,7 @@ export async function royaltiesRegistrySetup() {
     RoyaltiesRegistryFactory,
     [],
     {
-      initializer: '__RoyaltiesRegistry_init',
+      initializer: 'initialize',
     }
   );
 
