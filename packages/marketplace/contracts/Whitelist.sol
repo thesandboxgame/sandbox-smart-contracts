@@ -57,14 +57,12 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @notice Enable a given role.
     /// @param role Identifier of the role to be enabled.
     function enableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _enableRole(role);
     }
 
     /// @notice Disable a given role.
     /// @param role Identifier of the role to be disabled.
     function disableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _disableRole(role);
     }
 
@@ -132,6 +130,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @dev Internal function to activate a role.
     /// @param role Identifier of the role to be enabled.
     function _enableRole(bytes32 role) internal {
+        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _rolesEnabled[role] = true;
         emit RoleEnabled(role);
     }
@@ -139,6 +138,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @dev Internal function to deactivate a role.
     /// @param role Identifier of the role to be disabled.
     function _disableRole(bytes32 role) internal {
+        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _rolesEnabled[role] = false;
         emit RoleDisabled(role);
     }
