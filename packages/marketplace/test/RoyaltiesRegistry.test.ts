@@ -1,4 +1,4 @@
-import {deployFixtures} from './fixtures';
+import {simpleDeployFixture} from './fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {ZeroAddress, Contract, Signer} from 'ethers';
@@ -26,7 +26,7 @@ describe('RoyaltiesRegistry.sol', function () {
       RoyaltyInfo,
       user1,
       user2,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(simpleDeployFixture));
   });
 
   it('should upgrade the contract successfully', async function () {

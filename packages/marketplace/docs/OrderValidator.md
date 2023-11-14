@@ -52,8 +52,8 @@ We separate tokens into 2 categories:
 - payment tokens (ERC20)
 - collections (ERC1155 or ERC721).
 
-ERC20 tokens are controlled by the ER20_ROLE, if this role is activated, only
-tokens with said role can be exchange.
+ERC20 tokens are controlled by the ER20_ROLE, this role is always activated,
+only tokens with said role can be exchange.
 
 For collections two lists are available (Sandbox and Partners), only one is
 sufficient for a collection to be allowed. The whitelists for collections can be
