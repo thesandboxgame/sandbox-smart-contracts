@@ -16,7 +16,7 @@ import {BigNumber} from 'ethers';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
-  describe('General', () => {
+  describe('General', function () {
     it('Should have return correct name and symbol', async function () {
       const {AssetContract} = await runAssetSetup();
       expect(await AssetContract.name()).to.be.equal("The Sandbox's ASSETs");
