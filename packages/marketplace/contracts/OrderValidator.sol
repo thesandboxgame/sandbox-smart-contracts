@@ -26,8 +26,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param roles Array of role identifiers for the Whitelist contract.
     /// @param permissions Array of permissions associated with each role.
     /// @param whitelistsEnabled Boolean to indicate if whitelist functionality is enabled.
-    // solhint-disable-next-line func-name-mixedcase
-    function __OrderValidator_init_unchained(
+    function initialize(
         address admin,
         bytes32[] calldata roles,
         bool[] calldata permissions,

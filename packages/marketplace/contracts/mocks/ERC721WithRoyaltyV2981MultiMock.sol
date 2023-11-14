@@ -18,11 +18,6 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
 
     Recipient[] private _recipients;
 
-    function initialize() external initializer {
-        __Ownable_init();
-        setRoyalties(5000);
-    }
-
     function mint(address to, uint256 tokenId, Recipient[] memory _fees) external {
         _mint(to, tokenId);
         _setRecipients(_fees);
