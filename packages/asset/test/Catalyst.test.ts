@@ -15,7 +15,7 @@ import {BigNumber} from 'ethers';
 const catalystArray = [0, 1, 2, 3, 4, 5, 6];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
+describe.only('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
   describe('Contract setup', function () {
     it('Should deploy correctly', async function () {
       const {
@@ -37,6 +37,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.be.equals(true);
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
+    });
+    it('Should have return correct name and symbol', async function () {
+      const {catalyst} = await runCatalystSetup();
+      expect(await catalyst.name()).to.be.equal("The Sandbox's CATALYSTs");
+      expect(await catalyst.symbol()).to.be.equal('CATALYST');
     });
     describe('Interface support', function () {
       it('should support ERC165', async function () {
