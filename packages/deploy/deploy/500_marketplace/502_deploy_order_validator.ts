@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TSB_ROLE = utils.keccak256(utils.toUtf8Bytes('TSB_ROLE'));
   const PARTNER_ROLE = utils.keccak256(utils.toUtf8Bytes('PARTNER_ROLE'));
-  const ERC20_ROLE = utils.keccak256(utils.toUtf8Bytes('ERC20_ROLE'));
 
   await deploy('OrderValidator', {
     from: deployer,
@@ -20,12 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: '__OrderValidator_init_unchained',
-        args: [
-          sandAdmin,
-          [TSB_ROLE, PARTNER_ROLE],
-          [false, false],
-          false,
-        ],
+        args: [sandAdmin, [TSB_ROLE, PARTNER_ROLE], [false, false], false],
       },
       upgradeIndex: 0,
     },
