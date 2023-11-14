@@ -345,13 +345,10 @@ describe('OrderValidator.sol', function () {
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
-      false
-    );
 
     await OrderValidatorAsAdmin.setRolesEnabled(
-      [TSBRole, PartnerRole, ERC20Role],
-      [true, true, true]
+      [TSBRole, PartnerRole],
+      [true, true]
     );
     await OrderValidatorAsAdmin.enableWhitelists();
 
@@ -362,9 +359,6 @@ describe('OrderValidator.sol', function () {
       true
     );
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
-      true
-    );
   });
 
   it('should not be able to add token to tsb list if caller is not owner', async function () {
