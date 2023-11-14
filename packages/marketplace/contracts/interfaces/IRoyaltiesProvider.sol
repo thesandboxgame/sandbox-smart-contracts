@@ -18,6 +18,6 @@ interface IRoyaltiesProvider {
     /// @notice Calculates all roaylties in token for tokenId
     /// @param token Address of token
     /// @param tokenId of the token we want to calculate royalites
-    /// @return A LibPart.Part with all royalties for token
+    /// @return A part with all royalties for token
     function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
 }

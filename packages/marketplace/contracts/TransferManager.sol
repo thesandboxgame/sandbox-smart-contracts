@@ -85,8 +85,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
     }
 
     /// @notice Executes transfers for 2 matched orders
-    /// @param left DealSide from the left order (see LibDeal.sol)
-    /// @param right DealSide from the right order (see LibDeal.sol)
+    /// @param left DealSide from the left order
+    /// @param right DealSide from the right order
     /// @dev This is the main entry point, when used as a separated contract this method will be external
     function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
         DealSide memory paymentSide;
