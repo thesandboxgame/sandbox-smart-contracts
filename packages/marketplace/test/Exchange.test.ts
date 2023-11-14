@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from './fixtures/index.ts';
+import {deployFixturesGrantRoleERC20} from './fixtures/index.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -79,18 +79,7 @@ describe('Exchange.sol', function () {
       user,
       EXCHANGE_ADMIN_ROLE,
       PAUSER_ROLE,
-    } = await loadFixture(deployFixtures));
-    const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
-
-    await OrderValidatorAsAdmin.grantRole(
-      ERC20Role,
-      await ERC20Contract.getAddress()
-    );
-
-    await OrderValidatorAsAdmin.grantRole(
-      ERC20Role,
-      await ERC20Contract2.getAddress()
-    );
+    } = await loadFixture(deployFixturesGrantRoleERC20));
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
