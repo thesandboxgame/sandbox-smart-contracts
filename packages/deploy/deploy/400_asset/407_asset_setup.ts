@@ -24,31 +24,45 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Asset MODERATOR_ROLE granted to ${assetAdmin}`);
   }
 
-  await catchUnknownSigner(
-    execute(
-      'RoyaltyManager',
-      {from: contractRoyaltySetter, log: true},
-      'setContractRoyalty',
-      Asset.address,
-      DEFAULT_BPS
-    )
-  );
-  log(`Asset set on RoyaltyManager with ${DEFAULT_BPS} BPS royalty`);
+  if (
+    (await read('RoyaltyManager', 'getContractRoyalty', Asset.address)) !==
+    DEFAULT_BPS
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'RoyaltyManager',
+        {from: contractRoyaltySetter, log: true},
+        'setContractRoyalty',
+        Asset.address,
+        DEFAULT_BPS
+      )
+    );
+    log(`Asset set on RoyaltyManager with ${DEFAULT_BPS} BPS royalty`);
+  }
 
   const splitterDeployerRole = await read(
     'RoyaltyManager',
     'SPLITTER_DEPLOYER_ROLE'
   );
-  await catchUnknownSigner(
-    execute(
+  if (
+    !(await read(
       'RoyaltyManager',
-      {from: royaltyManagerAdmin, log: true},
-      'grantRole',
+      'hasRole',
       splitterDeployerRole,
       Asset.address
-    )
-  );
-  log(`Asset set on RoyaltyManager with Splitter Deployer Role`);
+    ))
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'RoyaltyManager',
+        {from: royaltyManagerAdmin, log: true},
+        'grantRole',
+        splitterDeployerRole,
+        Asset.address
+      )
+    );
+    log(`Asset set on RoyaltyManager with Splitter Deployer Role`);
+  }
 };
 
 export default func;

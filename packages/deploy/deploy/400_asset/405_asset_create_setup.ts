@@ -53,17 +53,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Catalyst BURNER_ROLE granted to ${assetCreate.address}`);
   }
 
-  await catchUnknownSigner(
-    execute(
-      'AuthSuperValidator',
-      {from: assetAdmin, log: true},
-      'setSigner',
-      assetCreate.address,
-      backendAuthWallet
-    )
-  );
-
-  log(`AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`);
+  if (
+    (
+      await read('AuthSuperValidator', 'getSigner', assetCreate.address)
+    ).toLowerCase() !== backendAuthWallet.toLowerCase()
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'AuthSuperValidator',
+        {from: assetAdmin, log: true},
+        'setSigner',
+        assetCreate.address,
+        backendAuthWallet
+      )
+    );
+    log(
+      `AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`
+    );
+  }
 };
 
 export default func;
