@@ -19,7 +19,7 @@ export async function orderValidatorFailSetup() {
   );
   await upgrades.deployProxy(
     OrderValidatorFactory,
-    [admin.address, [TSBRole, PartnerRole], [false, false, false], false],
+    [admin.address, [TSBRole, PartnerRole], [false], false],
     {
       initializer: '__OrderValidator_init_unchained',
     }
@@ -34,12 +34,7 @@ export async function orderValidatorSetup() {
   );
   const OrderValidatorAsDeployer = await upgrades.deployProxy(
     OrderValidatorFactory,
-    [
-      admin.address,
-      [TSBRole, PartnerRole, ERC20Role],
-      [false, false, false],
-      false,
-    ],
+    [admin.address, [TSBRole, PartnerRole], [false, false], false],
     {
       initializer: '__OrderValidator_init_unchained',
     }

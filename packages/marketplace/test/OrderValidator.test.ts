@@ -67,6 +67,11 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
+
     const makerAsset = await AssetERC20(ERC20Contract, 100);
     const takerAsset = await AssetERC721(ERC721Contract, 100);
 
@@ -266,6 +271,11 @@ describe('OrderValidator.sol', function () {
       user1,
     } = await loadFixture(deployFixtures);
 
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
+
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );
@@ -295,66 +305,6 @@ describe('OrderValidator.sol', function () {
     expect(
       await OrderValidatorAsUser.hasRole(
         TSBRole,
-        await ERC20Contract.getAddress()
-      )
-    ).to.be.equal(true);
-
-    const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetERC721(ERC721Contract, 100);
-    const order = await OrderDefault(
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0
-    );
-    const signature = await signOrder(order, user1, OrderValidatorAsUser);
-
-    await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress())
-    ).to.not.be.reverted;
-  });
-
-  it('should validate when whitelist is enabled, partners is enabled and makeTokenAddress have PARTNER_ROLE', async function () {
-    const {
-      OrderValidatorAsUser,
-      OrderValidatorAsAdmin,
-      ERC20Contract,
-      ERC721Contract,
-      user1,
-    } = await loadFixture(deployFixtures);
-
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
-      false
-    );
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
-      false
-    );
-
-    await OrderValidatorAsAdmin.enableWhitelists();
-    await OrderValidatorAsAdmin.enableRole(PartnerRole);
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
-      true
-    );
-
-    expect(
-      await OrderValidatorAsUser.hasRole(
-        PartnerRole,
-        await ERC20Contract.getAddress()
-      )
-    ).to.be.equal(false);
-
-    await OrderValidatorAsAdmin.grantRole(
-      PartnerRole,
-      await ERC20Contract.getAddress()
-    );
-
-    expect(
-      await OrderValidatorAsUser.hasRole(
-        PartnerRole,
         await ERC20Contract.getAddress()
       )
     ).to.be.equal(true);

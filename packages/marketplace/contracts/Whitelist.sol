@@ -15,7 +15,7 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @notice Role for partner tokens
     /// @return Hash for PARTNER_ROLE
     bytes32 public constant PARTNER_ROLE = keccak256("PARTNER_ROLE");
-    /// @notice Role for ERC20 tokens
+    /// @notice Role for ERC20 tokens, enebled all times
     /// @return Hash for ERC20_ROLE
     bytes32 public constant ERC20_ROLE = keccak256("ERC20_ROLE");
 
@@ -57,12 +57,14 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @notice Enable a given role.
     /// @param role Identifier of the role to be enabled.
     function enableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _enableRole(role);
     }
 
     /// @notice Disable a given role.
     /// @param role Identifier of the role to be disabled.
     function disableRole(bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(role != ERC20_ROLE, "ERC20_ROLE is enebled all times");
         _disableRole(role);
     }
 

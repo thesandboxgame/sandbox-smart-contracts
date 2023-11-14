@@ -27,6 +27,13 @@ export function shouldMatchOrderForBatching() {
         user2: maker,
         user: taker,
       } = await loadFixture(deployFixtures));
+
+      const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
+
+      await OrderValidatorAsAdmin.grantRole(
+        ERC20Role,
+        await ERC20Contract.getAddress()
+      );
     });
 
     it('should be able to buy 2 tokens from different orders in one txs', async function () {
