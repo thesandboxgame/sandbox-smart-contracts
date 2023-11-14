@@ -32,7 +32,7 @@ const namedAccounts = {
   deployer: {
     default: 1,
     mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
-    polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
+    polygon: '0x114B1d9f0d546B8f85C4003dcd4ca5CbB7F6bC98',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
   }, // deploy contracts and make sure they are set up correctly
