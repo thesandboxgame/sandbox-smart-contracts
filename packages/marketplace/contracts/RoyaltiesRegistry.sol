@@ -65,7 +65,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         __Ownable_init();
     }
 
-    /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (4).
+    /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (2).
     /// @param token Address of the token.
     /// @param provider Address of the external royalties provider.
     function setProviderByToken(address token, address provider) external {

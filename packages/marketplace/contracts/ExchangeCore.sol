@@ -176,7 +176,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         );
     }
 
-    /// @notice Parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
+    /// @notice Parse orders to get the order data, then create a new fill with setFillEmitMatch()
     /// @param sender The message sender
     /// @param orderLeft Left order
     /// @param orderRight Right order
