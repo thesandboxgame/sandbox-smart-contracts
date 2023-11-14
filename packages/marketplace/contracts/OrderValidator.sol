@@ -33,7 +33,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         bool[] calldata permissions,
         bool whitelistsEnabled
     ) external initializer {
-        __EIP712_init_unchained("Exchange", "1");
+        __EIP712_init_unchained("The Sandbox Marketplace", "1.0.0");
         __Whitelist_init(admin, roles, permissions, whitelistsEnabled);
     }
 

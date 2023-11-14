@@ -178,7 +178,7 @@ describe('RoyaltiesRegistry.sol', function () {
   it('should not set royalties by token if caller is not owner', async function () {
     const part = {
       account: user1.getAddress(),
-      value: 1,
+      basisPoints: 1,
     };
     const royalties = [part];
     await expect(
@@ -192,7 +192,7 @@ describe('RoyaltiesRegistry.sol', function () {
   it('should not set royalties with token with a zero address recipient', async function () {
     const part = {
       account: ZeroAddress,
-      value: 1,
+      basisPoints: 1,
     };
     const royalties = [part];
     await expect(
@@ -203,10 +203,10 @@ describe('RoyaltiesRegistry.sol', function () {
     ).to.be.revertedWith('recipient should be present');
   });
 
-  it('should not set royalties with token with invalid royalty value', async function () {
+  it('should not set royalties with token with invalid royalty basisPoints', async function () {
     const part = {
       account: user1.getAddress(),
-      value: 0,
+      basisPoints: 0,
     };
     const royalties = [part];
     await expect(
@@ -214,17 +214,17 @@ describe('RoyaltiesRegistry.sol', function () {
         await ERC721WithRoyaltyV2981.getAddress(),
         royalties
       )
-    ).to.be.revertedWith('royalty value should be > 0');
+    ).to.be.revertedWith('basisPoints should be > 0');
   });
 
   it('should not set royalties with token when setting royalties exceeding 100%', async function () {
     const part1 = {
       account: user1.getAddress(),
-      value: 5000,
+      basisPoints: 5000,
     };
     const part2 = {
       account: user2.getAddress(),
-      value: 5000,
+      basisPoints: 5000,
     };
     const royalties = [part1, part2];
     await expect(
@@ -242,7 +242,7 @@ describe('RoyaltiesRegistry.sol', function () {
     );
     const part = {
       account: user1.getAddress(),
-      value: 1,
+      basisPoints: 1,
     };
     const royalties = [part];
     await expect(
@@ -274,7 +274,7 @@ describe('RoyaltiesRegistry.sol', function () {
   it('should getRoyalties for token with royaltiesType 1', async function () {
     const part = {
       account: user1.getAddress(),
-      value: 1,
+      basisPoints: 1,
     };
     const royalties = [part];
     await RoyaltiesRegistryAsDeployer.setRoyaltiesByToken(

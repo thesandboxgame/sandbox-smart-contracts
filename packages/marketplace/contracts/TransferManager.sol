@@ -9,7 +9,7 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -183,12 +183,12 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
             IRoyaltiesProvider.Part memory r = royalties[i];
-            totalRoyalties = totalRoyalties + r.value;
+            totalRoyalties = totalRoyalties + r.basisPoints;
             if (r.account == nftSide.account) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }
-            remainder = _transferPercentage(remainder, paymentSide, r.account, r.value, BASIS_POINTS);
+            remainder = _transferPercentage(remainder, paymentSide, r.account, r.basisPoints, TOTAL_BASIS_POINTS);
         }
         require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "royalties are too high (>50%)");
         return remainder;

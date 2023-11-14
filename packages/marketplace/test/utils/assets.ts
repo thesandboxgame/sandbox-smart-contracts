@@ -57,10 +57,10 @@ export const FeeRecipientsData = async (
 
 export const LibPartData = async (
   account: AddressLike,
-  value: Numeric
+  basisPoints: Numeric
 ): Promise<LibPart> => ({
   account,
-  value,
+  basisPoints,
 });
 
 export const AssetERC20 = async (

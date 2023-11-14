@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.19;
 
-// The IRoyaltiesProvider.Part.value represents percentages in base points: 2.5 % == 0.025 * 10000 == 250.
+// The IRoyaltiesProvider.Part.basisPoints represents percentages in base points: 2.5 % == 0.025 * 10000 == 250.
 // We expect external contracts to return the values with this precision.
-uint256 constant BASIS_POINTS = 10000;
+uint256 constant TOTAL_BASIS_POINTS = 10000;
 
 /// @author The Sandbox
 /// @title RoyaltiesProvider contract interface
@@ -12,7 +12,7 @@ uint256 constant BASIS_POINTS = 10000;
 interface IRoyaltiesProvider {
     struct Part {
         address account;
-        uint256 value;
+        uint256 basisPoints;
     }
 
     /// @notice Calculates all roaylties in token for tokenId
