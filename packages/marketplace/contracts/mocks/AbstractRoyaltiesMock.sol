@@ -11,8 +11,8 @@ abstract contract AbstractRoyaltiesMock {
         uint256 totalValue;
         for (uint256 i = 0; i < _royalties.length; ++i) {
             require(_royalties[i].account != address(0x0), "Recipient should be present");
-            require(_royalties[i].value != 0, "Royalty value should be positive");
-            totalValue += _royalties[i].value;
+            require(_royalties[i].basisPoints != 0, "basisPoints should be > 0");
+            totalValue += _royalties[i].basisPoints;
             royalties[id].push(_royalties[i]);
         }
         require(totalValue < 10000, "Royalty should be < 10000");

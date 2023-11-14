@@ -7,7 +7,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
-import {BASIS_POINTS} from "../interfaces/IRoyaltiesProvider.sol";
+import {TOTAL_BASIS_POINTS} from "../interfaces/IRoyaltiesProvider.sol";
 
 /// @title ERC721WithRoyaltyWithoutIROYALTYUGCMock Contract
 /// @dev Contract that do not supports IRoyaltyUGC.
@@ -60,6 +60,6 @@ contract ERC721WithRoyaltyWithoutIROYALTYUGCMock is Initializable, Royalties2981
             totalBPS += recipients[i].bps;
             _recipients.push(recipients[i]);
         }
-        require(totalBPS == BASIS_POINTS, "Total bps must be 10000");
+        require(totalBPS == TOTAL_BASIS_POINTS, "Total bps must be 10000");
     }
 }

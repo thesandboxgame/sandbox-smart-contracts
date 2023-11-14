@@ -385,8 +385,8 @@ export function shouldMatchOrdersWithRoyalty() {
       await ERC721WithRoyalty.setRoyalties(5000);
 
       const fees = [
-        {account: receiver1.getAddress(), value: 4000},
-        {account: receiver2.getAddress(), value: 5000},
+        {account: receiver1.getAddress(), basisPoints: 4000},
+        {account: receiver2.getAddress(), basisPoints: 5000},
       ];
       await ERC721WithRoyalty.mint(maker.getAddress(), 1, fees);
 
