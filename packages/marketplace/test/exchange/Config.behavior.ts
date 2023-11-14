@@ -1,6 +1,6 @@
 /* eslint-disable mocha/no-setup-in-describe */
 import {expect} from 'chai';
-import {simpleDeployFixtures} from '../fixtures';
+import {deployFixtures} from '../fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {checkAccessControl} from '../common/AccessControl.behavior';
@@ -25,7 +25,7 @@ export function exchangeConfig() {
         user2,
         EXCHANGE_ADMIN_ROLE,
         PAUSER_ROLE,
-      } = await loadFixture(simpleDeployFixtures));
+      } = await loadFixture(deployFixtures));
     });
 
     describe('roles', function () {
@@ -110,7 +110,7 @@ export function exchangeConfig() {
 
         it('should not unpause if caller is not in the role', async function () {
           const {ExchangeContractAsUser, EXCHANGE_ADMIN_ROLE, user} =
-            await loadFixture(simpleDeployFixtures);
+            await loadFixture(deployFixtures);
           await expect(ExchangeContractAsUser.unpause()).to.be.revertedWith(
             `AccessControl: account ${(
               await user.getAddress()
@@ -156,7 +156,7 @@ export function exchangeConfig() {
       });
 
       it('should not set setMatchOrdersLimit if caller is not in the role', async function () {
-        await loadFixture(simpleDeployFixtures);
+        await loadFixture(deployFixtures);
         const newMatchOrdersLimit = 200;
         await expect(
           ExchangeContractAsUser.setMatchOrdersLimit(newMatchOrdersLimit)
@@ -199,7 +199,7 @@ export function exchangeConfig() {
 
 function shouldNotBeAbleToSetAsZero(name, err) {
   it(`should not be able to ${name} as address zero`, async function () {
-    const {ExchangeContractAsAdmin} = await loadFixture(simpleDeployFixtures);
+    const {ExchangeContractAsAdmin} = await loadFixture(deployFixtures);
     await expect(ExchangeContractAsAdmin[name](ZeroAddress)).to.revertedWith(
       err
     );

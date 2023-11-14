@@ -4,27 +4,7 @@ import {ZeroAddress} from 'ethers';
 import {exchangeSetup} from './exchange';
 import {mockAssetsSetup} from './assets';
 
-export async function simpleDeployFixtures() {
-  const contracts = await deployFixtures();
-  return {...contracts};
-}
-export async function deployFixturesGrantRoleERC20() {
-  const contracts = await deployFixtures();
-  const {OrderValidatorAsAdmin, ERC20Contract, ERC20Contract2} = contracts;
-
-  const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
-
-  await OrderValidatorAsAdmin.grantRole(
-    ERC20Role,
-    await ERC20Contract.getAddress()
-  );
-  await OrderValidatorAsAdmin.grantRole(
-    ERC20Role,
-    await ERC20Contract2.getAddress()
-  );
-  return {...contracts};
-}
-async function deployFixtures() {
+export async function deployFixtures() {
   const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
@@ -56,4 +36,20 @@ async function deployFixtures() {
     defaultFeeReceiver,
     ZERO_ADDRESS: ZeroAddress,
   };
+}
+export async function deployFixturesGrantRoleERC20() {
+  const contracts = await deployFixtures();
+  const {OrderValidatorAsAdmin, ERC20Contract, ERC20Contract2} = contracts;
+
+  const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
+
+  await OrderValidatorAsAdmin.grantRole(
+    ERC20Role,
+    await ERC20Contract.getAddress()
+  );
+  await OrderValidatorAsAdmin.grantRole(
+    ERC20Role,
+    await ERC20Contract2.getAddress()
+  );
+  return {...contracts};
 }
