@@ -78,7 +78,7 @@ export function shouldCheckForWhitelisting() {
         takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
       });
 
-      it('should NOT execute a complete match order between ERC20 tokens', async function () {
+      it('should NOT execute a complete match order between ERC20 tokens if tokens are not whitelisted', async function () {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
