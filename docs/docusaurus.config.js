@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'The Sandbox Smart Contracts',
+  title: 'The Sandbox Smart Contracts Docs',
   tagline: '',
   favicon: 'img/favicon.ico',
 
