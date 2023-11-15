@@ -1,6 +1,6 @@
 import {
+  deployFixturesWithoutWhitelist,
   deployFixtures,
-  deployFixturesGrantRoleERC20,
 } from './fixtures/index.ts';
 import {orderValidatorFailSetup} from './fixtures/orderValidator';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
@@ -46,7 +46,7 @@ describe('OrderValidator.sol', function () {
       user,
       user1,
       user2,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(deployFixturesWithoutWhitelist));
   });
 
   it('initialization should fail if roles and permissions lenghts are different', async function () {
@@ -272,7 +272,7 @@ describe('OrderValidator.sol', function () {
       ERC20Contract,
       ERC721Contract,
       user1,
-    } = await loadFixture(deployFixturesGrantRoleERC20);
+    } = await loadFixture(deployFixtures);
 
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false

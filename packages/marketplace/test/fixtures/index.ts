@@ -4,7 +4,7 @@ import {ZeroAddress} from 'ethers';
 import {exchangeSetup} from './exchange';
 import {mockAssetsSetup} from './assets';
 
-export async function deployFixtures() {
+export async function deployFixturesWithoutWhitelist() {
   const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
@@ -37,8 +37,8 @@ export async function deployFixtures() {
     ZERO_ADDRESS: ZeroAddress,
   };
 }
-export async function deployFixturesGrantRoleERC20() {
-  const contracts = await deployFixtures();
+export async function deployFixtures() {
+  const contracts = await deployFixturesWithoutWhitelist();
   const {OrderValidatorAsAdmin, ERC20Contract, ERC20Contract2} = contracts;
 
   const ERC20Role = await OrderValidatorAsAdmin.ERC20_ROLE();
