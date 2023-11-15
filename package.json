@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "workspaces": {
         "packages": [
-            "packages/*"
+            "packages/*",
+            "docs"
         ]
     },
     "private": true,
