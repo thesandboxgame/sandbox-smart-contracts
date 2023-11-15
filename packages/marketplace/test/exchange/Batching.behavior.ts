@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixturesGrantRoleERC20} from '../fixtures/index.ts';
+import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {AssetERC20, AssetERC721, Asset} from '../utils/assets.ts';
 
@@ -26,7 +26,7 @@ export function shouldMatchOrderForBatching() {
         ERC721Contract,
         user2: maker,
         user: taker,
-      } = await loadFixture(deployFixturesGrantRoleERC20));
+      } = await loadFixture(deployFixtures));
     });
 
     it('should be able to buy 2 tokens from different orders in one txs', async function () {

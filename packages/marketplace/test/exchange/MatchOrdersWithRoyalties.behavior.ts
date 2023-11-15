@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixturesGrantRoleERC20} from '../fixtures/index.ts';
+import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -62,7 +62,7 @@ export function shouldMatchOrdersWithRoyalty() {
         user: receiver2,
         deployer: royaltyReceiver,
         EXCHANGE_ADMIN_ROLE,
-      } = await loadFixture(deployFixturesGrantRoleERC20));
+      } = await loadFixture(deployFixtures));
 
       await ERC20Contract.mint(taker.getAddress(), 10000000000);
       await ERC20Contract.connect(taker).approve(

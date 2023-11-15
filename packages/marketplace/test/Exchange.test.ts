@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixturesGrantRoleERC20} from './fixtures/index.ts';
+import {deployFixtures} from './fixtures/index.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -79,7 +79,7 @@ describe('Exchange.sol', function () {
       user,
       EXCHANGE_ADMIN_ROLE,
       PAUSER_ROLE,
-    } = await loadFixture(deployFixturesGrantRoleERC20));
+    } = await loadFixture(deployFixtures));
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
