@@ -312,5 +312,17 @@ contract Catalyst is
         emit OperatorRegistrySet(registry);
     }
 
+    /// @notice A descriptive name for the collection of tokens in this contract.
+    /// @return _name the name of the tokens.
+    function name() external pure returns (string memory _name) {
+        return "The Sandbox's CATALYSTs";
+    }
+
+    /// @notice An abbreviated name for the collection of tokens in this contract.
+    /// @return _symbol the symbol of the tokens.
+    function symbol() external pure returns (string memory _symbol) {
+        return "CATALYST";
+    }
+
     uint256[49] private __gap;
 }
