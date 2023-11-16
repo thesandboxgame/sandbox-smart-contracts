@@ -34,6 +34,7 @@ const namedAccounts = {
     mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
     polygon: '0x114B1d9f0d546B8f85C4003dcd4ca5CbB7F6bC98',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+    sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
   }, // deploy contracts and make sure they are set up correctly
 
@@ -42,6 +43,7 @@ const namedAccounts = {
     mainnet: '0x6ec4090d0F3cB76d9f3D8c4D5BB058A225E560a1',
     polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
   }, // can add super operators and change admin
 
@@ -93,6 +95,7 @@ const namedAccounts = {
     mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     polygon: '0xbc4fE9A8a46442eDaF13Bd5c615D7CFe0953885B',
     goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
+    sepolia: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
     mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
   },
 
@@ -113,6 +116,7 @@ const namedAccounts = {
   landSaleFeeRecipient: {
     default: 3,
     goerli: 5,
+    sepolia: 5,
     mumbai: 5,
     mainnet: 'sandSaleBeneficiary',
     polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
@@ -121,6 +125,7 @@ const namedAccounts = {
   exchangeFeeRecipient: {
     default: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
     goerli: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    sepolia: '',
     mumbai: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
     mainnet: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
     polygon: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
@@ -131,6 +136,7 @@ const namedAccounts = {
     mainnet: 'sandAdmin',
     polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa',
     goerli: 'sandAdmin',
+    sepolia: 'sandAdmin',
     mumbai: 'sandAdmin',
   }, // can add super operators and change admin
 
@@ -139,8 +145,9 @@ const namedAccounts = {
   proxyAdminOwner: {
     default: 2,
     mainnet: 'sandAdmin',
-    polygon: 'landAdmin',
+    polygon: 'sandAdmin',
     goerli: 'sandAdmin',
+    sepolia: 'sandAdmin',
     mumbai: 'sandAdmin',
   },
 
@@ -156,6 +163,7 @@ const namedAccounts = {
     mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
     polygon: '0x3044719d139F866a44c988823513eCB93060bF1b',
     goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+    sepolia: '',
     mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
   },
   // To be used with AuthValidator only
@@ -165,6 +173,7 @@ const namedAccounts = {
     default: 'backendReferralWallet',
     mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
     goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+    sepolia: '',
     polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
     mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
   },
@@ -192,6 +201,7 @@ const namedAccounts = {
     mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
     polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
     goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+    sepolia: '',
   },
   sandboxFoundation: {
     default: 'sandAdmin',
@@ -202,6 +212,7 @@ const namedAccounts = {
     default: null,
     mainnet: null,
     goerli: 'sandboxAccount', // Leon account on demo.sandbox
+    sepolia: '',
   },
   defaultOperatorFiltererRegistry: '0x000000000000AAeB6D7670E522A718067333cd4E',
   defaultOperatorFiltererSubscription:
@@ -223,6 +234,7 @@ const namedAccounts = {
     mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
     polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
     goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
+    sepolia: '',
     mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
   },
   landMigrationBatchExecutor: 'ozdRelayer',
@@ -253,6 +265,12 @@ const networks = {
   goerli: {
     tags: ['L1'],
     // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
+    companionNetworks: {
+      l2: 'mumbai',
+    },
+  },
+  sepolia: {
+    tags: ['L1'],
     companionNetworks: {
       l2: 'mumbai',
     },
