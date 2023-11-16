@@ -240,7 +240,7 @@ const config: HardhatUserConfig = {
       polygon: '0x3044719d139F866a44c988823513eCB93060bF1b',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
-      sepolia: '',
+      sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
     // To be used with AuthValidator only
@@ -251,7 +251,7 @@ const config: HardhatUserConfig = {
       mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       goerli_test: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
-      sepolia: '',
+      sepolia: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
@@ -274,7 +274,7 @@ const config: HardhatUserConfig = {
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      sepolia: '',
+      sepolia: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     sandboxFoundation: {
       default: 'sandAdmin',
@@ -286,7 +286,7 @@ const config: HardhatUserConfig = {
       mainnet: null,
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      sepolia: '',
+      sepolia: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     defaultOperatorFiltererRegistry:
       '0x000000000000AAeB6D7670E522A718067333cd4E',
@@ -309,7 +309,7 @@ const config: HardhatUserConfig = {
       mainnet: '0x0073e6eb087019bdb7bede02d23aeb068b74af99',
       polygon: '0x7051cb544c4a8d5aad1be46cc9524e48108e60b4',
       goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
-      sepolia: '',
+      sepolia: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
     },
     landMigrationBatchExecutor: 'ozdRelayer',
