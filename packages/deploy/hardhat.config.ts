@@ -163,7 +163,7 @@ const namedAccounts = {
     mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
     polygon: '0x3044719d139F866a44c988823513eCB93060bF1b',
     goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
-    sepolia: '',
+    sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
   },
   // To be used with AuthValidator only
