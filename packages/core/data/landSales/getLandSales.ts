@@ -307,7 +307,7 @@ export async function getLandSaleFiles(
   } else {
     secret = loadSecret(secretPath);
     if (!secret && hre.network.tags.mainnet)
-      throw new Error('LandPreSale secret not found');
+      throw new Error(`LandPreSale secret not found.`);
     else secret = generateSecret(secretPath);
   }
   const sectors = (await import(sectorPath)).default;
@@ -320,7 +320,7 @@ function loadSecret(path: string) {
   try {
     secret = fs.readFileSync(path).toString();
   } catch {
-    console.log('LandPreSale secret not found.');
+    console.log(`LandPreSale secret not found ${path}`);
   }
   return secret;
 }
