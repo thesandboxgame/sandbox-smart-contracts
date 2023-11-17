@@ -15,9 +15,9 @@ interface IRoyaltiesProvider {
         uint256 basisPoints;
     }
 
-    /// @notice Calculates all roaylties in token for tokenId
+    /// @notice Calculates all royalties in token for tokenId
     /// @param token Address of token
-    /// @param tokenId of the token we want to calculate royalites
+    /// @param tokenId of the token we want to calculate royalties
     /// @return A part with all royalties for token
     function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
 }
