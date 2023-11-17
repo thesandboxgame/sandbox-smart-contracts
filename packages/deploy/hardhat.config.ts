@@ -7,6 +7,7 @@ import {
   addForkingSupport,
   addNodeAndMnemonic,
   skipDeploymentsOnLiveNetworks,
+  skipShanghaiIfNeeded,
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
 
@@ -286,12 +287,14 @@ const networks = {
     companionNetworks: {
       l1: 'goerli',
     },
+    dontSupportShanghai: true,
   },
   polygon: {
     tags: ['mainnet', 'L2'],
     companionNetworks: {
       l1: 'mainnet',
     },
+    dontSupportShanghai: true,
   },
 };
 
@@ -315,18 +318,20 @@ const compilers = [
   },
 }));
 
-const config = skipDeploymentsOnLiveNetworks(
-  addForkingSupport({
-    importedPackages,
-    namedAccounts,
-    networks: addNodeAndMnemonic(networks),
-    mocha: {
-      timeout: 0,
-      ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
-    },
-    solidity: {
-      compilers,
-    },
-  })
+const config = skipShanghaiIfNeeded(
+  skipDeploymentsOnLiveNetworks(
+    addForkingSupport({
+      importedPackages,
+      namedAccounts,
+      networks: addNodeAndMnemonic(networks),
+      mocha: {
+        timeout: 0,
+        ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
+      },
+      solidity: {
+        compilers,
+      },
+    })
+  )
 );
 export default config;
