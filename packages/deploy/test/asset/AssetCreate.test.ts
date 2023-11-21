@@ -1,11 +1,12 @@
 import {expect} from 'chai';
 import {deployments} from 'hardhat';
+import {withSnapshot} from '../../utils/testUtils';
 
-const setupTest = deployments.createFixture(
-  async ({deployments, getNamedAccounts, ethers}) => {
+const setupTest = withSnapshot(
+  ['Asset'],
+  async ({getNamedAccounts, ethers}) => {
     const {assetAdmin, backendAuthWallet, assetPauser} =
       await getNamedAccounts();
-    await deployments.fixture();
     const Asset = await deployments.get('Asset');
     const AssetContract = await ethers.getContractAt('Asset', Asset.address);
     const AssetCreate = await deployments.get('AssetCreate');
