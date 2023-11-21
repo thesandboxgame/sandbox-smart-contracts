@@ -17,11 +17,11 @@ optimizer_runs = 200
 
 [rpc_endpoints]
 default = "http://localhost:8545"
-mumbai = "https://rpc-mumbai.maticvigil.com/"
+mumbai = "${MUMBAI_RPC_URL}"
 
 # ETHERSCAN SETTINGS
 
 [etherscan]
-mumbai = { key = "YOUR_API_KEY_HERE" }
+mumbai = { key = "${MUMBAI_POLYGONSCAN_API_KEY}" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
