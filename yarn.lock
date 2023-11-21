@@ -2377,6 +2377,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sandbox-smart-contracts/example-foundry@workspace:packages/example-foundry":
+  version: 0.0.0-use.local
+  resolution: "@sandbox-smart-contracts/example-foundry@workspace:packages/example-foundry"
+  dependencies:
+    "@openzeppelin/contracts": 4.9.3
+    "@openzeppelin/contracts-upgradeable": 4.9.3
+    eslint: ^8.41.0
+    prettier: ^2.8.8
+    prettier-plugin-solidity: 1.0.0-beta.11
+    solhint: ^3.6.2
+  languageName: unknown
+  linkType: soft
+
 "@sandbox-smart-contracts/example-hardhat@workspace:packages/example-hardhat":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/example-hardhat@workspace:packages/example-hardhat"
