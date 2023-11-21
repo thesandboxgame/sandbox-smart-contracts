@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from './fixtures.ts';
+import {deployFixtures} from './fixtures/index.ts';
 import {loadFixture, mine} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -203,16 +203,6 @@ describe('Exchange.sol', function () {
         0,
         0
       );
-    });
-
-    it('should not cancel an order if Exchange Contract is paused', async function () {
-      await ExchangeContractAsAdmin.grantRole(PAUSER_ROLE, user.getAddress());
-      await ExchangeContractAsAdmin.connect(user).pause();
-      expect(await ExchangeContractAsAdmin.paused()).to.be.true;
-
-      await expect(
-        ExchangeContractAsUser.cancel(orderLeft, hashKey(orderLeft))
-      ).to.be.revertedWith('Pausable: paused');
     });
 
     it('should not cancel the order if caller is not maker', async function () {

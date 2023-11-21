@@ -1,7 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-// TODO this should not be hardcoded here
 export const royaltyAmount = 500;
 
 const func: DeployFunction = async function (
@@ -20,7 +19,7 @@ const func: DeployFunction = async function (
       {from: contractRoyaltySetter},
       'contractRoyalty',
       catalyst.address
-    )) === 0
+    )) !== royaltyAmount
   ) {
     await catchUnknownSigner(
       execute(

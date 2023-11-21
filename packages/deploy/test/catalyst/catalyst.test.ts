@@ -1,5 +1,8 @@
 import {royaltyAmount} from '../../deploy/300_catalyst/302_catalyst_setup';
-import {OPERATOR_FILTER_REGISTRY} from './../../../asset/data/constants';
+import {
+  DEFAULT_SUBSCRIPTION,
+  OPERATOR_FILTER_REGISTRY,
+} from './../../../asset/data/constants';
 import {expect} from 'chai';
 import {OperatorFilterRegistryBytecode} from '../../utils/bytecodes';
 import {OperatorFilterRegistry_ABI} from '../../utils/abi';
@@ -7,7 +10,8 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const {catalystAdmin, catalystMinter} = await getNamedAccounts();
+    const {catalystAdmin, catalystMinter, sandAdmin} = await getNamedAccounts();
+
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryBytecode,
@@ -17,12 +21,45 @@ const setupTest = deployments.createFixture(
       OPERATOR_FILTER_REGISTRY
     );
 
+    await network.provider.send('hardhat_setBalance', [
+      DEFAULT_SUBSCRIPTION,
+      '0xDE0B6B3A7640000',
+    ]);
+
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [DEFAULT_SUBSCRIPTION],
+    });
+
+    const defaultSubscriptionSigner = await ethers.getSigner(
+      DEFAULT_SUBSCRIPTION
+    );
+
+    if (
+      !(await OperatorFilterRegistryContract.isRegistered(DEFAULT_SUBSCRIPTION))
+    ) {
+      await OperatorFilterRegistryContract.connect(
+        defaultSubscriptionSigner
+      ).register(DEFAULT_SUBSCRIPTION);
+    }
+
+    await network.provider.request({
+      method: 'hardhat_stopImpersonatingAccount',
+      params: [DEFAULT_SUBSCRIPTION],
+    });
+
     await deployments.fixture([
       'MockERC1155MarketPlace1',
       'MockERC1155MarketPlace2',
       'MockERC1155MarketPlace3',
       'MockERC1155MarketPlace4',
+      'OperatorFilterCatalystSubscription',
+      'Catalyst',
     ]);
+
+    const OperatorFilterCatalystSubscription = await deployments.get(
+      'OperatorFilterCatalystSubscription'
+    );
 
     const MockERC1155MarketPlace1 = await deployments.get(
       'MockERC1155MarketPlace1'
@@ -36,59 +73,35 @@ const setupTest = deployments.createFixture(
     const MockERC1155MarketPlace4 = await deployments.get(
       'MockERC1155MarketPlace4'
     );
-    await network.provider.send('hardhat_setBalance', [
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
-      '0xDE0B6B3A7640000',
-    ]);
-    await network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
-    });
-    const signer = await ethers.getSigner(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
-    );
-    const tx = await OperatorFilterRegistryContract.connect(signer).register(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
-    );
+
+    const subscriptionOwner = await ethers.getSigner(sandAdmin);
+
     const MockMarketPlace1CodeHash =
-      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+      await OperatorFilterRegistryContract.codeHashOf(
         MockERC1155MarketPlace1.address
       );
     const MockMarketPlace2CodeHash =
-      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+      await OperatorFilterRegistryContract.codeHashOf(
         MockERC1155MarketPlace2.address
       );
-    await tx.wait();
+
     const tx2 = await OperatorFilterRegistryContract.connect(
-      signer
+      subscriptionOwner
     ).updateOperators(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      OperatorFilterCatalystSubscription.address,
       [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
       true
     );
     await tx2.wait();
     const tx3 = await OperatorFilterRegistryContract.connect(
-      signer
+      subscriptionOwner
     ).updateCodeHashes(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
+      OperatorFilterCatalystSubscription.address,
       [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
       true
     );
     await tx3.wait();
-    await network.provider.request({
-      method: 'hardhat_stopImpersonatingAccount',
-      params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
-    });
 
-    await deployments.fixture('Catalyst');
-
-    const OperatorFilterSubscription = await deployments.get(
-      'OperatorFilterSubscription'
-    );
-    const OperatorFilterSubscriptionContract = await ethers.getContractAt(
-      OperatorFilterSubscription.abi,
-      OperatorFilterSubscription.address
-    );
     const Catalyst = await deployments.get('Catalyst');
     const CatalystContract = await ethers.getContractAt(
       Catalyst.abi,
@@ -110,7 +123,7 @@ const setupTest = deployments.createFixture(
 
     return {
       CatalystContract,
-      OperatorFilterSubscriptionContract,
+      OperatorFilterCatalystSubscription,
       RoyaltyManagerContract,
       catalystAdmin,
       TRUSTED_FORWARDER,
@@ -172,13 +185,13 @@ describe('Catalyst', function () {
       const {
         OperatorFilterRegistryContract,
         CatalystContract,
-        OperatorFilterSubscriptionContract,
+        OperatorFilterCatalystSubscription,
       } = await setupTest();
       expect(
         await OperatorFilterRegistryContract.subscriptionOf(
           CatalystContract.address
         )
-      ).to.be.equal(OperatorFilterSubscriptionContract.address);
+      ).to.be.equal(OperatorFilterCatalystSubscription.address);
     });
     it('catalyst contract has correct market places black listed', async function () {
       const {

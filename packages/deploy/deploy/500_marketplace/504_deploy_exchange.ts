@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: '__Exchange_init',
+        methodName: 'initialize',
         args: [
           sandAdmin,
           TRUSTED_FORWARDER.address,

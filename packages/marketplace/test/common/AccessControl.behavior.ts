@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures.ts';
+import {deployFixturesWithoutWhitelist} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {Contract, Signer} from 'ethers';
 
@@ -25,7 +25,7 @@ export function checkAccessControl(
         ExchangeContractAsUser,
         user,
         DEFAULT_ADMIN_ROLE,
-      } = await loadFixture(deployFixtures));
+      } = await loadFixture(deployFixturesWithoutWhitelist));
       contractMap = {
         ExchangeContractAsAdmin: ExchangeContractAsAdmin,
         ExchangeContractAsUser: ExchangeContractAsUser,
@@ -48,7 +48,9 @@ export function checkAccessControl(
 
       it(`should be able to ${functionName[i]}`, async function () {
         await expect(
-          contractMap[adminContract[i]][functionName[i]](user.getAddress())
+          contractMap[adminContract[i]][functionName[i]](
+            contractMap[adminContract[i]].getAddress()
+          )
         ).to.emit(ExchangeContractAsAdmin, eventName[i]);
       });
     }

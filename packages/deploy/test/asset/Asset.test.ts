@@ -1,4 +1,7 @@
-import {OPERATOR_FILTER_REGISTRY} from './../../../asset/data/constants';
+import {
+  DEFAULT_SUBSCRIPTION,
+  OPERATOR_FILTER_REGISTRY,
+} from './../../../asset/data/constants';
 import {DEFAULT_BPS} from '../../deploy/400_asset/407_asset_setup';
 import {expect} from 'chai';
 import {deployments} from 'hardhat';
@@ -7,8 +10,8 @@ import {OperatorFilterRegistry_ABI} from '../../utils/abi';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const {deployer, assetAdmin, filterOperatorSubscription, sandAdmin} =
-      await getNamedAccounts();
+    const {deployer, assetAdmin, sandAdmin} = await getNamedAccounts();
+
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryBytecode,
@@ -18,12 +21,38 @@ const setupTest = deployments.createFixture(
       OPERATOR_FILTER_REGISTRY
     );
 
-    await deployments.fixture([
-      'MockERC1155MarketPlace1',
-      'MockERC1155MarketPlace2',
-      'MockERC1155MarketPlace3',
-      'MockERC1155MarketPlace4',
+    await network.provider.send('hardhat_setBalance', [
+      DEFAULT_SUBSCRIPTION,
+      '0xDE0B6B3A7640000',
     ]);
+
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [DEFAULT_SUBSCRIPTION],
+    });
+
+    const defaultSubscriptionSigner = await ethers.getSigner(
+      DEFAULT_SUBSCRIPTION
+    );
+
+    if (
+      !(await OperatorFilterRegistryContract.isRegistered(DEFAULT_SUBSCRIPTION))
+    ) {
+      await OperatorFilterRegistryContract.connect(
+        defaultSubscriptionSigner
+      ).register(DEFAULT_SUBSCRIPTION);
+    }
+
+    await network.provider.request({
+      method: 'hardhat_stopImpersonatingAccount',
+      params: [DEFAULT_SUBSCRIPTION],
+    });
+
+    await deployments.fixture();
+
+    const OperatorFilterAssetSubscription = await deployments.get(
+      'OperatorFilterAssetSubscription'
+    );
 
     const MockERC1155MarketPlace1 = await deployments.get(
       'MockERC1155MarketPlace1'
@@ -38,63 +67,33 @@ const setupTest = deployments.createFixture(
       'MockERC1155MarketPlace4'
     );
 
-    const deployerSigner = await ethers.getSigner(deployer);
-
-    const tx1 = await OperatorFilterRegistryContract.connect(
-      deployerSigner
-    ).register(filterOperatorSubscription);
-
-    await tx1.wait();
-
-    await network.provider.send('hardhat_setBalance', [
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6',
-      '0xDE0B6B3A7640000',
-    ]);
-    await network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
-    });
-    const signer = await ethers.getSigner(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
-    );
-    const tx = await OperatorFilterRegistryContract.connect(signer).register(
-      '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
-    );
-    await tx.wait();
+    const subscriptionOwner = await ethers.getSigner(sandAdmin);
     const MockMarketPlace1CodeHash =
-      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+      await OperatorFilterRegistryContract.codeHashOf(
         MockERC1155MarketPlace1.address
       );
     const MockMarketPlace2CodeHash =
-      await OperatorFilterRegistryContract.connect(signer).codeHashOf(
+      await OperatorFilterRegistryContract.codeHashOf(
         MockERC1155MarketPlace2.address
       );
 
-    const subscriptionSigner = await ethers.getSigner(
-      filterOperatorSubscription
-    );
     const tx2 = await OperatorFilterRegistryContract.connect(
-      subscriptionSigner
+      subscriptionOwner
     ).updateOperators(
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription.address,
       [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
       true
     );
     await tx2.wait();
     const tx3 = await OperatorFilterRegistryContract.connect(
-      subscriptionSigner
+      subscriptionOwner
     ).updateCodeHashes(
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription.address,
       [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
       true
     );
     await tx3.wait();
-    await network.provider.request({
-      method: 'hardhat_stopImpersonatingAccount',
-      params: ['0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'],
-    });
 
-    await deployments.fixture();
     const Asset = await deployments.get('Asset');
     const AssetContract = await ethers.getContractAt(Asset.abi, Asset.address);
     const AssetCreate = await deployments.get('AssetCreate');
@@ -133,7 +132,7 @@ const setupTest = deployments.createFixture(
       RoyaltyManagerContract,
       deployer,
       sandAdmin,
-      filterOperatorSubscription,
+      OperatorFilterAssetSubscription,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
@@ -205,13 +204,13 @@ describe('Asset', function () {
       const {
         OperatorFilterRegistryContract,
         AssetContract,
-        filterOperatorSubscription,
+        OperatorFilterAssetSubscription,
       } = await setupTest();
       expect(
         await OperatorFilterRegistryContract.subscriptionOf(
           AssetContract.address
         )
-      ).to.be.equal(filterOperatorSubscription);
+      ).to.be.equal(OperatorFilterAssetSubscription.address);
     });
     it('asset contract has correct market places black listed', async function () {
       const {

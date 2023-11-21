@@ -8,7 +8,7 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {Royalties2981ImplMock} from "./Royalties2981ImplMock.sol";
-import {BASIS_POINTS} from "../interfaces/IRoyaltiesProvider.sol";
+import {TOTAL_BASIS_POINTS} from "../interfaces/IRoyaltiesProvider.sol";
 
 contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock, ERC721Upgradeable {
     struct Recipient {
@@ -17,11 +17,6 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
     }
 
     Recipient[] private _recipients;
-
-    function initialize() external initializer {
-        __Ownable_init();
-        setRoyalties(5000);
-    }
 
     function mint(address to, uint256 tokenId, Recipient[] memory _fees) external {
         _mint(to, tokenId);
@@ -59,6 +54,6 @@ contract ERC721WithRoyaltyV2981MultiMock is Initializable, Royalties2981ImplMock
             totalBPS += recipients[i].bps;
             _recipients.push(recipients[i]);
         }
-        require(totalBPS == BASIS_POINTS, "Total bps must be 10000");
+        require(totalBPS == TOTAL_BASIS_POINTS, "Total bps must be 10000");
     }
 }

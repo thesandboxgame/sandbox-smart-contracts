@@ -26,14 +26,13 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param roles Array of role identifiers for the Whitelist contract.
     /// @param permissions Array of permissions associated with each role.
     /// @param whitelistsEnabled Boolean to indicate if whitelist functionality is enabled.
-    // solhint-disable-next-line func-name-mixedcase
-    function __OrderValidator_init_unchained(
+    function initialize(
         address admin,
         bytes32[] calldata roles,
         bool[] calldata permissions,
         bool whitelistsEnabled
     ) external initializer {
-        __EIP712_init_unchained("Exchange", "1");
+        __EIP712_init_unchained("The Sandbox Marketplace", "1.0.0");
         __Whitelist_init(admin, roles, permissions, whitelistsEnabled);
     }
 
@@ -65,15 +64,16 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @notice Verifies if the asset exchange is affected by the whitelist.
     /// @param asset Details of the asset to be verified.
     /// @dev If the asset type is ERC20, the ERC20_ROLE is checked.
+    /// @dev if ERC20_ROLE is enabled only tokens that have the role are accepted
     /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
         address makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
+            if (!hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");
             }
         } else {
-            if (isWhitelistsEnabled()) {
+            if (!isWhitelistsEnabled()) {
                 return;
             } else if (
                 (isRoleEnabled(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||

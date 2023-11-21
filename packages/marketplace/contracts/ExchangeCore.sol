@@ -3,6 +3,7 @@
 pragma solidity 0.8.19;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -13,6 +14,7 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
+    using AddressUpgradeable for address;
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
@@ -85,7 +87,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @notice Updates the OrderValidator contract address.
     /// @param contractAddress Address of the new OrderValidator contract.
     function _setOrderValidatorContract(IOrderValidator contractAddress) internal {
-        require(address(contractAddress) != address(0), "invalid order validator");
+        require(address(contractAddress).isContract(), "invalid order validator");
         orderValidator = contractAddress;
         emit OrderValidatorSet(contractAddress);
     }
@@ -174,7 +176,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         );
     }
 
-    /// @notice Parse orders with LibOrderDataGeneric parse() to get the order data, then create a new fill with setFillEmitMatch()
+    /// @notice Parse orders to get the order data, then create a new fill with setFillEmitMatch()
     /// @param sender The message sender
     /// @param orderLeft Left order
     /// @param orderRight Right order

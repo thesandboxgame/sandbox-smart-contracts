@@ -110,6 +110,7 @@ library LibOrder {
         LibOrder.Order calldata order,
         uint256 fill
     ) internal pure returns (uint256 makeValue, uint256 takeValue) {
+        require(order.takeAsset.value >= fill, "filling more than order permits");
         takeValue = order.takeAsset.value - fill;
         makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);
     }

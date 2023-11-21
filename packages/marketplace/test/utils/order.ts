@@ -116,8 +116,8 @@ export async function signOrder(
   const network = await verifyingContract.runner?.provider?.getNetwork();
   return account.signTypedData(
     {
-      name: 'Exchange',
-      version: '1',
+      name: 'The Sandbox Marketplace',
+      version: '1.0.0',
       chainId: network.chainId,
       verifyingContract: await verifyingContract.getAddress(),
     },

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {deployFixtures} from '../fixtures.ts';
+import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
   AssetERC20,
@@ -385,8 +385,8 @@ export function shouldMatchOrdersWithRoyalty() {
       await ERC721WithRoyalty.setRoyalties(5000);
 
       const fees = [
-        {account: receiver1.getAddress(), value: 4000},
-        {account: receiver2.getAddress(), value: 5000},
+        {account: receiver1.getAddress(), basisPoints: 4000},
+        {account: receiver2.getAddress(), basisPoints: 5000},
       ];
       await ERC721WithRoyalty.mint(maker.getAddress(), 1, fees);
 
@@ -480,6 +480,7 @@ export function shouldMatchOrdersWithRoyalty() {
     });
 
     it('should execute a complete match order with royalties 2981(type 3) transferred to fee recipients', async function () {
+      await ERC721WithRoyaltyV2981.setRoyalties(5000);
       await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
         await FeeRecipientsData(receiver1.getAddress(), 3000),
         await FeeRecipientsData(receiver2.getAddress(), 7000),
