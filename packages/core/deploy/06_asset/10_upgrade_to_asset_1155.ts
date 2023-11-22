@@ -60,7 +60,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'Asset_deploy', 'AssetERC1155', 'AssetERC1155_deploy'];
+func.tags = ['AssetERC1155', 'AssetERC1155_deploy'];
 func.dependencies = [
   'AssetERC721',
   'TRUSTED_FORWARDER',
