@@ -2239,4 +2239,56 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       });
     });
   });
+  describe('AssetV2', function () {
+    it('successfully upgrades to AssetV2', async function () {
+      const {AssetContract} = await runAssetSetup();
+      const AssetV2 = await ethers.getContractFactory('AssetV2');
+      expect(await upgrades.upgradeProxy(AssetContract.address, AssetV2)).to.not
+        .be.reverted;
+    });
+    it('successfully reinitializes', async function () {
+      const {AssetContract} = await runAssetSetup();
+      const AssetV2 = await ethers.getContractFactory('AssetV2');
+      const AsetV2Contract = await upgrades.upgradeProxy(
+        AssetContract.address,
+        AssetV2
+      );
+      expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
+    });
+    it('correctly returns the contract owner', async function () {
+      const {AssetContract, deployer} = await runAssetSetup();
+      const AssetV2 = await ethers.getContractFactory('AssetV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        AssetContract.address,
+        AssetV2
+      );
+      await AssetV2Contract.reinitialize();
+      expect(await AssetV2Contract.owner()).to.be.equals(deployer.address);
+    });
+    it('allows owner to transfer the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      const AssetV2 = await ethers.getContractFactory('AssetV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        AssetContract.address,
+        AssetV2
+      );
+      await AssetV2Contract.reinitialize();
+      await AssetV2Contract.transferOwnership(assetAdmin.address);
+      expect(await AssetV2Contract.owner()).to.be.equals(assetAdmin.address);
+    });
+    it('does not allow non-owner to transfer the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      const AssetV2 = await ethers.getContractFactory('AssetV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        AssetContract.address,
+        AssetV2
+      );
+      await AssetV2Contract.reinitialize();
+      await expect(
+        AssetV2Contract.connect(assetAdmin).transferOwnership(
+          assetAdmin.address
+        )
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
 });
