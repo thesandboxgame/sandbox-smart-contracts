@@ -74,6 +74,7 @@ export function generateAssetId(
 
 export async function runAssetSetup() {
   const [
+    deployer,
     assetAdmin,
     owner,
     secondOwner,
@@ -273,6 +274,7 @@ export async function runAssetSetup() {
     AssetContractAsBurner,
     AssetContractAsAdmin,
     owner,
+    deployer,
     assetAdmin,
     minter,
     burner,
