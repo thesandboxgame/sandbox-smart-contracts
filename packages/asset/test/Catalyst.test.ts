@@ -1961,4 +1961,56 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       });
     });
   });
+  describe('CatalystV2', function () {
+    it('successfully upgrades to CatalystV2', async function () {
+      const {catalyst} = await runCatalystSetup();
+      const CatalystV2 = await ethers.getContractFactory('CatalystV2');
+      expect(await upgrades.upgradeProxy(catalyst.address, CatalystV2)).to.not
+        .be.reverted;
+    });
+    it('successfully reinitializes', async function () {
+      const {catalyst} = await runCatalystSetup();
+      const CatalystV2 = await ethers.getContractFactory('CatalystV2');
+      const AsetV2Contract = await upgrades.upgradeProxy(
+        catalyst.address,
+        CatalystV2
+      );
+      expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
+    });
+    it('correctly returns the contract owner', async function () {
+      const {catalyst, deployer} = await runCatalystSetup();
+      const CatalystV2 = await ethers.getContractFactory('CatalystV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        catalyst.address,
+        CatalystV2
+      );
+      await AssetV2Contract.reinitialize();
+      expect(await AssetV2Contract.owner()).to.be.equals(deployer.address);
+    });
+    it('allows owner to transfer the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      const CatalystV2 = await ethers.getContractFactory('CatalystV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        catalyst.address,
+        CatalystV2
+      );
+      await AssetV2Contract.reinitialize();
+      await AssetV2Contract.transferOwnership(catalystAdmin.address);
+      expect(await AssetV2Contract.owner()).to.be.equals(catalystAdmin.address);
+    });
+    it('does not allow non-owner to transfer the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      const CatalystV2 = await ethers.getContractFactory('CatalystV2');
+      const AssetV2Contract = await upgrades.upgradeProxy(
+        catalyst.address,
+        CatalystV2
+      );
+      await AssetV2Contract.reinitialize();
+      await expect(
+        AssetV2Contract.connect(catalystAdmin).transferOwnership(
+          catalystAdmin.address
+        )
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
 });
