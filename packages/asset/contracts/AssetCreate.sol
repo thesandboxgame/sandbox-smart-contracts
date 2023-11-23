@@ -192,8 +192,8 @@ contract AssetCreate is
     /// @param creator The address of the creator
     function createMultipleSpecialAssets(
         bytes memory signature,
-        uint256[] memory amounts,
-        string[] memory metadataHashes,
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes,
         address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) whenNotPaused {
         bool[] memory revealed = new bool[](amounts.length);
