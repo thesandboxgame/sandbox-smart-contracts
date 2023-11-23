@@ -1965,8 +1965,8 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     it('successfully upgrades to CatalystV2', async function () {
       const {catalyst} = await runCatalystSetup();
       const CatalystV2 = await ethers.getContractFactory('CatalystV2');
-      expect(await upgrades.upgradeProxy(catalyst.address, CatalystV2)).to.not
-        .be.reverted;
+      await expect(await upgrades.upgradeProxy(catalyst.address, CatalystV2)).to
+        .not.be.reverted;
     });
     it('successfully reinitializes', async function () {
       const {catalyst} = await runCatalystSetup();
@@ -1975,7 +1975,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalyst.address,
         CatalystV2
       );
-      expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
+      await expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
     });
     it('correctly returns the contract owner', async function () {
       const {catalyst, deployer} = await runCatalystSetup();

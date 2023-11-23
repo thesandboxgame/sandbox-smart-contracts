@@ -641,10 +641,10 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       await MockAssetContract.msgData();
     });
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
-      const {AssetContract} = await runAssetSetup();
+      const {AssetContractAsAdmin} = await runAssetSetup();
       const randomAddress = ethers.Wallet.createRandom().address;
-      await AssetContract.setTrustedForwarder(randomAddress);
-      expect(await AssetContract.getTrustedForwarder()).to.be.equal(
+      await AssetContractAsAdmin.setTrustedForwarder(randomAddress);
+      expect(await AssetContractAsAdmin.getTrustedForwarder()).to.be.equal(
         randomAddress
       );
     });
@@ -2243,8 +2243,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
     it('successfully upgrades to AssetV2', async function () {
       const {AssetContract} = await runAssetSetup();
       const AssetV2 = await ethers.getContractFactory('AssetV2');
-      expect(await upgrades.upgradeProxy(AssetContract.address, AssetV2)).to.not
-        .be.reverted;
+      await expect(await upgrades.upgradeProxy(AssetContract.address, AssetV2))
+        .to.not.be.reverted;
     });
     it('successfully reinitializes', async function () {
       const {AssetContract} = await runAssetSetup();
@@ -2253,7 +2253,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         AssetContract.address,
         AssetV2
       );
-      expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
+      await expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
     });
     it('correctly returns the contract owner', async function () {
       const {AssetContract, deployer} = await runAssetSetup();
