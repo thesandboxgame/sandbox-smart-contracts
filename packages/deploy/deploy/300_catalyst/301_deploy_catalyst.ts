@@ -19,7 +19,14 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployer, upgradeAdmin, catalystMinter, catalystAdmin} =
+    await getNamedAccounts();
+
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const OperatorFilterCatalystSubscription = await deployments.get(
+    'OperatorFilterCatalystSubscription'
+  );
+  const RoyaltyManager = await deployments.get('RoyaltyManager');
 
   await deploy('Catalyst', {
     from: deployer,
@@ -28,8 +35,19 @@ const func: DeployFunction = async function (
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'reinitialize',
-      upgradeIndex: 1,
+      execute: {
+        methodName: 'initialize',
+        args: [
+          CATALYST_BASE_URI,
+          TRUSTED_FORWARDER.address,
+          OperatorFilterCatalystSubscription.address,
+          catalystAdmin, // DEFAULT_ADMIN_ROLE
+          catalystMinter, // MINTER_ROLE
+          CATALYST_IPFS_CID_PER_TIER,
+          RoyaltyManager.address,
+        ],
+      },
+      upgradeIndex: 0,
     },
     skipIfAlreadyDeployed: true,
   });
