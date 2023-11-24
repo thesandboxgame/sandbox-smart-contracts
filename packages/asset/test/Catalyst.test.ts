@@ -258,6 +258,28 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: CID cant be empty');
     });
+    it('successfully reinitializes', async function () {
+      const {catalyst} = await runCatalystSetup();
+      expect(await catalyst.reinitialize()).to.not.be.reverted;
+    });
+    it("should have the owner set to the deployer's address", async function () {
+      const {catalyst, deployer} = await runCatalystSetup();
+      await catalyst.reinitialize();
+      expect(await catalyst.owner()).to.be.equal(deployer.address);
+    });
+    it('allows owner to transfer the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      await catalyst.reinitialize();
+      await catalyst.transferOwnership(catalystAdmin.address);
+      expect(await catalyst.owner()).to.be.equals(catalystAdmin.address);
+    });
+    it('does not allow non-owner to transfer the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      await catalyst.reinitialize();
+      await expect(
+        catalyst.connect(catalystAdmin).transferOwnership(catalystAdmin.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
   });
   describe('Admin Role', function () {
     it('Admin can set minter', async function () {

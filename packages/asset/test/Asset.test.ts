@@ -16,6 +16,30 @@ import {BigNumber} from 'ethers';
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function () {
+  describe('Ownable', function () {
+    it('successfully reinitializes', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.reinitialize()).to.not.be.reverted;
+    });
+    it("should have the owner set to the deployer's address", async function () {
+      const {AssetContract, deployer} = await runAssetSetup();
+      await AssetContract.reinitialize();
+      expect(await AssetContract.owner()).to.be.equal(deployer.address);
+    });
+    it('allows owner to transfer the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      await AssetContract.reinitialize();
+      await AssetContract.transferOwnership(assetAdmin.address);
+      expect(await AssetContract.owner()).to.be.equals(assetAdmin.address);
+    });
+    it('does not allow non-owner to transfer the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      await AssetContract.reinitialize();
+      await expect(
+        AssetContract.connect(assetAdmin).transferOwnership(assetAdmin.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
   describe('Access Control', function () {
     it('should have MINTER_ROLE defined', async function () {
       const {AssetContract} = await runAssetSetup();
@@ -2237,58 +2261,6 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           TrustedForwarder.execute({...data, value: BigNumber.from(0)})
         ).to.be.revertedWith('Call execution failed');
       });
-    });
-  });
-  describe('AssetV2', function () {
-    it('successfully upgrades to AssetV2', async function () {
-      const {AssetContract} = await runAssetSetup();
-      const AssetV2 = await ethers.getContractFactory('AssetV2');
-      expect(await upgrades.upgradeProxy(AssetContract.address, AssetV2)).to.not
-        .be.reverted;
-    });
-    it('successfully reinitializes', async function () {
-      const {AssetContract} = await runAssetSetup();
-      const AssetV2 = await ethers.getContractFactory('AssetV2');
-      const AsetV2Contract = await upgrades.upgradeProxy(
-        AssetContract.address,
-        AssetV2
-      );
-      expect(await AsetV2Contract.reinitialize()).to.not.be.reverted;
-    });
-    it('correctly returns the contract owner', async function () {
-      const {AssetContract, deployer} = await runAssetSetup();
-      const AssetV2 = await ethers.getContractFactory('AssetV2');
-      const AssetV2Contract = await upgrades.upgradeProxy(
-        AssetContract.address,
-        AssetV2
-      );
-      await AssetV2Contract.reinitialize();
-      expect(await AssetV2Contract.owner()).to.be.equals(deployer.address);
-    });
-    it('allows owner to transfer the ownership', async function () {
-      const {AssetContract, assetAdmin} = await runAssetSetup();
-      const AssetV2 = await ethers.getContractFactory('AssetV2');
-      const AssetV2Contract = await upgrades.upgradeProxy(
-        AssetContract.address,
-        AssetV2
-      );
-      await AssetV2Contract.reinitialize();
-      await AssetV2Contract.transferOwnership(assetAdmin.address);
-      expect(await AssetV2Contract.owner()).to.be.equals(assetAdmin.address);
-    });
-    it('does not allow non-owner to transfer the ownership', async function () {
-      const {AssetContract, assetAdmin} = await runAssetSetup();
-      const AssetV2 = await ethers.getContractFactory('AssetV2');
-      const AssetV2Contract = await upgrades.upgradeProxy(
-        AssetContract.address,
-        AssetV2
-      );
-      await AssetV2Contract.reinitialize();
-      await expect(
-        AssetV2Contract.connect(assetAdmin).transferOwnership(
-          assetAdmin.address
-        )
-      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
 });
