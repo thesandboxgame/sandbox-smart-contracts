@@ -665,10 +665,10 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       await MockAssetContract.msgData();
     });
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
-      const {AssetContract} = await runAssetSetup();
+      const {AssetContractAsAdmin} = await runAssetSetup();
       const randomAddress = ethers.Wallet.createRandom().address;
-      await AssetContract.setTrustedForwarder(randomAddress);
-      expect(await AssetContract.getTrustedForwarder()).to.be.equal(
+      await AssetContractAsAdmin.setTrustedForwarder(randomAddress);
+      expect(await AssetContractAsAdmin.getTrustedForwarder()).to.be.equal(
         randomAddress
       );
     });
