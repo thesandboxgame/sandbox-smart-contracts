@@ -361,7 +361,7 @@ contract Asset is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Invalid subscription or registrant address");
+        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Invalid subscription address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
