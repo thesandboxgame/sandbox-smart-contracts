@@ -88,6 +88,7 @@ contract Catalyst is
         __ERC1155_init(_baseUri);
         __AccessControl_init();
         __ERC1155Burnable_init();
+        __Ownable_init();
         __ERC1155Supply_init();
         __ERC1155URIStorage_init();
         __ERC2771Handler_init(_trustedForwarder);
@@ -326,7 +327,7 @@ contract Catalyst is
         return "CATALYST";
     }
 
-        /// @notice initializes the ownable extension
+    /// @notice initializes the ownable extension
     function reinitialize() public reinitializer(2) {
         __Ownable_init();
     }

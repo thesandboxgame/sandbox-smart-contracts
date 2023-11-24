@@ -80,6 +80,7 @@ contract Asset is
         __ERC1155Supply_init();
         __ERC2771Handler_init(forwarder);
         __ERC1155Burnable_init();
+        __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         __OperatorFilterer_init(commonSubscription, true);
         __MultiRoyaltyDistributor_init(_manager);
