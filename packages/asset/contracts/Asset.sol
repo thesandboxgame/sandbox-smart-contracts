@@ -65,22 +65,22 @@ contract Asset is
     /// @param assetAdmin The address of the asset admin
     /// @param baseUri The base URI for the token metadata
     /// @param commonSubscription The address of the operator filter subscription
-    /// @param _manager The address of the royalty manager
+    /// @param manager The address of the royalty manager
     function initialize(
         address forwarder,
         address assetAdmin,
         string memory baseUri,
         address commonSubscription,
-        address _manager
+        address manager
     ) external initializer {
+        __ERC2771Handler_init(forwarder);
+        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         _setBaseURI(baseUri);
+        __OperatorFilterer_init(commonSubscription, true);
+        __MultiRoyaltyDistributor_init(manager);
         __AccessControl_init();
         __ERC1155Supply_init();
-        __ERC2771Handler_init(forwarder);
         __ERC1155Burnable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-        __OperatorFilterer_init(commonSubscription, true);
-        __MultiRoyaltyDistributor_init(_manager);
     }
 
     /// @notice Mint new tokens
