@@ -5,6 +5,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {
     ERC1155BurnableUpgradeable,
     ERC1155Upgradeable
@@ -40,6 +41,7 @@ contract Asset is
     ERC2771HandlerUpgradeable,
     ERC1155BurnableUpgradeable,
     AccessControlUpgradeable,
+    OwnableUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
     OperatorFiltererUpgradeable,
@@ -368,6 +370,11 @@ contract Asset is
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(registry != address(0), "Asset: Zero address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
+    }
+
+    /// @notice initializes the ownable extension
+    function reinitialize() public reinitializer(2) {
+        __Ownable_init();
     }
 
     uint256[49] private __gap;

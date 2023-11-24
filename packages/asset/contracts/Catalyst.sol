@@ -6,6 +6,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {
     ERC1155BurnableUpgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
@@ -37,6 +38,7 @@ contract Catalyst is
     ICatalyst,
     Initializable,
     ERC1155Upgradeable,
+    OwnableUpgradeable,
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
     ERC1155URIStorageUpgradeable,
@@ -322,6 +324,11 @@ contract Catalyst is
     /// @return _symbol the symbol of the tokens.
     function symbol() external pure returns (string memory _symbol) {
         return "CATALYST";
+    }
+
+        /// @notice initializes the ownable extension
+    function reinitialize() public reinitializer(2) {
+        __Ownable_init();
     }
 
     uint256[49] private __gap;
