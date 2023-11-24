@@ -8,8 +8,8 @@ const func: DeployFunction = async function (
   const {execute, read, catchUnknownSigner} = deployments;
   const {sandAdmin} = await getNamedAccounts();
 
-  const ERC1776_OPERATOR_ROLE = await read('Exchange','ERC1776_OPERATOR_ROLE');
-  const EXCHANGE_ADMIN_ROLE = await read('Exchange','EXCHANGE_ADMIN_ROLE');
+  const ERC1776_OPERATOR_ROLE = await read('Exchange', 'ERC1776_OPERATOR_ROLE');
+  const EXCHANGE_ADMIN_ROLE = await read('Exchange', 'EXCHANGE_ADMIN_ROLE');
   const sandContract = await deployments.get('PolygonSand');
 
   const hasERC1776OperatorRole = await read(
