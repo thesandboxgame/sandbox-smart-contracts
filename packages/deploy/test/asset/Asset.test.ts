@@ -117,6 +117,8 @@ const setupTest = deployments.createFixture(
 
     // grant moderator role to the assetAdmin
     const adminSigner = await ethers.getSigner(assetAdmin);
+    const sandAdminSigner = await ethers.getSigner(sandAdmin);
+    const deployerSigner = await ethers.getSigner(deployer);
     const moderatorRole = await AssetContract.MODERATOR_ROLE();
     await AssetContract.connect(adminSigner).grantRole(
       moderatorRole,
@@ -131,7 +133,9 @@ const setupTest = deployments.createFixture(
       AssetCreateContract,
       RoyaltyManagerContract,
       deployer,
+      deployerSigner,
       sandAdmin,
+      sandAdminSigner,
       OperatorFilterAssetSubscription,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
@@ -167,6 +171,25 @@ describe('Asset', function () {
       const {AssetContract, sandAdmin} = await setupTest();
       const moderatorRole = await AssetContract.MODERATOR_ROLE();
       expect(await AssetContract.hasRole(moderatorRole, sandAdmin)).to.be.true;
+    });
+  });
+  describe('Owner', function () {
+    it('Owner is set correctly', async function () {
+      const {AssetContract, deployerSigner} = await setupTest();
+      expect(await AssetContract.owner()).to.be.equal(deployerSigner.address);
+    });
+    it('Owner can be changed by the current owner', async function () {
+      const {AssetContract, deployerSigner, sandAdmin} = await setupTest();
+      await AssetContract.connect(deployerSigner).transferOwnership(sandAdmin);
+      expect(await AssetContract.owner()).to.be.equal(sandAdmin);
+    });
+    it("Owner can't be changed by a non-owner", async function () {
+      const {AssetContract, sandAdminSigner} = await setupTest();
+      await expect(
+        AssetContract.connect(sandAdminSigner).transferOwnership(
+          sandAdminSigner.address
+        )
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
   describe("Asset's Metadata", function () {

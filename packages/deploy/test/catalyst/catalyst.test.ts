@@ -10,7 +10,8 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const {catalystAdmin, catalystMinter, sandAdmin} = await getNamedAccounts();
+    const {catalystAdmin, catalystMinter, sandAdmin, deployer} =
+      await getNamedAccounts();
 
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
@@ -121,11 +122,16 @@ const setupTest = deployments.createFixture(
       TRUSTED_FORWARDER_Data.address
     );
 
+    const deployerSigner = await ethers.getSigner(deployer);
+    const catalystAdminSigner = await ethers.getSigner(catalystAdmin);
+
     return {
       CatalystContract,
       OperatorFilterCatalystSubscription,
       RoyaltyManagerContract,
       catalystAdmin,
+      deployerSigner,
+      catalystAdminSigner,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
@@ -139,6 +145,30 @@ const setupTest = deployments.createFixture(
 );
 
 describe('Catalyst', function () {
+  describe('Owner', function () {
+    it('Owner is set correctly', async function () {
+      const {CatalystContract, deployerSigner} = await setupTest();
+      expect(await CatalystContract.owner()).to.be.equal(
+        deployerSigner.address
+      );
+    });
+    it('Owner can be changed by the current owner', async function () {
+      const {CatalystContract, deployerSigner, catalystAdmin} =
+        await setupTest();
+      await CatalystContract.connect(deployerSigner).transferOwnership(
+        catalystAdmin
+      );
+      expect(await CatalystContract.owner()).to.be.equal(catalystAdmin);
+    });
+    it("Owner can't be changed by a non-owner", async function () {
+      const {CatalystContract, catalystAdminSigner} = await setupTest();
+      await expect(
+        CatalystContract.connect(catalystAdminSigner).transferOwnership(
+          catalystAdminSigner.address
+        )
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
   describe('check roles', function () {
     it('admin', async function () {
       const {CatalystContract, catalystAdmin} = await setupTest();
