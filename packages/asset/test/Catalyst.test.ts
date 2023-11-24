@@ -260,7 +260,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     });
     it('successfully reinitializes', async function () {
       const {catalyst} = await runCatalystSetup();
-      expect(await catalyst.reinitialize()).to.not.be.reverted;
+      await expect(await catalyst.reinitialize()).to.not.be.reverted;
     });
     it("should have the owner set to the deployer's address", async function () {
       const {catalyst, deployer} = await runCatalystSetup();

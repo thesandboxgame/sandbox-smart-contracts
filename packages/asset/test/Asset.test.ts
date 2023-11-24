@@ -19,7 +19,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
   describe('Ownable', function () {
     it('successfully reinitializes', async function () {
       const {AssetContract} = await runAssetSetup();
-      expect(await AssetContract.reinitialize()).to.not.be.reverted;
+      await expect(await AssetContract.reinitialize()).to.not.be.reverted;
     });
     it("should have the owner set to the deployer's address", async function () {
       const {AssetContract, deployer} = await runAssetSetup();
