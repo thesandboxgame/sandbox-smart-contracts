@@ -3,15 +3,15 @@ import {ethers, getNamedAccounts} from 'hardhat';
 import {DeployFunction, DeploymentsExtension} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {fee10000th} from '../../data/assetSignedAuction';
-// import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   await setupContract(deployments, 'AssetSignedAuction', fee10000th);
-  // const skip = await skipUnlessTest(hre);
-  // if (!skip) {
-  //   await setupContract(deployments, 'AssetSignedAuctionWithAuth', fee10000th);
-  // }
+  const skip = await skipUnlessTest(hre);
+  if (!skip) {
+    await setupContract(deployments, 'AssetSignedAuctionWithAuth', fee10000th);
+  }
 };
 
 async function setupContract(
@@ -104,10 +104,10 @@ export default func;
 func.tags = [
   'AssetSignedAuction',
   'AssetSignedAuction_setup',
-  // 'AssetSignedAuctionWithAuth',
-  // 'AssetSignedAuctionWithAuth_setup',
+  'AssetSignedAuctionWithAuth',
+  'AssetSignedAuctionWithAuth_setup',
 ];
 func.dependencies = [
   'AssetSignedAuction_deploy',
-  // 'AssetSignedAuctionWithAuth_deploy',
+  'AssetSignedAuctionWithAuth_deploy',
 ];

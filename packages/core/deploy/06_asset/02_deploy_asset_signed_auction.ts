@@ -29,5 +29,9 @@ const func: DeployFunction = async function (hre) {
   });
 };
 export default func;
-func.tags = ['AssetSignedAuction', 'AssetSignedAuction_deploy'];
-func.dependencies = ['Asset_deploy', 'Sand_deploy'];
+func.tags = [
+  'AssetSignedAuctionV1',
+  'AssetSignedAuction',
+  'AssetSignedAuction_deploy',
+];
+func.dependencies = ['Asset_setup', 'Sand_deploy'];
