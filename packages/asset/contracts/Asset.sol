@@ -205,7 +205,7 @@ contract Asset is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder.isContract(), "Asset: Invalid trusted forwarder address");
+        require(trustedForwarder.isContract(), "Asset: Bad forwarder address");
         _setTrustedForwarder(trustedForwarder);
     }
 
@@ -361,14 +361,14 @@ contract Asset is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Invalid subscription address");
+        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Bad subscription address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets the operator filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry.isContract(), "Asset: Invalid registry address");
+        require(registry.isContract(), "Asset: Bad registry address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
     }
 

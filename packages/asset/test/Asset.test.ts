@@ -1080,13 +1080,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         await expect(
           Asset.connect(assetAdmin).setOperatorRegistry(zeroAddress)
-        ).to.be.revertedWith('Asset: Invalid registry address');
+        ).to.be.revertedWith('Asset: Bad registry address');
 
         await expect(
           Asset.connect(assetAdmin).registerAndSubscribe(zeroAddress, true)
-        ).to.be.revertedWith(
-          'Asset: Invalid subscription or registrant address'
-        );
+        ).to.be.revertedWith('Asset: Bad subscription address');
       });
 
       it('should revert when registry is set and subscription is set by non-admin', async function () {
