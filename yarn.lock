@@ -2086,7 +2086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@workspace:packages/asset":
+"@sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
   dependencies:
@@ -2339,7 +2339,6 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": 1
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomiclabs/hardhat-ethers": ^2.2.3
-    "@sandbox-smart-contracts/asset": "*"
     "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
@@ -2355,6 +2354,8 @@ __metadata:
     "@types/prettier": ^2
     "@typescript-eslint/eslint-plugin": ^5.59.8
     "@typescript-eslint/parser": ^5.59.8
+    asset-1.0.2: "npm:@sandbox-smart-contracts/asset@1.0.2"
+    asset-latest: "npm:@sandbox-smart-contracts/asset@1.0.2"
     chai: ^4.3.7
     child_process: ^1.0.2
     cross-env: ^7.0.3
@@ -3923,6 +3924,19 @@ __metadata:
   version: 1.1.0
   resolution: "assertion-error@npm:1.1.0"
   checksum: fd9429d3a3d4fd61782eb3962ae76b6d08aa7383123fca0596020013b3ebd6647891a85b05ce821c47d1471ed1271f00b0545cf6a4326cf2fc91efcc3b0fbecf
+  languageName: node
+  linkType: hard
+
+"asset-1.0.2@npm:@sandbox-smart-contracts/asset@1.0.2, asset-latest@npm:@sandbox-smart-contracts/asset@1.0.2":
+  version: 1.0.2
+  resolution: "@sandbox-smart-contracts/asset@npm:1.0.2"
+  dependencies:
+    "@openzeppelin/contracts": ^4.9.0
+    "@openzeppelin/contracts-upgradeable": ^4.9.0
+    "@sandbox-smart-contracts/dependency-metatx": "*"
+    "@sandbox-smart-contracts/dependency-operator-filter": "*"
+    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+  checksum: b5d82fb3ef7b731a55febccf75a47cdfb9fba3bfd378e8b27f86351a66a20cf3a429ee86da78a2588f046c0b88d751d5b9101eab2271e13f9390f34304123982
   languageName: node
   linkType: hard
 
