@@ -512,7 +512,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/networks@npm:5.7.1, @ethersproject/networks@npm:^5.7.0":
+"@ethersproject/networks@npm:5.7.1, @ethersproject/networks@npm:^5.7.0, @ethersproject/networks@npm:^5.7.1":
   version: 5.7.1
   resolution: "@ethersproject/networks@npm:5.7.1"
   dependencies:
@@ -1906,6 +1906,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/defender-sdk-account-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-account-client@npm:1.5.0"
+  dependencies:
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: b9ec559135914b34223d641db30269c6179291cd49637ddc5221e73191b1fda057d7933883191d335eb61b8b589564b64facf623efbfaab55d992af142687f85
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-action-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-action-client@npm:1.5.0"
+  dependencies:
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    glob: ^7.1.6
+    jszip: ^3.10.1
+    lodash: ^4.17.21
+  checksum: 6e8ce94b2808dbf423c5a21a0372f90b012a824b78fdacf5d29eb0e4f4c0d2275639e6c49500544c546fcb189dbaebec01354d098449185e846d08b83358c043
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/defender-sdk-base-client@npm:^1.2.0, @openzeppelin/defender-sdk-base-client@npm:^1.5.0":
   version: 1.5.0
   resolution: "@openzeppelin/defender-sdk-base-client@npm:1.5.0"
@@ -1916,7 +1940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-sdk-deploy-client@npm:^1.2.0":
+"@openzeppelin/defender-sdk-deploy-client@npm:^1.2.0, @openzeppelin/defender-sdk-deploy-client@npm:^1.5.0":
   version: 1.5.0
   resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.5.0"
   dependencies:
@@ -1925,6 +1949,113 @@ __metadata:
     axios: ^1.4.0
     lodash: ^4.17.21
   checksum: fcb3564e7d1d367507dc900af6f55f7775089650e0a3e7e161163e91557c60192e924c23ede39f9a67ee5c0dc35824c7607a91fa1765ab116194455d8e42c00e
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-monitor-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-monitor-client@npm:1.5.0"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: a347291bffdb9052ece3149004105f954579282ef09cc6d6fc6409e50fc4c83530da9ee3aebe80c8607628c97fa3cc3609b6af36c9aeeeb25a69974ac124ba19
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-network-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-network-client@npm:1.5.0"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: d8627a2dc6bf38516963afae2709af486919707800c7cd8e03c6522d3382bc24d2ed62f9a391a23294351720fc0bd75402444a77fb967702a495aa950ff249e8
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-notification-channel-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-notification-channel-client@npm:1.5.0"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: f7b2564ef7c1c5194b0bd12a6d02caf3b5d6dec08ef0ea225b02d026eabdb89c24b4c6a8f8d785780856a48e9c06e2dccde10d573946e336c34c406c005137bf
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-proposal-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-proposal-client@npm:1.5.0"
+  dependencies:
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    ethers: ^5.7.2
+    lodash: ^4.17.21
+  checksum: 93c4276d347af3989f81760e205798fbcdcbe7fd39b50d43110826c196fb65247b3295fbec895cf5cc72aba9ecd035fa90c3857aad8e1057e0e4d75a255b200c
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-relay-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-relay-client@npm:1.5.0"
+  dependencies:
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: b3002ad642d2e25a4f657cfd138d4039a7cc7ce1f014f3b12032b10f164046cccada17f453fb29397bcb97d89deb76bc35086f9a5d40fb52687fdbef80bfbf5d
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-relay-signer-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-relay-signer-client@npm:1.5.0"
+  dependencies:
+    "@ethersproject/bignumber": ^5.7.0
+    "@ethersproject/bytes": ^5.7.0
+    "@ethersproject/contracts": ^5.7.0
+    "@ethersproject/logger": ^5.7.0
+    "@ethersproject/networks": ^5.7.1
+    "@ethersproject/properties": ^5.7.0
+    "@ethersproject/random": ^5.7.0
+    "@ethersproject/strings": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    amazon-cognito-identity-js: ^6.3.6
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  peerDependencies:
+    "@ethersproject/abstract-provider": ^5.6.1
+    "@ethersproject/abstract-signer": ^5.6.2
+    "@ethersproject/hash": ^5.6.1
+    "@ethersproject/providers": ^5.6.8
+    "@ethersproject/transactions": ^5.6.2
+    web3: ^1.8.2
+    web3-core: ^1.10.3
+    web3-core-helpers: ^1.8.2
+    web3-utils: ^1.8.2
+  checksum: d59966a4f15f5da780fe6fcc25feddcfe967c29bad229beb89666f758845a82336d96cb252311b3338caa339554b54ae5177867730383531ca36cf8334764aeb
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk@npm:1.5.0"
+  dependencies:
+    "@openzeppelin/defender-sdk-account-client": ^1.5.0
+    "@openzeppelin/defender-sdk-action-client": ^1.5.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    "@openzeppelin/defender-sdk-deploy-client": ^1.5.0
+    "@openzeppelin/defender-sdk-monitor-client": ^1.5.0
+    "@openzeppelin/defender-sdk-network-client": ^1.5.0
+    "@openzeppelin/defender-sdk-notification-channel-client": ^1.5.0
+    "@openzeppelin/defender-sdk-proposal-client": ^1.5.0
+    "@openzeppelin/defender-sdk-relay-client": ^1.5.0
+    "@openzeppelin/defender-sdk-relay-signer-client": ^1.5.0
+  checksum: d71f2ff53af6195e526422d9f9f99f6d37788f483ab3214e406bb06a6a402c29bcec1da906a6690e3b0f5434c0ecf75920a6a85943654e5640383736430f5233
   languageName: node
   linkType: hard
 
@@ -2339,6 +2470,8 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": 1
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomiclabs/hardhat-ethers": ^2.2.3
+    "@openzeppelin/defender-sdk": ^1.5.0
+    "@openzeppelin/defender-sdk-deploy-client": ^1.5.0
     "@sandbox-smart-contracts/asset": "*"
     "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
@@ -7392,7 +7525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.0.0, glob@npm:^7.1.3, glob@npm:^7.1.4":
+"glob@npm:^7.0.0, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -8300,6 +8433,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immediate@npm:~3.0.5":
+  version: 3.0.6
+  resolution: "immediate@npm:3.0.6"
+  checksum: f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
+  languageName: node
+  linkType: hard
+
 "immediate@npm:~3.2.3":
   version: 3.2.3
   resolution: "immediate@npm:3.2.3"
@@ -9204,6 +9344,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jszip@npm:^3.10.1":
+  version: 3.10.1
+  resolution: "jszip@npm:3.10.1"
+  dependencies:
+    lie: ~3.3.0
+    pako: ~1.0.2
+    readable-stream: ~2.3.6
+    setimmediate: ^1.0.5
+  checksum: abc77bfbe33e691d4d1ac9c74c8851b5761fba6a6986630864f98d876f3fcc2d36817dfc183779f32c00157b5d53a016796677298272a714ae096dfe6b1c8b60
+  languageName: node
+  linkType: hard
+
 "jwa@npm:^2.0.0":
   version: 2.0.0
   resolution: "jwa@npm:2.0.0"
@@ -9417,6 +9569,15 @@ __metadata:
     prelude-ls: ~1.1.2
     type-check: ~0.3.2
   checksum: 0d084a524231a8246bb10fec48cdbb35282099f6954838604f3c7fc66f2e16fa66fd9cc2f3f20a541a113c4dafdf181e822c887c8a319c9195444e6c64ac395e
+  languageName: node
+  linkType: hard
+
+"lie@npm:~3.3.0":
+  version: 3.3.0
+  resolution: "lie@npm:3.3.0"
+  dependencies:
+    immediate: ~3.0.5
+  checksum: 33102302cf19766f97919a6a98d481e01393288b17a6aa1f030a3542031df42736edde8dab29ffdbf90bebeffc48c761eb1d064dc77592ca3ba3556f9fe6d2a8
   languageName: node
   linkType: hard
 
@@ -10977,6 +11138,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pako@npm:~1.0.2":
+  version: 1.0.11
+  resolution: "pako@npm:1.0.11"
+  checksum: 1be2bfa1f807608c7538afa15d6f25baa523c30ec870a3228a89579e474a4d992f4293859524e46d5d87fd30fa17c5edf34dbef0671251d9749820b488660b16
+  languageName: node
+  linkType: hard
+
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -11435,7 +11603,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^2.2.2":
+"readable-stream@npm:^2.2.2, readable-stream@npm:~2.3.6":
   version: 2.3.8
   resolution: "readable-stream@npm:2.3.8"
   dependencies:
