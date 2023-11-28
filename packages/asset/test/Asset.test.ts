@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers, upgrades} from 'hardhat';
+import {ethers, network, upgrades} from 'hardhat';
 import {runAssetSetup} from './fixtures/asset/assetFixture';
 import {setupOperatorFilter} from './fixtures/operatorFilterFixture';
 import {
@@ -648,11 +648,17 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       await MockAssetContract.msgData();
     });
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
-      const {AssetContract} = await runAssetSetup();
-      const randomAddress = ethers.Wallet.createRandom().address;
-      await AssetContract.setTrustedForwarder(randomAddress);
-      expect(await AssetContract.getTrustedForwarder()).to.be.equal(
-        randomAddress
+      const {AssetContractAsAdmin} = await runAssetSetup();
+      const randomContract = ethers.Wallet.createRandom().address;
+      // set code to randomContract
+      await network.provider.send('hardhat_setCode', [
+        randomContract,
+        `0x${'a'.repeat(40)}`,
+      ]);
+
+      await AssetContractAsAdmin.setTrustedForwarder(randomContract);
+      expect(await AssetContractAsAdmin.getTrustedForwarder()).to.be.equal(
+        randomContract
       );
     });
     it("should not allow non-DEFAULT_ADMIN to set the trusted forwarder's address", async function () {
@@ -1074,11 +1080,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         await expect(
           Asset.connect(assetAdmin).setOperatorRegistry(zeroAddress)
-        ).to.be.revertedWith('Asset: Zero address');
+        ).to.be.revertedWith('Asset: Bad registry address');
 
         await expect(
           Asset.connect(assetAdmin).registerAndSubscribe(zeroAddress, true)
-        ).to.be.revertedWith('Asset: Zero address');
+        ).to.be.revertedWith('Asset: Bad subscription address');
       });
 
       it('should revert when registry is set and subscription is set by non-admin', async function () {

@@ -75,6 +75,19 @@ export async function setupOperatorFilter() {
 
   await operatorFilterRegistry.deployed();
 
+  const filterOperatorSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
+  );
+
+  const filterOperatorSubscription =
+    await filterOperatorSubscriptionFactory.deploy(
+      deployer.address,
+      operatorFilterRegistry.address
+    );
+
+  const operatorFilterRegistryAsSubscription =
+    operatorFilterRegistry.connect(deployer);
+
   const RoyaltySplitterFactory = await ethers.getContractFactory(
     'RoyaltySplitter'
   );

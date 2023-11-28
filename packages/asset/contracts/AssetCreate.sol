@@ -2,6 +2,7 @@
 pragma solidity 0.8.18;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import {
     AccessControlUpgradeable,
@@ -29,6 +30,7 @@ contract AssetCreate is
     PausableUpgradeable
 {
     using TokenIdUtils for uint256;
+    using Address for address;
 
     IAsset private assetContract;
     ICatalyst private catalystContract;
@@ -192,8 +194,8 @@ contract AssetCreate is
     /// @param creator The address of the creator
     function createMultipleSpecialAssets(
         bytes memory signature,
-        uint256[] memory amounts,
-        string[] memory metadataHashes,
+        uint256[] calldata amounts,
+        string[] calldata metadataHashes,
         address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) whenNotPaused {
         bool[] memory revealed = new bool[](amounts.length);
@@ -328,7 +330,7 @@ contract AssetCreate is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "AssetCreate: Zero address");
+        require(trustedForwarder.isContract(), "AssetCreate: Bad forwarder addr");
         _setTrustedForwarder(trustedForwarder);
     }
 
