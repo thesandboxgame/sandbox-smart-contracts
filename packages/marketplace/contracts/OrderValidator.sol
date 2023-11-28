@@ -26,14 +26,13 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param roles Array of role identifiers for the Whitelist contract.
     /// @param permissions Array of permissions associated with each role.
     /// @param whitelistsEnabled Boolean to indicate if whitelist functionality is enabled.
-    // solhint-disable-next-line func-name-mixedcase
-    function __OrderValidator_init_unchained(
+    function initialize(
         address admin,
         bytes32[] calldata roles,
         bool[] calldata permissions,
         bool whitelistsEnabled
     ) external initializer {
-        __EIP712_init_unchained("Exchange", "1");
+        __EIP712_init_unchained("The Sandbox Marketplace", "1.0.0");
         __Whitelist_init(admin, roles, permissions, whitelistsEnabled);
     }
 
@@ -70,7 +69,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
         address makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (isRoleEnabled(ERC20_ROLE) && !hasRole(ERC20_ROLE, makeToken)) {
+            if (!hasRole(ERC20_ROLE, makeToken)) {
                 revert("payment token not allowed");
             }
         } else {

@@ -38,6 +38,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
+    it('Should have return correct name and symbol', async function () {
+      const {catalyst} = await runCatalystSetup();
+      expect(await catalyst.name()).to.be.equal("The Sandbox's CATALYSTs");
+      expect(await catalyst.symbol()).to.be.equal('CATALYST');
+    });
     describe('Interface support', function () {
       it('should support ERC165', async function () {
         const {catalyst} = await runCatalystSetup();

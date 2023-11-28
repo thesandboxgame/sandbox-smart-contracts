@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
 
   const newProtocolFeePrimary = 0;
-  const newProtocolFeeSecondary = 250;
+  const newProtocolFeeSecondary = 0;
   const newMatchOrdersLimit = 50;
 
   await deploy('Exchange', {
@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: '__Exchange_init',
+        methodName: 'initialize',
         args: [
           sandAdmin,
           TRUSTED_FORWARDER.address,

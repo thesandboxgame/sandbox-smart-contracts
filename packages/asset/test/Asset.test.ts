@@ -1011,7 +1011,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           operatorFilterRegistry,
           assetAdmin,
           TrustedForwarder,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
@@ -1021,7 +1021,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1037,7 +1037,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         );
 
         await Asset.connect(assetAdmin).registerAndSubscribe(
-          filterOperatorSubscription.address,
+          assetOperatorFilterSubscription.address,
           true
         );
 
@@ -1047,14 +1047,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(
           await operatorFilterRegistry.subscriptionOf(Asset.address)
-        ).to.be.equals(filterOperatorSubscription.address);
+        ).to.be.equals(assetOperatorFilterSubscription.address);
       });
 
       it('should revert when registry is set zero and subscription is set zero', async function () {
         const {
           assetAdmin,
           TrustedForwarder,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           RoyaltyManagerContract,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
@@ -1064,7 +1064,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1085,7 +1085,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           assetAdmin,
           TrustedForwarder,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           RoyaltyManagerContract,
           operatorFilterRegistry,
           defaultAdminRole,
@@ -1098,7 +1098,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1116,7 +1116,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         await expect(
           Asset.connect(user1).registerAndSubscribe(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             true
           )
         ).to.be.revertedWith(
@@ -1127,11 +1127,9 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           assetAdmin,
           TrustedForwarder,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           RoyaltyManagerContract,
           operatorFilterRegistry,
-          defaultAdminRole,
-          user1,
         } = await setupOperatorFilter();
         const AssetFactory = await ethers.getContractFactory('Asset');
         const Asset = await upgrades.deployProxy(
@@ -1140,7 +1138,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             TrustedForwarder.address,
             assetAdmin.address,
             'ipfs://',
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             RoyaltyManagerContract.address,
           ],
           {
@@ -1148,30 +1146,45 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           }
         );
 
-        await expect(
-          Asset.connect(user1).setOperatorRegistry(
-            operatorFilterRegistry.address
-          )
-        ).to.be.revertedWith(
-          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
-        );
+        const setOperatorRequest = {
+          from: assetAdmin.address,
+          to: Asset.address,
+          value: 0,
+          gasLimit: 1000000,
+          data: Asset.interface.encodeFunctionData('setOperatorRegistry', [
+            operatorFilterRegistry.address,
+          ]),
+        };
+        // expect the call to not revert
+        await expect(TrustedForwarder.execute(setOperatorRequest)).to.not.be
+          .reverted;
 
-        await expect(
-          Asset.connect(user1).registerAndSubscribe(
-            filterOperatorSubscription.address,
-            true
-          )
-        ).to.be.revertedWith(
-          `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${defaultAdminRole}`
+        const registerAndSubscribeRequest = {
+          from: assetAdmin.address,
+          to: Asset.address,
+          value: 0,
+          gasLimit: 1000000,
+          data: Asset.interface.encodeFunctionData('registerAndSubscribe', [
+            assetOperatorFilterSubscription.address,
+            true,
+          ]),
+        };
+
+        // expect the call to not revert
+        await expect(TrustedForwarder.execute(registerAndSubscribeRequest)).to
+          .not.be.reverted;
+
+        expect(await Asset.getOperatorFilterRegistry()).to.be.equals(
+          operatorFilterRegistry.address
         );
       });
 
       it('should be subscribed to common subscription', async function () {
-        const {operatorFilterRegistry, Asset, filterOperatorSubscription} =
+        const {operatorFilterRegistry, Asset, assetOperatorFilterSubscription} =
           await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.subscriptionOf(Asset.address)
-        ).to.be.equal(filterOperatorSubscription.address);
+        ).to.be.equal(assetOperatorFilterSubscription.address);
       });
 
       it('default subscription should blacklist Mock Market places 1, 2 and not 3, 4', async function () {
@@ -1254,11 +1267,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace2,
           mockMarketPlace3,
           mockMarketPlace4,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(true);
@@ -1266,14 +1279,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace2.address
           )
         ).to.be.equal(true);
@@ -1282,14 +1295,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           await operatorFilterRegistry.codeHashOf(mockMarketPlace2.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace2CodeHash
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(false);
@@ -1298,14 +1311,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace4.address
           )
         ).to.be.equal(false);
@@ -1314,7 +1327,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           await operatorFilterRegistry.codeHashOf(mockMarketPlace4.address);
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace4CodeHash
           )
         ).to.be.equal(false);
@@ -1397,8 +1410,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           operatorFilterRegistry,
           mockMarketPlace1,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           Asset,
         } = await setupOperatorFilter();
         expect(
@@ -1418,26 +1430,26 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
         );
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           MockERC1155MarketPlace1CodeHash,
           false
         );
@@ -1458,14 +1470,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace1.address
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace1CodeHash
           )
         ).to.be.equal(false);
@@ -1475,8 +1487,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           operatorFilterRegistry,
           mockMarketPlace3,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          assetOperatorFilterSubscription,
           Asset,
         } = await setupOperatorFilter();
         expect(
@@ -1496,26 +1507,26 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(false);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(false);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
         );
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           MockERC1155MarketPlace3CodeHash,
           true
         );
@@ -1536,14 +1547,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(
           await operatorFilterRegistry.isOperatorFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             mockMarketPlace3.address
           )
         ).to.be.equal(true);
 
         expect(
           await operatorFilterRegistry.isCodeHashFiltered(
-            filterOperatorSubscription.address,
+            assetOperatorFilterSubscription.address,
             MockERC1155MarketPlace3CodeHash
           )
         ).to.be.equal(true);
@@ -1640,11 +1651,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         ).to.be.equal(true);
       });
 
-      it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted ', async function () {
+      it('it should not be able to setApprovalForAll non blacklisted marketplaces after they are blacklisted ', async function () {
         const {
           mockMarketPlace3,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           Asset,
           users,
         } = await setupOperatorFilter();
@@ -1657,30 +1668,28 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
         );
 
         await expect(
           users[1].Asset.setApprovalForAll(mockMarketPlace3.address, true)
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
-      it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted ', async function () {
+      it('it should not be able to setApprovalForAll non blacklisted marketplaces after their codeHashes are blacklisted ', async function () {
         const {
           mockMarketPlace3,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           Asset,
           users,
         } = await setupOperatorFilter();
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace3.address
-          );
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
 
         await users[0].Asset.setApprovalForAll(mockMarketPlace3.address, true);
 
@@ -1691,67 +1700,63 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           )
         ).to.be.equal(true);
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
 
         await expect(
           users[1].Asset.setApprovalForAll(mockMarketPlace3.address, true)
-        ).to.be.revertedWith;
+        ).to.be.reverted;
       });
 
       it('it should not be able to setApprovalForAll trusted forwarder if black listed', async function () {
         const {
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           users,
           TrustedForwarder,
         } = await setupOperatorFilter();
 
         const TrustedForwarderCodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            TrustedForwarder.address
-          );
+          await operatorFilterRegistry.codeHashOf(TrustedForwarder.address);
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           TrustedForwarderCodeHash,
           true
         );
 
         await expect(
           users[1].Asset.setApprovalForAll(TrustedForwarder.address, true)
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should be able to setApprovalForAll blacklisted market places after they are removed from the blacklist ', async function () {
         const {
           mockMarketPlace1,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           Asset,
           users,
         } = await setupOperatorFilter();
 
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace1.address
-          );
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
 
         await expect(
           users[0].Asset.setApprovalForAll(mockMarketPlace1.address, true)
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
         );
@@ -1783,7 +1788,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             1,
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should not be able to transfer through market places after they are blacklisted', async function () {
@@ -1791,8 +1796,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace3,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
 
@@ -1812,8 +1817,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
         );
@@ -1827,21 +1832,21 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             1,
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should be able to transfer through trusted forwarder after it is blacklisted', async function () {
         const {
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           TrustedForwarder,
         } = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           TrustedForwarder.address,
           true
         );
@@ -1903,8 +1908,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace3,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
 
@@ -1924,11 +1929,9 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         expect(await Asset.balanceOf(users[1].address, 1)).to.be.equal(1);
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace3.address
-          );
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
@@ -1942,7 +1945,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             1,
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
@@ -1950,13 +1953,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace1,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace1.address
-          );
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
         await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
 
         await users[0].Asset.setApprovalForAllWithoutFilter(
@@ -1973,16 +1974,16 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             1,
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
         );
@@ -2016,7 +2017,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             [1, 1],
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should not be able to batch transfer through market places after they are blacklisted', async function () {
@@ -2024,8 +2025,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace3,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
         await Asset.mintWithoutMinterRole(users[0].address, 2, 2);
@@ -2048,8 +2049,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
 
         expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3.address,
           true
         );
@@ -2063,7 +2064,7 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
             [1, 1],
             '0x'
           )
-        ).to.be.revertedWithCustomError;
+        ).to.be.reverted;
       });
 
       it('it should be able to batch transfer through non blacklisted market places', async function () {
@@ -2093,8 +2094,8 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace3,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         await Asset.mintWithoutMinterRole(users[0].address, 1, 2);
         await Asset.mintWithoutMinterRole(users[0].address, 2, 2);
@@ -2116,11 +2117,9 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         expect(await Asset.balanceOf(users[1].address, 2)).to.be.equal(1);
 
         const mockMarketPlace3CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace3.address
-          );
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace3.address);
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace3CodeHash,
           true
         );
@@ -2142,13 +2141,11 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           mockMarketPlace1,
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
         } = await setupOperatorFilter();
         const mockMarketPlace1CodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            mockMarketPlace1.address
-          );
+          await operatorFilterRegistry.codeHashOf(mockMarketPlace1.address);
         await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
         await Asset.mintWithoutMinterRole(users[0].address, 2, 1);
 
@@ -2168,14 +2165,14 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
           )
         ).to.be.revertedWithCustomError;
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1CodeHash,
           false
         );
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           mockMarketPlace1.address,
           false
         );
@@ -2195,25 +2192,23 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
         const {
           Asset,
           users,
-          operatorFilterRegistryAsSubscription,
-          filterOperatorSubscription,
+          operatorFilterRegistry,
+          assetOperatorFilterSubscription,
           TrustedForwarder,
         } = await setupOperatorFilter();
         const TrustedForwarderCodeHash =
-          await operatorFilterRegistryAsSubscription.codeHashOf(
-            TrustedForwarder.address
-          );
+          await operatorFilterRegistry.codeHashOf(TrustedForwarder.address);
         await Asset.mintWithoutMinterRole(users[0].address, 1, 1);
         await Asset.mintWithoutMinterRole(users[0].address, 2, 1);
 
-        await operatorFilterRegistryAsSubscription.updateCodeHash(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateCodeHash(
+          assetOperatorFilterSubscription.address,
           TrustedForwarderCodeHash,
           true
         );
 
-        await operatorFilterRegistryAsSubscription.updateOperator(
-          filterOperatorSubscription.address,
+        await operatorFilterRegistry.updateOperator(
+          assetOperatorFilterSubscription.address,
           TrustedForwarder.address,
           true
         );

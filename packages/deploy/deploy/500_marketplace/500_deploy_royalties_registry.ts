@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: '__RoyaltiesRegistry_init',
+        methodName: 'initialize',
         args: [],
       },
       upgradeIndex: 0,

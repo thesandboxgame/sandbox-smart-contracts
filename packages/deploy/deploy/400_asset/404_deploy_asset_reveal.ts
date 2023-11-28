@@ -39,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 
-func.tags = ['Asset', 'AssetReveal', 'AssetReveal_deploy', 'L2'];
+func.tags = ['AssetReveal', 'AssetReveal_deploy', 'L2'];
 func.dependencies = [
   'Asset_deploy',
   'AuthSuperValidator_deploy',

@@ -1,4 +1,8 @@
-import {deployFixtures} from './fixtures.ts';
+import {
+  deployFixturesWithoutWhitelist,
+  deployFixtures,
+} from './fixtures/index.ts';
+import {orderValidatorFailSetup} from './fixtures/orderValidator';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
@@ -42,7 +46,13 @@ describe('OrderValidator.sol', function () {
       user,
       user1,
       user2,
-    } = await loadFixture(deployFixtures));
+    } = await loadFixture(deployFixturesWithoutWhitelist));
+  });
+
+  it('initialization should fail if roles and permissions lenghts are different', async function () {
+    await expect(orderValidatorFailSetup()).to.be.revertedWith(
+      'Mismatched input lengths'
+    );
   });
 
   it('should upgrade the contract successfully', async function () {
@@ -60,6 +70,11 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should validate when assetClass is not ETH_ASSET_CLASS', async function () {
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20Role,
+      await ERC20Contract.getAddress()
+    );
+
     const makerAsset = await AssetERC20(ERC20Contract, 100);
     const takerAsset = await AssetERC721(ERC721Contract, 100);
 
@@ -310,66 +325,6 @@ describe('OrderValidator.sol', function () {
     ).to.not.be.reverted;
   });
 
-  it('should validate when whitelist is enabled, partners is enabled and makeTokenAddress have PARTNER_ROLE', async function () {
-    const {
-      OrderValidatorAsUser,
-      OrderValidatorAsAdmin,
-      ERC20Contract,
-      ERC721Contract,
-      user1,
-    } = await loadFixture(deployFixtures);
-
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
-      false
-    );
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
-      false
-    );
-
-    await OrderValidatorAsAdmin.enableWhitelists();
-    await OrderValidatorAsAdmin.enableRole(PartnerRole);
-    expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(PartnerRole)).to.be.equal(
-      true
-    );
-
-    expect(
-      await OrderValidatorAsUser.hasRole(
-        PartnerRole,
-        await ERC20Contract.getAddress()
-      )
-    ).to.be.equal(false);
-
-    await OrderValidatorAsAdmin.grantRole(
-      PartnerRole,
-      await ERC20Contract.getAddress()
-    );
-
-    expect(
-      await OrderValidatorAsUser.hasRole(
-        PartnerRole,
-        await ERC20Contract.getAddress()
-      )
-    ).to.be.equal(true);
-
-    const makerAsset = await AssetERC20(ERC20Contract, 100);
-    const takerAsset = await AssetERC721(ERC721Contract, 100);
-    const order = await OrderDefault(
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0
-    );
-    const signature = await signOrder(order, user1, OrderValidatorAsUser);
-
-    await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress())
-    ).to.not.be.reverted;
-  });
-
   it('should not set permission for token if caller is not owner', async function () {
     await expect(OrderValidatorAsUser.enableRole(TSBRole)).to.revertedWith(
       `AccessControl: account ${(
@@ -388,13 +343,10 @@ describe('OrderValidator.sol', function () {
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(
       false
     );
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
-      false
-    );
 
     await OrderValidatorAsAdmin.setRolesEnabled(
-      [TSBRole, PartnerRole, ERC20Role],
-      [true, true, true]
+      [TSBRole, PartnerRole],
+      [true, true]
     );
     await OrderValidatorAsAdmin.enableWhitelists();
 
@@ -405,9 +357,6 @@ describe('OrderValidator.sol', function () {
       true
     );
     expect(await OrderValidatorAsAdmin.isWhitelistsEnabled()).to.be.equal(true);
-    expect(await OrderValidatorAsAdmin.isRoleEnabled(ERC20Role)).to.be.equal(
-      true
-    );
   });
 
   it('should not be able to add token to tsb list if caller is not owner', async function () {

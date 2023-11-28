@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 import {constants} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -49,5 +49,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['AssetERC721Tunnel', 'AssetERC721Tunnel_setup', 'L1'];
 func.dependencies = ['AssetERC721Tunnel_deploy'];
-func.skip = skipUnlessTestnet;
+func.skip = skipUnlessTest;
 func.runAtTheEnd = true;
