@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {BigNumber, Event, ethers} from 'ethers';
 import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
+import {network} from 'hardhat';
 
 describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
@@ -52,11 +53,16 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
     });
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetCreateContractAsAdmin} = await runCreateTestSetup();
-      const randomAddress = ethers.Wallet.createRandom().address;
-      await AssetCreateContractAsAdmin.setTrustedForwarder(randomAddress);
+      const randomContract = ethers.Wallet.createRandom().address;
+      // set code to randomContract
+      await network.provider.send('hardhat_setCode', [
+        randomContract,
+        `0x${'a'.repeat(40)}`,
+      ]);
+      await AssetCreateContractAsAdmin.setTrustedForwarder(randomContract);
       expect(
         await AssetCreateContractAsAdmin.getTrustedForwarder()
-      ).to.be.equal(randomAddress);
+      ).to.be.equal(randomContract);
     });
     it('should not allow non DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetCreateContractAsUser, user, AdminRole} =

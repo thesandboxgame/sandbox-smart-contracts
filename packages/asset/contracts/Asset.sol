@@ -5,6 +5,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {
     ERC1155BurnableUpgradeable,
     ERC1155Upgradeable
@@ -47,6 +48,7 @@ contract Asset is
     ITokenUtils
 {
     using TokenIdUtils for uint256;
+    using Address for address;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -203,7 +205,7 @@ contract Asset is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "Asset: Zero address");
+        require(trustedForwarder.isContract(), "Asset: Bad forwarder address");
         _setTrustedForwarder(trustedForwarder);
     }
 
@@ -359,14 +361,14 @@ contract Asset is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy != address(0), "Asset: Zero address");
+        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Bad subscription address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets the operator filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Asset: Zero address");
+        require(registry.isContract(), "Asset: Bad registry address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
     }
 
