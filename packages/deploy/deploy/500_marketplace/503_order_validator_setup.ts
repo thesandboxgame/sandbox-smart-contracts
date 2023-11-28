@@ -12,24 +12,19 @@ const func: DeployFunction = async function (
   const TSB_ROLE = await read('OrderValidator', 'TSB_ROLE');
   const PARTNER_ROLE = await read('OrderValidator', 'PARTNER_ROLE');
 
-  const SandContract = await deployments.get('PolygonSand');  
+  const SandContract = await deployments.get('PolygonSand');
   const AssetContract = await deployments.get('Asset');
 
-  let addressesToGrant = [];
+  const addressesToGrant = [];
   addressesToGrant[ERC20_ROLE] = [SandContract.address];
   addressesToGrant[TSB_ROLE] = [AssetContract.address];
   addressesToGrant[PARTNER_ROLE] = [];
 
   for (const role in addressesToGrant) {
     for (const address of addressesToGrant[role]) {
-      const hasRole = await read(
-        'OrderValidator',
-        'hasRole',
-        role,
-        address
-      );
+      const hasRole = await read('OrderValidator', 'hasRole', role, address);
 
-      if(!hasRole) {
+      if (!hasRole) {
         await catchUnknownSigner(
           execute(
             'OrderValidator',
@@ -38,9 +33,9 @@ const func: DeployFunction = async function (
             role,
             address
           )
-        );            
+        );
       }
-    }       
+    }
   }
 
   const currentWhitelistsEnabled = await read(
@@ -57,7 +52,7 @@ const func: DeployFunction = async function (
           {from: sandAdmin, log: true},
           'enableWhitelists'
         )
-      );      
+      );
     } else {
       await catchUnknownSigner(
         execute(
@@ -69,17 +64,13 @@ const func: DeployFunction = async function (
     }
   }
 
-  let rolesEnabled = [];
+  const rolesEnabled = [];
   rolesEnabled[TSB_ROLE] = true;
   rolesEnabled[PARTNER_ROLE] = false;
 
   for (const role in rolesEnabled) {
-    const isRoleEnabled = await read(
-      'OrderValidator',
-      'isRoleEnabled',
-      role
-    );
-    
+    const isRoleEnabled = await read('OrderValidator', 'isRoleEnabled', role);
+
     if (isRoleEnabled != rolesEnabled[role]) {
       if (rolesEnabled[role]) {
         await catchUnknownSigner(
@@ -98,7 +89,7 @@ const func: DeployFunction = async function (
             'disableRole',
             role
           )
-        );        
+        );
       }
     }
   }
