@@ -123,12 +123,9 @@ const namedAccounts = {
   }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
   exchangeFeeRecipient: {
-    default: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
-    goerli: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
-    sepolia: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
-    mumbai: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
-    mainnet: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
-    polygon: '0xc66d094ed928f7840a6b0d373c1cd825c97e3c7c', // TODO: set the correct wallet for the FeeReceiver
+    default: 'sandSaleBeneficiary',
+    mainnet: 'treasury',
+    polygon: 'treasury',
   },
 
   landAdmin: {

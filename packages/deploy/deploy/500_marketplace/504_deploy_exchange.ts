@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Exchange', 'Exchange_deploy'];
 func.dependencies = [
-  'RoyaltiesRegistry',
-  'OrderValidator',
+  'RoyaltiesRegistry_deploy',
+  'OrderValidator_deploy',
   'TRUSTED_FORWARDER_V2',
 ];
