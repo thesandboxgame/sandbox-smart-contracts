@@ -50,5 +50,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Exchange', 'ExchangeSetup_setup'];
+func.tags = ['Exchange', 'Exchange_setup'];
 func.dependencies = ['Exchange_deploy', 'PolygonSand_deploy'];
