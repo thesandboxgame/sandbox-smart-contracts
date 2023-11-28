@@ -449,6 +449,12 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystAsMinter.mint(user1.address, 7, 1)
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+    it("Can't mint catalyst of tier 0", async function () {
+      const {catalystAsMinter, user1} = await runCatalystSetup();
+      await expect(
+        catalystAsMinter.mint(user1.address, 0, 1)
+      ).to.be.revertedWith('Catalyst: invalid catalyst id');
+    });
     it('Minter can batch mint token', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
