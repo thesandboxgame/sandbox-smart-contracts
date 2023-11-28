@@ -97,4 +97,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OrderValidator', 'OrderValidator_setup'];
-func.dependencies = ['OrderValidator_deploy', 'PolygonSand', 'Asset'];
+func.dependencies = ['OrderValidator_deploy', 'PolygonSand_deploy', 'Asset_deploy'];
