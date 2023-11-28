@@ -12,5 +12,7 @@ artifacts
 # generated docs
 generated-markups
 
+defenderActions.json
+
 # editors
 .idea
