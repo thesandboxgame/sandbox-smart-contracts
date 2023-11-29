@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+    - Autogenerate the RELEASE.md file
+    - Still testing the publishing process.
+
 ## [0.0.2] - 2023-11-29
 
 ### Added
