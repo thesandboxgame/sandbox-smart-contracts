@@ -1,6 +1,6 @@
 {
     "name": "@sandbox-smart-contracts/deploy",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "TheSandbox game smart contracts deployment",
     "repository": {
         "type": "git",
