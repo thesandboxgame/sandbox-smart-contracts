@@ -2345,7 +2345,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@sandbox-smart-contracts/faucets": 0.0.1
     "@sandbox-smart-contracts/giveaway": 0.0.3
-    "@sandbox-smart-contracts/marketplace": "*"
+    "@sandbox-smart-contracts/marketplace": 1.0.1
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
@@ -2509,7 +2509,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/marketplace@*, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
+"@sandbox-smart-contracts/marketplace@1.0.1, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
   dependencies:
