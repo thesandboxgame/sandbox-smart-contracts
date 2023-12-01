@@ -36,10 +36,10 @@ const func: DeployFunction = async function (hre) {
   const {deployments} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
 
-  const admin = await read('OldCatalysts', {}, 'getAdmin');
+  const admin = await read('Catalysts', {}, 'getAdmin');
 
   for (let i = 0; i < 4; i++) {
-    const config = await read('OldCatalysts', 'getMintData', i);
+    const config = await read('Catalysts', 'getMintData', i);
     const setup = catalysts[i];
     console.log(`${i} ${setup.name}`);
     const keys = [
@@ -57,7 +57,7 @@ const func: DeployFunction = async function (hre) {
       console.log(`Updating minting data for ${setup.name}`);
       await catchUnknownSigner(
         execute(
-          'OldCatalysts',
+          'Catalysts',
           {from: admin},
           'setConfiguration',
           i,

@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -12,13 +12,13 @@ const func: DeployFunction = async function (hre) {
     extraCatalystAndGemMinter,
   } = await getNamedAccounts();
 
-  const currentAdmin = await read('OldGems', 'getAdmin');
+  const currentAdmin = await read('Gems', 'getAdmin');
 
   // TODO get all enabled minter from event and remove right unless specified
-  const isDeployerMinter = await read('OldGems', 'isMinter', deployer);
+  const isDeployerMinter = await read('Gems', 'isMinter', deployer);
   if (isDeployerMinter) {
     await execute(
-      'OldGems',
+      'Gems',
       {from: currentAdmin, log: true},
       'setMinter',
       deployer,
@@ -26,10 +26,10 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const isGemMinter = await read('OldGems', 'isMinter', gemMinter);
+  const isGemMinter = await read('Gems', 'isMinter', gemMinter);
   if (!isGemMinter) {
     await execute(
-      'OldGems',
+      'Gems',
       {from: currentAdmin, log: true},
       'setMinter',
       gemMinter,
@@ -39,13 +39,13 @@ const func: DeployFunction = async function (hre) {
 
   if (extraCatalystAndGemMinter) {
     const isGemMinter = await read(
-      'OldGems',
+      'Gems',
       'isMinter',
       extraCatalystAndGemMinter
     );
     if (!isGemMinter) {
       await execute(
-        'OldGems',
+        'Gems',
         {from: currentAdmin, log: true},
         'setMinter',
         extraCatalystAndGemMinter,
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (hre) {
 
   if (currentAdmin.toLowerCase() !== gemAdmin.toLowerCase()) {
     await execute(
-      'OldGems',
+      'Gems',
       {from: currentAdmin, log: true},
       'changeAdmin',
       gemAdmin
@@ -68,4 +68,4 @@ func.tags = ['OldGems'];
 func.dependencies = ['OldGems_deploy'];
 func.runAtTheEnd = true;
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 const {BigNumber} = ethers;
 
 // sand price is in Sand unit (Sand has 18 decimals)
@@ -24,8 +24,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const sandContract = await deployments.get('Sand');
   const daiContract = await deployments.get('DAI');
   const daiMedianizer = await deployments.get('DAIMedianizer');
-  const catalystGroup = await deployments.get('OldCatalysts');
-  const gemGroup = await deployments.get('OldGems');
+  const catalystGroup = await deployments.get('Catalysts');
+  const gemGroup = await deployments.get('Gems');
 
   await deploy('StarterPackV1', {
     from: deployer,
@@ -54,4 +54,4 @@ func.dependencies = [
   'OldCatalysts_deploy',
   'OldGems_deploy',
 ];
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

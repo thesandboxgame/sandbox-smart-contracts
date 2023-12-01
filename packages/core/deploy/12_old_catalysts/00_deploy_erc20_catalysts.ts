@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 import {sandWei} from '../../utils/units';
 
 const catalysts = [
@@ -50,7 +50,7 @@ const func: DeployFunction = async function (hre) {
 
   const sand = await deployments.get('Sand');
 
-  const catalystGroup = await deploy('OldCatalysts', {
+  const catalystGroup = await deploy('Catalysts', {
     contract: 'ERC20GroupCatalyst',
     from: deployer,
     log: true,
@@ -76,7 +76,7 @@ const func: DeployFunction = async function (hre) {
     const data = [];
     for (let i = 0; i < catalystData.length; i++) {
       const catalyst = catalystData[i];
-      const deploymentName = `Old_${catalyst.name}Catalyst`;
+      const deploymentName = `${catalyst.name}Catalyst`;
       const tokenSymbol = catalyst.symbol;
       const result = await deploy(deploymentName, {
         contract: 'ERC20SubToken',
@@ -99,12 +99,12 @@ const func: DeployFunction = async function (hre) {
         maxGems: catalyst.maxGems,
       });
     }
-    const contract = await ethers.getContract('OldCatalysts');
+    const contract = await ethers.getContract('Catalysts');
     const filter = contract.filters['SubToken']();
     const res = await contract.queryFilter(filter);
     if (res.length === 0) {
       return execute(
-        'OldCatalysts',
+        'Catalysts',
         {from: deployer},
         'addCatalysts',
         erc20s,
@@ -115,10 +115,11 @@ const func: DeployFunction = async function (hre) {
       console.log('Catalyst already setup');
     }
   }
+  console;
   await addCatalysts(catalysts);
 };
 export default func;
 func.tags = ['OldCatalysts', 'OldCatalysts_deploy'];
 func.dependencies = ['Sand'];
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed
