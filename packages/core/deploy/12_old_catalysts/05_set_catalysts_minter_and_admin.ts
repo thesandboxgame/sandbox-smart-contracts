@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -12,13 +12,13 @@ const func: DeployFunction = async function (hre) {
     extraCatalystAndGemMinter,
   } = await getNamedAccounts();
 
-  const currentAdmin = await read('OldCatalysts', 'getAdmin');
+  const currentAdmin = await read('Catalysts', 'getAdmin');
 
   // TODO get all enabled minter from event and remove right unless specified
-  const isDeployerMinter = await read('OldCatalysts', 'isMinter', deployer);
+  const isDeployerMinter = await read('Catalysts', 'isMinter', deployer);
   if (isDeployerMinter) {
     await execute(
-      'OldCatalysts',
+      'Catalysts',
       {from: currentAdmin, log: true},
       'setMinter',
       deployer,
@@ -26,14 +26,10 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const isCatalystMinter = await read(
-    'OldCatalysts',
-    'isMinter',
-    catalystMinter
-  );
+  const isCatalystMinter = await read('Catalysts', 'isMinter', catalystMinter);
   if (!isCatalystMinter) {
     await execute(
-      'OldCatalysts',
+      'Catalysts',
       {from: currentAdmin, log: true},
       'setMinter',
       catalystMinter,
@@ -43,13 +39,13 @@ const func: DeployFunction = async function (hre) {
 
   if (extraCatalystAndGemMinter) {
     const isCatalystMinter = await read(
-      'OldCatalysts',
+      'Catalysts',
       'isMinter',
       extraCatalystAndGemMinter
     );
     if (!isCatalystMinter) {
       await execute(
-        'OldCatalysts',
+        'Catalysts',
         {from: currentAdmin, log: true},
         'setMinter',
         extraCatalystAndGemMinter,
@@ -60,7 +56,7 @@ const func: DeployFunction = async function (hre) {
 
   if (currentAdmin.toLowerCase() !== catalystAdmin.toLowerCase()) {
     await execute(
-      'OldCatalysts',
+      'Catalysts',
       {from: currentAdmin, log: true},
       'changeAdmin',
       catalystAdmin
@@ -72,4 +68,4 @@ func.tags = ['OldCatalysts'];
 func.dependencies = ['OldCatalysts_deploy'];
 func.runAtTheEnd = true;
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

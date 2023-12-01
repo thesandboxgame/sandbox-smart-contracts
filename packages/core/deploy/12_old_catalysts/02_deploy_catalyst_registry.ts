@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -7,9 +7,9 @@ const func: DeployFunction = async function (hre) {
 
   const {deployer} = await getNamedAccounts();
 
-  const catalyst = await deployments.get('OldCatalysts');
+  const catalyst = await deployments.get('Catalysts');
 
-  await deploy('OldCatalystRegistry', {
+  await deploy('CatalystRegistry', {
     contract: 'CatalystRegistry',
     from: deployer,
     args: [
@@ -24,4 +24,4 @@ export default func;
 func.tags = ['OldCatalystRegistry', 'OldCatalystRegistry_deploy'];
 func.dependencies = ['OldCatalysts_deploy', 'Sand_deploy'];
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

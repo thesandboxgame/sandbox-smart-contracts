@@ -11,12 +11,12 @@ const func: DeployFunction = async function (hre) {
   const registry = await deployments.get('OldCatalystRegistry');
   const sand = await deployments.get('Sand');
   const asset = await deployments.get('Asset');
-  const gem = await deployments.get('OldGems');
-  const catalyst = await deployments.get('OldCatalysts');
+  const gem = await deployments.get('Gems');
+  const catalyst = await deployments.get('Catalysts');
 
   const bakedMintData = [];
   for (let i = 0; i < 4; i++) {
-    const mintData = await read('OldCatalysts', 'getMintData', i);
+    const mintData = await read('Catalysts', 'getMintData', i);
     const maxGems = BigNumber.from(mintData.maxGems).mul(
       BigNumber.from(2).pow(240)
     );
@@ -45,7 +45,7 @@ const func: DeployFunction = async function (hre) {
     bakedMintData.push(bakedData);
   }
 
-  const catalystMinter = await deploy('OldCatalystMinterLegendary220', {
+  const catalystMinter = await deploy('CatalystMinterLegendary220', {
     contract: 'CatalystMinter',
     from: deployer,
     log: true,
@@ -118,15 +118,15 @@ const func: DeployFunction = async function (hre) {
   }
 
   await setSuperOperatorFor('Sand', catalystMinter.address);
-  await setSuperOperatorFor('OldGems', catalystMinter.address);
+  await setSuperOperatorFor('Gems', catalystMinter.address);
   await setSuperOperatorFor('Asset', catalystMinter.address);
-  await setSuperOperatorFor('OldCatalysts', catalystMinter.address);
+  await setSuperOperatorFor('Catalysts', catalystMinter.address);
 };
 export default func;
 func.tags = [
-  'OldCatalystMinterLegendary220',
-  'OldCatalystMinterLegendary220_setup',
-  'OldCatalystMinterLegendary220_deploy',
+  'CatalystMinterLegendary220',
+  'CatalystMinterLegendary220_setup',
+  'CatalystMinterLegendary220_deploy',
 ];
 func.dependencies = [
   'Sand_deploy',

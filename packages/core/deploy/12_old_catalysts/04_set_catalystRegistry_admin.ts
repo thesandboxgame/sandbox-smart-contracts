@@ -1,16 +1,16 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {log, read, execute} = deployments;
 
   const {catalystRegistryAdmin} = await getNamedAccounts();
-  const currentAdmin = await read('OldCatalystRegistry', 'getAdmin');
+  const currentAdmin = await read('CatalystRegistry', 'getAdmin');
   if (currentAdmin.toLowerCase() !== catalystRegistryAdmin.toLowerCase()) {
     log('setting CatalystRegistry Admin');
     await execute(
-      'OldCatalystRegistry',
+      'CatalystRegistry',
       {from: currentAdmin},
       'changeAdmin',
       catalystRegistryAdmin
@@ -22,4 +22,4 @@ func.tags = ['OldCatalystRegistry'];
 func.dependencies = ['OldCatalystRegistry_deploy'];
 func.runAtTheEnd = true;
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

@@ -8,15 +8,15 @@ const func: DeployFunction = async function (hre) {
 
   const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 
-  const registry = await deployments.get('OldCatalystRegistry');
+  const registry = await deployments.get('CatalystRegistry');
   const sand = await deployments.get('Sand');
   const asset = await deployments.get('Asset');
-  const gem = await deployments.get('OldGems');
-  const catalyst = await deployments.get('OldCatalysts');
+  const gem = await deployments.get('Gems');
+  const catalyst = await deployments.get('Catalysts');
 
   const bakedMintData = [];
   for (let i = 0; i < 4; i++) {
-    const mintData = await read('OldCatalysts', 'getMintData', i);
+    const mintData = await read('Catalysts', 'getMintData', i);
     const maxGems = BigNumber.from(mintData.maxGems).mul(
       BigNumber.from(2).pow(240)
     );
@@ -74,13 +74,13 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const currentMinter = await read('OldCatalystRegistry', 'getMinter');
+  const currentMinter = await read('CatalystRegistry', 'getMinter');
   if (currentMinter.toLowerCase() != sandboxMinter.address.toLowerCase()) {
     console.log('setting SandboxMinter as CatalystRegistry minter');
-    const currentRegistryAdmin = await read('OldCatalystRegistry', 'getAdmin');
+    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
     await catchUnknownSigner(
       execute(
-        'OldCatalystRegistry',
+        'CatalystRegistry',
         {from: currentRegistryAdmin, log: true},
         'setMinter',
         sandboxMinter.address
@@ -112,9 +112,9 @@ const func: DeployFunction = async function (hre) {
   }
 
   await setSuperOperatorFor('Sand', sandboxMinter.address);
-  await setSuperOperatorFor('OldGems', sandboxMinter.address);
+  await setSuperOperatorFor('Gems', sandboxMinter.address);
   await setSuperOperatorFor('Asset', sandboxMinter.address);
-  await setSuperOperatorFor('OldCatalysts', sandboxMinter.address);
+  await setSuperOperatorFor('Catalysts', sandboxMinter.address);
 };
 export default func;
 func.tags = ['SandboxMinter', 'SandboxMinter_setup', 'SandboxMinter_deploy'];

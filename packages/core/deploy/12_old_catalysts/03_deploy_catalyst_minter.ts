@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 import {BigNumber} from '@ethersproject/bignumber';
 import {sandWei} from '../../utils/units';
 
@@ -9,15 +9,15 @@ const func: DeployFunction = async function (hre) {
 
   const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 
-  const registry = await deployments.get('OldCatalystRegistry');
+  const registry = await deployments.get('CatalystRegistry');
   const sand = await deployments.get('Sand');
   const asset = await deployments.get('Asset');
-  const gem = await deployments.get('OldGems');
-  const catalyst = await deployments.get('OldCatalysts');
+  const gem = await deployments.get('Gems');
+  const catalyst = await deployments.get('Catalysts');
 
   const bakedMintData = [];
   for (let i = 0; i < 4; i++) {
-    const mintData = await read('OldCatalysts', 'getMintData', i);
+    const mintData = await read('Catalysts', 'getMintData', i);
     const maxGems = BigNumber.from(mintData.maxGems).mul(
       BigNumber.from(2).pow(240)
     );
@@ -39,7 +39,7 @@ const func: DeployFunction = async function (hre) {
     bakedMintData.push(bakedData);
   }
 
-  const catalystMinter = await deploy('OldCatalystMinter', {
+  const catalystMinter = await deploy('CatalystMinter', {
     contract: 'CatalystMinter',
     from: deployer,
     log: true,
@@ -57,12 +57,12 @@ const func: DeployFunction = async function (hre) {
     ],
   });
 
-  const currentMinter = await read('OldCatalystRegistry', 'getMinter');
+  const currentMinter = await read('CatalystRegistry', 'getMinter');
   if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-    log('setting OldCatalystMinter as CatalystRegistry minter');
-    const currentRegistryAdmin = await read('OldCatalystRegistry', 'getAdmin');
+    log('setting CatalystMinter as CatalystRegistry minter');
+    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
     await execute(
-      'OldCatalystRegistry',
+      'CatalystRegistry',
       {from: currentRegistryAdmin},
       'setMinter',
       catalystMinter.address
@@ -71,7 +71,7 @@ const func: DeployFunction = async function (hre) {
 
   const isBouncer = await read('Asset', 'isBouncer', catalystMinter.address);
   if (!isBouncer) {
-    log('setting OldCatalystMinter as Asset bouncer');
+    log('setting CatalystMinter as Asset bouncer');
     const currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
     await execute(
       'Asset',
@@ -89,7 +89,7 @@ const func: DeployFunction = async function (hre) {
       address
     );
     if (!isSuperOperator) {
-      log('setting OldCatalystMinter as super operator for ' + contractName);
+      log('setting CatalystMinter as super operator for ' + contractName);
       const currentSandAdmin = await read(contractName, 'getAdmin');
       await execute(
         contractName,
@@ -102,9 +102,9 @@ const func: DeployFunction = async function (hre) {
   }
 
   await setSuperOperatorFor('Sand', catalystMinter.address);
-  await setSuperOperatorFor('OldGems', catalystMinter.address);
+  await setSuperOperatorFor('Gems', catalystMinter.address);
   await setSuperOperatorFor('Asset', catalystMinter.address);
-  await setSuperOperatorFor(`OldCatalysts`, catalystMinter.address);
+  await setSuperOperatorFor(`Catalysts`, catalystMinter.address);
 };
 export default func;
 func.tags = ['OldCatalystMinter', 'OldCatalystMinter_deploy'];
@@ -112,8 +112,8 @@ func.dependencies = [
   'OldCatalysts_deploy',
   'Sand_deploy',
   'OldGems_deploy',
-  'Asset_deploy',
+  'AssetV1',
   'OldCatalystRegistry_deploy',
 ];
 // comment to deploy old system
-func.skip = skipUnlessTest; // not meant to be redeployed
+func.skip = skipUnlessTestnet; // not meant to be redeployed

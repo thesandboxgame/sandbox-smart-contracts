@@ -1,6 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -67,4 +67,4 @@ func.dependencies = [
   'ERC1155_PREDICATE',
   'operatorFilterSubscription',
 ];
-func.skip = skipUnlessTest;
+func.skip = skipUnlessTestnet;
