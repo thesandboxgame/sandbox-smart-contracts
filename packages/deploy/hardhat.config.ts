@@ -9,11 +9,24 @@ import {
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
+import './tasks/deployHook';
 
 // Package name : solidity source code path
 const importedPackages = {
-  'asset-latest': 'contracts/',
-  'asset-1.0.2': 'contracts/',
+  '@sandbox-smart-contracts/asset': [
+    'contracts/Asset.sol',
+    'contracts/AssetCreate.sol',
+    'contracts/AssetReveal.sol',
+    'contracts/AuthSuperValidator.sol',
+    'contracts/Catalyst.sol',
+  ],
+  '@sandbox-smart-contracts/asset-1.0.2': [
+    'contracts/Asset.sol',
+    'contracts/AssetCreate.sol',
+    'contracts/AssetReveal.sol',
+    'contracts/AuthSuperValidator.sol',
+    'contracts/Catalyst.sol',
+  ],
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
   '@sandbox-smart-contracts/marketplace': [

@@ -8,7 +8,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, assetAdmin} = await getNamedAccounts();
   await deploy('AuthSuperValidator', {
     from: deployer,
-    contract: 'asset-1.0.2/contracts/AuthSuperValidator.sol:AuthSuperValidator',
+    contract:
+      '@sandbox-smart-contracts/asset-1.0.2/contracts/AuthSuperValidator.sol:AuthSuperValidator',
     args: [assetAdmin],
     log: true,
   });
