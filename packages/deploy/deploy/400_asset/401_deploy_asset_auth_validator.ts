@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('AuthSuperValidator', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/asset-1.0.2/contracts/AuthSuperValidator.sol:AuthSuperValidator',
+      '@sandbox-smart-contracts/asset-1.0.3/contracts/AuthSuperValidator.sol:AuthSuperValidator',
     args: [assetAdmin],
     log: true,
   });

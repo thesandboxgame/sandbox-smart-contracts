@@ -20,7 +20,7 @@ const importedPackages = {
     'contracts/AuthSuperValidator.sol',
     'contracts/Catalyst.sol',
   ],
-  '@sandbox-smart-contracts/asset-1.0.2': [
+  '@sandbox-smart-contracts/asset-1.0.3': [
     'contracts/Asset.sol',
     'contracts/AssetCreate.sol',
     'contracts/AssetReveal.sol',

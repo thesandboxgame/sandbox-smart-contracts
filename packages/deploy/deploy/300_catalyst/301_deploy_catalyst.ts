@@ -32,7 +32,7 @@ const func: DeployFunction = async function (
     from: deployer,
     log: true,
     contract:
-      '@sandbox-smart-contracts/asset-1.0.2/contracts/Catalyst.sol:Catalyst',
+      '@sandbox-smart-contracts/asset-1.0.3/contracts/Catalyst.sol:Catalyst',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
