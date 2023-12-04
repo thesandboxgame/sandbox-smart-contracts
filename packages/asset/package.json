@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/asset",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Asset and Catalyst L2 smart contracts",
   "license": "MIT",
   "main": "index.js",
