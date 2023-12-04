@@ -21,3 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 
 func.tags = ['Asset_upgrade'];
+func.dependencies = ['Asset_deploy', 'Asset_setup'];

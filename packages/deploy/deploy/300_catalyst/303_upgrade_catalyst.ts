@@ -12,7 +12,7 @@ const func: DeployFunction = async function (
   await deploy('Catalyst', {
     from: deployer,
     log: true,
-    contract: '@sandbox-smart-contracts/asset/contracts/Catalyst.sol:Catalyst',
+    contract: 'asset-latest/contracts/Catalyst.sol:Catalyst',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',

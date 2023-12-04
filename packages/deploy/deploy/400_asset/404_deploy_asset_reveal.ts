@@ -16,8 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('AssetReveal', {
     from: deployer,
-    contract:
-      '@sandbox-smart-contracts/asset/contracts/AssetReveal.sol:AssetReveal',
+    contract: 'asset-1.0.2/contracts/AssetReveal.sol:AssetReveal',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
