@@ -246,7 +246,6 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
 
     /// @dev By overriding this function in an implementation which inherits this contract,
     /// you can enable versioned tokenIds without the extra overhead of writing to a new storage slot in _owners each time a version is incremented.
-    /// See GameToken._storageId() for an example, where the storageId is the tokenId minus the version number.
     /// !!! Caution !!! Overriding this function without taking appropriate care could lead to
     /// ownerOf() returning an owner for non-existent tokens. Tests should be written to
     /// guard against introducing this bug.
