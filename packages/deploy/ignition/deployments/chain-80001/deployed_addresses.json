@@ -1,4 +1,6 @@
 {
-  "RoyaltyModule#RoyaltySplitter": "0xB7987Cf8E2e0Df750AFf8053Ec6E5a625B8232f1",
-  "SandModule#PolygonSand": "0x4e65a41D91FdEeb4984705a223d3C4B6fd3cCCE6"
+  "deploySand#PolygonSand": "0x4b6bC0cc851546475a3a48c40698Ac4EEd250710",
+  "deployPool#ERC20RewardPoolV2": "0xd2518baE7B932c965d35F99d978dEAE4b1B7eb36",
+  "deployRewardCalculator#TwoPeriodsRewardCalculatorV2": "0xF3671F585b80B78f5e74e6C53BBB2Bc449AD7bCa",
+  "deployContributionRules#ContributionRulesV2": "0x7DeA5BA1dA33e5AfCA3C0cBA9f8E68d218FA7a8e"
 }

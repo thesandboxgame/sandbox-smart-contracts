@@ -18,6 +18,15 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
     ],
   },
   contractSizer: {

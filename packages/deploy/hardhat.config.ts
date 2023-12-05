@@ -26,6 +26,9 @@ const importedPackages = {
   '@sandbox-smart-contracts/core': [
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
+    '/src/solc_0.8/defi/ERC20RewardPoolV2.sol',
+    '/src/solc_0.8/defi/rules-v2/ContributionRulesV2.sol',
+    '/src/solc_0.8/defi/rewardCalculation/TwoPeriodsRewardCalculatorV2.sol',
   ],
 };
 

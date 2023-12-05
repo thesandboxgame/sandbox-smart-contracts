@@ -40,7 +40,7 @@
         "live:deploy": "node ./utils/npmScriptHelper.js deploy",
         "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
         "fork:test": "node ./utils/npmScriptHelper.js fork:test",
-        "ignition": "hardhat ignition deploy"
+        "ignition": "hardhat ignition"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
