@@ -8,6 +8,7 @@ import {
   addNodeAndMnemonic,
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
+import './tasks/deployHook';
 import './tasks/importedPackages';
 
 // Package name : solidity source code path
