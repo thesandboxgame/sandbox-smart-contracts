@@ -34,6 +34,7 @@ import {ITokenUtils, IRoyaltyUGC} from "./interfaces/ITokenUtils.sol";
 /// @author The Sandbox
 /// @notice ERC1155 asset token contract
 /// @notice Minting and burning tokens is only allowed through separate authorized contracts
+/// @dev Test comment for triggering defender scan
 /// @dev This contract is final and should not be inherited
 contract Asset is
     IAsset,
