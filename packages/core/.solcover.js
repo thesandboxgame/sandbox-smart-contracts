@@ -13,5 +13,6 @@ module.exports = {
     'solc_0.5',
     'solc_0.6',
     'solc_0.7',
+    'solc_0.8.15', //temporary for repo cleaning
   ],
 };
