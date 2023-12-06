@@ -10,6 +10,8 @@
 
 This mono-repo contains The Sandbox smart contracts, underpinning The Sandbox metaverse. Our key token contracts were conceived inside the core package. You can find out more about some of our early blockchain features in [this article](https://medium.com/sandbox-game/blockchain-features-in-the-sandbox-7db91fcc615c). Since core was created, we have added new contracts and updates via new packages - see the below Architecture Overview for more information.
 
+Test line added to initiate scan.
+
 ## Learn more
 
 - [Website](www.sandbox.game)
@@ -47,6 +49,7 @@ yarn install
 ```
 
 Install Slither (optional)
+
 ```bash
 pip3 install -r requirements.txt
 ```
