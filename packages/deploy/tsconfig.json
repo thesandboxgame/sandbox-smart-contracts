@@ -15,6 +15,8 @@
     "./deploy_mocks",
     "./utils",
     "./tasks",
+    "./integration_test",
+    "./runtime_test",
     "./test"
   ]
 }

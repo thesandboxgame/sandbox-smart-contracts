@@ -28,7 +28,9 @@
     ],
     "scripts": {
         "compile": "hardhat compile",
-        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test",
+        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true yarn hardhat test && yarn test:integration && yarn test:runtime",
+        "test:integration": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test --integration",
+        "test:runtime": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test --runtime",
         "void:deploy": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
         "deploy": "npm run void:deploy",
         "hardhat": "hardhat",
