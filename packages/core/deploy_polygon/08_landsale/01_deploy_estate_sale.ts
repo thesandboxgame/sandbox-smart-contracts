@@ -112,6 +112,6 @@ func.tags = ['PolygonEstateSaleWithAuth', 'PolygonEstateSaleWithAuth_deploy'];
 func.dependencies = [
   'PolygonSand_deploy',
   'PolygonLand_deploy',
-  'PolygonAssetERC1155_deploy',
+  // 'PolygonAssetERC1155_deploy', // comment out on mainnet deployments (has skipUnlessTestnet)
   'PolygonAuthValidator_deploy',
 ];
