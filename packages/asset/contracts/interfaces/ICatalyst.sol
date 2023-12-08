@@ -9,6 +9,7 @@ interface ICatalyst {
     event DefaultRoyaltyChanged(address indexed newDefaultRoyaltyRecipient, uint256 newDefaultRoyaltyAmount);
     event BaseURISet(string baseURI);
     event OperatorRegistrySet(address indexed registry);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /// @notice Mints a new token, limited to MINTER_ROLE only
     /// @param to The address that will own the minted token

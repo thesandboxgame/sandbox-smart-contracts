@@ -18,6 +18,7 @@ interface IAsset {
     }
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /// @notice Mint new tokens
     /// @dev Only callable by the minter role

@@ -259,6 +259,32 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.revertedWith('Catalyst: CID cant be empty');
     });
   });
+  describe('Owner', function () {
+    it('should not have the owner set when initially deployed', async function () {
+      const {catalyst} = await runCatalystSetup();
+      expect(await catalyst.owner()).to.be.equal(ethers.constants.AddressZero);
+    });
+    it('allows DEFAULT_ADMIN_ROLE to transfer the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      await catalyst
+        .connect(catalystAdmin)
+        .transferOwnership(catalystAdmin.address);
+      expect(await catalyst.owner()).to.be.equals(catalystAdmin.address);
+    });
+    it('does not allow non-DEFAULT_ADMIN_ROLE account to transfer the ownership', async function () {
+      const {catalyst, deployer} = await runCatalystSetup();
+      await expect(
+        catalyst.connect(deployer).transferOwnership(deployer.address)
+      ).to.be.revertedWith('Asset: Unauthorized');
+    });
+    it('emits OwnershipTransferred event when DEFAULT_ADMIN_ROLE transfers the ownership', async function () {
+      const {catalyst, catalystAdmin} = await runCatalystSetup();
+      const tx = await catalyst
+        .connect(catalystAdmin)
+        .transferOwnership(catalystAdmin.address);
+      await expect(tx).to.emit(catalyst, 'OwnershipTransferred');
+    });
+  });
   describe('Admin Role', function () {
     it('Admin can set minter', async function () {
       const {catalystAsAdmin, user1, minterRole} = await runCatalystSetup();

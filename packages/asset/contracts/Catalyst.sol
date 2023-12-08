@@ -324,5 +324,21 @@ contract Catalyst is
         return "CATALYST";
     }
 
-    uint256[49] private __gap;
+    address private _owner;
+
+    /// @notice Returns the owner of the contract
+    /// @return address of the owner
+    function owner() external view returns (address) {
+        return _owner;
+    }
+
+    /// @notice Sets the owner of the contract
+    /// @param newOwner address of the new owner
+    function transferOwnership(address newOwner) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Asset: Unauthorized");
+        _owner = newOwner;
+        emit OwnershipTransferred(_owner, newOwner);
+    }
+
+    uint256[48] private __gap;
 }
