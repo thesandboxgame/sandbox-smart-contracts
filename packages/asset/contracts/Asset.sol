@@ -56,6 +56,7 @@ contract Asset is
 
     // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
+    address private _owner;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -383,8 +384,6 @@ contract Asset is
     function symbol() external pure returns (string memory _symbol) {
         return "ASSET";
     }
-
-    address private _owner;
 
     /// @notice Returns the owner of the contract
     /// @return address of the owner

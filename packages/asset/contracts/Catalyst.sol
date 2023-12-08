@@ -49,6 +49,7 @@ contract Catalyst is
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     uint256 public highestTierIndex;
+    address private _owner;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -323,8 +324,6 @@ contract Catalyst is
     function symbol() external pure returns (string memory _symbol) {
         return "CATALYST";
     }
-
-    address private _owner;
 
     /// @notice Returns the owner of the contract
     /// @return address of the owner
