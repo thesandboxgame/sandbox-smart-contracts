@@ -14,6 +14,10 @@ import './tasks/importedPackages';
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/asset': 'contracts/',
+  '@sandbox-smart-contracts/asset-1.0.3': [
+    'contracts/Asset.sol',
+    'contracts/Catalyst.sol',
+  ],
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
   '@sandbox-smart-contracts/marketplace': [

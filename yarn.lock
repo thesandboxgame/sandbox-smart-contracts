@@ -2154,6 +2154,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sandbox-smart-contracts/asset-1.0.3@npm:@sandbox-smart-contracts/asset@1.0.3":
+  version: 1.0.3
+  resolution: "@sandbox-smart-contracts/asset@npm:1.0.3"
+  dependencies:
+    "@manifoldxyz/libraries-solidity": ^1.0.4
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
+    "@openzeppelin/contracts": 4.9.3
+    "@openzeppelin/contracts-upgradeable": 4.9.3
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+  checksum: bbf63b91b98bf694fd68592d7f35a5aacafb2bfd67243352f27b4bf062dc17c13509c480571077cadc451059c15587029145caece2814495d69cd5241e82f6db
+  languageName: node
+  linkType: hard
+
 "@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
@@ -2411,6 +2426,7 @@ __metadata:
     "@nomiclabs/hardhat-ethers": ^2.2.3
     "@openzeppelin/hardhat-upgrades": ^2.5.0
     "@sandbox-smart-contracts/asset": "*"
+    "@sandbox-smart-contracts/asset-1.0.3": "npm:@sandbox-smart-contracts/asset@1.0.3"
     "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": "*"
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
