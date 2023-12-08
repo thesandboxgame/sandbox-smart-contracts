@@ -4,10 +4,9 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
-
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployments, getNamedAccounts, ethers} = hre;
+  const {execute, read, catchUnknownSigner, deploy} = deployments;
+  const {deployer, upgradeAdmin, catalystAdmin} = await getNamedAccounts();
 
   await deploy('Catalyst', {
     from: deployer,
@@ -19,6 +18,17 @@ const func: DeployFunction = async function (
       upgradeIndex: 1,
     },
   });
+
+  if ((await read('Catalyst', 'owner')) === ethers.constants.AddressZero) {
+    await catchUnknownSigner(
+      execute(
+        'Catalyst',
+        {from: catalystAdmin, log: true},
+        'transferOwnership',
+        catalystAdmin
+      )
+    );
+  }
 };
 export default func;
 func.tags = ['Catalyst_upgrade'];

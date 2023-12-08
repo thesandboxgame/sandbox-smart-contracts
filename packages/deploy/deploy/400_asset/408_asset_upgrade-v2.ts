@@ -2,9 +2,9 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
-  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const {deployments, getNamedAccounts, ethers} = hre;
+  const {read, catchUnknownSigner, execute, deploy} = deployments;
+  const {deployer, upgradeAdmin, assetAdmin} = await getNamedAccounts();
 
   await deploy('Asset', {
     from: deployer,
@@ -16,6 +16,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     log: true,
   });
+
+  if ((await read('Asset', 'owner')) === ethers.constants.AddressZero) {
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: assetAdmin, log: true},
+        'transferOwnership',
+        assetAdmin
+      )
+    );
+  }
 };
 export default func;
 
