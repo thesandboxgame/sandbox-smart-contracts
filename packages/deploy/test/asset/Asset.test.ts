@@ -126,11 +126,14 @@ const setupTest = deployments.createFixture(
     const mockMetadataHash = 'QmQ6BFzGGAU7JdkNJmvkEVjvqKC4VCGb3qoDnjAQWHexxD';
     await AssetContract.connect(adminSigner).setTokenURI(1, mockMetadataHash);
 
+    const deployeSigner = await ethers.getSigner(deployer);
+
     return {
       AssetContract,
       AssetCreateContract,
       RoyaltyManagerContract,
-      deployer,
+      deployer: deployeSigner,
+      adminSigner,
       sandAdmin,
       OperatorFilterAssetSubscription,
       TRUSTED_FORWARDER,
@@ -146,6 +149,28 @@ const setupTest = deployments.createFixture(
 );
 
 describe('Asset', function () {
+  describe('Owner', function () {
+    it('allows DEFAULT_ADMIN_ROLE to transfer the ownership', async function () {
+      const {AssetContract, adminSigner, deployer} = await setupTest();
+      await AssetContract.connect(adminSigner).transferOwnership(
+        deployer.address
+      );
+      expect(await AssetContract.owner()).to.be.equals(deployer.address);
+    });
+    it('does not allow non-DEFAULT_ADMIN_ROLE account to transfer the ownership', async function () {
+      const {AssetContract, deployer} = await setupTest();
+      await expect(
+        AssetContract.connect(deployer).transferOwnership(deployer.address)
+      ).to.be.revertedWith('Asset: Unauthorized');
+    });
+    it('emits OwnershipTransferred event when DEFAULT_ADMIN_ROLE transfers the ownership', async function () {
+      const {AssetContract, adminSigner, deployer} = await setupTest();
+      const tx = await AssetContract.connect(adminSigner).transferOwnership(
+        deployer.address
+      );
+      await expect(tx).to.emit(AssetContract, 'OwnershipTransferred');
+    });
+  });
   describe('Roles', function () {
     it('Admin', async function () {
       const {AssetContract, sandAdmin} = await setupTest();

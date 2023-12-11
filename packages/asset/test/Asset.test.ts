@@ -23,6 +23,34 @@ describe('Base Asset Contract (/packages/asset/contracts/Asset.sol)', function (
       expect(await AssetContract.symbol()).to.be.equal('ASSET');
     });
   });
+  describe('Owner', function () {
+    it('should not have the owner set when initially deployed', async function () {
+      const {AssetContract} = await runAssetSetup();
+      expect(await AssetContract.owner()).to.be.equal(
+        ethers.constants.AddressZero
+      );
+    });
+    it('allows DEFAULT_ADMIN_ROLE to transfer the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      await AssetContract.connect(assetAdmin).transferOwnership(
+        assetAdmin.address
+      );
+      expect(await AssetContract.owner()).to.be.equals(assetAdmin.address);
+    });
+    it('does not allow non-DEFAULT_ADMIN_ROLE account to transfer the ownership', async function () {
+      const {AssetContract, deployer} = await runAssetSetup();
+      await expect(
+        AssetContract.connect(deployer).transferOwnership(deployer.address)
+      ).to.be.revertedWith('Asset: Unauthorized');
+    });
+    it('emits OwnershipTransferred event when DEFAULT_ADMIN_ROLE transfers the ownership', async function () {
+      const {AssetContract, assetAdmin} = await runAssetSetup();
+      const tx = await AssetContract.connect(assetAdmin).transferOwnership(
+        assetAdmin.address
+      );
+      await expect(tx).to.emit(AssetContract, 'OwnershipTransferred');
+    });
+  });
   describe('Access Control', function () {
     it('should have MINTER_ROLE defined', async function () {
       const {AssetContract} = await runAssetSetup();

@@ -49,6 +49,7 @@ contract Catalyst is
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     uint256 public highestTierIndex;
+    address private _owner;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -324,5 +325,19 @@ contract Catalyst is
         return "CATALYST";
     }
 
-    uint256[49] private __gap;
+    /// @notice Returns the owner of the contract
+    /// @return address of the owner
+    function owner() external view returns (address) {
+        return _owner;
+    }
+
+    /// @notice Sets the owner of the contract
+    /// @param newOwner address of the new owner
+    function transferOwnership(address newOwner) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Catalyst: Unauthorized");
+        _owner = newOwner;
+        emit OwnershipTransferred(_owner, newOwner);
+    }
+
+    uint256[48] private __gap;
 }

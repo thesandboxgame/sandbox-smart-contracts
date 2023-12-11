@@ -56,6 +56,7 @@ contract Asset is
 
     // mapping of ipfs metadata token hash to token id
     mapping(string => uint256) public hashUsed;
+    address private _owner;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -384,5 +385,19 @@ contract Asset is
         return "ASSET";
     }
 
-    uint256[49] private __gap;
+    /// @notice Returns the owner of the contract
+    /// @return address of the owner
+    function owner() external view returns (address) {
+        return _owner;
+    }
+
+    /// @notice Sets the owner of the contract
+    /// @param newOwner address of the new owner
+    function transferOwnership(address newOwner) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Asset: Unauthorized");
+        _owner = newOwner;
+        emit OwnershipTransferred(_owner, newOwner);
+    }
+
+    uint256[48] private __gap;
 }

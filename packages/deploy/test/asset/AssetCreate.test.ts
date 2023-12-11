@@ -7,7 +7,10 @@ const setupTest = deployments.createFixture(
       await getNamedAccounts();
     await deployments.fixture();
     const Asset = await deployments.get('Asset');
-    const AssetContract = await ethers.getContractAt('Asset', Asset.address);
+    const AssetContract = await ethers.getContractAt(
+      '@sandbox-smart-contracts/asset/contracts/Asset.sol:Asset',
+      Asset.address
+    );
     const AssetCreate = await deployments.get('AssetCreate');
     const AssetCreateContract = await ethers.getContractAt(
       'AssetCreate',
@@ -15,7 +18,7 @@ const setupTest = deployments.createFixture(
     );
     const Catalyst = await deployments.get('Catalyst');
     const CatalystContract = await ethers.getContractAt(
-      'Catalyst',
+      '@sandbox-smart-contracts/asset/contracts/Catalyst.sol:Catalyst',
       Catalyst.address
     );
     const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
