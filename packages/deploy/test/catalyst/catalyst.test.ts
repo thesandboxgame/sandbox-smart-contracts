@@ -10,7 +10,8 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
-    const {catalystAdmin, catalystMinter, sandAdmin} = await getNamedAccounts();
+    const {deployer, catalystAdmin, catalystMinter, sandAdmin} =
+      await getNamedAccounts();
 
     await network.provider.send('hardhat_setCode', [
       OPERATOR_FILTER_REGISTRY,
@@ -121,11 +122,15 @@ const setupTest = deployments.createFixture(
       TRUSTED_FORWARDER_Data.address
     );
 
+    const deployeSigner = await ethers.getSigner(deployer);
+    const catalystAdminSigner = await ethers.getSigner(catalystAdmin);
+
     return {
       CatalystContract,
       OperatorFilterCatalystSubscription,
       RoyaltyManagerContract,
-      catalystAdmin,
+      deployer: deployeSigner,
+      catalystAdmin: catalystAdminSigner,
       TRUSTED_FORWARDER,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
@@ -139,12 +144,34 @@ const setupTest = deployments.createFixture(
 );
 
 describe('Catalyst', function () {
+  describe('Owner', function () {
+    it('allows DEFAULT_ADMIN_ROLE to transfer the ownership', async function () {
+      const {CatalystContract, catalystAdmin, deployer} = await setupTest();
+      await CatalystContract.connect(catalystAdmin).transferOwnership(
+        deployer.address
+      );
+      expect(await CatalystContract.owner()).to.be.equals(deployer.address);
+    });
+    it('does not allow non-DEFAULT_ADMIN_ROLE account to transfer the ownership', async function () {
+      const {CatalystContract, deployer} = await setupTest();
+      await expect(
+        CatalystContract.connect(deployer).transferOwnership(deployer.address)
+      ).to.be.revertedWith('Asset: Unauthorized');
+    });
+    it('emits OwnershipTransferred event when DEFAULT_ADMIN_ROLE transfers the ownership', async function () {
+      const {CatalystContract, catalystAdmin, deployer} = await setupTest();
+      const tx = await CatalystContract.connect(
+        catalystAdmin
+      ).transferOwnership(deployer.address);
+      await expect(tx).to.emit(CatalystContract, 'OwnershipTransferred');
+    });
+  });
   describe('check roles', function () {
     it('admin', async function () {
       const {CatalystContract, catalystAdmin} = await setupTest();
       const defaultAdminRole = await CatalystContract.DEFAULT_ADMIN_ROLE();
       expect(
-        await CatalystContract.hasRole(defaultAdminRole, catalystAdmin)
+        await CatalystContract.hasRole(defaultAdminRole, catalystAdmin.address)
       ).to.be.equals(true);
     });
     it('minter', async function () {
