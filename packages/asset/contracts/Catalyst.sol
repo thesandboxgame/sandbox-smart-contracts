@@ -334,7 +334,7 @@ contract Catalyst is
     /// @notice Sets the owner of the contract
     /// @param newOwner address of the new owner
     function transferOwnership(address newOwner) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Asset: Unauthorized");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Catalyst: Unauthorized");
         _owner = newOwner;
         emit OwnershipTransferred(_owner, newOwner);
     }
