@@ -156,7 +156,7 @@ describe('Catalyst', function () {
       const {CatalystContract, deployer} = await setupTest();
       await expect(
         CatalystContract.connect(deployer).transferOwnership(deployer.address)
-      ).to.be.revertedWith('Asset: Unauthorized');
+      ).to.be.revertedWith('Catalyst: Unauthorized');
     });
     it('emits OwnershipTransferred event when DEFAULT_ADMIN_ROLE transfers the ownership', async function () {
       const {CatalystContract, catalystAdmin, deployer} = await setupTest();
