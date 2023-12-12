@@ -7,21 +7,21 @@ const setupTest = deployments.createFixture(
       await getNamedAccounts();
     await deployments.fixture();
     const Asset = await deployments.get('Asset');
-    const AssetContract = await ethers.getContractAt('Asset', Asset.address);
+    const AssetContract = await ethers.getContractAt(Asset.abi, Asset.address);
     const AssetCreate = await deployments.get('AssetCreate');
     const AssetCreateContract = await ethers.getContractAt(
-      'AssetCreate',
+      AssetCreate.abi,
       AssetCreate.address
     );
     const Catalyst = await deployments.get('Catalyst');
     const CatalystContract = await ethers.getContractAt(
-      'Catalyst',
+      Catalyst.abi,
       Catalyst.address
     );
     const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
     const AuthSuperValidator = await deployments.get('AuthSuperValidator');
     const AuthSuperValidatorContract = await ethers.getContractAt(
-      'AuthSuperValidator',
+      AuthSuperValidator.abi,
       AuthSuperValidator.address
     );
 

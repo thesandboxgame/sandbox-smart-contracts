@@ -1,4 +1,4 @@
-import {getContract, withSnapshot} from '../../utils/testUtils';
+import {getContract, withSnapshot} from '../utils/testUtils';
 import {expect} from 'chai';
 
 const setupTest = withSnapshot(['SignedMultiGiveaway'], async (hre) => {

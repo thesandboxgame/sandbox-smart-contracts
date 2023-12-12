@@ -24,6 +24,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
   '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
   '@sandbox-smart-contracts/core': [
+    '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
   ],
