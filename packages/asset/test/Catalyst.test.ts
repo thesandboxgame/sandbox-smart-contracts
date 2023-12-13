@@ -715,9 +715,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(
         await catalyst.isApprovedForAll(user1.address, user2.address)
       ).to.be.equal(false);
-      await expect(catalyst
-        .connect(await ethers.provider.getSigner(user2.address)) // bad operator
-        .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
     });
     it('cannot batch transfer if not approved operator', async function () {
@@ -731,15 +733,17 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(
         await catalyst.isApprovedForAll(user1.address, user2.address)
       ).to.be.equal(false);
-      await expect(catalyst
-        .connect(await ethers.provider.getSigner(user2.address)) // bad operator
-        .safeBatchTransferFrom(
-          user1.address,
-          user2.address,
-          [1, 2],
-          [10, 10],
-          zeroAddress
-        )).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeBatchTransferFrom(
+            user1.address,
+            user2.address,
+            [1, 2],
+            [10, 10],
+            zeroAddress
+          )
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
     });

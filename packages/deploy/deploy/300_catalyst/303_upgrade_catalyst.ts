@@ -7,19 +7,21 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deploy, catchUnknownSigner} = deployments;
 
-  const {deployer, upgradeAdmin} =
-    await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
 
-    await catchUnknownSigner(deploy('Catalyst', {
-    from: deployer,
-    log: true,
-    contract: '@sandbox-smart-contracts/asset/contracts/Catalyst.sol:Catalyst',
-    proxy: {
-      owner: upgradeAdmin,
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      upgradeIndex: 1,
-    },
-  }));
+  await catchUnknownSigner(
+    deploy('Catalyst', {
+      from: deployer,
+      log: true,
+      contract:
+        '@sandbox-smart-contracts/asset/contracts/Catalyst.sol:Catalyst',
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        upgradeIndex: 1,
+      },
+    })
+  );
 };
 export default func;
 func.tags = ['Catalyst_upgrade', 'L2'];
