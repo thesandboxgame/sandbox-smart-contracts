@@ -53,7 +53,7 @@ const func: DeployFunction = async function (
   });
 };
 export default func;
-func.tags = ['Catalyst', 'Catalyst_deploy', 'L2', 'CatalysV1'];
+func.tags = ['Catalyst', 'Catalyst_deploy', 'L2', 'CatalystV1'];
 func.dependencies = [
   'OperatorFilterCatalystSubscription_deploy',
   'RoyaltyManager_deploy',
