@@ -707,6 +707,46 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user2.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user2.address, 2)).to.be.equal(10);
     });
+    it('cannot transfer if not approved operator', async function () {
+      const {catalyst, user1, catalystAsMinter, user2} =
+        await runCatalystSetup();
+      await catalystAsMinter.mint(user1.address, 1, 10);
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(
+        await catalyst.isApprovedForAll(user1.address, user2.address)
+      ).to.be.equal(false);
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+    });
+    it('cannot batch transfer if not approved operator', async function () {
+      const {catalyst, user1, catalystAsMinter, user2} =
+        await runCatalystSetup();
+      await catalystAsMinter.mint(user1.address, 1, 10);
+      await catalystAsMinter.mint(user1.address, 2, 10);
+
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
+      expect(
+        await catalyst.isApprovedForAll(user1.address, user2.address)
+      ).to.be.equal(false);
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeBatchTransferFrom(
+            user1.address,
+            user2.address,
+            [1, 2],
+            [10, 10],
+            zeroAddress
+          )
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
+    });
     it('should fail on transfering non existing token', async function () {
       const {catalyst, user1, user2} = await runCatalystSetup();
 

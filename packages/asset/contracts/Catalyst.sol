@@ -242,7 +242,7 @@ contract Catalyst is
         uint256 value,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        super._safeTransferFrom(from, to, id, value, data);
+        super.safeTransferFrom(from, to, id, value, data);
     }
 
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
@@ -259,7 +259,7 @@ contract Catalyst is
         uint256[] memory values,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        super._safeBatchTransferFrom(from, to, ids, values, data);
+        super.safeBatchTransferFrom(from, to, ids, values, data);
     }
 
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
