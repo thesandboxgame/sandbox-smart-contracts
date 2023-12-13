@@ -242,6 +242,7 @@ contract Catalyst is
         uint256 value,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "Catalyst: Transfer error");
         super._safeTransferFrom(from, to, id, value, data);
     }
 
@@ -259,7 +260,7 @@ contract Catalyst is
         uint256[] memory values,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        super._safeBatchTransferFrom(from, to, ids, values, data);
+        super.safeBatchTransferFrom(from, to, ids, values, data);
     }
 
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
