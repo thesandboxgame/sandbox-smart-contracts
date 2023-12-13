@@ -21,7 +21,7 @@ declare module 'hardhat/types/runtime' {
 }
 declare module 'hardhat/types/config' {
   interface HardhatUserConfig {
-    importedPackages: {[name: string]: string};
+    importedPackages: {[name: string]: string | string[]};
   }
 }
 

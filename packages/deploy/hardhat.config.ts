@@ -2,13 +2,14 @@ import 'dotenv/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
 import '@nomiclabs/hardhat-ethers';
-import 'hardhat-deploy';
 import {
   addForkingSupport,
   addNodeAndMnemonic,
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
+import './tasks/defenderCapture';
+import './tasks/defenderDeploy';
 
 // Package name : solidity source code path
 const importedPackages = {
