@@ -654,7 +654,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
     });
   });
 
-  describe.only('Token transfer and approval', function () {
+  describe('Token transfer and approval', function () {
     it('owner can approve operator', async function () {
       const {catalyst, user1, catalystAsMinter, user2} =
         await runCatalystSetup();
@@ -717,7 +717,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.be.equal(false);
       await expect(catalyst
         .connect(await ethers.provider.getSigner(user2.address)) // bad operator
-        .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)).to.be.revertedWith('Catalyst: Transfer error');
+        .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)).to.be.revertedWith('ERC1155: caller is not token owner or approved');
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
     });
     it('cannot batch transfer if not approved operator', async function () {

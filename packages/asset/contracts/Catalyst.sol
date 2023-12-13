@@ -242,8 +242,7 @@ contract Catalyst is
         uint256 value,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "Catalyst: Transfer error");
-        super._safeTransferFrom(from, to, id, value, data);
+        super.safeTransferFrom(from, to, id, value, data);
     }
 
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).

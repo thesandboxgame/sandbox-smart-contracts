@@ -5,12 +5,12 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, catchUnknownSigner} = deployments;
 
   const {deployer, upgradeAdmin} =
     await getNamedAccounts();
 
-  await deploy('Catalyst', {
+    await catchUnknownSigner(deploy('Catalyst', {
     from: deployer,
     log: true,
     contract: '@sandbox-smart-contracts/asset/contracts/Catalyst.sol:Catalyst',
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       upgradeIndex: 1,
     },
-  });
+  }));
 };
 export default func;
 func.tags = ['Catalyst_upgrade', 'L2'];
