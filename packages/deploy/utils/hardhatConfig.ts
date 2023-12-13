@@ -1,27 +1,30 @@
 import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
 import {HardhatUserConfig} from 'hardhat/config';
-import {NetworksUserConfig} from 'hardhat/types';
+import {MultiSolcUserConfig, NetworksUserConfig} from 'hardhat/types';
+import {ArgumentsParser} from 'hardhat/internal/cli/ArgumentsParser';
+import {HARDHAT_PARAM_DEFINITIONS} from 'hardhat/internal/core/params/hardhat-params';
+import {getEnvHardhatArguments} from 'hardhat/internal/core/params/env-variables';
+
+// Taken from hardhat
+function parseArgs() {
+  const argumentsParser = new ArgumentsParser();
+  const parsed = argumentsParser.parseHardhatArguments(
+    HARDHAT_PARAM_DEFINITIONS,
+    getEnvHardhatArguments(HARDHAT_PARAM_DEFINITIONS, process.env),
+    process.argv.slice(2)
+  );
+  // we assume no default network in our conf.
+  return {
+    taskName: parsed.scopeOrTaskName,
+    network: parsed.hardhatArguments.network || HARDHAT_NETWORK_NAME,
+  };
+}
 
 export function nodeUrl(networkName: string): string {
-  if (networkName) {
-    const uri = process.env['ETH_NODE_URI_' + networkName.toUpperCase()];
-    if (uri && uri !== '') {
-      return uri;
-    }
-  }
-
-  let uri = process.env.ETH_NODE_URI;
-  if (uri) {
-    uri = uri.replace('{{networkName}}', networkName);
-  }
-  if (!uri || uri === '') {
-    // throw new Error(`environment variable "ETH_NODE_URI" not configured `);
-    return '';
-  }
-  if (uri.indexOf('{{') >= 0) {
-    throw new Error(
-      `invalid uri or network not supported by node provider : ${uri}`
-    );
+  const envName = 'ETH_NODE_URI_' + networkName.toUpperCase();
+  const uri = process.env[envName];
+  if (!uri || uri.trim().length === 0) {
+    throw new Error(`${envName} must be configured in .env`);
   }
   return uri;
 }
@@ -48,10 +51,25 @@ export function getVerifyApiKey(networkName?: string): string {
 export function addNodeAndMnemonic(
   networks: NetworksUserConfig
 ): NetworksUserConfig {
+  const args = parseArgs();
+  const ret: NetworksUserConfig = {};
   for (const k in networks) {
+    if (k === 'localhost' || k == HARDHAT_NETWORK_NAME || k == args.network) {
+      ret[k] = networks[k];
+      // companionNetworks
+      Object.values(networks[k].companionNetworks).forEach((x: string) => {
+        ret[x] = networks[x];
+      });
+    }
+  }
+  console.log(
+    `Setting url and mnemonic for the following networks: ${Object.keys(ret)}`
+  );
+  for (const k in ret) {
     if (k === 'localhost' || k == HARDHAT_NETWORK_NAME) continue;
-    networks[k] = {
-      ...networks[k],
+
+    ret[k] = {
+      ...ret[k],
       url: nodeUrl(k),
       accounts: {
         mnemonic: getMnemonic(k),
@@ -63,18 +81,18 @@ export function addNodeAndMnemonic(
       },
     };
   }
-  return networks;
+  return ret;
 }
 
 export function skipDeploymentsOnLiveNetworks(
   conf: HardhatUserConfig
 ): HardhatUserConfig {
+  const args = parseArgs();
   // We want to run deployments on hardhat but not on live nets
   // The problem is that hardhat-deploy always run the fixtures when testing
   // maybe there is a better way to do it:
   const testingLive =
-    process.argv.some((x) => x === 'test') &&
-    process.argv.some((x) => x === '--network');
+    args.taskName === 'test' && args.network != HARDHAT_NETWORK_NAME;
   if (!conf.networks || !testingLive) {
     return conf;
   }
@@ -132,4 +150,48 @@ export function addForkingSupport(conf: HardhatUserConfig): HardhatUserConfig {
         }
       : undefined,
   };
+}
+
+export function skipShanghaiIfNeeded(
+  conf: HardhatUserConfig
+): HardhatUserConfig {
+  if (!conf.solidity) {
+    return conf;
+  }
+  const args = parseArgs();
+  if (
+    conf.networks &&
+    conf.networks[args.network] &&
+    conf.networks[args.network]
+  ) {
+    const n = conf.networks[args.network] as {dontSupportShanghai: boolean};
+    if (n.dontSupportShanghai) {
+      let s: MultiSolcUserConfig;
+      if (typeof conf.solidity === 'string') {
+        s = {compilers: [{version: conf.solidity}]};
+      } else if ('version' in conf.solidity) {
+        s = {compilers: [conf.solidity]};
+      } else if ('compilers' in conf.solidity) {
+        s = conf.solidity;
+      }
+      return {
+        ...conf,
+        solidity: {
+          ...s,
+          compilers: s.compilers.map((x) => ({
+            version: x.version,
+            settings: {
+              ...x.settings,
+              ...(x.version.localeCompare('0.8.18', undefined, {
+                numeric: true,
+              }) >= 0
+                ? {evmVersion: 'paris'}
+                : {}),
+            },
+          })),
+        },
+      };
+    }
+  }
+  return conf;
 }
