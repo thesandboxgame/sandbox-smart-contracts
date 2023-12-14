@@ -38,6 +38,11 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
+    it('Should have return correct name and symbol', async function () {
+      const {catalyst} = await runCatalystSetup();
+      expect(await catalyst.name()).to.be.equal("The Sandbox's CATALYSTs");
+      expect(await catalyst.symbol()).to.be.equal('CATALYST');
+    });
     describe('Interface support', function () {
       it('should support ERC165', async function () {
         const {catalyst} = await runCatalystSetup();
@@ -444,6 +449,12 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystAsMinter.mint(user1.address, 7, 1)
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+    it("Can't mint catalyst of tier 0", async function () {
+      const {catalystAsMinter, user1} = await runCatalystSetup();
+      await expect(
+        catalystAsMinter.mint(user1.address, 0, 1)
+      ).to.be.revertedWith('Catalyst: invalid catalyst id');
+    });
     it('Minter can batch mint token', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
@@ -695,6 +706,46 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         );
       expect(await catalyst.balanceOf(user2.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user2.address, 2)).to.be.equal(10);
+    });
+    it('cannot transfer if not approved operator', async function () {
+      const {catalyst, user1, catalystAsMinter, user2} =
+        await runCatalystSetup();
+      await catalystAsMinter.mint(user1.address, 1, 10);
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(
+        await catalyst.isApprovedForAll(user1.address, user2.address)
+      ).to.be.equal(false);
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress)
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+    });
+    it('cannot batch transfer if not approved operator', async function () {
+      const {catalyst, user1, catalystAsMinter, user2} =
+        await runCatalystSetup();
+      await catalystAsMinter.mint(user1.address, 1, 10);
+      await catalystAsMinter.mint(user1.address, 2, 10);
+
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
+      expect(
+        await catalyst.isApprovedForAll(user1.address, user2.address)
+      ).to.be.equal(false);
+      await expect(
+        catalyst
+          .connect(await ethers.provider.getSigner(user2.address)) // bad operator
+          .safeBatchTransferFrom(
+            user1.address,
+            user2.address,
+            [1, 2],
+            [10, 10],
+            zeroAddress
+          )
+      ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
+      expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
+      expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
     });
     it('should fail on transfering non existing token', async function () {
       const {catalyst, user1, user2} = await runCatalystSetup();

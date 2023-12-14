@@ -6,9 +6,10 @@ import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/util
 import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -18,6 +19,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 /// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {
+    using AddressUpgradeable for address;
     using ERC165CheckerUpgradeable for address;
 
     /// @notice Defines the base for representing fees to avoid rounding: 50% == 0.5 * 10000 == 5000.
@@ -78,13 +80,13 @@ abstract contract TransferManager is Initializable, ITransferManager {
         IRoyaltiesProvider newRoyaltiesProvider
     ) internal onlyInitializing {
         _setProtocolFee(newProtocolFeePrimary, newProtocolFeeSecondary);
-        _setRoyaltiesRegistry(newRoyaltiesProvider);
         _setDefaultFeeReceiver(newDefaultFeeReceiver);
+        _setRoyaltiesRegistry(newRoyaltiesProvider);
     }
 
     /// @notice Executes transfers for 2 matched orders
-    /// @param left DealSide from the left order (see LibDeal.sol)
-    /// @param right DealSide from the right order (see LibDeal.sol)
+    /// @param left DealSide from the left order
+    /// @param right DealSide from the right order
     /// @dev This is the main entry point, when used as a separated contract this method will be external
     function doTransfers(DealSide memory left, DealSide memory right, LibAsset.FeeSide feeSide) internal override {
         DealSide memory paymentSide;
@@ -109,7 +111,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Sets the royalties registry.
     /// @param newRoyaltiesRegistry Address of new royalties registry
     function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
-        require(address(newRoyaltiesRegistry) != address(0), "invalid Royalties Registry");
+        require(address(newRoyaltiesRegistry).isContract(), "invalid Royalties Registry");
         royaltiesRegistry = newRoyaltiesRegistry;
 
         emit RoyaltiesRegistrySet(newRoyaltiesRegistry);
@@ -181,18 +183,18 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
             IRoyaltiesProvider.Part memory r = royalties[i];
-            totalRoyalties = totalRoyalties + r.value;
+            totalRoyalties = totalRoyalties + r.basisPoints;
             if (r.account == nftSide.account) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }
-            remainder = _transferPercentage(remainder, paymentSide, r.account, r.value, BASIS_POINTS);
+            remainder = _transferPercentage(remainder, paymentSide, r.account, r.basisPoints, TOTAL_BASIS_POINTS);
         }
         require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "royalties are too high (>50%)");
         return remainder;
     }
 
-    /// @notice Do a transfer based on a percentage (in base points)
+    /// @notice Do a transfer based on a percentage (in basis points)
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
     /// @param to Account that will receive the asset
@@ -212,8 +214,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = remainder - fee;
             payment.value = fee;
         } else {
-            remainder = 0;
             payment.value = remainder;
+            remainder = 0;
         }
         if (payment.value > 0) {
             _transfer(payment, paymentSide.account, to);

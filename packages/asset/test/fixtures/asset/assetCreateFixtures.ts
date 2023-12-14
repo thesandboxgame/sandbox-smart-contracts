@@ -253,6 +253,21 @@ export async function runCreateTestSetup() {
     return result;
   };
 
+  const mintMultipleSpecialAssets = async (
+    signature: string,
+    amounts: number[],
+    metadataHashes: string[]
+  ) => {
+    const tx = await AssetCreateContractAsUser.createMultipleSpecialAssets(
+      signature,
+      amounts,
+      metadataHashes,
+      user.address
+    );
+    const result = await tx.wait();
+    return result;
+  };
+
   const getCreatorNonce = async (creator: string) => {
     const nonce = await AssetCreateContract.creatorNonces(creator);
     return nonce;
@@ -328,6 +343,7 @@ export async function runCreateTestSetup() {
     mintSingleAsset,
     mintMultipleAssets,
     mintSpecialAsset,
+    mintMultipleSpecialAssets,
     grantSpecialMinterRole,
     generateSingleMintSignature,
     generateMultipleMintSignature,

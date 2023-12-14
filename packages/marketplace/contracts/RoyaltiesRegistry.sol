@@ -7,7 +7,7 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
-import {IRoyaltiesProvider, BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
+import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 
 /// @author The Sandbox
 /// @title RoyaltiesRegistry
@@ -60,12 +60,11 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     }
 
     /// @notice Royalties registry initializer
-    // solhint-disable-next-line func-name-mixedcase
-    function __RoyaltiesRegistry_init() external initializer {
+    function initialize() external initializer {
         __Ownable_init();
     }
 
-    /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (4).
+    /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (2).
     /// @param token Address of the token.
     /// @param provider Address of the external royalties provider.
     function setProviderByToken(address token, address provider) external {
@@ -110,11 +109,11 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         delete royaltiesByToken[token];
         for (uint256 i = 0; i < royalties.length; ++i) {
             require(royalties[i].account != address(0x0), "recipient should be present");
-            require(royalties[i].value != 0, "royalty value should be > 0");
+            require(royalties[i].basisPoints != 0, "basisPoints should be > 0");
             royaltiesByToken[token].royalties.push(royalties[i]);
-            sumRoyalties += royalties[i].value;
+            sumRoyalties += royalties[i].basisPoints;
         }
-        require(sumRoyalties < BASIS_POINTS, "royalties sum more, than 100%");
+        require(sumRoyalties < TOTAL_BASIS_POINTS, "royalties sum is more than 100%");
         royaltiesByToken[token].initialized = true;
         emit RoyaltiesSetForContract(token, royalties);
     }
@@ -123,7 +122,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
     /// @param token Address of the token.
     /// @param tokenId ID of the token.
     /// @return An array containing royalty parts.
-    function getRoyalties(address token, uint256 tokenId) external override returns (Part[] memory) {
+    function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory) {
         uint256 royaltiesProviderData = royaltiesProviders[token];
 
         address royaltiesProvider = address(uint160(royaltiesProviderData));
@@ -246,7 +245,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
                 Recipient memory splitRecipient = multiRecipients[i];
                 royalties[i].account = splitRecipient.recipient;
                 uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
-                royalties[i].value = uint96(splitAmount);
+                royalties[i].basisPoints = splitAmount;
                 sum += splitAmount;
             }
             // sum can be less than amount, otherwise small-value listings can break
@@ -284,11 +283,11 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         if (amount == 0) {
             return result;
         }
-        uint256 percent = (amount * BASIS_POINTS) / WEIGHT_VALUE;
-        require(percent < BASIS_POINTS, "royalties 2981 exceeds 100%");
+        uint256 percent = (amount * TOTAL_BASIS_POINTS) / WEIGHT_VALUE;
+        require(percent < TOTAL_BASIS_POINTS, "royalties 2981 exceeds 100%");
         result = new Part[](1);
-        result[0].account = payable(to);
-        result[0].value = percent;
+        result[0].account = to;
+        result[0].basisPoints = percent;
         return result;
     }
 

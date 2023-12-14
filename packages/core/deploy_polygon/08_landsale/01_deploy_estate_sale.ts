@@ -28,7 +28,10 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_25', skip: async () => true},
   {name: 'LandPreSale_26', skip: async () => true},
   {name: 'LandPreSale_27', skip: async () => true},
-  {name: 'LandPreSale_28', skip: async () => false},
+  {name: 'LandPreSale_28', skip: async () => true},
+  {name: 'LandPreSale_29', skip: async () => true},
+  {name: 'LandPreSale_30', skip: async () => true},
+  {name: 'LandPreSale_31', skip: async () => false},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -109,6 +112,6 @@ func.tags = ['PolygonEstateSaleWithAuth', 'PolygonEstateSaleWithAuth_deploy'];
 func.dependencies = [
   'PolygonSand_deploy',
   'PolygonLand_deploy',
-  'PolygonAssetERC1155_deploy',
+  'PolygonAssetERC1155_deploy', // comment out on mainnet deployments (has skipUnlessTestnet)
   'PolygonAuthValidator_deploy',
 ];

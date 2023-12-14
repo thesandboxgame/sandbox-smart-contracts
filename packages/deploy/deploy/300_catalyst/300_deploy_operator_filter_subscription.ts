@@ -7,10 +7,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, sandAdmin} = await getNamedAccounts();
 
-  // TODO: review subscriptions for Catalyst and Asset
-
   // Operator filter subscription
-  await deploy('OperatorFilterSubscription', {
+
+  await deploy('OperatorFilterCatalystSubscription', {
     from: deployer,
     contract:
       '@sandbox-smart-contracts/dependency-operator-filter/contracts/OperatorFilterSubscription.sol:OperatorFilterSubscription',
@@ -18,11 +17,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  const owner = await read('OperatorFilterSubscription', 'owner');
+  const owner = await read('OperatorFilterCatalystSubscription', 'owner');
   if (owner != sandAdmin) {
     await catchUnknownSigner(
       execute(
-        'OperatorFilterSubscription',
+        'OperatorFilterCatalystSubscription',
         {from: owner, log: true},
         'transferOwnership',
         sandAdmin
@@ -32,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
-  'OperatorFilterSubscription',
-  'OperatorFilterSubscription_deploy',
+  'OperatorFilterCatalystSubscription',
+  'OperatorFilterCatalystSubscription_deploy',
   'L2',
 ];

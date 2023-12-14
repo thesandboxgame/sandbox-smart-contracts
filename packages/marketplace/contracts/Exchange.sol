@@ -51,8 +51,7 @@ contract Exchange is
     /// @param newDefaultFeeReceiver Market fee receiver.
     /// @param newRoyaltiesProvider Registry for the different types of royalties.
     /// @param orderValidatorAddress New OrderValidator contract address.
-    // solhint-disable-next-line func-name-mixedcase
-    function __Exchange_init(
+    function initialize(
         address admin,
         address newTrustedForwarder,
         uint256 newProtocolFeePrimary,
@@ -96,7 +95,7 @@ contract Exchange is
     /// @notice Cancel an order.
     /// @param order The order to be canceled.
     /// @param orderKeyHash Used as a checksum to avoid mistakes in the order values.
-    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external whenNotPaused {
+    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external {
         require(_msgSender() == order.maker, "not maker");
         _cancel(order, orderKeyHash);
     }

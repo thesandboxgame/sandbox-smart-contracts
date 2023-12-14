@@ -37,33 +37,40 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`AssetCreate PAUSER_ROLE granted to ${assetPauser}`);
   }
 
-  const catMinterRole = await read('Catalyst', 'BURNER_ROLE');
+  const catBurnerRole = await read('Catalyst', 'BURNER_ROLE');
   if (
-    !(await read('Catalyst', 'hasRole', catMinterRole, assetCreate.address))
+    !(await read('Catalyst', 'hasRole', catBurnerRole, assetCreate.address))
   ) {
     await catchUnknownSigner(
       execute(
         'Catalyst',
         {from: catalystAdmin, log: true},
         'grantRole',
-        catMinterRole,
+        catBurnerRole,
         assetCreate.address
       )
     );
     log(`Catalyst BURNER_ROLE granted to ${assetCreate.address}`);
   }
 
-  await catchUnknownSigner(
-    execute(
-      'AuthSuperValidator',
-      {from: assetAdmin, log: true},
-      'setSigner',
-      assetCreate.address,
-      backendAuthWallet
-    )
-  );
-
-  log(`AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`);
+  if (
+    (
+      await read('AuthSuperValidator', 'getSigner', assetCreate.address)
+    ).toLowerCase() !== backendAuthWallet.toLowerCase()
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'AuthSuperValidator',
+        {from: assetAdmin, log: true},
+        'setSigner',
+        assetCreate.address,
+        backendAuthWallet
+      )
+    );
+    log(
+      `AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`
+    );
+  }
 };
 
 export default func;

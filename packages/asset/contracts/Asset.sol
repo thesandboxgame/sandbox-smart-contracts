@@ -5,6 +5,7 @@ import {
     AccessControlUpgradeable,
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {
     ERC1155BurnableUpgradeable,
     ERC1155Upgradeable
@@ -47,6 +48,7 @@ contract Asset is
     ITokenUtils
 {
     using TokenIdUtils for uint256;
+    using Address for address;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -65,22 +67,22 @@ contract Asset is
     /// @param assetAdmin The address of the asset admin
     /// @param baseUri The base URI for the token metadata
     /// @param commonSubscription The address of the operator filter subscription
-    /// @param _manager The address of the royalty manager
+    /// @param manager The address of the royalty manager
     function initialize(
         address forwarder,
         address assetAdmin,
         string memory baseUri,
         address commonSubscription,
-        address _manager
+        address manager
     ) external initializer {
+        __ERC2771Handler_init(forwarder);
+        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
         _setBaseURI(baseUri);
+        __OperatorFilterer_init(commonSubscription, true);
+        __MultiRoyaltyDistributor_init(manager);
         __AccessControl_init();
         __ERC1155Supply_init();
-        __ERC2771Handler_init(forwarder);
         __ERC1155Burnable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, assetAdmin);
-        __OperatorFilterer_init(commonSubscription, true);
-        __MultiRoyaltyDistributor_init(_manager);
     }
 
     /// @notice Mint new tokens
@@ -203,7 +205,7 @@ contract Asset is
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder != address(0), "Asset: Zero address");
+        require(trustedForwarder.isContract(), "Asset: Bad forwarder address");
         _setTrustedForwarder(trustedForwarder);
     }
 
@@ -359,15 +361,27 @@ contract Asset is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(subscriptionOrRegistrantToCopy != address(0), "Asset: Zero address");
+        require(subscriptionOrRegistrantToCopy.isContract(), "Asset: Bad subscription address");
         _registerAndSubscribe(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets the operator filter registry address
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(registry != address(0), "Asset: Zero address");
+        require(registry.isContract(), "Asset: Bad registry address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
+    }
+
+    /// @notice A descriptive name for the collection of tokens in this contract.
+    /// @return _name the name of the tokens.
+    function name() external pure returns (string memory _name) {
+        return "The Sandbox's ASSETs";
+    }
+
+    /// @notice An abbreviated name for the collection of tokens in this contract.
+    /// @return _symbol the symbol of the tokens.
+    function symbol() external pure returns (string memory _symbol) {
+        return "ASSET";
     }
 
     uint256[49] private __gap;

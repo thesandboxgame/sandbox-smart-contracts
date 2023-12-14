@@ -21,6 +21,14 @@ interface IAssetCreate {
         string metadataHash,
         bool revealed
     );
+    event SpecialAssetBatchMinted(
+        address indexed creator,
+        uint256[] tokenIds,
+        uint8[] tiers,
+        uint256[] amounts,
+        string[] metadataHashes,
+        bool[] revealed
+    );
     event AssetBatchMinted(
         address indexed creator,
         uint256[] tokenIds,

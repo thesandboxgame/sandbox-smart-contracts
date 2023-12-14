@@ -46,4 +46,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.runAtTheEnd = true;
 func.tags = ['Asset', 'Asset_setup'];
-func.dependencies = ['Asset_deploy'];
+func.dependencies = ['AssetV1'];

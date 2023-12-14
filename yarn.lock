@@ -4230,19 +4230,32 @@ __metadata:
   linkType: hard
 
 "@openzeppelin/defender-admin-client@npm:^1.48.0":
-  version: 1.49.0
-  resolution: "@openzeppelin/defender-admin-client@npm:1.49.0"
+  version: 1.52.0
+  resolution: "@openzeppelin/defender-admin-client@npm:1.52.0"
   dependencies:
-    "@openzeppelin/defender-base-client": 1.49.0
+    "@openzeppelin/defender-base-client": 1.52.0
     axios: ^1.4.0
     ethers: ^5.7.2
     lodash: ^4.17.19
     node-fetch: ^2.6.0
-  checksum: 09630a941e49826afd8e973ef7bb5fd1e76e60f721b91aefd835b6b90f52786e8d39598fe03531a30e7056bde05ca21810fb62acf0e8a01d90743e8d68512a3b
+  checksum: a81af83c64cbe1f884aa9a6ebcc84b357e74522f2a26e95b913fd5fc3b8eb8ee28340d6a2422651b7f8969df3248d2224c44692188b7c38abd7eecaa9b97bda3
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-base-client@npm:1.49.0, @openzeppelin/defender-base-client@npm:^1.46.0, @openzeppelin/defender-base-client@npm:^1.48.0":
+"@openzeppelin/defender-base-client@npm:1.52.0, @openzeppelin/defender-base-client@npm:^1.48.0":
+  version: 1.52.0
+  resolution: "@openzeppelin/defender-base-client@npm:1.52.0"
+  dependencies:
+    amazon-cognito-identity-js: ^6.0.1
+    async-retry: ^1.3.3
+    axios: ^1.4.0
+    lodash: ^4.17.19
+    node-fetch: ^2.6.0
+  checksum: 7857a656a534e54ae94f50d6bb7ad6a17860375581a792c293f15707ae66088a02e2eb7213bb8e7e00496ea4e86330cbcee1a383c517f0d2e959c76a3722cdcd
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-base-client@npm:^1.46.0":
   version: 1.49.0
   resolution: "@openzeppelin/defender-base-client@npm:1.49.0"
   dependencies:
@@ -4255,25 +4268,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-sdk-base-client@npm:^1.2.0, @openzeppelin/defender-sdk-base-client@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.3.0"
+"@openzeppelin/defender-sdk-base-client@npm:^1.2.0, @openzeppelin/defender-sdk-base-client@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.5.0"
   dependencies:
-    amazon-cognito-identity-js: ^6.0.1
+    amazon-cognito-identity-js: ^6.3.6
     async-retry: ^1.3.3
-  checksum: 456c346e017bb807e595e95d0408b51c321e645d54fa08745d7d67ddf4ca64f8432bc91411b1111b0f5f1a41821f4ccfc284667f78c24f84d86b613e5333410b
+  checksum: b522b4c82dcd05519a83379033e89128b1148a8ff048405f00b01dc826fd3cb1d75790070dd1761440399c16a45e9b6d3df043a72cde4a9d90ea100f7b4d484f
   languageName: node
   linkType: hard
 
 "@openzeppelin/defender-sdk-deploy-client@npm:^1.2.0":
-  version: 1.3.0
-  resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.3.0"
+  version: 1.5.0
+  resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.5.0"
   dependencies:
-    "@ethersproject/abi": ^5.6.3
-    "@openzeppelin/defender-sdk-base-client": ^1.3.0
+    "@ethersproject/abi": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.5.0
     axios: ^1.4.0
     lodash: ^4.17.21
-  checksum: a67c838a51ecc2f3c14cc80228f6da669c23b0b8edd456f4dfd9d403598a147651d639a982224590d03fd9cfae873dc03388d37ae98d843b4968c47380e5ffe7
+  checksum: fcb3564e7d1d367507dc900af6f55f7775089650e0a3e7e161163e91557c60192e924c23ede39f9a67ee5c0dc35824c7607a91fa1765ab116194455d8e42c00e
   languageName: node
   linkType: hard
 
@@ -4342,7 +4355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/upgrades-core@npm:^1.27.0, @openzeppelin/upgrades-core@npm:^1.30.1":
+"@openzeppelin/upgrades-core@npm:^1.27.0":
   version: 1.30.1
   resolution: "@openzeppelin/upgrades-core@npm:1.30.1"
   dependencies:
@@ -4357,6 +4370,24 @@ __metadata:
   bin:
     openzeppelin-upgrades-core: dist/cli/cli.js
   checksum: c81194bfa6768b1c4b528c6b2fd1dcc51de86b0a1e2e52d71d08e153cdc2835677cb5933dad85965ef6c99fa71858949c623b02668e3b2ac7534b413a5a43aac
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/upgrades-core@npm:^1.30.1":
+  version: 1.31.1
+  resolution: "@openzeppelin/upgrades-core@npm:1.31.1"
+  dependencies:
+    cbor: ^9.0.0
+    chalk: ^4.1.0
+    compare-versions: ^6.0.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.0.3
+    minimist: ^1.2.7
+    proper-lockfile: ^4.1.1
+    solidity-ast: ^0.4.51
+  bin:
+    openzeppelin-upgrades-core: dist/cli/cli.js
+  checksum: 5b424201e2deb41e8d1be00375768d8477b190ba70ca5af2385fb2437f9804be8fd5fee717c47734e3058a9568b52cad4101de47ef760abcf839e007df3eb2dd
   languageName: node
   linkType: hard
 
@@ -4581,13 +4612,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-metatx@npm:0.0.3":
-  version: 0.0.3
-  resolution: "@sandbox-smart-contracts/dependency-metatx@npm:0.0.3"
-  checksum: fd18639d1746e023ca110d9cb239eb514fc0083fc23083a03b404a450f3d97558def87e4ebc91b4a1796b54bff3762fdf25343b11dd066b6bd5efdc322e062ea
-  languageName: node
-  linkType: hard
-
 "@sandbox-smart-contracts/dependency-operator-filter@*, @sandbox-smart-contracts/dependency-operator-filter@1.0.1, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter"
@@ -4690,7 +4714,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-royalty-management": "*"
     "@sandbox-smart-contracts/faucets": 0.0.1
     "@sandbox-smart-contracts/giveaway": 0.0.3
-    "@sandbox-smart-contracts/marketplace": "*"
+    "@sandbox-smart-contracts/marketplace": 1.0.1
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
@@ -4711,9 +4735,9 @@ __metadata:
     eslint-plugin-mocha: ^10.1.0
     eslint-plugin-prettier: ^4.2.1
     ethers: 5
-    hardhat: ~2.15.0
+    hardhat: ^2.19.0
     hardhat-contract-sizer: ^2.10.0
-    hardhat-deploy: ^0.11.30
+    hardhat-deploy: ^0.11.43
     prettier: ^2.8.8
     prettier-plugin-solidity: ^1.1.3
     ts-node: ^10.9.1
@@ -4854,7 +4878,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/marketplace@*, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
+"@sandbox-smart-contracts/marketplace@1.0.1, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
   dependencies:
@@ -4869,8 +4893,8 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^4.9.2
     "@openzeppelin/hardhat-upgrades": ^2.2.1
     "@release-it/keep-a-changelog": ^4.0.0
-    "@sandbox-smart-contracts/dependency-metatx": 0.0.3
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.6
@@ -6830,6 +6854,19 @@ __metadata:
     isomorphic-unfetch: ^3.0.0
     js-cookie: ^2.2.1
   checksum: 4f69d8618269fe0b081a1625a38f33af476e97ff6d4c8b79ea182169f16ed086bb01b5024e0a8af692029637a4c34203a2bb00666cbf52a133216220d43e31d8
+  languageName: node
+  linkType: hard
+
+"amazon-cognito-identity-js@npm:^6.3.6":
+  version: 6.3.7
+  resolution: "amazon-cognito-identity-js@npm:6.3.7"
+  dependencies:
+    "@aws-crypto/sha256-js": 1.2.2
+    buffer: 4.9.2
+    fast-base64-decode: ^1.0.0
+    isomorphic-unfetch: ^3.0.0
+    js-cookie: ^2.2.1
+  checksum: 51e2ecffa4e1c7084dc0c6b568ddb12be195c758a1a6dc0a305fc279ea8a2e5c53a72ebde913013f0df61a6542186484658115034d30dd3772c989b4d20f7152
   languageName: node
   linkType: hard
 
@@ -12531,7 +12568,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat-deploy@npm:^0.11.30":
+"hardhat-deploy@npm:^0.11.43":
   version: 0.11.43
   resolution: "hardhat-deploy@npm:0.11.43"
   dependencies:
@@ -12639,6 +12676,72 @@ __metadata:
   bin:
     hardhat: internal/cli/bootstrap.js
   checksum: b234ec9c4030ee91c0c91b78acbebf7fd6354ea46c7a5d1ced245b2e0e6045996d130944e6d2d5b2139fb53895a15c5eb054ab76571f9835e2021d9f70beccbe
+  languageName: node
+  linkType: hard
+
+"hardhat@npm:^2.19.0":
+  version: 2.19.0
+  resolution: "hardhat@npm:2.19.0"
+  dependencies:
+    "@ethersproject/abi": ^5.1.2
+    "@metamask/eth-sig-util": ^4.0.0
+    "@nomicfoundation/ethereumjs-block": 5.0.2
+    "@nomicfoundation/ethereumjs-blockchain": 7.0.2
+    "@nomicfoundation/ethereumjs-common": 4.0.2
+    "@nomicfoundation/ethereumjs-evm": 2.0.2
+    "@nomicfoundation/ethereumjs-rlp": 5.0.2
+    "@nomicfoundation/ethereumjs-statemanager": 2.0.2
+    "@nomicfoundation/ethereumjs-trie": 6.0.2
+    "@nomicfoundation/ethereumjs-tx": 5.0.2
+    "@nomicfoundation/ethereumjs-util": 9.0.2
+    "@nomicfoundation/ethereumjs-vm": 7.0.2
+    "@nomicfoundation/solidity-analyzer": ^0.1.0
+    "@sentry/node": ^5.18.1
+    "@types/bn.js": ^5.1.0
+    "@types/lru-cache": ^5.1.0
+    adm-zip: ^0.4.16
+    aggregate-error: ^3.0.0
+    ansi-escapes: ^4.3.0
+    chalk: ^2.4.2
+    chokidar: ^3.4.0
+    ci-info: ^2.0.0
+    debug: ^4.1.1
+    enquirer: ^2.3.0
+    env-paths: ^2.2.0
+    ethereum-cryptography: ^1.0.3
+    ethereumjs-abi: ^0.6.8
+    find-up: ^2.1.0
+    fp-ts: 1.19.3
+    fs-extra: ^7.0.1
+    glob: 7.2.0
+    immutable: ^4.0.0-rc.12
+    io-ts: 1.10.4
+    keccak: ^3.0.2
+    lodash: ^4.17.11
+    mnemonist: ^0.38.0
+    mocha: ^10.0.0
+    p-map: ^4.0.0
+    raw-body: ^2.4.1
+    resolve: 1.17.0
+    semver: ^6.3.0
+    solc: 0.7.3
+    source-map-support: ^0.5.13
+    stacktrace-parser: ^0.1.10
+    tsort: 0.0.1
+    undici: ^5.14.0
+    uuid: ^8.3.2
+    ws: ^7.4.6
+  peerDependencies:
+    ts-node: "*"
+    typescript: "*"
+  peerDependenciesMeta:
+    ts-node:
+      optional: true
+    typescript:
+      optional: true
+  bin:
+    hardhat: internal/cli/bootstrap.js
+  checksum: 99b7ee89c5898aa410298f48269360e414c5471c2cab56d382a08fd9d639db540c5d242ab9b1189bcffb4ac7847fbfc5b30c047cbc91fb802f2806e8e8c19e8f
   languageName: node
   linkType: hard
 

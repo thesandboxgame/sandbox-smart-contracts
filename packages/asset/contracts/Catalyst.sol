@@ -242,7 +242,7 @@ contract Catalyst is
         uint256 value,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        super._safeTransferFrom(from, to, id, value, data);
+        super.safeTransferFrom(from, to, id, value, data);
     }
 
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
@@ -259,7 +259,7 @@ contract Catalyst is
         uint256[] memory values,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
-        super._safeBatchTransferFrom(from, to, ids, values, data);
+        super.safeBatchTransferFrom(from, to, ids, values, data);
     }
 
     /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
@@ -310,6 +310,18 @@ contract Catalyst is
         require(registry != address(0), "Catalyst: Zero address");
         OperatorFiltererUpgradeable._setOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
+    }
+
+    /// @notice A descriptive name for the collection of tokens in this contract.
+    /// @return _name the name of the tokens.
+    function name() external pure returns (string memory _name) {
+        return "The Sandbox's CATALYSTs";
+    }
+
+    /// @notice An abbreviated name for the collection of tokens in this contract.
+    /// @return _symbol the symbol of the tokens.
+    function symbol() external pure returns (string memory _symbol) {
+        return "CATALYST";
     }
 
     uint256[49] private __gap;

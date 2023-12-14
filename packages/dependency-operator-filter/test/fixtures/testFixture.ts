@@ -6,7 +6,8 @@ export async function setupOperatorFilter() {
   const [
     deployer,
     upgradeAdmin,
-    filterOperatorSubscription,
+    assetAdmin,
+    catalystAdmin,
     user1,
     user2,
     user3,
@@ -54,15 +55,29 @@ export async function setupOperatorFilter() {
   );
 
   await operatorFilterRegistry.deployed();
-  const operatorFilterRegistryAsSubscription = operatorFilterRegistry.connect(
-    filterOperatorSubscription
-  );
-  const tnx = await operatorFilterRegistryAsSubscription.registerAndCopyEntries(
-    filterOperatorSubscription.address,
-    DEFAULT_SUBSCRIPTION
+
+  const operatorFilterSubscriptionFactory = await ethers.getContractFactory(
+    'MockOperatorFilterSubscription'
   );
 
-  await tnx.wait();
+  const assetOperatorFilterSubscription =
+    await operatorFilterSubscriptionFactory.deploy(
+      assetAdmin.address,
+      operatorFilterRegistry.address
+    );
+
+  const catalystOperatorFilterSubscription =
+    await operatorFilterSubscriptionFactory.deploy(
+      catalystAdmin.address,
+      operatorFilterRegistry.address
+    );
+
+  const basicOperatorFilterSubscription =
+    await operatorFilterSubscriptionFactory.deploy(
+      user1.address,
+      operatorFilterRegistry.address
+    );
+
   const ERC1155Factory = await ethers.getContractFactory('TestERC1155');
   const ERC1155 = await upgrades.deployProxy(
     ERC1155Factory,
@@ -70,23 +85,6 @@ export async function setupOperatorFilter() {
     {
       initializer: 'initialize',
     }
-  );
-
-  let MockOperatorFilterSubscriptionFactory = await ethers.getContractFactory(
-    'MockOperatorFilterSubscription'
-  );
-
-  MockOperatorFilterSubscriptionFactory =
-    await MockOperatorFilterSubscriptionFactory.connect(deployer);
-
-  const operatorFilterSubscription =
-    await MockOperatorFilterSubscriptionFactory.deploy(
-      deployer.address,
-      operatorFilterRegistry.address
-    );
-
-  const operatorFilterRegistryAsOwner = await operatorFilterRegistry.connect(
-    deployer
   );
 
   const ERC721Factory = await ethers.getContractFactory('TestERC721');
@@ -100,13 +98,13 @@ export async function setupOperatorFilter() {
   await ERC721.deployed();
   const tnx2 = await ERC1155.setRegistryAndSubscribe(
     operatorFilterRegistry.address,
-    filterOperatorSubscription.address
+    assetOperatorFilterSubscription.address
   );
   await tnx2.wait();
 
   const tnx3 = await ERC721.setRegistryAndSubscribe(
     operatorFilterRegistry.address,
-    operatorFilterSubscription.address
+    catalystOperatorFilterSubscription.address
   );
   await tnx3.wait();
 
@@ -117,7 +115,7 @@ export async function setupOperatorFilter() {
     UnregisteredTokenFactory,
     [
       'UnregisteredToken',
-      operatorFilterSubscription.address,
+      assetOperatorFilterSubscription.address,
       true,
       TrustedForwarder.address,
     ],
@@ -141,16 +139,15 @@ export async function setupOperatorFilter() {
     mockMarketPlace3,
     mockMarketPlace4,
     operatorFilterRegistry,
-    operatorFilterRegistryAsSubscription,
-    filterOperatorSubscription,
     users,
     deployer,
     upgradeAdmin,
     ERC1155,
     DEFAULT_SUBSCRIPTION,
-    operatorFilterRegistryAsOwner,
-    operatorFilterSubscription,
     ERC721,
     UnregisteredToken,
+    assetOperatorFilterSubscription,
+    catalystOperatorFilterSubscription,
+    basicOperatorFilterSubscription,
   };
 }

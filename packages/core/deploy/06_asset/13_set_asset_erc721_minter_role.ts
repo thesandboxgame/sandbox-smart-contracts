@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 // AssetERC721 can be only minted in L2, when moved to L1 the polygon predicate is in charge of minting them.
 const func: DeployFunction = async function (
@@ -26,4 +26,4 @@ export default func;
 func.tags = ['AssetERC721_setup'];
 func.runAtTheEnd = true;
 func.dependencies = ['AssetERC721_deploy', 'AssetERC721Tunnel_deploy'];
-func.skip = skipUnlessTestnet;
+func.skip = skipUnlessTest;

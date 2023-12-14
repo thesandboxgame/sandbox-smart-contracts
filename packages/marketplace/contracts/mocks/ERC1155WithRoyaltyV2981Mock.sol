@@ -18,10 +18,6 @@ contract ERC1155WithRoyaltyV2981Mock is
     AbstractRoyaltiesMock,
     ERC1155Upgradeable
 {
-    function initialize() external initializer {
-        __Ownable_init();
-    }
-
     function mint(address to, uint256 tokenId, uint256 amount, IRoyaltiesProvider.Part[] memory _fees) external {
         _mint(to, tokenId, amount, "");
         _saveRoyalties(tokenId, _fees);
