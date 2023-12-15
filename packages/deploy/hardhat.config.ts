@@ -12,6 +12,7 @@ import './tasks/importedPackages';
 
 // Package name : solidity source code path
 const importedPackages = {
+  '@sandbox-smart-contracts/avatar': 'contracts/',
   '@sandbox-smart-contracts/asset': 'contracts/',
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
@@ -296,7 +297,6 @@ const compilers = [
   '0.8.21',
   '0.8.19',
   '0.8.18',
-  '0.8.15',
   '0.8.2',
   '0.7.5',
   '0.7.6',
@@ -311,6 +311,16 @@ const compilers = [
     },
   },
 }));
+
+compilers.push({
+  version: '0.8.15',
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
+    },
+  },
+});
 
 const config = skipDeploymentsOnLiveNetworks(
   addForkingSupport({
