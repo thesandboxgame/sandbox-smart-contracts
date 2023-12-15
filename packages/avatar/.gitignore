@@ -1,0 +1,16 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+
+# Hardhat files
+cache
+artifacts
+
+# generated docs
+generated-markups
+
+# editors
+.idea
