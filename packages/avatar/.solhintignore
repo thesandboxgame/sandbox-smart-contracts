@@ -1,0 +1,6 @@
+artifacts/
+cache/
+coverage/
+node_modules/
+contracts/raffleold/
+contracts/raffle/

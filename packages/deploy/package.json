@@ -16,6 +16,7 @@
     "private": true,
     "dependencies": {
         "@sandbox-smart-contracts/asset": "*",
+        "@sandbox-smart-contracts/avatar": "*",
         "@sandbox-smart-contracts/core": "*",
         "@sandbox-smart-contracts/dependency-operator-filter": "*",
         "@sandbox-smart-contracts/dependency-royalty-management": "*",
