@@ -397,7 +397,7 @@ describe(collectionName, function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it(`@skip-on-ci should be able to mint ${COLLECTION_MAX_SUPPLY} different tokens`, async function () {
+  it(`@skip-on-ci @skip-on-coverage should be able to mint ${COLLECTION_MAX_SUPPLY} different tokens`, async function () {
     const nftPriceInSand = 1;
     const {
       network,
@@ -460,7 +460,7 @@ describe(collectionName, function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it(`@skip-on-ci should be able to mint ${COLLECTION_MAX_SUPPLY} different tokens in 3 waves`, async function () {
+  it(`@skip-on-ci @skip-on-coverage should be able to mint ${COLLECTION_MAX_SUPPLY} different tokens in 3 waves`, async function () {
     const nftPriceInSand = 1; // not in WEI, in actual token, scaled to decimals
     const {
       network,
