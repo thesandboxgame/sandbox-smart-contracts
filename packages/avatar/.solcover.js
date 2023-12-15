@@ -4,8 +4,7 @@ module.exports = {
     invert: true, // Run the grep's inverse set.
   },
   skipFiles: [
-    'contracts/mocks',
-    'contracts/raffleold/contracts/PeopleOfCrypto.sol',
-    'contracts/raffleold/contracts/Raffle.sol',
+    'mocks',
+    'raffleold',
   ],
 };
