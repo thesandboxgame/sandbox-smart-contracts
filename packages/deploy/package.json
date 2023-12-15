@@ -16,7 +16,6 @@
     "private": true,
     "dependencies": {
         "@sandbox-smart-contracts/asset": "*",
-        "@sandbox-smart-contracts/avatar": "workspace:^",
         "@sandbox-smart-contracts/dependency-operator-filter": "*",
         "@sandbox-smart-contracts/dependency-royalty-management": "*",
         "@sandbox-smart-contracts/giveaway": "0.0.3",
@@ -38,8 +37,7 @@
         "verify": "yarn hardhat etherscan-verify --network",
         "live:deploy": "node ./utils/npmScriptHelper.js deploy",
         "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
-        "fork:test": "node ./utils/npmScriptHelper.js fork:test",
-        "fork:deploy:mumbai": "cross-env HARDHAT_FORK=mumbai HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mumbai HARDHAT_DEPLOY_FIXTURE=true NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat deploy"
+        "fork:test": "node ./utils/npmScriptHelper.js fork:test"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",
