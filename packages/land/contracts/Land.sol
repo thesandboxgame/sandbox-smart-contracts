@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
 import {LandBaseTokenV3} from "./mainnet/LandBaseTokenV3.sol";
-import {LandStorageMixin} from "./LandStorageMixin.sol";
+import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
 
 /**
  * @title LandV3

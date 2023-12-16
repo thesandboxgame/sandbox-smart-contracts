@@ -7,7 +7,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 import {PolygonLandBaseTokenV2} from "./polygon/PolygonLandBaseTokenV2.sol";
 import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
 import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
-import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
+import {PolygonLandStorageMixin} from "./polygon/PolygonLandStorageMixin.sol";
 
 /// @title LAND token on L2 (PolygonLandV2)
 /// @dev PolygonLandStorageMixin must be the first base class, it has a gap that moves everything (just in case)
