@@ -1,0 +1,148 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.2;
+
+contract TestERC1155ERC721TokenReceiver {
+    bool private allowTokensReceived;
+    bool private returnCorrectBytes;
+    bool private allowBatchTokensReceived;
+    bool private returnCorrectBytesOnBatch;
+    bool private doNotThrow;
+
+    address private owner;
+    address private tokenContract;
+    mapping(uint256 => bool) private tokens;
+
+    bytes4 private constant ERC1155_IS_RECEIVER = 0x0d912442;
+    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+    bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
+    bytes4 private constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
+
+    constructor(
+        address _tokenContract,
+        bool _allowTokensReceived,
+        bool _returnCorrectBytes,
+        bool _allowBatchTokensReceived,
+        bool _returnCorrectBytesOnBatch,
+        bool _doNotThrow
+    ) {
+        tokenContract = _tokenContract;
+        allowTokensReceived = _allowTokensReceived;
+        returnCorrectBytes = _returnCorrectBytes;
+        allowBatchTokensReceived = _allowBatchTokensReceived;
+        returnCorrectBytesOnBatch = _returnCorrectBytesOnBatch;
+        doNotThrow = _doNotThrow;
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "only owner allowed");
+        _;
+    }
+
+    function onERC1155Received(
+        address _operator,
+        address _from,
+        uint256 _id,
+        uint256,
+        bytes calldata _data
+    ) external returns (bytes4) {
+        require(address(tokenContract) == msg.sender, "accept tokenContract only");
+        require(doNotThrow, "throw requested");
+        if (!allowTokensReceived) {
+            return 0x150b7a03;
+        }
+
+        if (returnCorrectBytes) {
+            // solhint-disable avoid-low-level-calls
+            (bool success, bytes memory returnData) = tokenContract.call(
+                abi.encodeWithSignature("ownerOf(uint256)", _id)
+            );
+            uint256 value;
+            // solhint-disable no-inline-assembly
+            assembly {
+                value := mload(add(returnData, 32))
+            }
+            if (success && value == uint256(uint160(address(this)))) {
+                onERC721Received(_operator, _from, _id, _data);
+            }
+            return ERC1155_RECEIVED;
+        } else {
+            return 0x150b7a03;
+        }
+    }
+
+    function supportsInterface(bytes4 _interfaceId) external pure returns (bool) {
+        return _interfaceId == 0x01ffc9a7 || _interfaceId == 0x4e2312e0 || _interfaceId == 0x5e8bf644;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
+    ) external view returns (bytes4) {
+        require(address(tokenContract) == msg.sender, "accept tokenContract only");
+        require(allowBatchTokensReceived, "Receive not allowed");
+        if (returnCorrectBytesOnBatch) {
+            return ERC1155_BATCH_RECEIVED;
+        } else {
+            return 0x150b7a03;
+        }
+    }
+
+    function onERC721BatchReceived(
+        address, // operator,
+        address, // from,
+        uint256[] memory, // ids,
+        bytes memory // data
+    ) public view returns (bytes4) {
+        require(address(tokenContract) == msg.sender, "accept tokenContract only");
+        require(allowBatchTokensReceived, "Receive not allowed");
+        if (returnCorrectBytes) {
+            return _ERC721_BATCH_RECEIVED;
+        } else {
+            return 0x150b7a03;
+        }
+    }
+
+    function onERC721Received(
+        address, // operator,
+        address, // from,
+        uint256, // _tokenId,
+        bytes memory // data
+    ) public view returns (bytes4) {
+        require(address(tokenContract) == msg.sender, "accept tokenContract only");
+        require(allowTokensReceived, "Receive not allowed");
+        if (returnCorrectBytes) {
+            return _ERC721_RECEIVED;
+        } else {
+            return 0x150b7a03;
+        }
+    }
+
+    function acceptTokens() public onlyOwner {
+        allowTokensReceived = true;
+    }
+
+    function rejectTokens() public onlyOwner {
+        allowTokensReceived = false;
+    }
+
+    function acceptBatchTokens() public onlyOwner {
+        allowBatchTokensReceived = true;
+    }
+
+    function rejectBatchTokens() public onlyOwner {
+        allowBatchTokensReceived = false;
+    }
+
+    function returnRightBytes() public onlyOwner {
+        returnCorrectBytes = true;
+    }
+
+    function returnWrongBytes() public onlyOwner {
+        returnCorrectBytes = false;
+    }
+}

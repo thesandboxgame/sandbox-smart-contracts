@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.2;
+
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {WithAdmin} from "../common/WithAdmin.sol";
+
+/// @title MetaTransactionReceiverV2
+/// @author The Sandbox
+/// @notice Implements meta-transactions
+/// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
+abstract contract MetaTransactionReceiverV2 is WithAdmin {
+    using AddressUpgradeable for address;
+
+    event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);
+
+    /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
+    /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
+    /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
+    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public onlyAdmin {
+        require(metaTransactionProcessor.isContract(), "only contracts");
+        _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
+    }
+
+    /// @param metaTransactionProcessor address of the operator
+    /// @param enabled is it enabled
+    function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {
+        mapping(address => bool) storage _metaTransactionContracts = $metaTransactionContracts();
+        _metaTransactionContracts[metaTransactionProcessor] = enabled;
+        emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
+    }
+
+    /// @notice check whether address `who` is given meta-transaction execution rights.
+    /// @param who The address to query.
+    /// @return whether the address has meta-transaction execution rights.
+    function isMetaTransactionProcessor(address who) external view returns (bool) {
+        return _isMetaTransactionProcessor(who);
+    }
+
+    function _isMetaTransactionProcessor(address who) internal view returns (bool) {
+        mapping(address => bool) storage _metaTransactionContracts = $metaTransactionContracts();
+        return _metaTransactionContracts[who];
+    }
+
+    function $metaTransactionContracts() internal view virtual returns (mapping(address => bool) storage);
+}
