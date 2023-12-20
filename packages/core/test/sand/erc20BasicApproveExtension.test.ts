@@ -3,7 +3,7 @@ import {setupERC20BasicApproveExtension} from './fixtures';
 import {BigNumber, constants, Contract} from 'ethers';
 import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
-import {transferSand} from '../polygon/catalyst/utils';
+import {transferSand} from '../polygon/sandPolyonDepositor/utils';
 import MerkleTreeHelper, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 import MerkleTree = require('../../lib/merkleTree');
 

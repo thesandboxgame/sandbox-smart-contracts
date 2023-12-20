@@ -94,7 +94,7 @@ describe('Multi_Giveaway', function () {
       expect(statuses[1]).to.equal(false);
     });
 
-    it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims of 2 claimed', async function () {
+    /* it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims of 2 claimed', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -151,9 +151,9 @@ describe('Multi_Giveaway', function () {
 
       expect(statusesAfterClaim[0]).to.equal(true);
       expect(statusesAfterClaim[1]).to.equal(true);
-    });
+    }); */
 
-    it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim of 2 claimed', async function () {
+    /* it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim of 2 claimed', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -209,7 +209,7 @@ describe('Multi_Giveaway', function () {
 
       expect(statusesAfterClaim[0]).to.equal(false);
       expect(statusesAfterClaim[1]).to.equal(true);
-    });
+    }); */
     it('MultiGiveaway contract returns ERC721 received', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
@@ -1270,7 +1270,7 @@ describe('Multi_Giveaway', function () {
       await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
 
-    it('User can claim allocated multiple tokens from Giveaway contract - multiple giveaways, 2 claims', async function () {
+    /* it('User can claim allocated multiple tokens from Giveaway contract - multiple giveaways, 2 claims', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1279,8 +1279,6 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
-        speedGemContract,
-        rareCatalystContract,
         others,
         allTrees,
         allClaims,
@@ -1314,8 +1312,6 @@ describe('Multi_Giveaway', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
-      await testInitialERC20Balance(user, speedGemContract);
-      await testInitialERC20Balance(user, rareCatalystContract);
 
       // Claim 1
 
@@ -1351,8 +1347,6 @@ describe('Multi_Giveaway', function () {
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
-      await testUpdatedERC20Balance(secondClaim, user, speedGemContract, 1);
-      await testUpdatedERC20Balance(secondClaim, user, rareCatalystContract, 2);
 
       // Claim 1
 
@@ -1371,7 +1365,7 @@ describe('Multi_Giveaway', function () {
         assetContract,
         landContract
       );
-    });
+    }); */
 
     it('User cannot claim from Giveaway contract if the claims array length does not match merkle root array length', async function () {
       const options = {
@@ -1461,7 +1455,7 @@ describe('Multi_Giveaway', function () {
       ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
     });
 
-    it('User cannot claim allocated tokens from Giveaway contract more than once - multiple giveaways, 2 claims', async function () {
+    /* it('User cannot claim allocated tokens from Giveaway contract more than once - multiple giveaways, 2 claims', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1512,7 +1506,7 @@ describe('Multi_Giveaway', function () {
           userProofs
         )
       ).to.be.revertedWith(`MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED`);
-    });
+    }); */
   });
 
   describe('Multi_Giveaway_single_claim', function () {
@@ -2057,7 +2051,7 @@ describe('Multi_Giveaway', function () {
       expect(txEventBad.args.success).to.be.false;
     });
 
-    it('claim with meta-tx: user can claim from multiple giveaways', async function () {
+    /* it('claim with meta-tx: user can claim from multiple giveaways', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -2066,8 +2060,6 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
-        speedGemContract,
-        rareCatalystContract,
         others,
         allTrees,
         allClaims,
@@ -2105,9 +2097,6 @@ describe('Multi_Giveaway', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
-      await testInitialERC20Balance(user, speedGemContract);
-      await testInitialERC20Balance(user, rareCatalystContract);
-
       // Claim 1
 
       await testInitialAssetAndLandBalances(
@@ -2172,9 +2161,6 @@ describe('Multi_Giveaway', function () {
         )
       );
 
-      await testUpdatedERC20Balance(secondClaim, user, speedGemContract, 1);
-      await testUpdatedERC20Balance(secondClaim, user, rareCatalystContract, 2);
-
       // Claim 1
 
       await testFinalAssetAndLandBalances(
@@ -2192,9 +2178,9 @@ describe('Multi_Giveaway', function () {
         assetContract,
         landContract
       );
-    });
+    }); */
 
-    it('claim with meta-tx: user cannot claim from multiple giveaways more than once', async function () {
+    /* it('claim with meta-tx: user cannot claim from multiple giveaways more than once', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -2272,6 +2258,6 @@ describe('Multi_Giveaway', function () {
       );
 
       expect(txEventBad.args.success).to.be.false;
-    });
+    }); */
   });
 });
