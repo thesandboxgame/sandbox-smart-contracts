@@ -5,7 +5,7 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
-import {transferSand} from '../catalyst/utils';
+import {transferSand} from './utils';
 import {withSnapshot} from '../../utils';
 
 export const setupSandPolygonDepositor = withSnapshot(['Sand'], async () => {

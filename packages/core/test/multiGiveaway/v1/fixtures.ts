@@ -38,9 +38,7 @@ export const setupTestGiveaway = withSnapshot(
   [
     'Multi_Giveaway_1',
     'PolygonAssetERC1155',
-    'PolygonGems',
     'PolygonSand',
-    'PolygonCatalysts',
   ],
   async function (hre, options?: Options) {
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
@@ -50,18 +48,12 @@ export const setupTestGiveaway = withSnapshot(
       assetBouncerAdmin,
       landAdmin,
       sandAdmin,
-      catalystMinter,
-      gemMinter,
       multiGiveawayAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
     const others = otherAccounts;
     const sandContract = await ethers.getContract('PolygonSand');
     const assetContract = await ethers.getContract('PolygonAssetERC1155');
-    const speedGemContract = await ethers.getContract('PolygonGem_SPEED');
-    const rareCatalystContract = await ethers.getContract(
-      'PolygonCatalyst_RARE'
-    );
 
     await deployments.deploy('TestMetaTxForwarder', {
       from: deployer,
@@ -107,14 +99,6 @@ export const setupTestGiveaway = withSnapshot(
     if (sand) {
       await sandContractAsAdmin.transfer(giveawayContract.address, SAND_AMOUNT);
     }
-
-    // Supply Catalysts and Gems
-    await speedGemContract
-      .connect(ethers.provider.getSigner(gemMinter))
-      .mint(giveawayContract.address, 16);
-    await rareCatalystContract
-      .connect(ethers.provider.getSigner(catalystMinter))
-      .mint(giveawayContract.address, 8);
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
@@ -224,9 +208,7 @@ export const setupTestGiveaway = withSnapshot(
             claim.erc20.contractAddresses = [sandContract.address];
           if (claim.erc20.amounts.length === 3)
             claim.erc20.contractAddresses = [
-              sandContract.address,
-              speedGemContract.address,
-              rareCatalystContract.address,
+              sandContract.address
             ];
         }
         return claim;
@@ -409,8 +391,6 @@ export const setupTestGiveaway = withSnapshot(
       sandContract,
       assetContract,
       landContract,
-      speedGemContract,
-      rareCatalystContract,
       others,
       allTrees,
       allClaims,
