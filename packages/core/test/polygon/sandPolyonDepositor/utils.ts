@@ -16,10 +16,6 @@ export async function transferSand(
   );
 }
 
-
-
-
-
 class ReceiptObject {
   receipt: Receipt;
   type: number;
@@ -29,11 +25,9 @@ class ReceiptObject {
   }
 }
 
-
 export async function getReceiptObject(
   receipt: Receipt,
   type: number
 ): Promise<ReceiptObject> {
   return new ReceiptObject(receipt, type);
 }
-

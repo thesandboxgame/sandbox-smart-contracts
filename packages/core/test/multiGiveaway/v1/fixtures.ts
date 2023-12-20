@@ -35,11 +35,7 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  [
-    'Multi_Giveaway_1',
-    'PolygonAssetERC1155',
-    'PolygonSand',
-  ],
+  ['Multi_Giveaway_1', 'PolygonAssetERC1155', 'PolygonSand'],
   async function (hre, options?: Options) {
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
       options || {};
@@ -207,9 +203,7 @@ export const setupTestGiveaway = withSnapshot(
           if (claim.erc20.amounts.length === 1)
             claim.erc20.contractAddresses = [sandContract.address];
           if (claim.erc20.amounts.length === 3)
-            claim.erc20.contractAddresses = [
-              sandContract.address
-            ];
+            claim.erc20.contractAddresses = [sandContract.address];
         }
         return claim;
       });

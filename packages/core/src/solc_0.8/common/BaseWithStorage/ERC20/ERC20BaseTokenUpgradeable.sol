@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
+import "hardhat/console.sol";
 
 abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
@@ -194,6 +195,8 @@ abstract contract ERC20BaseTokenUpgradeable is
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(to != address(this), "NOT_TO_THIS");
         uint256 currentBalance = _balances[from];
+        console.log("heheheh");
+        console.log(currentBalance);
         require(currentBalance >= amount, "INSUFFICIENT_FUNDS");
         _balances[from] = currentBalance - amount;
         _balances[to] += amount;
@@ -211,6 +214,8 @@ abstract contract ERC20BaseTokenUpgradeable is
         require(newTotalSupply > currentTotalSupply, "OVERFLOW");
         _totalSupply = newTotalSupply;
         _balances[to] += amount;
+        console.log("dingding");
+        console.log(_balances[to]);
         emit Transfer(address(0), to, amount);
     }
 
