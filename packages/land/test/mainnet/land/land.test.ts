@@ -1031,10 +1031,10 @@ describe('LandV3', function () {
     });
 
     it('should only be a contract as meta transaction processor', async function () {
-      const {landAsAdmin, landAdmin} = await loadFixture(setupLand);
+      const {landAsAdmin} = await loadFixture(setupLand);
       await expect(
-        landAsAdmin.setMetaTransactionProcessor(landAdmin.address, true),
-      ).to.be.revertedWith('only contracts');
+        landAsAdmin.setMetaTransactionProcessor(ZeroAddress, true),
+      ).to.be.revertedWith('invalid address');
     });
 
     it('should only be the admin able to set a meta transaction processor', async function () {

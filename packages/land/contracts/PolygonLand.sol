@@ -1,27 +1,34 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
+import {SuperOperators} from "./common/SuperOperators.sol";
+import {ERC721BaseToken} from "./common/ERC721BaseToken.sol";
+import {WithAdmin} from "./common/WithAdmin.sol";
 import {PolygonLandBaseTokenV2} from "./polygon/PolygonLandBaseTokenV2.sol";
 import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
-import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
 import {PolygonLandStorageMixin} from "./polygon/PolygonLandStorageMixin.sol";
 
 /// @title LAND token on L2 (PolygonLandV2)
 /// @dev PolygonLandStorageMixin must be the first base class, it has a gap that moves everything (just in case)
 contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseTokenV2, ERC2771Handler, OperatorFiltererUpgradeable {
-    using AddressUpgradeable for address;
+    using Address for address;
 
     event OperatorRegistrySet(address indexed registry);
 
-    function initialize(address trustedForwarder) external initializer {
-        // TODO: Bad idea, fix
-        address s = _msgSender();
-        $setAdmin(s);
-        __ERC2771Handler_initialize(trustedForwarder);
-        emit AdminChanged(address(0), s);
+    /**
+     * @notice Initializes the contract with the meta-transaction contract & admin
+     * @param admin Admin of the contract
+     */
+    function initialize(address admin) external initializer {
+        // We must be able to initialize the admin if this is a fresh deploy, but we want to
+        // be backward compatible with the current deployment
+        require($getAdmin() == address(0), "already initialized");
+        $setAdmin(admin);
+        emit AdminChanged(address(0), admin);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -136,51 +143,86 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseTokenV2, ERC2771
         return ERC2771Handler._msgData();
     }
 
-    function $superOperators() internal view override returns (mapping(address => bool) storage) {
-        return _getPolygonLandStorage()._superOperators;
+    function $superOperators()
+        internal
+        view
+        override(PolygonLandStorageMixin, SuperOperators)
+        returns (mapping(address => bool) storage)
+    {
+        return PolygonLandStorageMixin.$superOperators();
     }
 
-    function $numNFTPerAddress() internal view override returns (mapping(address => uint256) storage) {
-        return _getPolygonLandStorage()._numNFTPerAddress;
+    function $numNFTPerAddress()
+        internal
+        view
+        override(PolygonLandStorageMixin, ERC721BaseToken)
+        returns (mapping(address => uint256) storage)
+    {
+        return PolygonLandStorageMixin.$numNFTPerAddress();
     }
 
-    function $owners() internal view override returns (mapping(uint256 => uint256) storage) {
-        return _getPolygonLandStorage()._owners;
+    function $owners()
+        internal
+        view
+        override(PolygonLandStorageMixin, ERC721BaseToken)
+        returns (mapping(uint256 => uint256) storage)
+    {
+        return PolygonLandStorageMixin.$owners();
     }
 
-    function $operators() internal view override returns (mapping(uint256 => address) storage) {
-        return _getPolygonLandStorage()._operators;
+    function $operators()
+        internal
+        view
+        override(PolygonLandStorageMixin, ERC721BaseToken)
+        returns (mapping(uint256 => address) storage)
+    {
+        return PolygonLandStorageMixin.$operators();
     }
 
-    function $operatorsForAll() internal view override returns (mapping(address => mapping(address => bool)) storage) {
-        return _getPolygonLandStorage()._operatorsForAll;
+    function $operatorsForAll()
+        internal
+        view
+        override(PolygonLandStorageMixin, ERC721BaseToken)
+        returns (mapping(address => mapping(address => bool)) storage)
+    {
+        return PolygonLandStorageMixin.$operatorsForAll();
     }
 
-    function $getAdmin() internal view override returns (address) {
-        return _getPolygonLandStorage()._admin;
+    function $getAdmin() internal view override(PolygonLandStorageMixin, WithAdmin) returns (address) {
+        return PolygonLandStorageMixin.$getAdmin();
     }
 
-    function $setAdmin(address a) internal override {
-        _getPolygonLandStorage()._admin = a;
+    function $setAdmin(address a) internal override(PolygonLandStorageMixin, WithAdmin) {
+        PolygonLandStorageMixin.$setAdmin(a);
     }
 
-    function $getTrustedForwarder() internal view override returns (address) {
-        return _getPolygonLandStorage()._trustedForwarder;
+    function $getTrustedForwarder() internal view override(PolygonLandStorageMixin, ERC2771Handler) returns (address) {
+        return PolygonLandStorageMixin.$getTrustedForwarder();
     }
 
-    function $setTrustedForwarder(address a) internal override {
-        _getPolygonLandStorage()._trustedForwarder = a;
+    function $setTrustedForwarder(address a) internal override(PolygonLandStorageMixin, ERC2771Handler) {
+        PolygonLandStorageMixin.$setTrustedForwarder(a);
     }
 
-    function $getOperatorFilterRegistry() internal view override returns (address a) {
-        return _getPolygonLandStorage().operatorFilterRegistry;
+    function $getOperatorFilterRegistry()
+        internal
+        view
+        override(PolygonLandStorageMixin, OperatorFiltererUpgradeable)
+        returns (address a)
+    {
+        return PolygonLandStorageMixin.$getOperatorFilterRegistry();
     }
 
-    function $setOperatorFilterRegistry(address a) internal {
-        _getPolygonLandStorage().operatorFilterRegistry = a;
+    function $setOperatorFilterRegistry(address a) internal override {
+        PolygonLandStorageMixin.$setOperatorFilterRegistry(a);
     }
 
-    function $minters() internal view override returns (mapping(address => bool) storage) {
-        return _getPolygonLandStorage()._minters;
+    function $minters()
+        internal
+        view
+        override(PolygonLandStorageMixin, PolygonLandBaseTokenV2)
+        returns (mapping(address => bool) storage)
+    {
+        return PolygonLandStorageMixin.$minters();
     }
 }

@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
 /* solhint-disable no-empty-blocks */
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
-import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
+import {SuperOperators} from "./common/SuperOperators.sol";
+import {ERC721BaseToken} from "./common/ERC721BaseToken.sol";
+import {WithAdmin} from "./common/WithAdmin.sol";
 import {LandBaseTokenV3} from "./mainnet/LandBaseTokenV3.sol";
+import {MetaTransactionReceiverV2} from "./mainnet/MetaTransactionReceiverV2.sol";
 import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
 
 /**
@@ -16,6 +20,18 @@ import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
  */
 contract Land is LandStorageMixin, LandBaseTokenV3, OperatorFiltererUpgradeable {
     event OperatorRegistrySet(address indexed registry);
+
+    /**
+     * @notice Initializes the contract with the meta-transaction contract & admin
+     * @param admin Admin of the contract
+     */
+    function initialize(address admin) public initializer {
+        // We must be able to initialize the admin if this is a fresh deploy, but we want to
+        // be backward compatible with the current deployment
+        require($getAdmin() == address(0), "already initialized");
+        $setAdmin(admin);
+        emit AdminChanged(address(0), admin);
+    }
 
     /**
      * @notice Return the name of the token contract
@@ -40,10 +56,7 @@ contract Land is LandStorageMixin, LandBaseTokenV3, OperatorFiltererUpgradeable 
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "LandV3: Id does not exist");
-        return
-            string(
-                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
-            );
+        return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
     }
 
     /**
@@ -161,47 +174,87 @@ contract Land is LandStorageMixin, LandBaseTokenV3, OperatorFiltererUpgradeable 
         return msg.sender;
     }
 
-    function $superOperators() internal view override returns (mapping(address => bool) storage) {
-        return _getLandStorage()._superOperators;
+    function $superOperators()
+        internal
+        view
+        override(LandStorageMixin, SuperOperators)
+        returns (mapping(address => bool) storage)
+    {
+        return LandStorageMixin.$superOperators();
     }
 
-    function $metaTransactionContracts() internal view override returns (mapping(address => bool) storage) {
-        return _getLandStorage()._metaTransactionContracts;
+    function $metaTransactionContracts()
+        internal
+        view
+        override(LandStorageMixin, MetaTransactionReceiverV2)
+        returns (mapping(address => bool) storage)
+    {
+        return LandStorageMixin.$metaTransactionContracts();
     }
 
-    function $numNFTPerAddress() internal view override returns (mapping(address => uint256) storage) {
-        return _getLandStorage()._numNFTPerAddress;
+    function $numNFTPerAddress()
+        internal
+        view
+        override(LandStorageMixin, ERC721BaseToken)
+        returns (mapping(address => uint256) storage)
+    {
+        return LandStorageMixin.$numNFTPerAddress();
     }
 
-    function $owners() internal view override returns (mapping(uint256 => uint256) storage) {
-        return _getLandStorage()._owners;
+    function $owners()
+        internal
+        view
+        override(LandStorageMixin, ERC721BaseToken)
+        returns (mapping(uint256 => uint256) storage)
+    {
+        return LandStorageMixin.$owners();
     }
 
-    function $operators() internal view override returns (mapping(uint256 => address) storage) {
-        return _getLandStorage()._operators;
+    function $operators()
+        internal
+        view
+        override(LandStorageMixin, ERC721BaseToken)
+        returns (mapping(uint256 => address) storage)
+    {
+        return LandStorageMixin.$operators();
     }
 
-    function $operatorsForAll() internal view override returns (mapping(address => mapping(address => bool)) storage) {
-        return _getLandStorage()._operatorsForAll;
+    function $operatorsForAll()
+        internal
+        view
+        override(LandStorageMixin, ERC721BaseToken)
+        returns (mapping(address => mapping(address => bool)) storage)
+    {
+        return LandStorageMixin.$operatorsForAll();
     }
 
-    function $getAdmin() internal view override returns (address) {
-        return _getLandStorage()._admin;
+    function $getAdmin() internal view override(LandStorageMixin, WithAdmin) returns (address) {
+        return LandStorageMixin.$getAdmin();
     }
 
-    function $setAdmin(address a) internal override {
-        _getLandStorage()._admin = a;
+    function $setAdmin(address a) internal override(LandStorageMixin, WithAdmin) {
+        LandStorageMixin.$setAdmin(a);
     }
 
-    function $getOperatorFilterRegistry() internal view override returns (address) {
-        return _getLandStorage().operatorFilterRegistry;
+    function $getOperatorFilterRegistry()
+        internal
+        view
+        override(LandStorageMixin, OperatorFiltererUpgradeable)
+        returns (address a)
+    {
+        return LandStorageMixin.$getOperatorFilterRegistry();
     }
 
-    function $setOperatorFilterRegistry(address a) internal {
-        _getLandStorage().operatorFilterRegistry = a;
+    function $setOperatorFilterRegistry(address a) internal override {
+        LandStorageMixin.$setOperatorFilterRegistry(a);
     }
 
-    function $minters() internal view override returns (mapping(address => bool) storage) {
-        return _getLandStorage()._minters;
+    function $minters()
+        internal
+        view
+        override(LandStorageMixin, LandBaseTokenV3)
+        returns (mapping(address => bool) storage)
+    {
+        return LandStorageMixin.$minters();
     }
 }

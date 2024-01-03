@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {WithAdmin} from "../common/WithAdmin.sol";
 
 /// @title MetaTransactionReceiverV2
@@ -9,15 +8,13 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 /// @notice Implements meta-transactions
 /// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
 abstract contract MetaTransactionReceiverV2 is WithAdmin {
-    using AddressUpgradeable for address;
-
     event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);
 
     /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public onlyAdmin {
-        require(metaTransactionProcessor.isContract(), "only contracts");
+        require(metaTransactionProcessor != address(0), "invalid address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 

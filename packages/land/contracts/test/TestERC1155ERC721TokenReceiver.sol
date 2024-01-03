@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
 contract TestERC1155ERC721TokenReceiver {
     bool private allowTokensReceived;

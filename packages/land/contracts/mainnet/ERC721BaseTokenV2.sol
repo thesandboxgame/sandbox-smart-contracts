@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
@@ -15,19 +14,6 @@ import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenRece
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
 abstract contract ERC721BaseTokenV2 is ERC721BaseToken, MetaTransactionReceiverV2 {
-    using AddressUpgradeable for address;
-
-    /**
-     * @notice Initializes the contract with the meta-transaction contract & admin
-     * @param metaTransactionContract Authorized contract for meta-transactions
-     * @param admin Admin of the contract
-     */
-    function initialize(address metaTransactionContract, address admin) public initializer {
-        $setAdmin(admin);
-        _setMetaTransactionProcessor(metaTransactionContract, true);
-        emit AdminChanged(address(0), admin);
-    }
-
     /**
      * @param from Sender address
      * @param to Recipient address
@@ -195,7 +181,7 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken, MetaTransactionReceiverV
     function transferFrom(address from, address to, uint256 id) public virtual override {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(
                 _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""),
                 "erc721 transfer rejected by to"
@@ -213,12 +199,10 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken, MetaTransactionReceiverV
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual override {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract()) {
-            require(
-                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),
-                "ERC721: transfer rejected by to"
-            );
-        }
+        require(
+            _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),
+            "ERC721: transfer rejected by to"
+        );
     }
 
     /**
@@ -273,19 +257,17 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken, MetaTransactionReceiverV
             _moveNumNFTPerAddress(from, to, numTokens);
         }
 
-        if (to.isContract()) {
-            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                "batch transfer rejected by to"
+            );
+        } else if (safe) {
+            for (uint256 i = 0; i < numTokens; i++) {
                 require(
-                    _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
-                    "batch transfer rejected by to"
+                    _checkOnERC721Received(metaTx ? from : msg.sender, from, to, ids[i], ""),
+                    "transfer rejected by to"
                 );
-            } else if (safe) {
-                for (uint256 i = 0; i < numTokens; i++) {
-                    require(
-                        _checkOnERC721Received(metaTx ? from : msg.sender, from, to, ids[i], ""),
-                        "transfer rejected by to"
-                    );
-                }
             }
         }
     }
@@ -411,7 +393,7 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken, MetaTransactionReceiverV
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

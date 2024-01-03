@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /* solhint-disable no-empty-blocks */
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
 abstract contract LandStorageAbstract {
     uint256[500] private _initialGap;

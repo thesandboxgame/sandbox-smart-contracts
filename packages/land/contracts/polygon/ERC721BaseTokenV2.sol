@@ -1,10 +1,9 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
 
@@ -13,8 +12,6 @@ import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenRece
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
 abstract contract ERC721BaseTokenV2 is ERC721BaseToken {
-    using AddressUpgradeable for address;
-
     uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
     uint256 internal constant OPERATOR_FLAG = (2 ** 255);
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
@@ -60,7 +57,7 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken {
     function transferFrom(address from, address to, uint256 id) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "ERC721_TRANSFER_REJECTED");
         }
     }
@@ -178,9 +175,7 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken {
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract()) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
-        }
+        require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
     }
 
     /// @notice Check if the contract supports an interface.
@@ -238,13 +233,11 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken {
             _moveNumNFTPerAddress(from, to, numTokens);
         }
 
-        if (to.isContract()) {
-            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
-            } else if (safe) {
-                for (uint256 i = 0; i < numTokens; i++) {
-                    require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
-                }
+        if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
+        } else if (safe) {
+            for (uint256 i = 0; i < numTokens; i++) {
+                require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
             }
         }
     }
@@ -282,7 +275,7 @@ abstract contract ERC721BaseTokenV2 is ERC721BaseToken {
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

@@ -1,4 +1,4 @@
-import {Contract, Signer, ZeroAddress} from 'ethers';
+import {Contract, Signer} from 'ethers';
 import {ethers} from 'hardhat';
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
@@ -29,7 +29,7 @@ export async function setupLand() {
   );
   const [sandContract] = await deploy('MockLand', [deployer]);
   // TODO: mock sand contract (approve and call)
-  await landAsDeployer.initialize(ZeroAddress, landAdmin.address);
+  await landAsDeployer.initialize(landAdmin.address);
   await landAsAdmin.setMinter(minter.address, true);
   const [TestERC1155ERC721TokenReceiver] = await deploy(
     'TestERC1155ERC721TokenReceiver',
@@ -47,7 +47,7 @@ export async function setupLand() {
     mocklandAsMinter,
     mocklandAsOther,
   ] = await deploy('MockLand', [deployer, landAdmin, minter, other]);
-  await mockLandAsDeployer.initialize(ZeroAddress, landAdmin.address);
+  await mockLandAsDeployer.initialize(landAdmin.address);
   await mocklandAsAdmin.setMinter(minter.address, true);
   return {
     deployer,

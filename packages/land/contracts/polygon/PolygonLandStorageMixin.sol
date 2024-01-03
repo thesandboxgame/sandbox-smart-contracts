@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.2;
+pragma solidity 0.8.20;
 
 //│          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │
 //│         PolygonLand         │       _initialized        │      0       │   0    │                     t_uint8                      │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │       1       │
@@ -18,28 +18,67 @@ pragma solidity 0.8.2;
 //│         PolygonLand         │  operatorFilterRegistry   │     108      │   0    │     t_contract(IOperatorFilterRegistry)3942      │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
 
 contract PolygonLandStorageMixin {
-    struct Storage {
-        uint8 _initialized; // not used anymore
-        bool _initializing; // not used anymore
-        uint256[50] __gap1;
-        address _admin;
-        mapping(address => bool) _superOperators;
-        mapping(address => uint256) _numNFTPerAddress;
-        mapping(uint256 => uint256) _owners;
-        mapping(address => mapping(address => bool)) _operatorsForAll;
-        mapping(uint256 => address) _operators;
-        mapping(address => bool) _minters;
-        uint256[49] __gap2;
-        address _trustedForwarder;
-        address operatorFilterRegistry;
-    }
+    uint8 private _initialized; // not used anymore
+    bool private _initializing; // not used anymore
+    uint256[50] private __gap1;
+    address private _admin;
+    mapping(address => bool) private _superOperators;
+    mapping(address => uint256) private _numNFTPerAddress;
+    mapping(uint256 => uint256) private _owners;
+    mapping(address => mapping(address => bool)) private _operatorsForAll;
+    mapping(uint256 => address) private _operators;
+    mapping(address => bool) private _minters;
+    uint256[49] private __gap2;
+    address private _trustedForwarder;
+    address private operatorFilterRegistry;
     // This moves everything just in case.
     uint256[500] private _initialGap;
 
-    function _getPolygonLandStorage() internal pure returns (Storage storage $) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            $.slot := 0
-        }
+    function $superOperators() internal view virtual returns (mapping(address => bool) storage) {
+        return _superOperators;
+    }
+
+    function $numNFTPerAddress() internal view virtual returns (mapping(address => uint256) storage) {
+        return _numNFTPerAddress;
+    }
+
+    function $owners() internal view virtual returns (mapping(uint256 => uint256) storage) {
+        return _owners;
+    }
+
+    function $operators() internal view virtual returns (mapping(uint256 => address) storage) {
+        return _operators;
+    }
+
+    function $operatorsForAll() internal view virtual returns (mapping(address => mapping(address => bool)) storage) {
+        return _operatorsForAll;
+    }
+
+    function $getAdmin() internal view virtual returns (address) {
+        return _admin;
+    }
+
+    function $setAdmin(address a) internal virtual {
+        _admin = a;
+    }
+
+    function $getTrustedForwarder() internal view virtual returns (address) {
+        return _trustedForwarder;
+    }
+
+    function $setTrustedForwarder(address a) internal virtual {
+        _trustedForwarder = a;
+    }
+
+    function $getOperatorFilterRegistry() internal view virtual returns (address a) {
+        return operatorFilterRegistry;
+    }
+
+    function $setOperatorFilterRegistry(address a) internal virtual {
+        operatorFilterRegistry = a;
+    }
+
+    function $minters() internal view virtual returns (mapping(address => bool) storage) {
+        return _minters;
     }
 }
