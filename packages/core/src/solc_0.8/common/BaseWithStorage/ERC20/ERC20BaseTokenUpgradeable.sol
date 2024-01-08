@@ -192,10 +192,17 @@ abstract contract ERC20BaseTokenUpgradeable is
         address to,
         uint256 amount
     ) internal virtual override {
+        console.log("inside erc20 base");
+        console.log("to address is");
+        console.log(to);
+        console.log("from address is");
+        console.log(from);
+        console.log("amount is");
+        console.log(amount);
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(to != address(this), "NOT_TO_THIS");
         uint256 currentBalance = _balances[from];
-        console.log("heheheh");
+        console.log("current balance of from is");
         console.log(currentBalance);
         require(currentBalance >= amount, "INSUFFICIENT_FUNDS");
         _balances[from] = currentBalance - amount;

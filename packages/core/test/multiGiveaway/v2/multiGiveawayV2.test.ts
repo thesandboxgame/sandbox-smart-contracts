@@ -148,7 +148,7 @@ describe('Multi_Giveaway_V2', function () {
       expect(statuses[1]).to.equal(false);
     });
 
-    /* it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims of 2 claimed', async function () {
+    it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims of 2 claimed', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -162,6 +162,8 @@ describe('Multi_Giveaway_V2', function () {
         allClaims,
         allMerkleRoots,
       } = setUp;
+
+      console.log(allClaims);
 
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
@@ -206,7 +208,7 @@ describe('Multi_Giveaway_V2', function () {
       expect(statusesAfterClaim[0]).to.equal(true);
       expect(statusesAfterClaim[1]).to.equal(true);
     });
- */
+
     /* it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim of 2 claimed', async function () {
       const options = {
         mint: true,
