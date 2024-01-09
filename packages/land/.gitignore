@@ -13,3 +13,5 @@ artifacts
 ./typechain
 
 deployments
+
+storageLayout
