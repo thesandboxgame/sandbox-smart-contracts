@@ -2858,6 +2858,7 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^4.9.5
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
+    "@types/chai": ^4.3.11
     "@types/mocha": ^10.0.6
     "@types/node": ^20.10.4
     "@typescript-eslint/eslint-plugin": ^6.14.0
@@ -3303,6 +3304,13 @@ __metadata:
   version: 4.3.9
   resolution: "@types/chai@npm:4.3.9"
   checksum: 2300a2c7abd4cb590349927a759b3d0172211a69f363db06e585faf7874a47f125ef3b364cce4f6190e3668147587fc11164c791c9560cf9bce8478fb7019610
+  languageName: node
+  linkType: hard
+
+"@types/chai@npm:^4.3.11":
+  version: 4.3.11
+  resolution: "@types/chai@npm:4.3.11"
+  checksum: d0c05fe5d02b2e6bbca2bd4866a2ab20a59cf729bc04af0060e7a3277eaf2fb65651b90d4c74b0ebf1d152b4b1d49fa8e44143acef276a2bbaa7785fbe5642d3
   languageName: node
   linkType: hard
 
