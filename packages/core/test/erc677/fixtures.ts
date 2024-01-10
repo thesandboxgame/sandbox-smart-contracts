@@ -7,17 +7,17 @@ export const setupERC677 = withSnapshot(['ERC20TokenUpgradeable'], async () => {
   const accounts = await getNamedAccounts();
   await deployments.deploy('ERC20TokenUpgradeable', {
     contract: 'ERC20TokenUpgradeable',
-    from: accounts.deployer,
+    from: accounts.sandAdmin,
     log: true,
     proxy: {
-      owner: accounts.upgradeAdmin,
+      owner: accounts.sandAdmin,
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: '__ERC20TokenUpgradeable_init',
         args: [
           'ERC20_Example',
           'ERC20_Example',
-          accounts.deployer,
+          accounts.sandAdmin,
           accounts.sandAdmin,
         ],
       },
@@ -45,9 +45,10 @@ export const setupERC677 = withSnapshot(['ERC20TokenUpgradeable'], async () => {
   const fallbackContract: Contract = await ethers.getContract(
     'FallBackContract'
   );
+
   const tx = await sand
   .connect(ethers.provider.getSigner(accounts.sandAdmin))
-    .mint(accounts.deployer, BigNumber.from('100000000000000000000'));
+  .mint(accounts.deployer, BigNumber.from('100000000000000000000'));
   await tx.wait();
   return {
     sand,
