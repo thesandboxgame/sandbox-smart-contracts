@@ -18,8 +18,6 @@ contract ERC20TokenUpgradeable is ERC677Extension, WithPermitUpgradeable, ERC20B
     }
 
     function mint(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        console.log("inside minting");
-        console.log(_msgSender());
         _mint(to, amount);
     }
 
