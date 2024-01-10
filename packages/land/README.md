@@ -56,7 +56,8 @@ errors
 4. It's permissible to create mock contracts at
    `packages/<package>/contracts/mock` e.g. for third-party contracts
 5. Tests must not rely on any deploy scripts from the `deploy` package; your
-   contracts must be deployed inside the test fixture. See `test/fixtures.ts`
+   contracts must be deployed inside the test fixture. See
+   `test/fixtures_old.ts`
 
 # Deployment
 
