@@ -218,8 +218,6 @@ export const setupTestGiveaway = withSnapshot(
         if (claim.erc20) {
           if (claim.erc20.amounts.length === 1)
             claim.erc20.contractAddresses = [sandContract.address];
-          if (claim.erc20.amounts.length === 3)
-            claim.erc20.contractAddresses = [sandContract.address];
         }
         return claim;
       });

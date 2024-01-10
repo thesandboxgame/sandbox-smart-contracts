@@ -23,9 +23,7 @@ export const setupERC677 = withSnapshot(['ERC20TokenUpgradeable'], async () => {
       },
     },
   });
-  const sand: Contract = await ethers.getContract(
-    'ERC20TokenUpgradeable'
-  );
+  const sand: Contract = await ethers.getContract('ERC20TokenUpgradeable');
   await deployments.deploy('MockERC677Receiver', {
     from: accounts.deployer,
     args: [],
@@ -47,8 +45,8 @@ export const setupERC677 = withSnapshot(['ERC20TokenUpgradeable'], async () => {
   );
 
   const tx = await sand
-  .connect(ethers.provider.getSigner(accounts.sandAdmin))
-  .mint(accounts.deployer, BigNumber.from('100000000000000000000'));
+    .connect(ethers.provider.getSigner(accounts.sandAdmin))
+    .mint(accounts.deployer, BigNumber.from('100000000000000000000'));
   await tx.wait();
   return {
     sand,
