@@ -8,24 +8,12 @@ describe('ERC677Token', function () {
     const {sand, tokenReceiver} = await setupERC677();
     const accounts = await getNamedAccounts();
     const fromBalanceBefore = await sand.balanceOf(accounts.deployer);
-    console.log("the deployer address is ");
-    console.log(accounts.deployer);
-    console.log(fromBalanceBefore.toString());
-    const bigFrom = BigNumber.from(fromBalanceBefore);
     const toBalanceBefore = await sand.balanceOf(tokenReceiver.address);
-    console.log(toBalanceBefore.toString());
     const amount = BigNumber.from('100');
-    const sub = bigFrom.sub(amount);
-    console.log("amount " + amount);
-    console.log(sub.toString());
-
-    const balance = await sand.balanceOf(accounts.deployer);
-    console.log("balance of deployer " + balance.toString());
     const tx = await sand
       .connect(ethers.provider.getSigner(accounts.deployer))
       .transferAndCall(tokenReceiver.address, amount, Buffer.from('data'));
     await tx.wait();
-    console.log(tx);
     const fromBalanceAfter = await sand.balanceOf(accounts.deployer);
     const toBalanceAfter = await sand.balanceOf(tokenReceiver.address);
     const tokenReceiverEvents = await tokenReceiver.queryFilter(

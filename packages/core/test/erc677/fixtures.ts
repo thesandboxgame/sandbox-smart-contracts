@@ -17,7 +17,7 @@ export const setupERC677 = withSnapshot(['ERC20TokenUpgradeable'], async () => {
         args: [
           'ERC20_Example',
           'ERC20_Example',
-          accounts.sandAdmin,
+          ethers.constants.AddressZero,
           accounts.sandAdmin,
         ],
       },
