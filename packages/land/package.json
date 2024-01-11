@@ -24,9 +24,13 @@
       "test/**/*.ts"
     ]
   },
+  "dependencies": {
+    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
+    "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",

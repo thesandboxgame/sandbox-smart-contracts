@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.2;
+pragma solidity 0.8.18;
 
 /**
  * @title ERC2771Handler

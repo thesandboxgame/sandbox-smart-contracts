@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.2;
+pragma solidity 0.8.18;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
@@ -9,12 +9,14 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {WithSuperOperatorsV2} from "./WithSuperOperatorsV2.sol";
 import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
+import {RoyaltyDistributor} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributor.sol";
+import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 /// @title ERC721BaseTokenV2
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2 {
+contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2,RoyaltyDistributor {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -212,7 +214,13 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     /// 0x80ac58cd is ERC-721
     /// @param id The id of the interface.
     /// @return Whether the interface is supported.
-    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
+    // function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
+    //     return id == 0x01ffc9a7 || id == 0x80ac58cd;
+    // }
+
+    function supportsInterface(
+        bytes4 id
+    ) public pure virtual override(IERC165Upgradeable, RoyaltyDistributor) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
