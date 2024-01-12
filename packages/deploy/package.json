@@ -1,87 +1,87 @@
 {
-    "name": "@sandbox-smart-contracts/deploy",
-    "version": "0.0.1",
-    "description": "TheSandbox game smart contracts deployment",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/thesandboxgame/sandbox-smart-contracts.git"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
-    },
-    "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
-    "private": true,
-    "dependencies": {
-        "@sandbox-smart-contracts/asset": "*",
-        "@sandbox-smart-contracts/avatar": "*",
-        "@sandbox-smart-contracts/core": "*",
-        "@sandbox-smart-contracts/dependency-operator-filter": "*",
-        "@sandbox-smart-contracts/dependency-royalty-management": "*",
-        "@sandbox-smart-contracts/faucets": "0.0.1",
-        "@sandbox-smart-contracts/giveaway": "0.0.3",
-        "@sandbox-smart-contracts/marketplace": "1.0.1"
-    },
-    "files": [
-        "deployments"
-    ],
-    "scripts": {
-        "compile": "hardhat compile",
-        "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test",
-        "void:deploy": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
-        "deploy": "npm run void:deploy",
-        "hardhat": "hardhat",
-        "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\"",
-        "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
-        "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
-        "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
-        "verify": "yarn hardhat etherscan-verify --network",
-        "live:deploy": "node ./utils/npmScriptHelper.js deploy",
-        "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
-        "fork:test": "node ./utils/npmScriptHelper.js fork:test"
-    },
-    "devDependencies": {
-        "@ethersproject/abi": "^5.7.0",
-        "@ethersproject/providers": "^5.7.2",
-        "@nomicfoundation/hardhat-chai-matchers": "1",
-        "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
-        "@nomiclabs/hardhat-ethers": "^2.2.3",
-        "@typechain/ethers-v5": "^11.0.0",
-        "@typechain/hardhat": "^8.0.0",
-        "@types/chai": "^4.3.5",
-        "@types/eslint": "^8",
-        "@types/mocha": "^10.0.1",
-        "@types/node": "^20.2.5",
-        "@types/prettier": "^2",
-        "@typescript-eslint/eslint-plugin": "^5.59.8",
-        "@typescript-eslint/parser": "^5.59.8",
-        "chai": "^4.3.7",
-        "child_process": "^1.0.2",
-        "cross-env": "^7.0.3",
-        "dotenv": "^16.1.4",
-        "dotenv-cli": "^7.2.1",
-        "eslint": "^8.43.0",
-        "eslint-config-prettier": "^8.8.0",
-        "eslint-plugin-json": "^3.1.0",
-        "eslint-plugin-mocha": "^10.1.0",
-        "eslint-plugin-prettier": "^4.2.1",
-        "ethers": "5",
-        "hardhat": "^2.19.0",
-        "hardhat-contract-sizer": "^2.10.0",
-        "hardhat-deploy": "^0.11.43",
-        "prettier": "^2.8.8",
-        "prettier-plugin-solidity": "^1.1.3",
-        "ts-node": "^10.9.1",
-        "typechain": "^8.2.0",
-        "typescript": "5.0.4"
-    },
-    "mocha": {
-        "require": "hardhat/register",
-        "timeout": 40000,
-        "_": [
-            "test/**/*.ts"
-        ]
-    }
+  "name": "@sandbox-smart-contracts/deploy",
+  "version": "0.0.1",
+  "description": "TheSandbox game smart contracts deployment",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thesandboxgame/sandbox-smart-contracts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thesandboxgame/sandbox-smart-contracts/issues"
+  },
+  "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
+  "private": true,
+  "dependencies": {
+    "@sandbox-smart-contracts/asset": "1.1.0",
+    "@sandbox-smart-contracts/avatar": "*",
+    "@sandbox-smart-contracts/core": "*",
+    "@sandbox-smart-contracts/dependency-operator-filter": "1.0.1",
+    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
+    "@sandbox-smart-contracts/faucets": "0.0.1",
+    "@sandbox-smart-contracts/giveaway": "0.0.3",
+    "@sandbox-smart-contracts/marketplace": "1.0.1"
+  },
+  "files": [
+    "deployments"
+  ],
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 node --unhandled-rejections=strict\" HARDHAT_COMPILE=true hardhat test",
+    "void:deploy": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --unhandled-rejections=strict\" hardhat deploy",
+    "deploy": "npm run void:deploy",
+    "hardhat": "hardhat",
+    "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\"",
+    "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
+    "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
+    "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
+    "verify": "yarn hardhat etherscan-verify --network",
+    "live:deploy": "node ./utils/npmScriptHelper.js deploy",
+    "fork:deploy": "node ./utils/npmScriptHelper.js fork:deploy",
+    "fork:test": "node ./utils/npmScriptHelper.js fork:test"
+  },
+  "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@nomicfoundation/hardhat-chai-matchers": "1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@typechain/ethers-v5": "^11.0.0",
+    "@typechain/hardhat": "^8.0.0",
+    "@types/chai": "^4.3.5",
+    "@types/eslint": "^8",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.2.5",
+    "@types/prettier": "^2",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "chai": "^4.3.7",
+    "child_process": "^1.0.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.1.4",
+    "dotenv-cli": "^7.2.1",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ethers": "5",
+    "hardhat": "^2.19.0",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-deploy": "^0.11.43",
+    "prettier": "^2.8.8",
+    "prettier-plugin-solidity": "^1.1.3",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.2.0",
+    "typescript": "5.0.4"
+  },
+  "mocha": {
+    "require": "hardhat/register",
+    "timeout": 40000,
+    "_": [
+      "test/**/*.ts"
+    ]
+  }
 }

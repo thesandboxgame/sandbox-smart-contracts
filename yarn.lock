@@ -2215,7 +2215,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/asset@*, @sandbox-smart-contracts/asset@workspace:packages/asset":
+"@sandbox-smart-contracts/asset@1.1.0, @sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
   dependencies:
@@ -2419,7 +2419,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-operator-filter@*, @sandbox-smart-contracts/dependency-operator-filter@1.0.1, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
+"@sandbox-smart-contracts/dependency-operator-filter@1.0.1, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter"
   dependencies:
@@ -2462,7 +2462,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-royalty-management@*, @sandbox-smart-contracts/dependency-royalty-management@1.0.2, @sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management":
+"@sandbox-smart-contracts/dependency-royalty-management@1.0.2, @sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-royalty-management@workspace:packages/dependency-royalty-management"
   dependencies:
@@ -2515,11 +2515,11 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": 1
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomiclabs/hardhat-ethers": ^2.2.3
-    "@sandbox-smart-contracts/asset": "*"
+    "@sandbox-smart-contracts/asset": 1.1.0
     "@sandbox-smart-contracts/avatar": "*"
     "@sandbox-smart-contracts/core": "*"
-    "@sandbox-smart-contracts/dependency-operator-filter": "*"
-    "@sandbox-smart-contracts/dependency-royalty-management": "*"
+    "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@sandbox-smart-contracts/faucets": 0.0.1
     "@sandbox-smart-contracts/giveaway": 0.0.3
     "@sandbox-smart-contracts/marketplace": 1.0.1
