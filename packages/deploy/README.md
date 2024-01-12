@@ -1,7 +1,7 @@
 # TSB contracts deploy
 
-This package is used to compile, deploy, test and keep track of the contracts we
-use in our environments.
+This package is used to compile, deploy, test, upgrade and keep track of the
+contracts we use in our environments.
 
 ## Compilation
 
@@ -43,6 +43,43 @@ where:
 - `SOMETAGS` are the tags used to limit which deployment scripts will be
   executed ( see:[hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
   configuration)
+
+## Upgrades
+
+To make an upgrade make the necessary changes to the smart contracts, add tests
+and update documentation in the respective package and get it reviewed through a
+PR.
+
+The next step is to create an upgrade script, please refer to
+(packages/deploy/deploy/300_catalyst/303_upgrade_catalyst.ts) for an example.
+
+Note the upgrade index in the upgrade script needs to be higher than the
+previous upgrade index.
+
+A contact(s) upgrade proposal should be published to NPM as a release candidate
+(RC). The version should increment the minor version number and be suffixed with
+`-rc.0`. For example, if the current version is `1.0.0`, the RC version should
+be `1.1.0-rc.0`. Future RC versions should increment the patch number, for
+example `1.1.0-rc.1`, `1.1.0-rc.2`, etc.
+
+For very minor upgrades, it is possible to skip publishing the RC version and
+upgrade directly to a stable release. For example, if the current version is
+`1.0.0`, the next version could be `1.0.1` or `1.1.0`.
+
+The upgrade should be tested on a fork of the live network before being deployed
+to the live network.
+
+Once ready for upgrade, change the dependency version in the deploy package.json
+file (packages/deploy/package.json) and run `yarn install`.
+
+Run the upgrade script, for example:
+
+```bash
+yarn hardhat deploy --network polygon --tags Catalyst-upgrade
+```
+
+Once the upgrade is complete, the RC version should be published as a stable
+release. The version should be the same as the RC version, without the `-rc.0`.
 
 ## Testing
 
