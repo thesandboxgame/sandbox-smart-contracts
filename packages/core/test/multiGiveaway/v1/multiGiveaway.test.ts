@@ -1279,6 +1279,8 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
+        MockERC20,
+        MockERC202,
         others,
         allTrees,
         allClaims,
@@ -1312,6 +1314,8 @@ describe('Multi_Giveaway', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, MockERC20);
+      await testInitialERC20Balance(user, MockERC202);
 
       // Claim 1
 
@@ -1347,6 +1351,8 @@ describe('Multi_Giveaway', function () {
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
+      await testUpdatedERC20Balance(secondClaim, user, MockERC20, 1);
+      await testUpdatedERC20Balance(secondClaim, user, MockERC202, 2);
 
       // Claim 1
 
@@ -2060,6 +2066,8 @@ describe('Multi_Giveaway', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
+        MockERC20,
+        MockERC202,
         others,
         allTrees,
         allClaims,
@@ -2097,6 +2105,9 @@ describe('Multi_Giveaway', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, MockERC20);
+      await testInitialERC20Balance(user, MockERC202);
+
       // Claim 1
 
       await testInitialAssetAndLandBalances(
@@ -2160,6 +2171,9 @@ describe('Multi_Giveaway', function () {
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
+
+      await testUpdatedERC20Balance(secondClaim, user, MockERC20, 1);
+      await testUpdatedERC20Balance(secondClaim, user, MockERC202, 2);
 
       // Claim 1
 
