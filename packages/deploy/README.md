@@ -49,9 +49,20 @@ where:
 We assume that the imported contracts are well tested in their own package by
 having enough unit tests and more that 80% coverage. This repo contains
 integrations tests, tests for the deployment process and tests that verify the
-integrity of the system. For example in the case of the `SignedMultiGiveaway`
-contract we check the roles and the users assigned to them are correctly
-configured.
+runtime integrity of the system. For example in the case of the
+`SignedMultiGiveaway` contract we check the roles and the users assigned to them
+are correctly configured.
+
+There are three directories to distinguish the type of test:
+
+- runtime_test: tests that check the runtime consistency of the contracts. They
+  must be able to run on a live network, a forked network or after a local
+  deploy.
+- integration_test: tests used to check some functionality of imported contract
+  when they interact together. They are meant to be run in a forked network or
+  on a local deploy, they don't necessarily work on a live network.
+- test: tests in this folder are always executed they must run at least on a
+  local deploy.
 
 To test the deployment process:
 
@@ -61,7 +72,7 @@ To test the deployment process:
   `fork:deploy NETWORK` where NETWORK is `mainnet`,`polygon` ,`goerli`,`mumbai`,
   etc.
 
-The tests the integrity of the system:
+To test the integrity of the system:
 
 - using hardhat local node and `hardhat-deploy` deployment scripts: `yarn test`
 - on a live network over contracts that are already deployed:
