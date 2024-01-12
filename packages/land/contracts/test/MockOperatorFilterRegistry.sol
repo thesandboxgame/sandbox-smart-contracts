@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable code-complexity
+// solhint-disable one-contract-per-file
+// solhint-disable reason-string
 pragma solidity 0.8.2;
 
 import {EnumerableSetUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";
 
 contract OperatorFilterRegistryEvents {
