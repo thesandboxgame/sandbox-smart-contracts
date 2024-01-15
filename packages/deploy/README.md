@@ -54,25 +54,31 @@ The next step is to create an upgrade script, please refer to
 (packages/deploy/deploy/300_catalyst/303_upgrade_catalyst.ts) for an example.
 
 Note the upgrade index in the upgrade script needs to be higher than the
-previous upgrade index.
+previous upgrade index. This needs to be verified manually at this time.
 
-A contact(s) upgrade proposal should be published to NPM as a release candidate
-(RC). The version should increment the minor version number and be suffixed with
-`-rc.0`. For example, if the current version is `1.0.0`, the RC version should
-be `1.1.0-rc.0`. Future RC versions should increment the patch number, for
-example `1.1.0-rc.1`, `1.1.0-rc.2`, etc.
+Once a contact(s) is reviewed and ready for upgrade proposal should be published
+to NPM as a release candidate (RC). The version should increment the minor
+version number and be suffixed with `-rc.0`. For example, if the current version
+is `1.0.0`, the RC version should be `1.1.0-rc.0`. Future RC versions should
+increment the patch number, for example `1.1.0-rc.1`, `1.1.0-rc.2`, etc.
 
-For very minor upgrades, it is possible to skip publishing the RC version and
-upgrade directly to a stable release. For example, if the current version is
-`1.0.0`, the next version could be `1.0.1` or `1.1.0`.
+For upgrades that are non-critical, it is possible to skip publishing the RC
+version and upgrade directly to a stable release after the upgrade is performed.
+For example, if the current version is `1.0.0`, the next version could be
+`1.0.1` or `1.1.0`.
 
 The upgrade should be tested on a fork of the live network before being deployed
 to the live network.
 
 Once ready for upgrade, change the dependency version in the deploy package.json
-file (packages/deploy/package.json) and run `yarn install`.
+file (packages/deploy/package.json), for exmaple:
 
-Run the upgrade script, for example:
+~"@sandbox-smart-contracts/asset": "1.0.3"~ => "@sandbox-smart-contracts/asset":
+"1.1.0"
+
+After that run `yarn install` in the deploy package.
+
+The next step is to run the upgrade script, for example:
 
 ```bash
 yarn hardhat deploy --network polygon --tags Catalyst-upgrade
@@ -80,6 +86,15 @@ yarn hardhat deploy --network polygon --tags Catalyst-upgrade
 
 Once the upgrade is complete, the RC version should be published as a stable
 release. The version should be the same as the RC version, without the `-rc.0`.
+
+To perform the npm publish make sure you are logged in to npm. We use a package
+called [https://github.com/release-it/release-it](release-it) to perform npm
+package releases.
+
+Make sure you are in the upgraded package directory and run `yarn release`.
+
+The above process will prompt you for the new version number and automatically
+update the `package.json` file.
 
 ## Testing
 
