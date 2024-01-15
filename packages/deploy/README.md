@@ -67,7 +67,7 @@ where:
 
 7. Update the dependency version in `packages/deploy/package.json`, then run
    `yarn install` in the deploy package. For example:
-   `"@sandbox-smart-contracts/asset": "1.0.3"~ =>
+   `~"@sandbox-smart-contracts/asset": "1.0.3"~ =>
    "@sandbox-smart-contracts/asset": "1.1.0"``
 
 8. Run the upgrade script, e.g.,
