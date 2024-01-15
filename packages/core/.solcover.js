@@ -15,6 +15,6 @@ module.exports = {
     'solc_0.7',
     'solc_0.8.15', //temporary for repo cleaning
     'solc_0.8/asset/AssetSignedAuctionWithAuth.sol', //temporary for repo cleaning
-    'solc_0.8/asset/libraries/AssetHelper.sol' //temporary for repo cleaning
+    'solc_0.8/asset/libraries/AssetHelper.sol', //temporary for repo cleaning
   ],
 };
