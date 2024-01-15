@@ -15,7 +15,7 @@
   "homepage": "https://github.com/thesandboxgame/sandbox-smart-contracts#readme",
   "private": true,
   "dependencies": {
-    "@sandbox-smart-contracts/asset": "1.0.3",
+    "@sandbox-smart-contracts/asset": "1.1.0",
     "@sandbox-smart-contracts/avatar": "*",
     "@sandbox-smart-contracts/core": "*",
     "@sandbox-smart-contracts/dependency-operator-filter": "1.0.1",
