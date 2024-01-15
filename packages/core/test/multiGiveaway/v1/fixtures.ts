@@ -35,11 +35,7 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  [
-    'Multi_Giveaway_1',
-    'PolygonAssetERC1155',
-    'PolygonSand',
-  ],
+  ['Multi_Giveaway_1', 'PolygonAssetERC1155', 'PolygonSand'],
   async function (hre, options?: Options) {
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
       options || {};
@@ -49,21 +45,43 @@ export const setupTestGiveaway = withSnapshot(
       landAdmin,
       sandAdmin,
       multiGiveawayAdmin,
+      upgradeAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
     const others = otherAccounts;
     const sandContract = await ethers.getContract('PolygonSand');
     const assetContract = await ethers.getContract('PolygonAssetERC1155');
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
     await deployments.deploy('MockERC20', {
       from: deployer,
-      contract: 'ERC20Mintable',
-      args: ['MockERC20', 'M20'],
+      contract: 'ERC20TokenUpgradeable',
+      log: true,
+      skipIfAlreadyDeployed: true,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: '__ERC20TokenUpgradeable_init',
+          args: ['MockERC20', 'M20', TRUSTED_FORWARDER.address, sandAdmin],
+        },
+        upgradeIndex: 0,
+      },
     });
     const MockERC20 = await ethers.getContract('MockERC20', deployer);
     await deployments.deploy('MockERC202', {
       from: deployer,
-      contract: 'ERC20Mintable',
-      args: ['MockERC202', 'M202'],
+      contract: 'ERC20TokenUpgradeable',
+      log: true,
+      skipIfAlreadyDeployed: true,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: '__ERC20TokenUpgradeable_init',
+          args: ['MockERC202', 'M202', TRUSTED_FORWARDER.address, sandAdmin],
+        },
+        upgradeIndex: 0,
+      },
     });
     const MockERC202 = await ethers.getContract('MockERC202', deployer);
 
@@ -113,12 +131,14 @@ export const setupTestGiveaway = withSnapshot(
     }
 
     // Supply mock ERC20
-    await MockERC20
-      .connect(ethers.provider.getSigner(sandAdmin))
-      .mint(giveawayContract.address, 16);
-    await MockERC202
-      .connect(ethers.provider.getSigner(sandAdmin))
-      .mint(giveawayContract.address, 8);
+    await MockERC20.connect(ethers.provider.getSigner(sandAdmin)).mint(
+      giveawayContract.address,
+      16
+    );
+    await MockERC202.connect(ethers.provider.getSigner(sandAdmin)).mint(
+      giveawayContract.address,
+      8
+    );
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
