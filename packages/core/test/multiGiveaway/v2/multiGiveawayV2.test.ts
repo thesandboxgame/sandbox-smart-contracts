@@ -163,8 +163,6 @@ describe('Multi_Giveaway_V2', function () {
         allMerkleRoots,
       } = setUp;
 
-      console.log(allClaims);
-
       // make arrays of claims and proofs relevant to specific user
       const userProofs = [];
       const userClaims = [];
@@ -1325,6 +1323,8 @@ describe('Multi_Giveaway_V2', function () {
         allClaims,
         assetContract,
         landContract,
+        MockERC20,
+        MockERC202,
         sandContract,
         allMerkleRoots,
       } = setUp;
@@ -1353,6 +1353,8 @@ describe('Multi_Giveaway_V2', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, MockERC20);
+      await testInitialERC20Balance(user, MockERC202);
 
       // Claim 1
 
@@ -1388,6 +1390,8 @@ describe('Multi_Giveaway_V2', function () {
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
+      await testUpdatedERC20Balance(secondClaim, user, MockERC20, 1);
+      await testUpdatedERC20Balance(secondClaim, user, MockERC202, 2);
 
       // Claim 1
 
@@ -2101,6 +2105,8 @@ describe('Multi_Giveaway_V2', function () {
       const setUp = await setupTestGiveaway(options);
       const {
         giveawayContract,
+        MockERC20,
+        MockERC202,
         others,
         allTrees,
         allClaims,
@@ -2138,6 +2144,8 @@ describe('Multi_Giveaway_V2', function () {
       // ERC20
 
       await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, MockERC20);
+      await testInitialERC20Balance(user, MockERC202);
 
       // Claim 1
 
@@ -2202,6 +2210,8 @@ describe('Multi_Giveaway_V2', function () {
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
+      await testUpdatedERC20Balance(secondClaim, user, MockERC20, 1);
+      await testUpdatedERC20Balance(secondClaim, user, MockERC202, 2);
 
       // Claim 1
 

@@ -53,6 +53,7 @@ export const setupTestGiveaway = withSnapshot(
       landAdmin,
       sandAdmin,
       multiGiveawayAdmin,
+      upgradeAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
     const others = otherAccounts;
@@ -70,6 +71,39 @@ export const setupTestGiveaway = withSnapshot(
       args: [sandContract.address, landAdmin],
       deterministicDeployment: true, // Set a fixed address for MockLand, so that the address can be used in the test claim data
     });
+
+    await deployments.deploy('MockERC20', {
+      from: deployer,
+      contract: 'ERC20TokenUpgradeable',
+      log: true,
+      skipIfAlreadyDeployed: true,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: '__ERC20TokenUpgradeable_init',
+          args: ['MockERC20', 'M20', trustedForwarder.address, sandAdmin],
+        },
+        upgradeIndex: 0,
+      },
+    });
+    const MockERC20 = await ethers.getContract('MockERC20', deployer);
+    await deployments.deploy('MockERC202', {
+      from: deployer,
+      contract: 'ERC20TokenUpgradeable',
+      log: true,
+      skipIfAlreadyDeployed: true,
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OptimizedTransparentProxy',
+        execute: {
+          methodName: '__ERC20TokenUpgradeable_init',
+          args: ['MockERC202', 'M202', trustedForwarder.address, sandAdmin],
+        },
+        upgradeIndex: 0,
+      },
+    });
+    const MockERC202 = await ethers.getContract('MockERC202', deployer);
 
     const sandContractAsAdmin = await sandContract.connect(
       ethers.provider.getSigner(sandAdmin)
@@ -111,6 +145,16 @@ export const setupTestGiveaway = withSnapshot(
     if (sand) {
       await sandContractAsAdmin.transfer(giveawayContract.address, SAND_AMOUNT);
     }
+
+    // Supply Mock ERC20s
+    await MockERC20.connect(ethers.provider.getSigner(sandAdmin)).mint(
+      giveawayContract.address,
+      16
+    );
+    await MockERC202.connect(ethers.provider.getSigner(sandAdmin)).mint(
+      giveawayContract.address,
+      8
+    );
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
@@ -218,6 +262,12 @@ export const setupTestGiveaway = withSnapshot(
         if (claim.erc20) {
           if (claim.erc20.amounts.length === 1)
             claim.erc20.contractAddresses = [sandContract.address];
+          if (claim.erc20.amounts.length === 3)
+            claim.erc20.contractAddresses = [
+              sandContract.address,
+              MockERC20.address,
+              MockERC202.address,
+            ];
         }
         return claim;
       });
@@ -409,6 +459,8 @@ export const setupTestGiveaway = withSnapshot(
       sandContract,
       assetContract,
       landContract,
+      MockERC20,
+      MockERC202,
       others,
       allTrees,
       allClaims,

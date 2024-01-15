@@ -51,7 +51,18 @@ export const setupTestGiveaway = withSnapshot(
     const others = otherAccounts;
     const sandContract = await ethers.getContract('PolygonSand');
     const assetContract = await ethers.getContract('PolygonAssetERC1155');
-    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+    await deployments.deploy('TestMetaTxForwarder', {
+      from: deployer,
+    });
+    const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+
+    await deployments.deploy('MockLand', {
+      from: deployer,
+      args: [sandContract.address, landAdmin],
+      deterministicDeployment: true, // Set a fixed address for MockLand, so that the address can be used in the test claim data
+    });
+
     await deployments.deploy('MockERC20', {
       from: deployer,
       contract: 'ERC20TokenUpgradeable',
@@ -62,7 +73,7 @@ export const setupTestGiveaway = withSnapshot(
         proxyContract: 'OptimizedTransparentProxy',
         execute: {
           methodName: '__ERC20TokenUpgradeable_init',
-          args: ['MockERC20', 'M20', TRUSTED_FORWARDER.address, sandAdmin],
+          args: ['MockERC20', 'M20', trustedForwarder.address, sandAdmin],
         },
         upgradeIndex: 0,
       },
@@ -78,24 +89,12 @@ export const setupTestGiveaway = withSnapshot(
         proxyContract: 'OptimizedTransparentProxy',
         execute: {
           methodName: '__ERC20TokenUpgradeable_init',
-          args: ['MockERC202', 'M202', TRUSTED_FORWARDER.address, sandAdmin],
+          args: ['MockERC202', 'M202', trustedForwarder.address, sandAdmin],
         },
         upgradeIndex: 0,
       },
     });
     const MockERC202 = await ethers.getContract('MockERC202', deployer);
-
-    await deployments.deploy('TestMetaTxForwarder', {
-      from: deployer,
-    });
-    const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
-    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
-
-    await deployments.deploy('MockLand', {
-      from: deployer,
-      args: [sandContract.address, landAdmin],
-      deterministicDeployment: true, // Set a fixed address for MockLand, so that the address can be used in the test claim data
-    });
 
     const sandContractAsAdmin = await sandContract.connect(
       ethers.provider.getSigner(sandAdmin)
@@ -130,7 +129,7 @@ export const setupTestGiveaway = withSnapshot(
       await sandContractAsAdmin.transfer(giveawayContract.address, SAND_AMOUNT);
     }
 
-    // Supply mock ERC20
+    // Supply mock ERC20s
     await MockERC20.connect(ethers.provider.getSigner(sandAdmin)).mint(
       giveawayContract.address,
       16
