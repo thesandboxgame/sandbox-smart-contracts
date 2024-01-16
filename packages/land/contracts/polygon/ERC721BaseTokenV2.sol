@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.18;
+pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
@@ -16,7 +16,7 @@ import {ERC165Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upg
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2,RoyaltyDistributor {
+contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2, RoyaltyDistributor {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;

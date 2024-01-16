@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -15,9 +15,10 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
 
     event OperatorRegistrySet(address indexed registry);
 
-    function initialize(address trustedForwarder) external initializer {
+    function initialize(address trustedForwarder, address _royaltyManager) external initializer {
         _admin = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
+        __RoyaltyDistributor_init(_royaltyManager);
         emit AdminChanged(address(0), _admin);
     }
 
@@ -26,6 +27,10 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderSet(trustedForwarder);
+    }
+
+    function owner() public view returns (address) {
+        return _msgSender();
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {

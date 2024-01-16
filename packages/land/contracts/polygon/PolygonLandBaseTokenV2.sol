@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable code-complexity
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
 import {ILandToken} from "./ILandToken.sol";
 import {IPolygonLand} from "./IPolygonLand.sol";
@@ -17,7 +17,7 @@ import {IPolygonLand} from "./IPolygonLand.sol";
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
 abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721BaseTokenV2 {
-    using AddressUpgradeable for address;
+    using Address for address;
 
     uint256 internal constant GRID_SIZE = 408;
 
@@ -254,10 +254,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
-        return
-            string(
-                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
-            );
+        return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
     }
 
     function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {

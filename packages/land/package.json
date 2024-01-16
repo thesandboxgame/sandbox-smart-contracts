@@ -25,6 +25,7 @@
     ]
   },
   "dependencies": {
+    "@openzeppelin/hardhat-upgrades": "^3.0.2",
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
   },
   "devDependencies": {
