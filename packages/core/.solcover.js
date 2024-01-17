@@ -17,5 +17,6 @@ module.exports = {
     'solc_0.8/asset', //temporary for repo cleaning
     'solc_0.8/assetERC721', //temporary for repo cleaning
     'solc_0.8/assetERC1155', //temporary for repo cleaning
+    'solc_0.8/common/BaseWithStorage/ERC721BaseToken.sol', //temporary for repo cleaning
   ],
 };
