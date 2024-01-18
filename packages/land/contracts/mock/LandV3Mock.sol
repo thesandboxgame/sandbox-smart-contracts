@@ -35,7 +35,7 @@ contract LandV3Mock is LandV3 {
             emit Transfer(address(0), to, _id);
         }
 
-        _owners[quadId] = uint256(uint160(to));
+        _owners[quadId] = uint160(to);
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);

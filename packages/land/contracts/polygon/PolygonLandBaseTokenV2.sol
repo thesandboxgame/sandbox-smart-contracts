@@ -21,12 +21,14 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
 
     uint256 internal constant GRID_SIZE = 408;
 
+    /* solhint-disable const-name-snakecase */
     uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+    /* solhint-enable const-name-snakecase */
 
     mapping(address => bool) internal _minters;
 
@@ -53,15 +55,12 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         uint256[] calldata ys,
         bytes calldata data
     ) external override {
-        require(from != address(0), "from is zero address");
+        require(from != address(0), "invalid from");
         require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length, "PolygonLandBaseTokenV2: sizes's and x's length are different");
-        require(xs.length == ys.length, "PolygonLandBaseTokenV2: x's and y's length are different");
+        require(sizes.length == xs.length, "sizes's and x's are different");
+        require(xs.length == ys.length, "x's and y's are different");
         if (_msgSender() != from) {
-            require(
-                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
-                "not authorized to transferMultiQuads"
-            );
+            require(_operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()], "not authorized");
         }
         uint256 numTokensTransfered = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
@@ -82,10 +81,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
                     counter++;
                 }
             }
-            require(
-                _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
-                "erc721 batch transfer rejected by to"
-            );
+            require(_checkOnERC721BatchReceived(_msgSender(), from, to, ids, data), "erc721 batchTransfer rejected");
         }
     }
 
@@ -274,7 +270,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
-            require(owner == from, "not owner in _transferQuad");
+            require(owner == from, "not owner");
             _owners[id1x1] = uint256(uint160(address(to)));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
@@ -454,7 +450,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             for (uint256 i = 0; i < size * size; i++) {
                 ids[i] = _idInPath(i, size, x, y);
             }
-            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
+            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batchTransfer rejected");
         }
     }
 
@@ -511,11 +507,11 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             // checking if "to" contact can handle ERC721 tokens
             require(
                 _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
-                "erc721 batch transfer rejected by to"
+                "erc721 batchTransfer rejected"
             );
             require(
                 _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
-                "erc721 batch transfer rejected by to"
+                "erc721 batchTransfer rejected"
             );
         } else {
             for (uint256 i = 0; i < size * size; i++) {
@@ -673,7 +669,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
         // owned by "from" and sets the owner for the id of land to "to" address.
         if (set) {
             if (!ownerOfAll) {
-                require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner of all sub quads nor parent quads");
+                require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner");
             }
             _owners[quadId] = uint256(uint160(to));
             return true;
