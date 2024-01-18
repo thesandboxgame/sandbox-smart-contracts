@@ -166,20 +166,14 @@ describe('LandV3', function () {
 
     it('should enable a minter', async function () {
       const {landAsAdmin, deployer} = await setupLand();
-      await expect(
-        landAsAdmin.setMinter(deployer, true),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
       expect(await landAsAdmin.isMinter(deployer)).to.be.true;
     });
 
     it('should disable a minter', async function () {
       const {landAsAdmin, deployer} = await setupLand();
-      await expect(
-        landAsAdmin.setMinter(deployer, true),
-      ).not.to.be.revertedWith('bla');
-      await expect(
-        landAsAdmin.setMinter(deployer, false),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
+      await expect(landAsAdmin.setMinter(deployer, false)).not.to.be.reverted;
       expect(await landAsAdmin.isMinter(deployer)).to.be.false;
     });
 
@@ -196,16 +190,12 @@ describe('LandV3', function () {
 
     it('should only be able to disable an enabled minter', async function () {
       const {landAsAdmin, deployer} = await setupLand();
-      await expect(
-        landAsAdmin.setMinter(deployer, true),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
       expect(await landAsAdmin.isMinter(deployer)).to.be.true;
       await expect(landAsAdmin.setMinter(deployer, true)).to.be.revertedWith(
         'the status should be different than the current one',
       );
-      await expect(
-        landAsAdmin.setMinter(deployer, false),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setMinter(deployer, false)).not.to.be.reverted;
     });
 
     it('should only be able to enable a disabled minter', async function () {
@@ -214,9 +204,7 @@ describe('LandV3', function () {
       await expect(landAsAdmin.setMinter(deployer, false)).to.be.revertedWith(
         'the status should be different than the current one',
       );
-      await expect(
-        landAsAdmin.setMinter(deployer, true),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
     });
 
     it('should return the grid height', async function () {
@@ -894,7 +882,7 @@ describe('LandV3', function () {
         await loadFixture(setupLand);
       await expect(
         landAsAdmin.setMetaTransactionProcessor(metaTransactionContract, true),
-      ).not.to.be.revertedWith('bla');
+      ).not.to.be.reverted;
       expect(
         await landAsAdmin.isMetaTransactionProcessor(metaTransactionContract),
       ).to.be.true;
@@ -905,7 +893,7 @@ describe('LandV3', function () {
         await loadFixture(setupLand);
       await expect(
         landAsAdmin.setMetaTransactionProcessor(metaTransactionContract, false),
-      ).not.to.be.revertedWith('bla');
+      ).not.to.be.reverted;
       expect(
         await landAsAdmin.isMetaTransactionProcessor(metaTransactionContract),
       ).to.be.false;
@@ -929,7 +917,7 @@ describe('LandV3', function () {
       ).to.be.revertedWith('only admin allowed');
       await expect(
         landAsAdmin.setMetaTransactionProcessor(metaTransactionContract, true),
-      ).not.to.be.revertedWith('bla');
+      ).not.to.be.reverted;
     });
   });
 
@@ -941,9 +929,7 @@ describe('LandV3', function () {
 
     it('should change the admin to a new address', async function () {
       const {landAsAdmin, deployer} = await loadFixture(setupLand);
-      await expect(landAsAdmin.changeAdmin(deployer)).not.to.be.revertedWith(
-        'bla',
-      );
+      await expect(landAsAdmin.changeAdmin(deployer)).not.to.be.reverted;
       expect(await landAsAdmin.getAdmin()).to.be.equal(deployer);
     });
 
@@ -980,9 +966,8 @@ describe('LandV3', function () {
       const {landAsAdmin, landAdmin} = await loadFixture(setupLand);
       await expect(landAsAdmin.setSuperOperator(landAdmin.address, true)).not.to
         .be.reverted;
-      await expect(
-        landAsAdmin.setSuperOperator(landAdmin.address, false),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setSuperOperator(landAdmin.address, false)).not
+        .to.be.reverted;
       expect(await landAsAdmin.isSuperOperator(landAdmin.address)).to.be.false;
     });
 
@@ -1007,9 +992,8 @@ describe('LandV3', function () {
       ).to.be.revertedWith(
         'the status should be different than the current one',
       );
-      await expect(
-        landAsAdmin.setSuperOperator(landAdmin.address, false),
-      ).not.to.be.revertedWith('bla');
+      await expect(landAsAdmin.setSuperOperator(landAdmin.address, false)).not
+        .to.be.reverted;
     });
 
     it('should only be able to enable a disabled super operator', async function () {
