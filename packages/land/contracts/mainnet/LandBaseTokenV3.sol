@@ -16,12 +16,14 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
 
+    /* solhint-disable const-name-snakecase */
     uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+    /* solhint-enable const-name-snakecase */
 
     mapping(address => bool) internal _minters;
     event Minter(address indexed superOperator, bool enabled);
@@ -57,7 +59,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             emit Transfer(address(0), to, _id);
         }
 
-        _owners[quadId] = uint256(uint160(to));
+        _owners[quadId] = uint160(to);
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
@@ -128,14 +130,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length, "LandBaseTokenV3: sizes's and x's length are different");
-        require(xs.length == ys.length, "LandBaseTokenV3: x's and y's length are different");
+        require(sizes.length == xs.length, "sizes's and x's are different");
+        require(xs.length == ys.length, "x's and y's are different");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
-            require(
-                _operatorsForAll[from][msg.sender] || _superOperators[msg.sender],
-                "not authorized to transferMultiQuads"
-            );
+            require(_operatorsForAll[from][msg.sender] || _superOperators[msg.sender], "not authorized");
         }
         uint256 numTokensTransfered = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
@@ -158,7 +157,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             }
             require(
                 _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
-                "erc721 batch transfer rejected by to"
+                "erc721 batchTransfer rejected"
             );
         }
     }
@@ -167,8 +166,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external onlyAdmin {
-        require(minter != address(0), "address 0 is not allowed as minter");
-        require(enabled != _minters[minter], "the status should be different than the current one");
+        require(minter != address(0), "address 0 is not allowed");
+        require(enabled != _minters[minter], "the status should be different");
         _minters[minter] = enabled;
         emit Minter(minter, enabled);
     }
@@ -284,7 +283,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
         _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, numLandMinted, to, size, x, y, data);
 
-        _owners[quadId] = uint256(uint160(to));
+        _owners[quadId] = uint160(to);
         _numNFTPerAddress[to] += size * size;
         _numNFTPerAddress[msg.sender] -= numLandMinted;
     }
@@ -310,7 +309,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             for (uint256 i = 0; i < size * size; i++) {
                 ids[i] = _idInPath(i, size, x, y);
             }
-            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
+            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batchTransfer rejected");
         }
     }
 
@@ -367,11 +366,11 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             // checking if "to" contact can handle ERC721 tokens
             require(
                 _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
-                "erc721 batch transfer rejected by to"
+                "erc721 batchTransfer rejected"
             );
             require(
                 _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
-                "erc721 batch transfer rejected by to"
+                "erc721 batchTransfer rejected"
             );
         } else {
             for (uint256 i = 0; i < size * size; i++) {
@@ -392,8 +391,8 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
-            require(owner == from, "not owner in _transferQuad");
-            _owners[id1x1] = uint256(uint160(to));
+            require(owner == from, "not owner");
+            _owners[id1x1] = uint160(to);
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
@@ -548,7 +547,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                         if (ownerChild != 0) {
                             if (!ownAllIndividual) {
                                 // checking the owner of child quad
-                                require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
+                                require(ownerChild == uint160(from), "not owner of child Quad");
                             }
                             // clearing owner of child quad
                             _owners[idChild] = 0;
@@ -564,9 +563,9 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         // owned by "from" and sets the owner for the id of land to "to" address.
         if (set) {
             if (!ownerOfAll) {
-                require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner of all sub quads nor parent quads");
+                require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner");
             }
-            _owners[quadId] = uint256(uint160(to));
+            _owners[quadId] = uint160(to);
             return true;
         }
 

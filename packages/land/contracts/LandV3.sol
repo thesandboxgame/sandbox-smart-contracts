@@ -31,7 +31,6 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         return "LAND";
     }
 
-    // solium-disable-next-line security/no-assign-params
     function uint2str(uint256 _i) internal pure returns (string memory) {
         if (_i == 0) {
             return "0";
@@ -43,10 +42,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint256 k = len - 1;
         while (_i != 0) {
-            bstr[k] = bytes1(uint8(48 + (_i % 10)));
-            if (k > 0) k--;
+            bstr[--len] = bytes1(uint8(48 + (_i % 10)));
             _i /= 10;
         }
         return string(bstr);
@@ -79,7 +76,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "LandV3: subscription can't be zero address");
+        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 

@@ -746,7 +746,7 @@ describe('ERC721 tests', function () {
       NONEXISTANT_TOKEN: 'token does not exist',
       ZERO_ADDRESS_OWNER: 'owner is zero address',
       BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
-      ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batch transfer rejected by to',
+      ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
       ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
       // TODO: FIX contract
       ERC721_TRANSFER_REJECTED2: 'ERC721: transfer rejected by to',

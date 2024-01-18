@@ -17,7 +17,7 @@ contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
-        require(_msgSender() == _admin, "only admin is allowed to add super operators");
+        require(_msgSender() == _admin, "only admin");
         _superOperators[superOperator] = enabled;
         emit SuperOperator(superOperator, enabled);
     }
