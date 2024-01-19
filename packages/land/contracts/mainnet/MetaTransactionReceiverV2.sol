@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 import {AdminV2} from "./AdminV2.sol";
-import {AddressUtils} from "./AddressUtils.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 /// @title MetaTransactionReceiverV2
 /// @author The Sandbox
 /// @notice Implements meta-transactions
 /// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
 contract MetaTransactionReceiverV2 is AdminV2 {
-    using AddressUtils for address;
+    using AddressUpgradeable for address;
 
     mapping(address => bool) internal _metaTransactionContracts;
     event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);

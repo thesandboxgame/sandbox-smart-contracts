@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 /**
  * @title ERC721MandatoryTokenReceiver
@@ -8,7 +8,7 @@ pragma solidity 0.5.9;
  * from ERC721 asset contracts.
  * @dev The ERC-165 identifier for this interface is 0x5e8bf644.
  */
-interface ERC721MandatoryTokenReceiver {
+interface IERC721MandatoryTokenReceiver {
     /**
      * @notice Whenever tokens are transferred to this contract via {IERC721-safeBatchTransferFrom}
      * by `operator` from `from`, this function is called.

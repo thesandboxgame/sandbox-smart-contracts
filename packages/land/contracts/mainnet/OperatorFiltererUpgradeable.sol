@@ -1,15 +1,15 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
-import {AddressUtils} from "./AddressUtils.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
 
 /// @title OperatorFiltererUpgradeable
 /// @author The Sandbox
 /// @notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
-/// @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
+/// @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.8.23 solidity version
 contract OperatorFiltererUpgradeable {
-    using AddressUtils for address;
+    using AddressUpgradeable for address;
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);

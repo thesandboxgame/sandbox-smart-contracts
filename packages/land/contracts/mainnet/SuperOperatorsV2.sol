@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 import {AdminV2} from "./AdminV2.sol";
 
@@ -17,7 +17,7 @@ contract SuperOperatorsV2 is AdminV2 {
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
         require(superOperator != address(0), "address 0 is not allowed as super operator");
-        require(enabled != _superOperators[superOperator], "the status should be different than the current one");
+        require(enabled != _superOperators[superOperator], "status must change");
         _superOperators[superOperator] = enabled;
         emit SuperOperator(superOperator, enabled);
     }

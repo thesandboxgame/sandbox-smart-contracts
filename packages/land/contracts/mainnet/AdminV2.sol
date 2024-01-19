@@ -1,4 +1,5 @@
-pragma solidity 0.5.9;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.23;
 
 contract AdminV2 {
     address internal _admin;
@@ -16,7 +17,7 @@ contract AdminV2 {
     function changeAdmin(address newAdmin) external {
         address admin = _admin;
         require(msg.sender == admin, "only admin can change admin");
-        require(newAdmin != admin, "it can be only changed to a new admin");
+        require(newAdmin != admin, "can be only changed to a new admin");
         emit AdminChanged(admin, newAdmin);
         _admin = newAdmin;
     }

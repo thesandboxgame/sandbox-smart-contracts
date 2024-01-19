@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 contract MockERC721TokenReceiver {
     bool public denyTokensReceived;
