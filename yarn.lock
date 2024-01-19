@@ -2015,6 +2015,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:^4.9.5":
+  version: 4.9.5
+  resolution: "@openzeppelin/contracts@npm:4.9.5"
+  checksum: 2cddeb08c006a8f99c5cc40cc80aecb449fd941cd1a92ebda315d77f48c4b4d487798a1254bffbc3ec811b390365d14665e92dbb2dd8f45aacef479d69d94574
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/defender-admin-client@npm:^1.48.0":
   version: 1.52.0
   resolution: "@openzeppelin/defender-admin-client@npm:1.52.0"
@@ -2100,6 +2107,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/defender-sdk-base-client@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.8.0"
+  dependencies:
+    amazon-cognito-identity-js: ^6.3.6
+    async-retry: ^1.3.3
+  checksum: f5ba28d00c93dca1ce53d0140549741fe95d80611980e0e4243814007233b826c2a898cd38edccdc181aa22daf688d06f93ecfeda942e68a5f1a9fe8f06398d9
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/defender-sdk-deploy-client@npm:^1.2.0":
   version: 1.5.0
   resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.5.0"
@@ -2121,6 +2138,18 @@ __metadata:
     axios: ^1.4.0
     lodash: ^4.17.21
   checksum: 2875808be0a5940a38a30216b8ab29106d0da221aeef29656deb705007380dbcaf80f2b3ea14a113033c70966ea0fcb98854e4bc86030b65031422a598973980
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-deploy-client@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.8.0"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.8.0
+    axios: ^1.4.0
+    lodash: ^4.17.21
+  checksum: 586213fd27afd355488936f3dc785202dcb71b907657aed27bbd64ffdc838c9b17f6709c079215127da56bb07c5fce69a12c9026ac4718d75fe63cf6c7274997
   languageName: node
   linkType: hard
 
@@ -2229,6 +2258,34 @@ __metadata:
   bin:
     migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
   checksum: 2d431ad84635ddbefeb83e1d651e5ec49c1574c7cc70cf67ad98c1c8c75d359dc73d6a1e1b99c2543784a25f57b38b4cf6fae3ca621318f320a64c496df5696f
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/hardhat-upgrades@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@openzeppelin/hardhat-upgrades@npm:3.0.2"
+  dependencies:
+    "@openzeppelin/defender-admin-client": ^1.52.0
+    "@openzeppelin/defender-base-client": ^1.52.0
+    "@openzeppelin/defender-sdk-base-client": ^1.8.0
+    "@openzeppelin/defender-sdk-deploy-client": ^1.8.0
+    "@openzeppelin/upgrades-core": ^1.32.0
+    chalk: ^4.1.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.1.5
+    proper-lockfile: ^4.1.1
+    undici: ^5.28.2
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@nomicfoundation/hardhat-verify": ^2.0.0
+    ethers: ^6.6.0
+    hardhat: ^2.0.2
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-verify":
+      optional: true
+  bin:
+    migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
+  checksum: 0368e746a1d6ca73374b370ea8a51fd3e71919bbb4f56e3081b34541f2dd57ba4b95745fd3091f66894c15f56af53b96b87f485a193b151a1af395fce8fca492
   languageName: node
   linkType: hard
 
@@ -2849,13 +2906,18 @@ __metadata:
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/providers": ^5.7.2
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.2
     "@nomicfoundation/hardhat-ethers": ^3.0.5
     "@nomicfoundation/hardhat-network-helpers": ^1.0.10
     "@nomicfoundation/hardhat-toolbox": ^4.0.0
     "@nomicfoundation/hardhat-verify": ^2.0.2
     "@nomiclabs/hardhat-etherscan": ^3.1.7
+    "@openzeppelin/contracts": ^4.9.5
     "@openzeppelin/contracts-upgradeable": ^4.9.5
+    "@openzeppelin/hardhat-upgrades": ^3.0.2
+    "@sandbox-smart-contracts/dependency-metatx": "*"
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
@@ -14416,6 +14478,15 @@ __metadata:
   dependencies:
     "@fastify/busboy": ^2.0.0
   checksum: 4d37f14ce56837d332ab1623be751f2a5b439069705671cc60b441133300b05bcb8803668132e7b3f98800db19cd6cb76b48831facbdbc2d73271b12383ab3cd
+  languageName: node
+  linkType: hard
+
+"undici@npm:^5.28.2":
+  version: 5.28.2
+  resolution: "undici@npm:5.28.2"
+  dependencies:
+    "@fastify/busboy": ^2.0.0
+  checksum: f9e9335803f962fff07c3c11c6d50bbc76248bacf97035047155adb29c3622a65bd6bff23a22218189740133149d22e63b68131d8c40e78ac6cb4b6d686a6dfa
   languageName: node
   linkType: hard
 

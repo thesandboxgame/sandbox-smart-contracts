@@ -55,8 +55,8 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
     ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length, "PolygonLandBaseTokenV2: sizes's and x's length are different");
-        require(xs.length == ys.length, "PolygonLandBaseTokenV2: x's and y's length are different");
+        require(sizes.length == xs.length, "sizes's and x's length are different");
+        require(xs.length == ys.length, "x's and y's length are different");
         if (_msgSender() != from) {
             require(
                 _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
@@ -84,7 +84,7 @@ abstract contract PolygonLandBaseTokenV2 is IPolygonLand, Initializable, ERC721B
             }
             require(
                 _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
-                "erc721 batch transfer rejected by to"
+                "batch transfer rejected"
             );
         }
     }

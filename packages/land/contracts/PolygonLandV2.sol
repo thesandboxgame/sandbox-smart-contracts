@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.23;
@@ -14,9 +15,13 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
     using AddressUpgradeable for address;
 
     event OperatorRegistrySet(address indexed registry);
+    event OwnerSet(address indexed owner);
+
+    address private _owner;
 
     function initialize(address trustedForwarder, address _royaltyManager) external initializer {
         _admin = _msgSender();
+        _owner = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
         __RoyaltyDistributor_init(_royaltyManager);
         emit AdminChanged(address(0), _admin);
@@ -29,8 +34,13 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         emit TrustedForwarderSet(trustedForwarder);
     }
 
-    function owner() public view returns (address) {
-        return _msgSender();
+    function owner() external view returns (address) {
+        return _owner;
+    }
+
+    function setOwner(address _newOwner) external onlyAdmin() {
+        _owner = _newOwner;
+        emit OwnerSet(_newOwner);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {

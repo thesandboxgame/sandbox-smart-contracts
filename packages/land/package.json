@@ -14,7 +14,7 @@
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
     "compile": "hardhat compile",
-    "size": "hardhat size-contracts",
+    "sizer": "hardhat size-contracts",
     "layout": "hardhat clean && hardhat compile && hardhat check"
   },
   "mocha": {
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@openzeppelin/hardhat-upgrades": "^3.0.2",
+    "@sandbox-smart-contracts/dependency-metatx": "*",
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/contracts": "^4.9.5",
     "@openzeppelin/contracts-upgradeable": "^4.9.5",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
