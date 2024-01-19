@@ -31,7 +31,7 @@ async function initLand(
   landAdmin,
   minter,
 ) {
-  const [metaTransactionContract] = await deploy('MockContract', [deployer]);
+  const [metaTransactionContract] = await deploy('ContractMock', [deployer]);
   await landAsDeployer.initialize(metaTransactionContract, landAdmin);
   await landAsAdmin.setMinter(minter, true);
   // from: 05_remove_land_sand_meta_tx
@@ -46,7 +46,7 @@ async function initPolygonLand(
   landAdmin,
   minter,
 ) {
-  const [trustedForwarder] = await deploy('MockMetaTxForwarder', [deployer]);
+  const [trustedForwarder] = await deploy('MetaTxForwarderMock', [deployer]);
   await landAsDeployer.initialize(trustedForwarder);
   // TODO: this must be fixed in the contract, admin must be an initializing argument.
   await landAsDeployer.changeAdmin(landAdmin);
@@ -74,7 +74,7 @@ export async function setupMainContract(mainContract: TesteableContracts) {
     other1,
     other2,
   ]);
-  const [testERC721TokenReceiver] = await deploy('MockERC721TokenReceiver', [
+  const [testERC721TokenReceiver] = await deploy('ERC721TokenReceiverMock', [
     deployer,
   ]);
   await testERC721TokenReceiver.setTokenContract(landAsOther);
@@ -127,20 +127,20 @@ export async function setupOperatorFilter(mainContract: TesteableContracts) {
     other,
     other1,
   ] = await ethers.getSigners();
-  const [mockMarketPlace1] = await deploy('MockMarketPlaceToFilter', [
+  const [mockMarketPlace1] = await deploy('MarketPlaceToFilterMock', [
     deployer,
   ]);
-  const [mockMarketPlace2] = await deploy('MockMarketPlaceToFilter', [
+  const [mockMarketPlace2] = await deploy('MarketPlaceToFilterMock', [
     deployer,
   ]);
   // Any contract will to, but must be !-MockMarketPlace
-  const [mockMarketPlace3] = await deploy('MockMarketPlace', [deployer]);
+  const [mockMarketPlace3] = await deploy('MarketPlaceMock', [deployer]);
   const [landAsDeployer, landAsAdmin, landAsOther, landAsOther1] = await deploy(
-    'Mock' + mainContract,
+    mainContract + 'Mock',
     [deployer, landAdmin, other, other1],
   );
   const [operatorFilterRegistry] = await deploy(
-    'MockOperatorFilterRegistry',
+    'OperatorFilterRegistryMock',
     [deployer],
     defaultSubscription,
     [mockMarketPlace1, mockMarketPlace2],
@@ -149,7 +149,7 @@ export async function setupOperatorFilter(mainContract: TesteableContracts) {
     landRegistryNotSetAsDeployer,
     landRegistryNotSetAsAdmin,
     landRegistryNotSetAsOther,
-  ] = await deploy('Mock' + mainContract, [deployer, landAdmin, other]);
+  ] = await deploy(mainContract + 'Mock', [deployer, landAdmin, other]);
 
   let initData;
   if (mainContract === 'LandV3') {

@@ -25,7 +25,7 @@ contract OperatorFilterRegistryEvents {
  * @notice This contracts allows tokens or token owners to register specific addresses or codeHashes that may be
  * *       restricted according to the isOperatorAllowed function.
  */
-contract MockOperatorFilterRegistry is IOperatorFilterRegistry, OperatorFilterRegistryEvents {
+contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRegistryEvents {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
 

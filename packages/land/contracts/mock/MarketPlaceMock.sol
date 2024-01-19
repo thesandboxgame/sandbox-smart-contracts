@@ -9,7 +9,7 @@ interface IToken {
     function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external;
 }
 
-contract MockMarketPlace {
+contract MarketPlaceMock {
     bytes4 private constant ERC721_IS_RECEIVER = 0x150b7a02;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 

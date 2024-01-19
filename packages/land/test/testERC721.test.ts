@@ -24,7 +24,7 @@ async function setupTests(mainContract: TesteableContracts) {
     const {tokenId} = await mint(ret.owner);
     tokenIds.push(tokenId);
   }
-  const [nonReceivingContract] = await deploy('MockContract', [ret.deployer]);
+  const [nonReceivingContract] = await deploy('ContractMock', [ret.deployer]);
   return {nonReceivingContract, tokenIds, mint, ...ret};
 }
 

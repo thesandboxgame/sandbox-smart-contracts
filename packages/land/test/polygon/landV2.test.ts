@@ -8,7 +8,7 @@ const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
 // TODO: some test were testing the tunnel => not anymore. We need to check if we missed something.
-describe('MockLandV2WithMint.sol', function () {
+describe('PolygonLandV2.sol', function () {
   it('creation', async function () {
     const {landAsAdmin} = await loadFixture(setupPolygonLand);
 
