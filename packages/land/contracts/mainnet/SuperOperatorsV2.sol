@@ -17,8 +17,8 @@ contract SuperOperatorsV2 is AdminV2 {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
-        require(superOperator != address(0), "address 0 is not allowed as super operator");
-        require(enabled != _superOperators[superOperator], "the status should be different than the current one");
+        require(superOperator != address(0), "address 0 is not allowed");
+        require(enabled != _superOperators[superOperator], "invalid status");
         _superOperators[superOperator] = enabled;
         emit SuperOperator(superOperator, enabled);
     }

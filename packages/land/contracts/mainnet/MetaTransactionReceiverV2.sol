@@ -19,7 +19,7 @@ contract MetaTransactionReceiverV2 is AdminV2 {
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public onlyAdmin {
-        require(metaTransactionProcessor.isContract(), "only contracts can be meta transaction processor");
+        require(metaTransactionProcessor.isContract(), "invalid address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 

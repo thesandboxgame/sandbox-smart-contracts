@@ -14,6 +14,7 @@ abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
+    // solhint-disable-next-line func-name-mixedcase
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }

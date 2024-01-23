@@ -508,7 +508,7 @@ describe('PolygonLandV2.sol', function () {
           0,
           '0x',
         ),
-      ).to.be.revertedWith('erc721 batch transfer rejected by to');
+      ).to.be.revertedWith('erc721 batchTransfer rejected');
     });
 
     it('should not revert when to is ERC721 receiving contract', async function () {
@@ -662,7 +662,7 @@ describe('PolygonLandV2.sol', function () {
     it('subscription can not be zero address', async function () {
       const {landAsAdmin} = await loadFixture(setupPolygonLandOperatorFilter);
       await expect(landAsAdmin.register(ZeroAddress, true)).to.be.revertedWith(
-        "PolygonLandV2: subscription can't be zero address",
+        "subscription can't be zero",
       );
     });
 
@@ -990,7 +990,7 @@ describe('PolygonLandV2.sol', function () {
           [0, 300, 30, 24],
           bytes,
         ),
-      ).to.be.revertedWith('from is zero address');
+      ).to.be.revertedWith('invalid from');
     });
 
     it('reverts transfers batch of quads for invalid parameters', async function () {
@@ -1007,9 +1007,7 @@ describe('PolygonLandV2.sol', function () {
           [0, 300, 30, 24],
           bytes,
         ),
-      ).to.be.revertedWith(
-        "PolygonLandBaseTokenV2: sizes's and x's length are different",
-      );
+      ).to.be.revertedWith("sizes's and x's are different");
     });
 
     it('reverts transfers batch of quads for invalid x and y length', async function () {
@@ -1026,9 +1024,7 @@ describe('PolygonLandV2.sol', function () {
           [0, 300, 30, 24],
           bytes,
         ),
-      ).to.be.revertedWith(
-        "PolygonLandBaseTokenV2: x's and y's length are different",
-      );
+      ).to.be.revertedWith("x's and y's are different");
     });
   });
 
