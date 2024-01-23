@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /* solhint-disable no-empty-blocks */
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 import {LandBaseTokenV3} from "./mainnet/LandBaseTokenV3.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
@@ -45,7 +45,8 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         bytes memory bstr = new bytes(len);
         uint256 k = len - 1;
         while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + (_i % 10)));
+            bstr[k] = bytes1(uint8(48 + (_i % 10)));
+            if (k > 0) k--;
             _i /= 10;
         }
         return string(bstr);
@@ -69,7 +70,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
@@ -95,7 +96,11 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approveFor(address sender, address operator, uint256 id) public onlyAllowedOperatorApproval(operator) {
+    function approveFor(
+        address sender,
+        address operator,
+        uint256 id
+    ) public override onlyAllowedOperatorApproval(operator) {
         super.approveFor(sender, operator, id);
     }
 
@@ -104,7 +109,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved) public onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -118,7 +123,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         address sender,
         address operator,
         bool approved
-    ) public onlyAllowedOperatorApproval(operator) {
+    ) public override onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAllFor(sender, operator, approved);
     }
 
@@ -127,7 +132,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approve(address operator, uint256 id) public onlyAllowedOperatorApproval(operator) {
+    function approve(address operator, uint256 id) public override onlyAllowedOperatorApproval(operator) {
         super.approve(operator, id);
     }
 
@@ -137,7 +142,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param to The recipient of the token
      * @param id The id of the token
      */
-    function transferFrom(address from, address to, uint256 id) public onlyAllowedOperator(from) {
+    function transferFrom(address from, address to, uint256 id) public override onlyAllowedOperator(from) {
         super.transferFrom(from, to, id);
     }
 
@@ -153,7 +158,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
         address to,
         uint256 id,
         bytes memory data
-    ) public onlyAllowedOperator(from) {
+    ) public override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, id, data);
     }
 
@@ -163,7 +168,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param to The recipient of the token
      * @param id The id of the token
      */
-    function safeTransferFrom(address from, address to, uint256 id) external onlyAllowedOperator(from) {
+    function safeTransferFrom(address from, address to, uint256 id) external override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, id, "");
     }
 }

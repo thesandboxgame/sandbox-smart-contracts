@@ -1,4 +1,6 @@
-pragma solidity 0.5.9;
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.23;
 
 contract AdminV2 {
     address internal _admin;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+
+pragma solidity 0.8.23;
 
 /**
  * @title AddressUtils
@@ -12,8 +13,8 @@ library AddressUtils {
      * @param _address target address
      * @return a payable address
      */
-    function toPayable(address _address) internal pure returns (address payable) {
-        return address(uint160(_address));
+    function toPayable(address _address) internal pure returns (address) {
+        return _address;
     }
 
     /**

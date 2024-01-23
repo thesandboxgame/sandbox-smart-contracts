@@ -1,11 +1,12 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+
+pragma solidity 0.8.23;
 
 /**
  * @title IOperatorFilterRegistry
  * @author OpenSea
  * @notice Interface of the operator filter registry
- * @dev This interface comes from OpenSea https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/IOperatorFilterRegistry.sol and adapted to the 0.5.9 solidity version
+ * @dev This interface comes from OpenSea https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/IOperatorFilterRegistry.sol and adapted to the 0.8.23 solidity version
  */
 interface IOperatorFilterRegistry {
     /**
@@ -85,7 +86,7 @@ interface IOperatorFilterRegistry {
     /**
      * @notice Get the subscription of an address
      * @param addr address to check
-     * @return the registrant address
+     * @return registrant the registrant address
      */
     function subscriptionOf(address addr) external returns (address registrant);
 
