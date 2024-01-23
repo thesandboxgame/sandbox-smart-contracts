@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
+import {AddressUtils} from "./AddressUtils.sol";
 import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
 
 /**
@@ -11,6 +12,7 @@ import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
 contract LandBaseTokenV3 is ERC721BaseTokenV2 {
+    using AddressUtils for address;
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
 
@@ -55,7 +57,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             emit Transfer(address(0), to, _id);
         }
 
-        _owners[quadId] = uint256(to);
+        _owners[quadId] = uint256(uint160(to));
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
@@ -282,7 +284,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
         // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
         _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, numLandMinted, to, size, x, y, data);
 
-        _owners[quadId] = uint256(to);
+        _owners[quadId] = uint256(uint160(to));
         _numNFTPerAddress[to] += size * size;
         _numNFTPerAddress[msg.sender] -= numLandMinted;
     }
@@ -391,7 +393,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
             require(owner == from, "not owner in _transferQuad");
-            _owners[id1x1] = uint256(to);
+            _owners[id1x1] = uint256(uint160(to));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
@@ -441,7 +443,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
         uint256 currentOwner = _owners[tokenId];
         if (currentOwner != 0) {
-            require(address(currentOwner) == from, "not owner");
+            require(address(uint160(currentOwner)) == from, "not owner");
             _owners[tokenId] = 0;
             return true;
         }
@@ -546,7 +548,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
                         if (ownerChild != 0) {
                             if (!ownAllIndividual) {
                                 // checking the owner of child quad
-                                require(ownerChild == uint256(from), "not owner of child Quad");
+                                require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                             }
                             // clearing owner of child quad
                             _owners[idChild] = 0;
@@ -564,7 +566,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
             if (!ownerOfAll) {
                 require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner of all sub quads nor parent quads");
             }
-            _owners[quadId] = uint256(to);
+            _owners[quadId] = uint256(uint160(to));
             return true;
         }
 
@@ -660,7 +662,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @return address of the owner of the quad
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         (uint256 layer, uint256 parentSize, ) = _getQuadLayer(size);
-        address owner = address(_owners[_getQuadId(layer, (x / size) * size, (y / size) * size)]);
+        address owner = address(uint160(_owners[_getQuadId(layer, (x / size) * size, (y / size) * size)]));
         if (owner != address(0)) {
             return owner;
         } else if (size < 24) {
@@ -694,7 +696,7 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
 
     /// @param id quad id
     /// @return address of the owner
-    function _ownerOf(uint256 id) internal view returns (address) {
+    function _ownerOf(uint256 id) internal view override returns (address) {
         require(id & LAYER == 0, "Invalid token id");
         (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
         require(x % size == 0, "x coordinate: Invalid token id");
@@ -705,14 +707,16 @@ contract LandBaseTokenV3 is ERC721BaseTokenV2 {
     /// @param id token id
     /// @return owner owner of the token
     /// @return operatorEnabled is operator enabled
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
+    function _ownerAndOperatorEnabledOf(
+        uint256 id
+    ) internal view override returns (address owner, bool operatorEnabled) {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = _getX(id);
         uint256 y = _getY(id);
         uint256 owner1x1 = _owners[id];
 
         if (owner1x1 != 0) {
-            owner = address(owner1x1);
+            owner = address(uint160(owner1x1));
             operatorEnabled = (owner1x1 / 2 ** 255) == 1;
         } else {
             owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);

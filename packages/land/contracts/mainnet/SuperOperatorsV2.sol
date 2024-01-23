@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+
+pragma solidity 0.8.23;
 
 import {AdminV2} from "./AdminV2.sol";
 

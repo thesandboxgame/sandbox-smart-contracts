@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.2;
+pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";

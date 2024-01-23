@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable one-contract-per-file
 // solhint-disable reason-string
-pragma solidity 0.8.2;
+pragma solidity 0.8.23;
 
 import {EnumerableSetUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";

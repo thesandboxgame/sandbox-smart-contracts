@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-fixed
-pragma solidity 0.5.9;
+pragma solidity 0.8.23;
 
 /**
  * @title ERC721TokenReceiver
