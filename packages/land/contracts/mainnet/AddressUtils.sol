@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.5.9;
+
+pragma solidity 0.8.23;
 
 /**
  * @title AddressUtils
@@ -12,8 +13,8 @@ library AddressUtils {
      * @param _address target address
      * @return a payable address
      */
-    function toPayable(address _address) internal pure returns (address payable) {
-        return address(uint160(_address));
+    function toPayable(address _address) internal pure returns (address) {
+        return _address;
     }
 
     /**
@@ -26,7 +27,7 @@ library AddressUtils {
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
 
         bytes32 codehash;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codehash := extcodehash(addr)
         }

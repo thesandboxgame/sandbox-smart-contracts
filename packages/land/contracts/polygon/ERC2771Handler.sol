@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.2;
+pragma solidity 0.8.23;
 
 /**
  * @title ERC2771Handler
@@ -19,6 +19,7 @@ abstract contract ERC2771Handler {
      * @dev Initializes the contract
      * @param forwarder trusted forwarder address
      */
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_initialize(address forwarder) internal {
         _trustedForwarder = forwarder;
         emit TrustedForwarderSet(_trustedForwarder);

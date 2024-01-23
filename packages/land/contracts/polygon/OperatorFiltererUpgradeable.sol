@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+
+pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
@@ -13,6 +14,7 @@ abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
+    // solhint-disable-next-line func-name-mixedcase
     function __OperatorFilterer_init(address subscriptionOrRegistrantToCopy, bool subscribe) internal onlyInitializing {
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }

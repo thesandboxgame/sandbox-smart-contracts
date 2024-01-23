@@ -35,11 +35,7 @@ describe('LandV3', function () {
                 0,
                 '0x',
               ),
-            ).to.be.revertedWith(
-              innerSize == 1
-                ? 'not owner in _transferQuad'
-                : 'not owner of all sub quads nor parent quads',
-            );
+            ).to.be.revertedWith('not owner');
           });
         });
       });
@@ -181,9 +177,9 @@ describe('LandV3', function () {
       const {landAsAdmin} = await setupLand();
       await expect(
         landAsAdmin.setMinter(ZeroAddress, false),
-      ).to.be.revertedWith('address 0 is not allowed as minter');
+      ).to.be.revertedWith('address 0 is not allowed');
       await expect(landAsAdmin.setMinter(ZeroAddress, true)).to.be.revertedWith(
-        'address 0 is not allowed as minter',
+        'address 0 is not allowed',
       );
       expect(await landAsAdmin.isMinter(ZeroAddress)).to.be.false;
     });
@@ -193,7 +189,7 @@ describe('LandV3', function () {
       await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
       expect(await landAsAdmin.isMinter(deployer)).to.be.true;
       await expect(landAsAdmin.setMinter(deployer, true)).to.be.revertedWith(
-        'the status should be different than the current one',
+        'the status should be different',
       );
       await expect(landAsAdmin.setMinter(deployer, false)).not.to.be.reverted;
     });
@@ -202,7 +198,7 @@ describe('LandV3', function () {
       const {landAsAdmin, deployer} = await setupLand();
       expect(await landAsAdmin.isMinter(deployer)).to.be.false;
       await expect(landAsAdmin.setMinter(deployer, false)).to.be.revertedWith(
-        'the status should be different than the current one',
+        'the status should be different',
       );
       await expect(landAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
     });
@@ -339,9 +335,7 @@ describe('LandV3', function () {
           [0, 6],
           '0x',
         ),
-      ).to.be.revertedWith(
-        "LandBaseTokenV3: sizes's and x's length are different",
-      );
+      ).to.be.revertedWith("sizes's and x's are different");
     });
 
     it('should revert when x, y are not of same length', async function () {
@@ -357,7 +351,7 @@ describe('LandV3', function () {
           [6],
           '0x',
         ),
-      ).to.be.revertedWith("LandBaseTokenV3: x's and y's length are different");
+      ).to.be.revertedWith("x's and y's are different");
     });
 
     it('should revert when size, x are not of same length', async function () {
@@ -373,9 +367,7 @@ describe('LandV3', function () {
           [0, 6],
           '0x',
         ),
-      ).to.be.revertedWith(
-        "LandBaseTokenV3: sizes's and x's length are different",
-      );
+      ).to.be.revertedWith("sizes's and x's are different");
     });
 
     it('should revert when to is a contract and not a ERC721 receiver', async function () {
@@ -392,7 +384,7 @@ describe('LandV3', function () {
           [0],
           '0x',
         ),
-      ).to.be.revertedWith('erc721 batch transfer rejected by to');
+      ).to.be.revertedWith('erc721 batchTransfer rejected');
     });
 
     it('should revert when to is zero address', async function () {
@@ -431,7 +423,7 @@ describe('LandV3', function () {
       await mintQuad(deployer, 6, 0, 0);
       await expect(
         landAsAdmin.batchTransferQuad(deployer, landAdmin, [6], [0], [0], '0x'),
-      ).to.be.revertedWith('not authorized to transferMultiQuads');
+      ).to.be.revertedWith('not authorized');
     });
 
     it('should revert if signer is not approved', async function () {
@@ -529,7 +521,7 @@ describe('LandV3', function () {
           0,
           '0x',
         ),
-      ).to.be.revertedWith('erc721 batch transfer rejected by to');
+      ).to.be.revertedWith('erc721 batchTransfer rejected');
     });
 
     it('should not revert when to is ERC721 receiving contract', async function () {
@@ -716,7 +708,7 @@ describe('LandV3', function () {
       const {landAsOther, other1, deployer} = await loadFixture(setupLand);
       await expect(
         landAsOther.setApprovalForAllFor(deployer, other1, true),
-      ).to.be.revertedWith('not authorized to approve for all');
+      ).to.be.revertedWith('not authorized');
     });
 
     it('it should revert Approval for invalid token', async function () {
@@ -856,11 +848,7 @@ describe('LandV3', function () {
           await mintQuad(deployer, innerSize, 0, 0);
           await expect(
             landAsMinter.mintAndTransferQuad(landAdmin, outerSize, 0, 0, '0x'),
-          ).to.be.revertedWith(
-            outerSize == 1
-              ? 'not owner in _transferQuad'
-              : 'not owner of all sub quads nor parent quads',
-          );
+          ).to.be.revertedWith('not owner');
         });
       });
     });
@@ -903,7 +891,7 @@ describe('LandV3', function () {
       const {landAsAdmin, landAdmin} = await loadFixture(setupLand);
       await expect(
         landAsAdmin.setMetaTransactionProcessor(landAdmin.address, true),
-      ).to.be.revertedWith('only contracts can be meta transaction processor');
+      ).to.be.revertedWith('invalid address');
     });
 
     it('should only be the admin able to set a meta transaction processor', async function () {
@@ -937,7 +925,7 @@ describe('LandV3', function () {
       const {landAsAdmin, landAdmin} = await loadFixture(setupLand);
       await expect(
         landAsAdmin.changeAdmin(landAdmin.address),
-      ).to.be.revertedWith('it can be only changed to a new admin');
+      ).to.be.revertedWith('only new admin');
     });
   });
 
@@ -975,10 +963,10 @@ describe('LandV3', function () {
       const {landAsAdmin} = await loadFixture(setupLand);
       await expect(
         landAsAdmin.setSuperOperator(ZeroAddress, false),
-      ).to.be.revertedWith('address 0 is not allowed as super operator');
+      ).to.be.revertedWith('address 0 is not allowed');
       await expect(
         landAsAdmin.setSuperOperator(ZeroAddress, true),
-      ).to.be.revertedWith('address 0 is not allowed as super operator');
+      ).to.be.revertedWith('address 0 is not allowed');
       expect(await landAsAdmin.isSuperOperator(ZeroAddress)).to.be.false;
     });
 
@@ -989,9 +977,7 @@ describe('LandV3', function () {
       expect(await landAsAdmin.isSuperOperator(landAdmin.address)).to.be.true;
       await expect(
         landAsAdmin.setSuperOperator(landAdmin.address, true),
-      ).to.be.revertedWith(
-        'the status should be different than the current one',
-      );
+      ).to.be.revertedWith('invalid status');
       await expect(landAsAdmin.setSuperOperator(landAdmin.address, false)).not
         .to.be.reverted;
     });
@@ -1001,9 +987,7 @@ describe('LandV3', function () {
       expect(await landAsAdmin.isSuperOperator(landAdmin.address)).to.be.false;
       await expect(
         landAsAdmin.setSuperOperator(landAdmin.address, false),
-      ).to.be.revertedWith(
-        'the status should be different than the current one',
-      );
+      ).to.be.revertedWith('invalid status');
       await expect(landAsAdmin.setSuperOperator(landAdmin.address, true)).not.to
         .be.reverted;
     });
