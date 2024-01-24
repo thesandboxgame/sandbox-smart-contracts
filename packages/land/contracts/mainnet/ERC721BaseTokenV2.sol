@@ -2,12 +2,12 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.8.23;
 
-import {AddressUtils} from "./AddressUtils.sol";
-import {ERC721TokenReceiver} from "./ERC721TokenReceiver.sol";
-import {ERC721Events} from "./ERC721Events.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {SuperOperatorsV2} from "./SuperOperatorsV2.sol";
 import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
-import {ERC721MandatoryTokenReceiver} from "./ERC721MandatoryTokenReceiver.sol";
+import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
 
 /**
  * @title ERC721BaseTokenV2
@@ -15,8 +15,8 @@ import {ERC721MandatoryTokenReceiver} from "./ERC721MandatoryTokenReceiver.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionReceiverV2 {
-    using AddressUtils for address;
+contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransactionReceiverV2 {
+    using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -443,7 +443,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 
@@ -463,7 +463,7 @@ contract ERC721BaseTokenV2 is ERC721Events, SuperOperatorsV2, MetaTransactionRec
         uint256[] memory ids,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
+        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 

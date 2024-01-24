@@ -3,13 +3,13 @@
 pragma solidity 0.8.23;
 
 /**
- * @title ERC721MandatoryTokenReceiver
+ * @title IERC721MandatoryTokenReceiver
  * @author The Sandbox
  * @notice Interface for any contract that wants to support safeBatchTransfers
  * from ERC721 asset contracts.
  * @dev The ERC-165 identifier for this interface is 0x5e8bf644.
  */
-interface ERC721MandatoryTokenReceiver {
+interface IERC721MandatoryTokenReceiver {
     /**
      * @notice Whenever tokens are transferred to this contract via {IERC721-safeBatchTransferFrom}
      * by `operator` from `from`, this function is called.
