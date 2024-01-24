@@ -2,7 +2,7 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.8.23;
 
-import {AddressUtils} from "./AddressUtils.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
 
 /**
@@ -12,7 +12,7 @@ import {ERC721BaseTokenV2} from "./ERC721BaseTokenV2.sol";
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
 contract LandBaseTokenV3 is ERC721BaseTokenV2 {
-    using AddressUtils for address;
+    using AddressUpgradeable for address;
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
 
