@@ -16,7 +16,7 @@ and this project adheres to
 - Use `hardhat-toolbox`instead of `hardhat-deploy` plugin for unit testing.
 - First official version using release-it.
 
-## [0.0.1] - 2024-01-01
+## [0.0.2] - 2024-01-01
 
 ### Added
 
