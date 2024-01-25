@@ -1,6 +1,6 @@
 {
   "name": "@sandbox-smart-contracts/land",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Land smart contract",
   "files": [
     "contracts",
