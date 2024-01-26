@@ -4,19 +4,15 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
+import {ILazyVault} from "./interfaces/ILazyVault.sol";
 
 /// @title AssetCreate
 /// @author The Sandbox
@@ -105,8 +101,13 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -352,6 +353,169 @@ contract AssetCreate is
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    bytes32 public constant LAZY_MINT_TYPEHASH =
+        keccak256(
+            "LazyMint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash,uint256 maxSupply)"
+        );
+
+    bytes32 public constant LAZY_MINT_BATCH_TYPEHASH =
+        keccak256(
+            "LazyMintBatch(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes,uint256[] maxSupplies)"
+        );
+
+    ILazyVault public vault;
+
+    // mapping of tokenId => maxSupply
+    mapping(uint256 => uint256) public availableToMint;
+
+    function lazyCreateAsset(
+        bytes memory signature,
+        uint8 tier,
+        uint256 amount,
+        bool revealed,
+        string calldata metadataHash,
+        uint256 maxSupply,
+        address creator
+    ) external whenNotPaused {
+        require(
+            authValidator.verify(
+                signature,
+                _hashLazyMint(creator, signatureNonces[_msgSender()]++, tier, amount, revealed, metadataHash, maxSupply)
+            ),
+            "AssetCreate: Invalid signature"
+        );
+        // check if asset has already been minted before
+        uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHash);
+        if (tokenId == 0) {
+            tokenId = TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, true);
+            require(amount <= maxSupply, "AssetCreate: Amount exceeds max supply");
+            availableToMint[tokenId] = maxSupply - amount;
+        }
+
+        require(availableToMint[tokenId] >= amount, "AssetCreate: Max supply reached");
+        availableToMint[tokenId] -= amount;
+
+        // burn catalyst of a given tier
+        catalystContract.burnFrom(creator, tier, amount);
+        uint8[] memory tiers = new uint8[](1);
+        tiers[0] = tier;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+        address[] memory creatorArray = new address[](1);
+        vault.distribute(tiers, amounts, creatorArray);
+        assetContract.mint(creator, tokenId, amount, metadataHash);
+        emit AssetLazyMinted(_msgSender(), creator, tokenId, tier, amount, metadataHash, revealed);
+    }
+
+    function lazyCreateMultipleAssets(
+        bytes memory signature,
+        uint8[] calldata tiers,
+        uint256[] calldata amounts,
+        bool[] calldata revealed,
+        string[] calldata metadataHashes,
+        uint256[] calldata maxSupplies,
+        address[] calldata creators
+    ) external whenNotPaused {
+        require(
+            authValidator.verify(
+                signature,
+                _hashLazyBatchMint(
+                    creators,
+                    signatureNonces[_msgSender()]++,
+                    tiers,
+                    amounts,
+                    revealed,
+                    metadataHashes,
+                    maxSupplies
+                )
+            ),
+            "AssetCreate: Invalid signature"
+        );
+
+        require(tiers.length == amounts.length, "AssetCreate: 1-Array lengths");
+        require(amounts.length == metadataHashes.length, "AssetCreate: 2-Array lengths");
+        require(metadataHashes.length == revealed.length, "AssetCreate: 3-Array lengths");
+        require(revealed.length == maxSupplies.length, "AssetCreate: 4-Array lengths");
+
+        uint256[] memory tokenIds = new uint256[](tiers.length);
+        uint256[] memory tiersToBurn = new uint256[](tiers.length);
+        for (uint256 i = 0; i < tiers.length; i++) {
+            tiersToBurn[i] = tiers[i];
+            tokenIds[i] = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
+            if (tokenIds[i] == 0) {
+                tokenIds[i] = TokenIdUtils.generateTokenId(
+                    creators[i],
+                    tiers[i],
+                    ++creatorNonces[creators[i]],
+                    revealed[i] ? 1 : 0,
+                    true
+                );
+                require(amounts[i] <= maxSupplies[i], "AssetCreate: Amount exceeds max supply");
+                availableToMint[tokenIds[i]] = maxSupplies[i] - amounts[i];
+            }
+        }
+
+        catalystContract.burnBatchFrom(_msgSender(), tiersToBurn, amounts);
+        vault.distribute(tiers, amounts, creators);
+        assetContract.mintBatch(_msgSender(), tokenIds, amounts, metadataHashes);
+        emit AssetBatchLazyMinted(_msgSender(), creators, tokenIds, tiers, amounts, metadataHashes, revealed);
+    }
+
+    function _hashLazyMint(
+        address creator,
+        uint16 nonce,
+        uint8 tier,
+        uint256 amount,
+        bool revealed,
+        string memory metadataHash,
+        uint256 maxSupply
+    ) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LAZY_MINT_TYPEHASH,
+                    creator,
+                    nonce,
+                    tier,
+                    amount,
+                    revealed,
+                    keccak256((abi.encodePacked(metadataHash))),
+                    maxSupply
+                )
+            )
+        );
+    }
+
+    function _hashLazyBatchMint(
+        address[] memory creators,
+        uint16 nonce,
+        uint8[] memory tiers,
+        uint256[] memory amounts,
+        bool[] memory revealed,
+        string[] memory metadataHashes,
+        uint256[] memory maxSupplies
+    ) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LAZY_MINT_BATCH_TYPEHASH,
+                    keccak256(abi.encodePacked(creators)),
+                    nonce,
+                    keccak256(abi.encodePacked(tiers)),
+                    keccak256(abi.encodePacked(amounts)),
+                    keccak256(abi.encodePacked(revealed)),
+                    _encodeHashes(metadataHashes),
+                    keccak256(abi.encodePacked(maxSupplies))
+                )
+            )
+        );
+    }
+
+    function setVaultAddress(address _vault) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_vault.isContract(), "AssetCreate: Bad vault addr");
+        vault = ILazyVault(_vault);
     }
 
     uint256[45] private __gap;
