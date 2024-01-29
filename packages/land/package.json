@@ -1,10 +1,15 @@
 {
   "name": "@sandbox-smart-contracts/land",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Land smart contract",
   "files": [
-    "contracts"
+    "contracts",
+    "README.md",
+    "CHANGELOG.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
@@ -15,7 +20,8 @@
     "hardhat": "hardhat",
     "compile": "hardhat compile",
     "size": "hardhat size-contracts",
-    "layout": "hardhat clean && hardhat compile && hardhat check"
+    "layout": "hardhat clean && hardhat compile && hardhat check",
+    "release": "release-it"
   },
   "mocha": {
     "require": "hardhat/register",
@@ -23,6 +29,22 @@
     "_": [
       "test/**/*.ts"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/land release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/land release v${version}",
+      "tagName": "@sandbox-smart-contracts/land@v${version}"
+    },
+    "plugins": {
+      "@release-it/keep-a-changelog": {}
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -34,6 +56,7 @@
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@openzeppelin/contracts-upgradeable": "^4.9.5",
+    "@release-it/keep-a-changelog": "^5.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.11",
@@ -53,6 +76,7 @@
     "hardhat-storage-layout": "^0.1.7",
     "prettier": "^3.1.1",
     "prettier-plugin-solidity": "^1.2.0",
+    "release-it": "^17.0.3",
     "solhint": "^4.0.0",
     "solhint-plugin-prettier": "^0.1.0",
     "solidity-coverage": "^0.8.5",
