@@ -3,26 +3,19 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, getNamedAccounts, ethers}) => {
+    async function getEthersContract(name: string) {
+      const contract = await deployments.get(name);
+      return await ethers.getContractAt(contract.abi, contract.address);
+    }
     const {assetAdmin, backendAuthWallet, assetPauser} =
       await getNamedAccounts();
     await deployments.fixture('Asset');
-    const Asset = await deployments.get('Asset');
-    const AssetContract = await ethers.getContractAt('Asset', Asset.address);
-    const AssetReveal = await deployments.get('AssetReveal');
-    const AssetRevealContract = await ethers.getContractAt(
-      'AssetReveal',
-      AssetReveal.address
-    );
-    const Catalyst = await deployments.get('Catalyst');
-    const CatalystContract = await ethers.getContractAt(
-      'Catalyst',
-      Catalyst.address
-    );
-    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
-    const AuthSuperValidator = await deployments.get('AuthSuperValidator');
-    const AuthSuperValidatorContract = await ethers.getContractAt(
-      'AuthSuperValidator',
-      AuthSuperValidator.address
+    const AssetContract = await getEthersContract('Asset');
+    const AssetRevealContract = await getEthersContract('AssetReveal');
+    const CatalystContract = await getEthersContract('Catalyst');
+    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const AuthSuperValidatorContract = await getEthersContract(
+      'AuthSuperValidator'
     );
 
     return {
@@ -44,13 +37,13 @@ describe('Asset Reveal', function () {
       const {AssetRevealContract, AuthSuperValidatorContract} =
         await setupTest();
       expect(await AssetRevealContract.getAuthValidator()).to.be.equal(
-        AuthSuperValidatorContract.address
+        AuthSuperValidatorContract
       );
     });
     it('Asset', async function () {
       const {AssetRevealContract, AssetContract} = await setupTest();
       expect(await AssetRevealContract.getAssetContract()).to.be.equal(
-        AssetContract.address
+        AssetContract
       );
     });
   });
@@ -64,9 +57,8 @@ describe('Asset Reveal', function () {
     it("Asset's Minter role is granted to AssetReveal", async function () {
       const {AssetRevealContract, AssetContract} = await setupTest();
       const minterRole = await AssetContract.MINTER_ROLE();
-      expect(
-        await AssetContract.hasRole(minterRole, AssetRevealContract.address)
-      ).to.be.true;
+      expect(await AssetContract.hasRole(minterRole, AssetRevealContract)).to.be
+        .true;
     });
     it('AuthSuperValidator signer is set to backendAuthWallet', async function () {
       const {
@@ -75,10 +67,10 @@ describe('Asset Reveal', function () {
         backendAuthWallet,
       } = await setupTest();
       expect(
-        await AuthSuperValidatorContract.getSigner(AssetRevealContract.address)
+        await AuthSuperValidatorContract.getSigner(AssetRevealContract)
       ).to.be.equal(backendAuthWallet);
       expect(
-        await AuthSuperValidatorContract.getSigner(AssetRevealContract.address)
+        await AuthSuperValidatorContract.getSigner(AssetRevealContract)
       ).to.be.equal(backendAuthWallet);
     });
     it('Pauser role is granted to assetPauser', async function () {
@@ -104,7 +96,7 @@ describe('Asset Reveal', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetRevealContract, TRUSTED_FORWARDER} = await setupTest();
       expect(await AssetRevealContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER.address
+        TRUSTED_FORWARDER
       );
     });
   });

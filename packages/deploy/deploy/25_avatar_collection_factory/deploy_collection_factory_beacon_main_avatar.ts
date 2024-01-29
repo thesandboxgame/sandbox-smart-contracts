@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     factory.address
   );
   const factoryContractAsOwner = factoryContract.connect(
-    ethers.provider.getSigner(owner)
+    await ethers.provider.getSigner(owner)
   );
   console.log('CollectionFactory:', factoryContractAsOwner.address);
   console.log('CollectionFactory owner:', owner);
@@ -48,14 +48,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       console.log('Continuing with deployment');
     }
   }
-
-  const implementationAlias = ethers.utils.formatBytes32String(beaconAlias);
+  const implementationAlias = ethers.encodeBytes32String(beaconAlias);
 
   // deploying beacon
-  const deployTx = await factoryContractAsOwner.deployBeacon(
-    avatarCollectionImplementationContract.address,
-    implementationAlias
+
+  const deployTx = await deployments.catchUnknownSigner(
+    factoryContractAsOwner.deployBeacon(
+      avatarCollectionImplementationContract.address,
+      implementationAlias
+    )
   );
+  if (!deployTx) {
+    return;
+  }
   await deployTx.wait(); // a must
 
   // get beacon address, for now, the last BeaconAdded holds the address

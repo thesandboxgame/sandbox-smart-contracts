@@ -3,26 +3,20 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, getNamedAccounts, ethers}) => {
+    async function getEthersContract(name: string) {
+      const contract = await deployments.get(name);
+      return await ethers.getContractAt(contract.abi, contract.address);
+    }
+
     const {assetAdmin, backendAuthWallet, assetPauser} =
       await getNamedAccounts();
     await deployments.fixture();
-    const Asset = await deployments.get('Asset');
-    const AssetContract = await ethers.getContractAt('Asset', Asset.address);
-    const AssetCreate = await deployments.get('AssetCreate');
-    const AssetCreateContract = await ethers.getContractAt(
-      'AssetCreate',
-      AssetCreate.address
-    );
-    const Catalyst = await deployments.get('Catalyst');
-    const CatalystContract = await ethers.getContractAt(
-      'Catalyst',
-      Catalyst.address
-    );
-    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
-    const AuthSuperValidator = await deployments.get('AuthSuperValidator');
-    const AuthSuperValidatorContract = await ethers.getContractAt(
-      'AuthSuperValidator',
-      AuthSuperValidator.address
+    const AssetContract = await getEthersContract('Asset');
+    const AssetCreateContract = await getEthersContract('AssetCreate');
+    const CatalystContract = await getEthersContract('Catalyst');
+    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const AuthSuperValidatorContract = await getEthersContract(
+      'AuthSuperValidator'
     );
 
     return {
@@ -44,19 +38,19 @@ describe('Asset Create', function () {
       const {AssetCreateContract, AuthSuperValidatorContract} =
         await setupTest();
       expect(await AssetCreateContract.getAuthValidator()).to.be.equal(
-        AuthSuperValidatorContract.address
+        AuthSuperValidatorContract
       );
     });
     it('Asset', async function () {
       const {AssetCreateContract, AssetContract} = await setupTest();
       expect(await AssetCreateContract.getAssetContract()).to.be.equal(
-        AssetContract.address
+        AssetContract
       );
     });
     it('Catalyst', async function () {
       const {AssetCreateContract, CatalystContract} = await setupTest();
       expect(await AssetCreateContract.getCatalystContract()).to.be.equal(
-        CatalystContract.address
+        CatalystContract
       );
     });
   });
@@ -70,16 +64,14 @@ describe('Asset Create', function () {
     it("Asset's Minter role is granted to AssetCreate", async function () {
       const {AssetCreateContract, AssetContract} = await setupTest();
       const minterRole = await AssetContract.MINTER_ROLE();
-      expect(
-        await AssetContract.hasRole(minterRole, AssetCreateContract.address)
-      ).to.be.true;
+      expect(await AssetContract.hasRole(minterRole, AssetCreateContract)).to.be
+        .true;
     });
     it("Catalyst's Burner role is granted to AssetCreate", async function () {
       const {AssetCreateContract, CatalystContract} = await setupTest();
       const burnerRole = await CatalystContract.BURNER_ROLE();
-      expect(
-        await CatalystContract.hasRole(burnerRole, AssetCreateContract.address)
-      ).to.be.true;
+      expect(await CatalystContract.hasRole(burnerRole, AssetCreateContract)).to
+        .be.true;
     });
     it('AuthSuperValidator signer is set to backendAuthWallet', async function () {
       const {
@@ -88,10 +80,10 @@ describe('Asset Create', function () {
         backendAuthWallet,
       } = await setupTest();
       expect(
-        await AuthSuperValidatorContract.getSigner(AssetCreateContract.address)
+        await AuthSuperValidatorContract.getSigner(AssetCreateContract)
       ).to.be.equal(backendAuthWallet);
       expect(
-        await AuthSuperValidatorContract.getSigner(AssetCreateContract.address)
+        await AuthSuperValidatorContract.getSigner(AssetCreateContract)
       ).to.be.equal(backendAuthWallet);
     });
     it('Pauser role is granted to assetPauser', async function () {
@@ -117,7 +109,7 @@ describe('Asset Create', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetCreateContract, TRUSTED_FORWARDER} = await setupTest();
       expect(await AssetCreateContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER.address
+        TRUSTED_FORWARDER
       );
     });
   });

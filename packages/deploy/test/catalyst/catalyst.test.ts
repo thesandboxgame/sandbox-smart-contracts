@@ -10,6 +10,11 @@ import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
+    async function getEthersContract(name: string) {
+      const contract = await deployments.get(name);
+      return await ethers.getContractAt(contract.abi, contract.address);
+    }
+
     const {catalystAdmin, catalystMinter, sandAdmin} = await getNamedAccounts();
 
     await network.provider.send('hardhat_setCode', [
@@ -57,70 +62,51 @@ const setupTest = deployments.createFixture(
       'Catalyst',
     ]);
 
-    const OperatorFilterCatalystSubscription = await deployments.get(
+    const OperatorFilterCatalystSubscription = await getEthersContract(
       'OperatorFilterCatalystSubscription'
     );
 
-    const MockERC1155MarketPlace1 = await deployments.get(
+    const MockERC1155MarketPlace1 = await getEthersContract(
       'MockERC1155MarketPlace1'
     );
-    const MockERC1155MarketPlace2 = await deployments.get(
+    const MockERC1155MarketPlace2 = await getEthersContract(
       'MockERC1155MarketPlace2'
     );
-    const MockERC1155MarketPlace3 = await deployments.get(
+    const MockERC1155MarketPlace3 = await getEthersContract(
       'MockERC1155MarketPlace3'
     );
-    const MockERC1155MarketPlace4 = await deployments.get(
+    const MockERC1155MarketPlace4 = await getEthersContract(
       'MockERC1155MarketPlace4'
     );
 
     const subscriptionOwner = await ethers.getSigner(sandAdmin);
 
     const MockMarketPlace1CodeHash =
-      await OperatorFilterRegistryContract.codeHashOf(
-        MockERC1155MarketPlace1.address
-      );
+      await OperatorFilterRegistryContract.codeHashOf(MockERC1155MarketPlace1);
     const MockMarketPlace2CodeHash =
-      await OperatorFilterRegistryContract.codeHashOf(
-        MockERC1155MarketPlace2.address
-      );
+      await OperatorFilterRegistryContract.codeHashOf(MockERC1155MarketPlace2);
 
     const tx2 = await OperatorFilterRegistryContract.connect(
       subscriptionOwner
     ).updateOperators(
-      OperatorFilterCatalystSubscription.address,
-      [MockERC1155MarketPlace1.address, MockERC1155MarketPlace2.address],
+      OperatorFilterCatalystSubscription,
+      [MockERC1155MarketPlace1, MockERC1155MarketPlace2],
       true
     );
     await tx2.wait();
     const tx3 = await OperatorFilterRegistryContract.connect(
       subscriptionOwner
     ).updateCodeHashes(
-      OperatorFilterCatalystSubscription.address,
+      OperatorFilterCatalystSubscription,
       [MockMarketPlace1CodeHash, MockMarketPlace2CodeHash],
       true
     );
     await tx3.wait();
 
-    const Catalyst = await deployments.get('Catalyst');
-    const CatalystContract = await ethers.getContractAt(
-      Catalyst.abi,
-      Catalyst.address
-    );
+    const CatalystContract = await getEthersContract('Catalyst');
 
-    const RoyaltyManager = await deployments.get('RoyaltyManager');
-    const RoyaltyManagerContract = await ethers.getContractAt(
-      RoyaltyManager.abi,
-      RoyaltyManager.address
-    );
-    const TRUSTED_FORWARDER_Data = await deployments.get(
-      'TRUSTED_FORWARDER_V2'
-    );
-    const TRUSTED_FORWARDER = await ethers.getContractAt(
-      TRUSTED_FORWARDER_Data.abi,
-      TRUSTED_FORWARDER_Data.address
-    );
-
+    const RoyaltyManagerContract = await getEthersContract('RoyaltyManager');
+    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
     return {
       CatalystContract,
       OperatorFilterCatalystSubscription,
@@ -159,15 +145,13 @@ describe('Catalyst', function () {
     it('RoyaltyManager contract is set correctly', async function () {
       const {CatalystContract, RoyaltyManagerContract} = await setupTest();
       expect(await CatalystContract.getRoyaltyManager()).to.be.equal(
-        RoyaltyManagerContract.address
+        RoyaltyManagerContract
       );
     });
     it('Contract is registered on RoyaltyManager', async function () {
       const {CatalystContract, RoyaltyManagerContract} = await setupTest();
       expect(
-        await RoyaltyManagerContract.getContractRoyalty(
-          CatalystContract.address
-        )
+        await RoyaltyManagerContract.getContractRoyalty(CatalystContract)
       ).to.be.equal(royaltyAmount);
     });
   });
@@ -176,9 +160,7 @@ describe('Catalyst', function () {
       const {OperatorFilterRegistryContract, CatalystContract} =
         await setupTest();
       expect(
-        await OperatorFilterRegistryContract.isRegistered(
-          CatalystContract.address
-        )
+        await OperatorFilterRegistryContract.isRegistered(CatalystContract)
       ).to.be.true;
     });
     it('catalyst contract is subscribed to correct address', async function () {
@@ -188,10 +170,8 @@ describe('Catalyst', function () {
         OperatorFilterCatalystSubscription,
       } = await setupTest();
       expect(
-        await OperatorFilterRegistryContract.subscriptionOf(
-          CatalystContract.address
-        )
-      ).to.be.equal(OperatorFilterCatalystSubscription.address);
+        await OperatorFilterRegistryContract.subscriptionOf(CatalystContract)
+      ).to.be.equal(OperatorFilterCatalystSubscription);
     });
     it('catalyst contract has correct market places black listed', async function () {
       const {
@@ -204,26 +184,26 @@ describe('Catalyst', function () {
       } = await setupTest();
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
-          CatalystContract.address,
-          MockERC1155MarketPlace1.address
+          CatalystContract,
+          MockERC1155MarketPlace1
         )
       ).to.be.equal(true);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
-          CatalystContract.address,
-          MockERC1155MarketPlace2.address
+          CatalystContract,
+          MockERC1155MarketPlace2
         )
       ).to.be.equal(true);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
-          CatalystContract.address,
-          MockERC1155MarketPlace3.address
+          CatalystContract,
+          MockERC1155MarketPlace3
         )
       ).to.be.equal(false);
       expect(
         await OperatorFilterRegistryContract.isOperatorFiltered(
-          CatalystContract.address,
-          MockERC1155MarketPlace4.address
+          CatalystContract,
+          MockERC1155MarketPlace4
         )
       ).to.be.equal(false);
     });
@@ -232,7 +212,7 @@ describe('Catalyst', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {CatalystContract, TRUSTED_FORWARDER} = await setupTest();
       expect(await CatalystContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER.address
+        TRUSTED_FORWARDER
       );
     });
   });
