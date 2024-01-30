@@ -4,8 +4,10 @@ pragma solidity 0.8.18;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ILazyVault} from "./interfaces/ILazyVault.sol";
-import "hardhat/console.sol";
 
+/// @title LazyVault
+/// @author The Sandbox
+/// @notice Contract responsible for distributing tokens to creators and split recipients
 contract LazyVault is ILazyVault, AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
@@ -17,12 +19,20 @@ contract LazyVault is ILazyVault, AccessControl {
     // array of recipients and their split
     SplitRecipient[] public splitRecipients;
 
-    constructor(uint256[] memory _tierValues, SplitRecipient[] memory _initialRecipients, address _vaultToken) {
+    /// @notice Sets the initial vault token, tier values, and split recipients
+    /// @param _tierValues The initial tier values
+    /// @param _initialRecipients The initial split recipients
+    /// @param _vaultToken The vault token
+    constructor(
+        uint256[] memory _tierValues,
+        SplitRecipient[] memory _initialRecipients,
+        address _vaultToken
+    ) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MANAGER_ROLE, msg.sender);
-        tierValues = _tierValues;
-        vaultToken = _vaultToken;
         _setSplitRecipients(_initialRecipients);
+        _setTierValues(_tierValues);
+        vaultToken = _vaultToken;
     }
 
     /// @notice Distributes tokens to the creators and shares a specified percentage with the split recipients
@@ -30,9 +40,13 @@ contract LazyVault is ILazyVault, AccessControl {
     /// @param tiers An array of tiers
     /// @param amounts An array of amounts
     /// @param creators An array of creators
-    function distribute(uint8[] calldata tiers, uint256[] calldata amounts, address[] calldata creators) external {
-        require(tiers.length == amounts.length, "Tiers and amounts length mismatch");
-        require(tiers.length == creators.length, "Tiers and creators length mismatch");
+    function distribute(
+        uint8[] calldata tiers,
+        uint256[] calldata amounts,
+        address[] calldata creators
+    ) external {
+        require(tiers.length == amounts.length, "LazyVault: 1-Array mismatch");
+        require(tiers.length == creators.length, "LazyVault: 2-Array mismatch");
 
         for (uint256 i = 0; i < tiers.length; i++) {
             uint256 totalValue = amounts[i] * tierValues[tiers[i]];
@@ -46,6 +60,8 @@ contract LazyVault is ILazyVault, AccessControl {
                 IERC20(vaultToken).transfer(recipient.recipient, splitValue);
                 creatorShare -= splitValue;
             }
+
+            IERC20(vaultToken).transfer(creators[i], creatorShare);
 
             emit Distributed(
                 tiers[i],
@@ -74,41 +90,34 @@ contract LazyVault is ILazyVault, AccessControl {
         _setSplitRecipients(recipients);
     }
 
-    /// @dev Resizes the splitRecipients array and sets the new recipients
+    /// @dev Wipes the splitRecipients array and sets the new recipients
     /// @param recipients The new split recipients
     function _setSplitRecipients(SplitRecipient[] memory recipients) internal {
-        SplitRecipient[] memory newRecipients = new SplitRecipient[](recipients.length);
+        delete splitRecipients;
         for (uint256 i = 0; i < recipients.length; i++) {
             SplitRecipient memory recipient = recipients[i];
             require(recipient.split <= 10000, "Split must be <= 10000");
             require(recipient.recipient != address(0), "Recipient cannot be 0x0");
-            newRecipients[i] = recipient;
+            splitRecipients[i] = recipient;
         }
-
-        // Resize splitRecipients to match the size of newRecipients
-        if (splitRecipients.length != newRecipients.length) {
-            // Reduce the length of splitRecipients if it's longer than newRecipients
-            for (uint256 i = newRecipients.length; i < splitRecipients.length; i++) {
-                splitRecipients.pop();
-            }
-            // Extend splitRecipients if it's shorter than newRecipients
-            while (splitRecipients.length < newRecipients.length) {
-                splitRecipients.push();
-            }
-        }
-
-        // Now copy elements from newRecipients to splitRecipients
-        for (uint256 i = 0; i < newRecipients.length; i++) {
-            splitRecipients[i] = newRecipients[i];
-        }
+        emit SplitRecipientsChanged(splitRecipients);
     }
 
-    /// @notice Changes the value of a specific tier
+    /// @notice Changes the values of the tiers
     /// @dev Only the manager role can change the tier values
-    /// @param tier The tier to change
-    /// @param value The new value of the tier
-    function changeTierValue(uint8 tier, uint256 value) external onlyRole(MANAGER_ROLE) {
-        require(tier < tierValues.length, "Tier out of bounds");
-        tierValues[tier] = value;
+    /// @param values The new values of the tiers
+    function changeTierValues(uint256[] calldata values) external onlyRole(MANAGER_ROLE) {
+        _setTierValues(values);
+    }
+
+    /// @dev Wipes the tierValues array and sets the new values
+    /// @param values The new values of the tiers
+    function _setTierValues(uint256[] memory values) internal {
+        uint256[] memory oldValues = tierValues;
+        delete tierValues;
+        for (uint256 i = 0; i < values.length; i++) {
+            tierValues[i + 1] = values[i];
+        }
+        emit TierValuesChanged(oldValues, values);
     }
 }
