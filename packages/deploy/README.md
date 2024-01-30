@@ -44,6 +44,15 @@ where:
   executed ( see:[hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
   configuration)
 
+> [!IMPORTANT]  
+> WE ALWAYS FILTER BY `TAGS` IN DEPLOY SCRIPTS
+>
+> Hardhat deploy provides different means to filter which deploy scripts to run.
+> Don't use `func.skip` or conditional `if` inside you deploy scripts.
+>
+> Only for testing purposes while running into the hardhat node you can put some
+> scripts inside the `deploy_mock` directory.
+
 ## Testing
 
 We assume that the imported contracts are well tested in their own package by
