@@ -3,14 +3,14 @@
 pragma solidity 0.8.23;
 
 import {AdminV2} from "./AdminV2.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 /// @title MetaTransactionReceiverV2
 /// @author The Sandbox
 /// @notice Implements meta-transactions
 /// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
 contract MetaTransactionReceiverV2 is AdminV2 {
-    using AddressUpgradeable for address;
+    using Address for address;
 
     mapping(address => bool) internal _metaTransactionContracts;
     event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);
@@ -19,7 +19,7 @@ contract MetaTransactionReceiverV2 is AdminV2 {
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public onlyAdmin {
-        require(metaTransactionProcessor.isContract(), "invalid address");
+        require(metaTransactionProcessor.code.length > 0, "invalid address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 

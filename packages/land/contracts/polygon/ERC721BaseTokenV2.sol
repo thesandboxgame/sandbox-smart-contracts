@@ -3,10 +3,11 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import {WithSuperOperatorsV2} from "./WithSuperOperatorsV2.sol";
 import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
 
@@ -14,8 +15,8 @@ import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2 {
-    using AddressUpgradeable for address;
+contract ERC721BaseTokenV2 is Initializable, Context, IERC721, WithSuperOperatorsV2 {
+    using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -78,7 +79,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     function transferFrom(address from, address to, uint256 id) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "ERC721_TRANSFER_REJECTED");
         }
     }
@@ -202,7 +203,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual override {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
@@ -277,7 +278,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
             _numNFTPerAddress[to] += numTokens;
         }
 
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
                 require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
             } else if (safe) {
@@ -319,7 +320,7 @@ contract ERC721BaseTokenV2 is ContextUpgradeable, IERC721Upgradeable, WithSuperO
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

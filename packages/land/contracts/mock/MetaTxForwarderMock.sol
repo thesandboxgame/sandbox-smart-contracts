@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract MetaTxForwarderMock {
     event TXResult(bool success, bytes returndata);
 
     function execute(address from, address to, bytes calldata data) public payable returns (bytes memory) {
-        return AddressUpgradeable.functionCall(to, abi.encodePacked(data, from));
+        return Address.functionCall(to, abi.encodePacked(data, from));
     }
 }

@@ -3,12 +3,13 @@
 pragma solidity 0.8.23;
 
 import {WithAdminV2} from "./WithAdminV2.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /// @title WithSuperOperatorsV2
 /// @author The Sandbox
 /// @notice Add super operators handled by an admin
-contract WithSuperOperatorsV2 is ContextUpgradeable, WithAdminV2 {
+contract WithSuperOperatorsV2 is Initializable, Context, WithAdminV2 {
     mapping(address => bool) internal _superOperators;
 
     event SuperOperator(address indexed superOperator, bool indexed enabled);
