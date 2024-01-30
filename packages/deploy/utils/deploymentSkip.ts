@@ -16,13 +16,20 @@ export function isL2(hre: HardhatRuntimeEnvironment): boolean {
   return isInTags(hre, 'L2');
 }
 
-// This is just an extra security measure so we avoid deploying external contracts to mainnet
-export function isNotMainnet(hre: HardhatRuntimeEnvironment): boolean {
-  return !isInTags(hre, 'mainnet');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function isFork(hre: HardhatRuntimeEnvironment): boolean {
+  return !!process.env.HARDHAT_FORK;
+}
+
+export function isNotFork(hre: HardhatRuntimeEnvironment): boolean {
+  return !isFork(hre);
 }
 
 // Helper function to fix a bug in hardhat-deploy for the "hardhat" network.
 export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
+  if (isFork(hre)) {
+    return hre.config.networks[process.env.HARDHAT_FORK].tags.includes(key);
+  }
   return (
     (hre.network.tags && hre.network.tags[key]) ||
     (hre.network.config.tags && hre.network.config.tags.includes(key))
@@ -32,9 +39,3 @@ export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
 export function isHardhat(hre: HardhatRuntimeEnvironment) {
   return hre.network.name === HARDHAT_NETWORK_NAME;
 }
-
-export const isTestnet = isNotMainnet;
-export const skipUnlessIsTestnet = unless(isNotMainnet);
-export const skipUnlessIsHardhat = unless(isHardhat);
-export const skipUnlessIsL1 = unless(isL1);
-export const skipUnlessIsL2 = unless(isL2);

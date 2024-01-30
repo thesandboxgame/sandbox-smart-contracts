@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {isL2, unless} from '../../utils/deploymentSkip';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -24,5 +25,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonSand', 'PolygonSand_deploy', 'L2'];
+func.tags = ['Sand', 'Sand_deploy'];
 func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER_V2'];
+func.skip = unless(isL2);

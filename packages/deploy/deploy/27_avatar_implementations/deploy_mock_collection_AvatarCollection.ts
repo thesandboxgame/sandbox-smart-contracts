@@ -172,7 +172,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['AvatarCollectionTest', 'AvatarCollectionTest_deploy'];
 func.dependencies = [
-  'PolygonSand_deploy',
+  'Sand_deploy',
   'CollectionFactory_deploy_beacon_main_avatar',
   'TRUSTED_FORWARDER_V2',
 ];
