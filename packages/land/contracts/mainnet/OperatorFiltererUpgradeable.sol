@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
 
 /// @title OperatorFiltererUpgradeable
@@ -10,7 +10,7 @@ import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
 /// @notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
 /// @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.8.23 solidity version
 contract OperatorFiltererUpgradeable {
-    using AddressUpgradeable for address;
+    using Address for address;
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
@@ -24,7 +24,7 @@ contract OperatorFiltererUpgradeable {
         // If an inheriting token contract is deployed to a network without the registry deployed, the modifier
         // will not revert, but the contract will need to be registered with the registry once it is deployed in
         // order for the modifier to filter addresses.
-        if (address(operatorFilterRegistry).isContract()) {
+        if (address(operatorFilterRegistry).code.length > 0) {
             if (!operatorFilterRegistry.isRegistered(address(this))) {
                 if (subscribe) {
                     operatorFilterRegistry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
@@ -42,7 +42,7 @@ contract OperatorFiltererUpgradeable {
 
     modifier onlyAllowedOperator(address from) {
         // Check registry code length to facilitate testing in environments without a deployed registry.
-        if (address(operatorFilterRegistry).isContract()) {
+        if (address(operatorFilterRegistry).code.length > 0) {
             // Allow spending tokens from addresses with balance
             // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
             // from an EOA.
@@ -59,7 +59,7 @@ contract OperatorFiltererUpgradeable {
 
     modifier onlyAllowedOperatorApproval(address operator) {
         // Check registry code length to facilitate testing in environments without a deployed registry.
-        if (address(operatorFilterRegistry).isContract()) {
+        if (address(operatorFilterRegistry).code.length > 0) {
             if (!operatorFilterRegistry.isOperatorAllowed(address(this), operator)) {
                 revert("Operator Not Allowed");
             }

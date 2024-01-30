@@ -2,9 +2,9 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
+import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import {SuperOperatorsV2} from "./SuperOperatorsV2.sol";
 import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
 import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
@@ -15,8 +15,8 @@ import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransactionReceiverV2 {
-    using AddressUpgradeable for address;
+contract ERC721BaseTokenV2 is IERC721, SuperOperatorsV2, MetaTransactionReceiverV2 {
+    using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -230,7 +230,7 @@ contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransact
     function transferFrom(address from, address to, uint256 id) public virtual {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(
                 _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""),
                 "erc721 transfer rejected by to"
@@ -248,7 +248,7 @@ contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransact
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             require(
                 _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),
                 "ERC721: transfer rejected by to"
@@ -308,7 +308,7 @@ contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransact
             _numNFTPerAddress[to] += numTokens;
         }
 
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
                 require(
                     _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
@@ -443,7 +443,7 @@ contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransact
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

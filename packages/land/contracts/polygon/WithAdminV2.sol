@@ -2,12 +2,15 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /// @title WithAdminV2
 /// @author The Sandbox
 /// @notice Add an admin to the contract
-contract WithAdminV2 is ContextUpgradeable {
+contract WithAdminV2 is Initializable, Context {
+    uint256[51] private placeholderForUnusedStorage;
+
     address internal _admin;
 
     /// @dev Emits when the contract administrator is changed.

@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {PolygonLandBaseTokenV2} from "./polygon/PolygonLandBaseTokenV2.sol";
 import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
 import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
@@ -11,7 +11,7 @@ import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable
 
 /// @title LAND token on L2
 contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFiltererUpgradeable {
-    using AddressUpgradeable for address;
+    using Address for address;
 
     event OperatorRegistrySet(address indexed registry);
 
@@ -28,11 +28,11 @@ contract PolygonLandV2 is PolygonLandBaseTokenV2, ERC2771Handler, OperatorFilter
         emit TrustedForwarderSet(trustedForwarder);
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 

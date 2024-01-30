@@ -2,14 +2,15 @@
 
 pragma solidity 0.8.23;
 
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The Sandbox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
-abstract contract OperatorFiltererUpgradeable is ContextUpgradeable {
+abstract contract OperatorFiltererUpgradeable is Initializable, Context {
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
