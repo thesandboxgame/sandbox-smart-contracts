@@ -1,14 +1,14 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {utils} from 'ethers';
+import {keccak256, toUtf8Bytes} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, sandAdmin, upgradeAdmin} = await getNamedAccounts();
 
-  const TSB_ROLE = utils.keccak256(utils.toUtf8Bytes('TSB_ROLE'));
-  const PARTNER_ROLE = utils.keccak256(utils.toUtf8Bytes('PARTNER_ROLE'));
+  const TSB_ROLE = keccak256(toUtf8Bytes('TSB_ROLE'));
+  const PARTNER_ROLE = keccak256(toUtf8Bytes('PARTNER_ROLE'));
 
   await deploy('OrderValidator', {
     from: deployer,

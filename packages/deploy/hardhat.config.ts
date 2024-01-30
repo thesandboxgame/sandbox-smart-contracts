@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
-import '@nomiclabs/hardhat-ethers';
+import '@nomicfoundation/hardhat-ethers';
 import 'hardhat-deploy';
+import 'hardhat-deploy-ethers';
 import {
   addForkingSupport,
   addNodeAndMnemonic,

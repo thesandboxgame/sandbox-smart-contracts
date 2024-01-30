@@ -53,12 +53,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const operatorFiltererSubscriptionSubscribe = true; // if to actually subscribe or just copy
 
   // default values used for minting setups // // //
-  const mintPrice = ethers.utils.parseUnits('100', 'ether');
+  const mintPrice = ethers.parseUnits('100', 'ether');
   const maxPublicTokensPerWallet = 4;
   const maxAllowlistTokensPerWallet = 2;
 
   // references to implementation
-  const implementationAlias = ethers.utils.formatBytes32String('main-avatar');
+  const implementationAlias = ethers.encodeBytes32String('main-avatar');
   const implementationContractName = 'AvatarCollection';
 
   // check if particular collection was already deployed, if yes, will not deploy again
