@@ -43,8 +43,7 @@ interface IAssetCreate {
         uint256 tokenId,
         uint16 tier,
         uint256 amount,
-        string metadataHash,
-        bool revealed
+        string metadataHash
     );
     event AssetBatchLazyMinted(
         address indexed recipient,
@@ -52,7 +51,6 @@ interface IAssetCreate {
         uint256[] tokenIds,
         uint8[] tiers,
         uint256[] amounts,
-        string[] metadataHashes,
-        bool[] revealed
+        string[] metadataHashes
     );
 }
