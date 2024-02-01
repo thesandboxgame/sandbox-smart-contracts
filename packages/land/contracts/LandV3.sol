@@ -3,8 +3,10 @@
 pragma solidity 0.8.23;
 
 import {LandBaseTokenV3} from "./mainnet/LandBaseTokenV3.sol";
+import {ERC721BaseTokenV2} from "./mainnet/ERC721BaseTokenV2.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
+import {RoyaltyDistributor} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributor.sol";
 
 /**
  * @title LandV3
@@ -12,8 +14,22 @@ import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
+contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable, RoyaltyDistributor {
     event OperatorRegistrySet(address indexed registry);
+
+    /**
+     * @notice Initializes the contract with the meta-transaction contract & admin
+     * @param metaTransactionContract Authorized contract for meta-transactions
+     * @param admin Admin of the contract
+     * @param _royaltyManager the address of the Manager contract for common royalty recipient
+     */
+    function initialize(address metaTransactionContract, address admin, address _royaltyManager) public initializer {
+        _admin = admin;
+        _setMetaTransactionProcessor(metaTransactionContract, true);
+        _initialized = true;
+        __RoyaltyDistributor_init(_royaltyManager);
+        emit AdminChanged(address(0), _admin);
+    }
 
     /**
      * @notice Return the name of the token contract
@@ -67,7 +83,7 @@ contract LandV3 is LandBaseTokenV3, OperatorFiltererUpgradeable {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) external pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(ERC721BaseTokenV2, RoyaltyDistributor) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 

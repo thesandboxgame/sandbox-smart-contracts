@@ -38,23 +38,6 @@ contract ERC721BaseTokenV2 is IERC721Upgradeable, SuperOperatorsV2, MetaTransact
 
     bool internal _initialized;
 
-    modifier initializer() {
-        require(!_initialized, "already initialized");
-        _;
-    }
-
-    /**
-     * @notice Initializes the contract with the meta-transaction contract & admin
-     * @param metaTransactionContract Authorized contract for meta-transactions
-     * @param admin Admin of the contract
-     */
-    function initialize(address metaTransactionContract, address admin) public initializer {
-        _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, true);
-        _initialized = true;
-        emit AdminChanged(address(0), _admin);
-    }
-
     /**
      * @param from Sender address
      * @param to Recipient address
