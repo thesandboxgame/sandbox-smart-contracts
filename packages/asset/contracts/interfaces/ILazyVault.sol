@@ -23,5 +23,9 @@ interface ILazyVault {
 
     event SplitRecipientsChanged(SplitRecipient[] recipients);
 
-    function distribute(uint8[] calldata tiers, uint256[] calldata amounts, address[] calldata creators) external;
+    function distribute(
+        uint8[] calldata tiers,
+        uint256[] calldata amounts,
+        address[] calldata creators
+    ) external;
 }
