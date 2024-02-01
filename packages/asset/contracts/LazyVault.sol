@@ -4,12 +4,14 @@ pragma solidity 0.8.18;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ILazyVault} from "./interfaces/ILazyVault.sol";
+import "hardhat/console.sol";
 
 /// @title LazyVault
 /// @author The Sandbox
 /// @notice Contract responsible for distributing tokens to creators and split recipients
 contract LazyVault is ILazyVault, AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLEw");
 
     // address of the token that will be distributed by this vault
     address public vaultToken;
@@ -24,12 +26,16 @@ contract LazyVault is ILazyVault, AccessControl {
     /// @param _initialRecipients The initial split recipients
     /// @param _vaultToken The vault token
     constructor(
+        address _admin,
+        address _manager,
+        address _distributor,
         uint256[] memory _tierValues,
         SplitRecipient[] memory _initialRecipients,
         address _vaultToken
     ) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MANAGER_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(MANAGER_ROLE, _manager);
+        _grantRole(DISTRIBUTOR_ROLE, _distributor);
         _setSplitRecipients(_initialRecipients);
         _setTierValues(_tierValues);
         vaultToken = _vaultToken;
@@ -44,7 +50,7 @@ contract LazyVault is ILazyVault, AccessControl {
         uint8[] calldata tiers,
         uint256[] calldata amounts,
         address[] calldata creators
-    ) external {
+    ) external onlyRole(DISTRIBUTOR_ROLE) {
         require(tiers.length == amounts.length, "LazyVault: 1-Array mismatch");
         require(tiers.length == creators.length, "LazyVault: 2-Array mismatch");
 
@@ -52,9 +58,10 @@ contract LazyVault is ILazyVault, AccessControl {
             uint256 totalValue = amounts[i] * tierValues[tiers[i]];
             uint256 creatorShare = totalValue;
             uint256[] memory splitValues = new uint256[](splitRecipients.length);
-
+            address[] memory splitRecipientsAddresses = new address[](splitRecipients.length);
             for (uint256 j = 0; j < splitRecipients.length; j++) {
                 SplitRecipient memory recipient = splitRecipients[j];
+                splitRecipientsAddresses[j] = recipient.recipient;
                 uint256 splitValue = (totalValue * recipient.split) / 10000;
                 splitValues[j] = splitValue;
                 IERC20(vaultToken).transfer(recipient.recipient, splitValue);
@@ -69,7 +76,7 @@ contract LazyVault is ILazyVault, AccessControl {
                 tierValues[tiers[i]],
                 creators[i],
                 splitValues,
-                splitRecipients,
+                splitRecipientsAddresses,
                 creatorShare
             );
         }
@@ -98,7 +105,7 @@ contract LazyVault is ILazyVault, AccessControl {
             SplitRecipient memory recipient = recipients[i];
             require(recipient.split <= 10000, "Split must be <= 10000");
             require(recipient.recipient != address(0), "Recipient cannot be 0x0");
-            splitRecipients[i] = recipient;
+            splitRecipients.push(recipient);
         }
         emit SplitRecipientsChanged(splitRecipients);
     }
@@ -113,10 +120,11 @@ contract LazyVault is ILazyVault, AccessControl {
     /// @dev Wipes the tierValues array and sets the new values
     /// @param values The new values of the tiers
     function _setTierValues(uint256[] memory values) internal {
+        require(values[0] == 0, "LazyVault: Tier 0 must be 0");
         uint256[] memory oldValues = tierValues;
         delete tierValues;
         for (uint256 i = 0; i < values.length; i++) {
-            tierValues[i + 1] = values[i];
+            tierValues.push(values[i]);
         }
         emit TierValuesChanged(oldValues, values);
     }
