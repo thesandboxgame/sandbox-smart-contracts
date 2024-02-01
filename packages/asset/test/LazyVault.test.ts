@@ -1,11 +1,10 @@
-import {formatEther, parseEther} from 'ethers/lib/utils';
+import {parseEther} from 'ethers/lib/utils';
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from 'chai';
 import runSetup from './fixtures/lazyVaultFixture';
-import exp from 'constants';
 import {Event} from 'ethers';
 
-describe.only('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
+describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
   describe('General', function () {
     it('should assign DEFAULT_ADMIN to the admin address from the constructor', async function () {
       const {admin, LazyVaultContract} = await runSetup();
@@ -159,12 +158,10 @@ describe.only('LazyVault (/packages/asset/contracts/LazyVault.sol)', function ()
           const tiers = [1];
           const amounts = [2];
 
-          expect(
-            await LazyVaultContract.connect(distributor).distribute(
-              tiers,
-              amounts,
-              [creator1.address]
-            )
+          await expect(
+            LazyVaultContract.connect(distributor).distribute(tiers, amounts, [
+              creator1.address,
+            ])
           ).to.not.be.reverted;
         });
         it("should NOT allow non-distributors to distribute the vaulted token's balance", async function () {
@@ -626,8 +623,9 @@ describe.only('LazyVault (/packages/asset/contracts/LazyVault.sol)', function ()
           for (let i = 0; i < events.length; i++) {
             const event = events[i];
             const expectedData = Object.values(expectedEventData[i]);
-            // @ts-ignore
-            const eventData = Object.values(event.args);
+            const eventData = Object.values(
+              event.args as unknown as (typeof expectedEventData)[0]
+            );
             for (let j = 0; j < expectedData.length; j++) {
               expect(eventData[j]).to.deep.equal(expectedData[j]);
             }
