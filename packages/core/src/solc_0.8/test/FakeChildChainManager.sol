@@ -2,24 +2,25 @@
 pragma solidity 0.8.2;
 
 //import "../polygon/child/asset/PolygonAssetERC1155.sol";
+import "../test/MockERC1155Asset.sol";
 import "../polygon/child/sand/PolygonSand.sol";
 
 /// @dev This is NOT a secure ChildChainManager contract implementation!
 /// DO NOT USE in production.
 
 contract FakeChildChainManager {
-    //address public polygonAsset;
+    address public polygonAsset;
 
     // solhint-disable-next-line no-empty-blocks
     constructor() {}
 
-    /* function setPolygonAsset(address _polygonAsset) external {
+    function setPolygonAsset(address _polygonAsset) external {
         polygonAsset = _polygonAsset;
-    } */
+    }
 
-    /* function callDeposit(address user, bytes calldata depositData) external {
-        PolygonAssetERC1155(polygonAsset).deposit(user, depositData);
-    } */
+    function callDeposit(address user, bytes calldata depositData) external {
+        MockERC1155Asset(polygonAsset).deposit(user, depositData);
+    }
 
     function callSandDeposit(
         address polygonSand,

@@ -25,6 +25,9 @@ contract MockERC1155Asset is ERC1155PresetMinterPauser, Ownable {
         address owner,
         bytes calldata data) external {
         _mint(owner, packId, supply, data);
-        //_mint(address to, uint256 id, uint256 value, bytes memory data);
+    }
+
+    function deposit(address user, bytes calldata depositData) external {
+        // solhint-disable-previous-line no-empty-blocks
     }
 }
