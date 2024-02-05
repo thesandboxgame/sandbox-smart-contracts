@@ -1,4 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
 import {HardhatUserConfig} from 'hardhat/config';
 import 'hardhat-storage-layout';
 import 'hardhat-contract-sizer';
@@ -18,6 +19,11 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
   },
 };
 export default config;
