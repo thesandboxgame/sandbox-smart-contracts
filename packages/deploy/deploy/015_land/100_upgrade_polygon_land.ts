@@ -27,5 +27,10 @@ const func: DeployFunction = async function (
   );
 };
 export default func;
-func.tags = ['PolygonLand', 'PolygonLand_upgrade_1', 'L2'];
+func.tags = [
+  'PolygonLand',
+  'PolygonLand_upgrade',
+  'PolygonLand_upgrade_1',
+  'L2',
+];
 func.dependencies = ['PolygonLand_deploy'];
