@@ -4,20 +4,16 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
 import {ILazyVault} from "./interfaces/ILazyVault.sol";
+import "hardhat/console.sol";
 
 /// @title AssetCreate
 /// @author The Sandbox
@@ -106,8 +102,13 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -357,12 +358,12 @@ contract AssetCreate is
 
     bytes32 public constant LAZY_MINT_TYPEHASH =
         keccak256(
-            "LazyMint(address creator,uint16 nonce,uint8 tier,uint256 amount,bool revealed,string metadataHash,uint256 maxSupply)"
+            "LazyMint(address creator,uint16 nonce,uint8 tier,uint256 amount,string metadataHash,uint256 maxSupply)"
         );
 
     bytes32 public constant LAZY_MINT_BATCH_TYPEHASH =
         keccak256(
-            "LazyMintBatch(address[] creators,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes,uint256[] maxSupplies)"
+            "LazyMintBatch(address[] creators,uint16 nonce,uint8[] tiers,uint256[] amounts,string[] metadataHashes,uint256[] maxSupplies)"
         );
 
     // Address of the vault that distributes the catalyst value to the creators
@@ -396,21 +397,22 @@ contract AssetCreate is
         // check if asset has already been minted before
         uint256 tokenId = assetContract.getTokenIdByMetadataHash(metadataHash);
         if (tokenId == 0) {
-            tokenId = TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], 0, true);
+            tokenId = TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], tier == 1 ? 1 : 0, true);
             require(amount <= maxSupply, "AssetCreate: Max supply exceeded");
             availableToMint[tokenId] = maxSupply - amount;
+        } else {
+            require(availableToMint[tokenId] >= amount, "AssetCreate: Max supply reached");
+            availableToMint[tokenId] -= amount;
         }
 
-        require(availableToMint[tokenId] >= amount, "AssetCreate: Max supply reached");
-        availableToMint[tokenId] -= amount;
-
         // burn catalyst of a given tier
-        catalystContract.burnFrom(creator, tier, amount);
+        catalystContract.burnFrom(_msgSender(), tier, amount);
         uint8[] memory tiers = new uint8[](1);
         tiers[0] = tier;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         address[] memory creatorArray = new address[](1);
+        creatorArray[0] = creator;
         vault.distribute(tiers, amounts, creatorArray);
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit AssetLazyMinted(_msgSender(), creator, tokenId, tier, amount, metadataHash);
@@ -453,6 +455,7 @@ contract AssetCreate is
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
         for (uint256 i = 0; i < tiers.length; i++) {
+            uint16 revealed = tiers[i] == 1 ? 1 : 0;
             tiersToBurn[i] = tiers[i];
             tokenIds[i] = assetContract.getTokenIdByMetadataHash(metadataHashes[i]);
             if (tokenIds[i] == 0) {
@@ -460,7 +463,7 @@ contract AssetCreate is
                     creators[i],
                     tiers[i],
                     ++creatorNonces[creators[i]],
-                    0,
+                    revealed,
                     true
                 );
                 require(amounts[i] <= maxSupplies[i], "AssetCreate: Max supply exceeded");

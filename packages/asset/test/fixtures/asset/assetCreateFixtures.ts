@@ -2,12 +2,15 @@ import {ethers, upgrades} from 'hardhat';
 import {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
+  createLazyMintSignature,
+  createLazyMintMultipleAssetsSignature,
 } from '../../utils/createSignature';
 import {
   DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
 } from '../../../data/constants';
+import {parseEther} from 'ethers/lib/utils';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
@@ -27,6 +30,8 @@ export async function runCreateTestSetup() {
     contractRoyaltySetter,
     mockMarketplace1,
     mockMarketplace2,
+    creator,
+    treasury,
   ] = await ethers.getSigners();
 
   // test upgradeable contract using '@openzeppelin/hardhat-upgrades'
@@ -128,6 +133,9 @@ export async function runCreateTestSetup() {
 
   await AuthValidatorContract.deployed();
 
+  const MockeERC20Factory = await ethers.getContractFactory('TestERC20');
+  const MockERC20Contract = await MockeERC20Factory.deploy('MockERC20', 'M20');
+
   // END DEPLOY DEPENDENCIES
 
   const MockAssetCreate = await ethers.getContractFactory('MockAssetCreate');
@@ -153,6 +161,25 @@ export async function runCreateTestSetup() {
   );
 
   await AssetCreateContract.deployed();
+  const LazyVaultFactory = await ethers.getContractFactory('LazyVault');
+  const LazyVaultContract = await LazyVaultFactory.deploy(
+    assetAdmin.address,
+    managerAdmin.address,
+    AssetCreateContract.address,
+    [
+      0,
+      parseEther('100'),
+      parseEther('200'),
+      parseEther('300'),
+      parseEther('400'),
+      parseEther('500'),
+      parseEther('600'),
+    ],
+    [[treasury.address, 100]],
+    MockERC20Contract.address
+  );
+
+  MockERC20Contract.mint(LazyVaultContract.address, parseEther('10000'));
 
   const AssetCreateContractAsUser = AssetCreateContract.connect(user);
 
@@ -184,6 +211,9 @@ export async function runCreateTestSetup() {
   const PauserRole = await AssetCreateContract.PAUSER_ROLE();
   await AssetCreateContractAsAdmin.grantRole(PauserRole, assetAdmin.address);
   // END SETUP ROLES
+
+  // SET VAULT ADDRESS
+  await AssetCreateContractAsAdmin.setVaultAddress(LazyVaultContract.address);
 
   // HELPER FUNCTIONS
   const grantSpecialMinterRole = async (address: string) => {
@@ -268,6 +298,46 @@ export async function runCreateTestSetup() {
     return result;
   };
 
+  const lazyMintAsset = async (
+    signature: string,
+    tier: number,
+    amount: number,
+    metadataHash: string,
+    maxSupply: number,
+    creator: string
+  ) => {
+    const tx = await AssetCreateContractAsUser.lazyCreateAsset(
+      signature,
+      tier,
+      amount,
+      metadataHash,
+      maxSupply,
+      creator
+    );
+    const result = await tx.wait();
+    return result;
+  };
+
+  const lazyMintMultipleAssets = async (
+    signature: string,
+    tiers: number[],
+    amounts: number[],
+    metadataHashes: string[],
+    maxSupplies: number[],
+    creators: string[]
+  ) => {
+    const tx = await AssetCreateContractAsUser.lazyCreateMultipleAssets(
+      signature,
+      tiers,
+      amounts,
+      metadataHashes,
+      maxSupplies,
+      creators
+    );
+    const result = await tx.wait();
+    return result;
+  };
+
   const getCreatorNonce = async (creator: string) => {
     const nonce = await AssetCreateContract.creatorNonces(creator);
     return nonce;
@@ -311,6 +381,45 @@ export async function runCreateTestSetup() {
     return signature;
   };
 
+  const generateLazyMintSignature = async (
+    creator: string,
+    tier: number,
+    amount: number,
+    metadataHash: string,
+    maxSupply: number
+  ) => {
+    const signature = await createLazyMintSignature(
+      creator,
+      tier,
+      amount,
+      metadataHash,
+      maxSupply,
+      AssetCreateContract,
+      backendAuthWallet,
+      user
+    );
+    return signature;
+  };
+
+  const generateLazyMintMultipleAssetsSignature = async (
+    creator: string,
+    tiers: number[],
+    amounts: number[],
+    metadataHashes: string[],
+    maxSupplies: number[]
+  ) => {
+    const signature = await createLazyMintMultipleAssetsSignature(
+      creator,
+      tiers,
+      amounts,
+      metadataHashes,
+      maxSupplies,
+      AssetCreateContract,
+      backendAuthWallet
+    );
+    return signature;
+  };
+
   const pause = async () => {
     await AssetCreateContractAsAdmin.pause();
   };
@@ -328,6 +437,8 @@ export async function runCreateTestSetup() {
     ],
     additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
     user,
+    creator,
+    treasury,
     AdminRole,
     PauserRole,
     trustedForwarder,
@@ -339,14 +450,20 @@ export async function runCreateTestSetup() {
     AuthValidatorContract,
     CatalystContract,
     MockAssetCreateContract,
+    MockERC20Contract,
+    LazyVaultContract,
     mintCatalyst,
     mintSingleAsset,
     mintMultipleAssets,
     mintSpecialAsset,
     mintMultipleSpecialAssets,
+    lazyMintAsset,
+    lazyMintMultipleAssets,
     grantSpecialMinterRole,
     generateSingleMintSignature,
     generateMultipleMintSignature,
+    generateLazyMintSignature,
+    generateLazyMintMultipleAssetsSignature,
     getCreatorNonce,
     pause,
     unpause,

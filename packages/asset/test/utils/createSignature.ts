@@ -96,6 +96,100 @@ const createMultipleAssetsMintSignature = async (
   return signature;
 };
 
+const createLazyMintSignature = async (
+  creator: string,
+  tier: number,
+  amount: number,
+  metadataHash: string,
+  maxSupply: number,
+  contract: Contract,
+  signer: SignerWithAddress,
+  txSender: SignerWithAddress
+) => {
+  const AssetCreateContract = contract;
+  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
+
+  const data = {
+    types: {
+      LazyMint: [
+        {name: 'creator', type: 'address'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tier', type: 'uint8'},
+        {name: 'amount', type: 'uint256'},
+        {name: 'metadataHash', type: 'string'},
+        {name: 'maxSupply', type: 'uint256'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+      verifyingContract: AssetCreateContract.address,
+    },
+    message: {
+      creator,
+      nonce,
+      tier,
+      amount,
+      metadataHash,
+      maxSupply,
+    },
+  };
+
+  const signature = await signer._signTypedData(
+    data.domain,
+    data.types,
+    data.message
+  );
+  return signature;
+};
+
+const createLazyMintMultipleAssetsSignature = async (
+  creator: string,
+  tiers: number[],
+  amounts: number[],
+  metadataHashes: string[],
+  maxSupplies: number[],
+  contract: Contract,
+  signer: SignerWithAddress
+) => {
+  const AssetCreateContract = contract;
+  const nonce = await AssetCreateContract.signatureNonces(creator);
+  const data = {
+    types: {
+      LazyMintBatch: [
+        {name: 'creators', type: 'address[]'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tiers', type: 'uint8[]'},
+        {name: 'amounts', type: 'uint256[]'},
+        {name: 'metadataHashes', type: 'string[]'},
+        {name: 'maxSupplies', type: 'uint256[]'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+      verifyingContract: AssetCreateContract.address,
+    },
+    message: {
+      creator,
+      nonce,
+      tiers,
+      amounts,
+      metadataHashes,
+      maxSupplies,
+    },
+  };
+
+  const signature = await signer._signTypedData(
+    data.domain,
+    data.types,
+    data.message
+  );
+  return signature;
+};
+
 const createMockSignature = async (
   creator: string,
   signer: SignerWithAddress
@@ -155,6 +249,8 @@ const createMockDigest = async (creator: string) => {
 export {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
+  createLazyMintSignature,
+  createLazyMintMultipleAssetsSignature,
   createMockSignature,
   createMockDigest,
 };
