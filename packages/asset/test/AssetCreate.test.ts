@@ -1572,7 +1572,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
-  describe.only('Single lazy mint', function () {
+  describe('Single lazy mint', function () {
     describe('Success', function () {
       it('should correctly lazy mint an asset if all conditions are met', async function () {
         const {
@@ -1827,8 +1827,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           metadataHashes,
           creator,
           AssetContract,
-          AssetCreateContract,
-          user,
         } = await runCreateTestSetup();
         await mintCatalyst(4, 10);
 
@@ -2146,5 +2144,4 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
-  describe('Multiple lazy mint', function () {});
 });
