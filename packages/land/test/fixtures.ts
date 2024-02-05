@@ -1,4 +1,4 @@
-import {Signer} from 'ethers';
+import {AbiCoder, Contract, keccak256, Signer, toUtf8Bytes} from 'ethers';
 import {ethers, upgrades} from 'hardhat';
 
 export async function deploy(
@@ -17,9 +17,40 @@ export async function deploy(
   return ret;
 }
 
+export async function deployWithProxy(
+  name: string,
+  users: Signer[] = [],
+): Promise<Contract[]> {
+  const contract = await deploy(name, users);
+  const Proxy = await ethers.getContractFactory('ProxyMock');
+  // This uses signers[0]
+  const proxy = await Proxy.deploy(contract[0]);
+  await proxy.waitForDeployment();
+  const ret = [];
+  for (let i = 0; i < contract.length; i++) {
+    ret[i] = await contract[i].attach(await proxy.getAddress());
+  }
+  // add implementation contract
+  ret.push(contract[0]);
+  return ret;
+}
+
 export function getId(layer: number, x: number, y: number): string {
   const h = BigInt(x + y * 408) + (BigInt(layer - 1) << 248n);
   return '0x' + h.toString(16).padStart(62, '0');
+}
+
+export function getStorageSlotJS(key: string): bigint {
+  return (
+    BigInt(
+      keccak256(
+        AbiCoder.defaultAbiCoder().encode(
+          ['uint256'],
+          [BigInt(keccak256(toUtf8Bytes(key))) - 1n],
+        ),
+      ),
+    ) & ~0xffn
+  );
 }
 
 export async function setupLandContract() {

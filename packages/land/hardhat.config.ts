@@ -20,5 +20,8 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  mocha: {
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
+  },
 };
 export default config;
