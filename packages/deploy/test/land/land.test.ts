@@ -17,7 +17,7 @@ function commonTests(setupFunc) {
 }
 
 // TODO: We need a way to skip some tests when running on l1 or L2
-function mainNetTests(setupFunc) {
+function mainnetTests(setupFunc) {
   it('meta transaction processor', async function () {
     const {contract, sand} = await setupFunc();
     expect(await contract.isMetaTransactionProcessor(sand)).to.be.true;
@@ -36,7 +36,7 @@ function polygonTests(setupFunc) {
 describe('Land', function () {
   describe('Mainnet Land', function () {
     commonTests(setupMainNetTest);
-    mainNetTests(setupMainNetTest);
+    mainnetTests(setupMainNetTest);
   });
 
   describe('Polygon Land', function () {
@@ -46,7 +46,7 @@ describe('Land', function () {
 
   describe('Mainnet Land V1', function () {
     commonTests(setupMainNetV1Test);
-    mainNetTests(setupMainNetV1Test);
+    mainnetTests(setupMainNetV1Test);
   });
 
   describe('Polygon Land V1', function () {

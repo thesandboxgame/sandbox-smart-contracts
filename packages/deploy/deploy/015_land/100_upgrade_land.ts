@@ -27,5 +27,5 @@ const func: DeployFunction = async function (
   );
 };
 export default func;
-func.tags = ['Land', 'Land_upgrade_1', 'L1'];
+func.tags = ['Land', 'Land_upgrade', 'Land_upgrade_1', 'L1'];
 func.dependencies = ['Land_deploy'];
