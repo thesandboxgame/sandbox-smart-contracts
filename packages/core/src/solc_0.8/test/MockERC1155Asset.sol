@@ -8,5 +8,23 @@ import "@openzeppelin/contracts-0.8/token/ERC1155/presets/ERC1155PresetMinterPau
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 contract MockERC1155Asset is ERC1155PresetMinterPauser, Ownable {
+    event Bouncer(address indexed bouncer, bool indexed enabled);
+
     constructor(string memory uri) ERC1155PresetMinterPauser(uri) Ownable() {}
+
+    function setBouncer(address bouncer, bool enabled) external {
+        emit Bouncer(bouncer, enabled);
+    }
+
+
+    function mint(
+        address creator,
+        uint40 packId,
+        bytes32 hash,
+        uint256 supply,
+        address owner,
+        bytes calldata data) external {
+        _mint(owner, packId, supply, data);
+        //_mint(address to, uint256 id, uint256 value, bytes memory data);
+    }
 }

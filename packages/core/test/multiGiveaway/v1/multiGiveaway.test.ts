@@ -315,7 +315,8 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`can't substract more than there is`);
+      ).to.be.revertedWith(`ERC1155: insufficient balance for transfer`);
+      //).to.be.revertedWith(`can't substract more than there is`); original revert message
     });
 
     it('User cannot claim sand when contract does not hold any', async function () {
@@ -1162,7 +1163,8 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`can't substract more than there is`);
+      ).to.be.revertedWith(`ERC1155: insufficient balance for transfer`);
+      //).to.be.revertedWith(`can't substract more than there is`); original revert message
     });
 
     it('User cannot claim sand when contract does not hold any - multiple giveaways, 1 claim', async function () {
@@ -1538,7 +1540,8 @@ describe('Multi_Giveaway', function () {
 
       await expect(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
-      ).to.be.revertedWith(`can't substract more than there is`);
+      ).to.be.revertedWith(`ERC1155: insufficient balance for transfer`);
+      //).to.be.revertedWith(`can't substract more than there is`); original revert message
     });
 
     it('User cannot claim sand when contract does not hold any', async function () {

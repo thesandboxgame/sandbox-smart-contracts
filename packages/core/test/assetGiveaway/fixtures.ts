@@ -39,6 +39,17 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
 
   const assetContract = await ethers.getContract('Asset');
 
+  /* await deployments.deploy('MockAsset', {
+    from: deployer,
+    contract: 'MockERC1155Asset',
+    log: true,
+    skipIfAlreadyDeployed: true,
+    proxy: false,
+    args: ['http'],
+  });
+
+  const assetContract = await ethers.getContract('MockAsset'); */
+
   const emptyBytes32 =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -87,11 +98,16 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
       ethers.provider.getSigner(creator)
     );
 
-    const receipt = await waitFor(
+    /* const receipt = await waitFor(
       assetContractAsCreator[
-        'mint(address,uint40,bytes32,uint256,address,bytes)'
+        'mint(address,uint40,bytes32,uint8,address,bytes)'
       ](creator, packId, hash, supply, owner, data)
+    ); */
+
+    const receipt = await waitFor(
+      assetContractAsCreator.mint(creator, packId, hash, supply, 0, owner, data)
     );
+    //rarity = 0
 
     const transferEvent = await expectReceiptEventWithArgs(
       receipt,
