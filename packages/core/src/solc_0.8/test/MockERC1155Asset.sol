@@ -16,14 +16,14 @@ contract MockERC1155Asset is ERC1155PresetMinterPauser, Ownable {
         emit Bouncer(bouncer, enabled);
     }
 
-
     function mint(
         address creator,
         uint40 packId,
         bytes32 hash,
         uint256 supply,
         address owner,
-        bytes calldata data) external {
+        bytes calldata data
+    ) external {
         _mint(owner, packId, supply, data);
     }
 
