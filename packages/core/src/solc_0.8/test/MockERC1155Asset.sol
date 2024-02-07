@@ -28,6 +28,8 @@ contract MockERC1155Asset is ERC1155PresetMinterPauser, Ownable {
     }
 
     function deposit(address user, bytes calldata depositData) external {
-        // solhint-disable-previous-line no-empty-blocks
+        (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
+            abi.decode(depositData, (uint256[], uint256[], bytes));
+        emit TransferBatch(_msgSender(), address(0), user, ids, amounts);
     }
 }
