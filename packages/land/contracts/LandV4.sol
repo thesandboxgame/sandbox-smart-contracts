@@ -5,7 +5,6 @@ pragma solidity 0.8.23;
 import {LandBaseTokenV4} from "./mainnet/LandBaseTokenV4.sol";
 import {ERC721BaseTokenV3} from "./mainnet/ERC721BaseTokenV3.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {RoyaltyDistributor} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributor.sol";
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 
@@ -16,12 +15,12 @@ import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
 contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistributor {
-    bool internal _init_v4;
+    bool internal _initV4;
 
     event OperatorRegistrySet(address indexed registry);
 
-    modifier initializer_v4() {
-        require(!_init_v4, "already initialized");
+    modifier initializerV4() {
+        require(!_initV4, "already initialized");
         _;
     }
 
@@ -29,8 +28,9 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @notice Initializes the upgrade to version 4
      * @param _royaltyManager address of the manager contract for common royalty recipient
      */
-    function init_v4(address _royaltyManager) public initializer_v4 {
-       __RoyaltyDistributor_init(_royaltyManager);
+    function initializeV4(address _royaltyManager) public initializerV4 {
+        __RoyaltyDistributor_init(_royaltyManager);
+        _initV4 = true;
     }
 
     /**
