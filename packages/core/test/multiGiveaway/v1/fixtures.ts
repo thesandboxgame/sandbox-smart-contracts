@@ -50,7 +50,6 @@ export const setupTestGiveaway = withSnapshot(
     const otherAccounts = await getUnnamedAccounts();
     const others = otherAccounts;
     const sandContract = await ethers.getContract('PolygonSand');
-    //const assetContract = await ethers.getContract('PolygonAssetERC1155');
 
     await deployments.deploy('MockAsset', {
       from: deployer,
