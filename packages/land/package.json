@@ -46,6 +46,10 @@
       ]
     }
   },
+  "dependencies": {
+    "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
+    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -55,6 +59,7 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/contracts": "4.9.5",
     "@openzeppelin/contracts-upgradeable": "^4.9.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@typechain/ethers-v6": "^0.5.1",
