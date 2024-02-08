@@ -3,7 +3,7 @@ import {BigNumber, Event, ethers} from 'ethers';
 import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 import {network} from 'hardhat';
 
-describe.only('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
+describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should deploy successfully', async function () {
       const {AssetCreateContract} = await runCreateTestSetup();
@@ -2661,7 +2661,6 @@ describe.only('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', functio
           'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
           'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJB',
           'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1FjB',
-          'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95C',
         ];
 
         const firstSignature = await generateLazyMintMultipleAssetsSignature(
