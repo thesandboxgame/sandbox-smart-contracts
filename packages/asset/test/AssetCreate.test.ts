@@ -2253,7 +2253,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
-  describe.only('Multiple lazy mint', function () {
+  describe('Multiple lazy mint', function () {
     describe('Success', function () {
       it('should correctly lazy mint multiple assets if all conditions are met', async function () {
         const {

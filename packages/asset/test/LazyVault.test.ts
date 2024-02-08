@@ -162,6 +162,28 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
           ])
         ).to.not.be.reverted;
       });
+      it('should NOT allow distribution of tier 0 (zero) value', async function () {
+        const {distributor, creator1, LazyVaultContract} = await runSetup();
+        const tiers = [0];
+        const amounts = [2];
+
+        await expect(
+          LazyVaultContract.connect(distributor).distribute(tiers, amounts, [
+            creator1.address,
+          ])
+        ).to.be.revertedWith('LazyVault: Invalid tier');
+      });
+      it("should NOT allow distribution of a tier that doesn't exist", async function () {
+        const {distributor, creator1, LazyVaultContract} = await runSetup();
+        const tiers = [7];
+        const amounts = [2];
+
+        await expect(
+          LazyVaultContract.connect(distributor).distribute(tiers, amounts, [
+            creator1.address,
+          ])
+        ).to.be.revertedWith('LazyVault: Invalid tier');
+      });
       it("should NOT allow non-distributors to distribute the vaulted token's balance", async function () {
         const {creator1, DISTRIBUTOR_ROLE, LazyVaultContract} =
           await runSetup();

@@ -54,6 +54,7 @@ contract LazyVault is ILazyVault, AccessControl {
         require(tiers.length == creators.length, "LazyVault: 2-Array mismatch");
 
         for (uint256 i = 0; i < tiers.length; i++) {
+            require(tiers[i] > 0 && tiers[i] < tierValues.length, "LazyVault: Invalid tier");
             uint256 totalValue = amounts[i] * tierValues[tiers[i]];
             uint256 creatorShare = totalValue;
             uint256[] memory splitValues = new uint256[](splitRecipients.length);
