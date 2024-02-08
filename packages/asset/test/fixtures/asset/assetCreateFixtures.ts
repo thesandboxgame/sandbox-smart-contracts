@@ -439,10 +439,6 @@ export async function runCreateTestSetup() {
     metadataHashes: [
       'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA',
       'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1Fja',
-      'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
-      'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJB',
-      'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1FjB',
-      'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95C',
     ],
     additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
     user,

@@ -3,7 +3,7 @@ import {BigNumber, Event, ethers} from 'ethers';
 import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 import {network} from 'hardhat';
 
-describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
+describe.only('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
     it('should deploy successfully', async function () {
       const {AssetCreateContract} = await runCreateTestSetup();
@@ -2643,7 +2643,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintCatalyst,
           lazyMintMultipleAssets,
           generateLazyMintMultipleAssetsSignature,
-          metadataHashes,
           creator,
           secondCreator,
           thirdCreator,
@@ -2656,6 +2655,15 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await mintCatalyst(4, 10);
         await mintCatalyst(5, 10);
 
+        const metadataHashes = [
+          'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA',
+          'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1Fja',
+          'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+          'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJB',
+          'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1FjB',
+          'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95C',
+        ];
+
         const firstSignature = await generateLazyMintMultipleAssetsSignature(
           [
             creator.address,
@@ -2666,13 +2674,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           ],
           [1, 2, 3, 4, 5],
           [2, 2, 2, 2, 2],
-          [
-            metadataHashes[0],
-            metadataHashes[1],
-            metadataHashes[2],
-            metadataHashes[3],
-            metadataHashes[4],
-          ],
+          metadataHashes,
           [10, 10, 10, 10, 10]
         );
         await expect(
@@ -2680,13 +2682,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             firstSignature,
             [1, 2, 3, 4, 5],
             [2, 2, 2, 2, 2],
-            [
-              metadataHashes[0],
-              metadataHashes[1],
-              metadataHashes[2],
-              metadataHashes[3],
-              metadataHashes[4],
-            ],
+            metadataHashes,
             [10, 10, 10, 10, 10],
             [
               creator.address,
