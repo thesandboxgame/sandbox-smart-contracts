@@ -5,8 +5,9 @@ pragma solidity 0.8.23;
 import {LandBaseTokenV4} from "./mainnet/LandBaseTokenV4.sol";
 import {ERC721BaseTokenV3} from "./mainnet/ERC721BaseTokenV3.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
-import {RoyaltyDistributor} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributor.sol";
+import {RoyaltyDistributorV2} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributorV2.sol";
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
+import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 /**
  * @title LandV4
@@ -14,7 +15,7 @@ import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistributor {
+contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
     bool internal _initV4;
 
     event OperatorRegistrySet(address indexed registry);
@@ -29,7 +30,7 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @param _royaltyManager address of the manager contract for common royalty recipient
      */
     function initializeV4(address _royaltyManager) public initializerV4 {
-        __RoyaltyDistributor_init(_royaltyManager);
+        _setRoyaltyManager(_royaltyManager);
         _initV4 = true;
     }
 
@@ -85,8 +86,8 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(ERC721BaseTokenV3, RoyaltyDistributor) returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+    function supportsInterface(bytes4 id) public pure override(ERC721BaseTokenV3, RoyaltyDistributorV2) returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
