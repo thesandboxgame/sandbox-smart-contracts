@@ -31,6 +31,10 @@ export async function runCreateTestSetup() {
     mockMarketplace1,
     mockMarketplace2,
     creator,
+    secondCreator,
+    thirdCreator,
+    fourthCreator,
+    fifthCreator,
     treasury,
   ] = await ethers.getSigners();
 
@@ -402,20 +406,21 @@ export async function runCreateTestSetup() {
   };
 
   const generateLazyMintMultipleAssetsSignature = async (
-    creator: string,
+    creators: string[],
     tiers: number[],
     amounts: number[],
     metadataHashes: string[],
     maxSupplies: number[]
   ) => {
     const signature = await createLazyMintMultipleAssetsSignature(
-      creator,
+      creators,
       tiers,
       amounts,
       metadataHashes,
       maxSupplies,
       AssetCreateContract,
-      backendAuthWallet
+      backendAuthWallet,
+      user
     );
     return signature;
   };
@@ -434,10 +439,18 @@ export async function runCreateTestSetup() {
     metadataHashes: [
       'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJA',
       'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1Fja',
+      'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
+      'QmZvGR5JNtSjSgSL9sD8V3LpSTHYXcfc9gy3CqptuoETJB',
+      'QmcU8NLdWyoDAbPc67irYpCnCH9ciRUjMC784dvRfy1FjB',
+      'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95C',
     ],
     additionalMetadataHash: 'QmZEhV6rMsZfNyAmNKrWuN965xaidZ8r5nd2XkZq9yZ95L',
     user,
     creator,
+    secondCreator,
+    thirdCreator,
+    fourthCreator,
+    fifthCreator,
     treasury,
     AdminRole,
     PauserRole,

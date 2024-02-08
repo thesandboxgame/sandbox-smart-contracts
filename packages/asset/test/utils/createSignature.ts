@@ -145,16 +145,17 @@ const createLazyMintSignature = async (
 };
 
 const createLazyMintMultipleAssetsSignature = async (
-  creator: string,
+  creators: string[],
   tiers: number[],
   amounts: number[],
   metadataHashes: string[],
   maxSupplies: number[],
   contract: Contract,
-  signer: SignerWithAddress
+  signer: SignerWithAddress,
+  txSender: SignerWithAddress
 ) => {
   const AssetCreateContract = contract;
-  const nonce = await AssetCreateContract.signatureNonces(creator);
+  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
   const data = {
     types: {
       LazyMintBatch: [
@@ -173,7 +174,7 @@ const createLazyMintMultipleAssetsSignature = async (
       verifyingContract: AssetCreateContract.address,
     },
     message: {
-      creator,
+      creators,
       nonce,
       tiers,
       amounts,

@@ -1888,6 +1888,115 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           lazyMintAsset(signature, 4, 1, metadataHashes[0], 10, creator.address)
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+      it('should revert if tier does not match the tier in the signature', async function () {
+        const {
+          mintCatalyst,
+          lazyMintAsset,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          4,
+          1,
+          metadataHashes[0],
+          10
+        );
+        await expect(
+          lazyMintAsset(signature, 3, 1, metadataHashes[0], 10, creator.address)
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it('should revert if amount does not match the amount in the signature', async function () {
+        const {
+          mintCatalyst,
+          lazyMintAsset,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          4,
+          1,
+          metadataHashes[0],
+          10
+        );
+        await expect(
+          lazyMintAsset(signature, 4, 2, metadataHashes[0], 10, creator.address)
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it('should revert if metadataHash does not match the metadataHash in the signature', async function () {
+        const {
+          mintCatalyst,
+          lazyMintAsset,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          4,
+          1,
+          metadataHashes[0],
+          10
+        );
+        await expect(
+          lazyMintAsset(signature, 4, 1, metadataHashes[1], 10, creator.address)
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it('should revert if maxSupply does not match the maxSupply in the signature', async function () {
+        const {
+          mintCatalyst,
+          lazyMintAsset,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          4,
+          1,
+          metadataHashes[0],
+          10
+        );
+        await expect(
+          lazyMintAsset(signature, 4, 1, metadataHashes[0], 11, creator.address)
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it('should revert if creator does not match the creator in the signature', async function () {
+        const {
+          mintCatalyst,
+          lazyMintAsset,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          4,
+          1,
+          metadataHashes[0],
+          10
+        );
+        await expect(
+          lazyMintAsset(
+            signature,
+            4,
+            1,
+            metadataHashes[0],
+            10,
+            secondCreator.address
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+
       it('should revert if the signature has been used before', async function () {
         const {
           mintCatalyst,
@@ -2071,7 +2180,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           (e: Event) => e.event == 'AssetLazyMinted'
         )[0].args;
 
-        // creator should be user
+        // creator should be the creator
         expect(eventData.creator).to.equal(creator.address);
         // tier should be 4
         expect(eventData.tier).to.equal(4);
@@ -2135,6 +2244,890 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           metadataHashes[0],
           10,
           creator.address
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.address == LazyVaultContract.address
+        );
+        expect(eventData).to.not.be.undefined;
+      });
+    });
+  });
+  describe.only('Multiple lazy mint', function () {
+    describe('Success', function () {
+      it('should correctly lazy mint multiple assets if all conditions are met', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            selectedMetadataHashes,
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.not.be.reverted;
+      });
+      it('should mint correct amounts of assets', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+        expect(eventData[4]).to.deep.equal([5, 5]);
+      });
+      it('should mint correct tiers of assets', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+        expect(eventData[3]).to.deep.equal([3, 4]);
+      });
+      it('should mint assets with correct metadataHashes', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+        expect(eventData[5]).to.deep.equal(selectedMetadataHashes);
+      });
+      it('should increase the creators balance of MockERC20', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          MockERC20Contract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const balanceBefore = await MockERC20Contract.balanceOf(
+          creator.address
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+        const balanceAfter = await MockERC20Contract.balanceOf(creator.address);
+        expect(balanceAfter).to.be.gt(balanceBefore);
+      });
+      it('should increate multiple creators balances of MockERC20', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+          MockERC20Contract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, secondCreator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const balanceBefore = await MockERC20Contract.balanceOf(
+          creator.address
+        );
+        const secondBalanceBefore = await MockERC20Contract.balanceOf(
+          secondCreator.address
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, secondCreator.address]
+        );
+        const balanceAfter = await MockERC20Contract.balanceOf(creator.address);
+        const secondBalanceAfter = await MockERC20Contract.balanceOf(
+          secondCreator.address
+        );
+        expect(balanceAfter).to.be.gt(balanceBefore);
+        expect(secondBalanceAfter).to.be.gt(secondBalanceBefore);
+      });
+      it('should increase the balance of the treasury', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          MockERC20Contract,
+          treasury,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const balanceBefore = await MockERC20Contract.balanceOf(
+          treasury.address
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+        const balanceAfter = await MockERC20Contract.balanceOf(
+          treasury.address
+        );
+        expect(balanceAfter).to.be.gt(balanceBefore);
+      });
+      it('should burn the catalysts', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          user,
+          CatalystContract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const balanceBefore = await CatalystContract.balanceOf(user.address, 3);
+        const secondBalanceBefore = await CatalystContract.balanceOf(
+          user.address,
+          4
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+        const balanceAfter = await CatalystContract.balanceOf(user.address, 3);
+        const secondBalanceAfter = await CatalystContract.balanceOf(
+          user.address,
+          4
+        );
+        expect(balanceAfter).to.be.lt(balanceBefore);
+        expect(secondBalanceAfter).to.be.lt(secondBalanceBefore);
+      });
+      it('should increment the creators nonces', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+          AssetCreateContract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, secondCreator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const nonceBefore = await AssetCreateContract.creatorNonces(
+          creator.address
+        );
+        const secondNonceBefore = await AssetCreateContract.creatorNonces(
+          secondCreator.address
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, secondCreator.address]
+        );
+        const nonceAfter = await AssetCreateContract.creatorNonces(
+          creator.address
+        );
+        const secondNonceAfter = await AssetCreateContract.creatorNonces(
+          secondCreator.address
+        );
+        expect(nonceAfter).to.be.gt(nonceBefore);
+        expect(secondNonceAfter).to.be.gt(secondNonceBefore);
+      });
+      it('should increase the amount for already minted assets', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+          AssetContract,
+          user,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 10);
+        await mintCatalyst(4, 10);
+
+        const firstSignature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, secondCreator.address],
+          [3, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        const firstResult = await lazyMintMultipleAssets(
+          firstSignature,
+          [3, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10],
+          [creator.address, secondCreator.address]
+        );
+
+        const firstEventData = firstResult.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+
+        const secondSignature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, secondCreator.address],
+          [3, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        const secondResult = await lazyMintMultipleAssets(
+          secondSignature,
+          [3, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10],
+          [creator.address, secondCreator.address]
+        );
+        const secondEventData = secondResult.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+
+        // tokenIds should be the same
+        expect(secondEventData[2]).to.deep.equal(firstEventData[2]);
+
+        // users balance should be 10
+        expect(
+          await AssetContract.balanceOf(user.address, firstEventData[2][0])
+        ).to.equal(10);
+        expect(
+          await AssetContract.balanceOf(user.address, secondEventData[2][1])
+        ).to.equal(10);
+      });
+      it('should work with 5 creators and 5 assets', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+          thirdCreator,
+          fourthCreator,
+          fifthCreator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(1, 10);
+        await mintCatalyst(2, 10);
+        await mintCatalyst(3, 10);
+        await mintCatalyst(4, 10);
+        await mintCatalyst(5, 10);
+
+        const firstSignature = await generateLazyMintMultipleAssetsSignature(
+          [
+            creator.address,
+            secondCreator.address,
+            thirdCreator.address,
+            fourthCreator.address,
+            fifthCreator.address,
+          ],
+          [1, 2, 3, 4, 5],
+          [2, 2, 2, 2, 2],
+          [
+            metadataHashes[0],
+            metadataHashes[1],
+            metadataHashes[2],
+            metadataHashes[3],
+            metadataHashes[4],
+          ],
+          [10, 10, 10, 10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            firstSignature,
+            [1, 2, 3, 4, 5],
+            [2, 2, 2, 2, 2],
+            [
+              metadataHashes[0],
+              metadataHashes[1],
+              metadataHashes[2],
+              metadataHashes[3],
+              metadataHashes[4],
+            ],
+            [10, 10, 10, 10, 10],
+            [
+              creator.address,
+              secondCreator.address,
+              thirdCreator.address,
+              fourthCreator.address,
+              fifthCreator.address,
+            ]
+          )
+        ).to.not.be.reverted;
+      });
+    });
+    describe('Revert', function () {
+      it("should revert if tiers do not match signature's tiers", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [2, 4],
+            [1, 1],
+            selectedMetadataHashes,
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it("should revert if amounts do not match signature's amounts", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [2, 1],
+            selectedMetadataHashes,
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it("should revert if metadataHashes do not match signature's metadataHashes", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            [metadataHashes[1], metadataHashes[0]],
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it("should revert if maxSupplies do not match signature's maxSupplies", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            selectedMetadataHashes,
+            [11, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it("should revert if creators do not match signature's creators", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          secondCreator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            selectedMetadataHashes,
+            [10, 10],
+            [secondCreator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it('should revert if the signature was used before', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [1, 1],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            selectedMetadataHashes,
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid signature');
+      });
+      it("should return if the user doesn't have enough catalysts", async function () {
+        const {
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [1, 1],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            [metadataHashes[0], metadataHashes[1]],
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+      });
+      it('should not allow minting tier 0 assets using batch lazy minting', async function () {
+        const {
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [0, 4],
+          [1, 1],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [0, 4],
+            [1, 1],
+            [metadataHashes[0], metadataHashes[1]],
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
+      });
+      it("should revert when lazy vault doesn't have enough balance", async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 200);
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [4, 4],
+          [100, 100],
+          [metadataHashes[0], metadataHashes[1]],
+          [100, 100]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [4, 4],
+            [100, 100],
+            [metadataHashes[0], metadataHashes[1]],
+            [100, 100],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+      });
+      it('should revert when trying to mint more than the max supply during first lazy mint', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 4);
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [4, 4],
+          [4, 4],
+          [metadataHashes[0], metadataHashes[1]],
+          [3, 3]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            signature,
+            [4, 4],
+            [4, 4],
+            [metadataHashes[0], metadataHashes[1]],
+            [3, 3],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Max supply exceeded');
+      });
+      it('should revert when trying to mint more than the max supply during second lazy mint', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 100);
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [4, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        await lazyMintMultipleAssets(
+          signature,
+          [4, 4],
+          [5, 5],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10],
+          [creator.address, creator.address]
+        );
+        const secondSignature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [4, 4],
+          [6, 6],
+          [metadataHashes[0], metadataHashes[1]],
+          [10, 10]
+        );
+        await expect(
+          lazyMintMultipleAssets(
+            secondSignature,
+            [4, 4],
+            [6, 6],
+            [metadataHashes[0], metadataHashes[1]],
+            [10, 10],
+            [creator.address, creator.address]
+          )
+        ).to.be.revertedWith('AssetCreate: Max supply reached');
+      });
+    });
+    describe('Event', function () {
+      it('should emit AssetBatchLazyMinted event with the correct data', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.event == 'AssetBatchLazyMinted'
+        )[0].args;
+
+        // tiers should be [3, 4]
+        expect(eventData[3]).to.deep.equal([3, 4]);
+        // amounts should be [5, 5]
+        expect(eventData[4]).to.deep.equal([5, 5]);
+        // metadataHashes should be selectedMetadataHashes
+        expect(eventData[5]).to.deep.equal(selectedMetadataHashes);
+      });
+      it('should emit Catalyst burn events', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          CatalystContract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
+        );
+
+        const eventData = result.events.filter(
+          (e: Event) => e.address == CatalystContract.address
+        );
+        expect(eventData).to.not.be.undefined;
+      });
+      it('should emit LazyVault Distributed events', async function () {
+        const {
+          mintCatalyst,
+          lazyMintMultipleAssets,
+          generateLazyMintMultipleAssetsSignature,
+          metadataHashes,
+          creator,
+          LazyVaultContract,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 5);
+        await mintCatalyst(4, 5);
+        const selectedMetadataHashes = [metadataHashes[0], metadataHashes[1]];
+        const signature = await generateLazyMintMultipleAssetsSignature(
+          [creator.address, creator.address],
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10]
+        );
+        const result = await lazyMintMultipleAssets(
+          signature,
+          [3, 4],
+          [5, 5],
+          selectedMetadataHashes,
+          [10, 10],
+          [creator.address, creator.address]
         );
 
         const eventData = result.events.filter(
