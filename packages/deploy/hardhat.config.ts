@@ -56,6 +56,7 @@ const importedPackages = {
     '/src/solc_0.8/test/FakeChildChainManager.sol',
     '/src/solc_0.8/test/MockOperatorFilterRegistry.sol',
     '/src/solc_0.8/OperatorFilterer/contracts/OperatorFilterRegistrant.sol',
+    'src/solc_0.5/Sand.sol',
     'src/solc_0.5/Land.sol',
     'src/solc_0.5/LandV2.sol',
     'src/solc_0.5/LandV3.sol',
