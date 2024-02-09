@@ -9,6 +9,7 @@ import {
   addNodeAndMnemonic,
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
+import './tasks/hardhatVerifyUpgrade';
 import './tasks/importedPackages';
 
 // Package name : solidity source code path
@@ -25,8 +26,15 @@ const importedPackages = {
   '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
   '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
   '@sandbox-smart-contracts/core': [
-    '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
-    '/src/solc_0.8/test/FakeChildChainManager.sol',
+    'src/solc_0.8/polygon/child/sand/PolygonSand.sol',
+    'src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
+    'src/solc_0.8/test/FakeChildChainManager.sol',
+    'src/solc_0.5/Sand.sol',
+    'src/solc_0.5/LandV3.sol',
+  ],
+  '@sandbox-smart-contracts/land': [
+    'contracts/PolygonLandV2.sol',
+    'contracts/LandV3.sol',
   ],
 };
 
@@ -295,6 +303,7 @@ const networks = {
 };
 
 const compilers = [
+  '0.8.23',
   '0.8.21',
   '0.8.19',
   '0.8.18',
