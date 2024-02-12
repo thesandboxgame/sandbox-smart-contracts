@@ -77,7 +77,11 @@ contract LazyVault is ILazyVault, AccessControl {
     /// @param tier The tier of the distribution
     /// @param amount The amount to be distributed
     /// @param creator The creator's address
-    function processDistribution(uint8 tier, uint256 amount, address creator) internal {
+    function processDistribution(
+        uint8 tier,
+        uint256 amount,
+        address creator
+    ) internal {
         uint256 totalValue = amount * tierValues[tier];
         uint256 creatorShare = totalValue;
         uint256[] memory splitValues = new uint256[](splitRecipients.length);

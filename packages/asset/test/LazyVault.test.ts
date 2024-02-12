@@ -4,7 +4,7 @@ import {expect} from 'chai';
 import runSetup from './fixtures/lazyVaultFixture';
 import {Event} from 'ethers';
 
-describe.only('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
+describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
   describe('General', function () {
     it('should assign DEFAULT_ADMIN to the admin address from the constructor', async function () {
       const {admin, LazyVaultContract} = await runSetup();
