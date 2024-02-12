@@ -132,7 +132,10 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
       );
 
       await expect(
-        LazyVaultContract.connect(manager).withdraw(parseEther('100'))
+        LazyVaultContract.connect(manager).withdraw(
+          parseEther('100'),
+          manager.address
+        )
       ).to.not.be.reverted;
       const balanceAfter = await VaultTokenContract.balanceOf(
         LazyVaultContract.address
@@ -143,7 +146,10 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
     it('should NOT allow non-managers to withdraw any amount of the vaulted token', async function () {
       const {creator1, LazyVaultContract, MANAGER_ROLE} = await runSetup();
       await expect(
-        LazyVaultContract.connect(creator1).withdraw(parseEther('100'))
+        LazyVaultContract.connect(creator1).withdraw(
+          parseEther('100'),
+          creator1.address
+        )
       ).to.be.revertedWith(
         `AccessControl: account ${creator1.address.toLowerCase()} is missing role ${MANAGER_ROLE}`
       );
@@ -541,7 +547,7 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
           .withArgs(
             tiers[0], // 1, not BigNumber because its uint8
             BigNumber.from(amounts[0]), // BigNumber.from(2)
-            initialTierValues[tiers[0]], // BigNumber.from(100)
+            initialTierValues[tiers[0]].mul(amounts[0]), // BigNumber.from(100)
             creator1.address, // creator1.address
             [splitRecipient1Amount, splitRecipient2Amount], // BigNumber.from(200), BigNumber.from(500)
             [initialRecipients[0].address, initialRecipients[1].address], // initialRecipients[0].address, initialRecipients[1].address
@@ -611,7 +617,7 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
           {
             tier: tiers[0],
             amount: BigNumber.from(amounts[0]),
-            tierValue: initialTierValues[tiers[0]],
+            tierValue: initialTierValues[tiers[0]].mul(amounts[0]),
             creator: creator1.address,
             splitAmounts: [
               splitRecipient1Asset1Amount,
@@ -626,7 +632,7 @@ describe('LazyVault (/packages/asset/contracts/LazyVault.sol)', function () {
           {
             tier: tiers[1],
             amount: BigNumber.from(amounts[1]),
-            tierValue: initialTierValues[tiers[1]],
+            tierValue: initialTierValues[tiers[1]].mul(amounts[1]),
             creator: creator1.address,
             splitAmounts: [
               splitRecipient1Asset2Amount,
