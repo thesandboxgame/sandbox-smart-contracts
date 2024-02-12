@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.23;
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 interface IToken {
     function safeTransferFrom(address from, address to, uint256 id) external;
@@ -64,5 +67,20 @@ contract MarketPlaceMock {
 
     function supportsInterface(bytes4 _interfaceId) external pure returns (bool) {
         return _interfaceId == 0x01ffc9a7 || _interfaceId == ERC721_IS_RECEIVER;
+    }
+
+    function distributeRoyaltyEIP2981(
+        uint256 erc20TokenAmount,
+        IERC20 erc20Contract,
+        address nftContract,
+        uint256 nftId,
+        address nftBuyer,
+        address nftSeller
+    ) external payable {
+        require(erc20TokenAmount > 0, "erc20 token amount can't be zero");
+        (address royaltyReceiver, uint256 value) = IERC2981(nftContract).royaltyInfo(nftId, erc20TokenAmount);
+        erc20Contract.transferFrom(nftBuyer, royaltyReceiver, value);
+        erc20Contract.transferFrom(nftBuyer, nftSeller, (erc20TokenAmount - value));
+        IERC721(nftContract).safeTransferFrom(nftSeller, nftBuyer, nftId, "0x");
     }
 }
