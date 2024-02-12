@@ -17,15 +17,11 @@ interface ILazyVault {
         uint256 creatorShare
     );
 
-    event VaultWithdraw(address indexed manager, uint256 amount);
+    event VaultWithdraw(address indexed caller, address indexed manager, uint256 amount);
 
     event TierValuesChanged(uint256[] oldValues, uint256[] newValues);
 
     event SplitRecipientsChanged(SplitRecipient[] recipients);
 
-    function distribute(
-        uint8[] calldata tiers,
-        uint256[] calldata amounts,
-        address[] calldata creators
-    ) external;
+    function distribute(uint8[] calldata tiers, uint256[] calldata amounts, address[] calldata creators) external;
 }

@@ -3,6 +3,7 @@ pragma solidity 0.8.18;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ILazyVault} from "./interfaces/ILazyVault.sol";
 
 /// @title LazyVault
@@ -10,7 +11,7 @@ import {ILazyVault} from "./interfaces/ILazyVault.sol";
 /// @notice Contract responsible for distributing tokens to creators and split recipients
 contract LazyVault is ILazyVault, AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLEw");
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
 
     // address of the token that will be distributed by this vault
     address public vaultToken;
@@ -40,8 +41,8 @@ contract LazyVault is ILazyVault, AccessControl {
         vaultToken = _vaultToken;
     }
 
-    /// @notice Distributes tokens to the creators and shares a specified percentage with the split recipients
-    /// @dev The order of items in the tiers, amounts, and creators arrays must be preserved
+    /// @notice Distributes tokens to creators and split recipients
+    /// @dev Only the distributor role can distribute tokens
     /// @param tiers An array of tiers
     /// @param amounts An array of amounts
     /// @param creators An array of creators
@@ -50,44 +51,56 @@ contract LazyVault is ILazyVault, AccessControl {
         uint256[] calldata amounts,
         address[] calldata creators
     ) external onlyRole(DISTRIBUTOR_ROLE) {
+        validateDistributionInputs(tiers, amounts, creators);
+        for (uint256 i = 0; i < tiers.length; i++) {
+            processDistribution(tiers[i], amounts[i], creators[i]);
+        }
+    }
+
+    /// @notice Validates the input arrays for distribution
+    /// @param tiers An array of tiers
+    /// @param amounts An array of amounts
+    /// @param creators An array of creators
+    function validateDistributionInputs(
+        uint8[] memory tiers,
+        uint256[] memory amounts,
+        address[] memory creators
+    ) internal view {
         require(tiers.length == amounts.length, "LazyVault: 1-Array mismatch");
         require(tiers.length == creators.length, "LazyVault: 2-Array mismatch");
-
         for (uint256 i = 0; i < tiers.length; i++) {
             require(tiers[i] > 0 && tiers[i] < tierValues.length, "LazyVault: Invalid tier");
-            uint256 totalValue = amounts[i] * tierValues[tiers[i]];
-            uint256 creatorShare = totalValue;
-            uint256[] memory splitValues = new uint256[](splitRecipients.length);
-            address[] memory splitRecipientsAddresses = new address[](splitRecipients.length);
-            for (uint256 j = 0; j < splitRecipients.length; j++) {
-                SplitRecipient memory recipient = splitRecipients[j];
-                splitRecipientsAddresses[j] = recipient.recipient;
-                uint256 splitValue = (totalValue * recipient.split) / 10000;
-                splitValues[j] = splitValue;
-                IERC20(vaultToken).transfer(recipient.recipient, splitValue);
-                creatorShare -= splitValue;
-            }
-
-            IERC20(vaultToken).transfer(creators[i], creatorShare);
-
-            emit Distributed(
-                tiers[i],
-                amounts[i],
-                tierValues[tiers[i]],
-                creators[i],
-                splitValues,
-                splitRecipientsAddresses,
-                creatorShare
-            );
         }
+    }
+
+    /// @notice Processes the distribution internally and does token transfers
+    /// @param tier The tier of the distribution
+    /// @param amount The amount to be distributed
+    /// @param creator The creator's address
+    function processDistribution(uint8 tier, uint256 amount, address creator) internal {
+        uint256 totalValue = amount * tierValues[tier];
+        uint256 creatorShare = totalValue;
+        uint256[] memory splitValues = new uint256[](splitRecipients.length);
+        address[] memory splitRecipientsAddresses = new address[](splitRecipients.length);
+        for (uint256 j = 0; j < splitRecipients.length; j++) {
+            SplitRecipient memory recipient = splitRecipients[j];
+            splitRecipientsAddresses[j] = recipient.recipient;
+            uint256 splitValue = (totalValue * recipient.split) / 10000;
+            splitValues[j] = splitValue;
+            SafeERC20.safeTransfer(IERC20(vaultToken), recipient.recipient, splitValue);
+            creatorShare -= splitValue;
+        }
+
+        SafeERC20.safeTransfer(IERC20(vaultToken), creator, creatorShare);
+        emit Distributed(tier, amount, totalValue, creator, splitValues, splitRecipientsAddresses, creatorShare);
     }
 
     /// @notice Withdraws tokens from the vault
     /// @dev Only the manager role can withdraw tokens
     /// @param amount The amount to withdraw
-    function withdraw(uint256 amount) external onlyRole(MANAGER_ROLE) {
-        IERC20(vaultToken).transfer(_msgSender(), amount);
-        emit VaultWithdraw(_msgSender(), amount);
+    function withdraw(uint256 amount, address recipient) external onlyRole(MANAGER_ROLE) {
+        SafeERC20.safeTransfer(IERC20(vaultToken), recipient, amount);
+        emit VaultWithdraw(_msgSender(), recipient, amount);
     }
 
     /// @notice Changes the split recipients and their split amount
