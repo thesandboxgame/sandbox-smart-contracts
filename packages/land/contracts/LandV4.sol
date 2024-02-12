@@ -29,7 +29,13 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @notice Initializes the upgrade to version 4
      * @param _royaltyManager address of the manager contract for common royalty recipient
      */
-    function initializeV4(address _royaltyManager) public initializerV4 {
+    function initializeV4(
+        address metaTransactionContract,
+        address admin,
+        address _royaltyManager
+    ) public initializerV4 {
+        _admin = admin;
+        _setMetaTransactionProcessor(metaTransactionContract, true);
         _setRoyaltyManager(_royaltyManager);
         _initV4 = true;
     }
