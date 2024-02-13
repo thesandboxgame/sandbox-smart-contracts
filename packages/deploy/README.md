@@ -1,7 +1,7 @@
 # TSB contracts deploy
 
-This package is used to compile, deploy, test and keep track of the contracts we
-use in our environments.
+This package is used to compile, deploy, test, upgrade and keep track of the
+contracts we use in our environments.
 
 ## Compilation
 
@@ -43,6 +43,43 @@ where:
 - `SOMETAGS` are the tags used to limit which deployment scripts will be
   executed ( see:[hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
   configuration)
+
+## Upgrades
+
+1. Modify smart contracts, add tests, and update documentation in the respective
+   package. Submit these changes for review via a Pull Request (PR).
+
+2. Create an upgrade script, referring to
+   `packages/deploy/deploy/300_catalyst/303_upgrade_catalyst.ts` as an example.
+
+3. Ensure the upgrade index in the script is higher than the previous one,
+   verifying manually.
+
+4. Once the contract(s) is reviewed, publish to NPM as a release candidate (RC).
+   Increment the minor version and suffix with `-rc.0`. For subsequent RC
+   versions, increment the patch number (e.g., `1.1.0-rc.1`).
+
+5. For non-critical upgrades, you may release a stable version directly
+   post-upgrade, skipping the RC stage.
+
+6. Test the upgrade on a fork of the live network before deploying to the live
+   network.
+
+7. Update the dependency version in `packages/deploy/package.json`, then run
+   `yarn install` in the deploy package. For example:
+   `~"@sandbox-smart-contracts/asset": "1.0.3"~ =>
+   "@sandbox-smart-contracts/asset": "1.1.0"``
+
+8. Run the upgrade script, e.g.,
+   `yarn hardhat deploy --network polygon --tags Catalyst-upgrade`.
+
+9. After completing the upgrade, publish the RC as a stable release, removing
+   the `-rc.0` suffix.
+
+10. For npm publication, ensure you are logged in to NPM. Use
+    [release-it](https://github.com/release-it/release-it) for npm package
+    releases. In the upgraded package directory, run `yarn release`, which
+    prompts for the new version number and updates the `package.json` file.
 
 ## Testing
 
