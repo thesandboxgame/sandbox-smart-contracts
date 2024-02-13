@@ -1,5 +1,5 @@
 import {Signer} from 'ethers';
-import {ethers} from 'hardhat';
+import {ethers, upgrades} from 'hardhat';
 
 export type TesteableContracts = 'LandV3' | 'PolygonLandV2';
 
@@ -195,6 +195,252 @@ export async function setupOperatorFilter(mainContract: TesteableContracts) {
     mockMarketPlace2,
     mockMarketPlace3,
     deployer,
+    operatorFilterSubscription,
+    other,
+    other1,
+  };
+}
+
+export async function setupPolygonLandV3Contract() {
+  const [
+    deployer,
+    seller,
+    buyer,
+    other,
+    other1,
+    other2,
+    trustedForwarder,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    landAdmin,
+    landMinter,
+    contractRoyaltySetter,
+  ] = await ethers.getSigners();
+
+  const RoyaltySplitterFactory =
+    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory =
+    await ethers.getContractFactory('RoyaltyManager');
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      await RoyaltySplitter.getAddress(),
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+      trustedForwarder.address,
+    ],
+    {
+      initializer: 'initialize',
+    },
+  );
+
+  const TrustedForwarderContractFactory = await ethers.getContractFactory(
+    'MetaTxForwarderMock',
+  );
+  const TrustedForwarderContract =
+    await TrustedForwarderContractFactory.deploy();
+
+  const PolygonLandV3Factory = await ethers.getContractFactory('PolygonLandV3');
+  const PolygonLandV3Contract = await upgrades.deployProxy(
+    PolygonLandV3Factory,
+    [
+      await TrustedForwarderContract.getAddress(),
+      await RoyaltyManagerContract.getAddress(),
+    ],
+    {
+      initializer: 'initialize',
+    },
+  );
+
+  // mock contract deploy
+  const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
+    'ERC721TokenReceiverMock',
+  );
+  const TestERC721TokenReceiver = await TestERC721TokenReceiverFactory.deploy();
+
+  const MockMarketPlaceFactory =
+    await ethers.getContractFactory('MarketPlaceMock');
+  const MockMarketPlace = await MockMarketPlaceFactory.deploy();
+
+  const ERC20ContractFactory = await ethers.getContractFactory('ERC20Mock');
+  const ERC20Contract = await ERC20ContractFactory.deploy();
+
+  const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
+    'MarketPlaceToFilterMock',
+  );
+  const MockMarketPlace1 = await MarketPlaceToFilterMockFactory.deploy();
+  const MockMarketPlace2 = await MarketPlaceToFilterMockFactory.deploy();
+  const MockMarketPlace3 = await MarketPlaceToFilterMockFactory.deploy();
+
+  // setup role
+  await PolygonLandV3Contract.changeAdmin(landAdmin);
+  const LandAsAdmin = PolygonLandV3Contract.connect(landAdmin);
+  await PolygonLandV3Contract.connect(landAdmin).setMinter(
+    await landMinter.getAddress(),
+    true,
+  );
+  const LandAsMinter = PolygonLandV3Contract.connect(landMinter);
+  const LandAsOther = PolygonLandV3Contract.connect(other);
+  const LandAsOther1 = PolygonLandV3Contract.connect(other1);
+
+  await TestERC721TokenReceiver.setTokenContract(LandAsOther);
+  const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
+    contractRoyaltySetter,
+  );
+  const contractRoyaltySetterRole =
+    await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
+  const ERC20AsBuyer = ERC20Contract.connect(buyer);
+  // End set up roles
+
+  return {
+    manager: RoyaltyManagerContract,
+    RoyaltySplitter,
+    TrustedForwarderContract,
+    PolygonLandV3Contract,
+    LandAsAdmin,
+    LandAsMinter,
+    LandAsOther,
+    LandAsOther1,
+    TestERC721TokenReceiver,
+    MockMarketPlace,
+    ERC20Contract,
+    MockMarketPlace1,
+    MockMarketPlace2,
+    MockMarketPlace3,
+    managerAsRoyaltySetter,
+    contractRoyaltySetterRole,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
+    ERC20AsBuyer,
+    deployer,
+    landAdmin,
+    landMinter,
+    buyer,
+    seller,
+    other,
+    other1,
+    other2,
+  };
+}
+
+export async function setupPolygonLandV3OperatorFilter() {
+  const [
+    deployer,
+    commonRoyaltyReceiver,
+    managerAdmin,
+    contractRoyaltySetter,
+    trustedForwarder,
+    other,
+    other1,
+    landAdmin,
+    operatorFilterSubscription,
+    defaultSubscription,
+  ] = await ethers.getSigners();
+
+  const RoyaltySplitterFactory =
+    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
+
+  const RoyaltyManagerFactory =
+    await ethers.getContractFactory('RoyaltyManager');
+  const RoyaltyManagerContract = await upgrades.deployProxy(
+    RoyaltyManagerFactory,
+    [
+      commonRoyaltyReceiver.address,
+      5000,
+      await RoyaltySplitter.getAddress(),
+      managerAdmin.address,
+      contractRoyaltySetter.address,
+      trustedForwarder.address,
+    ],
+    {
+      initializer: 'initialize',
+    },
+  );
+
+  const TrustedForwarderContractFactory = await ethers.getContractFactory(
+    'MetaTxForwarderMock',
+  );
+  const TrustedForwarderContract =
+    await TrustedForwarderContractFactory.deploy();
+
+  const PolygonLandV3Factory =
+    await ethers.getContractFactory('PolygonLandV3Mock');
+  const PolygonLandV3Contract = await upgrades.deployProxy(
+    PolygonLandV3Factory,
+    [
+      await TrustedForwarderContract.getAddress(),
+      await RoyaltyManagerContract.getAddress(),
+    ],
+    {
+      initializer: 'initialize',
+    },
+  );
+
+  await PolygonLandV3Contract.changeAdmin(landAdmin);
+  const LandAsAdmin = PolygonLandV3Contract.connect(landAdmin);
+  const LandAsOther = PolygonLandV3Contract.connect(other);
+  const LandAsOther1 = PolygonLandV3Contract.connect(other1);
+  const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
+    'MarketPlaceToFilterMock',
+  );
+  const MockMarketPlace1 = await MarketPlaceToFilterMockFactory.deploy();
+  const MockMarketPlace2 = await MarketPlaceToFilterMockFactory.deploy();
+
+  const MockMarketPlace3Factory =
+    await ethers.getContractFactory('MarketPlaceMock');
+  const MockMarketPlace3 = await MockMarketPlace3Factory.deploy();
+
+  const OperatorFilterRegistryFactory = await ethers.getContractFactory(
+    'OperatorFilterRegistryMock',
+  );
+  const OperatorFilterRegistry = await OperatorFilterRegistryFactory.deploy(
+    defaultSubscription,
+    [MockMarketPlace1, MockMarketPlace2],
+  );
+
+  await OperatorFilterRegistry.registerAndCopyEntries(
+    operatorFilterSubscription,
+    defaultSubscription,
+  );
+
+  await LandAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
+  await LandAsAdmin.register(operatorFilterSubscription, true);
+
+  const PolygonLandV3MockContract = await upgrades.deployProxy(
+    PolygonLandV3Factory,
+    [
+      await TrustedForwarderContract.getAddress(),
+      await RoyaltyManagerContract.getAddress(),
+    ],
+    {
+      initializer: 'initialize',
+    },
+  );
+  const LandRegistryNotSetAsDeployer =
+    PolygonLandV3MockContract.connect(deployer);
+  const LandRegistryNotSetAsAdmin =
+    PolygonLandV3MockContract.connect(landAdmin);
+  const LandRegistryNotSetAsOther = PolygonLandV3MockContract.connect(other);
+  return {
+    PolygonLandV3Contract,
+    LandAsAdmin,
+    LandAsOther,
+    LandAsOther1,
+    OperatorFilterRegistry,
+    LandRegistryNotSetAsDeployer,
+    LandRegistryNotSetAsAdmin,
+    LandRegistryNotSetAsOther,
+    MockMarketPlace1,
+    MockMarketPlace2,
+    MockMarketPlace3,
+    deployer,
+    landAdmin,
     operatorFilterSubscription,
     other,
     other1,
