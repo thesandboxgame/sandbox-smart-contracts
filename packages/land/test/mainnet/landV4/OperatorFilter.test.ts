@@ -213,7 +213,7 @@ describe('LandV4:OperatorFilterer', function () {
 
     expect(await LandAsOther.balanceOf(other1)).to.be.equal(2);
   });
-  
+
   it('should be able to batch transfer Land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
       setupLandV4OperatorFilter,
