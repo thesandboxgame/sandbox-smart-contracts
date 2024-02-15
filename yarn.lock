@@ -2198,6 +2198,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/hardhat-upgrades@npm:^3.0.2":
+  version: 3.0.3
+  resolution: "@openzeppelin/hardhat-upgrades@npm:3.0.3"
+  dependencies:
+    "@openzeppelin/defender-admin-client": ^1.52.0
+    "@openzeppelin/defender-base-client": ^1.52.0
+    "@openzeppelin/defender-sdk-base-client": ^1.8.0
+    "@openzeppelin/defender-sdk-deploy-client": ^1.8.0
+    "@openzeppelin/upgrades-core": ^1.32.0
+    chalk: ^4.1.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.1.5
+    proper-lockfile: ^4.1.1
+    undici: ^5.28.2
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@nomicfoundation/hardhat-verify": ^2.0.0
+    ethers: ^6.6.0
+    hardhat: ^2.0.2
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-verify":
+      optional: true
+  bin:
+    migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
+  checksum: 62f99fe0c460f76b8a7b8c466061f7439c1d12aff49b3d854f975b7e7c4f376ed5f490d5f21bb68432305462701539cb1f93ab715ff11ac926dfa00cdfad88b5
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/platform-deploy-client@npm:^0.8.0":
   version: 0.8.0
   resolution: "@openzeppelin/platform-deploy-client@npm:0.8.0"
@@ -2804,7 +2832,9 @@ __metadata:
     "@nomiclabs/hardhat-etherscan": ^3.1.7
     "@openzeppelin/contracts": 4.9.5
     "@openzeppelin/contracts-upgradeable": ^4.9.5
+    "@openzeppelin/hardhat-upgrades": ^3.0.2
     "@release-it/keep-a-changelog": ^5.0.0
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
     "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
