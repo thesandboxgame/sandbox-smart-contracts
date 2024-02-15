@@ -8,14 +8,19 @@ import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
 import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
 import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
-import {RoyaltyDistributorV2} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributorV2.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 
 /// @title LAND token on L2
-contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
+contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
     using AddressUpgradeable for address;
 
+    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
+
+    IRoyaltyManager private royaltyManager;
+
     event OperatorRegistrySet(address indexed registry);
+    event RoyaltyManagerSet(address indexed _royaltyManager);
 
     function initialize(address trustedForwarder, address _royaltyManager) external initializer {
         _admin = _msgSender();
@@ -24,11 +29,39 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
         emit AdminChanged(address(0), _admin);
     }
 
+    /// @notice set royalty manager
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(_royaltyManager);
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderSet(trustedForwarder);
+    }
+
+    /// @notice Returns how much royalty is owed and to whom based on ERC2981
+    /// @dev tokenId is one of the EIP2981 args for this function can't be removed
+    /// @param _salePrice the price of token on which the royalty is calculated
+    /// @return receiver the receiver of royalty
+    /// @return royaltyAmount the amount of royalty
+    function royaltyInfo(
+        uint256 /*_tokenId */,
+        uint256 _salePrice
+    ) external view returns (address receiver, uint256 royaltyAmount) {
+        uint16 royaltyBps;
+        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
+        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
+        return (receiver, royaltyAmount);
+    }
+
+    /// @notice returns the royalty manager
+    /// @return royaltyManagerAddress address of royalty manager contract.
+    function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
+        return royaltyManager;
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
@@ -129,9 +162,7 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(
-        bytes4 id
-    ) public pure override(PolygonLandBaseToken, RoyaltyDistributorV2) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(PolygonLandBaseToken) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
     }
 
