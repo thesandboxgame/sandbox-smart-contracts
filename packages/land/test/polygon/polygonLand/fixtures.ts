@@ -1,8 +1,8 @@
-import {setupPolygonLandV3Contract} from '../../fixtures';
+import {setupPolygonLandContract} from '../../fixtures';
 import {Addressable} from 'ethers';
 
-export async function setupPolygonLandV3() {
-  const ret = await setupPolygonLandV3Contract();
+export async function setupPolygonLand() {
+  const ret = await setupPolygonLandContract();
 
   async function sendMetaTx(
     from: Addressable | string,

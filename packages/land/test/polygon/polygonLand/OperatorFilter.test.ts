@@ -1,22 +1,22 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupPolygonLandV3OperatorFilter} from '../../fixtures';
+import {setupPolygonLandOperatorFilter} from '../../fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../../fixtures';
 
-describe('PolygonLandV3 OperatorFilterer', function () {
+describe('PolygonLand OperatorFilterer', function () {
   it('should be registered', async function () {
-    const {OperatorFilterRegistry, PolygonLandV3Contract} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+    const {OperatorFilterRegistry, PolygonLandContract} = await loadFixture(
+      setupPolygonLandOperatorFilter,
     );
     expect(
-      await OperatorFilterRegistry.isRegistered(PolygonLandV3Contract),
+      await OperatorFilterRegistry.isRegistered(PolygonLandContract),
     ).to.be.equal(true);
   });
 
   it('would not register on the operator filter registry if not set on the Land', async function () {
     const {OperatorFilterRegistry, LandRegistryNotSetAsDeployer} =
-      await loadFixture(setupPolygonLandV3OperatorFilter);
+      await loadFixture(setupPolygonLandOperatorFilter);
     await LandRegistryNotSetAsDeployer.registerFilterer(ZeroAddress, false);
     expect(
       await OperatorFilterRegistry.isRegistered(LandRegistryNotSetAsDeployer),
@@ -28,7 +28,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       OperatorFilterRegistry,
       operatorFilterSubscription,
       LandRegistryNotSetAsDeployer,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandRegistryNotSetAsDeployer.setOperatorRegistry(
       OperatorFilterRegistry,
     );
@@ -45,7 +45,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should could be registered through OperatorFiltererUpgradeable', async function () {
     const {OperatorFilterRegistry, LandRegistryNotSetAsDeployer} =
-      await loadFixture(setupPolygonLandV3OperatorFilter);
+      await loadFixture(setupPolygonLandOperatorFilter);
 
     await LandRegistryNotSetAsDeployer.setOperatorRegistry(
       OperatorFilterRegistry,
@@ -63,7 +63,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       LandRegistryNotSetAsDeployer,
       operatorFilterSubscription,
       MockMarketPlace1,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     await LandRegistryNotSetAsDeployer.setOperatorRegistry(
       OperatorFilterRegistry,
@@ -96,7 +96,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       other,
       MockMarketPlace1,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     await LandRegistryNotSetAsDeployer.mintQuad(other, 1, 0, 0, '0x');
     await LandRegistryNotSetAsDeployer.registerFilterer(
@@ -122,7 +122,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other,
       other1,
       MockMarketPlace1,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     await LandRegistryNotSetAsDeployer.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -152,18 +152,18 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be subscribed to operator filterer subscription contract', async function () {
     const {
-      PolygonLandV3Contract,
+      PolygonLandContract,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     expect(
-      await OperatorFilterRegistry.subscriptionOf(PolygonLandV3Contract),
+      await OperatorFilterRegistry.subscriptionOf(PolygonLandContract),
     ).to.be.equal(operatorFilterSubscription);
   });
 
   it('should be able to transfer land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -175,7 +175,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should revert for minted invalid size', async function () {
     const {LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await expect(
       LandAsOther.mintQuad(other, 25, 0, 0, '0x'),
@@ -184,7 +184,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe transfer land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -200,7 +200,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe transfer(with data) land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -217,7 +217,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe batch transfer Land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
@@ -231,7 +231,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to batch transfer Land if from is the owner of token', async function () {
     const {LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
@@ -246,7 +246,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
     const {MockMarketPlace1, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -258,7 +258,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
     const {MockMarketPlace1, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -274,7 +274,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe transfer(with data) token if from is the owner of token and to is a blacklisted marketplace', async function () {
     const {MockMarketPlace1, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -291,7 +291,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to safe batch transfer Land if from is the owner of token and to is a blacklisted marketplace', async function () {
     const {MockMarketPlace1, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
@@ -310,7 +310,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
     const {MockMarketPlace1, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
@@ -330,14 +330,14 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should not approve blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await expect(LandAsOther.approve(MockMarketPlace1, 1)).to.be.reverted;
   });
 
   it('it should not approveFor blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther1, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await expect(LandAsOther1.approveFor(other, MockMarketPlace1, 1)).to.be
       .reverted;
@@ -345,7 +345,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should not setApprovalForAll blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await expect(LandAsOther1.setApprovalForAll(MockMarketPlace1, true)).to.be
       .reverted;
@@ -353,7 +353,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should not setApprovalForAllFor blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther1, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await expect(
       LandAsOther1.setApprovalForAllFor(other, MockMarketPlace1, true),
@@ -362,7 +362,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should approve non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
 
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
@@ -374,7 +374,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should approveFor non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -384,7 +384,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should setApprovalForAll non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.setApprovalForAll(MockMarketPlace3, true);
     expect(
@@ -394,7 +394,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should setApprovalForAllFor non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.setApprovalForAllFor(other, MockMarketPlace3, true);
     expect(
@@ -409,7 +409,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
     await LandAsOther.approve(MockMarketPlace3, id1);
@@ -437,7 +437,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
     await LandAsOther.approveFor(other, MockMarketPlace3, id1);
@@ -466,7 +466,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       LandAsOther,
       LandAsOther1,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.setApprovalForAll(MockMarketPlace3, true);
 
     expect(
@@ -493,7 +493,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       LandAsOther1,
       other,
       other1,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.setApprovalForAllFor(other, MockMarketPlace3, true);
 
     expect(
@@ -518,7 +518,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace3CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
@@ -550,7 +550,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace3CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
@@ -583,7 +583,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       LandAsOther,
       LandAsOther1,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace3CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
@@ -614,7 +614,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       LandAsOther1,
       other,
       other1,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace3CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
@@ -643,7 +643,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
@@ -679,7 +679,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
@@ -715,7 +715,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
@@ -749,7 +749,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       operatorFilterSubscription,
       LandAsOther,
       other,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
 
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
@@ -779,7 +779,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should not be able to transfer through blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -804,7 +804,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
 
@@ -838,7 +838,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should be able to transfer through non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -859,7 +859,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id1 = getId(1, 0, 0);
 
@@ -899,7 +899,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
@@ -937,7 +937,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should not be able to transfer(without data) through blacklisted market places', async function () {
     const {MockMarketPlace1, LandAsOther, LandAsOther1, other, other1} =
-      await loadFixture(setupPolygonLandV3OperatorFilter);
+      await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
 
@@ -954,7 +954,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
 
   it('it should be able to transfer(without data) through non blacklisted market places', async function () {
     const {MockMarketPlace3, LandAsOther, other, other1} = await loadFixture(
-      setupPolygonLandV3OperatorFilter,
+      setupPolygonLandOperatorFilter,
     );
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
@@ -980,7 +980,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
 
@@ -1022,7 +1022,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
 
@@ -1066,7 +1066,7 @@ describe('PolygonLandV3 OperatorFilterer', function () {
       other1,
       OperatorFilterRegistry,
       operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandV3OperatorFilter);
+    } = await loadFixture(setupPolygonLandOperatorFilter);
     const MockMarketPlace1CodeHash =
       await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
     await LandAsOther.mintQuad(other, 1, 0, 0, '0x');

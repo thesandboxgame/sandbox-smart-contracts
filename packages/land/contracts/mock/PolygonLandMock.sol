@@ -3,9 +3,9 @@
 pragma solidity 0.8.23;
 
 import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";
-import {PolygonLandV3} from "../PolygonLandV3.sol";
+import {PolygonLand} from "../PolygonLand.sol";
 
-contract PolygonLandV3Mock is PolygonLandV3 {
+contract PolygonLandMock is PolygonLand {
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external override {

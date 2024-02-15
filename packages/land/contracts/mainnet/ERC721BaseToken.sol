@@ -9,12 +9,12 @@ import {SuperOperatorsV2} from "./SuperOperatorsV2.sol";
 import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
 
 /**
- * @title ERC721BaseTokenV3
+ * @title ERC721BaseToken
  * @author The Sandbox
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-contract ERC721BaseTokenV3 is IERC721Upgradeable, SuperOperatorsV2, MetaTransactionReceiverV2 {
+contract ERC721BaseToken is IERC721Upgradeable, SuperOperatorsV2, MetaTransactionReceiverV2 {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
