@@ -5,9 +5,9 @@ pragma solidity 0.8.23;
 import {LandBaseToken} from "./mainnet/LandBaseToken.sol";
 import {ERC721BaseToken} from "./mainnet/ERC721BaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
-import {RoyaltyDistributorV2} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributorV2.sol";
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 
 /**
  * @title Land Contract
@@ -15,10 +15,14 @@ import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interface
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract Land is LandBaseToken, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
+contract Land is LandBaseToken, OperatorFiltererUpgradeable {
+    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
+
     bool internal _initV4;
+    IRoyaltyManager private royaltyManager;
 
     event OperatorRegistrySet(address indexed registry);
+    event RoyaltyManagerSet(address indexed _royaltyManager);
 
     modifier initializerV4() {
         require(!_initV4, "already initialized");
@@ -74,6 +78,13 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable, RoyaltyDistributorV
         return string(bstr);
     }
 
+    /// @notice set royalty manager
+    /// @param _royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address _royaltyManager) internal {
+        royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(_royaltyManager);
+    }
+
     /**
      * @notice Return the URI of a specific token
      * @param id The id of the token
@@ -92,7 +103,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable, RoyaltyDistributorV
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(ERC721BaseToken, RoyaltyDistributorV2) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(ERC721BaseToken) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
     }
 
@@ -110,6 +121,27 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable, RoyaltyDistributorV
     function setOperatorRegistry(address registry) external onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
+    }
+
+    /// @notice Returns how much royalty is owed and to whom based on ERC2981
+    /// @dev tokenId is one of the EIP2981 args for this function can't be removed
+    /// @param _salePrice the price of token on which the royalty is calculated
+    /// @return receiver the receiver of royalty
+    /// @return royaltyAmount the amount of royalty
+    function royaltyInfo(
+        uint256 /*_tokenId */,
+        uint256 _salePrice
+    ) external view returns (address receiver, uint256 royaltyAmount) {
+        uint16 royaltyBps;
+        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
+        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
+        return (receiver, royaltyAmount);
+    }
+
+    /// @notice returns the royalty manager
+    /// @return royaltyManagerAddress address of royalty manager contract.
+    function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
+        return royaltyManager;
     }
 
     /**
