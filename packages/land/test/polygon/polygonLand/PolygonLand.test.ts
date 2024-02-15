@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupPolygonLandV3} from './fixtures';
+import {setupPolygonLand} from './fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../../fixtures';
 
@@ -8,24 +8,23 @@ const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
 // TODO: some test were testing the tunnel => not anymore. We need to check if we missed something.
-describe('PolygonLandV3.sol', function () {
+describe('PolygonLand.sol', function () {
   it('creation', async function () {
-    const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
+    const {PolygonLandContract} = await loadFixture(setupPolygonLand);
 
-    expect(await PolygonLandV3Contract.name()).to.be.equal("Sandbox's LANDs");
-    expect(await PolygonLandV3Contract.symbol()).to.be.equal('LAND');
+    expect(await PolygonLandContract.name()).to.be.equal("Sandbox's LANDs");
+    expect(await PolygonLandContract.symbol()).to.be.equal('LAND');
   });
 
   it('Only admin can set landMinter', async function () {
-    const {PolygonLandV3Contract, deployer} =
-      await loadFixture(setupPolygonLandV3);
+    const {PolygonLandContract, deployer} = await loadFixture(setupPolygonLand);
     await expect(
-      PolygonLandV3Contract.setMinter(deployer, true),
+      PolygonLandContract.setMinter(deployer, true),
     ).to.be.revertedWith('ADMIN_ONLY');
   });
 
   it('cannot set polygon Land Tunnel to zero address', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLandV3);
+    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
 
     await expect(
       LandAsAdmin.setMinter('0x0000000000000000000000000000000000000000', true),
@@ -37,12 +36,12 @@ describe('PolygonLandV3.sol', function () {
       it('transfers quads of all sizes', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {
-            PolygonLandV3Contract,
+            PolygonLandContract,
             LandAsMinter,
             LandAsOther,
             deployer,
             other,
-          } = await loadFixture(setupPolygonLandV3);
+          } = await loadFixture(setupPolygonLand);
           const bytes = '0x3333';
           const size = sizes[i];
           const plotCount = size * size;
@@ -52,7 +51,7 @@ describe('PolygonLandV3.sol', function () {
           expect(num).to.equal(plotCount);
 
           await LandAsOther.setApprovalForAllFor(other, deployer, true);
-          await PolygonLandV3Contract.transferQuad(
+          await PolygonLandContract.transferQuad(
             other,
             deployer,
             size,
@@ -60,9 +59,9 @@ describe('PolygonLandV3.sol', function () {
             0,
             bytes,
           );
-          const num1 = await PolygonLandV3Contract.balanceOf(other);
+          const num1 = await PolygonLandContract.balanceOf(other);
           expect(num1).to.equal(0);
-          const num2 = await PolygonLandV3Contract.balanceOf(deployer);
+          const num2 = await PolygonLandContract.balanceOf(deployer);
           expect(num2).to.equal(plotCount);
         }
       });
@@ -71,8 +70,8 @@ describe('PolygonLandV3.sol', function () {
     describe('Without approval', function () {
       it('reverts transfers of quads', async function () {
         for (let i = 0; i < sizes.length; i++) {
-          const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-            await loadFixture(setupPolygonLandV3);
+          const {PolygonLandContract, LandAsMinter, deployer, other} =
+            await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           const size = sizes[i];
@@ -80,11 +79,11 @@ describe('PolygonLandV3.sol', function () {
 
           await LandAsMinter.mintQuad(other, size, 0, 0, bytes);
 
-          const num = await PolygonLandV3Contract.balanceOf(other);
+          const num = await PolygonLandContract.balanceOf(other);
           expect(num).to.equal(plotCount);
 
           await expect(
-            PolygonLandV3Contract.transferQuad(
+            PolygonLandContract.transferQuad(
               other,
               deployer,
               size,
@@ -107,19 +106,19 @@ describe('PolygonLandV3.sol', function () {
           for (let j = 0; j < sizes.length; j++) {
             size2 = sizes[j];
             if (size2 >= size1) continue;
-            const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-              await loadFixture(setupPolygonLandV3);
+            const {PolygonLandContract, LandAsMinter, deployer, other} =
+              await loadFixture(setupPolygonLand);
 
             const bytes = '0x3333';
             await LandAsMinter.mintQuad(deployer, size1, 0, 0, bytes);
             for (let x = 0; x < size2; x++) {
               for (let y = 0; y < size2; y++) {
                 const tokenId = x + y * GRID_SIZE;
-                await PolygonLandV3Contract.burn(tokenId);
+                await PolygonLandContract.burn(tokenId);
               }
             }
             await expect(
-              PolygonLandV3Contract.transferQuad(
+              PolygonLandContract.transferQuad(
                 deployer,
                 other,
                 size1,
@@ -133,8 +132,8 @@ describe('PolygonLandV3.sol', function () {
       });
 
       it(`should NOT be able to transfer burned 1x1 through parent quad`, async function () {
-        const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-          await loadFixture(setupPolygonLandV3);
+        const {PolygonLandContract, LandAsMinter, deployer, other} =
+          await loadFixture(setupPolygonLand);
 
         const bytes = '0x3333';
 
@@ -148,18 +147,18 @@ describe('PolygonLandV3.sol', function () {
           }
         }
 
-        await PolygonLandV3Contract.burn(0);
+        await PolygonLandContract.burn(0);
 
         // should not be able to transfer a 3x3 quad that has a burnt 1x1
         await expect(
-          PolygonLandV3Contract.transferQuad(deployer, other, 3, 0, 0, '0x'),
+          PolygonLandContract.transferQuad(deployer, other, 3, 0, 0, '0x'),
         ).to.be.revertedWith('not owner');
       });
 
       it('transfers of quads of all sizes from self', async function () {
         for (let i = 0; i < sizes.length; i++) {
-          const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-            await loadFixture(setupPolygonLandV3);
+          const {PolygonLandContract, LandAsMinter, deployer, other} =
+            await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           const size = sizes[i];
@@ -167,9 +166,9 @@ describe('PolygonLandV3.sol', function () {
 
           await LandAsMinter.mintQuad(deployer, size, 0, 0, bytes);
 
-          const num = await PolygonLandV3Contract.balanceOf(deployer);
+          const num = await PolygonLandContract.balanceOf(deployer);
           expect(num).to.equal(plotCount);
-          await PolygonLandV3Contract.transferQuad(
+          await PolygonLandContract.transferQuad(
             deployer,
             other,
             size,
@@ -177,9 +176,9 @@ describe('PolygonLandV3.sol', function () {
             0,
             bytes,
           );
-          const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+          const num1 = await PolygonLandContract.balanceOf(deployer);
           expect(num1).to.equal(0);
-          const num2 = await PolygonLandV3Contract.balanceOf(other);
+          const num2 = await PolygonLandContract.balanceOf(other);
           expect(num2).to.equal(plotCount);
         }
       });
@@ -188,13 +187,13 @@ describe('PolygonLandV3.sol', function () {
 
   describe('Burn and transfer full quad', function () {
     it('should revert transfer quad from zero address', async function () {
-      const {PolygonLandV3Contract, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(
+        PolygonLandContract.transferQuad(
           '0x0000000000000000000000000000000000000000',
           deployer,
           1,
@@ -206,13 +205,13 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert transfer quad to zero address', async function () {
-      const {PolygonLandV3Contract, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(
+        PolygonLandContract.transferQuad(
           deployer,
           '0x0000000000000000000000000000000000000000',
           1,
@@ -226,18 +225,18 @@ describe('PolygonLandV3.sol', function () {
     describe('With approval', function () {
       it('should not transfer a burned 1x1 quad', async function () {
         const {
-          PolygonLandV3Contract,
+          PolygonLandContract,
           LandAsMinter,
           LandAsOther,
           deployer,
           other,
-        } = await loadFixture(setupPolygonLandV3);
+        } = await loadFixture(setupPolygonLand);
 
         const bytes = '0x3333';
 
         await LandAsMinter.mintQuad(other, 1, 0, 0, bytes);
 
-        const num = await PolygonLandV3Contract.balanceOf(other);
+        const num = await PolygonLandContract.balanceOf(other);
         expect(num).to.equal(1);
 
         await LandAsOther.setApprovalForAllFor(other, deployer, true);
@@ -245,19 +244,19 @@ describe('PolygonLandV3.sol', function () {
         await LandAsOther.burn(0);
 
         await expect(
-          PolygonLandV3Contract.transferQuad(other, deployer, 1, 0, 0, bytes),
+          PolygonLandContract.transferQuad(other, deployer, 1, 0, 0, bytes),
         ).to.be.revertedWith('token does not exist');
       });
 
       it('should not transfer burned quads', async function () {
         for (let i = 1; i < sizes.length; i++) {
           const {
-            PolygonLandV3Contract,
+            PolygonLandContract,
             LandAsMinter,
             LandAsOther,
             deployer,
             other,
-          } = await loadFixture(setupPolygonLandV3);
+          } = await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           const size = sizes[i];
@@ -265,7 +264,7 @@ describe('PolygonLandV3.sol', function () {
 
           await LandAsMinter.mintQuad(other, size, 0, 0, bytes);
 
-          const num = await PolygonLandV3Contract.balanceOf(other);
+          const num = await PolygonLandContract.balanceOf(other);
           expect(num).to.equal(plotCount);
 
           await LandAsOther.setApprovalForAllFor(other, deployer, true);
@@ -277,7 +276,7 @@ describe('PolygonLandV3.sol', function () {
           }
 
           await expect(
-            PolygonLandV3Contract.transferQuad(
+            PolygonLandContract.transferQuad(
               other,
               deployer,
               size,
@@ -292,32 +291,32 @@ describe('PolygonLandV3.sol', function () {
 
     describe('From self', function () {
       it('should not transfer a burned 1x1 quad', async function () {
-        const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-          await loadFixture(setupPolygonLandV3);
+        const {PolygonLandContract, LandAsMinter, deployer, other} =
+          await loadFixture(setupPolygonLand);
 
         const bytes = '0x3333';
 
         await LandAsMinter.mintQuad(deployer, 1, 0, 0, bytes);
 
-        const num = await PolygonLandV3Contract.balanceOf(deployer);
+        const num = await PolygonLandContract.balanceOf(deployer);
         expect(num).to.equal(1);
 
-        await PolygonLandV3Contract.burn(0);
+        await PolygonLandContract.burn(0);
 
         await expect(
-          PolygonLandV3Contract.transferQuad(deployer, other, 1, 0, 0, bytes),
+          PolygonLandContract.transferQuad(deployer, other, 1, 0, 0, bytes),
         ).to.be.revertedWith('token does not exist');
       });
 
       it('should not transfer burned quads', async function () {
         for (let i = 1; i < sizes.length; i++) {
           const {
-            PolygonLandV3Contract,
+            PolygonLandContract,
             LandAsMinter,
             LandAsOther,
             deployer,
             other,
-          } = await loadFixture(setupPolygonLandV3);
+          } = await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           const size = sizes[i];
@@ -325,7 +324,7 @@ describe('PolygonLandV3.sol', function () {
 
           await LandAsMinter.mintQuad(other, size, 0, 0, bytes);
 
-          const num = await PolygonLandV3Contract.balanceOf(other);
+          const num = await PolygonLandContract.balanceOf(other);
           expect(num).to.equal(plotCount);
 
           await LandAsOther.setApprovalForAllFor(other, deployer, true);
@@ -344,19 +343,19 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('burnt token cannot be approved', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await LandAsMinter.mintQuad(deployer, 1, 0, 0, bytes);
 
-      await PolygonLandV3Contract.burn(0);
+      await PolygonLandContract.burn(0);
 
-      await expect(PolygonLandV3Contract.approveFor(deployer, other, 0)).to.be
+      await expect(PolygonLandContract.approveFor(deployer, other, 0)).to.be
         .reverted;
 
-      await expect(PolygonLandV3Contract.approve(other, 0)).to.be.reverted;
+      await expect(PolygonLandContract.approve(other, 0)).to.be.reverted;
     });
   });
 
@@ -364,13 +363,13 @@ describe('PolygonLandV3.sol', function () {
     for (const size of [1, 3, 6, 12, 24]) {
       it(`mint and check URI ${size}`, async function () {
         const GRID_SIZE = 408;
-        const {PolygonLandV3Contract, LandAsMinter, deployer} =
-          await loadFixture(setupPolygonLandV3);
+        const {PolygonLandContract, LandAsMinter, deployer} =
+          await loadFixture(setupPolygonLand);
 
         const bytes = '0x3333';
         await LandAsMinter.mintQuad(deployer, size, size, size, bytes);
         const tokenId = size + size * GRID_SIZE;
-        expect(await PolygonLandV3Contract.tokenURI(tokenId)).to.be.equal(
+        expect(await PolygonLandContract.tokenURI(tokenId)).to.be.equal(
           `https://api.sandbox.game/lands/${tokenId}/metadata.json`,
         );
       });
@@ -378,10 +377,10 @@ describe('PolygonLandV3.sol', function () {
 
     it(`reverts check URI for non existing token`, async function () {
       const GRID_SIZE = 408;
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
 
       const tokenId = 2 + 2 * GRID_SIZE;
-      await expect(PolygonLandV3Contract.tokenURI(tokenId)).to.be.revertedWith(
+      await expect(PolygonLandContract.tokenURI(tokenId)).to.be.revertedWith(
         'Id does not exist',
       );
     });
@@ -389,7 +388,7 @@ describe('PolygonLandV3.sol', function () {
 
   describe('testing mintQuad', function () {
     it('should revert if to address zero', async function () {
-      const {LandAsMinter} = await loadFixture(setupPolygonLandV3);
+      const {LandAsMinter} = await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
@@ -399,7 +398,7 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert if signer is not landMinter', async function () {
-      const {LandAsOther, other} = await loadFixture(setupPolygonLandV3);
+      const {LandAsOther, other} = await loadFixture(setupPolygonLand);
 
       await expect(
         LandAsOther.mintQuad(other, 3, 0, 0, '0x'),
@@ -407,7 +406,7 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert for wrong size', async function () {
-      const {LandAsMinter, deployer} = await loadFixture(setupPolygonLandV3);
+      const {LandAsMinter, deployer} = await loadFixture(setupPolygonLand);
 
       await expect(
         LandAsMinter.mintQuad(deployer, 9, 0, 0, '0x'),
@@ -419,8 +418,7 @@ describe('PolygonLandV3.sol', function () {
       sizes.forEach((size2) => {
         if (size2 <= size1) return;
         it(`should NOT be able to mint child ${size1}x${size1} quad if parent ${size2}x${size2} quad is already minted`, async function () {
-          const {LandAsMinter, deployer} =
-            await loadFixture(setupPolygonLandV3);
+          const {LandAsMinter, deployer} = await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           await LandAsMinter.mintQuad(deployer, size2, 0, 0, bytes);
@@ -437,8 +435,7 @@ describe('PolygonLandV3.sol', function () {
       sizes.forEach((size2) => {
         if (size2 >= size1) return;
         it(`should NOT be able to mint ${size1}x${size1} quad if child ${size2}x${size2} quad is already minted`, async function () {
-          const {LandAsMinter, deployer} =
-            await loadFixture(setupPolygonLandV3);
+          const {LandAsMinter, deployer} = await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           await LandAsMinter.mintQuad(deployer, size2, 0, 0, bytes);
@@ -453,7 +450,7 @@ describe('PolygonLandV3.sol', function () {
 
   describe('testing mintAndTransferQuad', function () {
     it('should revert if signer is not landMinter', async function () {
-      const {LandAsOther, other} = await loadFixture(setupPolygonLandV3);
+      const {LandAsOther, other} = await loadFixture(setupPolygonLand);
 
       await expect(
         LandAsOther.mintAndTransferQuad(other, 3, 0, 0, '0x'),
@@ -461,12 +458,12 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert for transfer if to address zero', async function () {
-      const {LandAsAdmin, PolygonLandV3Contract, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {LandAsAdmin, PolygonLandContract, deployer} =
+        await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await LandAsAdmin.setMinter(deployer, true);
       await expect(
-        PolygonLandV3Contract.mintAndTransferQuad(ZeroAddress, 3, 3, 3, bytes),
+        PolygonLandContract.mintAndTransferQuad(ZeroAddress, 3, 3, 3, bytes),
       ).to.be.revertedWith('to is zero address');
     });
 
@@ -474,35 +471,27 @@ describe('PolygonLandV3.sol', function () {
       const {
         LandAsAdmin,
         LandAsMinter,
-        PolygonLandV3Contract,
+        PolygonLandContract,
         deployer,
         landAdmin,
         landMinter,
-      } = await loadFixture(setupPolygonLandV3);
+      } = await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await LandAsAdmin.setMinter(deployer, true);
       await LandAsMinter.mintQuad(deployer, 1, 0, 0, bytes);
       const id = getId(1, 0, 0);
-      await PolygonLandV3Contract.approve(landAdmin, id);
-      expect(await PolygonLandV3Contract.ownerOf(id)).to.be.equal(deployer);
-      expect(await PolygonLandV3Contract.getApproved(id)).to.be.equal(
-        landAdmin,
-      );
-      await PolygonLandV3Contract.mintAndTransferQuad(
-        landMinter,
-        3,
-        0,
-        0,
-        bytes,
-      );
-      expect(await PolygonLandV3Contract.getApproved(id)).to.be.equal(
+      await PolygonLandContract.approve(landAdmin, id);
+      expect(await PolygonLandContract.ownerOf(id)).to.be.equal(deployer);
+      expect(await PolygonLandContract.getApproved(id)).to.be.equal(landAdmin);
+      await PolygonLandContract.mintAndTransferQuad(landMinter, 3, 0, 0, bytes);
+      expect(await PolygonLandContract.getApproved(id)).to.be.equal(
         ZeroAddress,
       );
-      expect(await PolygonLandV3Contract.ownerOf(id)).to.be.equal(landMinter);
+      expect(await PolygonLandContract.ownerOf(id)).to.be.equal(landMinter);
     });
 
     it('should revert for mint if to address zero', async function () {
-      const {LandAsMinter} = await loadFixture(setupPolygonLandV3);
+      const {LandAsMinter} = await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
@@ -511,62 +500,62 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert for mint if x co-ordinates of Quad are invalid', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(deployer, other, 3, 4, 0, bytes),
+        PolygonLandContract.transferQuad(deployer, other, 3, 4, 0, bytes),
       ).to.be.revertedWith('Invalid x coordinate');
     });
 
     it('should revert for mint if y co-ordinates of Quad are invalid', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(deployer, other, 3, 0, 4, bytes),
+        PolygonLandContract.transferQuad(deployer, other, 3, 0, 4, bytes),
       ).to.be.revertedWith('Invalid y coordinate');
     });
 
     it('should revert for mint if x co-ordinate are out of bound', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(deployer, other, 3, 411, 0, bytes),
+        PolygonLandContract.transferQuad(deployer, other, 3, 411, 0, bytes),
       ).to.be.revertedWith('x out of bounds');
     });
 
     it('should revert for mint if y co-ordinates are out of bound', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await expect(
-        PolygonLandV3Contract.transferQuad(deployer, other, 3, 0, 411, bytes),
+        PolygonLandContract.transferQuad(deployer, other, 3, 0, 411, bytes),
       ).to.be.revertedWith('y out of bounds');
     });
 
     it('should revert for mint if size is out of bound', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
-        PolygonLandV3Contract.transferQuad(deployer, other, 25, 0, 0, bytes),
+        PolygonLandContract.transferQuad(deployer, other, 25, 0, 0, bytes),
       ).to.be.revertedWith('Invalid size');
     });
 
     it('should revert when to is non ERC721 receiving contract', async function () {
       const {LandAsMinter, landMinter, TestERC721TokenReceiver} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await TestERC721TokenReceiver.returnWrongBytes();
       await LandAsMinter.mintQuad(landMinter, 3, 0, 0, bytes);
@@ -583,7 +572,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should not revert when to is ERC721 receiving contract', async function () {
       const {LandAsMinter, landMinter, TestERC721TokenReceiver} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(landMinter, 3, 0, 0, bytes);
       await LandAsMinter.mintAndTransferQuad(
@@ -600,7 +589,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert when size is invalid', async function () {
       const {LandAsMinter, landAdmin, TestERC721TokenReceiver} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(landAdmin, 3, 0, 0, bytes);
       await expect(
@@ -615,7 +604,7 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert when to is zero address', async function () {
-      const {LandAsMinter} = await loadFixture(setupPolygonLandV3);
+      const {LandAsMinter} = await loadFixture(setupPolygonLand);
       await expect(
         LandAsMinter.mintAndTransferQuad(ZeroAddress, 9, 0, 0, '0x'),
       ).to.be.revertedWith('to is zero address');
@@ -623,17 +612,17 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert when sender is not the owner of child quad', async function () {
       const {
-        PolygonLandV3Contract,
+        PolygonLandContract,
         LandAsMinter,
         deployer,
         landAdmin,
         TestERC721TokenReceiver,
-      } = await loadFixture(setupPolygonLandV3);
+      } = await loadFixture(setupPolygonLand);
       const bytes = '0x3333';
       await TestERC721TokenReceiver.returnWrongBytes();
       await LandAsMinter.mintQuad(landAdmin, 3, 0, 0, bytes);
       await expect(
-        PolygonLandV3Contract.transferQuad(
+        PolygonLandContract.transferQuad(
           deployer,
           TestERC721TokenReceiver,
           6,
@@ -646,7 +635,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert approveFor for ZeroAddress spender', async function () {
       const {LandAsMinter, LandAsOther, MockMarketPlace3, other} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await expect(
@@ -656,7 +645,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert approveFor for unauthorized user', async function () {
       const {LandAsMinter, LandAsOther, MockMarketPlace3, other, other1} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await expect(
@@ -666,7 +655,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert approveFor zero owner of tokenId', async function () {
       const {LandAsOther, MockMarketPlace3, other} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       const GRID_SIZE = 408;
       const tokenId = 2 + 2 * GRID_SIZE;
       await expect(
@@ -676,7 +665,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert approve for zero address owner of token', async function () {
       const {LandAsOther, MockMarketPlace3} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       const GRID_SIZE = 408;
       const tokenId = 2 + 2 * GRID_SIZE;
       await expect(
@@ -686,7 +675,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert approve for ZeroAddress spender', async function () {
       const {LandAsMinter, LandAsOther1, MockMarketPlace3, other} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await expect(
@@ -696,7 +685,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert setApprovalForAllFor for ZeroAddress', async function () {
       const {LandAsOther, MockMarketPlace3} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       await expect(
         LandAsOther.setApprovalForAllFor(ZeroAddress, MockMarketPlace3, true),
       ).to.be.revertedWith('Invalid sender address');
@@ -704,7 +693,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should revert setApprovalForAllFor for unauthorized users', async function () {
       const {LandAsOther, MockMarketPlace3} =
-        await loadFixture(setupPolygonLandV3);
+        await loadFixture(setupPolygonLand);
       await expect(
         LandAsOther.setApprovalForAllFor(
           MockMarketPlace3,
@@ -715,17 +704,17 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert approvalFor for same sender and spender', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
       await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await expect(
-        PolygonLandV3Contract.approveFor(deployer, deployer, id),
+        PolygonLandContract.approveFor(deployer, deployer, id),
       ).to.be.revertedWith('OWNER_NOT_SENDER');
     });
 
     it('subscription can not be zero address', async function () {
-      const {LandAsAdmin} = await loadFixture(setupPolygonLandV3);
+      const {LandAsAdmin} = await loadFixture(setupPolygonLand);
       await expect(LandAsAdmin.register(ZeroAddress, true)).to.be.revertedWith(
         "subscription can't be zero",
       );
@@ -737,7 +726,7 @@ describe('PolygonLandV3.sol', function () {
         if (size2 >= size1) return;
         it(`should NOT be able to mint and transfer ${size1}x${size1} quad if signer is not the owner of child ${size2}x${size2} quad`, async function () {
           const {LandAsMinter, deployer, other} =
-            await loadFixture(setupPolygonLandV3);
+            await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           await LandAsMinter.mintQuad(other, size2, 0, 0, bytes);
@@ -754,13 +743,13 @@ describe('PolygonLandV3.sol', function () {
       sizes.forEach((size2) => {
         if (size2 <= size1) return;
         it(`should NOT be able to transfer child ${size1}x${size1} quad if signer is not the owner of  parent ${size2}x${size2} quad `, async function () {
-          const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-            await loadFixture(setupPolygonLandV3);
+          const {PolygonLandContract, LandAsMinter, deployer, other} =
+            await loadFixture(setupPolygonLand);
 
           const bytes = '0x3333';
           await LandAsMinter.mintQuad(other, size2, 0, 0, bytes);
           await expect(
-            PolygonLandV3Contract.mintAndTransferQuad(
+            PolygonLandContract.mintAndTransferQuad(
               deployer,
               size1,
               0,
@@ -774,7 +763,7 @@ describe('PolygonLandV3.sol', function () {
   });
 
   it('supported interfaces', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLandV3);
+    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
 
     expect(await LandAsAdmin.supportsInterface('0x01ffc9a7')).to.be.true;
     expect(await LandAsAdmin.supportsInterface('0x80ac58cd')).to.be.true;
@@ -782,7 +771,7 @@ describe('PolygonLandV3.sol', function () {
   });
 
   it('should revert for incorrect id (wrong size)', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLandV3);
+    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
 
     await expect(LandAsAdmin.ownerOf(getId(9, 0, 0))).to.be.revertedWith(
       'Invalid token id',
@@ -790,7 +779,7 @@ describe('PolygonLandV3.sol', function () {
   });
 
   it('should return correct ownerOf 1*1 quad minted', async function () {
-    const {LandAsMinter, deployer} = await loadFixture(setupPolygonLandV3);
+    const {LandAsMinter, deployer} = await loadFixture(setupPolygonLand);
     const bytes = '0x3333';
     await LandAsMinter.mintQuad(deployer, 1, 1, 1, bytes);
     expect(await LandAsMinter.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
@@ -798,95 +787,81 @@ describe('PolygonLandV3.sol', function () {
 
   describe('Mint and transfer a smaller quad', function () {
     it('transferring a 1X1 quad from a 3x3', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 3, 3, 3, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(9);
 
-      await PolygonLandV3Contract.transferQuad(deployer, other, 1, 3, 3, bytes);
+      await PolygonLandContract.transferQuad(deployer, other, 1, 3, 3, bytes);
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(8);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(1);
     });
 
     it('transferring a 1X1 quad from a 12x12', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 12, 12, 12, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(144);
 
-      await PolygonLandV3Contract.transferQuad(
-        deployer,
-        other,
-        1,
-        12,
-        12,
-        bytes,
-      );
+      await PolygonLandContract.transferQuad(deployer, other, 1, 12, 12, bytes);
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(143);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(1);
     });
 
     it('transferring a 3X3 quad from a 6x6', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 6, 6, 6, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(36);
 
-      await PolygonLandV3Contract.transferQuad(deployer, other, 3, 6, 6, bytes);
+      await PolygonLandContract.transferQuad(deployer, other, 3, 6, 6, bytes);
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(27);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(9);
     });
 
     it('transferring a 6X6 quad from a 12x12', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 12, 12, 12, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(144);
 
-      await PolygonLandV3Contract.transferQuad(
-        deployer,
-        other,
-        6,
-        12,
-        12,
-        bytes,
-      );
+      await PolygonLandContract.transferQuad(deployer, other, 6, 12, 12, bytes);
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(108);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(36);
     });
@@ -894,22 +869,17 @@ describe('PolygonLandV3.sol', function () {
 
   describe('Mint and transfer all its smaller quads', function () {
     it('transferring all 1X1 quad from a 3x3', async function () {
-      const {
-        PolygonLandV3Contract,
-        LandAsMinter,
-        LandAsOther,
-        deployer,
-        other,
-      } = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, LandAsOther, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 3, 3, 3, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(9);
 
       for (let x = 3; x < 6; x++) {
         for (let y = 3; y < 6; y++) {
-          await PolygonLandV3Contract.transferQuad(
+          await PolygonLandContract.transferQuad(
             deployer,
             other,
             1,
@@ -927,11 +897,11 @@ describe('PolygonLandV3.sol', function () {
         }
       }
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(0);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(0);
 
@@ -941,22 +911,17 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('transferring all 1X1 quad from a 6x6', async function () {
-      const {
-        PolygonLandV3Contract,
-        LandAsMinter,
-        LandAsOther,
-        deployer,
-        other,
-      } = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, LandAsOther, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 6, 6, 6, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(36);
 
       for (let x = 6; x < 12; x++) {
         for (let y = 6; y < 12; y++) {
-          await PolygonLandV3Contract.transferQuad(
+          await PolygonLandContract.transferQuad(
             deployer,
             other,
             1,
@@ -974,11 +939,11 @@ describe('PolygonLandV3.sol', function () {
         }
       }
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(0);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(0);
 
@@ -988,22 +953,17 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('transferring all 1X1 quad from a 12x12', async function () {
-      const {
-        PolygonLandV3Contract,
-        LandAsMinter,
-        LandAsOther,
-        deployer,
-        other,
-      } = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, LandAsOther, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 12, 12, 12, bytes);
-      const num = await PolygonLandV3Contract.balanceOf(deployer);
+      const num = await PolygonLandContract.balanceOf(deployer);
       expect(num).to.equal(144);
 
       for (let x = 12; x < 24; x++) {
         for (let y = 12; y < 24; y++) {
-          await PolygonLandV3Contract.transferQuad(
+          await PolygonLandContract.transferQuad(
             deployer,
             other,
             1,
@@ -1020,11 +980,11 @@ describe('PolygonLandV3.sol', function () {
         }
       }
 
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
 
       expect(num1).to.equal(0);
 
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
 
       expect(num2).to.equal(0);
 
@@ -1036,13 +996,8 @@ describe('PolygonLandV3.sol', function () {
 
   describe('transfer batch', function () {
     it('transfers batch of quads of different sizes', async function () {
-      const {
-        PolygonLandV3Contract,
-        LandAsMinter,
-        LandAsOther,
-        deployer,
-        other,
-      } = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, LandAsOther, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(other, 24, 0, 0, bytes);
@@ -1050,7 +1005,7 @@ describe('PolygonLandV3.sol', function () {
       await LandAsMinter.mintQuad(other, 6, 30, 30, bytes);
       await LandAsMinter.mintQuad(other, 3, 24, 24, bytes);
       await LandAsOther.setApprovalForAllFor(other, deployer, true);
-      await PolygonLandV3Contract.batchTransferQuad(
+      await PolygonLandContract.batchTransferQuad(
         other,
         deployer,
         [24, 12, 6, 3],
@@ -1058,22 +1013,22 @@ describe('PolygonLandV3.sol', function () {
         [0, 300, 30, 24],
         bytes,
       );
-      const num1 = await PolygonLandV3Contract.balanceOf(other);
+      const num1 = await PolygonLandContract.balanceOf(other);
       expect(num1).to.equal(0);
-      const num2 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num2 = await PolygonLandContract.balanceOf(deployer);
       expect(num2).to.equal(765);
     });
 
     it('transfers batch of quads of different sizes from self', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 24, 0, 0, bytes);
       await LandAsMinter.mintQuad(deployer, 12, 300, 300, bytes);
       await LandAsMinter.mintQuad(deployer, 6, 30, 30, bytes);
       await LandAsMinter.mintQuad(deployer, 3, 24, 24, bytes);
-      await PolygonLandV3Contract.batchTransferQuad(
+      await PolygonLandContract.batchTransferQuad(
         deployer,
         other,
         [24, 12, 6, 3],
@@ -1081,19 +1036,19 @@ describe('PolygonLandV3.sol', function () {
         [0, 300, 30, 24],
         bytes,
       );
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
       expect(num1).to.equal(0);
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
       expect(num2).to.equal(765);
     });
 
     it('reverts transfers batch of quads to address zero', async function () {
-      const {PolygonLandV3Contract, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
-        PolygonLandV3Contract.batchTransferQuad(
+        PolygonLandContract.batchTransferQuad(
           deployer,
           '0x0000000000000000000000000000000000000000',
           [24, 12, 6, 3],
@@ -1105,12 +1060,11 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('reverts transfers batch of quads from address zero', async function () {
-      const {PolygonLandV3Contract, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, other} = await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
-        PolygonLandV3Contract.batchTransferQuad(
+        PolygonLandContract.batchTransferQuad(
           '0x0000000000000000000000000000000000000000',
           other,
           [24, 12, 6, 3],
@@ -1122,12 +1076,12 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('reverts transfers batch of quads for invalid parameters', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
-        PolygonLandV3Contract.batchTransferQuad(
+        PolygonLandContract.batchTransferQuad(
           deployer,
           other,
           [24, 12, 3],
@@ -1139,12 +1093,12 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('reverts transfers batch of quads for invalid x and y length', async function () {
-      const {PolygonLandV3Contract, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await expect(
-        PolygonLandV3Contract.batchTransferQuad(
+        PolygonLandContract.batchTransferQuad(
           deployer,
           other,
           [24, 12],
@@ -1158,48 +1112,43 @@ describe('PolygonLandV3.sol', function () {
 
   describe('Testing transferFrom', function () {
     it('Transfer 1x1 without approval', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(other, 1, 0, 0, bytes);
 
       await expect(
-        PolygonLandV3Contract.transferFrom(other, deployer, 0),
+        PolygonLandContract.transferFrom(other, deployer, 0),
       ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
     });
 
     it('Transfer 1x1 with approval', async function () {
-      const {
-        PolygonLandV3Contract,
-        LandAsOther,
-        LandAsMinter,
-        deployer,
-        other,
-      } = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsOther, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(other, 1, 0, 0, bytes);
 
       await LandAsOther.approve(deployer, 0);
 
-      await PolygonLandV3Contract.transferFrom(other, deployer, 0);
-      const num1 = await PolygonLandV3Contract.balanceOf(other);
+      await PolygonLandContract.transferFrom(other, deployer, 0);
+      const num1 = await PolygonLandContract.balanceOf(other);
       expect(num1).to.equal(0);
-      const num2 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num2 = await PolygonLandContract.balanceOf(deployer);
       expect(num2).to.equal(1);
     });
   });
 
   describe('testing batchTransferFrom', function () {
     it('Mint 12x12 and transfer all internals 1x1s from it', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer, other} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer, other} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
       await LandAsMinter.mintQuad(deployer, 12, 0, 0, bytes);
 
-      await PolygonLandV3Contract.batchTransferFrom(
+      await PolygonLandContract.batchTransferFrom(
         deployer,
         other,
         [
@@ -1219,9 +1168,9 @@ describe('PolygonLandV3.sol', function () {
         ],
         bytes,
       );
-      const num1 = await PolygonLandV3Contract.balanceOf(deployer);
+      const num1 = await PolygonLandContract.balanceOf(deployer);
       expect(num1).to.equal(0);
-      const num2 = await PolygonLandV3Contract.balanceOf(other);
+      const num2 = await PolygonLandContract.balanceOf(other);
       expect(num2).to.equal(144);
     });
   });
@@ -1231,7 +1180,7 @@ describe('PolygonLandV3.sol', function () {
       it('should not transfer quads of any size', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {LandAsMinter, other, other1, sendMetaTx} =
-            await loadFixture(setupPolygonLandV3);
+            await loadFixture(setupPolygonLand);
 
           const size = sizes[i];
           const x = 0;
@@ -1266,7 +1215,7 @@ describe('PolygonLandV3.sol', function () {
       it('should transfer quads of any size', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-            await loadFixture(setupPolygonLandV3);
+            await loadFixture(setupPolygonLand);
 
           const landHolder = other;
           const landReceiver = other1;
@@ -1307,7 +1256,7 @@ describe('PolygonLandV3.sol', function () {
             size2 = sizes[j];
             if (size2 < size1) {
               const {LandAsMinter, LandAsOther, other, other1, other2} =
-                await loadFixture(setupPolygonLandV3);
+                await loadFixture(setupPolygonLand);
 
               const landHolder = other;
               const landReceiver = other1;
@@ -1346,7 +1295,7 @@ describe('PolygonLandV3.sol', function () {
       it('should transfer quads of any size', async function () {
         for (let i = 0; i < sizes.length; i++) {
           const {LandAsMinter, other, other1, sendMetaTx} =
-            await loadFixture(setupPolygonLandV3);
+            await loadFixture(setupPolygonLand);
 
           const landHolder = other;
           const landReceiver = other1;
@@ -1379,7 +1328,7 @@ describe('PolygonLandV3.sol', function () {
     describe('Burn and transfer full quad', function () {
       it('should revert transfer of 1x1 quad after burn', async function () {
         const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-          await loadFixture(setupPolygonLandV3);
+          await loadFixture(setupPolygonLand);
 
         const landHolder = other;
         const landReceiver = other1;
@@ -1409,7 +1358,7 @@ describe('PolygonLandV3.sol', function () {
             size2 = sizes[j];
             if (size2 >= size1) continue;
             const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-              await loadFixture(setupPolygonLandV3);
+              await loadFixture(setupPolygonLand);
 
             const landHolder = other;
             const landReceiver = other1;
@@ -1461,7 +1410,7 @@ describe('PolygonLandV3.sol', function () {
       it('should revert transfer of any size quad after burn', async function () {
         for (let i = 1; i < sizes.length; i++) {
           const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-            await loadFixture(setupPolygonLandV3);
+            await loadFixture(setupPolygonLand);
 
           const landHolder = other;
           const landReceiver = other1;
@@ -1498,7 +1447,7 @@ describe('PolygonLandV3.sol', function () {
     describe('batchTransferQuad', function () {
       it('should batch transfer 1x1 quads', async function () {
         const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-          await loadFixture(setupPolygonLandV3);
+          await loadFixture(setupPolygonLand);
 
         const landHolder = other;
         const landReceiver = other1;
@@ -1528,7 +1477,7 @@ describe('PolygonLandV3.sol', function () {
 
       it('should batch transfer quads of different sizes', async function () {
         const {LandAsMinter, LandAsOther, other, other1, sendMetaTx} =
-          await loadFixture(setupPolygonLandV3);
+          await loadFixture(setupPolygonLand);
         const bytes = '0x3333';
         const landHolder = other;
         const landReceiver = other1;
@@ -1561,18 +1510,18 @@ describe('PolygonLandV3.sol', function () {
 
   describe('Getters', function () {
     it('returns the width of the grid', async function () {
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
-      expect(await PolygonLandV3Contract.width()).to.be.equal(408);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
+      expect(await PolygonLandContract.width()).to.be.equal(408);
     });
 
     it('returns the height of the grid', async function () {
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
-      expect(await PolygonLandV3Contract.height()).to.be.equal(408);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
+      expect(await PolygonLandContract.height()).to.be.equal(408);
     });
 
     it('should fetch x and y values of given quad id', async function () {
       for (let i = 1; i < sizes.length; i++) {
-        const {LandAsMinter, other} = await loadFixture(setupPolygonLandV3);
+        const {LandAsMinter, other} = await loadFixture(setupPolygonLand);
 
         const landHolder = other;
         const size = sizes[i];
@@ -1592,7 +1541,7 @@ describe('PolygonLandV3.sol', function () {
 
     it('should fetch owner of given quad id', async function () {
       for (let i = 1; i < sizes.length; i++) {
-        const {LandAsMinter, other} = await loadFixture(setupPolygonLandV3);
+        const {LandAsMinter, other} = await loadFixture(setupPolygonLand);
 
         const landHolder = other;
         const size = sizes[i];
@@ -1611,31 +1560,31 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should revert when fetching owner of given quad id with wrong size', async function () {
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
       const id = getId(9, 0, 0);
-      await expect(PolygonLandV3Contract.ownerOf(id)).to.be.revertedWith(
+      await expect(PolygonLandContract.ownerOf(id)).to.be.revertedWith(
         'Invalid token id',
       );
     });
 
     it('should revert when fetching owner of given quad id with invalid token', async function () {
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
       const id = getId(3, 2, 2);
-      await expect(PolygonLandV3Contract.ownerOf(id)).to.be.revertedWith(
+      await expect(PolygonLandContract.ownerOf(id)).to.be.revertedWith(
         'Invalid token id',
       );
     });
 
     it('should revert when fetching owner of given quad id with invalid token by(x)', async function () {
-      const {PolygonLandV3Contract} = await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract} = await loadFixture(setupPolygonLand);
       const id = getId(3, 2, 0);
-      await expect(PolygonLandV3Contract.ownerOf(id)).to.be.revertedWith(
+      await expect(PolygonLandContract.ownerOf(id)).to.be.revertedWith(
         'Invalid token id',
       );
     });
 
     it('should revert when fetching owner of given quad id with invalid token(y)', async function () {
-      const {LandAsMinter} = await loadFixture(setupPolygonLandV3);
+      const {LandAsMinter} = await loadFixture(setupPolygonLand);
       const id = getId(3, 0, 2);
       await expect(LandAsMinter.ownerOf(id)).to.be.revertedWith(
         'Invalid token id',
@@ -1643,35 +1592,35 @@ describe('PolygonLandV3.sol', function () {
     });
 
     it('should return owner for quad id', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer} =
+        await loadFixture(setupPolygonLand);
 
       await LandAsMinter.mintQuad(deployer, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
-      expect(await PolygonLandV3Contract.ownerOf(id)).to.be.equal(deployer);
+      expect(await PolygonLandContract.ownerOf(id)).to.be.equal(deployer);
     });
 
     it('checks if a quad is valid & exists', async function () {
-      const {PolygonLandV3Contract, LandAsMinter, deployer} =
-        await loadFixture(setupPolygonLandV3);
+      const {PolygonLandContract, LandAsMinter, deployer} =
+        await loadFixture(setupPolygonLand);
 
       const bytes = '0x3333';
 
       await LandAsMinter.mintQuad(deployer, 24, 0, 0, bytes);
 
       for (const size of sizes) {
-        expect(await PolygonLandV3Contract.exists(size, 0, 0)).to.be.true;
+        expect(await PolygonLandContract.exists(size, 0, 0)).to.be.true;
       }
 
-      await expect(PolygonLandV3Contract.exists(4, 0, 0)).to.be.reverted;
+      await expect(PolygonLandContract.exists(4, 0, 0)).to.be.reverted;
 
-      await expect(PolygonLandV3Contract.exists(1, 500, 0)).to.be.reverted;
+      await expect(PolygonLandContract.exists(1, 500, 0)).to.be.reverted;
 
-      await expect(PolygonLandV3Contract.exists(1, 0, 500)).to.be.reverted;
+      await expect(PolygonLandContract.exists(1, 0, 500)).to.be.reverted;
 
-      await expect(PolygonLandV3Contract.exists(3, 0, 500)).to.be.reverted;
+      await expect(PolygonLandContract.exists(3, 0, 500)).to.be.reverted;
 
-      await expect(PolygonLandV3Contract.exists(3, 500, 0)).to.be.reverted;
+      await expect(PolygonLandContract.exists(3, 500, 0)).to.be.reverted;
     });
   });
 });

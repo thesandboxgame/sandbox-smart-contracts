@@ -2,20 +2,20 @@
 /* solhint-disable no-empty-blocks */
 pragma solidity 0.8.23;
 
-import {LandBaseTokenV4} from "./mainnet/LandBaseTokenV4.sol";
-import {ERC721BaseTokenV3} from "./mainnet/ERC721BaseTokenV3.sol";
+import {LandBaseToken} from "./mainnet/LandBaseToken.sol";
+import {ERC721BaseToken} from "./mainnet/ERC721BaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
 import {RoyaltyDistributorV2} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/RoyaltyDistributorV2.sol";
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 /**
- * @title LandV4
+ * @title Land Contract
  * @author The Sandbox
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
+contract Land is LandBaseToken, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
     bool internal _initV4;
 
     event OperatorRegistrySet(address indexed registry);
@@ -80,7 +80,7 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @return The URI of the token
      */
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "LandV4: Id does not exist");
+        require(_ownerOf(id) != address(0), "Land: Id does not exist");
         return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(id), "/metadata.json"));
     }
 
@@ -92,7 +92,7 @@ contract LandV4 is LandBaseTokenV4, OperatorFiltererUpgradeable, RoyaltyDistribu
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(ERC721BaseTokenV3, RoyaltyDistributorV2) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(ERC721BaseToken, RoyaltyDistributorV2) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
     }
 

@@ -3,15 +3,15 @@
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {ERC721BaseTokenV3} from "./ERC721BaseTokenV3.sol";
+import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 
 /**
- * @title LandBaseTokenV3
+ * @title LandBaseToken
  * @author The Sandbox
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-contract LandBaseTokenV4 is ERC721BaseTokenV3 {
+contract LandBaseToken is ERC721BaseToken {
     using AddressUpgradeable for address;
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;

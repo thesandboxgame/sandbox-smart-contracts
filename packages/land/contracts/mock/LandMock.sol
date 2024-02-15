@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.23;
 
-import {LandV4} from "../LandV4.sol";
+import {Land} from "../Land.sol";
 
-contract LandV4Mock is LandV4 {
+contract LandMock is Land {
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
     /// @param operator address of the operator to be approved
     /// @param approved bool value denoting approved (true) or not Approved(false)

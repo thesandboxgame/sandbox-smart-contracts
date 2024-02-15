@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {PolygonLandBaseTokenV3} from "./polygon/PolygonLandBaseTokenV3.sol";
+import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
 import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
 import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
@@ -12,7 +12,7 @@ import {RoyaltyDistributorV2} from "@sandbox-smart-contracts/dependency-royalty-
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 /// @title LAND token on L2
-contract PolygonLandV3 is PolygonLandBaseTokenV3, ERC2771Handler, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
+contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable, RoyaltyDistributorV2 {
     using AddressUpgradeable for address;
 
     event OperatorRegistrySet(address indexed registry);
@@ -131,7 +131,7 @@ contract PolygonLandV3 is PolygonLandBaseTokenV3, ERC2771Handler, OperatorFilter
      */
     function supportsInterface(
         bytes4 id
-    ) public pure override(PolygonLandBaseTokenV3, RoyaltyDistributorV2) returns (bool) {
+    ) public pure override(PolygonLandBaseToken, RoyaltyDistributorV2) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
     }
 
