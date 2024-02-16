@@ -785,6 +785,29 @@ describe('PolygonLand.sol', function () {
     expect(await LandAsMinter.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
   });
 
+  it('should not set owner if caller is not admin', async function () {
+    const {LandAsOther, other} = await loadFixture(setupPolygonLand);
+    await expect(
+      LandAsOther.setOwner(await other.getAddress()),
+    ).to.be.revertedWith('ADMIN_ONLY');
+  });
+
+  it('should not set zero address owner', async function () {
+    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
+    await expect(LandAsAdmin.setOwner(ZeroAddress)).to.be.revertedWith(
+      'owner cannot be zero address',
+    );
+  });
+
+  it('should set owner', async function () {
+    const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
+    expect(await LandAsAdmin.getOwner()).to.be.equal(
+      await landOwner.getAddress(),
+    );
+    await LandAsAdmin.setOwner(await other.getAddress());
+    expect(await LandAsAdmin.getOwner()).to.be.equal(await other.getAddress());
+  });
+
   describe('Mint and transfer a smaller quad', function () {
     it('transferring a 1X1 quad from a 3x3', async function () {
       const {PolygonLandContract, LandAsMinter, deployer, other} =
@@ -1517,6 +1540,14 @@ describe('PolygonLand.sol', function () {
     it('returns the height of the grid', async function () {
       const {PolygonLandContract} = await loadFixture(setupPolygonLand);
       expect(await PolygonLandContract.height()).to.be.equal(408);
+    });
+
+    it('should return owner address', async function () {
+      const {PolygonLandContract, landOwner} =
+        await loadFixture(setupPolygonLand);
+      expect(await PolygonLandContract.getOwner()).to.be.equal(
+        await landOwner.getAddress(),
+      );
     });
 
     it('should fetch x and y values of given quad id', async function () {
