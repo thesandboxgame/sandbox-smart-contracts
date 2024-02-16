@@ -204,6 +204,7 @@ export async function setupOperatorFilter(mainContract: TesteableContracts) {
 export async function setupLandContract() {
   const [
     deployer,
+    landOwner,
     seller,
     buyer,
     other,
@@ -248,6 +249,7 @@ export async function setupLandContract() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    await landOwner.getAddress(),
     4,
   );
 
@@ -302,6 +304,7 @@ export async function setupLandContract() {
     ERC20AsBuyer,
     deployer,
     landAdmin,
+    landOwner,
     landMinter,
     buyer,
     seller,
@@ -321,6 +324,7 @@ export async function setupLandContract() {
 export async function setupLandOperatorFilter() {
   const [
     deployer,
+    landOwner,
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
@@ -365,6 +369,7 @@ export async function setupLandOperatorFilter() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    await landOwner.getAddress(),
     4,
   );
 
@@ -381,7 +386,6 @@ export async function setupLandOperatorFilter() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
-    4,
   );
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
@@ -436,6 +440,7 @@ export async function setupLandOperatorFilter() {
 export async function setupPolygonLandContract() {
   const [
     deployer,
+    landOwner,
     seller,
     buyer,
     other,
@@ -483,6 +488,7 @@ export async function setupPolygonLandContract() {
       await TrustedForwarderContract.getAddress(),
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      await landOwner.getAddress(),
       3,
     ],
     {
@@ -552,6 +558,7 @@ export async function setupPolygonLandContract() {
     ERC20AsBuyer,
     deployer,
     landAdmin,
+    landOwner,
     landMinter,
     buyer,
     seller,
@@ -564,6 +571,7 @@ export async function setupPolygonLandContract() {
 export async function setupPolygonLandOperatorFilter() {
   const [
     deployer,
+    landOwner,
     commonRoyaltyReceiver,
     managerAdmin,
     contractRoyaltySetter,
@@ -609,6 +617,7 @@ export async function setupPolygonLandOperatorFilter() {
       await TrustedForwarderContract.getAddress(),
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      await landOwner.getAddress(),
       3,
     ],
     {
@@ -651,7 +660,6 @@ export async function setupPolygonLandOperatorFilter() {
       await TrustedForwarderContract.getAddress(),
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
-      3,
     ],
     {
       initializer: 'initialize',
