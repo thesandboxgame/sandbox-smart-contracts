@@ -18,9 +18,11 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private royaltyManager;
+    address private _owner;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
+    event OwnerSet(address indexed owner);
 
     /**
      * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
@@ -33,11 +35,13 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
         address trustedForwarder,
         address admin,
         address _royaltyManager,
+        address owner,
         uint8 version
     ) external reinitializer(version) {
         _admin = admin;
         __ERC2771Handler_initialize(trustedForwarder);
         _setRoyaltyManager(_royaltyManager);
+        _setOwner(owner);
         emit AdminChanged(address(0), _admin);
     }
 
@@ -46,6 +50,11 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     function _setRoyaltyManager(address _royaltyManager) internal {
         royaltyManager = IRoyaltyManager(_royaltyManager);
         emit RoyaltyManagerSet(_royaltyManager);
+    }
+
+    function _setOwner(address newOwner) internal {
+        _owner = newOwner;
+        emit OwnerSet(newOwner);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -74,6 +83,19 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
         return royaltyManager;
+    }
+
+    /// @notice returns the owner address
+    /// @return owner address of contract owner
+    function getOwner() external view returns (address owner) {
+        return _owner;
+    }
+
+    /// @notice Set new owner to contract
+    /// @param newOwner address of new owner
+    function setOwner(address newOwner) external onlyAdmin {
+        require(newOwner != address(0), "owner cannot be zero address");
+        _setOwner(newOwner);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {

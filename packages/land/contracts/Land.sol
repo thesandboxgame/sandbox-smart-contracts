@@ -19,11 +19,14 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private royaltyManager;
+    address private _owner;
     uint8 private initialized;
     bool private _initializing;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
+        event OwnerSet(address indexed owner);
+
     event Initialized(uint8 version);
 
     modifier reinitializer(uint8 version) {
@@ -46,11 +49,13 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
         address metaTransactionContract,
         address admin,
         address _royaltyManager,
+        address owner,
         uint8 version
     ) public reinitializer(version) {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
         _setRoyaltyManager(_royaltyManager);
+        _setOwner(owner);
     }
 
     /**
@@ -92,6 +97,11 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     function _setRoyaltyManager(address _royaltyManager) internal {
         royaltyManager = IRoyaltyManager(_royaltyManager);
         emit RoyaltyManagerSet(_royaltyManager);
+    }
+
+    function _setOwner(address newOwner) internal {
+        _owner = newOwner;
+        emit OwnerSet(newOwner);
     }
 
     /**
@@ -151,6 +161,19 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
         return royaltyManager;
+    }
+
+    /// @notice returns the owner address
+    /// @return owner address of contract owner
+    function getOwner() external view returns (address owner) {
+        return _owner;
+    }
+
+    /// @notice Set new owner to contract
+    /// @param newOwner address of new owner
+    function setOwner(address newOwner) external onlyAdmin {
+        require(newOwner != address(0), "owner cannot be zero address");
+        _setOwner(newOwner);
     }
 
     /**
