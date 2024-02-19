@@ -20,6 +20,7 @@ export type FillData = {
 export const fillOrder = (makeValue: Numeric, takeValue: Numeric): Order => ({
   maker: ZeroAddress,
   taker: ZeroAddress,
+  recipient: ZeroAddress,
   end: 0,
   start: 0,
   salt: 0,
