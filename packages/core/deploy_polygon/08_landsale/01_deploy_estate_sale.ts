@@ -47,7 +47,7 @@ const func: DeployFunction = async function (hre) {
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
-  const assetContract = await deployments.get('PolygonAssetERC1155'); // to be updated
+  const assetContract = await deployments.get('PolygonAssetERC1155'); // to be updated to latest L2 asset
   const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
