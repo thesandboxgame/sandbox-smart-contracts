@@ -49,20 +49,6 @@ const func: DeployFunction = async function (hre) {
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
-  let assetContract: Deployment;
-  const deployedAsset = await deployments.getOrNull('PolygonAssetERC1155'); // temporary until merge landpresale bundle work
-  if (!deployedAsset) {
-    // mock asset used for test networks and forking
-    assetContract = await deploy('MockERC1155Asset', {
-      from: assetAdmin,
-      args: ['http://nft-test/nft-1155-{id}'],
-      log: true,
-      skipIfAlreadyDeployed: true,
-    });
-  } else {
-    assetContract = deployedAsset;
-  }
-
   const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
@@ -87,7 +73,7 @@ const func: DeployFunction = async function (hre) {
           backendReferralWallet,
           2000,
           '0x0000000000000000000000000000000000000000',
-          assetContract.address,
+          '0xDbc52cd5b8EdA1A7BCBABb838ca927d23E3673e5',// L2 Asset address (proxy)
           landSaleFeeRecipient,
           authValidatorContract.address,
         ],
