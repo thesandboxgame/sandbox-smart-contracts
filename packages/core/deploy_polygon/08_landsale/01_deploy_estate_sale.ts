@@ -1,4 +1,4 @@
-import {DeployFunction} from 'hardhat-deploy/types';
+import {DeployFunction, Deployment} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {
   getDeadline,
@@ -49,7 +49,20 @@ const func: DeployFunction = async function (hre) {
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
-  const assetContract = await deployments.get('Asset'); // L2 Asset
+  let assetContract: Deployment;
+  try {
+    assetContract = await deployments.get('Asset'); // L2 Asset, json files available on Polygon and Mumbai
+  } catch {
+      // mock asset used for test networks and forking
+      assetContract = await deploy('MockERC1155Asset', {
+        from: assetAdmin,
+        args: ['http://nft-test/nft-1155-{id}'],
+        log: true,
+        skipIfAlreadyDeployed: true,
+      });
+
+  }
+
   const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
