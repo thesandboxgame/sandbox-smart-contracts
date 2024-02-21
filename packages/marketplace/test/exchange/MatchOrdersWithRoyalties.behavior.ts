@@ -30,7 +30,7 @@ export function shouldMatchOrdersWithRoyalty() {
       admin: Signer,
       maker: Signer,
       taker: Signer,
-      recipient: Signer,
+      makeRecipient: Signer,
       receiver1: Signer,
       receiver2: Signer,
       royaltyReceiver: Signer,
@@ -59,7 +59,7 @@ export function shouldMatchOrdersWithRoyalty() {
         admin,
         user1: maker,
         user2: taker,
-        user3: recipient,
+        user3: makeRecipient,
         admin: receiver1,
         user: receiver2,
         deployer: royaltyReceiver,
@@ -683,7 +683,7 @@ export function shouldMatchOrdersWithRoyalty() {
         1,
         0,
         0,
-        await recipient.getAddress()
+        await makeRecipient.getAddress()
       );
       orderRight = await OrderDefault(
         taker,
@@ -740,7 +740,9 @@ export function shouldMatchOrdersWithRoyalty() {
       ).to.be.equal(2000000000); // 20% of the amount
 
       //recipient should receive the payment in tokens
-      expect(await ERC20Contract.balanceOf(recipient.getAddress())).to.be.equal(
+      expect(
+        await ERC20Contract.balanceOf(makeRecipient.getAddress())
+      ).to.be.equal(
         7750000000 // 10000000000 - royalty - protocolFee
       );
     });
