@@ -173,12 +173,12 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             ITransferManager.DealSide(
                 LibAsset.Asset(makeMatch, newFill.leftValue),
                 orderLeft.maker,
-                orderLeft.recipient
+                orderLeft.makeRecipient
             ),
             ITransferManager.DealSide(
                 LibAsset.Asset(takeMatch, newFill.rightValue),
                 orderRight.maker,
-                orderRight.recipient
+                orderRight.makeRecipient
             ),
             LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
