@@ -49,6 +49,7 @@ const func: DeployFunction = async function (hre) {
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
+  const assetContract = await deployments.get('Asset'); // L2 Asset
   const authValidatorContract = await deployments.get('PolygonAuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
@@ -73,7 +74,7 @@ const func: DeployFunction = async function (hre) {
           backendReferralWallet,
           2000,
           '0x0000000000000000000000000000000000000000',
-          '0xDbc52cd5b8EdA1A7BCBABb838ca927d23E3673e5',// L2 Asset address (proxy)
+          assetContract.address,
           landSaleFeeRecipient,
           authValidatorContract.address,
         ],
