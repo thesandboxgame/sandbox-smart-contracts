@@ -1,7 +1,7 @@
 import {ethers, getNamedAccounts} from 'hardhat';
 import fs from 'fs-extra';
 import {SaltedProofSaleLandInfo} from '../../lib/merkleTreeHelper';
-import {Wallet} from 'ethers';
+import {BigNumber, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {withSnapshot} from '../utils';
 
@@ -93,5 +93,6 @@ async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
-  await sandContractAsSandBeneficiary.transfer(deployer, proofs[0].price);
+  const sandAmount = BigNumber.from(proofs[0].price).mul(5); // give extra to cover commission needed in asset bundle case
+  await sandContractAsSandBeneficiary.transfer(deployer, sandAmount);
 }

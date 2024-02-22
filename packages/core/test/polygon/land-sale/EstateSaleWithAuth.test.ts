@@ -230,4 +230,6 @@ describe('PolygonEstateSaleWithAuth', function () {
 
     // TODO: make sure that the asset balance of the landSale contract remains the same
   });
+
+  // TODO: add tests to make sure the purchase price is correct for lands with bundled assets, since commission is applied in this case
 });
