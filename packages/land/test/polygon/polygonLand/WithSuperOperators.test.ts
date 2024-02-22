@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {setupPolygonLand} from './fixtures';
 
-describe('PolygonLand:WithSuperOperatorsV2', function () {
+describe('PolygonLand:WithSuperOperators', function () {
   it('should not be a super operator by default', async function () {
     const {PolygonLandContract, landAdmin} =
       await loadFixture(setupPolygonLand);

@@ -7,14 +7,14 @@ import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Addr
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {WithSuperOperatorsV2} from "./WithSuperOperatorsV2.sol";
+import {WithSuperOperators} from "./WithSuperOperators.sol";
 import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
 
 /// @title ERC721BaseToken
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOperatorsV2 {
+contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOperators {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;

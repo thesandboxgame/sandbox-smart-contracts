@@ -18,14 +18,14 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-manag
 contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
-    bool internal _initV4;
+    bool internal _init;
     IRoyaltyManager private royaltyManager;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
 
-    modifier initializerV4() {
-        require(!_initV4, "already initialized");
+    modifier initializer() {
+        require(!_init, "already initialized");
         _;
     }
 
@@ -33,15 +33,11 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
      * @notice Initializes the upgrade to version 4
      * @param _royaltyManager address of the manager contract for common royalty recipient
      */
-    function initializeV4(
-        address metaTransactionContract,
-        address admin,
-        address _royaltyManager
-    ) public initializerV4 {
+    function initialize(address metaTransactionContract, address admin, address _royaltyManager) public initializer {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
         _setRoyaltyManager(_royaltyManager);
-        _initV4 = true;
+        _init = true;
     }
 
     /**

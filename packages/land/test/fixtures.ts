@@ -244,7 +244,7 @@ export async function setupLandContract() {
   const LandFactory = await ethers.getContractFactory('Land');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.initializeV4(
+  await LandContract.initialize(
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
@@ -360,7 +360,7 @@ export async function setupLandOperatorFilter() {
   const LandFactory = await ethers.getContractFactory('LandMock');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.initializeV4(
+  await LandContract.initialize(
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
@@ -375,7 +375,7 @@ export async function setupLandOperatorFilter() {
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);
   const LandMockContract = await LandFactory.deploy();
-  await LandMockContract.initializeV4(
+  await LandMockContract.initialize(
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
