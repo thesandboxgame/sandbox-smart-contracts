@@ -8,7 +8,7 @@ import {
   signAuthMessageAs,
 } from './fixtures';
 
-describe.only('EstateSaleWithAuth', function () {
+describe('EstateSaleWithAuth', function () {
   it('should be able to purchase a land with valid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
@@ -151,7 +151,7 @@ describe.only('EstateSaleWithAuth', function () {
       approveSandForEstateSale,
     } = await setupEstateSale();
     const {deployer} = await getNamedAccounts();
-    const {x, y, size, price, salt, proof, assetIds} = proofs[1];
+    const {x, y, size, price, salt, proof, assetIds} = proofs[1]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
     const signature = await signAuthMessageAs(
       backendAuthWallet,
       deployer,
