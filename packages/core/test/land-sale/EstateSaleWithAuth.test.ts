@@ -184,5 +184,50 @@ describe('EstateSaleWithAuth', function () {
     );
 
     await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
+
+    // TODO: make sure that the asset balance of the landSale contract are updated and the buyer receives them
+  });
+
+  it('should NOT be able to purchase a land with invalid signature - with bundled assets', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+    const {x, y, size, price, salt, proof, assetIds} = proofs[1];
+    const wallet = await ethers.getSigner(deployer);
+    const signature = await signAuthMessageAs(
+      wallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    await expect(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    ).to.be.revertedWith(`INVALID_AUTH`);
+
+    // TODO: make sure that the asset balance of the landSale contract remains the same
   });
 });
