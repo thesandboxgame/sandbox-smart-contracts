@@ -9,7 +9,7 @@ import {
 } from './fixtures';
 
 describe('PolygonEstateSaleWithAuth', function () {
-  it('should be able to purchase with valid signature', async function () {
+  it('should be able to purchase a land with valid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       proofs,
@@ -51,7 +51,7 @@ describe('PolygonEstateSaleWithAuth', function () {
     await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
   });
 
-  it('should NOT be able to purchase with invalid signature', async function () {
+  it('should NOT be able to purchase a land with invalid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       proofs,
@@ -92,7 +92,7 @@ describe('PolygonEstateSaleWithAuth', function () {
     ).to.be.revertedWith(`INVALID_AUTH`);
   });
 
-  it('should be able to purchase through sand contract', async function () {
+  it('should be able to purchase a land through sand contract - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       sandContract,
@@ -144,14 +144,14 @@ describe('PolygonEstateSaleWithAuth', function () {
     expect(landQuadPurchasedEvents.length).to.eq(1);
   });
 
-  it('buyer should receive bundled assets', async function () {
+  it('should be able to purchase a land with valid signature - with bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       proofs,
       approveSandForEstateSale,
     } = await setupEstateSale();
     const {deployer} = await getNamedAccounts();
-    const {x, y, size, price, salt, proof, assetIds} = proofs[0];
+    const {x, y, size, price, salt, proof, assetIds} = proofs[1]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
     const signature = await signAuthMessageAs(
       backendAuthWallet,
       deployer,
@@ -182,8 +182,52 @@ describe('PolygonEstateSaleWithAuth', function () {
         signature
       )
     );
+
     await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
-    // TODO: check the assetIds
-    console.log(assetIds);
+
+    // TODO: make sure that the asset balance of the landSale contract are updated and the buyer receives them
+  });
+
+  it('should NOT be able to purchase a land with invalid signature - with bundled assets', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+    const {x, y, size, price, salt, proof, assetIds} = proofs[1];
+    const wallet = await ethers.getSigner(deployer);
+    const signature = await signAuthMessageAs(
+      wallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    await expect(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    ).to.be.revertedWith(`INVALID_AUTH`);
+
+    // TODO: make sure that the asset balance of the landSale contract remains the same
   });
 });
