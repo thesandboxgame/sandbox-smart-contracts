@@ -22,7 +22,7 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
 
-    function initialize(address trustedForwarder, address _royaltyManager) external initializer {
+    function initialize(address trustedForwarder, address _royaltyManager) external reinitializer(3) {
         _admin = _msgSender();
         __ERC2771Handler_initialize(trustedForwarder);
         _setRoyaltyManager(_royaltyManager);
