@@ -8,7 +8,7 @@ const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
 describe('Land.sol', function () {
-  describe('LandBaseTokenV3', function () {
+  describe('LandBaseToken', function () {
     describe(`should NOT be able to transfer quad twice`, function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
       sizes.forEach((outerSize) => {
@@ -851,7 +851,7 @@ describe('Land.sol', function () {
     });
   });
 
-  describe('MetaTransactionReceiverV2', function () {
+  describe('MetaTransactionReceiver', function () {
     it('should not be a meta transaction processor', async function () {
       const {LandContract, MetaTransactionContract} =
         await loadFixture(setupLand);

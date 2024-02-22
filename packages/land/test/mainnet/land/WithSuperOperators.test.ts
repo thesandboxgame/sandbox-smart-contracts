@@ -3,7 +3,7 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
 import {setupLand} from './fixtures';
 
-describe('Land:SuperOperatorsV2', function () {
+describe('Land:SuperOperators', function () {
   it('should not be a super operator by default', async function () {
     const {LandContract, landAdmin} = await loadFixture(setupLand);
     expect(await LandContract.isSuperOperator(landAdmin)).to.be.false;

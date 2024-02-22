@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {setupPolygonLand} from './fixtures';
 
-describe('PolygonLand:WithAdminV2', function () {
+describe('PolygonLand:WithAdmin', function () {
   it('should get the current admin', async function () {
     const {PolygonLandContract, landAdmin} =
       await loadFixture(setupPolygonLand);

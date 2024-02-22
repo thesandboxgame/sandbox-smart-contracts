@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {setupLand} from './fixtures';
 
-describe('Land:AdminV2', function () {
+describe('Land:Admin', function () {
   it('should get the current admin', async function () {
     const {LandContract, landAdmin} = await loadFixture(setupLand);
     expect(await LandContract.getAdmin()).to.be.equal(landAdmin);

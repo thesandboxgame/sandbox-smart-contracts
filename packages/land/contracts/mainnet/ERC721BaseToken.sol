@@ -5,8 +5,8 @@ pragma solidity 0.8.23;
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
-import {SuperOperatorsV2} from "./SuperOperatorsV2.sol";
-import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
+import {SuperOperators} from "./SuperOperators.sol";
+import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 
 /**
  * @title ERC721BaseToken
@@ -14,7 +14,7 @@ import {MetaTransactionReceiverV2} from "./MetaTransactionReceiverV2.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-contract ERC721BaseToken is IERC721Upgradeable, SuperOperatorsV2, MetaTransactionReceiverV2 {
+contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTransactionReceiver {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
