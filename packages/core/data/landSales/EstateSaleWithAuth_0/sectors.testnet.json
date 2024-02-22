@@ -12,13 +12,13 @@
         "coordinateX": 1,
         "coordinateY": 0,
         "ownerAddress": "",
-        "bundleId": ""
+        "bundleId": "1"
       },
       {
         "coordinateX": -1,
         "coordinateY": 0,
         "ownerAddress": "",
-        "bundleId": ""
+        "bundleId": "0"
       }
     ],
     "estates": []

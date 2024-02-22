@@ -8,6 +8,7 @@ import {
   writeProofs,
 } from '../../data/landSales/getLandSales';
 import {Deployment} from 'hardhat-deploy/dist/types';
+import {skipUnlessTest} from '../../utils/network';
 
 type SaleDeployment = {
   name: string;
@@ -20,6 +21,7 @@ type SaleDeployment = {
 };
 
 const sales: SaleDeployment[] = [
+  {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
   {name: 'LandPreSale_19', skip: async () => true},
   {name: 'LandPreSale_20', skip: async () => true},
   {name: 'LandPreSale_21', skip: async () => true},
