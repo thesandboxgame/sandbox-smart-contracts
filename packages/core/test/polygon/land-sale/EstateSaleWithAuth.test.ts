@@ -8,7 +8,7 @@ import {
   signAuthMessageAs,
 } from './fixtures';
 
-describe.only('PolygonEstateSaleWithAuth', function () {
+describe('PolygonEstateSaleWithAuth', function () {
   it('should be able to purchase with valid signature', async function () {
     const {
       estateSaleWithAuthContract,

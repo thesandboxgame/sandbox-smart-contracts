@@ -8,8 +8,8 @@ import {
   signAuthMessageAs,
 } from './fixtures';
 
-describe('EstateSaleWithAuth', function () {
-  it('should be able to purchase with valid signature', async function () {
+describe.only('EstateSaleWithAuth', function () {
+  it('should be able to purchase a land with valid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       proofs,
@@ -51,7 +51,7 @@ describe('EstateSaleWithAuth', function () {
     await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
   });
 
-  it('should NOT be able to purchase with invalid signature', async function () {
+  it('should NOT be able to purchase a land with invalid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       proofs,
@@ -92,7 +92,7 @@ describe('EstateSaleWithAuth', function () {
     ).to.be.revertedWith(`INVALID_AUTH`);
   });
 
-  it('should be able to purchase through sand contract', async function () {
+  it('should be able to purchase a land through sand contract - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
       sandContract,
@@ -142,5 +142,47 @@ describe('EstateSaleWithAuth', function () {
       estateSaleWithAuthContract.filters.LandQuadPurchased()
     );
     expect(landQuadPurchasedEvents.length).to.eq(1);
+  });
+
+  it('should be able to purchase a land with valid signature - with bundled assets', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+    const {x, y, size, price, salt, proof, assetIds} = proofs[1];
+    const signature = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    const receipt = await waitFor(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    );
+
+    await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
   });
 });
