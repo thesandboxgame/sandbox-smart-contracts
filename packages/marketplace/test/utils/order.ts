@@ -53,9 +53,10 @@ export const OrderDefault = async (
 
 export function hashKey(order: Order): string {
   const encoded = AbiCoder.defaultAbiCoder().encode(
-    ['address', 'bytes32', 'bytes32', 'uint256'],
+    ['address', 'address', 'bytes32', 'bytes32', 'uint256'],
     [
       order.maker,
+      order.makeRecipient,
       hashAssetType(order.makeAsset.assetType),
       hashAssetType(order.takeAsset.assetType),
       order.salt,

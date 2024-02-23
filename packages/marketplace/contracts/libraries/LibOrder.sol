@@ -40,6 +40,7 @@ library LibOrder {
             keccak256(
                 abi.encode(
                     order.maker,
+                    order.makeRecipient,
                     LibAsset.hash(order.makeAsset.assetType),
                     LibAsset.hash(order.takeAsset.assetType),
                     order.salt
