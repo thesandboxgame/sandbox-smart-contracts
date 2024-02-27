@@ -35,7 +35,7 @@ type Options = {
 };
 
 export const setupTestGiveaway = withSnapshot(
-  ['Multi_Giveaway_1', 'PolygonAssetERC1155', 'PolygonSand'],
+  ['Multi_Giveaway_1', 'PolygonSand'],
   async function (hre, options?: Options) {
     const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
       options || {};
@@ -50,7 +50,18 @@ export const setupTestGiveaway = withSnapshot(
     const otherAccounts = await getUnnamedAccounts();
     const others = otherAccounts;
     const sandContract = await ethers.getContract('PolygonSand');
-    const assetContract = await ethers.getContract('PolygonAssetERC1155');
+
+    await deployments.deploy('MockAsset', {
+      from: deployer,
+      contract: 'MockERC1155Asset',
+      log: true,
+      skipIfAlreadyDeployed: true,
+      proxy: false,
+      args: ['http'],
+    });
+
+    const assetContract = await ethers.getContract('MockAsset');
+
     await deployments.deploy('TestMetaTxForwarder', {
       from: deployer,
     });
@@ -141,7 +152,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Supply assets
     const assetContractAsBouncerAdmin = await ethers.getContract(
-      'PolygonAssetERC1155',
+      'MockAsset',
       assetBouncerAdmin
     );
 

@@ -88,9 +88,7 @@ export const setupTestGiveaway = withSnapshot(['Asset'], async function (
     );
 
     const receipt = await waitFor(
-      assetContractAsCreator[
-        'mint(address,uint40,bytes32,uint256,address,bytes)'
-      ](creator, packId, hash, supply, owner, data)
+      assetContractAsCreator.mint(creator, packId, hash, supply, 0, owner, data)
     );
 
     const transferEvent = await expectReceiptEventWithArgs(
