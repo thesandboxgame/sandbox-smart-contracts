@@ -36,16 +36,18 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     }
 
     /**
-     * @notice Initializes the upgrade to version 4
+     * @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
      * @param metaTransactionContract Authorized contract for meta-transactions
      * @param admin Admin of the contract
      * @param _royaltyManager address of the manager contract for common royalty recipient
+     * @param version version number to which Land contract is being upgraded
      */
     function initialize(
         address metaTransactionContract,
         address admin,
-        address _royaltyManager
-    ) public reinitializer(4) {
+        address _royaltyManager,
+        uint8 version
+    ) public reinitializer(version) {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
         _setRoyaltyManager(_royaltyManager);
