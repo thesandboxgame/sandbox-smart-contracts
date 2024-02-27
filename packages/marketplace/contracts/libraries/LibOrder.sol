@@ -9,17 +9,26 @@ import {LibMath} from "./LibMath.sol";
 /// @title Order Handling Library
 /// @notice Provides tools for constructing, hashing, and validating orders.
 library LibOrder {
-    bytes32 internal constant ORDER_TYPEHASH =
+     bytes32 internal constant ORDER_TYPEHASH_V1 =
         keccak256(
             "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
+    bytes32 internal constant ORDER_TYPEHASH_V2 =
+        keccak256(
+            "Order(address maker,Asset[] makeAsset,address taker,Asset[] takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+        );
 
-    /// @dev Represents the structure of an order.
+    enum OrderType {
+        V1, // Represents order struct in the V1 format
+        V2 // Represents order struct in the V2 format
+    }
+    /// @dev Represents the structure of an order - V2.
     struct Order {
         address maker; // Address of the maker.
-        LibAsset.Asset makeAsset; // Asset the maker is providing.
+        LibAsset.Asset[] makeAsset; // Asset the maker is providing.
         address taker; // Address of the taker.
-        LibAsset.Asset takeAsset; // Asset the taker is providing.
+        LibAsset.Asset[] takeAsset; // Asset the taker is providing.
+        // uint256[] royalties // ToDo: apply royalties % on bundles
         uint256 salt; // Random number to ensure unique order hash.
         uint256 start; // Timestamp when the order becomes valid.
         uint256 end; // Timestamp when the order expires.
@@ -33,37 +42,82 @@ library LibOrder {
 
     /// @notice Computes the unique hash of an order.
     /// @param order The order data.
+    /// @param version Order struct version - V1 or V2
     /// @return The unique hash of the order.
-    function hashKey(Order calldata order) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    order.maker,
-                    LibAsset.hash(order.makeAsset.assetType),
-                    LibAsset.hash(order.takeAsset.assetType),
-                    order.salt
-                )
-            );
+    function hashKey(Order calldata order, OrderType version) internal pure returns (bytes32) {
+        if(version == OrderType.V1){
+            return keccak256(
+                    abi.encode(
+                        order.maker,
+                        LibAsset.hash(order.makeAsset[0].assetType),
+                        LibAsset.hash(order.takeAsset[0].assetType),
+                        order.salt
+                    )
+                );
+        } else {
+            bytes memory makeAssetsTypeEncoded;
+            for (uint i = 0; i < order.makeAsset.length; i++) {
+                makeAssetsTypeEncoded = abi.encodePacked(makeAssetsTypeEncoded, LibAsset.hash(order.makeAsset[i].assetType));
+            }
+
+            bytes memory takeAssetsTypeEncoded;
+            for (uint i = 0; i < order.takeAsset.length; i++) {
+                takeAssetsTypeEncoded = abi.encodePacked(takeAssetsTypeEncoded, LibAsset.hash(order.takeAsset[i].assetType));
+            }
+
+            return keccak256(
+                    abi.encode(
+                        order.maker,
+                        keccak256(makeAssetsTypeEncoded),
+                        keccak256(takeAssetsTypeEncoded),
+                        order.salt
+                    )
+                );
+        }
     }
 
     /// @notice Computes the complete hash of an order, including domain-specific data.
     /// @param order The order data.
+    /// @param version Order struct version - V1 or V2
     /// @return The complete hash of the order.
-    function hash(Order calldata order) internal pure returns (bytes32) {
-        return
+    function hash(Order calldata order, OrderType version) internal pure returns (bytes32) {
+        if(version == OrderType.V1){
+            return
             keccak256(
                 // solhint-disable-next-line func-named-parameters
                 abi.encode(
-                    ORDER_TYPEHASH,
+                    ORDER_TYPEHASH_V1,
                     order.maker,
-                    LibAsset.hash(order.makeAsset),
+                    LibAsset.hash(order.makeAsset[0]),
                     order.taker,
-                    LibAsset.hash(order.takeAsset),
+                    LibAsset.hash(order.takeAsset[0]),
                     order.salt,
                     order.start,
                     order.end
                 )
             );
+        } else {
+            bytes memory makeAssetsEncoded;
+            for (uint i = 0; i < order.makeAsset.length; i++) {
+                makeAssetsEncoded = abi.encodePacked(makeAssetsEncoded, LibAsset.hash(order.makeAsset[i]));
+            }
+
+            bytes memory takeAssetsEncoded;
+            for (uint i = 0; i < order.takeAsset.length; i++) {
+                takeAssetsEncoded = abi.encodePacked(takeAssetsEncoded, LibAsset.hash(order.takeAsset[i]));
+            }
+
+            return keccak256(abi.encode(
+                ORDER_TYPEHASH_V2,
+                order.maker,
+                keccak256(makeAssetsEncoded), // Hash of all makeAssets
+                order.taker,
+                keccak256(takeAssetsEncoded), // Hash of all takeAssets
+                order.salt,
+                order.start,
+                order.end
+            ));
+        }
     }
 
     /// @notice Validates order time
@@ -95,10 +149,11 @@ library LibOrder {
         (uint256 leftMakeValue, uint256 leftTakeValue) = calculateRemaining(leftOrder, leftOrderFill);
         (uint256 rightMakeValue, uint256 rightTakeValue) = calculateRemaining(rightOrder, rightOrderFill);
 
+        // ToDo: Fix order filling for bundles here
         if (rightTakeValue > leftMakeValue) {
-            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset.value, rightOrder.takeAsset.value);
+            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset[0].value, rightOrder.takeAsset[0].value);
         }
-        return _fillRight(leftOrder.makeAsset.value, leftOrder.takeAsset.value, rightMakeValue, rightTakeValue);
+        return _fillRight(leftOrder.makeAsset[0].value, leftOrder.takeAsset[0].value, rightMakeValue, rightTakeValue);
     }
 
     /// @notice Computes the remaining fillable amount of an order.
@@ -110,9 +165,10 @@ library LibOrder {
         LibOrder.Order calldata order,
         uint256 fill
     ) internal pure returns (uint256 makeValue, uint256 takeValue) {
-        require(order.takeAsset.value >= fill, "filling more than order permits");
-        takeValue = order.takeAsset.value - fill;
-        makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);
+        // ToDo: Fix order filling for bundles here
+        require(order.takeAsset[0].value >= fill, "filling more than order permits");
+        takeValue = order.takeAsset[0].value - fill;
+        makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset[0].value, order.takeAsset[0].value, takeValue);
     }
 
     /// @notice Computes the fill values for a situation where the right order is expected to fill the left order.

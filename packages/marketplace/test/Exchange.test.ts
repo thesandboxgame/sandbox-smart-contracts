@@ -8,10 +8,13 @@ import {
   Asset,
   AssetClassType,
 } from './utils/assets.ts';
-
+import {
+  deployLibAssetTest,
+} from './utils/fill';
 import {
   hashKey,
   hashOrder,
+  OrderType,
   OrderDefault,
   signOrder,
   Order,
@@ -196,9 +199,9 @@ describe('Exchange.sol', function () {
       takerAsset = await AssetERC20(ERC20Contract2, 456000000);
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
@@ -209,7 +212,8 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsDeployer.connect(taker).cancel(
           orderLeft,
-          hashOrder(orderLeft)
+          hashOrder(orderLeft, OrderType.V2),
+          OrderType.V2
         )
       ).to.be.revertedWith('not maker');
     });
@@ -217,9 +221,9 @@ describe('Exchange.sol', function () {
     it('should not cancel order with zero salt', async function () {
       const leftOrder = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         0, // setting salt value to 0
         0,
         0
@@ -227,7 +231,8 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.connect(maker).cancel(
           leftOrder,
-          hashKey(leftOrder)
+          hashKey(leftOrder),
+          OrderType.V2
         )
       ).to.be.revertedWith("0 salt can't be used");
     });
@@ -238,7 +243,8 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.connect(maker).cancel(
           orderLeft,
-          invalidOrderHash
+          invalidOrderHash,
+          OrderType.V2
         )
       ).to.be.revertedWith('invalid orderHash');
     });
@@ -246,7 +252,8 @@ describe('Exchange.sol', function () {
     it('should cancel an order and update fills mapping', async function () {
       await ExchangeContractAsUser.connect(maker).cancel(
         orderLeft,
-        hashKey(orderLeft)
+        hashKey(orderLeft),
+        OrderType.V2
       );
 
       expect(
@@ -256,7 +263,7 @@ describe('Exchange.sol', function () {
   });
 
   describe('matchOrders validation', function () {
-    beforeEach(async function () {
+    beforeEach(async function () {      
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
         await ExchangeContractAsUser.getAddress(),
@@ -272,25 +279,24 @@ describe('Exchange.sol', function () {
       takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
       );
-
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin)
     });
 
     it('should not execute match order if Exchange Contract is paused', async function () {
@@ -301,6 +307,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -333,18 +340,18 @@ describe('Exchange.sol', function () {
       takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -353,11 +360,13 @@ describe('Exchange.sol', function () {
       takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
       await ExchangeContractAsUser.connect(maker).cancel(
         orderLeft,
-        hashKey(orderLeft)
+        hashKey(orderLeft),
+        OrderType.V2
       );
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -370,18 +379,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when left order taker is not equal to right order maker', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         user,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -393,6 +402,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -405,18 +415,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when right order taker is not equal to left order maker', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         user,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -427,6 +437,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -439,18 +450,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when order start time is in the future', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         (await ethers.provider.getBlock('latest')).timestamp + 100,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -462,6 +473,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -474,18 +486,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when order end time is in the past', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         (await ethers.provider.getBlock('latest')).timestamp - 100
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -497,6 +509,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -507,20 +520,22 @@ describe('Exchange.sol', function () {
     });
 
     it('should execute match order when order start time is non zero and less than current timestamp', async function () {
+      const {libOrderMock} = await loadFixture(deployLibAssetTest);
+
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         (await ethers.provider.getBlock('latest')).timestamp + 100,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -538,6 +553,7 @@ describe('Exchange.sol', function () {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V1,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -554,18 +570,18 @@ describe('Exchange.sol', function () {
     it('should execute match order when order end time is non zero and more than current timestamp', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         (await ethers.provider.getBlock('latest')).timestamp + 100
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -581,6 +597,7 @@ describe('Exchange.sol', function () {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V1,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -614,18 +631,18 @@ describe('Exchange.sol', function () {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -648,6 +665,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -674,18 +692,18 @@ describe('Exchange.sol', function () {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -708,6 +726,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -725,18 +744,18 @@ describe('Exchange.sol', function () {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -759,6 +778,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -788,18 +808,18 @@ describe('Exchange.sol', function () {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -822,6 +842,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -857,18 +878,18 @@ describe('Exchange.sol', function () {
       const makerAssetForRightOrder = await AssetERC1155(ERC1155Contract, 1, 5);
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -879,6 +900,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -915,18 +937,18 @@ describe('Exchange.sol', function () {
       const makerAssetForRightOrder = await AssetERC721(ERC721Contract, 1);
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -937,6 +959,7 @@ describe('Exchange.sol', function () {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V1,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,

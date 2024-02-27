@@ -11,7 +11,8 @@ library LibAsset {
         INVALID, // Represents an invalid asset type.
         ERC20, // Represents an ERC20 token.
         ERC721, // Represents a single ERC721 token.
-        ERC1155 // Represents an ERC1155 token.
+        ERC1155, // Represents an ERC1155 token.
+        LAND // Represents a TSB LAND token
     }
 
     /// @dev Represents the side of the trade from which a fee should be taken, if any.

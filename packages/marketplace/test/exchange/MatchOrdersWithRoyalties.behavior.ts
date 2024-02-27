@@ -9,7 +9,7 @@ import {
   Asset,
 } from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
+import {hashKey, OrderDefault, OrderType, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
@@ -86,18 +86,18 @@ export function shouldMatchOrdersWithRoyalty() {
 
       orderLeft = await OrderDefault(
         deployer,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -120,6 +120,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -167,18 +168,18 @@ export function shouldMatchOrdersWithRoyalty() {
 
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -202,6 +203,7 @@ export function shouldMatchOrdersWithRoyalty() {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -227,18 +229,18 @@ export function shouldMatchOrdersWithRoyalty() {
       ERC721Asset = await AssetERC721(ERC721Contract, 1);
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -261,6 +263,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -315,18 +318,18 @@ export function shouldMatchOrdersWithRoyalty() {
       ERC721Asset = await AssetERC721(ERC721Contract, 1);
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -349,6 +352,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -404,18 +408,18 @@ export function shouldMatchOrdersWithRoyalty() {
       ERC721Asset = await AssetERC721(ERC721WithRoyalty, 1);
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -438,6 +442,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -500,18 +505,18 @@ export function shouldMatchOrdersWithRoyalty() {
       ERC721Asset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -534,6 +539,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -594,18 +600,18 @@ export function shouldMatchOrdersWithRoyalty() {
       ERC721Asset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
       orderLeft = await OrderDefault(
         maker,
-        ERC721Asset,
+        [ERC721Asset],
         ZeroAddress,
-        ERC20Asset,
+        [ERC20Asset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        ERC20Asset,
+        [ERC20Asset],
         ZeroAddress,
-        ERC721Asset,
+        [ERC721Asset],
         1,
         0,
         0
@@ -628,6 +634,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -672,18 +679,18 @@ export function shouldMatchOrdersWithRoyalty() {
         ERC721Asset = await AssetERC721(ERC721WithRoyaltyWithoutIROYALTYUGC, 1);
         orderLeft = await OrderDefault(
           maker,
-          ERC721Asset,
+          [ERC721Asset],
           ZeroAddress,
-          ERC20Asset,
+          [ERC20Asset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          ERC20Asset,
+          [ERC20Asset],
           ZeroAddress,
-          ERC721Asset,
+          [ERC721Asset],
           1,
           0,
           0
@@ -712,6 +719,7 @@ export function shouldMatchOrdersWithRoyalty() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -738,18 +746,18 @@ export function shouldMatchOrdersWithRoyalty() {
         ERC721Asset = await AssetERC721(ERC721WithRoyaltyWithoutIROYALTYUGC, 2);
         orderLeft = await OrderDefault(
           maker,
-          ERC721Asset,
+          [ERC721Asset],
           ZeroAddress,
-          ERC20Asset,
+          [ERC20Asset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          ERC20Asset,
+          [ERC20Asset],
           ZeroAddress,
-          ERC721Asset,
+          [ERC721Asset],
           1,
           0,
           0
@@ -773,6 +781,7 @@ export function shouldMatchOrdersWithRoyalty() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -798,6 +807,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,

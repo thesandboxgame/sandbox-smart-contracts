@@ -40,11 +40,15 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param order The order details to be validated.
     /// @param signature The signature associated with the order.
     /// @param sender Address of the order sender.
-    function validate(LibOrder.Order calldata order, bytes memory signature, address sender) external view {
+    /// @param orderType Order struct version - V1 or V2
+    function validate(LibOrder.Order calldata order, bytes memory signature, address sender, LibOrder.OrderType orderType) external view {
         require(order.maker != address(0), "no maker");
 
         LibOrder.validateOrderTime(order);
-        _verifyWhitelists(order.makeAsset);
+
+        for( uint i = 0; i < order.makeAsset.length; i++){
+            _verifyWhitelists(order.makeAsset[i]);
+        }
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");
@@ -56,7 +60,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
             return;
         }
 
-        bytes32 hash = LibOrder.hash(order);
+        bytes32 hash = LibOrder.hash(order, orderType);
 
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }

@@ -6,6 +6,7 @@ import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
 import {
   hashKey,
   OrderDefault,
+  OrderType,
   signOrder,
   Order,
   isOrderEqual,
@@ -76,18 +77,18 @@ export function shouldMatchOrders() {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -106,6 +107,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -142,9 +144,9 @@ export function shouldMatchOrders() {
         // left order for partial fill
         orderLeft = await OrderDefault(
           maker,
-          makerAssetForLeftOrder,
+          [makerAssetForLeftOrder],
           ZeroAddress,
-          takerAssetForLeftOrder,
+          [takerAssetForLeftOrder],
           1,
           0,
           0
@@ -152,9 +154,9 @@ export function shouldMatchOrders() {
         // right order for partial fill
         orderRight = await OrderDefault(
           taker,
-          takerAssetForRightOrder,
+          [takerAssetForRightOrder],
           ZeroAddress,
-          makerAssetForRightOrder,
+          [makerAssetForRightOrder],
           1,
           0,
           0
@@ -176,6 +178,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -217,9 +220,9 @@ export function shouldMatchOrders() {
         // left order for partial fill
         orderLeft = await OrderDefault(
           maker,
-          makerAssetForLeftOrder,
+          [makerAssetForLeftOrder],
           ZeroAddress,
-          takerAssetForLeftOrder,
+          [takerAssetForLeftOrder],
           1,
           0,
           0
@@ -227,9 +230,9 @@ export function shouldMatchOrders() {
         // right order for first partial fill
         const rightOrderForFirstMatch = await OrderDefault(
           taker,
-          takerAssetForRightOrder,
+          [takerAssetForRightOrder],
           ZeroAddress,
-          makerAssetForRightOrder,
+          [makerAssetForRightOrder],
           1,
           0,
           0
@@ -255,6 +258,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight: rightOrderForFirstMatch,
@@ -276,9 +280,9 @@ export function shouldMatchOrders() {
         // right order for second partial fill
         const rightOrderForSecondMatch = await OrderDefault(
           taker,
-          takerAssetForRightOrder,
+          [takerAssetForRightOrder],
           ZeroAddress,
-          makerAssetForRightOrder,
+          [makerAssetForRightOrder],
           2,
           0,
           0
@@ -291,6 +295,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight: rightOrderForSecondMatch,
@@ -322,18 +327,18 @@ export function shouldMatchOrders() {
 
         orderLeft = await OrderDefault(
           maker,
-          ERC20Asset,
+          [ERC20Asset],
           ZeroAddress,
-          ERC721Asset,
+          [ERC721Asset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          ERC721Asset,
+          [ERC721Asset],
           ZeroAddress,
-          ERC20Asset,
+          [ERC20Asset],
           1,
           0,
           0
@@ -358,6 +363,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft, // passing ERC20 as left order
             signatureLeft: makerSig,
             orderRight, // passing ERC721 as right order
@@ -402,6 +408,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderRight, // passing ERC721 as left order
             signatureRight: takerSig,
             orderLeft, // passing ERC20 as right order
@@ -437,18 +444,18 @@ export function shouldMatchOrders() {
         };
         orderLeft = await OrderDefault(
           maker,
-          ERC20Asset,
+          [ERC20Asset],
           ZeroAddress,
-          ERC721Asset,
+          [ERC721Asset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          ERC721Asset,
+          [ERC721Asset],
           ZeroAddress,
-          ERC20Asset,
+          [ERC20Asset],
           1,
           0,
           0
@@ -472,6 +479,7 @@ export function shouldMatchOrders() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -493,18 +501,18 @@ export function shouldMatchOrders() {
 
         orderLeft = await OrderDefault(
           maker,
-          ERC20Asset,
+          [ERC20Asset],
           ZeroAddress,
-          ERC1155Asset,
+          [ERC1155Asset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          ERC1155Asset,
+          [ERC1155Asset],
           ZeroAddress,
-          ERC20Asset,
+          [ERC20Asset],
           1,
           0,
           0
@@ -535,6 +543,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft, // passing ERC20 as left order
             signatureLeft: makerSig,
             orderRight, // passing ERC1155 as right order
@@ -591,6 +600,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderRight, // passing ERC1155 as left order
             signatureRight: takerSig,
             orderLeft, // passing ERC20 as right order
@@ -642,9 +652,9 @@ export function shouldMatchOrders() {
         // left order for partial fill
         orderLeft = await OrderDefault(
           maker,
-          ERC20AssetForLeftOrder,
+          [ERC20AssetForLeftOrder],
           ZeroAddress,
-          ERC1155AssetForLeftOrder,
+          [ERC1155AssetForLeftOrder],
           1,
           0,
           0
@@ -652,9 +662,9 @@ export function shouldMatchOrders() {
         // right order for partial fill
         orderRight = await OrderDefault(
           taker,
-          ERC1155AssetForRightOrder,
+          [ERC1155AssetForRightOrder],
           ZeroAddress,
-          ERC20AssetForRightOrder,
+          [ERC20AssetForRightOrder],
           1,
           0,
           0
@@ -682,6 +692,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -734,9 +745,9 @@ export function shouldMatchOrders() {
         // left order for partial fill
         orderLeft = await OrderDefault(
           maker,
-          ERC20AssetForLeftOrder,
+          [ERC20AssetForLeftOrder],
           ZeroAddress,
-          ERC1155AssetForLeftOrder,
+          [ERC1155AssetForLeftOrder],
           1,
           0,
           0
@@ -744,9 +755,9 @@ export function shouldMatchOrders() {
         // right order for first partial fill
         const rightOrderForFirstMatch = await OrderDefault(
           taker,
-          ERC1155AssetForRightOrder,
+          [ERC1155AssetForRightOrder],
           ZeroAddress,
-          ERC20AssetForRightOrder,
+          [ERC20AssetForRightOrder],
           1,
           0,
           0
@@ -780,6 +791,7 @@ export function shouldMatchOrders() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight: rightOrderForFirstMatch,
@@ -808,9 +820,9 @@ export function shouldMatchOrders() {
         // right order for second partial fill
         const rightOrderForSecondMatch = await OrderDefault(
           taker,
-          ERC1155AssetForRightOrder,
+          [ERC1155AssetForRightOrder],
           ZeroAddress,
-          ERC20AssetForRightOrder,
+          [ERC20AssetForRightOrder],
           2,
           0,
           0
@@ -822,6 +834,7 @@ export function shouldMatchOrders() {
         );
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight: rightOrderForSecondMatch,
@@ -872,6 +885,7 @@ export function shouldMatchOrders() {
             maker.getAddress(),
             [
               {
+                orderType: OrderType.V2,
                 orderLeft,
                 signatureLeft: makerSig,
                 orderRight,
@@ -886,6 +900,7 @@ export function shouldMatchOrders() {
         await expect(
           ExchangeContractAsUser.matchOrdersFrom(maker.getAddress(), [
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -915,6 +930,7 @@ export function shouldMatchOrders() {
         await expect(
           ExchangeContractAsUser.connect(maker).matchOrdersFrom(ZeroAddress, [
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -946,6 +962,7 @@ export function shouldMatchOrders() {
           maker.getAddress(),
           [
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -969,6 +986,7 @@ export function shouldMatchOrders() {
 
       const tx = await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1007,18 +1025,18 @@ export function shouldMatchOrders() {
       // left order taker is right order maker
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         taker,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -1034,6 +1052,7 @@ export function shouldMatchOrders() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1067,18 +1086,18 @@ export function shouldMatchOrders() {
 
       orderLeft = await OrderDefault(
         maker,
-        makerAssetForLeftOrder,
+        [makerAssetForLeftOrder],
         ZeroAddress,
-        takerAssetForLeftOrder,
+        [takerAssetForLeftOrder],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAssetForRightOrder,
+        [takerAssetForRightOrder],
         ZeroAddress,
-        makerAssetForRightOrder,
+        [makerAssetForRightOrder],
         1,
         0,
         0
@@ -1100,6 +1119,7 @@ export function shouldMatchOrders() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1122,18 +1142,18 @@ export function shouldMatchOrders() {
     it('should require the message sender to be the maker for a zero-salt right order', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         0,
         0,
         0
@@ -1149,6 +1169,7 @@ export function shouldMatchOrders() {
 
       await ExchangeContractAsUser.connect(taker).matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1165,18 +1186,18 @@ export function shouldMatchOrders() {
     it('should require the message sender to be the maker for a zero-salt left order', async function () {
       orderLeft = await OrderDefault(
         maker,
-        makerAsset,
+        [makerAsset],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         0,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        takerAsset,
+        [takerAsset],
         ZeroAddress,
-        makerAsset,
+        [makerAsset],
         1,
         0,
         0
@@ -1192,6 +1213,7 @@ export function shouldMatchOrders() {
 
       await ExchangeContractAsUser.connect(maker).matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1213,6 +1235,7 @@ export function shouldMatchOrders() {
 
       await ExchangeContractAsUser.matchOrders([
         {
+          orderType: OrderType.V2,
           orderLeft,
           signatureLeft: makerSig,
           orderRight,
@@ -1228,6 +1251,7 @@ export function shouldMatchOrders() {
       await expect(
         ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,

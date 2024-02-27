@@ -8,7 +8,7 @@ import {
   Asset,
 } from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
+import {hashKey, OrderDefault, OrderType, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
@@ -57,18 +57,18 @@ export function shouldCheckForWhitelisting() {
         takerAsset = await AssetERC20(ERC20Contract2, 456000000);
         orderLeft = await OrderDefault(
           maker,
-          makerAsset,
+          [makerAsset],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          takerAsset,
+          [takerAsset],
           ZeroAddress,
-          makerAsset,
+          [makerAsset],
           1,
           0,
           0
@@ -82,6 +82,7 @@ export function shouldCheckForWhitelisting() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -98,6 +99,7 @@ export function shouldCheckForWhitelisting() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -129,18 +131,18 @@ export function shouldCheckForWhitelisting() {
         takerAsset = await AssetERC20(ERC20Contract, 100000000000);
         orderLeft = await OrderDefault(
           maker,
-          makerAsset,
+          [makerAsset],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
         );
         orderRight = await OrderDefault(
           taker,
-          takerAsset,
+          [takerAsset],
           ZeroAddress,
-          makerAsset,
+          [makerAsset],
           1,
           0,
           0
@@ -166,6 +168,7 @@ export function shouldCheckForWhitelisting() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -192,6 +195,7 @@ export function shouldCheckForWhitelisting() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -217,6 +221,7 @@ export function shouldCheckForWhitelisting() {
         await expect(
           ExchangeContractAsUser.matchOrders([
             {
+              orderType: OrderType.V2,
               orderLeft,
               signatureLeft: makerSig,
               orderRight,
@@ -246,6 +251,7 @@ export function shouldCheckForWhitelisting() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,
@@ -274,6 +280,7 @@ export function shouldCheckForWhitelisting() {
 
         await ExchangeContractAsUser.matchOrders([
           {
+            orderType: OrderType.V2,
             orderLeft,
             signatureLeft: makerSig,
             orderRight,

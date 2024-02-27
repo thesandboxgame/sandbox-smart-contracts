@@ -239,6 +239,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param to Account that will receive the asset
     /// @dev This is the main entry point, when used as a separated contract this method will be external
     function _transfer(LibAsset.Asset memory asset, address from, address to) internal {
+        // ToDo: Call transferQuad for LAND
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             address token = LibAsset.decodeAddress(asset.assetType);
             // slither-disable-next-line arbitrary-send-erc20

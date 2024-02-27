@@ -95,9 +95,9 @@ contract Exchange is
     /// @notice Cancel an order.
     /// @param order The order to be canceled.
     /// @param orderKeyHash Used as a checksum to avoid mistakes in the order values.
-    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external {
+    function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash, LibOrder.OrderType orderType) external {
         require(_msgSender() == order.maker, "not maker");
-        _cancel(order, orderKeyHash);
+        _cancel(order, orderKeyHash, orderType);
     }
 
     /// @notice Set the royalty registry.

@@ -60,18 +60,18 @@ export function shouldMatchOrderForBatching() {
       takerAsset = await AssetERC20(ERC20Contract, totalPayment / 2);
       const left1 = await OrderDefault(
         maker,
-        await AssetERC721(ERC721Contract, 123),
+        [await AssetERC721(ERC721Contract, 123)],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
       );
       const left2 = await OrderDefault(
         maker,
-        await AssetERC721(ERC721Contract, 345),
+        [await AssetERC721(ERC721Contract, 345)],
         ZeroAddress,
-        takerAsset,
+        [takerAsset],
         1,
         0,
         0
@@ -135,9 +135,9 @@ export function shouldMatchOrderForBatching() {
       for (let i = 0; i < 3; i++) {
         const leftorder = await OrderDefault(
           maker,
-          await AssetERC721(ERC721Contract, i),
+          [await AssetERC721(ERC721Contract, i)],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
@@ -206,9 +206,9 @@ export function shouldMatchOrderForBatching() {
       for (let i = 0; i < 20; i++) {
         const leftorder = await OrderDefault(
           maker,
-          await AssetERC721(ERC721Contract, i),
+          [await AssetERC721(ERC721Contract, i)],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
@@ -281,9 +281,9 @@ export function shouldMatchOrderForBatching() {
       for (let i = 0; i < 50; i++) {
         const leftorder = await OrderDefault(
           maker,
-          await AssetERC721(ERC721Contract, i),
+          [await AssetERC721(ERC721Contract, i)],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
@@ -354,9 +354,9 @@ export function shouldMatchOrderForBatching() {
       for (let i = 0; i < 51; i++) {
         const leftorder = await OrderDefault(
           maker,
-          await AssetERC721(ERC721Contract, i),
+          [await AssetERC721(ERC721Contract, i)],
           ZeroAddress,
-          takerAsset,
+          [takerAsset],
           1,
           0,
           0
