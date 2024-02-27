@@ -248,6 +248,7 @@ export async function setupLandContract() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    4,
   );
 
   // deploy mocks
@@ -364,6 +365,7 @@ export async function setupLandOperatorFilter() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    4,
   );
 
   await LandContract.connect(landAdmin).setMinter(
@@ -379,6 +381,7 @@ export async function setupLandOperatorFilter() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    4,
   );
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
@@ -478,7 +481,9 @@ export async function setupPolygonLandContract() {
     PolygonLandFactory,
     [
       await TrustedForwarderContract.getAddress(),
+      await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      3,
     ],
     {
       initializer: 'initialize',
@@ -506,7 +511,6 @@ export async function setupPolygonLandContract() {
   const MockMarketPlace3 = await MarketPlaceToFilterMockFactory.deploy();
 
   // setup role
-  await PolygonLandContract.changeAdmin(landAdmin);
   const LandAsAdmin = PolygonLandContract.connect(landAdmin);
   await PolygonLandContract.connect(landAdmin).setMinter(
     await landMinter.getAddress(),
@@ -603,14 +607,15 @@ export async function setupPolygonLandOperatorFilter() {
     PolygonLandFactory,
     [
       await TrustedForwarderContract.getAddress(),
+      await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      3,
     ],
     {
       initializer: 'initialize',
     },
   );
 
-  await PolygonLandContract.changeAdmin(landAdmin);
   const LandAsAdmin = PolygonLandContract.connect(landAdmin);
   const LandAsOther = PolygonLandContract.connect(other);
   const LandAsOther1 = PolygonLandContract.connect(other1);
@@ -644,7 +649,9 @@ export async function setupPolygonLandOperatorFilter() {
     PolygonLandFactory,
     [
       await TrustedForwarderContract.getAddress(),
+      await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      3,
     ],
     {
       initializer: 'initialize',
