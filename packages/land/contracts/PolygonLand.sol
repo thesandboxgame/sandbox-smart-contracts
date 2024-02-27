@@ -22,8 +22,20 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
 
-    function initialize(address trustedForwarder, address _royaltyManager) external reinitializer(3) {
-        _admin = _msgSender();
+    /**
+     * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
+     * @param trustedForwarder TrustedForwarder address
+     * @param admin Admin of the contract
+     * @param _royaltyManager address of the manager contract for common royalty recipient
+     * @param version version number to which PolygonLand contract is being upgraded
+     */
+    function initialize(
+        address trustedForwarder,
+        address admin,
+        address _royaltyManager,
+        uint8 version
+    ) external reinitializer(version) {
+        _admin = admin;
         __ERC2771Handler_initialize(trustedForwarder);
         _setRoyaltyManager(_royaltyManager);
         emit AdminChanged(address(0), _admin);
