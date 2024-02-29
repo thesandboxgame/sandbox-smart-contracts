@@ -19,7 +19,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private royaltyManager;
-    uint8 private initialized = 3;
+    uint8 private initialized;
     bool private _initializing;
 
     event OperatorRegistrySet(address indexed registry);
