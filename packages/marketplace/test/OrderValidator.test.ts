@@ -326,6 +326,58 @@ describe('OrderValidator.sol', function () {
     ).to.not.be.reverted;
   });
 
+  it('should not validate if recipient is zero', async function () {
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const order = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0,
+      ZeroAddress
+    );
+
+    const signature = await signOrder(order, user1, OrderValidatorAsUser);
+
+    await expect(
+      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
+    ).to.be.revertedWith('no recipient');
+  });
+
+  it('should not validate if recipient is changed after signature', async function () {
+    const makerAsset = await AssetERC721(ERC721Contract, 100);
+    const takerAsset = await AssetERC20(ERC20Contract, 100);
+    const order = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0
+    );
+
+    const signature = await signOrder(order, user1, OrderValidatorAsUser);
+
+    const newOrder = await OrderDefault(
+      user1,
+      makerAsset,
+      ZeroAddress,
+      takerAsset,
+      1,
+      0,
+      0,
+      await user2.getAddress()
+    );
+
+    await expect(
+      OrderValidatorAsUser.validate(newOrder, signature, user2.getAddress())
+    ).to.be.revertedWith('signature verification error');
+  });
+
   it('should not set permission for token if caller is not owner', async function () {
     await expect(OrderValidatorAsUser.enableRole(TSBRole)).to.revertedWith(
       `AccessControl: account ${(

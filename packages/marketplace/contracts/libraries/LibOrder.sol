@@ -11,11 +11,11 @@ import {LibMath} from "./LibMath.sol";
 library LibOrder {
      bytes32 internal constant ORDER_TYPEHASH_V1 =
         keccak256(
-            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
     bytes32 internal constant ORDER_TYPEHASH_V2 =
         keccak256(
-            "Order(address maker,Asset[] makeAsset,address taker,Asset[] takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+            "Order(address maker,Asset[] makeAsset,address taker,Asset[] takeAsset,address makeRecipient, uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
 
     enum OrderType {
@@ -29,6 +29,7 @@ library LibOrder {
         address taker; // Address of the taker.
         LibAsset.Asset[] takeAsset; // Asset the taker is providing.
         // uint256[] royalties // ToDo: apply royalties % on bundles
+        address makeRecipient; // recipient address for maker.
         uint256 salt; // Random number to ensure unique order hash.
         uint256 start; // Timestamp when the order becomes valid.
         uint256 end; // Timestamp when the order expires.
@@ -49,6 +50,7 @@ library LibOrder {
             return keccak256(
                     abi.encode(
                         order.maker,
+                        order.makeRecipient,
                         LibAsset.hash(order.makeAsset[0].assetType),
                         LibAsset.hash(order.takeAsset[0].assetType),
                         order.salt
@@ -68,6 +70,7 @@ library LibOrder {
             return keccak256(
                     abi.encode(
                         order.maker,
+                        order.makeRecipient,
                         keccak256(makeAssetsTypeEncoded),
                         keccak256(takeAssetsTypeEncoded),
                         order.salt
@@ -91,6 +94,7 @@ library LibOrder {
                     LibAsset.hash(order.makeAsset[0]),
                     order.taker,
                     LibAsset.hash(order.takeAsset[0]),
+                    order.makeRecipient,
                     order.salt,
                     order.start,
                     order.end
@@ -113,6 +117,7 @@ library LibOrder {
                 keccak256(makeAssetsEncoded), // Hash of all makeAssets
                 order.taker,
                 keccak256(takeAssetsEncoded), // Hash of all takeAssets
+                order.makeRecipient,
                 order.salt,
                 order.start,
                 order.end

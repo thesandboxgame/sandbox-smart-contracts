@@ -27,6 +27,7 @@ export function shouldMatchOrders() {
       defaultFeeReceiver: Signer,
       maker: Signer,
       taker: Signer,
+      makeRecipient: Signer,
       user: Signer,
       makerAsset: Asset,
       takerAsset: Asset,
@@ -53,6 +54,7 @@ export function shouldMatchOrders() {
         defaultFeeReceiver,
         user1: maker,
         user2: taker,
+        user3: makeRecipient,
         user,
         PAUSER_ROLE,
         ERC1776_OPERATOR_ROLE,
@@ -976,6 +978,88 @@ export function shouldMatchOrders() {
         expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
         expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(0);
       });
+    });
+
+    it('different recipients test', async function () {
+      const recipientAddress = await makeRecipient.getAddress();
+      const makerAssetForLeftOrder = await AssetERC20(
+        ERC20Contract,
+        10000000000
+      );
+      const takerAssetForLeftOrder = await AssetERC20(
+        ERC20Contract2,
+        20000000000
+      );
+
+      const takerAssetForRightOrder = await AssetERC20(
+        ERC20Contract2,
+        10000000000
+      );
+
+      const makerAssetForRightOrder = await AssetERC20(
+        ERC20Contract,
+        5000000000
+      );
+
+      orderLeft = await OrderDefault(
+        maker,
+        makerAssetForLeftOrder,
+        ZeroAddress,
+        takerAssetForLeftOrder,
+        1,
+        0,
+        0,
+        recipientAddress
+      );
+
+      orderRight = await OrderDefault(
+        taker,
+        takerAssetForRightOrder,
+        ZeroAddress,
+        makerAssetForRightOrder,
+        1,
+        0,
+        0,
+        recipientAddress
+      );
+
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
+      expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(10000000000);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(5000000000);
+      expect(await ERC20Contract.balanceOf(maker)).to.be.equal(5000000000);
+      expect(await ERC20Contract.balanceOf(recipientAddress)).to.be.equal(
+        5000000000
+      );
+      expect(await ERC20Contract2.balanceOf(recipientAddress)).to.be.equal(
+        10000000000
+      );
+      expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(10000000000);
     });
 
     it('should emit a Match event', async function () {

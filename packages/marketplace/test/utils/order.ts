@@ -12,7 +12,7 @@ import {
 
 export const ORDER_TYPEHASH_V1 = keccak256(
   Buffer.from(
-    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
+    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
   )
 );
 
@@ -35,6 +35,7 @@ export type OrderV1 = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
+  makeRecipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -45,6 +46,7 @@ export type Order = {
   makeAsset: Asset[];
   taker: string;
   takeAsset: Asset[];
+  makeRecipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -57,13 +59,15 @@ export const OrderDefault = async (
   takeAsset: Asset[],
   salt: Numeric,
   start: Numeric,
-  end: Numeric
+  end: Numeric,
+  makeRecipient?: Address
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
   taker:
     taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
+  makeRecipient: makeRecipient || (await maker.getAddress()), // Use makerAddress if makeRecipient is not provided
   salt,
   start,
   end,
@@ -72,11 +76,12 @@ export const OrderDefault = async (
 export function hashKey(order: Order): string {
   // ToDo: make compatible with V1 and V2.
   const encoded = AbiCoder.defaultAbiCoder().encode(
-    ['address', 'bytes32', 'bytes32', 'uint256'],
+    ['address', 'address', 'bytes32', 'bytes32', 'uint256'],
     [
       order.maker,
       hashAssetType(order.makeAsset[0].assetType),
       hashAssetType(order.takeAsset[0].assetType),
+      order.makeRecipient,
       order.salt,
     ]
   );
@@ -94,7 +99,11 @@ export const getSymmetricOrder = async (
     takeAsset: o.makeAsset,
   };
   if (taker) {
-    return {...ret, maker: await taker.getAddress()};
+    return {
+      ...ret,
+      maker: await taker.getAddress(),
+      makeRecipient: await taker.getAddress(),
+    };
   }
   if (o.taker === ZeroAddress) {
     throw new Error(
@@ -114,6 +123,7 @@ export function hashOrder(order: Order, orderType: any): string {
         'bytes32',
         'address',
         'bytes32',
+        'address',
         'uint256',
         'uint256',
         'uint256',
@@ -124,6 +134,7 @@ export function hashOrder(order: Order, orderType: any): string {
         hashAsset(order.makeAsset[0]),
         order.taker,
         hashAsset(order.takeAsset[0]),
+        order.makeRecipient,
         order.salt,
         order.start,
         order.end,
@@ -148,6 +159,7 @@ export function hashOrder(order: Order, orderType: any): string {
         'bytes32',
         'address',
         'bytes32',
+        'address',
         'uint256',
         'uint256',
         'uint256',
@@ -158,6 +170,7 @@ export function hashOrder(order: Order, orderType: any): string {
         keccak256(makeAssetsEncoded),
         order.taker,
         keccak256(takeAssetsEncoded),
+        order.makeRecipient,
         order.salt,
         order.start,
         order.end,
@@ -198,6 +211,7 @@ export async function signOrder(
       { name: 'makeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]' },
       { name: 'taker', type: 'address' },
       { name: 'takeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]' },
+      { name: 'makeRecipient', type: 'address'},
       { name: 'salt', type: 'uint256' },
       { name: 'start', type: 'uint256' },
       { name: 'end', type: 'uint256' },

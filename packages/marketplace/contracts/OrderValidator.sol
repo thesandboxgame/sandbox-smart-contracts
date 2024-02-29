@@ -43,6 +43,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param orderType Order struct version - V1 or V2
     function validate(LibOrder.Order calldata order, bytes memory signature, address sender, LibOrder.OrderType orderType) external view {
         require(order.maker != address(0), "no maker");
+        require(order.makeRecipient != address(0), "no recipient");
 
         LibOrder.validateOrderTime(order);
 

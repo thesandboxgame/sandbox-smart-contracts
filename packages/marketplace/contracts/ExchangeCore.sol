@@ -184,13 +184,26 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
         // ToDo: Check this loop
         // ToDo: check newFill values for bundles
-        for(uint i = 0; i < makeAssetLength; i++){
-            doTransfers(
-                ITransferManager.DealSide(LibAsset.Asset(makeMatch[i], newFill.leftValue), orderLeft.maker),
-                ITransferManager.DealSide(LibAsset.Asset(takeMatch[i], newFill.rightValue), orderRight.maker),
-                LibAsset.getFeeSide(makeMatch[i].assetClass, takeMatch[i].assetClass)
-            );
-        }
+        // for(uint i = 0; i < makeAssetLength; i++){
+        //     doTransfers(
+        //         ITransferManager.DealSide(LibAsset.Asset(makeMatch[i], newFill.leftValue), orderLeft.maker),
+        //         ITransferManager.DealSide(LibAsset.Asset(takeMatch[i], newFill.rightValue), orderRight.maker),
+        //         LibAsset.getFeeSide(makeMatch[i].assetClass, takeMatch[i].assetClass)
+        //     );
+        // }
+        doTransfers(
+            ITransferManager.DealSide(
+                LibAsset.Asset(makeMatch, newFill.leftValue),
+                orderLeft.maker,
+                orderLeft.makeRecipient
+            ),
+            ITransferManager.DealSide(
+                LibAsset.Asset(takeMatch, newFill.rightValue),
+                orderRight.maker,
+                orderRight.makeRecipient
+            ),
+            LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
+        );
     }
 
     /// @notice Parse orders to get the order data, then create a new fill with setFillEmitMatch()
