@@ -100,7 +100,7 @@ describe('Land.sol', function () {
 
     it('should return owner address', async function () {
       const {LandContract, landOwner} = await loadFixture(setupLand);
-      expect(await LandContract.getOwner()).to.be.equal(
+      expect(await LandContract.owner()).to.be.equal(
         await landOwner.getAddress(),
       );
     });
@@ -108,26 +108,17 @@ describe('Land.sol', function () {
     it('should not set owner if caller is not admin', async function () {
       const {LandAsOther, other} = await loadFixture(setupLand);
       await expect(
-        LandAsOther.setOwner(await other.getAddress()),
+        LandAsOther.transferOwnership(await other.getAddress()),
       ).to.be.revertedWith('only admin allowed');
-    });
-
-    it('should not set zero address owner', async function () {
-      const {LandAsAdmin} = await loadFixture(setupLand);
-      await expect(LandAsAdmin.setOwner(ZeroAddress)).to.be.revertedWith(
-        'owner cannot be zero address',
-      );
     });
 
     it('should set owner', async function () {
       const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
-      expect(await LandAsAdmin.getOwner()).to.be.equal(
+      expect(await LandAsAdmin.owner()).to.be.equal(
         await landOwner.getAddress(),
       );
-      await LandAsAdmin.setOwner(await other.getAddress());
-      expect(await LandAsAdmin.getOwner()).to.be.equal(
-        await other.getAddress(),
-      );
+      await LandAsAdmin.transferOwnership(await other.getAddress());
+      expect(await LandAsAdmin.owner()).to.be.equal(await other.getAddress());
     });
 
     it(`should revert for invalid size`, async function () {
