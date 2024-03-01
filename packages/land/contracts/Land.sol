@@ -25,8 +25,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed _royaltyManager);
-        event OwnerSet(address indexed owner);
-
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event Initialized(uint8 version);
 
     modifier reinitializer(uint8 version) {
@@ -43,19 +42,21 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
      * @param metaTransactionContract Authorized contract for meta-transactions
      * @param admin Admin of the contract
      * @param _royaltyManager address of the manager contract for common royalty recipient
+     * @param _newOwner address of new owner
      * @param version version number to which Land contract is being upgraded
      */
     function initialize(
         address metaTransactionContract,
         address admin,
         address _royaltyManager,
-        address owner,
+        address _newOwner,
         uint8 version
     ) public reinitializer(version) {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
         _setRoyaltyManager(_royaltyManager);
-        _setOwner(owner);
+        _transferOwnership(_newOwner);
+        emit AdminChanged(address(0), _admin);
     }
 
     /**
@@ -99,9 +100,9 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
         emit RoyaltyManagerSet(_royaltyManager);
     }
 
-    function _setOwner(address newOwner) internal {
-        _owner = newOwner;
-        emit OwnerSet(newOwner);
+    function _transferOwnership(address _newOwner) internal {
+        emit OwnershipTransferred(_owner, _newOwner);
+        _owner = _newOwner;
     }
 
     /**
@@ -163,17 +164,16 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
         return royaltyManager;
     }
 
-    /// @notice returns the owner address
-    /// @return owner address of contract owner
-    function getOwner() external view returns (address owner) {
+    /// @notice Get the address of the owner
+    /// @return ownerAddress The address of the owner.
+    function owner() external view returns (address ownerAddress) {
         return _owner;
     }
 
-    /// @notice Set new owner to contract
-    /// @param newOwner address of new owner
-    function setOwner(address newOwner) external onlyAdmin {
-        require(newOwner != address(0), "owner cannot be zero address");
-        _setOwner(newOwner);
+    /// @notice Set the address of the new owner of the contract
+    /// @param _newOwner address of new owner
+    function transferOwnership(address _newOwner) external onlyAdmin {
+        _transferOwnership(_newOwner);
     }
 
     /**
