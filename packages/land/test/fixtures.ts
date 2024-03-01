@@ -370,7 +370,6 @@ export async function setupLandOperatorFilter() {
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
     await landOwner.getAddress(),
-    4,
   );
 
   await LandContract.connect(landAdmin).setMinter(
@@ -386,6 +385,7 @@ export async function setupLandOperatorFilter() {
     await MetaTransactionContract.getAddress(),
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
+    await landOwner.getAddress(),
   );
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
@@ -618,7 +618,6 @@ export async function setupPolygonLandOperatorFilter() {
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
       await landOwner.getAddress(),
-      3,
     ],
     {
       initializer: 'initialize',
@@ -660,6 +659,7 @@ export async function setupPolygonLandOperatorFilter() {
       await TrustedForwarderContract.getAddress(),
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
+      await landOwner.getAddress(),
     ],
     {
       initializer: 'initialize',

@@ -788,24 +788,15 @@ describe('PolygonLand.sol', function () {
   it('should not set owner if caller is not admin', async function () {
     const {LandAsOther, other} = await loadFixture(setupPolygonLand);
     await expect(
-      LandAsOther.setOwner(await other.getAddress()),
+      LandAsOther.transferOwnership(await other.getAddress()),
     ).to.be.revertedWith('ADMIN_ONLY');
-  });
-
-  it('should not set zero address owner', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
-    await expect(LandAsAdmin.setOwner(ZeroAddress)).to.be.revertedWith(
-      'owner cannot be zero address',
-    );
   });
 
   it('should set owner', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
-    expect(await LandAsAdmin.getOwner()).to.be.equal(
-      await landOwner.getAddress(),
-    );
-    await LandAsAdmin.setOwner(await other.getAddress());
-    expect(await LandAsAdmin.getOwner()).to.be.equal(await other.getAddress());
+    expect(await LandAsAdmin.owner()).to.be.equal(await landOwner.getAddress());
+    await LandAsAdmin.transferOwnership(await other.getAddress());
+    expect(await LandAsAdmin.owner()).to.be.equal(await other.getAddress());
   });
 
   describe('Mint and transfer a smaller quad', function () {
@@ -1545,7 +1536,7 @@ describe('PolygonLand.sol', function () {
     it('should return owner address', async function () {
       const {PolygonLandContract, landOwner} =
         await loadFixture(setupPolygonLand);
-      expect(await PolygonLandContract.getOwner()).to.be.equal(
+      expect(await PolygonLandContract.owner()).to.be.equal(
         await landOwner.getAddress(),
       );
     });
