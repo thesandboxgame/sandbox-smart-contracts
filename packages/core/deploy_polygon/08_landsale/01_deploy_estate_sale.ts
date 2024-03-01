@@ -45,7 +45,7 @@ const func: DeployFunction = async function (hre) {
     backendReferralWallet,
     landSaleFeeRecipient,
     landSaleAdmin,
-    assetAdmin
+    assetAdmin,
   } = await getNamedAccounts();
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
