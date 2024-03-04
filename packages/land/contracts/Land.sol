@@ -8,6 +8,7 @@ import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 /**
  * @title Land Contract
@@ -18,13 +19,13 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-manag
 contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
-    IRoyaltyManager private royaltyManager;
+    IRoyaltyManager private _royaltyManager;
     address private _owner;
     uint8 private initialized;
     bool private _initializing;
 
     event OperatorRegistrySet(address indexed registry);
-    event RoyaltyManagerSet(address indexed _royaltyManager);
+    event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event Initialized(uint8 version);
 
@@ -41,21 +42,21 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
      * @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
      * @param metaTransactionContract Authorized contract for meta-transactions
      * @param admin Admin of the contract
-     * @param _royaltyManager address of the manager contract for common royalty recipient
-     * @param _newOwner address of new owner
+     * @param royaltyManager address of the manager contract for common royalty recipient
+     * @param newOwner address of new owner
      * @param version version number to which Land contract is being upgraded
      */
     function initialize(
         address metaTransactionContract,
         address admin,
-        address _royaltyManager,
-        address _newOwner,
+        address royaltyManager,
+        address newOwner,
         uint8 version
     ) public reinitializer(version) {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
-        _setRoyaltyManager(_royaltyManager);
-        _transferOwnership(_newOwner);
+        _setRoyaltyManager(royaltyManager);
+        _transferOwnership(newOwner);
         emit AdminChanged(address(0), _admin);
     }
 
@@ -94,15 +95,15 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     }
 
     /// @notice set royalty manager
-    /// @param _royaltyManager address of royalty manager to set
-    function _setRoyaltyManager(address _royaltyManager) internal {
-        royaltyManager = IRoyaltyManager(_royaltyManager);
-        emit RoyaltyManagerSet(_royaltyManager);
+    /// @param royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address royaltyManager) internal {
+        _royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(royaltyManager);
     }
 
-    function _transferOwnership(address _newOwner) internal {
-        emit OwnershipTransferred(_owner, _newOwner);
-        _owner = _newOwner;
+    function _transferOwnership(address newOwner) internal {
+        _owner = newOwner;
+        emit OwnershipTransferred(_owner, newOwner);
     }
 
     /**
@@ -153,7 +154,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
         uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         uint16 royaltyBps;
-        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
+        (receiver, royaltyBps) = _royaltyManager.getRoyaltyInfo();
         royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
         return (receiver, royaltyAmount);
     }
@@ -161,7 +162,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     /// @notice returns the royalty manager
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        return royaltyManager;
+        return _royaltyManager;
     }
 
     /// @notice Get the address of the owner
@@ -171,9 +172,9 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     }
 
     /// @notice Set the address of the new owner of the contract
-    /// @param _newOwner address of new owner
-    function transferOwnership(address _newOwner) external onlyAdmin {
-        _transferOwnership(_newOwner);
+    /// @param newOwner address of new owner
+    function transferOwnership(address newOwner) external onlyAdmin {
+        _transferOwnership(newOwner);
     }
 
     /**
