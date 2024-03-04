@@ -8,7 +8,6 @@ import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 /**
  * @title Land Contract
@@ -97,7 +96,7 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     /// @notice set royalty manager
     /// @param royaltyManager address of royalty manager to set
     function _setRoyaltyManager(address royaltyManager) internal {
-        _royaltyManager = IRoyaltyManager(_royaltyManager);
+        _royaltyManager = IRoyaltyManager(royaltyManager);
         emit RoyaltyManagerSet(royaltyManager);
     }
 

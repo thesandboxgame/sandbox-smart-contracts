@@ -49,7 +49,7 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     /// @notice set royalty manager
     /// @param royaltyManager address of royalty manager to set
     function _setRoyaltyManager(address royaltyManager) internal {
-        _royaltyManager = IRoyaltyManager(_royaltyManager);
+        _royaltyManager = IRoyaltyManager(royaltyManager);
         emit RoyaltyManagerSet(royaltyManager);
     }
 
