@@ -17,45 +17,45 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
-    IRoyaltyManager private royaltyManager;
+    IRoyaltyManager private _royaltyManager;
     address private _owner;
 
     event OperatorRegistrySet(address indexed registry);
-    event RoyaltyManagerSet(address indexed _royaltyManager);
+    event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
      * @param trustedForwarder TrustedForwarder address
      * @param admin Admin of the contract
-     * @param _royaltyManager address of the manager contract for common royalty recipient
-     * @param _newOwner address of new owner
+     * @param royaltyManager address of the manager contract for common royalty recipient
+     * @param newOwner address of new owner
      * @param version version number to which PolygonLand contract is being upgraded
      */
     function initialize(
         address trustedForwarder,
         address admin,
-        address _royaltyManager,
-        address _newOwner,
+        address royaltyManager,
+        address newOwner,
         uint8 version
     ) external reinitializer(version) {
         _admin = admin;
         __ERC2771Handler_initialize(trustedForwarder);
-        _setRoyaltyManager(_royaltyManager);
-        _transferOwnership(_newOwner);
+        _setRoyaltyManager(royaltyManager);
+        _transferOwnership(newOwner);
         emit AdminChanged(address(0), _admin);
     }
 
     /// @notice set royalty manager
-    /// @param _royaltyManager address of royalty manager to set
-    function _setRoyaltyManager(address _royaltyManager) internal {
-        royaltyManager = IRoyaltyManager(_royaltyManager);
-        emit RoyaltyManagerSet(_royaltyManager);
+    /// @param royaltyManager address of royalty manager to set
+    function _setRoyaltyManager(address royaltyManager) internal {
+        _royaltyManager = IRoyaltyManager(_royaltyManager);
+        emit RoyaltyManagerSet(royaltyManager);
     }
 
-    function _transferOwnership(address _newOwner) internal {
-        emit OwnershipTransferred(_owner, _newOwner);
-        _owner = _newOwner;
+    function _transferOwnership(address newOwner) internal {
+        _owner = newOwner;
+        emit OwnershipTransferred(_owner, newOwner);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -75,7 +75,7 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
         uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         uint16 royaltyBps;
-        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
+        (receiver, royaltyBps) = _royaltyManager.getRoyaltyInfo();
         royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
         return (receiver, royaltyAmount);
     }
@@ -83,7 +83,7 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     /// @notice returns the royalty manager
     /// @return royaltyManagerAddress address of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        return royaltyManager;
+        return _royaltyManager;
     }
 
     /// @notice Get the address of the owner
@@ -93,9 +93,9 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
     }
 
     /// @notice Set the address of the new owner of the contract
-    /// @param _newOwner address of new owner
-    function transferOwnership(address _newOwner) external onlyAdmin {
-        _transferOwnership(_newOwner);
+    /// @param newOwner address of new owner
+    function transferOwnership(address newOwner) external onlyAdmin {
+        _transferOwnership(newOwner);
     }
 
     function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
