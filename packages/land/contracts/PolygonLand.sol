@@ -20,10 +20,12 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
 
     IRoyaltyManager private _royaltyManager;
     address private _owner;
+    address private _metadataRegistry;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event MetadataRegistrySet(address indexed metadataRegistry);
 
     /**
      * @notice Initializes the contract with the admin
@@ -45,6 +47,12 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     /// @param royaltyManager address of the manager contract for common royalty recipient
     function setRoyaltyManager(address royaltyManager) external onlyAdmin {
         _setRoyaltyManager(royaltyManager);
+    }
+
+    /// @notice sets address of the Metadata Registry
+    /// @param metadataRegistry The address of the rMetadata Registry
+    function setMetadataRegistry(address metadataRegistry) external onlyAdmin {
+        _setMetadataRegistry(metadataRegistry);
     }
 
     /// @notice Set the address of the new owner of the contract
@@ -85,9 +93,15 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     }
 
     /// @notice returns the royalty manager
-    /// @return royaltyManagerAddress address of royalty manager contract.
+    /// @return royaltyManagerAddress of royalty manager contract.
     function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
         return _royaltyManager;
+    }
+
+    /// @notice Get the address of the Metadata Registry
+    /// @return metadataRegistry The address of the Metadata Registry
+    function getMetadataRegistry() external view returns (address metadataRegistry) {
+        return _metadataRegistry;
     }
 
     /// @notice Get the address of the owner
@@ -199,6 +213,12 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     function _setRoyaltyManager(address royaltyManager) internal {
         _royaltyManager = IRoyaltyManager(royaltyManager);
         emit RoyaltyManagerSet(royaltyManager);
+    }
+
+    function _setMetadataRegistry(address metadataRegistry) internal {
+        require(metadataRegistry != address(0), "Invalid registry address");
+        _metadataRegistry = metadataRegistry;
+        emit MetadataRegistrySet(metadataRegistry);
     }
 
     function _transferOwnership(address newOwner) internal {

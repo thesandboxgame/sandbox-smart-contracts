@@ -28,10 +28,9 @@ describe('PolygonLand:OperatorFilterer', function () {
       OperatorFilterRegistry,
       operatorFilterSubscription,
       LandRegistryNotSetAsDeployer,
+      LandRegistryNotSetAsAdmin,
     } = await loadFixture(setupPolygonLandOperatorFilter);
-    await LandRegistryNotSetAsDeployer.setOperatorRegistry(
-      OperatorFilterRegistry,
-    );
+    await LandRegistryNotSetAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
     await LandRegistryNotSetAsDeployer.registerFilterer(ZeroAddress, false);
     await LandRegistryNotSetAsDeployer.registerFilterer(
       operatorFilterSubscription,
@@ -44,12 +43,13 @@ describe('PolygonLand:OperatorFilterer', function () {
   });
 
   it('should could be registered through OperatorFiltererUpgradeable', async function () {
-    const {OperatorFilterRegistry, LandRegistryNotSetAsDeployer} =
-      await loadFixture(setupPolygonLandOperatorFilter);
-
-    await LandRegistryNotSetAsDeployer.setOperatorRegistry(
+    const {
       OperatorFilterRegistry,
-    );
+      LandRegistryNotSetAsDeployer,
+      LandRegistryNotSetAsAdmin,
+    } = await loadFixture(setupPolygonLandOperatorFilter);
+
+    await LandRegistryNotSetAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
     await LandRegistryNotSetAsDeployer.registerFilterer(ZeroAddress, false);
 
     expect(
@@ -61,13 +61,12 @@ describe('PolygonLand:OperatorFilterer', function () {
     const {
       OperatorFilterRegistry,
       LandRegistryNotSetAsDeployer,
+      LandRegistryNotSetAsAdmin,
       operatorFilterSubscription,
       MockMarketPlace1,
     } = await loadFixture(setupPolygonLandOperatorFilter);
 
-    await LandRegistryNotSetAsDeployer.setOperatorRegistry(
-      OperatorFilterRegistry,
-    );
+    await LandRegistryNotSetAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
     await LandRegistryNotSetAsDeployer.registerFilterer(
       operatorFilterSubscription,
       false,
