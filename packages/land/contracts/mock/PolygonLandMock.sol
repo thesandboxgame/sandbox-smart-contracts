@@ -199,17 +199,11 @@ contract PolygonLandMock is PolygonLandBaseToken, ERC2771Handler, OperatorFilter
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
-    // /// @notice sets filter registry address deployed in test
-    // /// @param registry the address of the registry
-    // function setOperatorRegistry(address registry) external virtual onlyAdmin {
-    //     operatorFilterRegistry = IOperatorFilterRegistry(registry);
-    //     emit OperatorRegistrySet(registry);
-    // }
-
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external {
+    function setOperatorRegistry(address registry) external virtual onlyAdmin {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
