@@ -792,6 +792,14 @@ describe('PolygonLand.sol', function () {
     ).to.be.revertedWith('ADMIN_ONLY');
   });
 
+  it('should emit OwnershipTransferred event', async function () {
+    const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
+    const tx = await LandAsAdmin.transferOwnership(await other.getAddress());
+    await expect(tx)
+      .to.emit(LandAsAdmin, 'OwnershipTransferred')
+      .withArgs(await landOwner.getAddress(), await other.getAddress());
+  });
+
   it('should set owner', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
     expect(await LandAsAdmin.owner()).to.be.equal(await landOwner.getAddress());
