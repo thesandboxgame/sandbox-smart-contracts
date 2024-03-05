@@ -112,6 +112,14 @@ describe('Land.sol', function () {
       ).to.be.revertedWith('only admin allowed');
     });
 
+    it('should emit OwnershipTransferred event', async function () {
+      const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
+      const tx = await LandAsAdmin.transferOwnership(await other.getAddress());
+      await expect(tx)
+        .to.emit(LandAsAdmin, 'OwnershipTransferred')
+        .withArgs(await landOwner.getAddress(), await other.getAddress());
+    });
+
     it('should set owner', async function () {
       const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
       expect(await LandAsAdmin.owner()).to.be.equal(
