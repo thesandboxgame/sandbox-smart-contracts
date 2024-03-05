@@ -101,8 +101,8 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
     }
 
     function _transferOwnership(address newOwner) internal {
-        _owner = newOwner;
         emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
     }
 
     /**
@@ -120,11 +120,17 @@ contract Land is LandBaseToken, OperatorFiltererUpgradeable {
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
      * 0x5b5e139f is ERC-721 metadata
+     * 0x7f5828d0 is ERC-173
      * @param id The id of the interface
      * @return True if the interface is supported
      */
     function supportsInterface(bytes4 id) public pure override(ERC721BaseToken) returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
+        return
+            id == 0x01ffc9a7 ||
+            id == 0x80ac58cd ||
+            id == 0x5b5e139f ||
+            id == 0x7f5828d0 ||
+            id == type(IERC2981Upgradeable).interfaceId;
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
