@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {setupPolygonLand} from './fixtures';
 import {ZeroAddress} from 'ethers';
-import {getId} from '../../fixtures';
+import {getId} from '../fixtures';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;

@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
-import {getId} from '../../fixtures';
-import {setupLandOperatorFilter} from '../../fixtures';
+import {getId} from '../fixtures';
+import {setupLandOperatorFilter} from '../fixtures';
 
 describe('Land:OperatorFilterer', function () {
   it('should be registered', async function () {

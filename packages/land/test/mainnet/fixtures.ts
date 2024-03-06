@@ -1,9 +1,5 @@
-import {setupMainContract, setupOperatorFilter} from '../fixtures';
+import {setupLandContract} from '../fixtures';
 
 export async function setupLand() {
-  return setupMainContract('LandV3');
-}
-
-export async function setupLandOperatorFilter() {
-  return setupOperatorFilter('LandV3');
+  return setupLandContract();
 }

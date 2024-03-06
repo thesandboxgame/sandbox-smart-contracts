@@ -1,15 +1,15 @@
-import {setupMainContract, setupOperatorFilter} from '../fixtures';
+import {setupPolygonLandContract} from '../fixtures';
 import {Addressable} from 'ethers';
 
 export async function setupPolygonLand() {
-  const ret = await setupMainContract('PolygonLandV2');
+  const ret = await setupPolygonLandContract();
 
   async function sendMetaTx(
     from: Addressable | string,
     to: Addressable | string,
     data = '',
   ) {
-    return ret.trustedForwarder.execute(
+    return ret.TrustedForwarderContract.execute(
       typeof from === 'string' ? from : await from.getAddress(),
       typeof to === 'string' ? to : await to.getAddress(),
       data,
@@ -17,8 +17,4 @@ export async function setupPolygonLand() {
   }
 
   return {sendMetaTx, ...ret};
-}
-
-export async function setupPolygonLandOperatorFilter() {
-  return setupOperatorFilter('PolygonLandV2');
 }
