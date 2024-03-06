@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {setupPolygonLand} from './fixtures';
 
-describe('PolygonLand Royalty', function () {
+describe('PolygonLand:Royalty', function () {
   it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts', async function () {
     const {managerAsRoyaltySetter, PolygonLandContract} =
       await setupPolygonLand();

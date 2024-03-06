@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupPolygonLandOperatorFilter} from '../../fixtures';
+import {setupPolygonLandOperatorFilter} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {getId} from '../../fixtures';
+import {getId} from '../fixtures';
 
-describe('PolygonLand OperatorFilterer', function () {
+describe('PolygonLand:OperatorFilterer', function () {
   it('should be registered', async function () {
     const {OperatorFilterRegistry, PolygonLandContract} = await loadFixture(
       setupPolygonLandOperatorFilter,
