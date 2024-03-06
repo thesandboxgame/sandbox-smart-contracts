@@ -1,6 +1,12 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {setupRegistry} from './fixtures';
+import {
+  getRandomMetadata,
+  getRandomTokenIds,
+  Metadata,
+  setupRegistry,
+  updateMetadata,
+} from './fixtures';
 import {getStorageSlotJS} from '../fixtures';
 
 const tokenId = 23n + 97n * 408n;
@@ -230,5 +236,44 @@ describe('LandMetadataRegistry', function () {
       (totalGas * gasPriceInWei * ethPrice) / 10n ** 18n,
       'USD',
     );
+  });
+  it('@skip-on-coverage batch set and modify the metadata', async function () {
+    const CANT = 200;
+    const {registryAsAdmin} = await loadFixture(setupRegistry);
+
+    async function check(metadata: Metadata[]) {
+      for (const m of metadata) {
+        expect(await registryAsAdmin.isPremium(m.tokenId)).to.be.equal(
+          m.isPremium,
+        );
+        expect(await registryAsAdmin.getNeighborhoodId(m.tokenId)).to.be.equal(
+          m.neighborhoodId,
+        );
+      }
+    }
+
+    // some sequential, some random tokenIds
+    const sequential = [...Array(CANT).keys()].map(BigInt);
+    const tokenIds = [...sequential, ...getRandomTokenIds(CANT, sequential)];
+    const metadata = getRandomMetadata(tokenIds);
+    for (const m of metadata) {
+      expect(await registryAsAdmin.isPremium(m.tokenId)).to.be.false;
+      expect(await registryAsAdmin.getNeighborhoodId(m.tokenId)).to.be.equal(0);
+    }
+
+    await updateMetadata(registryAsAdmin, metadata);
+    await check(metadata);
+
+    // update the values for some tokenIds, leave others and some new ones
+    const newMetadata = getRandomMetadata([
+      ...tokenIds.slice(0, CANT / 2),
+      ...getRandomTokenIds(CANT, tokenIds),
+    ]);
+    await updateMetadata(registryAsAdmin, newMetadata);
+
+    // unchanged
+    await check(metadata.slice(CANT / 2));
+    // modified and added.
+    await check(newMetadata);
   });
 });
