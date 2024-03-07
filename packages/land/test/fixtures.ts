@@ -70,12 +70,13 @@ export async function setupLandContract() {
     contractRoyaltySetter,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory =
-    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitterMock',
+  );
   const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
-    await ethers.getContractFactory('RoyaltyManager');
+    await ethers.getContractFactory('RoyaltyManagerMock');
   const RoyaltyManagerContract = await upgrades.deployProxy(
     RoyaltyManagerFactory,
     [
@@ -197,12 +198,13 @@ export async function setupLandOperatorFilter() {
     defaultSubscription,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory =
-    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitterMock',
+  );
   const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
-    await ethers.getContractFactory('RoyaltyManager');
+    await ethers.getContractFactory('RoyaltyManagerMock');
   const RoyaltyManagerContract = await upgrades.deployProxy(
     RoyaltyManagerFactory,
     [
@@ -321,12 +323,13 @@ export async function setupPolygonLandContract() {
     contractRoyaltySetter,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory =
-    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitterMock',
+  );
   const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
-    await ethers.getContractFactory('RoyaltyManager');
+    await ethers.getContractFactory('RoyaltyManagerMock');
   const RoyaltyManagerContract = await upgrades.deployProxy(
     RoyaltyManagerFactory,
     [
@@ -454,12 +457,13 @@ export async function setupPolygonLandOperatorFilter() {
     defaultSubscription,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory =
-    await ethers.getContractFactory('RoyaltySplitter');
+  const RoyaltySplitterFactory = await ethers.getContractFactory(
+    'RoyaltySplitterMock',
+  );
   const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
-    await ethers.getContractFactory('RoyaltyManager');
+    await ethers.getContractFactory('RoyaltyManagerMock');
   const RoyaltyManagerContract = await upgrades.deployProxy(
     RoyaltyManagerFactory,
     [
