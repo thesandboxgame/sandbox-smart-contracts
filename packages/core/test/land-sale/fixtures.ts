@@ -89,10 +89,11 @@ export const setupEstateSale = withSnapshot(
 
 async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContract = await ethers.getContract('Sand');
-  const {deployer, sandBeneficiary} = await getNamedAccounts();
+  const {deployer, sandBeneficiary, sandboxAccount} = await getNamedAccounts();
   const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
-  const sandAmount = BigNumber.from(proofs[0].price).mul(5); // give extra to cover commission needed in asset bundle case
+  const sandAmount = BigNumber.from(proofs[2].price); // note: lands with asset bundleId carry premium price
   await sandContractAsSandBeneficiary.transfer(deployer, sandAmount);
+  await sandContractAsSandBeneficiary.transfer(sandboxAccount, sandAmount); // reserved address
 }
