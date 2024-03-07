@@ -5,9 +5,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
-  //   const operatorFilterSubscription = await deployments.get(
-  //     'PolygonOperatorFilterSubscription'
-  //   );
+
+  const operatorFilterSubscription = await deployments.get(
+    'PolygonOperatorFilterSubscription'
+  );
+
+  const operatorFilterRegistry = await deployments.get(
+    'PolygonOperatorFilterRegistry'
+  );
 
   const TRUSTED_FORWARDER = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0';
 
@@ -28,27 +33,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  // TODO Work on making this work
-  //   const admin = await deployments.read('PolygonLand', 'getAdmin');
+  const admin = await deployments.read('PolygonLand', 'getAdmin');
 
-  //   const operatorFilterRegistry = await deployments.get(
-  //     'PolygonOperatorFilterRegistry'
-  //   );
+  await deployments.execute(
+    'PolygonLand',
+    {from: admin},
+    'setOperatorRegistry',
+    operatorFilterRegistry.address
+  );
 
-  //   await deployments.execute(
-  //     'PolygonLand',
-  //     {from: admin},
-  //     'setOperatorRegistry',
-  //     operatorFilterRegistry.address
-  //   );
-
-  //   await deployments.execute(
-  //     'PolygonLand',
-  //     {from: admin},
-  //     'register',
-  //     operatorFilterSubscription.address,
-  //     true
-  //   );
+  await deployments.execute(
+    'PolygonLand',
+    {from: admin},
+    'register',
+    operatorFilterSubscription.address,
+    true
+  );
 };
 export default func;
 func.tags = ['PolygonLand', 'PolygonLand_deploy', 'L2'];
+func.dependencies = [
+  'PolygonOperatorFilterSubscription',
+  'PolygonOperatorFilterRegistry',
+];

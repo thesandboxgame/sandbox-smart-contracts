@@ -347,8 +347,6 @@ export async function setAsLandMinter(
   const isMinter = await read(contractName, 'isMinter', address);
   if (!isMinter) {
     const currentLandAdmin = await read(contractName, 'getAdmin');
-    console.log('currentLandAdmin', currentLandAdmin);
-    console.log('address', address);
     await catchUnknownSigner(
       execute(
         contractName,
