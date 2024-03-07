@@ -8,6 +8,7 @@ import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable
 import {IOperatorFilterRegistry} from "./mainnet/IOperatorFilterRegistry.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
+import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
 
 /**
  * @title Land Contract
@@ -15,7 +16,7 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-manag
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract Land is LandBaseToken, OperatorFiltererUpgradeable {
+contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private _royaltyManager;

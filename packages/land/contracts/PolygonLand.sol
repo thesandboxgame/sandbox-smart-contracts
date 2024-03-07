@@ -10,9 +10,10 @@ import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
 import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
+import {PolygonLandStorageMixin} from "./polygon/PolygonLandStorageMixin.sol";
 
 /// @title LAND token on L2
-contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
+contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
     using AddressUpgradeable for address;
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
