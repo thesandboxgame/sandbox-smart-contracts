@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {getId} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {setupLand} from './fixtures';
+import {setupLand, setupLandMock} from './fixtures';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -930,5 +930,19 @@ describe('Land.sol', function () {
         LandAsAdmin.setMetaTransactionProcessor(MetaTransactionContract, true),
       ).not.to.be.reverted;
     });
+  });
+  it('check storage structure', async function () {
+    const {landContract} = await loadFixture(setupLandMock);
+    const slots = await landContract.getStorageStructure();
+    expect(slots._admin).to.be.equal(0);
+    expect(slots._superOperators).to.be.equal(1);
+    expect(slots._metaTransactionContracts).to.be.equal(2);
+    expect(slots._numNFTPerAddress).to.be.equal(3);
+    expect(slots._owners).to.be.equal(4);
+    expect(slots._operatorsForAll).to.be.equal(5);
+    expect(slots._operators).to.be.equal(6);
+    expect(slots._initialized).to.be.equal(7);
+    expect(slots._minters).to.be.equal(57);
+    expect(slots.operatorFilterRegistry).to.be.equal(58);
   });
 });
