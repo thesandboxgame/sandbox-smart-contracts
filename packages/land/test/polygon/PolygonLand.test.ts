@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupPolygonLand} from './fixtures';
+import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../fixtures';
 
@@ -1652,5 +1652,18 @@ describe('PolygonLand.sol', function () {
 
       await expect(PolygonLandContract.exists(3, 500, 0)).to.be.reverted;
     });
+  });
+  it('check storage structure', async function () {
+    const {landContract} = await loadFixture(setupPolygonLandMock);
+    const slots = await landContract.getStorageStructure();
+    expect(slots._admin).to.be.equal(51);
+    expect(slots._superOperators).to.be.equal(52);
+    expect(slots._numNFTPerAddress).to.be.equal(53);
+    expect(slots._owners).to.be.equal(54);
+    expect(slots._operatorsForAll).to.be.equal(55);
+    expect(slots._operators).to.be.equal(56);
+    expect(slots._minters).to.be.equal(57);
+    expect(slots._trustedForwarder).to.be.equal(107);
+    expect(slots.operatorFilterRegistry).to.be.equal(108);
   });
 });
