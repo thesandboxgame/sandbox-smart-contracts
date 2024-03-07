@@ -230,13 +230,12 @@ export async function setupLandOperatorFilter() {
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
     await landOwner.getAddress(),
+    4,
   );
 
-  await LandContract.connect(landAdmin).setMinter(
-    await landMinter.getAddress(),
-    true,
-  );
   const LandAsAdmin = LandContract.connect(landAdmin);
+  await LandAsAdmin.setMinter(await landMinter.getAddress(), true);
+  const LandAsMinter = LandContract.connect(landMinter);
   await LandAsAdmin.setMetaTransactionProcessor(MetaTransactionContract, false);
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);
@@ -246,6 +245,7 @@ export async function setupLandOperatorFilter() {
     await landAdmin.getAddress(),
     await RoyaltyManagerContract.getAddress(),
     await landOwner.getAddress(),
+    4,
   );
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
@@ -276,15 +276,22 @@ export async function setupLandOperatorFilter() {
 
   const LandRegistryNotSetAsDeployer = LandMockContract.connect(deployer);
   const LandRegistryNotSetAsAdmin = LandMockContract.connect(landAdmin);
+  await LandRegistryNotSetAsAdmin.setMinter(
+    await landMinter.getAddress(),
+    true,
+  );
+  const LandRegistryNotSetAsMinter = LandMockContract.connect(landMinter);
   const LandRegistryNotSetAsOther = LandMockContract.connect(other);
   return {
     LandContract,
     LandAsAdmin,
     LandAsOther,
     LandAsOther1,
+    LandAsMinter,
     OperatorFilterRegistry,
     LandRegistryNotSetAsDeployer,
     LandRegistryNotSetAsAdmin,
+    LandRegistryNotSetAsMinter,
     LandRegistryNotSetAsOther,
     MockMarketPlace1,
     MockMarketPlace2,
@@ -482,6 +489,7 @@ export async function setupPolygonLandOperatorFilter() {
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
       await landOwner.getAddress(),
+      4,
     ],
     {
       initializer: 'initialize',
@@ -524,6 +532,7 @@ export async function setupPolygonLandOperatorFilter() {
       await landAdmin.getAddress(),
       await RoyaltyManagerContract.getAddress(),
       await landOwner.getAddress(),
+      4,
     ],
     {
       initializer: 'initialize',
