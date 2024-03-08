@@ -96,16 +96,10 @@ export async function setupLandContract() {
     await ethers.getContractFactory('ContractMock');
   const MetaTransactionContract = await MetaTransactionContractFactory.deploy();
 
-  const LandFactory = await ethers.getContractFactory('Land');
+  const LandFactory = await ethers.getContractFactory('LandMock');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.initialize(
-    await MetaTransactionContract.getAddress(),
-    await landAdmin.getAddress(),
-    await RoyaltyManagerContract.getAddress(),
-    await landOwner.getAddress(),
-    4,
-  );
+  await LandContract.setAdmin(landAdmin);
 
   // deploy mocks
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
@@ -133,6 +127,10 @@ export async function setupLandContract() {
   const LandAsOther2 = LandContract.connect(other2);
 
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
+  await LandAsAdmin.transferOwnership(await landOwner.getAddress());
+  await LandAsAdmin.setRoyaltyManager(
+    await RoyaltyManagerContract.getAddress(),
+  );
   await LandAsAdmin.setMetaTransactionProcessor(MetaTransactionContract, false);
   const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
     contractRoyaltySetter,
@@ -224,16 +222,10 @@ export async function setupLandOperatorFilter() {
     await ethers.getContractFactory('ContractMock');
   const MetaTransactionContract = await MetaTransactionContractFactory.deploy();
 
-  const LandFactory = await ethers.getContractFactory('LandMock');
+  const LandFactory = await ethers.getContractFactory('LandMockWithoutCheck');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.initialize(
-    await MetaTransactionContract.getAddress(),
-    await landAdmin.getAddress(),
-    await RoyaltyManagerContract.getAddress(),
-    await landOwner.getAddress(),
-    4,
-  );
+  await LandContract.setAdmin(landAdmin);
 
   const LandAsAdmin = LandContract.connect(landAdmin);
   await LandAsAdmin.setMinter(await landMinter.getAddress(), true);
@@ -242,13 +234,7 @@ export async function setupLandOperatorFilter() {
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);
   const LandMockContract = await LandFactory.deploy();
-  await LandMockContract.initialize(
-    await MetaTransactionContract.getAddress(),
-    await landAdmin.getAddress(),
-    await RoyaltyManagerContract.getAddress(),
-    await landOwner.getAddress(),
-    4,
-  );
+  await LandMockContract.setAdmin(landAdmin);
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
     'MarketPlaceToFilterMock',
@@ -273,6 +259,10 @@ export async function setupLandOperatorFilter() {
     defaultSubscription,
   );
 
+  await LandAsAdmin.transferOwnership(await landOwner.getAddress());
+  await LandAsAdmin.setRoyaltyManager(
+    await RoyaltyManagerContract.getAddress(),
+  );
   await LandAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
   await LandAsAdmin.register(operatorFilterSubscription, true);
 
@@ -351,20 +341,10 @@ export async function setupPolygonLandContract() {
   const TrustedForwarderContract =
     await TrustedForwarderContractFactory.deploy();
 
-  const PolygonLandFactory = await ethers.getContractFactory('PolygonLand');
-  const PolygonLandContract = await upgrades.deployProxy(
-    PolygonLandFactory,
-    [
-      await TrustedForwarderContract.getAddress(),
-      await landAdmin.getAddress(),
-      await RoyaltyManagerContract.getAddress(),
-      await landOwner.getAddress(),
-      3,
-    ],
-    {
-      initializer: 'initialize',
-    },
-  );
+  const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
+  const PolygonLandContract = await PolygonLandFactory.deploy();
+
+  await PolygonLandContract.setAdmin(landAdmin);
 
   // mock contract deploy
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
@@ -388,6 +368,15 @@ export async function setupPolygonLandContract() {
 
   // setup role
   const LandAsAdmin = PolygonLandContract.connect(landAdmin);
+
+  await LandAsAdmin.setTrustedForwarder(
+    await TrustedForwarderContract.getAddress(),
+  );
+
+  await LandAsAdmin.transferOwnership(await landOwner.getAddress());
+  await LandAsAdmin.setRoyaltyManager(
+    await RoyaltyManagerContract.getAddress(),
+  );
   await PolygonLandContract.connect(landAdmin).setMinter(
     await landMinter.getAddress(),
     true,
@@ -485,22 +474,23 @@ export async function setupPolygonLandOperatorFilter() {
   const TrustedForwarderContract =
     await TrustedForwarderContractFactory.deploy();
 
-  const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
-  const PolygonLandContract = await upgrades.deployProxy(
-    PolygonLandFactory,
-    [
-      await TrustedForwarderContract.getAddress(),
-      await landAdmin.getAddress(),
-      await RoyaltyManagerContract.getAddress(),
-      await landOwner.getAddress(),
-      4,
-    ],
-    {
-      initializer: 'initialize',
-    },
+  const PolygonLandFactory = await ethers.getContractFactory(
+    'PolygonLandMockWithoutCheck',
   );
+  const PolygonLandContract = await PolygonLandFactory.deploy();
+
+  await PolygonLandContract.setAdmin(landAdmin);
 
   const LandAsAdmin = PolygonLandContract.connect(landAdmin);
+  await LandAsAdmin.setTrustedForwarder(
+    await TrustedForwarderContract.getAddress(),
+  );
+
+  await LandAsAdmin.transferOwnership(await landOwner.getAddress());
+  await LandAsAdmin.setRoyaltyManager(
+    await RoyaltyManagerContract.getAddress(),
+  );
+
   const LandAsOther = PolygonLandContract.connect(other);
   const LandAsOther1 = PolygonLandContract.connect(other1);
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
@@ -529,19 +519,8 @@ export async function setupPolygonLandOperatorFilter() {
   await LandAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
   await LandAsAdmin.register(operatorFilterSubscription, true);
 
-  const PolygonLandMockContract = await upgrades.deployProxy(
-    PolygonLandFactory,
-    [
-      await TrustedForwarderContract.getAddress(),
-      await landAdmin.getAddress(),
-      await RoyaltyManagerContract.getAddress(),
-      await landOwner.getAddress(),
-      4,
-    ],
-    {
-      initializer: 'initialize',
-    },
-  );
+  const PolygonLandMockContract = await PolygonLandFactory.deploy();
+  await PolygonLandMockContract.setAdmin(landAdmin);
   const LandRegistryNotSetAsDeployer =
     PolygonLandMockContract.connect(deployer);
   const LandRegistryNotSetAsAdmin = PolygonLandMockContract.connect(landAdmin);
