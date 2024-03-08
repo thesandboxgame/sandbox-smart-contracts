@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {PolygonLand} from "../PolygonLand.sol";
 
 contract PolygonLandMock is PolygonLand {

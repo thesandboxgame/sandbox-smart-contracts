@@ -3,7 +3,7 @@
 pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The Sandbox

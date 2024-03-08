@@ -3,7 +3,7 @@
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 
 /// @title OperatorFiltererUpgradeable
 /// @author The Sandbox
