@@ -13,7 +13,7 @@ describe('PolygonLand:WithSuperOperators', function () {
     const {PolygonLandContract, deployer} = await loadFixture(setupPolygonLand);
     await expect(
       PolygonLandContract.setSuperOperator(deployer, true),
-    ).to.be.revertedWith('ADMIN_ONLY');
+    ).to.be.revertedWith('only admin allowed');
     expect(await PolygonLandContract.isSuperOperator(deployer)).to.be.false;
   });
 

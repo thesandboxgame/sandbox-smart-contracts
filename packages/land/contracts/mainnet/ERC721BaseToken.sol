@@ -14,7 +14,7 @@ import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTransactionReceiver {
+abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTransactionReceiver {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;

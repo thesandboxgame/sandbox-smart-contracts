@@ -2,20 +2,17 @@
 
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
-import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
-import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
-import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
-import {PolygonLandStorageMixin} from "./polygon/PolygonLandStorageMixin.sol";
+import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 
 /// @title LAND token on L2
-contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
-    using AddressUpgradeable for address;
-
+/// @author The Sandbox
+/// @notice LAND contract
+/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+/// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
+contract PolygonLand is PolygonLandBase {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private _royaltyManager;
@@ -26,12 +23,14 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
-     * @notice Initializes the contract with the admin
+     * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
      * @param admin Admin of the contract
      */
     function initialize(address admin) external initializer {
-        _admin = admin;
-        emit AdminChanged(address(0), _admin);
+        // We must be able to initialize the admin if this is a fresh deploy, but we want to
+        // be backward compatible with the current deployment
+        require(_getAdmin() == address(0), "already initialized");
+        _changeAdmin(admin);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -187,7 +186,7 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(PolygonLandBaseToken) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
         return
             id == 0x01ffc9a7 ||
             id == 0x80ac58cd ||
@@ -204,13 +203,5 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     function _transferOwnership(address newOwner) internal {
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
-    }
-
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
-        return ERC2771Handler._msgSender();
-    }
-
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
     }
 }

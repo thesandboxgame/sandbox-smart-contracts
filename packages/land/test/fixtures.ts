@@ -115,12 +115,9 @@ export async function setupLandContract() {
   const ERC20Contract = await ERC20ContractFactory.deploy();
 
   // setup role
-  await LandContract.connect(landAdmin).setMinter(
-    await landMinter.getAddress(),
-    true,
-  );
-  const LandAsMinter = LandContract.connect(landMinter);
   const LandAsAdmin = LandContract.connect(landAdmin);
+  await LandAsAdmin.setMinter(landMinter, true);
+  const LandAsMinter = LandContract.connect(landMinter);
   const LandAsOwner = LandContract.connect(landOwner);
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);

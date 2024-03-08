@@ -2,22 +2,18 @@
 /* solhint-disable no-empty-blocks */
 pragma solidity 0.8.23;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
-import {LandBaseToken} from "./mainnet/LandBaseToken.sol";
-import {ERC721BaseToken} from "./mainnet/ERC721BaseToken.sol";
-import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
-import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {LandBase} from "./mainnet/LandBase.sol";
 
-/**
- * @title Land Contract
- * @author The Sandbox
- * @notice LAND contract
- * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
- */
-contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable, Initializable {
+/// @title Land Contract
+/// @author The Sandbox
+/// @notice LAND contract
+/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+/// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
+contract Land is LandBase, Initializable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private _royaltyManager;
@@ -28,14 +24,14 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable, I
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
-     * @notice Initializes the contract with the admin
+     * @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
      * @param admin Admin of the contract
      */
-    function initialize(address admin) public initializer {
-        require(admin != address(0), "invalid admin");
-        require(_admin == address(0), "already initialized");
-        _admin = admin;
-        emit AdminChanged(address(0), _admin);
+    function initialize(address admin) external initializer {
+        // We must be able to initialize the admin if this is a fresh deploy, but we want to
+        // be backward compatible with the current deployment
+        require(_getAdmin() == address(0), "already initialized");
+        _changeAdmin(admin);
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
@@ -210,7 +206,7 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable, I
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(ERC721BaseToken) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
         return
             id == 0x01ffc9a7 ||
             id == 0x80ac58cd ||

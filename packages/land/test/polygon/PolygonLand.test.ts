@@ -20,7 +20,7 @@ describe('PolygonLand.sol', function () {
     const {PolygonLandContract, deployer} = await loadFixture(setupPolygonLand);
     await expect(
       PolygonLandContract.setMinter(deployer, true),
-    ).to.be.revertedWith('ADMIN_ONLY');
+    ).to.be.revertedWith('only admin allowed');
   });
 
   it('cannot set polygon Land Tunnel to zero address', async function () {
@@ -789,7 +789,7 @@ describe('PolygonLand.sol', function () {
     const {LandAsOther, other} = await loadFixture(setupPolygonLand);
     await expect(
       LandAsOther.setRoyaltyManager(await other.getAddress()),
-    ).to.be.revertedWith('ADMIN_ONLY');
+    ).to.be.revertedWith('only admin allowed');
   });
 
   it('should emit RoyaltyManagerSet event', async function () {
@@ -815,7 +815,7 @@ describe('PolygonLand.sol', function () {
     const {LandAsOther, other} = await loadFixture(setupPolygonLand);
     await expect(
       LandAsOther.transferOwnership(await other.getAddress()),
-    ).to.be.revertedWith('ADMIN_ONLY');
+    ).to.be.revertedWith('only admin allowed');
   });
 
   it('should emit OwnershipTransferred event', async function () {
