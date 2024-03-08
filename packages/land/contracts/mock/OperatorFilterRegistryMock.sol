@@ -4,7 +4,7 @@
 pragma solidity 0.8.23;
 
 import {EnumerableSetUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 
 contract OperatorFilterRegistryEvents {
     event RegistrationUpdated(address indexed registrant, bool indexed registered);

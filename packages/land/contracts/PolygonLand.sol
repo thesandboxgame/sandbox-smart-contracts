@@ -4,12 +4,12 @@ pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
-import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
-import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
-import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
+import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
+import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
+import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
+import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
 import {PolygonLandStorageMixin} from "./polygon/PolygonLandStorageMixin.sol";
 
 /// @title LAND token on L2
