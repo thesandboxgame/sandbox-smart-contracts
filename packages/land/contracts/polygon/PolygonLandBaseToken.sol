@@ -58,8 +58,9 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length, "sizes's and x's are different");
         require(xs.length == ys.length, "x's and y's are different");
-        if (_msgSender() != from) {
-            require(_operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()], "not authorized");
+        address msgSender = _msgSender();
+        if (msgSender != from) {
+            require(_isApprovedForAll(from, msgSender), "not authorized");
         }
         uint256 numTokensTransfered = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
@@ -80,7 +81,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
                     counter++;
                 }
             }
-            require(_checkOnERC721BatchReceived(_msgSender(), from, to, ids, data), "erc721 batchTransfer rejected");
+            require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "erc721 batchTransfer rejected");
         }
     }
 
@@ -110,17 +111,15 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
     ) external override {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        if (_msgSender() != from) {
-            require(
-                _operatorsForAll[from][_msgSender()] || _superOperators[_msgSender()],
-                "not authorized to transferQuad"
-            );
+        address msgSender = _msgSender();
+        if (msgSender != from) {
+            require(_isApprovedForAll(from, msgSender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
 
-        _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
+        _checkBatchReceiverAcceptQuad(msgSender, from, to, size, x, y, data);
     }
 
     /**

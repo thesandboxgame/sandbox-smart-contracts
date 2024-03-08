@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {WithAdmin} from "../common/WithAdmin.sol";
+import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {IContext} from "../common/IContext.sol";
 import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
@@ -31,5 +32,18 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _setAdmin(address a) internal override(PolygonLandStorageMixin, WithAdmin) {
         PolygonLandStorageMixin._setAdmin(a);
+    }
+
+    function _isSuperOperator(
+        address who
+    ) internal view override(PolygonLandStorageMixin, WithSuperOperators) returns (bool) {
+        return PolygonLandStorageMixin._isSuperOperator(who);
+    }
+
+    function _setSuperOperator(
+        address superOperator,
+        bool enabled
+    ) internal override(PolygonLandStorageMixin, WithSuperOperators) {
+        PolygonLandStorageMixin._setSuperOperator(superOperator, enabled);
     }
 }

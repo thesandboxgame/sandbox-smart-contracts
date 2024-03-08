@@ -8,7 +8,7 @@ import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/to
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IContext} from "../common/IContext.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
-import {WithSuperOperators} from "./WithSuperOperators.sol";
+import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 
 /// @title ERC721BaseToken
 /// @author The Sandbox
@@ -46,10 +46,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(
-            owner == msgSender || _operatorsForAll[owner][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
-        );
+        require(owner == msgSender || _isApprovedForAll(owner, msgSender), "UNAUTHORIZED_APPROVAL");
         _approveFor(ownerData, operator, id);
     }
 
@@ -63,10 +60,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(
-            msgSender == sender || _operatorsForAll[sender][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
-        );
+        require(msgSender == sender || _isApprovedForAll(sender, msgSender), "UNAUTHORIZED_APPROVAL");
         require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
         _approveFor(ownerData, operator, id);
     }
@@ -122,7 +116,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
         require(sender != address(0), "Invalid sender address");
         address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
+        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
 
         _setApprovalForAll(sender, operator, approved);
     }
@@ -148,10 +142,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(
-            msgSender == from ||
-                (operatorEnabled && _operators[id] == msgSender) ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[from][msgSender],
+            msgSender == from || (operatorEnabled && _operators[id] == msgSender) || _isApprovedForAll(from, msgSender),
             "UNAUTHORIZED_BURN"
         );
         _burn(from, owner, id);
@@ -191,7 +182,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
     function isApprovedForAll(address owner, address operator) external view override returns (bool) {
-        return _operatorsForAll[owner][operator] || _superOperators[operator];
+        return _isApprovedForAll(owner, operator);
     }
 
     /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
@@ -258,7 +249,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @dev See batchTransferFrom.
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
-        bool authorized = msgSender == from || _operatorsForAll[from][msgSender] || _superOperators[msgSender];
+        bool authorized = msgSender == from || _isApprovedForAll(from, msgSender);
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
@@ -290,7 +281,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
 
     /// @dev See setApprovalForAll.
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
-        require(!_superOperators[operator], "INVALID_APPROVAL_CHANGE");
+        require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
         _operatorsForAll[sender][operator] = approved;
 
         emit ApprovalForAll(sender, operator, approved);
@@ -300,7 +291,8 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "NOT_OWNER");
         uint256 storageId = _storageId(id);
-        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
+        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG;
+        // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }
@@ -378,8 +370,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(
             msgSender == owner ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[from][msgSender] ||
+                _isApprovedForAll(from, msgSender) ||
                 (operatorEnabled && _operators[id] == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
@@ -405,5 +396,13 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
         assert(gasleft() > 158);
         return success && result;
+    }
+
+    /// @notice Check if the sender approved the operator.
+    /// @param owner The address of the owner.
+    /// @param operator The address of the operator.
+    /// @return isOperator The status of the approval.
+    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
+        return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
     }
 }

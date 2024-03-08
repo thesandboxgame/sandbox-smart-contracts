@@ -26,6 +26,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /* solhint-enable const-name-snakecase */
 
     mapping(address => bool) internal _minters;
+
     event Minter(address indexed superOperator, bool enabled);
 
     struct Land {
@@ -101,10 +102,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(to != address(0), "can't send to zero address");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
-            require(
-                _operatorsForAll[from][msg.sender] || _superOperators[msg.sender],
-                "not authorized to transferQuad"
-            );
+            require(_isApprovedForAll(from, msg.sender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
         _numNFTPerAddress[from] -= size * size;
@@ -134,7 +132,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(xs.length == ys.length, "x's and y's are different");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
-            require(_operatorsForAll[from][msg.sender] || _superOperators[msg.sender], "not authorized");
+            require(_isApprovedForAll(from, msg.sender), "not authorized");
         }
         uint256 numTokensTransfered = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
