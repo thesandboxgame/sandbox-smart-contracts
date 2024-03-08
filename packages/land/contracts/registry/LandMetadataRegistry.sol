@@ -18,13 +18,15 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
     }
 
     /// @notice This event is emitted when the metadata is set for a single land
+    /// @param operator the sender of the transaction
     /// @param tokenId the token id
     /// @param oldNeighborhoodId the number that identifies the neighborhood before changing it
     /// @param wasPremium true if land was premium
     /// @param newNeighborhoodId the number that identifies the neighborhood
     /// @param isPremium true if land is premium
     event MetadataSet(
-        uint256 tokenId,
+        address indexed operator,
+        uint256 indexed tokenId,
         uint256 oldNeighborhoodId,
         bool wasPremium,
         uint256 newNeighborhoodId,
@@ -32,13 +34,15 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
     );
 
     /// @notice This event is emitted when the neighborhood name is set
+    /// @param operator the sender of the transaction
     /// @param neighborhoodId the number that identifies the neighborhood
     /// @param name human readable name
-    event NeighborhoodNameSet(uint256 neighborhoodId, string name);
+    event NeighborhoodNameSet(address indexed operator, uint256 indexed neighborhoodId, string name);
 
     /// @notice This event is emitted when the metadata is set in batch
+    /// @param operator the sender of the transaction
     /// @param data token id and metadata
-    event BatchMetadataSet(BatchSetData[] data);
+    event BatchMetadataSet(address indexed operator, BatchSetData[] data);
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
@@ -67,7 +71,7 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
     function setPremium(uint256 tokenId, bool premium) external onlyAdmin {
         (uint256 neighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);
         _setMetadataForTokenId(tokenId, neighborhoodId, premium);
-        emit MetadataSet(tokenId, neighborhoodId, wasPremium, neighborhoodId, premium);
+        emit MetadataSet(_msgSender(), tokenId, neighborhoodId, wasPremium, neighborhoodId, premium);
     }
 
     /// @notice set the neighborhood for one land
@@ -77,7 +81,7 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
         _isValidNeighborhoodId(newNeighborhoodId);
         (uint256 oldNeighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);
         _setMetadataForTokenId(tokenId, newNeighborhoodId, wasPremium);
-        emit MetadataSet(tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, wasPremium);
+        emit MetadataSet(_msgSender(), tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, wasPremium);
     }
 
     /// @notice set the premiumness for one land
@@ -88,7 +92,7 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
         _isValidNeighborhoodId(newNeighborhoodId);
         (uint256 oldNeighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);
         _setMetadataForTokenId(tokenId, newNeighborhoodId, premium);
-        emit MetadataSet(tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, premium);
+        emit MetadataSet(_msgSender(), tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, premium);
     }
 
     /// @notice set neighborhood name
@@ -97,7 +101,7 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
     function setNeighborhoodName(uint256 neighborhoodId, string calldata name) external onlyAdmin {
         _isValidNeighborhoodId(neighborhoodId);
         _setNeighborhoodName(neighborhoodId, name);
-        emit NeighborhoodNameSet(neighborhoodId, name);
+        emit NeighborhoodNameSet(_msgSender(), neighborhoodId, name);
     }
 
     /// @notice set the metadata for 32 lands at the same time in batch
@@ -110,7 +114,7 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
             require(_getBits(d.baseTokenId) == 0, "invalid base tokenId");
             _setMetadata(d.baseTokenId, d.metadata);
         }
-        emit BatchMetadataSet(data);
+        emit BatchMetadataSet(_msgSender(), data);
     }
 
     /// @notice return the metadata for one land
