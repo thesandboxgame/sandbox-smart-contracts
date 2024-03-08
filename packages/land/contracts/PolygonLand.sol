@@ -25,30 +25,6 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /**
-     * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
-     * @param trustedForwarder TrustedForwarder address
-     * @param admin Admin of the contract
-     * @param royaltyManager address of the manager contract for common royalty recipient
-     * @param newOwner address of new owner
-     * @param version version number to which PolygonLand contract is being upgraded
-     */
-    function initialize(
-        address trustedForwarder,
-        address admin,
-        address royaltyManager,
-        address newOwner,
-        uint8 version
-    ) external reinitializer(version) {
-        _admin = admin;
-        __ERC2771Handler_initialize(trustedForwarder);
-        _setRoyaltyManager(royaltyManager);
-        _transferOwnership(newOwner);
-        emit AdminChanged(address(0), _admin);
-    }
-
-    /// @notice set royalty manager
-    /// @param royaltyManager address of royalty manager to set
     function _setRoyaltyManager(address royaltyManager) internal {
         _royaltyManager = IRoyaltyManager(royaltyManager);
         emit RoyaltyManagerSet(royaltyManager);
@@ -91,6 +67,12 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     /// @return ownerAddress The address of the owner.
     function owner() external view returns (address ownerAddress) {
         return _owner;
+    }
+
+    /// @notice set royalty manager
+    /// @param royaltyManager address of the manager contract for common royalty recipient
+    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
+        _setRoyaltyManager(royaltyManager);
     }
 
     /// @notice Set the address of the new owner of the contract

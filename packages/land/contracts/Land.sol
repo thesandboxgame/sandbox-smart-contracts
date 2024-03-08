@@ -21,44 +21,10 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
 
     IRoyaltyManager private _royaltyManager;
     address private _owner;
-    uint8 private initialized;
-    bool private _initializing;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-    event Initialized(uint8 version);
-
-    modifier reinitializer(uint8 version) {
-        require(!_initializing && initialized < version, "contract is already initialized");
-        initialized = version;
-        _initializing = true;
-        _;
-        _initializing = false;
-        emit Initialized(version);
-    }
-
-    /**
-     * @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
-     * @param metaTransactionContract Authorized contract for meta-transactions
-     * @param admin Admin of the contract
-     * @param royaltyManager address of the manager contract for common royalty recipient
-     * @param newOwner address of new owner
-     * @param version version number to which Land contract is being upgraded
-     */
-    function initialize(
-        address metaTransactionContract,
-        address admin,
-        address royaltyManager,
-        address newOwner,
-        uint8 version
-    ) public reinitializer(version) {
-        _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, true);
-        _setRoyaltyManager(royaltyManager);
-        _transferOwnership(newOwner);
-        emit AdminChanged(address(0), _admin);
-    }
 
     /**
      * @notice Return the name of the token contract
@@ -94,8 +60,6 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
         return string(bstr);
     }
 
-    /// @notice set royalty manager
-    /// @param royaltyManager address of royalty manager to set
     function _setRoyaltyManager(address royaltyManager) internal {
         _royaltyManager = IRoyaltyManager(royaltyManager);
         emit RoyaltyManagerSet(royaltyManager);
@@ -175,6 +139,12 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
     /// @return ownerAddress The address of the owner.
     function owner() external view returns (address ownerAddress) {
         return _owner;
+    }
+
+    /// @notice set royalty manager
+    /// @param royaltyManager address of the manager contract for common royalty recipient
+    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
+        _setRoyaltyManager(royaltyManager);
     }
 
     /// @notice Set the address of the new owner of the contract
