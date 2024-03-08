@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.23;
 
-import {Admin} from "./Admin.sol";
+import {WithAdmin} from "../common/WithAdmin.sol";
 
 /// @title SuperOperators
 /// @author The Sandbox
 /// @notice Implements a super operator role on the contract
 /// @dev The contract inheriting SuperOperators is able to use a super operator role
-contract SuperOperators is Admin {
+abstract contract SuperOperators is WithAdmin {
     mapping(address => bool) internal _superOperators;
 
     event SuperOperator(address indexed superOperator, bool enabled);

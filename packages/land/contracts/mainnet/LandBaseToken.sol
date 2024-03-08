@@ -11,7 +11,7 @@ import {ERC721BaseToken} from "./ERC721BaseToken.sol";
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-contract LandBaseToken is ERC721BaseToken {
+abstract contract LandBaseToken is ERC721BaseToken {
     using AddressUpgradeable for address;
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;

@@ -16,7 +16,7 @@ describe('Land:Admin', function () {
 
   it('should only be changed to a new admin', async function () {
     const {LandAsAdmin, landAdmin} = await loadFixture(setupLand);
-    await expect(LandAsAdmin.changeAdmin(landAdmin.address)).to.be.revertedWith(
+    await expect(LandAsAdmin.changeAdmin(landAdmin)).to.be.revertedWith(
       'only new admin',
     );
   });

@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.23;
 
-import {Admin} from "./Admin.sol";
+import {WithAdmin} from "../common/WithAdmin.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 /// @title MetaTransactionReceiver
 /// @author The Sandbox
 /// @notice Implements meta-transactions
 /// @dev This contract permits to give an address the capacity to perform meta-transactions on behalf of any address
-contract MetaTransactionReceiver is Admin {
+abstract contract MetaTransactionReceiver is WithAdmin {
     using AddressUpgradeable for address;
 
     mapping(address => bool) internal _metaTransactionContracts;

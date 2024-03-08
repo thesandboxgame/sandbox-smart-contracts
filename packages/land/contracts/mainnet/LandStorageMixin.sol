@@ -16,4 +16,14 @@ pragma solidity 0.8.23;
 //│            Land             │         _minters          │      57      │   0    │           t_mapping(t_address,t_bool)            │  1  │ /build-info/8962c877ac6c2963a6c119c5538d62f6.json │      32       │
 //│            Land             │  operatorFilterRegistry   │      58      │   0    │     t_contract(IOperatorFilterRegistry)1931      │  1  │ /build-info/8962c877ac6c2963a6c119c5538d62f6.json │      20       │
 
-contract LandStorageMixin {}
+contract LandStorageMixin {
+    address internal _admin;
+
+    function _getAdmin() internal view virtual returns (address) {
+        return _admin;
+    }
+
+    function _setAdmin(address a) internal virtual {
+        _admin = a;
+    }
+}
