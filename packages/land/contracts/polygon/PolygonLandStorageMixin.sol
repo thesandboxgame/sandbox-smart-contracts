@@ -22,6 +22,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 
 contract PolygonLandStorageMixin is ContextUpgradeable {
     address internal _admin;
+    mapping(address => bool) internal _superOperators;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -29,5 +30,13 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     function _setAdmin(address a) internal virtual {
         _admin = a;
+    }
+
+    function _isSuperOperator(address who) internal view virtual returns (bool) {
+        return _superOperators[who];
+    }
+
+    function _setSuperOperator(address superOperator, bool enabled) internal virtual {
+        _superOperators[superOperator] = enabled;
     }
 }

@@ -5,7 +5,7 @@ pragma solidity 0.8.23;
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
-import {SuperOperators} from "./SuperOperators.sol";
+import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 
 /**
@@ -14,7 +14,7 @@ import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTransactionReceiver {
+abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, MetaTransactionReceiver {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -97,7 +97,8 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
      */
     function _approveFor(address owner, address operator, uint256 id) internal {
         if (operator == address(0)) {
-            _owners[id] = uint160(owner); // no need to resset the operator, it will be overriden next time
+            _owners[id] = uint160(owner);
+            // no need to resset the operator, it will be overriden next time
         } else {
             _owners[id] = uint160(owner) + 2 ** 255;
             _operators[id] = operator;
@@ -115,10 +116,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
         address owner = _ownerOf(id);
         require(sender != address(0), "sender is zero address");
         require(
-            msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _operatorsForAll[sender][msg.sender] ||
-                _superOperators[msg.sender],
+            msg.sender == sender || _metaTransactionContracts[msg.sender] || _isApprovedForAll(sender, msg.sender),
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
@@ -133,10 +131,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
     function approve(address operator, uint256 id) public virtual {
         address owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
-        require(
-            owner == msg.sender || _operatorsForAll[owner][msg.sender] || _superOperators[msg.sender],
-            "not authorized to approve"
-        );
+        require(owner == msg.sender || _isApprovedForAll(owner, msg.sender), "not authorized to approve");
         _approveFor(owner, operator, id);
     }
 
@@ -171,9 +166,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
                 return true;
             }
             require(
-                _operatorsForAll[from][msg.sender] ||
-                    (operatorEnabled && _operators[id] == msg.sender) ||
-                    _superOperators[msg.sender],
+                (operatorEnabled && _operators[id] == msg.sender) || _isApprovedForAll(from, msg.sender),
                 "not approved to transfer"
             );
         }
@@ -268,10 +261,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
      */
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
-        bool authorized = msg.sender == from ||
-            metaTx ||
-            _operatorsForAll[from][msg.sender] ||
-            _superOperators[msg.sender];
+        bool authorized = msg.sender == from || metaTx || _isApprovedForAll(from, msg.sender);
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -338,7 +328,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == sender || _metaTransactionContracts[msg.sender] || _isSuperOperator(msg.sender),
             "not authorized"
         );
 
@@ -360,7 +350,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
      * @param approved The determination of the approval
      */
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
-        require(!_superOperators[operator], "can't change approvalForAll");
+        require(!_isSuperOperator(operator), "can't change approvalForAll");
         _operatorsForAll[sender][operator] = approved;
 
         emit ApprovalForAll(sender, operator, approved);
@@ -373,7 +363,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
      * @return The status of the approval
      */
     function isApprovedForAll(address owner, address operator) external view returns (bool) {
-        return _operatorsForAll[owner][operator] || _superOperators[operator];
+        return _isApprovedForAll(owner, operator);
     }
 
     /**
@@ -383,7 +373,8 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
      */
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "not owner");
-        _owners[id] = 2 ** 160; // cannot mint it again
+        _owners[id] = 2 ** 160;
+        // cannot mint it again
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }
@@ -404,8 +395,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
             msg.sender == from ||
                 _metaTransactionContracts[msg.sender] ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
-                _operatorsForAll[from][msg.sender] ||
-                _superOperators[msg.sender],
+                _isApprovedForAll(from, msg.sender),
             "not authorized to burn"
         );
         _burn(from, owner, id);
@@ -449,6 +439,13 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, SuperOperators, MetaTra
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 
+    /// @notice Check if the sender approved the operator.
+    /// @param owner The address of the owner.
+    /// @param operator The address of the operator.
+    /// @return isOperator The status of the approval.
+    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
+        return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
+    }
     // Empty storage space in contracts for future enhancements
     // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
     uint256[49] private __gap;

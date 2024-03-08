@@ -18,6 +18,7 @@ pragma solidity 0.8.23;
 
 contract LandStorageMixin {
     address internal _admin;
+    mapping(address => bool) internal _superOperators;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -25,5 +26,13 @@ contract LandStorageMixin {
 
     function _setAdmin(address a) internal virtual {
         _admin = a;
+    }
+
+    function _isSuperOperator(address who) internal view virtual returns (bool) {
+        return _superOperators[who];
+    }
+
+    function _setSuperOperator(address superOperator, bool enabled) internal virtual {
+        _superOperators[superOperator] = enabled;
     }
 }

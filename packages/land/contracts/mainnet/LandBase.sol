@@ -3,6 +3,7 @@
 pragma solidity 0.8.23;
 
 import {WithAdmin} from "../common/WithAdmin.sol";
+import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
@@ -24,5 +25,16 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
 
     function _setAdmin(address a) internal override(LandStorageMixin, WithAdmin) {
         LandStorageMixin._setAdmin(a);
+    }
+
+    function _isSuperOperator(address who) internal view override(LandStorageMixin, WithSuperOperators) returns (bool) {
+        return LandStorageMixin._isSuperOperator(who);
+    }
+
+    function _setSuperOperator(
+        address superOperator,
+        bool enabled
+    ) internal override(LandStorageMixin, WithSuperOperators) {
+        LandStorageMixin._setSuperOperator(superOperator, enabled);
     }
 }
