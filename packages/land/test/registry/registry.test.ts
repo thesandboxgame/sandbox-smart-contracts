@@ -15,12 +15,12 @@ const neighborhoodName = 'MAIN_PLACE';
 describe('LandMetadataRegistry', function () {
   describe('metadata', function () {
     it('admin should be able to set metadata', async function () {
-      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.false;
       expect(await registryAsAdmin.getNeighborhoodId(tokenId)).to.be.equal(0);
       await expect(registryAsAdmin.setMetadata(tokenId, true, neighborhoodId))
         .to.emit(registryAsAdmin, 'MetadataSet')
-        .withArgs(tokenId, 0, false, neighborhoodId, true);
+        .withArgs(admin, tokenId, 0, false, neighborhoodId, true);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.true;
       expect(await registryAsAdmin.getNeighborhoodId(tokenId)).to.be.equal(
         neighborhoodId,
@@ -44,16 +44,16 @@ describe('LandMetadataRegistry', function () {
   });
   describe('premiumness', function () {
     it('admin should be able to set premiumness', async function () {
-      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       await registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.false;
       await expect(registryAsAdmin.setPremium(tokenId, true))
         .to.emit(registryAsAdmin, 'MetadataSet')
-        .withArgs(tokenId, neighborhoodId, false, neighborhoodId, true);
+        .withArgs(admin, tokenId, neighborhoodId, false, neighborhoodId, true);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.true;
       await expect(registryAsAdmin.setPremium(tokenId, false))
         .to.emit(registryAsAdmin, 'MetadataSet')
-        .withArgs(tokenId, neighborhoodId, true, neighborhoodId, false);
+        .withArgs(admin, tokenId, neighborhoodId, true, neighborhoodId, false);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.false;
     });
     it('other should fail to set premiumness', async function () {
@@ -65,11 +65,11 @@ describe('LandMetadataRegistry', function () {
   });
   describe('neighborhood number', function () {
     it('admin should be able to set neighborhood number', async function () {
-      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       expect(await registryAsAdmin.getNeighborhoodId(tokenId)).to.be.equal(0);
       await expect(registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId))
         .to.emit(registryAsAdmin, 'MetadataSet')
-        .withArgs(tokenId, 0, false, neighborhoodId, false);
+        .withArgs(admin, tokenId, 0, false, neighborhoodId, false);
       expect(await registryAsAdmin.getNeighborhoodId(tokenId)).to.be.equal(
         neighborhoodId,
       );
@@ -92,7 +92,7 @@ describe('LandMetadataRegistry', function () {
   });
   describe('neighborhood name', function () {
     it('admin should be able to set neighborhood name', async function () {
-      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
         '',
       );
@@ -100,7 +100,7 @@ describe('LandMetadataRegistry', function () {
         registryAsAdmin.setNeighborhoodName(neighborhoodId, neighborhoodName),
       )
         .to.emit(registryAsAdmin, 'NeighborhoodNameSet')
-        .withArgs(neighborhoodId, neighborhoodName);
+        .withArgs(admin, neighborhoodId, neighborhoodName);
       await registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId);
       expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
         neighborhoodName,
@@ -127,7 +127,7 @@ describe('LandMetadataRegistry', function () {
   });
   describe('batch set metadata', function () {
     it('admin should be able to batch set metadata', async function () {
-      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       const batch: {[key: string]: bigint} = {};
       for (let i = 0n; i < 408 * 4; i++) {
         const tId = tokenId + i;
@@ -144,7 +144,7 @@ describe('LandMetadataRegistry', function () {
       expect(await registryAsAdmin.getNeighborhoodId(tokenId)).to.be.equal(0);
       await expect(registryAsAdmin.batchSetMetadata(batchMetadata))
         .to.emit(registryAsAdmin, 'BatchMetadataSet')
-        .withArgs((toCheck) =>
+        .withArgs(admin, (toCheck) =>
           toCheck.some(
             (result, idx) =>
               batchMetadata[idx].baseTokenId == result[0] &&
