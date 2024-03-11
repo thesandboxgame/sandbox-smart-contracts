@@ -785,6 +785,32 @@ describe('PolygonLand.sol', function () {
     expect(await LandAsMinter.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
   });
 
+  it('should not set royaltyManager if caller is not admin', async function () {
+    const {LandAsOther, other} = await loadFixture(setupPolygonLand);
+    await expect(
+      LandAsOther.setRoyaltyManager(await other.getAddress()),
+    ).to.be.revertedWith('ADMIN_ONLY');
+  });
+
+  it('should emit RoyaltyManagerSet event', async function () {
+    const {LandAsAdmin, other} = await loadFixture(setupPolygonLand);
+    const tx = await LandAsAdmin.setRoyaltyManager(await other.getAddress());
+    await expect(tx)
+      .to.emit(LandAsAdmin, 'RoyaltyManagerSet')
+      .withArgs(await other.getAddress());
+  });
+
+  it('should set royaltyManager', async function () {
+    const {LandAsAdmin, other, manager} = await loadFixture(setupPolygonLand);
+    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(
+      await manager.getAddress(),
+    );
+    await LandAsAdmin.setRoyaltyManager(await other.getAddress());
+    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(
+      await other.getAddress(),
+    );
+  });
+
   it('should not set owner if caller is not admin', async function () {
     const {LandAsOther, other} = await loadFixture(setupPolygonLand);
     await expect(
@@ -1546,6 +1572,14 @@ describe('PolygonLand.sol', function () {
         await loadFixture(setupPolygonLand);
       expect(await PolygonLandContract.owner()).to.be.equal(
         await landOwner.getAddress(),
+      );
+    });
+
+    it('should return royaltyManager address', async function () {
+      const {PolygonLandContract, manager} =
+        await loadFixture(setupPolygonLand);
+      expect(await PolygonLandContract.getRoyaltyManager()).to.be.equal(
+        await manager.getAddress(),
       );
     });
 
