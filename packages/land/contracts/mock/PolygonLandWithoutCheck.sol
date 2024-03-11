@@ -6,13 +6,6 @@ import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {PolygonLand} from "../PolygonLand.sol";
 
 contract PolygonLandMockWithoutCheck is PolygonLand {
-    /// @notice Set admin adress
-    /// @param admin Admin of the contract
-    function setAdmin(address admin) external {
-        _admin = admin;
-        emit AdminChanged(address(0), _admin);
-    }
-
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(address registry) external override {

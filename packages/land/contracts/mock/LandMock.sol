@@ -5,13 +5,6 @@ pragma solidity 0.8.23;
 import {Land} from "../Land.sol";
 
 contract LandMock is Land {
-    /// @notice Set admin adress
-    /// @param admin Admin of the contract
-    function setAdmin(address admin) external {
-        _admin = admin;
-        emit AdminChanged(address(0), _admin);
-    }
-
     struct VarsStorage {
         uint256 _admin;
         uint256 _superOperators;

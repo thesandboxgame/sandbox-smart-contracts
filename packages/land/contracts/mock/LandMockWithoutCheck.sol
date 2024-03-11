@@ -5,13 +5,6 @@ pragma solidity 0.8.23;
 import {Land} from "../Land.sol";
 
 contract LandMockWithoutCheck is Land {
-    /// @notice Set admin adress
-    /// @param admin Admin of the contract
-    function setAdmin(address admin) external {
-        _admin = admin;
-        emit AdminChanged(address(0), _admin);
-    }
-
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
     /// @param operator address of the operator to be approved
     /// @param approved bool value denoting approved (true) or not Approved(false)
