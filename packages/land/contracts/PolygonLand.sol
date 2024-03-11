@@ -25,6 +25,15 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+    /**
+     * @notice Initializes the contract with the admin
+     * @param admin Admin of the contract
+     */
+    function initialize(address admin) external initializer {
+        _admin = admin;
+        emit AdminChanged(address(0), _admin);
+    }
+
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {

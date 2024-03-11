@@ -21,10 +21,26 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
 
     IRoyaltyManager private _royaltyManager;
     address private _owner;
+    bool private _initializing;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    modifier initializer() {
+        require(!_initializing, "already initialized");
+        _;
+    }
+
+    /**
+     * @notice Initializes the contract with the admin
+     * @param admin Admin of the contract
+     */
+    function initialize(address admin) public initializer {
+        _admin = admin;
+        _initializing = true;
+        emit AdminChanged(address(0), _admin);
+    }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
