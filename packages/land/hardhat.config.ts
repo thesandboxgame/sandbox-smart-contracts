@@ -23,9 +23,5 @@ const config: HardhatUserConfig = {
   mocha: {
     ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
-  // TODO: Remove or at least check that the only contracts over the max size are mocks.
-  networks: {
-    hardhat: {allowUnlimitedContractSize: true},
-  },
 };
 export default config;
