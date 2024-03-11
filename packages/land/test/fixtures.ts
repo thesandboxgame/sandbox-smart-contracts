@@ -99,7 +99,7 @@ export async function setupLandContract() {
   const LandFactory = await ethers.getContractFactory('LandMock');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.setAdmin(landAdmin);
+  await LandContract.initialize(await landAdmin.getAddress());
 
   // deploy mocks
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
@@ -225,7 +225,7 @@ export async function setupLandOperatorFilter() {
   const LandFactory = await ethers.getContractFactory('LandMockWithoutCheck');
   const LandContract = await LandFactory.deploy();
 
-  await LandContract.setAdmin(landAdmin);
+  await LandContract.initialize(await landAdmin.getAddress());
 
   const LandAsAdmin = LandContract.connect(landAdmin);
   await LandAsAdmin.setMinter(await landMinter.getAddress(), true);
@@ -234,7 +234,7 @@ export async function setupLandOperatorFilter() {
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);
   const LandMockContract = await LandFactory.deploy();
-  await LandMockContract.setAdmin(landAdmin);
+  await LandMockContract.initialize(await landAdmin.getAddress());
 
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
     'MarketPlaceToFilterMock',
@@ -342,9 +342,13 @@ export async function setupPolygonLandContract() {
     await TrustedForwarderContractFactory.deploy();
 
   const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
-  const PolygonLandContract = await PolygonLandFactory.deploy();
-
-  await PolygonLandContract.setAdmin(landAdmin);
+  const PolygonLandContract = await upgrades.deployProxy(
+    PolygonLandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
 
   // mock contract deploy
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
@@ -477,9 +481,13 @@ export async function setupPolygonLandOperatorFilter() {
   const PolygonLandFactory = await ethers.getContractFactory(
     'PolygonLandMockWithoutCheck',
   );
-  const PolygonLandContract = await PolygonLandFactory.deploy();
-
-  await PolygonLandContract.setAdmin(landAdmin);
+  const PolygonLandContract = await upgrades.deployProxy(
+    PolygonLandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
 
   const LandAsAdmin = PolygonLandContract.connect(landAdmin);
   await LandAsAdmin.setTrustedForwarder(
@@ -519,8 +527,14 @@ export async function setupPolygonLandOperatorFilter() {
   await LandAsAdmin.setOperatorRegistry(OperatorFilterRegistry);
   await LandAsAdmin.register(operatorFilterSubscription, true);
 
-  const PolygonLandMockContract = await PolygonLandFactory.deploy();
-  await PolygonLandMockContract.setAdmin(landAdmin);
+  const PolygonLandMockContract = await upgrades.deployProxy(
+    PolygonLandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
+
   const LandRegistryNotSetAsDeployer =
     PolygonLandMockContract.connect(deployer);
   const LandRegistryNotSetAsAdmin = PolygonLandMockContract.connect(landAdmin);
