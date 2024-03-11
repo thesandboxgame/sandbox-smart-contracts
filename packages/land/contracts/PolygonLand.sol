@@ -25,21 +25,39 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    function _setRoyaltyManager(address royaltyManager) internal {
-        _royaltyManager = IRoyaltyManager(royaltyManager);
-        emit RoyaltyManagerSet(royaltyManager);
-    }
-
-    function _transferOwnership(address newOwner) internal {
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _trustedForwarder = trustedForwarder;
         emit TrustedForwarderSet(trustedForwarder);
+    }
+
+    /// @notice set royalty manager
+    /// @param royaltyManager address of the manager contract for common royalty recipient
+    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
+        _setRoyaltyManager(royaltyManager);
+    }
+
+    /// @notice Set the address of the new owner of the contract
+    /// @param newOwner address of new owner
+    function transferOwnership(address newOwner) external onlyAdmin {
+        _transferOwnership(newOwner);
+    }
+
+    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
+    /// @dev can only be called by admin.
+    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+    /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
+        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(address registry) external virtual onlyAdmin {
+        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
@@ -67,26 +85,6 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
     /// @return ownerAddress The address of the owner.
     function owner() external view returns (address ownerAddress) {
         return _owner;
-    }
-
-    /// @notice set royalty manager
-    /// @param royaltyManager address of the manager contract for common royalty recipient
-    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
-        _setRoyaltyManager(royaltyManager);
-    }
-
-    /// @notice Set the address of the new owner of the contract
-    /// @param newOwner address of new owner
-    function transferOwnership(address newOwner) external onlyAdmin {
-        _transferOwnership(newOwner);
-    }
-
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
-        return ERC2771Handler._msgSender();
-    }
-
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
     }
 
     /**
@@ -189,19 +187,21 @@ contract PolygonLand is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Ha
             id == type(IERC2981Upgradeable).interfaceId;
     }
 
-    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
-    /// @dev can only be called by admin.
-    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
-    /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
-    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
-        _register(subscriptionOrRegistrantToCopy, subscribe);
+    function _setRoyaltyManager(address royaltyManager) internal {
+        _royaltyManager = IRoyaltyManager(royaltyManager);
+        emit RoyaltyManagerSet(royaltyManager);
     }
 
-    /// @notice sets filter registry address deployed in test
-    /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external virtual onlyAdmin {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
+    function _transferOwnership(address newOwner) internal {
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
