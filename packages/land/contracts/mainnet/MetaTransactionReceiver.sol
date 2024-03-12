@@ -12,13 +12,12 @@ import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Addr
 abstract contract MetaTransactionReceiver is WithAdmin {
     using AddressUpgradeable for address;
 
-    mapping(address => bool) internal _metaTransactionContracts;
     event MetaTransactionProcessor(address indexed metaTransactionProcessor, bool enabled);
 
     /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
-    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public onlyAdmin {
+    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) external onlyAdmin {
         require(metaTransactionProcessor.isContract(), "invalid address");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
@@ -26,7 +25,7 @@ abstract contract MetaTransactionReceiver is WithAdmin {
     /// @param metaTransactionProcessor address of the operator
     /// @param enabled is it enabled
     function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {
-        _metaTransactionContracts[metaTransactionProcessor] = enabled;
+        _setMetaTransactionContract(metaTransactionProcessor, enabled);
         emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
@@ -34,6 +33,10 @@ abstract contract MetaTransactionReceiver is WithAdmin {
     /// @param who The address to query.
     /// @return whether the address has meta-transaction execution rights.
     function isMetaTransactionProcessor(address who) external view returns (bool) {
-        return _metaTransactionContracts[who];
+        return _isMetaTransactionContract(who);
     }
+
+    function _isMetaTransactionContract(address who) internal view virtual returns (bool);
+
+    function _setMetaTransactionContract(address metaTransactionProcessor, bool enabled) internal virtual;
 }

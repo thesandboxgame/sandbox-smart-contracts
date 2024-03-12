@@ -19,6 +19,7 @@ pragma solidity 0.8.23;
 contract LandStorageMixin {
     address internal _admin;
     mapping(address => bool) internal _superOperators;
+    mapping(address => bool) internal _metaTransactionContracts;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -34,5 +35,13 @@ contract LandStorageMixin {
 
     function _setSuperOperator(address superOperator, bool enabled) internal virtual {
         _superOperators[superOperator] = enabled;
+    }
+
+    function _isMetaTransactionContract(address who) internal view virtual returns (bool) {
+        return _metaTransactionContracts[who];
+    }
+
+    function _setMetaTransactionContract(address metaTransactionProcessor, bool enabled) internal virtual {
+        _metaTransactionContracts[metaTransactionProcessor] = enabled;
     }
 }

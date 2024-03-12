@@ -116,7 +116,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         address owner = _ownerOf(id);
         require(sender != address(0), "sender is zero address");
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _isApprovedForAll(sender, msg.sender),
+            msg.sender == sender || _isMetaTransactionContract(msg.sender) || _isApprovedForAll(sender, msg.sender),
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
@@ -162,7 +162,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
         if (msg.sender != from) {
-            if (_metaTransactionContracts[msg.sender]) {
+            if (_isMetaTransactionContract(msg.sender)) {
                 return true;
             }
             require(
@@ -260,7 +260,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      * @param safe checks the target contract
      */
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        bool metaTx = msg.sender != from && _isMetaTransactionContract(msg.sender);
         bool authorized = msg.sender == from || metaTx || _isApprovedForAll(from, msg.sender);
 
         require(from != address(0), "from is zero address");
@@ -328,7 +328,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _isSuperOperator(msg.sender),
+            msg.sender == sender || _isMetaTransactionContract(msg.sender) || _isSuperOperator(msg.sender),
             "not authorized"
         );
 
@@ -393,7 +393,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
-                _metaTransactionContracts[msg.sender] ||
+                _isMetaTransactionContract(msg.sender) ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
                 _isApprovedForAll(from, msg.sender),
             "not authorized to burn"
