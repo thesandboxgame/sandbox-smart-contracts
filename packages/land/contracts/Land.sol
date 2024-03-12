@@ -9,6 +9,7 @@ import {LandBaseToken} from "./mainnet/LandBaseToken.sol";
 import {ERC721BaseToken} from "./mainnet/ERC721BaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./mainnet/OperatorFiltererUpgradeable.sol";
 import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title Land Contract
@@ -16,7 +17,7 @@ import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
  * @notice LAND contract
  * @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
  */
-contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
+contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable, Initializable {
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
     IRoyaltyManager private _royaltyManager;
@@ -26,17 +27,13 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    modifier initializer() {
-        require(_admin == address(0), "already initialized");
-        _;
-    }
-
     /**
      * @notice Initializes the contract with the admin
      * @param admin Admin of the contract
      */
     function initialize(address admin) public initializer {
         require(admin != address(0), "invalid admin");
+        require(_admin == address(0), "already initialized");
         _admin = admin;
         emit AdminChanged(address(0), _admin);
     }
