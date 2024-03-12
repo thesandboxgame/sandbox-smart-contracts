@@ -21,14 +21,13 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
 
     IRoyaltyManager private _royaltyManager;
     address private _owner;
-    bool private _initV4;
 
     event OperatorRegistrySet(address indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     modifier initializer() {
-        require(!_initV4, "already initialized");
+        require(_admin == address(0), "already initialized");
         _;
     }
 
@@ -37,8 +36,8 @@ contract Land is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
      * @param admin Admin of the contract
      */
     function initialize(address admin) public initializer {
+        require(admin != address(0), "invalid admin");
         _admin = admin;
-        _initV4 = true;
         emit AdminChanged(address(0), _admin);
     }
 
