@@ -2822,6 +2822,8 @@ __metadata:
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2"
     "@openzeppelin/contracts-upgradeable": ^4.9.5
     "@release-it/keep-a-changelog": ^5.0.0
+    "@sandbox-smart-contracts/core": "*"
+    "@sandbox-smart-contracts/land": "*"
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
@@ -2856,7 +2858,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/land@workspace:packages/land":
+"@sandbox-smart-contracts/land@*, @sandbox-smart-contracts/land@workspace:packages/land":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land@workspace:packages/land"
   dependencies:

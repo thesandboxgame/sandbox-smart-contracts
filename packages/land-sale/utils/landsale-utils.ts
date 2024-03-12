@@ -145,7 +145,7 @@ export async function getLandSaleFiles(
     localhost: 'testnet',
   };
   const name = networkNameMap[networkName];
-  const secretPath = `./secret/.${presale}_${name}_secret`;
+  const secretPath = `../secret/.${presale}_${name}_secret`;
   const sectorPath = `../data/landSale/${presale}/sectors.${name}.json`;
   const bundlesPaths = [
     `../data/landSale/${presale}/bundles.${networkName}.json`,
