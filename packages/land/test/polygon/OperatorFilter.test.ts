@@ -6,12 +6,12 @@ import {getId} from '../fixtures';
 
 describe('PolygonLand:OperatorFilterer', function () {
   it('should be registered', async function () {
-    const {OperatorFilterRegistry, PolygonLandContract} = await loadFixture(
+    const {OperatorFilterRegistry, LandContract} = await loadFixture(
       setupPolygonLandOperatorFilter,
     );
-    expect(
-      await OperatorFilterRegistry.isRegistered(PolygonLandContract),
-    ).to.be.equal(true);
+    expect(await OperatorFilterRegistry.isRegistered(LandContract)).to.be.equal(
+      true,
+    );
   });
 
   it('would not register on the operator filter registry if not set on the Land', async function () {
@@ -151,13 +151,10 @@ describe('PolygonLand:OperatorFilterer', function () {
   });
 
   it('should be subscribed to operator filterer subscription contract', async function () {
-    const {
-      PolygonLandContract,
-      OperatorFilterRegistry,
-      operatorFilterSubscription,
-    } = await loadFixture(setupPolygonLandOperatorFilter);
+    const {LandContract, OperatorFilterRegistry, operatorFilterSubscription} =
+      await loadFixture(setupPolygonLandOperatorFilter);
     expect(
-      await OperatorFilterRegistry.subscriptionOf(PolygonLandContract),
+      await OperatorFilterRegistry.subscriptionOf(LandContract),
     ).to.be.equal(operatorFilterSubscription);
   });
 

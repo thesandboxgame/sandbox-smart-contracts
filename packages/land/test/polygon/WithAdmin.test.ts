@@ -4,9 +4,8 @@ import {setupPolygonLand} from './fixtures';
 
 describe('PolygonLand:WithAdmin', function () {
   it('should get the current admin', async function () {
-    const {PolygonLandContract, landAdmin} =
-      await loadFixture(setupPolygonLand);
-    expect(await PolygonLandContract.getAdmin()).to.be.equal(landAdmin);
+    const {LandContract, landAdmin} = await loadFixture(setupPolygonLand);
+    expect(await LandContract.getAdmin()).to.be.equal(landAdmin);
   });
 
   it('should change the admin to a new address', async function () {

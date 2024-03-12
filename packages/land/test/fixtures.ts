@@ -342,7 +342,7 @@ export async function setupPolygonLandContract() {
     await TrustedForwarderContractFactory.deploy();
 
   const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
-  const PolygonLandContract = await upgrades.deployProxy(
+  const LandContract = await upgrades.deployProxy(
     PolygonLandFactory,
     [await landAdmin.getAddress()],
     {
@@ -371,7 +371,7 @@ export async function setupPolygonLandContract() {
   const MockMarketPlace3 = await MarketPlaceToFilterMockFactory.deploy();
 
   // setup role
-  const LandAsAdmin = PolygonLandContract.connect(landAdmin);
+  const LandAsAdmin = LandContract.connect(landAdmin);
 
   await LandAsAdmin.setTrustedForwarder(
     await TrustedForwarderContract.getAddress(),
@@ -381,15 +381,15 @@ export async function setupPolygonLandContract() {
   await LandAsAdmin.setRoyaltyManager(
     await RoyaltyManagerContract.getAddress(),
   );
-  await PolygonLandContract.connect(landAdmin).setMinter(
+  await LandContract.connect(landAdmin).setMinter(
     await landMinter.getAddress(),
     true,
   );
-  const LandAsMinter = PolygonLandContract.connect(landMinter);
-  const LandAsOwner = PolygonLandContract.connect(landOwner);
-  const LandAsOther = PolygonLandContract.connect(other);
-  const LandAsOther1 = PolygonLandContract.connect(other1);
-  const LandAsOther2 = PolygonLandContract.connect(other2);
+  const LandAsMinter = LandContract.connect(landMinter);
+  const LandAsOwner = LandContract.connect(landOwner);
+  const LandAsOther = LandContract.connect(other);
+  const LandAsOther1 = LandContract.connect(other1);
+  const LandAsOther2 = LandContract.connect(other2);
 
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
   const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
@@ -404,7 +404,7 @@ export async function setupPolygonLandContract() {
     manager: RoyaltyManagerContract,
     RoyaltySplitter,
     TrustedForwarderContract,
-    PolygonLandContract,
+    LandContract,
     LandAsAdmin,
     LandAsMinter,
     LandAsOwner,
@@ -481,7 +481,7 @@ export async function setupPolygonLandOperatorFilter() {
   const PolygonLandFactory = await ethers.getContractFactory(
     'PolygonLandMockWithoutCheck',
   );
-  const PolygonLandContract = await upgrades.deployProxy(
+  const LandContract = await upgrades.deployProxy(
     PolygonLandFactory,
     [await landAdmin.getAddress()],
     {
@@ -489,7 +489,7 @@ export async function setupPolygonLandOperatorFilter() {
     },
   );
 
-  const LandAsAdmin = PolygonLandContract.connect(landAdmin);
+  const LandAsAdmin = LandContract.connect(landAdmin);
   await LandAsAdmin.setTrustedForwarder(
     await TrustedForwarderContract.getAddress(),
   );
@@ -499,8 +499,8 @@ export async function setupPolygonLandOperatorFilter() {
     await RoyaltyManagerContract.getAddress(),
   );
 
-  const LandAsOther = PolygonLandContract.connect(other);
-  const LandAsOther1 = PolygonLandContract.connect(other1);
+  const LandAsOther = LandContract.connect(other);
+  const LandAsOther1 = LandContract.connect(other1);
   const MarketPlaceToFilterMockFactory = await ethers.getContractFactory(
     'MarketPlaceToFilterMock',
   );
@@ -540,7 +540,7 @@ export async function setupPolygonLandOperatorFilter() {
   const LandRegistryNotSetAsAdmin = PolygonLandMockContract.connect(landAdmin);
   const LandRegistryNotSetAsOther = PolygonLandMockContract.connect(other);
   return {
-    PolygonLandContract,
+    LandContract,
     LandAsAdmin,
     LandAsOther,
     LandAsOther1,
