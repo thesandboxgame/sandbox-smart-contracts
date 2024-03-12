@@ -7,6 +7,7 @@ import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
+import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 
 /// @title LAND Base L1
 /// @notice This class composes everything together without adding any functionality (except for _msgSender).
@@ -36,5 +37,18 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         bool enabled
     ) internal override(LandStorageMixin, WithSuperOperators) {
         LandStorageMixin._setSuperOperator(superOperator, enabled);
+    }
+
+    function _isMetaTransactionContract(
+        address who
+    ) internal view override(LandStorageMixin, MetaTransactionReceiver) returns (bool) {
+        return LandStorageMixin._isMetaTransactionContract(who);
+    }
+
+    function _setMetaTransactionContract(
+        address metaTransactionProcessor,
+        bool enabled
+    ) internal override(LandStorageMixin, MetaTransactionReceiver) {
+        LandStorageMixin._setMetaTransactionContract(metaTransactionProcessor, enabled);
     }
 }
