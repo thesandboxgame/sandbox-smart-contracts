@@ -56,11 +56,11 @@ abstract contract LandBaseToken is ERC721BaseToken {
         _checkOwner(size, x, y, 24);
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
-            require(_owners[_id] == 0, "Already minted");
+            require(_getOwnerData(_id) == 0, "Already minted");
             emit Transfer(address(0), to, _id);
         }
 
-        _owners[quadId] = uint160(to);
+        _setOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
@@ -258,13 +258,13 @@ abstract contract LandBaseToken is ERC721BaseToken {
                     // if land is in the quadMinted array there just emitting transfer event.
                     emit Transfer(msg.sender, to, _id);
                 } else {
-                    if (address(uint160(_owners[_id])) == msg.sender) {
+                    if (_getOwnerAddress(_id) == msg.sender) {
                         if (_operators[_id] != address(0)) _operators[_id] = address(0);
                         numLandMinted += 1;
                         emit Transfer(msg.sender, to, _id);
                     } else {
                         // else is checked if owned by the msg.sender or not. If it is not owned by msg.sender it should not have an owner.
-                        require(_owners[_id] == 0, "Already minted");
+                        require(_getOwnerData(_id) == 0, "Already minted");
 
                         emit Transfer(address(0), to, _id);
                     }
@@ -275,7 +275,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
         _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, numLandMinted, to, size, x, y, data);
 
-        _owners[quadId] = uint160(to);
+        _setOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _subNumNFTPerAddress(msg.sender, numLandMinted);
     }
@@ -344,8 +344,8 @@ abstract contract LandBaseToken is ERC721BaseToken {
                     // if land is in the quads already minted it just pushed in to the idsToTransfer array
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
-                } else if (address(uint160(_owners[id])) == msg.sender) {
-                    _owners[id] = 0;
+                } else if (_getOwnerAddress(id) == msg.sender) {
+                    _setOwnerData(id, 0);
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
                 } else {
@@ -367,7 +367,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         } else {
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 id = _idInPath(i, size, x, y);
-                if (address(uint160(_owners[id])) == msg.sender) _owners[id] = 0;
+                if (_getOwnerAddress(id) == msg.sender) _setOwnerData(id, 0);
             }
         }
     }
@@ -384,7 +384,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
             require(owner == from, "not owner");
-            _owners[id1x1] = uint160(to);
+            _setOwnerData(id1x1, uint160(to));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
@@ -406,9 +406,9 @@ abstract contract LandBaseToken is ERC721BaseToken {
             // then it is checked if the bigger quad which encapsulates the quad to be minted
             // of with size equals the quadCompareSize has been minted or not
             require(
-                _owners[
+                _getOwnerData(
                     _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
-                ] == 0,
+                ) == 0,
                 "Already minted"
             );
         } else {
@@ -418,7 +418,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
             uint256 toY = y + size;
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    require(_owners[_getQuadId(layer, xi, yi)] == 0, "Already minted");
+                    require(_getOwnerData(_getQuadId(layer, xi, yi)) == 0, "Already minted");
                 }
             }
         }
@@ -432,10 +432,10 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /// @param tokenId token id
     /// @return if the address is the owner of the token
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
-        uint256 currentOwner = _owners[tokenId];
+        uint256 currentOwner = _getOwnerData(tokenId);
         if (currentOwner != 0) {
             require(address(uint160(currentOwner)) == from, "not owner");
-            _owners[tokenId] = 0;
+            _setOwnerData(tokenId, 0);
             return true;
         }
         return false;
@@ -471,7 +471,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
                 // if child quad is not already in the quadMinted array.
                 if (!isQuadChecked) {
                     uint256 id = _getQuadId(layer, xi, yi);
-                    address owner = address(uint160(_owners[id]));
+                    address owner = _getOwnerAddress(id);
                     // owner of the child quad is checked to be owned by msg.sender else should not be owned by anyone.
                     if (owner == msg.sender) {
                         // if child quad is minted it would be pushed in quadMinted array.
@@ -481,7 +481,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
                         // total land minted is increase by the number if land of 1x1 in child quad
                         numLandMinted += quadCompareSize * quadCompareSize;
                         //owner is cleared
-                        _owners[id] = 0;
+                        _setOwnerData(id, 0);
                     } else {
                         require(owner == address(0), "Already minted");
                     }
@@ -535,14 +535,14 @@ abstract contract LandBaseToken is ERC721BaseToken {
                             childQuadSize / 2
                         );
                         uint256 idChild = _getQuadId(childLayer, xi, yi);
-                        ownerChild = _owners[idChild];
+                        ownerChild = _getOwnerData(idChild);
                         if (ownerChild != 0) {
                             if (!ownAllIndividual) {
                                 // checking the owner of child quad
                                 require(ownerChild == uint160(from), "not owner of child Quad");
                             }
                             // clearing owner of child quad
-                            _owners[idChild] = 0;
+                            _setOwnerData(idChild, 0);
                         }
                     }
                     // ownerOfAll should be true if "from" is owner of all the child quads iterated over
@@ -557,7 +557,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
             if (!ownerOfAll) {
                 require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner");
             }
-            _owners[quadId] = uint160(to);
+            _setOwnerData(quadId, uint160(to));
             return true;
         }
 
@@ -653,7 +653,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /// @return address of the owner of the quad
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         (uint256 layer, uint256 parentSize, ) = _getQuadLayer(size);
-        address owner = address(uint160(_owners[_getQuadId(layer, (x / size) * size, (y / size) * size)]));
+        address owner = _getOwnerAddress(_getQuadId(layer, (x / size) * size, (y / size) * size));
         if (owner != address(0)) {
             return owner;
         } else if (size < 24) {
@@ -704,7 +704,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = _getX(id);
         uint256 y = _getY(id);
-        uint256 owner1x1 = _owners[id];
+        uint256 owner1x1 = _getOwnerData(id);
 
         if (owner1x1 != 0) {
             owner = address(uint160(owner1x1));

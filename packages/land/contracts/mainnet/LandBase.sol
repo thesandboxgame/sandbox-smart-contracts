@@ -62,4 +62,12 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
     function _setNumNFTPerAddress(address who, uint256 val) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setNumNFTPerAddress(who, val);
     }
+
+    function _getOwnerData(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return LandStorageMixin._getOwnerData(id);
+    }
+
+    function _setOwnerData(uint256 id, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setOwnerData(id, data);
+    }
 }
