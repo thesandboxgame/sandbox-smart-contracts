@@ -70,4 +70,19 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
     function _setOwnerData(uint256 id, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setOwnerData(id, data);
     }
+
+    function _isOperatorForAll(
+        address owner,
+        address operator
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (bool) {
+        return LandStorageMixin._isOperatorForAll(owner, operator);
+    }
+
+    function _setOperatorForAll(
+        address owner,
+        address operator,
+        bool val
+    ) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setOperatorForAll(owner, operator, val);
+    }
 }

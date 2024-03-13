@@ -28,7 +28,6 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
 
-    mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
@@ -261,8 +260,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @dev See setApprovalForAll.
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
         require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
-        _operatorsForAll[sender][operator] = approved;
-
+        _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
     }
 
@@ -381,7 +379,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
     function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
-        return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
+        return _isOperatorForAll(owner, operator) || _isSuperOperator(operator);
     }
 
     function _addNumNFTPerAddress(address who, uint256 val) internal {
@@ -408,4 +406,8 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     }
 
     function _setOwnerData(uint256 id, uint256 data) internal virtual;
+
+    function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
+
+    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 }

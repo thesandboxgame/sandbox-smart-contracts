@@ -23,9 +23,6 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    /// @notice Operators for each owner address for all tokens
-    mapping(address => mapping(address => bool)) public _operatorsForAll;
-
     /// @notice Operator for each token id
     mapping(uint256 => address) public _operators;
 
@@ -343,8 +340,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      */
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
         require(!_isSuperOperator(operator), "can't change approvalForAll");
-        _operatorsForAll[sender][operator] = approved;
-
+        _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
     }
 
@@ -436,7 +432,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
     function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
-        return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
+        return _isOperatorForAll(owner, operator) || _isSuperOperator(operator);
     }
 
     function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
@@ -463,6 +459,10 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     function _getOwnerAddress(uint256 id) internal view virtual returns (address) {
         return address(uint160(_getOwnerData(id)));
     }
+
+    function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
+
+    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 
     // Empty storage space in contracts for future enhancements
     // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)

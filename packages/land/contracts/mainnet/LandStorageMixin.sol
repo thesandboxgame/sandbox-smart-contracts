@@ -28,6 +28,8 @@ contract LandStorageMixin {
      * For burned 1x1 Land 160 bit is set to 1.
      */
     mapping(uint256 => uint256) internal _owners;
+    /// @notice Operators for each owner address for all tokens
+    mapping(address => mapping(address => bool)) public _operatorsForAll;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -67,5 +69,13 @@ contract LandStorageMixin {
 
     function _setOwnerData(uint256 id, uint256 data) internal virtual {
         _owners[id] = data;
+    }
+
+    function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool) {
+        return _operatorsForAll[owner][operator];
+    }
+
+    function _setOperatorForAll(address owner, address operator, bool val) internal virtual {
+        _operatorsForAll[owner][operator] = val;
     }
 }
