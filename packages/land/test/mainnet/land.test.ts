@@ -3,11 +3,15 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {getId} from '../fixtures';
 import {ZeroAddress} from 'ethers';
 import {setupLand, setupLandMock} from './fixtures';
+import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
 
 describe('Land.sol', function () {
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForRoyalty(setupLand, 'Land');
+
   describe('LandBaseToken', function () {
     describe(`should NOT be able to transfer quad twice`, function () {
       // eslint-disable-next-line mocha/no-setup-in-describe
@@ -903,64 +907,54 @@ describe('Land.sol', function () {
 
   it('should return royaltyManager address', async function () {
     const {LandContract, manager} = await loadFixture(setupLand);
-    expect(await LandContract.getRoyaltyManager()).to.be.equal(
-      await manager.getAddress(),
-    );
+    expect(await LandContract.getRoyaltyManager()).to.be.equal(manager);
   });
 
   it('should not set royaltyManager if caller is not admin', async function () {
     const {LandAsOther, other} = await loadFixture(setupLand);
-    await expect(
-      LandAsOther.setRoyaltyManager(await other.getAddress()),
-    ).to.be.revertedWith('only admin allowed');
+    await expect(LandAsOther.setRoyaltyManager(other)).to.be.revertedWith(
+      'only admin allowed',
+    );
   });
 
   it('should emit RoyaltyManagerSet event', async function () {
     const {LandAsAdmin, other} = await loadFixture(setupLand);
-    const tx = await LandAsAdmin.setRoyaltyManager(await other.getAddress());
-    await expect(tx)
-      .to.emit(LandAsAdmin, 'RoyaltyManagerSet')
-      .withArgs(await other.getAddress());
+    const tx = await LandAsAdmin.setRoyaltyManager(other);
+    await expect(tx).to.emit(LandAsAdmin, 'RoyaltyManagerSet').withArgs(other);
   });
 
   it('should set royaltyManager', async function () {
     const {LandAsAdmin, other, manager} = await loadFixture(setupLand);
-    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(
-      await manager.getAddress(),
-    );
-    await LandAsAdmin.setRoyaltyManager(await other.getAddress());
-    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(
-      await other.getAddress(),
-    );
+    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(manager);
+    await LandAsAdmin.setRoyaltyManager(other);
+    expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(other);
   });
 
   it('should return owner address', async function () {
     const {LandContract, landOwner} = await loadFixture(setupLand);
-    expect(await LandContract.owner()).to.be.equal(
-      await landOwner.getAddress(),
-    );
+    expect(await LandContract.owner()).to.be.equal(landOwner);
   });
 
   it('should not set owner if caller is not admin', async function () {
     const {LandAsOther, other} = await loadFixture(setupLand);
-    await expect(
-      LandAsOther.transferOwnership(await other.getAddress()),
-    ).to.be.revertedWith('only admin allowed');
+    await expect(LandAsOther.transferOwnership(other)).to.be.revertedWith(
+      'only admin allowed',
+    );
   });
 
   it('should emit OwnershipTransferred event', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
-    const tx = await LandAsAdmin.transferOwnership(await other.getAddress());
+    const tx = await LandAsAdmin.transferOwnership(other);
     await expect(tx)
       .to.emit(LandAsAdmin, 'OwnershipTransferred')
-      .withArgs(await landOwner.getAddress(), await other.getAddress());
+      .withArgs(landOwner, other);
   });
 
   it('should set owner', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
-    expect(await LandAsAdmin.owner()).to.be.equal(await landOwner.getAddress());
-    await LandAsAdmin.transferOwnership(await other.getAddress());
-    expect(await LandAsAdmin.owner()).to.be.equal(await other.getAddress());
+    expect(await LandAsAdmin.owner()).to.be.equal(landOwner);
+    await LandAsAdmin.transferOwnership(other);
+    expect(await LandAsAdmin.owner()).to.be.equal(other);
   });
 
   it('check storage structure', async function () {
