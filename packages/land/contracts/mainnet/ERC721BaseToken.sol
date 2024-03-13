@@ -23,9 +23,6 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    /// @notice Token ids per address
-    mapping(uint256 => uint256) public _owners;
-
     /// @notice Operators for each owner address for all tokens
     mapping(address => mapping(address => bool)) public _operatorsForAll;
 
@@ -41,7 +38,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      */
     function _transferFrom(address from, address to, uint256 id) internal {
         _transferNumNFTPerAddress(from, to, 1);
-        _owners[id] = uint160(to);
+        _setOwnerData(id, uint160(to));
         emit Transfer(from, to, id);
     }
 
@@ -60,7 +57,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      * @return address of the owner
      */
     function _ownerOf(uint256 id) internal view virtual returns (address) {
-        return address(uint160(_owners[id]));
+        return _getOwnerAddress(id);
     }
 
     /**
@@ -71,7 +68,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[id];
+        uint256 data = _getOwnerData(id);
         owner = address(uint160(data));
         operatorEnabled = (data / 2 ** 255) == 1;
     }
@@ -93,10 +90,10 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      */
     function _approveFor(address owner, address operator, uint256 id) internal {
         if (operator == address(0)) {
-            _owners[id] = uint160(owner);
+            _setOwnerData(id, uint160(owner));
             // no need to resset the operator, it will be overriden next time
         } else {
-            _owners[id] = uint160(owner) + 2 ** 255;
+            _setOwnerData(id, uint160(owner) + 2 ** 255);
             _operators[id] = operator;
         }
         emit Approval(owner, operator, id);
@@ -268,7 +265,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "not owner in batchTransferFrom");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "not authorized");
-            _owners[id] = uint160(to);
+            _setOwnerData(id, uint160(to));
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -368,7 +365,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      */
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "not owner");
-        _owners[id] = 2 ** 160;
+        _setOwnerData(id, 2 ** 160);
         // cannot mint it again
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
@@ -458,6 +455,15 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         _subNumNFTPerAddress(from, quantity);
         _addNumNFTPerAddress(to, quantity);
     }
+
+    function _getOwnerData(uint256 id) internal view virtual returns (uint256);
+
+    function _setOwnerData(uint256 id, uint256 data) internal virtual;
+
+    function _getOwnerAddress(uint256 id) internal view virtual returns (address) {
+        return address(uint160(_getOwnerData(id)));
+    }
+
     // Empty storage space in contracts for future enhancements
     // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
     uint256[49] private __gap;

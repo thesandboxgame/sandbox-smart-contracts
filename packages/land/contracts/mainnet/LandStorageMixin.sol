@@ -22,6 +22,12 @@ contract LandStorageMixin {
     mapping(address => bool) internal _metaTransactionContracts;
     /// @notice Number of NFT an address own
     mapping(address => uint256) internal _numNFTPerAddress;
+    /**
+     * @dev mapping to store owner of lands and quads.
+     * For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved.
+     * For burned 1x1 Land 160 bit is set to 1.
+     */
+    mapping(uint256 => uint256) internal _owners;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -53,5 +59,13 @@ contract LandStorageMixin {
 
     function _setNumNFTPerAddress(address who, uint256 val) internal virtual {
         _numNFTPerAddress[who] = val;
+    }
+
+    function _getOwnerData(uint256 id) internal view virtual returns (uint256) {
+        return _owners[id];
+    }
+
+    function _setOwnerData(uint256 id, uint256 data) internal virtual {
+        _owners[id] = data;
     }
 }

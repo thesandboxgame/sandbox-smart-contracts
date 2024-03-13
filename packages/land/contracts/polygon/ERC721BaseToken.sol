@@ -28,12 +28,6 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
 
-    /**
-     * @dev mapping to store owner of lands and quads.
-     * For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved.
-     * For burned 1x1 Land 160 bit is set to 1.
-     */
-    mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
@@ -41,7 +35,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approve(address operator, uint256 id) public virtual override {
-        uint256 ownerData = _owners[_storageId(id)];
+        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -54,7 +48,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approveFor(address sender, address operator, uint256 id) public virtual {
-        uint256 ownerData = _owners[_storageId(id)];
+        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
@@ -206,29 +200,17 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
-    /// @dev By overriding this function in an implementation which inherits this contract,
-    /// you can enable versioned tokenIds without the extra overhead of writing to a new storage slot in _owners each time a version is incremented.
-    /// See GameToken._storageId() for an example, where the storageId is the tokenId minus the version number.
-    /// !!! Caution !!! Overriding this function without taking appropriate care could lead to
-    /// ownerOf() returning an owner for non-existent tokens. Tests should be written to
-    /// guard against introducing this bug.
-    /// @param id The id of a token.
-    /// @return The id used for storage mappings.
-    function _storageId(uint256 id) internal view virtual returns (uint256) {
-        return id;
-    }
-
     function _updateOwnerData(uint256 id, uint256 oldData, address newOwner, bool hasOperator) internal virtual {
         if (hasOperator) {
-            _owners[_storageId(id)] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner));
+            _setOwnerData(id, (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner)));
         } else {
-            _owners[_storageId(id)] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(uint160(newOwner));
+            _setOwnerData(id, ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(uint160(newOwner)));
         }
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
         _transferNumNFTPerAddress(from, to, 1);
-        _updateOwnerData(id, _owners[_storageId(id)], to, false);
+        _updateOwnerData(id, _getOwnerData(id), to, false);
         emit Transfer(from, to, id);
     }
 
@@ -258,7 +240,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msgSender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, _owners[_storageId(id)], to, false);
+            _updateOwnerData(id, _getOwnerData(id), to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -287,8 +269,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @dev See burn.
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "NOT_OWNER");
-        uint256 storageId = _storageId(id);
-        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG;
+        _setOwnerData(id, (_getOwnerData(id) & NOT_OPERATOR_FLAG) | BURNED_FLAG);
         // record as non owner but keep track of last owner
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
@@ -332,7 +313,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
 
     /// @dev See ownerOf
     function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _owners[_storageId(id)];
+        uint256 data = _getOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             return address(0);
         }
@@ -346,7 +327,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[_storageId(id)];
+        uint256 data = _getOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
@@ -419,4 +400,12 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
 
     function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
+
+    function _getOwnerData(uint256 id) internal view virtual returns (uint256);
+
+    function _getOwnerAddress(uint256 id) internal view virtual returns (address) {
+        return address(uint160(_getOwnerData(id)));
+    }
+
+    function _setOwnerData(uint256 id, uint256 data) internal virtual;
 }
