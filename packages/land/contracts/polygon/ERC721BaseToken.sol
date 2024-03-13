@@ -28,7 +28,6 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
 
-    mapping(address => uint256) internal _numNFTPerAddress;
     /**
      * @dev mapping to store owner of lands and quads.
      * For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved.
@@ -153,7 +152,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     /// @return The number of tokens owned by the address.
     function balanceOf(address owner) external view override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS_OWNER");
-        return _numNFTPerAddress[owner];
+        return _getNumNFTPerAddress(owner);
     }
 
     /// @notice Get the owner of a token.
@@ -228,8 +227,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
-        _numNFTPerAddress[from]--;
-        _numNFTPerAddress[to]++;
+        _transferNumNFTPerAddress(from, to, 1);
         _updateOwnerData(id, _owners[_storageId(id)], to, false);
         emit Transfer(from, to, id);
     }
@@ -264,8 +262,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
             emit Transfer(from, to, id);
         }
         if (from != to) {
-            _numNFTPerAddress[from] -= numTokens;
-            _numNFTPerAddress[to] += numTokens;
+            _transferNumNFTPerAddress(from, to, numTokens);
         }
 
         if (to.isContract()) {
@@ -293,7 +290,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         uint256 storageId = _storageId(id);
         _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG;
         // record as non owner but keep track of last owner
-        _numNFTPerAddress[from]--;
+        _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
     }
 
@@ -405,4 +402,21 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
         return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
     }
+
+    function _addNumNFTPerAddress(address who, uint256 val) internal {
+        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+    }
+
+    function _subNumNFTPerAddress(address who, uint256 val) internal {
+        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+    }
+
+    function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
+        _subNumNFTPerAddress(from, quantity);
+        _addNumNFTPerAddress(to, quantity);
+    }
+
+    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
+
+    function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
 }

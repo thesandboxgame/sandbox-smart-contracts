@@ -62,17 +62,16 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         if (msgSender != from) {
             require(_isApprovedForAll(from, msgSender), "not authorized");
         }
-        uint256 numTokensTransfered = 0;
+        uint256 numTokensTransferred = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             uint256 size = sizes[i];
             _transferQuad(from, to, size, xs[i], ys[i]);
-            numTokensTransfered += size * size;
+            numTokensTransferred += size * size;
         }
-        _numNFTPerAddress[from] -= numTokensTransfered;
-        _numNFTPerAddress[to] += numTokensTransfered;
+        _transferNumNFTPerAddress(from, to, numTokensTransferred);
 
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            uint256[] memory ids = new uint256[](numTokensTransfered);
+            uint256[] memory ids = new uint256[](numTokensTransferred);
             uint256 counter = 0;
             for (uint256 j = 0; j < sizes.length; j++) {
                 uint256 size = sizes[j];
@@ -116,9 +115,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
             require(_isApprovedForAll(from, msgSender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
-        _numNFTPerAddress[from] -= size * size;
-        _numNFTPerAddress[to] += size * size;
-
+        _transferNumNFTPerAddress(from, to, size * size);
         _checkBatchReceiverAcceptQuad(msgSender, from, to, size, x, y, data);
     }
 
@@ -152,8 +149,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
 
         if (exists(size, x, y)) {
             _transferQuad(msg.sender, to, size, x, y);
-            _numNFTPerAddress[msg.sender] -= size * size;
-            _numNFTPerAddress[to] += size * size;
+            _transferNumNFTPerAddress(msg.sender, to, size * size);
             _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
         } else {
             _mintAndTransferQuad(to, size, x, y, data);
@@ -292,8 +288,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         }
 
         _owners[quadId] = uint256(uint160(to));
-        _numNFTPerAddress[to] += size * size;
-
+        _addNumNFTPerAddress(to, size * size);
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 
@@ -359,8 +354,8 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, landMinted, to, size, x, y, data);
 
         _owners[quadId] = uint256(uint160(to));
-        _numNFTPerAddress[to] += size * size;
-        _numNFTPerAddress[msg.sender] -= landMinted;
+        _addNumNFTPerAddress(to, size * size);
+        _subNumNFTPerAddress(msg.sender, landMinted);
     }
 
     /**

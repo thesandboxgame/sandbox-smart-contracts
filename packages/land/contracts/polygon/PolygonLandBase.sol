@@ -10,6 +10,7 @@ import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
+import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 
 /// @title LAND Base L2
 /// @notice This contract composes everything together without adding any functionality (except for _msgSender).
@@ -45,5 +46,18 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
         bool enabled
     ) internal override(PolygonLandStorageMixin, WithSuperOperators) {
         PolygonLandStorageMixin._setSuperOperator(superOperator, enabled);
+    }
+
+    function _getNumNFTPerAddress(
+        address who
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return PolygonLandStorageMixin._getNumNFTPerAddress(who);
+    }
+
+    function _setNumNFTPerAddress(
+        address who,
+        uint256 val
+    ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
+        PolygonLandStorageMixin._setNumNFTPerAddress(who, val);
     }
 }

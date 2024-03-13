@@ -8,6 +8,7 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
+import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 
 /// @title LAND Base L1
 /// @notice This class composes everything together without adding any functionality (except for _msgSender).
@@ -50,5 +51,15 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         bool enabled
     ) internal override(LandStorageMixin, MetaTransactionReceiver) {
         LandStorageMixin._setMetaTransactionContract(metaTransactionProcessor, enabled);
+    }
+
+    function _getNumNFTPerAddress(
+        address who
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return LandStorageMixin._getNumNFTPerAddress(who);
+    }
+
+    function _setNumNFTPerAddress(address who, uint256 val) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setNumNFTPerAddress(who, val);
     }
 }
