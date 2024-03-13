@@ -23,9 +23,6 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    /// @notice Number of NFT an address own
-    mapping(address => uint256) public _numNFTPerAddress;
-
     /// @notice Token ids per address
     mapping(uint256 => uint256) public _owners;
 
@@ -43,8 +40,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      * @param id Token id to transfer
      */
     function _transferFrom(address from, address to, uint256 id) internal {
-        _numNFTPerAddress[from]--;
-        _numNFTPerAddress[to]++;
+        _transferNumNFTPerAddress(from, to, 1);
         _owners[id] = uint160(to);
         emit Transfer(from, to, id);
     }
@@ -56,7 +52,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
      */
     function balanceOf(address owner) external view returns (uint256) {
         require(owner != address(0), "owner is zero address");
-        return _numNFTPerAddress[owner];
+        return _getNumNFTPerAddress(owner);
     }
 
     /**
@@ -276,8 +272,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
             emit Transfer(from, to, id);
         }
         if (from != to) {
-            _numNFTPerAddress[from] -= numTokens;
-            _numNFTPerAddress[to] += numTokens;
+            _transferNumNFTPerAddress(from, to, numTokens);
         }
 
         if (to.isContract()) {
@@ -375,7 +370,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         require(from == owner, "not owner");
         _owners[id] = 2 ** 160;
         // cannot mint it again
-        _numNFTPerAddress[from]--;
+        _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
     }
 
@@ -445,6 +440,23 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     /// @return isOperator The status of the approval.
     function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
         return _operatorsForAll[owner][operator] || _isSuperOperator(operator);
+    }
+
+    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
+
+    function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
+
+    function _addNumNFTPerAddress(address who, uint256 val) internal {
+        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+    }
+
+    function _subNumNFTPerAddress(address who, uint256 val) internal {
+        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+    }
+
+    function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
+        _subNumNFTPerAddress(from, quantity);
+        _addNumNFTPerAddress(to, quantity);
     }
     // Empty storage space in contracts for future enhancements
     // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)

@@ -20,6 +20,8 @@ contract LandStorageMixin {
     address internal _admin;
     mapping(address => bool) internal _superOperators;
     mapping(address => bool) internal _metaTransactionContracts;
+    /// @notice Number of NFT an address own
+    mapping(address => uint256) internal _numNFTPerAddress;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -43,5 +45,13 @@ contract LandStorageMixin {
 
     function _setMetaTransactionContract(address metaTransactionProcessor, bool enabled) internal virtual {
         _metaTransactionContracts[metaTransactionProcessor] = enabled;
+    }
+
+    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256) {
+        return _numNFTPerAddress[who];
+    }
+
+    function _setNumNFTPerAddress(address who, uint256 val) internal virtual {
+        _numNFTPerAddress[who] = val;
     }
 }

@@ -23,6 +23,8 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 contract PolygonLandStorageMixin is ContextUpgradeable {
     address internal _admin;
     mapping(address => bool) internal _superOperators;
+    /// @notice Number of NFT an address own
+    mapping(address => uint256) internal _numNFTPerAddress;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -38,5 +40,13 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     function _setSuperOperator(address superOperator, bool enabled) internal virtual {
         _superOperators[superOperator] = enabled;
+    }
+
+    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256) {
+        return _numNFTPerAddress[who];
+    }
+
+    function _setNumNFTPerAddress(address who, uint256 val) internal virtual {
+        _numNFTPerAddress[who] = val;
     }
 }
