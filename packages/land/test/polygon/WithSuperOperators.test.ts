@@ -4,17 +4,16 @@ import {setupPolygonLand} from './fixtures';
 
 describe('PolygonLand:WithSuperOperators', function () {
   it('should not be a super operator by default', async function () {
-    const {PolygonLandContract, landAdmin} =
-      await loadFixture(setupPolygonLand);
-    expect(await PolygonLandContract.isSuperOperator(landAdmin)).to.be.false;
+    const {LandContract, landAdmin} = await loadFixture(setupPolygonLand);
+    expect(await LandContract.isSuperOperator(landAdmin)).to.be.false;
   });
 
   it('should be an admin to set super operator', async function () {
-    const {PolygonLandContract, deployer} = await loadFixture(setupPolygonLand);
+    const {LandContract, deployer} = await loadFixture(setupPolygonLand);
     await expect(
-      PolygonLandContract.setSuperOperator(deployer, true),
+      LandContract.setSuperOperator(deployer, true),
     ).to.be.revertedWith('only admin allowed');
-    expect(await PolygonLandContract.isSuperOperator(deployer)).to.be.false;
+    expect(await LandContract.isSuperOperator(deployer)).to.be.false;
   });
 
   it('should enable a super operator', async function () {
