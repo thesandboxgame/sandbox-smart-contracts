@@ -11,8 +11,8 @@ export async function setupPolygonLand() {
     data = '',
   ) {
     return ret.TrustedForwarderContract.execute(
-      typeof from === 'string' ? from : await from.getAddress(),
-      typeof to === 'string' ? to : await to.getAddress(),
+      typeof from === 'string' ? from : from,
+      typeof to === 'string' ? to : to,
       data,
     );
   }
