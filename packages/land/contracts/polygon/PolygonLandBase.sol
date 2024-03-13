@@ -6,9 +6,10 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {IContext} from "../common/IContext.sol";
+import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
-import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
 import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 
@@ -112,5 +113,20 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _setTrustedForwarder(address val) internal virtual override(PolygonLandStorageMixin, ERC2771Handler) {
         PolygonLandStorageMixin._setTrustedForwarder(val);
+    }
+
+    function _getOperatorFilterRegistry()
+        internal
+        view
+        override(PolygonLandStorageMixin, OperatorFiltererUpgradeable)
+        returns (IOperatorFilterRegistry)
+    {
+        return PolygonLandStorageMixin._getOperatorFilterRegistry();
+    }
+
+    function _setOperatorFilterRegistry(
+        IOperatorFilterRegistry val
+    ) internal override(PolygonLandStorageMixin, OperatorFiltererUpgradeable) {
+        PolygonLandStorageMixin._setOperatorFilterRegistry(val);
     }
 }

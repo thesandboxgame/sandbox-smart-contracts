@@ -3,6 +3,7 @@
 pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 
 // According to hardhat-storage plugin run onto the latest deployed version (@core)
 //│          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │
@@ -39,6 +40,7 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
     mapping(address => bool) internal _minters;
     uint256[49] private __gap;
     address internal _trustedForwarder;
+    IOperatorFilterRegistry internal _operatorFilterRegistry;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -102,5 +104,13 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     function _setTrustedForwarder(address val) internal virtual {
         _trustedForwarder = val;
+    }
+
+    function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry) {
+        return _operatorFilterRegistry;
+    }
+
+    function _setOperatorFilterRegistry(IOperatorFilterRegistry val) internal virtual {
+        _operatorFilterRegistry = val;
     }
 }

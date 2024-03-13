@@ -20,7 +20,7 @@ contract Land is LandBase, Initializable {
     address private _owner;
     address private _metadataRegistry;
 
-    event OperatorRegistrySet(address indexed registry);
+    event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event MetadataRegistrySet(address indexed metadataRegistry);
@@ -47,8 +47,8 @@ contract Land is LandBase, Initializable {
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external onlyAdmin {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    function setOperatorRegistry(IOperatorFilterRegistry registry) external onlyAdmin {
+        _setOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
     }
 

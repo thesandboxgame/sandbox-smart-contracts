@@ -37,7 +37,7 @@ contract PolygonLandMock is PolygonLand {
             i := add(i, 0x20)
             mstore(add(ret, i), _trustedForwarder.slot)
             i := add(i, 0x20)
-            mstore(add(ret, i), operatorFilterRegistry.slot)
+            mstore(add(ret, i), _operatorFilterRegistry.slot)
             i := add(i, 0x20)
         }
     }

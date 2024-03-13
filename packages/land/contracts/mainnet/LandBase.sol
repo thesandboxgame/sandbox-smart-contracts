@@ -4,8 +4,9 @@ pragma solidity 0.8.23;
 
 import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
+import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
-import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 import {ERC721BaseToken} from "./ERC721BaseToken.sol";
@@ -100,5 +101,20 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
 
     function _setMinter(address who, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
         LandStorageMixin._setMinter(who, enabled);
+    }
+
+    function _getOperatorFilterRegistry()
+        internal
+        view
+        override(LandStorageMixin, OperatorFiltererUpgradeable)
+        returns (IOperatorFilterRegistry)
+    {
+        return LandStorageMixin._getOperatorFilterRegistry();
+    }
+
+    function _setOperatorFilterRegistry(
+        IOperatorFilterRegistry val
+    ) internal override(LandStorageMixin, OperatorFiltererUpgradeable) {
+        LandStorageMixin._setOperatorFilterRegistry(val);
     }
 }
