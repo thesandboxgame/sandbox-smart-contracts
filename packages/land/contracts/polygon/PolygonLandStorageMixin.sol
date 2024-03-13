@@ -38,6 +38,7 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     mapping(address => bool) internal _minters;
     uint256[49] private __gap;
+    address internal _trustedForwarder;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -93,5 +94,13 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     function _setMinter(address who, bool enabled) internal virtual {
         _minters[who] = enabled;
+    }
+
+    function _getTrustedForwarder() internal view virtual returns (address) {
+        return _trustedForwarder;
+    }
+
+    function _setTrustedForwarder(address val) internal virtual {
+        _trustedForwarder = val;
     }
 }

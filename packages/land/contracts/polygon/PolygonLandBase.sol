@@ -105,4 +105,12 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
     function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, PolygonLandBaseToken) {
         PolygonLandStorageMixin._setMinter(who, enabled);
     }
+
+    function _getTrustedForwarder() internal view override(PolygonLandStorageMixin, ERC2771Handler) returns (address) {
+        return PolygonLandStorageMixin._getTrustedForwarder();
+    }
+
+    function _setTrustedForwarder(address val) internal virtual override(PolygonLandStorageMixin, ERC2771Handler) {
+        PolygonLandStorageMixin._setTrustedForwarder(val);
+    }
 }
