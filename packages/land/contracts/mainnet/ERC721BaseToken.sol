@@ -23,11 +23,6 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    /// @notice Operator for each token id
-    mapping(uint256 => address) public _operators;
-
-    bool internal _initialized; // obsolete
-
     /**
      * @param from Sender address
      * @param to Recipient address
@@ -91,7 +86,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
             // no need to resset the operator, it will be overriden next time
         } else {
             _setOwnerData(id, uint160(owner) + 2 ** 255);
-            _operators[id] = operator;
+            _setOperator(id, operator);
         }
         emit Approval(owner, operator, id);
     }
@@ -134,7 +129,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         if (operatorEnabled) {
-            return _operators[id];
+            return _getOperator(id);
         } else {
             return address(0);
         }
@@ -156,7 +151,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
                 return true;
             }
             require(
-                (operatorEnabled && _operators[id] == msg.sender) || _isApprovedForAll(from, msg.sender),
+                (operatorEnabled && _getOperator(id) == msg.sender) || _isApprovedForAll(from, msg.sender),
                 "not approved to transfer"
             );
         }
@@ -261,7 +256,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
             uint256 id = ids[i];
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "not owner in batchTransferFrom");
-            require(authorized || (operatorEnabled && _operators[id] == msg.sender), "not authorized");
+            require(authorized || (operatorEnabled && _getOperator(id) == msg.sender), "not authorized");
             _setOwnerData(id, uint160(to));
             emit Transfer(from, to, id);
         }
@@ -382,7 +377,7 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
         require(
             msg.sender == from ||
                 _isMetaTransactionContract(msg.sender) ||
-                (operatorEnabled && _operators[id] == msg.sender) ||
+                (operatorEnabled && _getOperator(id) == msg.sender) ||
                 _isApprovedForAll(from, msg.sender),
             "not authorized to burn"
         );
@@ -463,6 +458,10 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
 
     function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
+
+    function _getOperator(uint256 id) internal view virtual returns (address);
+
+    function _setOperator(uint256 id, address val) internal virtual;
 
     // Empty storage space in contracts for future enhancements
     // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)

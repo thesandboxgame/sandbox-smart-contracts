@@ -259,7 +259,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
                     emit Transfer(msg.sender, to, _id);
                 } else {
                     if (_getOwnerAddress(_id) == msg.sender) {
-                        if (_operators[_id] != address(0)) _operators[_id] = address(0);
+                        if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
                         numLandMinted += 1;
                         emit Transfer(msg.sender, to, _id);
                     } else {
