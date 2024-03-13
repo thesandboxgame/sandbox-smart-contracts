@@ -33,6 +33,8 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
     mapping(uint256 => uint256) internal _owners;
     /// @notice Operators for each owner address for all tokens
     mapping(address => mapping(address => bool)) public _operatorsForAll;
+    /// @notice Operator for each token id
+    mapping(uint256 => address) public _operators;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -72,5 +74,13 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
 
     function _setOperatorForAll(address owner, address operator, bool val) internal virtual {
         _operatorsForAll[owner][operator] = val;
+    }
+
+    function _getOperator(uint256 id) internal view virtual returns (address) {
+        return _operators[id];
+    }
+
+    function _setOperator(uint256 id, address val) internal virtual {
+        _operators[id] = val;
     }
 }

@@ -28,8 +28,6 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
 
-    mapping(uint256 => address) internal _operators;
-
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
@@ -134,7 +132,9 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         address msgSender = _msgSender();
         require(
-            msgSender == from || (operatorEnabled && _operators[id] == msgSender) || _isApprovedForAll(from, msgSender),
+            msgSender == from ||
+                (operatorEnabled && _getOperator(id) == msgSender) ||
+                _isApprovedForAll(from, msgSender),
             "UNAUTHORIZED_BURN"
         );
         _burn(from, owner, id);
@@ -163,7 +163,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
         if (operatorEnabled) {
-            return _operators[id];
+            return _getOperator(id);
         } else {
             return address(0);
         }
@@ -220,7 +220,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
             _updateOwnerData(id, ownerData, owner, false);
         } else {
             _updateOwnerData(id, ownerData, owner, true);
-            _operators[id] = operator;
+            _setOperator(id, operator);
         }
         emit Approval(owner, operator, id);
     }
@@ -238,7 +238,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
             uint256 id = ids[i];
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
-            require(authorized || (operatorEnabled && _operators[id] == msgSender), "NOT_AUTHORIZED");
+            require(authorized || (operatorEnabled && _getOperator(id) == msgSender), "NOT_AUTHORIZED");
             _updateOwnerData(id, _getOwnerData(id), to, false);
             emit Transfer(from, to, id);
         }
@@ -347,7 +347,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
         require(
             msgSender == owner ||
                 _isApprovedForAll(from, msgSender) ||
-                (operatorEnabled && _operators[id] == msgSender),
+                (operatorEnabled && _getOperator(id) == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
     }
@@ -410,4 +410,8 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
     function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
 
     function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
+
+    function _getOperator(uint256 id) internal view virtual returns (address);
+
+    function _setOperator(uint256 id, address val) internal virtual;
 }

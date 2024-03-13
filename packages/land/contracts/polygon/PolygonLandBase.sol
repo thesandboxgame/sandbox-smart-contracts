@@ -85,4 +85,14 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setOperatorForAll(owner, operator, val);
     }
+
+    function _getOperator(
+        uint256 id
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (address) {
+        return PolygonLandStorageMixin._getOperator(id);
+    }
+
+    function _setOperator(uint256 id, address val) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
+        PolygonLandStorageMixin._setOperator(id, val);
+    }
 }
