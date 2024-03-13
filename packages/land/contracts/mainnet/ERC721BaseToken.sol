@@ -462,8 +462,4 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
     function _getOperator(uint256 id) internal view virtual returns (address);
 
     function _setOperator(uint256 id, address val) internal virtual;
-
-    // Empty storage space in contracts for future enhancements
-    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
-    uint256[49] private __gap;
 }

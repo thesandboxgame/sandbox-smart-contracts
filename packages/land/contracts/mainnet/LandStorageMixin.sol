@@ -34,6 +34,8 @@ contract LandStorageMixin {
     mapping(uint256 => address) public _operators;
 
     bool internal _initialized; // obsolete
+    uint256[49] private __gap;
+    mapping(address => bool) internal _minters;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -79,8 +81,8 @@ contract LandStorageMixin {
         return _operatorsForAll[owner][operator];
     }
 
-    function _setOperatorForAll(address owner, address operator, bool val) internal virtual {
-        _operatorsForAll[owner][operator] = val;
+    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual {
+        _operatorsForAll[owner][operator] = enabled;
     }
 
     function _getOperator(uint256 id) internal view virtual returns (address) {
@@ -89,5 +91,13 @@ contract LandStorageMixin {
 
     function _setOperator(uint256 id, address val) internal virtual {
         _operators[id] = val;
+    }
+
+    function _isMinter(address who) internal view virtual returns (bool) {
+        return _minters[who];
+    }
+
+    function _setMinter(address who, bool enabled) internal virtual {
+        _minters[who] = enabled;
     }
 }

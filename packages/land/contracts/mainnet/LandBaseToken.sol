@@ -25,8 +25,6 @@ abstract contract LandBaseToken is ERC721BaseToken {
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
     /* solhint-enable const-name-snakecase */
 
-    mapping(address => bool) internal _minters;
-
     event Minter(address indexed superOperator, bool enabled);
 
     struct Land {
@@ -159,8 +157,8 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external onlyAdmin {
         require(minter != address(0), "address 0 is not allowed");
-        require(enabled != _minters[minter], "the status should be different");
-        _minters[minter] = enabled;
+        require(enabled != _isMinter(minter), "the status should be different");
+        _setMinter(minter, enabled);
         emit Minter(minter, enabled);
     }
 
@@ -194,7 +192,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /// @param who The address to query.
     /// @return whether the address has minter rights.
     function isMinter(address who) public view returns (bool) {
-        return _minters[who];
+        return _isMinter(who);
     }
 
     /// @notice checks if Land has been minted or not
@@ -714,4 +712,8 @@ abstract contract LandBaseToken is ERC721BaseToken {
             operatorEnabled = false;
         }
     }
+
+    function _isMinter(address who) internal view virtual returns (bool);
+
+    function _setMinter(address who, bool enabled) internal virtual;
 }
