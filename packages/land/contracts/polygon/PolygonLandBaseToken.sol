@@ -29,8 +29,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
     /* solhint-enable const-name-snakecase */
 
-    mapping(address => bool) internal _minters;
-
     event Minter(address indexed minter, bool enabled);
 
     struct Land {
@@ -89,7 +87,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external onlyAdmin {
         require(minter != address(0), "PolygonLand: Invalid address");
-        _minters[minter] = enabled;
+        _setMinter(minter, enabled);
         emit Minter(minter, enabled);
     }
 
@@ -204,7 +202,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
     /// @param who The address to query.
     /// @return whether the address has minter rights.
     function isMinter(address who) public view returns (bool) {
-        return _minters[who];
+        return _isMinter(who);
     }
 
     /// @notice checks if Land has been minted or not
@@ -736,7 +734,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         }
     }
 
-    // Empty storage space in contracts for future enhancements
-    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
-    uint256[49] private __gap;
+    function _isMinter(address who) internal view virtual returns (bool);
+
+    function _setMinter(address who, bool enabled) internal virtual;
 }

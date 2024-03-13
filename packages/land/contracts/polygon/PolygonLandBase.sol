@@ -81,9 +81,9 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
     function _setOperatorForAll(
         address owner,
         address operator,
-        bool val
+        bool enabled
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setOperatorForAll(owner, operator, val);
+        PolygonLandStorageMixin._setOperatorForAll(owner, operator, enabled);
     }
 
     function _getOperator(
@@ -94,5 +94,15 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _setOperator(uint256 id, address val) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setOperator(id, val);
+    }
+
+    function _isMinter(
+        address who
+    ) internal view override(PolygonLandStorageMixin, PolygonLandBaseToken) returns (bool) {
+        return PolygonLandStorageMixin._isMinter(who);
+    }
+
+    function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, PolygonLandBaseToken) {
+        PolygonLandStorageMixin._setMinter(who, enabled);
     }
 }

@@ -81,9 +81,9 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
     function _setOperatorForAll(
         address owner,
         address operator,
-        bool val
+        bool enabled
     ) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setOperatorForAll(owner, operator, val);
+        LandStorageMixin._setOperatorForAll(owner, operator, enabled);
     }
 
     function _getOperator(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {
@@ -92,5 +92,13 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
 
     function _setOperator(uint256 id, address val) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setOperator(id, val);
+    }
+
+    function _isMinter(address who) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
+        return LandStorageMixin._isMinter(who);
+    }
+
+    function _setMinter(address who, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
+        LandStorageMixin._setMinter(who, enabled);
     }
 }
