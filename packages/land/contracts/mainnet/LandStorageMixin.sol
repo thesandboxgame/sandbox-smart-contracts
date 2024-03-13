@@ -2,6 +2,8 @@
 /* solhint-disable no-empty-blocks */
 pragma solidity 0.8.23;
 
+import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
+
 // According to hardhat-storage plugin run onto the latest deployed version (@core)
 //│          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │
 //│            Land             │          _admin           │      0       │   0    │                    t_address                     │  1  │ /build-info/8962c877ac6c2963a6c119c5538d62f6.json │      20       │
@@ -36,6 +38,7 @@ contract LandStorageMixin {
     bool internal _initialized; // obsolete
     uint256[49] private __gap;
     mapping(address => bool) internal _minters;
+    IOperatorFilterRegistry internal _operatorFilterRegistry;
 
     function _getAdmin() internal view virtual returns (address) {
         return _admin;
@@ -99,5 +102,13 @@ contract LandStorageMixin {
 
     function _setMinter(address who, bool enabled) internal virtual {
         _minters[who] = enabled;
+    }
+
+    function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry) {
+        return _operatorFilterRegistry;
+    }
+
+    function _setOperatorFilterRegistry(IOperatorFilterRegistry val) internal virtual {
+        _operatorFilterRegistry = val;
     }
 }

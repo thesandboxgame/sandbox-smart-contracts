@@ -8,8 +8,8 @@ import {PolygonLand} from "../PolygonLand.sol";
 contract PolygonLandMockWithoutCheck is PolygonLand {
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external override {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    function setOperatorRegistry(IOperatorFilterRegistry registry) external override {
+        _setOperatorFilterRegistry(registry);
     }
 
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
