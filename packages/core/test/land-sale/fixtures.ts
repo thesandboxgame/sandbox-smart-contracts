@@ -4,6 +4,7 @@ import {SaltedProofSaleLandInfo} from '../../lib/merkleTreeHelper';
 import {BigNumber, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {withSnapshot} from '../utils';
+import {originalAssetFixtures} from '../common/fixtures/asset';
 
 export const backendAuthWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
@@ -55,7 +56,7 @@ export const setupAuthValidator = withSnapshot(
 );
 
 export const setupEstateSale = withSnapshot(
-  ['EstateSaleWithAuth'],
+  ['EstateSaleWithAuth', 'AssetV1', 'Sand'],
   async function (hre) {
     const authValidatorContract = await ethers.getContract('AuthValidator');
     const estateSaleWithAuthContract = await ethers.getContract(
@@ -65,6 +66,12 @@ export const setupEstateSale = withSnapshot(
     const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
       './secret/estate-sale/hardhat/.proofs_0.json'
     );
+
+    // Set up asset for lands with bundleIds
+    const {mintAsset} = await originalAssetFixtures();
+    const tokenId = await mintAsset(estateSaleWithAuthContract.address, 11); // 8349792007883253008793378344657167658080137837039009398933893752043587241984
+    // ---
+
     await transferSandToDeployer(proofs);
     const approveSandForEstateSale = async (address: string, price: string) => {
       const sandContractAsUser = sandContract.connect(
@@ -83,6 +90,7 @@ export const setupEstateSale = withSnapshot(
       proofs,
       hre,
       getNamedAccounts,
+      tokenId
     };
   }
 );

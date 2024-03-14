@@ -5,15 +5,15 @@ import {
   setupEstateSale,
   backendAuthWallet,
   zeroAddress,
-  signAuthMessageAs,
+  signAuthMessageAs
 } from './fixtures';
 
-// test land data covers the following scenarios:
-// land for sale
-// premium land for sale
-// reserved land (only purchasable by the address set)
+// test land data covers the following scenarios on L1:
+// 1. land for sale
+// 2. premium land for sale (has bundleId)
+// 3. reserved land (only purchasable by the address set)
 
-describe.only('EstateSaleWithAuth', function () {
+describe('EstateSaleWithAuth', function () {
   it('should be able to purchase a land with valid signature - no bundled assets', async function () {
     const {
       estateSaleWithAuthContract,
@@ -238,6 +238,7 @@ describe.only('EstateSaleWithAuth', function () {
       approveSandForEstateSale,
     } = await setupEstateSale();
     const {deployer} = await getNamedAccounts();
+
     const {x, y, size, price, salt, proof, assetIds} = proofs[2]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
     const signature = await signAuthMessageAs(
       backendAuthWallet,
