@@ -4,6 +4,8 @@ import {getId} from '../fixtures';
 import {ZeroAddress} from 'ethers';
 import {setupLand, setupLandMock} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
+import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
+import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -11,6 +13,12 @@ const GRID_SIZE = 408;
 describe('Land.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForRoyalty(setupLand, 'Land');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForAdmin(setupLand, 'Land');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForSuperOperators(setupLand, 'Land');
 
   describe('LandBaseToken', function () {
     describe(`should NOT be able to transfer quad twice`, function () {
