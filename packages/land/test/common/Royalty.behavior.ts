@@ -1,39 +1,12 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForRoyalty(setupLand, Contract: string) {
   describe(Contract + ':Royalty', function () {
-    let managerAsRoyaltySetter: Contract,
-      manager: Contract,
-      LandContract: Contract,
-      LandAsMinter: Contract,
-      ERC20Contract: Contract,
-      ERC20AsBuyer: Contract,
-      MockMarketPlace: Contract,
-      commonRoyaltyReceiver: Signer,
-      seller: Signer,
-      buyer: Signer,
-      contractRoyaltySetterRole: string;
-
-    beforeEach(async function () {
-      ({
-        managerAsRoyaltySetter,
-        manager,
-        LandContract,
-        LandAsMinter,
-        ERC20Contract,
-        ERC20AsBuyer,
-        MockMarketPlace,
-        commonRoyaltyReceiver,
-        seller,
-        buyer,
-        contractRoyaltySetterRole,
-      } = await loadFixture(setupLand));
-    });
-
     it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts', async function () {
+      const {managerAsRoyaltySetter, LandContract} =
+        await loadFixture(setupLand);
       expect(
         await managerAsRoyaltySetter.contractRoyalty(LandContract),
       ).to.be.equal(0);
@@ -44,6 +17,8 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
     });
 
     it('only manager contract royalty setter can set Eip 2981 royaltyBps for other contracts', async function () {
+      const {manager, seller, contractRoyaltySetterRole, LandContract} =
+        await loadFixture(setupLand);
       await expect(
         manager.connect(seller).setContractRoyalty(LandContract, 500),
       ).to.be.revertedWith(
@@ -52,7 +27,12 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
     });
 
     it('land should return EIP2981 royalty recipient and royalty for other contracts', async function () {
-      await managerAsRoyaltySetter.setContractRoyalty(LandContract, 500);
+      const {managerAsRoyaltySetter, LandContract, commonRoyaltyReceiver} =
+        await loadFixture(setupLand);
+      await managerAsRoyaltySetter.setContractRoyalty(
+        await LandContract.getAddress(),
+        500,
+      );
       const id = 1;
       const priceToken = 300000;
       const royaltyInfo = await LandContract.royaltyInfo(id, priceToken);
@@ -61,7 +41,12 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
     });
 
     it('land should return same EIP2981 royalty recipient for different tokens contracts', async function () {
-      await managerAsRoyaltySetter.setContractRoyalty(LandContract, 500);
+      const {managerAsRoyaltySetter, LandContract, commonRoyaltyReceiver} =
+        await loadFixture(setupLand);
+      await managerAsRoyaltySetter.setContractRoyalty(
+        await LandContract.getAddress(),
+        500,
+      );
       const id = 1;
       const id2 = 2;
       const priceToken = 300000;
@@ -75,7 +60,18 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
     });
 
     it('should split ERC20 using EIP2981', async function () {
-      await LandAsMinter.mintQuad(seller, 1, 0, 0, '0x');
+      const {
+        LandAsMinter,
+        ERC20Contract,
+        ERC20AsBuyer,
+        MockMarketPlace,
+        LandContract,
+        seller,
+        buyer,
+        managerAsRoyaltySetter,
+        commonRoyaltyReceiver,
+      } = await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(await seller.getAddress(), 1, 0, 0, '0x');
 
       await ERC20Contract.mint(buyer, 1000000);
       await ERC20AsBuyer.approve(MockMarketPlace, 1000000);
