@@ -55,6 +55,7 @@ const func: DeployFunction = async function (hre) {
   const deployedAsset = await deployments.getOrNull('Asset'); // L2 Asset, json files available on Polygon and Mumbai
   if (!deployedAsset) {
     // mock asset used for test networks and forking
+    // TODO: change to MockAsset from packages/asset when outside core
     assetContract = await deploy('MockERC1155Asset', {
       from: assetAdmin,
       args: ['http://nft-test/nft-1155-{id}'],

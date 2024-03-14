@@ -9,9 +9,9 @@ import {
 } from './fixtures';
 
 // test land data covers the following scenarios on L1:
-// 1. land for sale
-// 2. premium land for sale (has bundleId)
-// 3. reserved land (only purchasable by the address set)
+// 1. land for sale (land[0])
+// 2. premium land for sale (has bundleId) (land[2])
+// 3. reserved land (only purchasable by the address set) (land[1])
 
 describe('EstateSaleWithAuth', function () {
   it('should be able to purchase a land with valid signature - no bundled assets', async function () {
