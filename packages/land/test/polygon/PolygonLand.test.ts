@@ -4,6 +4,8 @@ import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
+import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
+import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -12,6 +14,12 @@ const GRID_SIZE = 408;
 describe('PolygonLand.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForRoyalty(setupPolygonLand, 'PolygonLand');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForAdmin(setupPolygonLand, 'PolygonLand');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForSuperOperators(setupPolygonLand, 'PolygonLand');
 
   it('creation', async function () {
     const {LandContract} = await loadFixture(setupPolygonLand);
@@ -721,6 +729,15 @@ describe('PolygonLand.sol', function () {
     const bytes = '0x3333';
     await LandAsMinter.mintQuad(deployer, 1, 1, 1, bytes);
     expect(await LandAsMinter.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
+  });
+
+  it('changes the admin to a new address via meta transaction', async function () {
+    const {LandAsAdmin, landAdmin, deployer, sendMetaTx} =
+      await loadFixture(setupPolygonLand);
+    const {to, data} =
+      await LandAsAdmin.changeAdmin.populateTransaction(deployer);
+    await sendMetaTx(landAdmin, to, data);
+    expect(await LandAsAdmin.getAdmin()).to.be.equal(deployer);
   });
 
   it('should not set royaltyManager if caller is not admin', async function () {
@@ -1601,6 +1618,7 @@ describe('PolygonLand.sol', function () {
       await expect(LandContract.exists(3, 500, 0)).to.be.reverted;
     });
   });
+
   it('check storage structure', async function () {
     const {landContract} = await loadFixture(setupPolygonLandMock);
     const slots = await landContract.getStorageStructure();
