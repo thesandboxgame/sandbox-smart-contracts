@@ -256,14 +256,14 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         address feeDistributor,
         address authValidator
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
-        // require(landAddress.isContract(), "EstateSaleWithAuth: is not a contract");
-        // require(sandContractAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(landAddress.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(sandContractAddress.isContract(), "EstateSaleWithAuth: is not a contract");
         require(initialMetaTx != address(0), "EstateSaleWithAuth: zero address");
         require(admin != address(0), "EstateSaleWithAuth: zero address");
         require(initialWalletAddress != address(0), "EstateSaleWithAuth: zero address");
-        // require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(asset.isContract(), "EstateSaleWithAuth: is not a contract");
         require(feeDistributor != address(0), "EstateSaleWithAuth: zero address");
-        // require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
+        require(authValidator.isContract(), "EstateSaleWithAuth: is not a contract");
 
         _land = ILandToken(landAddress);
         _sand = IERC20(sandContractAddress);

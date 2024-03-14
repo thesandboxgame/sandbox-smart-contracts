@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import hre from 'hardhat';
-import {TheGraph} from './utils/graph-utils';
-import {SectorData, SectorLand} from './utils/landsale-utils';
+import {TheGraph} from './test/utils/graph-utils';
+import {SectorData, SectorLand} from './test/utils/landsale-utils';
 
 let l1, l2;
 if (hre.network.tags.testnet && !process.env.HARDHAT_FORK) {

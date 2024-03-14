@@ -3,14 +3,14 @@ import helpers, {
   SaleLandInfo,
   SaltedProofSaleLandInfo,
   SaltedSaleLandInfo,
-} from '../lib/merkleTreeHelper';
+} from './merkleTreeHelper';
 import hre from 'hardhat';
-import MerkleTree from '../lib/merkleTree';
+import MerkleTree from './merkleTree';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import deadlines from '../deadlines';
+import deadlines from '../../deadlines';
 import {isTestnet} from './network-utils';
-import {excludeMinted} from '../excludeMinted';
-import addresses from '../addresses.json';
+import {excludeMinted} from '../../excludeMinted';
+import addresses from '../../addresses.json';
 import prices from './prices';
 import {ethers} from 'ethers';
 
@@ -145,7 +145,7 @@ export async function getLandSaleFiles(
     localhost: 'testnet',
   };
   const name = networkNameMap[networkName];
-  const secretPath = `../secret/.${presale}_${name}_secret`;
+  const secretPath = `../data/secret/.${presale}_${name}_secret`;
   const sectorPath = `../data/landSale/${presale}/sectors.${name}.json`;
   const bundlesPaths = [
     `../data/landSale/${presale}/bundles.${networkName}.json`,
@@ -387,21 +387,12 @@ async function loadBundles(paths: string[]) {
   throw new Error('Bundles not found');
 }
 
-export function writeProofs(
-  hre: HardhatRuntimeEnvironment,
-  landSaleName: string,
-  landSale: LandSale,
-): void {
-  if (
-    hre.network.name !== 'hardhat' ||
-    landSaleName === 'EstateSaleWithAuth_0_0'
-  ) {
-    const landsWithProof: SaltedProofSaleLandInfo[] = [];
-    for (const land of landSale.saltedLands) {
-      const proof = landSale.tree.getProof(calculateLandHash(land));
-      landsWithProof.push({...land, proof});
-    }
-    const path = `./secret/estate-sale/${hre.network.name}/.proofs_${landSale.sector}.json`;
-    fs.outputJsonSync(path, landsWithProof);
+export function writeProofs(landSale: LandSale): void {
+  const landsWithProof: SaltedProofSaleLandInfo[] = [];
+  for (const land of landSale.saltedLands) {
+    const proof = landSale.tree.getProof(calculateLandHash(land));
+    landsWithProof.push({...land, proof});
   }
+  const path = `./test/data/secret/estate-sale/hardhat/.proofs_${landSale.sector}.json`;
+  fs.outputJsonSync(path, landsWithProof);
 }
