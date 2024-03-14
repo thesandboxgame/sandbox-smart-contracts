@@ -368,4 +368,180 @@ describe('PolygonEstateSaleWithAuth', function () {
       )
     ).to.be.revertedWith(`INVALID_AUTH`);
   });
+
+  it('should be able to purchase a land with valid signature - with more than one bundled assets', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+
+    const {x, y, size, price, salt, proof, assetIds} = proofs[4]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
+    const signature = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    const receipt = await waitFor(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    );
+
+    await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
+  });
+
+  it('should be able to purchase more than 1 land that uses the same assetId', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+
+    const {x, y, size, price, salt, proof, assetIds} = proofs[4]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
+    const signature = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    const receipt = await waitFor(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    );
+
+    await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
+
+    const {x: x1, y: y1, size: size1, price: price1, salt:salt1, proof: proof1, assetIds: assetIds1} = proofs[5]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
+    const signature1 = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x1,
+      y1,
+      size1,
+      price1,
+      salt1,
+      assetIds1,
+      proof1
+    );
+    await approveSandForEstateSale(deployer, price);
+
+    const receipt1 = await waitFor(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x1, y1, size1, price1],
+        salt1,
+        assetIds1,
+        proof1,
+        '0x',
+        signature1
+      )
+    );
+
+    await expectReceiptEventWithArgs(receipt1, 'LandQuadPurchased');
+  });
+
+  it('should NOT be able to use a signature more than once', async function () {
+    const {
+      estateSaleWithAuthContract,
+      proofs,
+      approveSandForEstateSale,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+
+    const {x, y, size, price, salt, proof, assetIds} = proofs[4]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
+    const signature = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    await approveSandForEstateSale(deployer, price);
+    const contract = await estateSaleWithAuthContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    const receipt = await waitFor(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    );
+
+    await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
+
+    await approveSandForEstateSale(deployer, price);
+
+    await expect(
+      contract.buyLandWithSand(
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature
+      )
+    ).to.be.revertedWith("Already minted")
+  });
 });

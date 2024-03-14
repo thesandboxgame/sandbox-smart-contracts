@@ -89,7 +89,7 @@ export const setupEstateSale = withSnapshot(
     const sandContractAsSandBeneficiary = sandContract.connect(
       ethers.provider.getSigner(sandBeneficiary)
     );
-    await sandContractAsSandBeneficiary.transfer(deployer, proofs[3].price);
+    await sandContractAsSandBeneficiary.transfer(deployer, BigNumber.from(proofs[3].price).mul(2));
     await sandContractAsSandBeneficiary.transfer(sandboxAccount, proofs[3].price); // reserved address
     //---
 
