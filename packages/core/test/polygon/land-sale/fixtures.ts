@@ -46,7 +46,9 @@ export const signAuthMessageAs = async (
 export const setupAuthValidator = withSnapshot(
   ['PolygonAuthValidator'],
   async function (hre) {
-    const authValidatorContract = await ethers.getContract('PolygonAuthValidator');
+    const authValidatorContract = await ethers.getContract(
+      'PolygonAuthValidator'
+    );
     return {
       authValidatorContract,
       hre,
@@ -58,16 +60,41 @@ export const setupAuthValidator = withSnapshot(
 export const setupEstateSale = withSnapshot(
   ['PolygonEstateSaleWithAuth', 'MockERC1155Asset', 'PolygonSand'],
   async function (hre) {
-    const {sandAdmin, sandBeneficiary, deployer, sandboxAccount} = await getNamedAccounts();
-    const authValidatorContract = await ethers.getContract('PolygonAuthValidator');
+    const {
+      sandAdmin,
+      sandBeneficiary,
+      deployer,
+      sandboxAccount,
+    } = await getNamedAccounts();
+    const authValidatorContract = await ethers.getContract(
+      'PolygonAuthValidator'
+    );
     const estateSaleWithAuthContract = await ethers.getContract(
       'PolygonLandPreSale_0' // name of test deployment using test data at core/data/landSales/EstateSaleWithAuth_0
     );
     // Set up asset contract for lands with bundleIds
-    const assetContract = await ethers.getContract('MockERC1155Asset', sandAdmin); // TODO: change to MockAsset from packages/asset when outside core
-    await assetContract['mint(address,uint256,uint256,bytes)'](estateSaleWithAuthContract.address, 1, 2, "0x")
-    await assetContract['mint(address,uint256,uint256,bytes)'](estateSaleWithAuthContract.address, 2, 1, "0x")
-    await assetContract['mint(address,uint256,uint256,bytes)'](estateSaleWithAuthContract.address, 3, 2, "0x")
+    const assetContract = await ethers.getContract(
+      'MockERC1155Asset',
+      sandAdmin
+    ); // TODO: change to MockAsset from packages/asset when outside core
+    await assetContract['mint(address,uint256,uint256,bytes)'](
+      estateSaleWithAuthContract.address,
+      1,
+      2,
+      '0x'
+    );
+    await assetContract['mint(address,uint256,uint256,bytes)'](
+      estateSaleWithAuthContract.address,
+      2,
+      1,
+      '0x'
+    );
+    await assetContract['mint(address,uint256,uint256,bytes)'](
+      estateSaleWithAuthContract.address,
+      3,
+      2,
+      '0x'
+    );
     // ---
 
     // Set up PolygonSand and transfer funds to purchasers
@@ -89,8 +116,14 @@ export const setupEstateSale = withSnapshot(
     const sandContractAsSandBeneficiary = sandContract.connect(
       ethers.provider.getSigner(sandBeneficiary)
     );
-    await sandContractAsSandBeneficiary.transfer(deployer, BigNumber.from(proofs[3].price).mul(2));
-    await sandContractAsSandBeneficiary.transfer(sandboxAccount, proofs[3].price); // reserved address
+    await sandContractAsSandBeneficiary.transfer(
+      deployer,
+      BigNumber.from(proofs[3].price).mul(2)
+    );
+    await sandContractAsSandBeneficiary.transfer(
+      sandboxAccount,
+      proofs[3].price
+    ); // reserved address
     //---
 
     const approveSandForEstateSale = async (address: string, price: string) => {
@@ -113,4 +146,3 @@ export const setupEstateSale = withSnapshot(
     };
   }
 );
-

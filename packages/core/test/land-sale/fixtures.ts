@@ -90,7 +90,7 @@ export const setupEstateSale = withSnapshot(
       proofs,
       hre,
       getNamedAccounts,
-      tokenId
+      tokenId,
     };
   }
 );

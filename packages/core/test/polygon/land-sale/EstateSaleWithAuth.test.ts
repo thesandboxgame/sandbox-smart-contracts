@@ -454,7 +454,15 @@ describe('PolygonEstateSaleWithAuth', function () {
 
     await expectReceiptEventWithArgs(receipt, 'LandQuadPurchased');
 
-    const {x: x1, y: y1, size: size1, price: price1, salt:salt1, proof: proof1, assetIds: assetIds1} = proofs[5]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
+    const {
+      x: x1,
+      y: y1,
+      size: size1,
+      price: price1,
+      salt: salt1,
+      proof: proof1,
+      assetIds: assetIds1,
+    } = proofs[5]; // this land is set up with assetIds, see core/data/landSales/EstateSaleWithAuth_0
     const signature1 = await signAuthMessageAs(
       backendAuthWallet,
       deployer,
@@ -542,6 +550,6 @@ describe('PolygonEstateSaleWithAuth', function () {
         '0x',
         signature
       )
-    ).to.be.revertedWith("Already minted")
+    ).to.be.revertedWith('Already minted');
   });
 });

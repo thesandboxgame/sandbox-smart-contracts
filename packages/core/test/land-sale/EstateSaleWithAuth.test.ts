@@ -5,7 +5,7 @@ import {
   setupEstateSale,
   backendAuthWallet,
   zeroAddress,
-  signAuthMessageAs
+  signAuthMessageAs,
 } from './fixtures';
 
 // test land data covers the following scenarios on L1:
