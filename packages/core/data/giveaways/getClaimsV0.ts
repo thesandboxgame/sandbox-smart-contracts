@@ -8,13 +8,13 @@ const {
   saltMultiClaim,
 } = helpers;
 
-export function createClaimMerkleTreeV2(
+export function createClaimMerkleTreeV0(
   hre: HardhatRuntimeEnvironment,
   claimData: Array<MultiClaim>,
   claimContract: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
-  const secretPath = `./secret/multi-giveaway-v2/.${claimContract.toLowerCase()}_secret${hre.network.live ? ('.' + hre.network.name) : ''}`;
+  const secretPath = `./secret/multi-giveaway-v0/.${claimContract.toLowerCase()}_secret${hre.network.live ? ('.' + hre.network.name) : ''}`;
   let secret;
   try {
     secret = fs.readFileSync(secretPath);

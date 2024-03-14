@@ -5,9 +5,9 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {default as testData0} from '../../../data/giveaways/polygonmulti_giveaway_v2_1/claims_0_hardhat.json';
-import {default as testData1} from '../../../data/giveaways/polygonmulti_giveaway_v2_1/claims_1_hardhat.json';
-import {createClaimMerkleTreeV2} from '../../../data/giveaways/getClaimsV2';
+import {default as testData0} from '../../../data/giveaways/polygonmulti_giveaway_v0_1/claims_0_hardhat.json';
+import {default as testData1} from '../../../data/giveaways/polygonmulti_giveaway_v0_1/claims_1_hardhat.json';
+import {createClaimMerkleTreeV0} from '../../../data/giveaways/getClaimsV0';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 import {expect} from '../../chai-setup';
@@ -130,8 +130,8 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
 
   await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
     from: deployer,
-    contract: 'MultiGiveawayV2',
-    args: [sandAdmin, multiGiveawayAdmin, trustedForwarder.address],
+    contract: 'MultiGiveawayV0',
+    args: [multiGiveawayAdmin],
   });
 
   const giveawayContract = await ethers.getContract(
@@ -146,7 +146,6 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
   );
 
   // Business-related admin is MULTIGIVEAWAY_ROLE (can call addNewGiveaway)
-  const multiGiveawayRole = await await giveawayContract.MULTIGIVEAWAY_ROLE();
   const giveawayContractAsMultiGiveawayAdmin = await ethers.getContract(
     'Test_Multi_Giveaway_1_with_ERC20',
     multiGiveawayAdmin
@@ -400,7 +399,7 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
   const {
     claims: claims0,
     merkleRootHash: merkleRootHash0,
-  } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
+  } = createClaimMerkleTreeV0(hre, dataWithIds0, 'Multi_Giveaway_V0_1');
 
   const allMerkleRoots = [];
   const allClaims = [claims0];
@@ -429,7 +428,7 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
     const {
       claims: claims1,
       merkleRootHash: merkleRootHash1,
-    } = createClaimMerkleTreeV2(hre, dataWithIds1, 'Multi_Giveaway_V2_1');
+    } = createClaimMerkleTreeV0(hre, dataWithIds1, 'Multi_Giveaway_V0_1');
     allClaims.push(claims1);
     allMerkleRoots.push(merkleRootHash1);
     const hashArray2 = createDataArrayMultiClaim(claims1);
@@ -451,7 +450,7 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
     const {
       claims: badClaims0,
       merkleRootHash: badMerkleRootHash0,
-    } = createClaimMerkleTreeV2(hre, dataWithIds0, 'Multi_Giveaway_V2_1');
+    } = createClaimMerkleTreeV0(hre, dataWithIds0, 'Multi_Giveaway_V0_1');
     allClaims.push(badClaims0);
     allMerkleRoots.push(badMerkleRootHash0);
     const hashArray2 = createDataArrayMultiClaim(badClaims0);
@@ -478,6 +477,5 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
     trustedForwarder,
     multiGiveawayAdmin,
     sandAdmin,
-    multiGiveawayRole,
   };
 });
