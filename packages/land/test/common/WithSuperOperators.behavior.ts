@@ -4,7 +4,7 @@ import {ZeroAddress} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForSuperOperators(setupLand, Contract: string) {
-  describe(Contract + ':WithAdmin', function () {
+  describe(Contract + ':WithSuperOperators', function () {
     it('should not be a super operator by default', async function () {
       const {LandContract, landAdmin} = await loadFixture(setupLand);
       expect(await LandContract.isSuperOperator(landAdmin)).to.be.false;
