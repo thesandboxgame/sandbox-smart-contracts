@@ -68,8 +68,12 @@ export const setupEstateSale = withSnapshot(
     );
 
     // Set up asset for lands with bundleIds
-    const {mintAsset} = await originalAssetFixtures();
-    const tokenId = await mintAsset(estateSaleWithAuthContract.address, 11); // 8349792007883253008793378344657167658080137837039009398933893752043587241984
+    const {originalAsset, mintAsset} = await originalAssetFixtures();
+    const {deployer} = await getNamedAccounts();
+    const tokenId = await mintAsset(deployer, 11);
+    await originalAsset[
+      'safeTransferFrom(address,address,uint256,uint256,bytes)'
+    ](deployer, estateSaleWithAuthContract.address, tokenId, 11, '0x');
     // ---
 
     await transferSandToDeployer(proofs);
