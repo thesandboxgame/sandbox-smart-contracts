@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const multigiveaways = [0, 1];
+const multigiveaways = [1, 2];
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -23,26 +23,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
   };
 
-  let args;
-  let contract;
   for (const n of multigiveaways) {
-    if (n == 0) {
-      contract = 'MultiGiveawayV0';
-      args = [multiGiveawayAdmin];
-    } else {
-      contract = 'MultiGiveaway';
-      args = [
-        // admin, trustedForwarder
-        adminByNetwork[n][hre.network.name] || adminByNetwork[n].default,
-        '0x0000000000000000000000000000000000000000',
-      ];
-    }
     await deploy(`Multi_Giveaway_${n}`, {
-      contract: contract,
+      contract: 'MultiGiveaway',
       from: deployer,
       log: true,
       skipIfAlreadyDeployed: true,
-      args: args,
+      args: [
+        adminByNetwork[n][hre.network.name] || adminByNetwork[n].default,
+        '0x0000000000000000000000000000000000000000',
+      ], // admin, trustedForwarder
     });
   }
 };
