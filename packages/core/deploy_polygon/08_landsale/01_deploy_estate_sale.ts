@@ -8,6 +8,7 @@ import {
   writeProofs,
 } from '../../data/landSales/getLandSales';
 import {Deployment} from 'hardhat-deploy/dist/types';
+import {skipUnlessTest} from '../../utils/network';
 
 type SaleDeployment = {
   name: string;
@@ -20,6 +21,7 @@ type SaleDeployment = {
 };
 
 const sales: SaleDeployment[] = [
+  {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
   {name: 'LandPreSale_19', skip: async () => true},
   {name: 'LandPreSale_20', skip: async () => true},
   {name: 'LandPreSale_21', skip: async () => true},
@@ -50,9 +52,10 @@ const func: DeployFunction = async function (hre) {
   const sandContract = await deployments.get('PolygonSand');
   const landContract = await deployments.get('PolygonLand');
   let assetContract: Deployment;
-  const deployedAsset = await deployments.getOrNull('PolygonAssetERC1155'); // temporary until merge landpresale bundle work
+  const deployedAsset = await deployments.getOrNull('Asset'); // L2 Asset, json files available on Polygon and Mumbai
   if (!deployedAsset) {
     // mock asset used for test networks and forking
+    // TODO: change to MockAsset from packages/asset when outside core
     assetContract = await deploy('MockERC1155Asset', {
       from: assetAdmin,
       args: ['http://nft-test/nft-1155-{id}'],
