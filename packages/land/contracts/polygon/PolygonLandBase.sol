@@ -57,9 +57,9 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _setNumNFTPerAddress(
         address who,
-        uint256 val
+        uint256 num
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setNumNFTPerAddress(who, val);
+        PolygonLandStorageMixin._setNumNFTPerAddress(who, num);
     }
 
     function _getOwnerData(
@@ -93,8 +93,8 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
         return PolygonLandStorageMixin._getOperator(id);
     }
 
-    function _setOperator(uint256 id, address val) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setOperator(id, val);
+    function _setOperator(uint256 id, address operator) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
+        PolygonLandStorageMixin._setOperator(id, operator);
     }
 
     function _isMinter(
@@ -111,8 +111,10 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
         return PolygonLandStorageMixin._getTrustedForwarder();
     }
 
-    function _setTrustedForwarder(address val) internal virtual override(PolygonLandStorageMixin, ERC2771Handler) {
-        PolygonLandStorageMixin._setTrustedForwarder(val);
+    function _setTrustedForwarder(
+        address trustedForwarder
+    ) internal virtual override(PolygonLandStorageMixin, ERC2771Handler) {
+        PolygonLandStorageMixin._setTrustedForwarder(trustedForwarder);
     }
 
     function _getOperatorFilterRegistry()
@@ -125,8 +127,8 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
     }
 
     function _setOperatorFilterRegistry(
-        IOperatorFilterRegistry val
+        IOperatorFilterRegistry registry
     ) internal override(PolygonLandStorageMixin, OperatorFiltererUpgradeable) {
-        PolygonLandStorageMixin._setOperatorFilterRegistry(val);
+        PolygonLandStorageMixin._setOperatorFilterRegistry(registry);
     }
 }

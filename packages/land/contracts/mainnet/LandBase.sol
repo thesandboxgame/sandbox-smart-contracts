@@ -60,8 +60,8 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         return LandStorageMixin._getNumNFTPerAddress(who);
     }
 
-    function _setNumNFTPerAddress(address who, uint256 val) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setNumNFTPerAddress(who, val);
+    function _setNumNFTPerAddress(address who, uint256 num) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setNumNFTPerAddress(who, num);
     }
 
     function _getOwnerData(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
@@ -91,8 +91,8 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         return LandStorageMixin._getOperator(id);
     }
 
-    function _setOperator(uint256 id, address val) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setOperator(id, val);
+    function _setOperator(uint256 id, address operator) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setOperator(id, operator);
     }
 
     function _isMinter(address who) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
@@ -113,8 +113,8 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
     }
 
     function _setOperatorFilterRegistry(
-        IOperatorFilterRegistry val
+        IOperatorFilterRegistry trustedForwarder
     ) internal override(LandStorageMixin, OperatorFiltererUpgradeable) {
-        LandStorageMixin._setOperatorFilterRegistry(val);
+        LandStorageMixin._setOperatorFilterRegistry(trustedForwarder);
     }
 }
