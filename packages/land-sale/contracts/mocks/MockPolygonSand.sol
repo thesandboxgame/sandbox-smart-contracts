@@ -8,4 +8,8 @@ contract MockPolygonSand is ERC20 {
     constructor() ERC20("Sand", "SAND") {
         _mint(msg.sender, 1000000000000000000000000000);
     }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }

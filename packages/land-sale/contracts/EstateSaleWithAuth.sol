@@ -10,6 +10,7 @@ import "./ILandToken.sol";
 import "./BaseWithStorage/MetaTransactionReceiver.sol";
 import "./ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
+import "hardhat/console.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
