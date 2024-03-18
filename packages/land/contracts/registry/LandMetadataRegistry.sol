@@ -2,6 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {ILandMetadataRegistry} from "../common/ILandMetadataRegistry.sol";
 import {LandMetadataBase} from "./LandMetadataBase.sol";
 
 /**
@@ -9,7 +10,7 @@ import {LandMetadataBase} from "./LandMetadataBase.sol";
  * @author The Sandbox
  * @notice Store information about the lands (premiumness and neighborhood)
  */
-contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadataBase {
+contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {
     struct BatchSetData {
         // baseTokenId the token id floor 32
         uint256 baseTokenId;
@@ -119,10 +120,14 @@ contract LandMetadataRegistry is AccessControlEnumerableUpgradeable, LandMetadat
 
     /// @notice return the metadata for one land
     /// @param tokenId the token id
-    /// @return neighborhoodId the number that identifies the neighborhood
     /// @return premium true if the land is premium
-    function getMetadata(uint256 tokenId) external view returns (uint256 neighborhoodId, bool premium) {
-        return _getMetadataForTokenId(tokenId);
+    /// @return neighborhoodId the number that identifies the neighborhood
+    /// @return neighborhoodName the neighborhood name
+    function getMetadata(
+        uint256 tokenId
+    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {
+        (neighborhoodId, premium) = _getMetadataForTokenId(tokenId);
+        neighborhoodName = _getNeighborhoodName(neighborhoodId);
     }
 
     /// @notice return true if a land is premium

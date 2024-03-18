@@ -5,6 +5,7 @@ pragma solidity 0.8.23;
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
+import {ILandMetadataRegistry} from "./common/ILandMetadataRegistry.sol";
 import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 
 /// @title LAND token on L2
@@ -17,7 +18,7 @@ contract PolygonLand is PolygonLandBase {
 
     IRoyaltyManager private _royaltyManager;
     address private _owner;
-    address private _metadataRegistry;
+    ILandMetadataRegistry private _metadataRegistry;
 
     event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
     event RoyaltyManagerSet(address indexed royaltyManager);
@@ -99,8 +100,19 @@ contract PolygonLand is PolygonLandBase {
 
     /// @notice Get the address of the Metadata Registry
     /// @return metadataRegistry The address of the Metadata Registry
-    function getMetadataRegistry() external view returns (address metadataRegistry) {
+    function getMetadataRegistry() external view returns (ILandMetadataRegistry metadataRegistry) {
         return _metadataRegistry;
+    }
+
+    /// @notice return the metadata for one land
+    /// @param tokenId the token id
+    /// @return premium true if the land is premium
+    /// @return neighborhoodId the number that identifies the neighborhood
+    /// @return neighborhoodName the neighborhood name
+    function getMetadata(
+        uint256 tokenId
+    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {
+        return _metadataRegistry.getMetadata(tokenId);
     }
 
     /// @notice Get the address of the owner
@@ -216,7 +228,7 @@ contract PolygonLand is PolygonLandBase {
 
     function _setMetadataRegistry(address metadataRegistry) internal {
         require(metadataRegistry != address(0), "Invalid registry address");
-        _metadataRegistry = metadataRegistry;
+        _metadataRegistry = ILandMetadataRegistry(metadataRegistry);
         emit MetadataRegistrySet(metadataRegistry);
     }
 
