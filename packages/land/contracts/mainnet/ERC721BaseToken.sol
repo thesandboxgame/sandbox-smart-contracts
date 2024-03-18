@@ -2,10 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
-import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
-import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 
 /**
@@ -14,19 +11,8 @@ import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-abstract contract ERC721BaseToken is
-    ERC721BaseTokenCommon,
-    IERC721Upgradeable,
-    WithSuperOperators,
-    MetaTransactionReceiver
-{
+abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionReceiver {
     using AddressUpgradeable for address;
-
-    bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
-    bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
-
-    bytes4 internal constant ERC165ID = 0x01ffc9a7;
-    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     /**
      * @param from Sender address
@@ -160,30 +146,6 @@ abstract contract ERC721BaseToken is
                 "not approved to transfer"
             );
         }
-    }
-
-    /**
-     * @dev Checks if the target contract supports the given interface & doesn't exceed 10000 gas
-     * @param _contract The target contract
-     * @param interfaceId The interface id
-     * @return if the call is a success
-     */
-    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
     }
 
     /**
@@ -345,16 +307,6 @@ abstract contract ERC721BaseToken is
     }
 
     /**
-     * @notice Check if the sender approved the operator
-     * @param owner The address of the owner
-     * @param operator The address of the operator
-     * @return The status of the approval
-     */
-    function isApprovedForAll(address owner, address operator) external view returns (bool) {
-        return _isApprovedForAll(owner, operator);
-    }
-
-    /**
      * @param from sender address
      * @param owner owner address of the token
      * @param id token id to burn
@@ -388,83 +340,4 @@ abstract contract ERC721BaseToken is
         );
         _burn(from, owner, id);
     }
-
-    /**
-     * @param operator Sender of the tx
-     * @param from Owner of the token
-     * @param to Recipient
-     * @param tokenId Token id
-     * @param _data extra data
-     */
-    function _checkOnERC721Received(
-        address operator,
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal returns (bool) {
-        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
-        return (retval == _ERC721_RECEIVED);
-    }
-
-    /**
-     * @dev Check if receiving contract accepts erc721 batch transfers.
-     * @param operator Sender of the tx
-     * @param from Owner of the token
-     * @param to Recipient
-     * @param ids Token ids
-     * @param _data extra data
-     * @return Whether the expected value of 0x4b808c46 is returned.
-     */
-    function _checkOnERC721BatchReceived(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        bytes memory _data
-    ) internal returns (bool) {
-        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
-        return (retval == _ERC721_BATCH_RECEIVED);
-    }
-
-    /// @notice Check if the sender approved the operator.
-    /// @param owner The address of the owner.
-    /// @param operator The address of the operator.
-    /// @return isOperator The status of the approval.
-    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
-        return _isOperatorForAll(owner, operator) || _isSuperOperator(operator);
-    }
-
-    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
-
-    function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
-
-    function _addNumNFTPerAddress(address who, uint256 val) internal {
-        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
-    }
-
-    function _subNumNFTPerAddress(address who, uint256 val) internal {
-        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
-    }
-
-    function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
-        _subNumNFTPerAddress(from, quantity);
-        _addNumNFTPerAddress(to, quantity);
-    }
-
-    function _getOwnerData(uint256 id) internal view virtual returns (uint256);
-
-    function _setOwnerData(uint256 id, uint256 data) internal virtual;
-
-    function _getOwnerAddress(uint256 id) internal view virtual returns (address) {
-        return address(uint160(_getOwnerData(id)));
-    }
-
-    function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
-
-    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
-
-    function _getOperator(uint256 id) internal view virtual returns (address);
-
-    function _setOperator(uint256 id, address operator) internal virtual;
 }
