@@ -30,9 +30,9 @@ contract LandStorageMixin {
      */
     mapping(uint256 => uint256) internal _owners;
     /// @notice Operators for each owner address for all tokens
-    mapping(address => mapping(address => bool)) public _operatorsForAll;
+    mapping(address => mapping(address => bool)) internal _operatorsForAll;
     /// @notice Operator for each token id
-    mapping(uint256 => address) public _operators;
+    mapping(uint256 => address) internal _operators;
 
     bool internal _initialized; // obsolete
     uint256[49] private __gap;

@@ -25,6 +25,15 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, WithSup
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
 
+    /**
+     * @notice Return the internal owner data of a Land
+     * @param id The id of the Land
+     * @dev for debugging purposes
+     */
+    function getOwnerData(uint256 id) external view returns (uint256) {
+        return _getOwnerData(id);
+    }
+
     /// @notice Check if the sender approved the operator.
     /// @param owner The address of the owner.
     /// @param operator The address of the operator.
