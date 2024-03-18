@@ -1,11 +1,13 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {setupPolygonLandOperatorFilter} from '../fixtures';
 import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
 import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
+import {shouldCheckForOperatorFilter} from '../common/OperatorFilter.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -20,6 +22,9 @@ describe('PolygonLand.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForSuperOperators(setupPolygonLand, 'PolygonLand');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForOperatorFilter(setupPolygonLandOperatorFilter, 'PolygonLand');
 
   it('creation', async function () {
     const {LandContract} = await loadFixture(setupPolygonLand);
