@@ -94,7 +94,7 @@ describe('LandMetadataRegistry', function () {
     it('admin should be able to set neighborhood name', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
-        '',
+        'unknown',
       );
       await expect(
         registryAsAdmin.setNeighborhoodName(neighborhoodId, neighborhoodName),
@@ -105,6 +105,11 @@ describe('LandMetadataRegistry', function () {
       expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
         neighborhoodName,
       );
+      expect(await registryAsAdmin.getMetadata(tokenId)).to.be.eql([
+        false,
+        neighborhoodId,
+        neighborhoodName,
+      ]);
       expect(
         await registryAsAdmin.getNeighborhoodNameForId(neighborhoodId),
       ).to.be.equal(neighborhoodName);
@@ -161,8 +166,9 @@ describe('LandMetadataRegistry', function () {
       );
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.true;
       expect(await registryAsAdmin.getMetadata(tokenId)).to.be.eql([
-        neighborhoodId,
         true,
+        neighborhoodId,
+        '',
       ]);
     });
     it('other should fail to batch set metadata', async function () {
@@ -191,7 +197,11 @@ describe('LandMetadataRegistry', function () {
   it('should not be able to set land type back to unknown', async function () {
     const {registryAsAdmin} = await loadFixture(setupRegistry);
     // unknown
-    expect(await registryAsAdmin.getMetadata(tokenId)).to.be.eql([0n, false]);
+    expect(await registryAsAdmin.getMetadata(tokenId)).to.be.eql([
+      false,
+      0n,
+      'unknown',
+    ]);
     // known type
     await registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId);
     await expect(registryAsAdmin.setNeighborhoodId(tokenId, 0)).to.revertedWith(

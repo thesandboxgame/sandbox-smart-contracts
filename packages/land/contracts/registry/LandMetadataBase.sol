@@ -9,6 +9,7 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
  * @notice Store information about the lands (premiumness and neighborhood)
  */
 abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
+    string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
     uint256 public constant LANDS_PER_WORD = 32;
     uint256 public constant BITS_PER_LAND = 256 / LANDS_PER_WORD;
     uint256 public constant LAND_MASK = 0xFF;
@@ -83,6 +84,9 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     /// @param neighborhoodId the number that identifies the neighborhood
     function _getNeighborhoodName(uint256 neighborhoodId) internal view returns (string memory) {
         LandMetadataStorage storage $ = _getLandMetadataStorage();
+        if (neighborhoodId == 0) {
+            return UNKNOWN_NEIGHBORHOOD;
+        }
         return $._neighborhoodName[neighborhoodId];
     }
 
