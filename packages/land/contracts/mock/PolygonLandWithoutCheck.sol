@@ -27,7 +27,7 @@ contract PolygonLandMockWithoutCheck is PolygonLand {
      * @param y The top left y coordinate of the new quad
      * @param data extra data to pass to the transfer
      */
-    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external override {
+    function mintQuadWithOutMinterCheck(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external {
         _mintQuad(user, size, x, y, data);
     }
 
