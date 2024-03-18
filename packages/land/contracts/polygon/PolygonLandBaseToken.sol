@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable code-complexity
-
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
