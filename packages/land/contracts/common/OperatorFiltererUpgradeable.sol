@@ -70,5 +70,5 @@ abstract contract OperatorFiltererUpgradeable is IContext {
 
     function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry);
 
-    function _setOperatorFilterRegistry(IOperatorFilterRegistry val) internal virtual;
+    function _setOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual;
 }

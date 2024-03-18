@@ -92,8 +92,8 @@ contract LandStorageMixin {
         return _operators[id];
     }
 
-    function _setOperator(uint256 id, address val) internal virtual {
-        _operators[id] = val;
+    function _setOperator(uint256 id, address operator) internal virtual {
+        _operators[id] = operator;
     }
 
     function _isMinter(address who) internal view virtual returns (bool) {
@@ -108,7 +108,7 @@ contract LandStorageMixin {
         return _operatorFilterRegistry;
     }
 
-    function _setOperatorFilterRegistry(IOperatorFilterRegistry val) internal virtual {
-        _operatorFilterRegistry = val;
+    function _setOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual {
+        _operatorFilterRegistry = registry;
     }
 }

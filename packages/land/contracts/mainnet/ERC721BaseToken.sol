@@ -461,5 +461,5 @@ abstract contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, Met
 
     function _getOperator(uint256 id) internal view virtual returns (address);
 
-    function _setOperator(uint256 id, address val) internal virtual;
+    function _setOperator(uint256 id, address operator) internal virtual;
 }
