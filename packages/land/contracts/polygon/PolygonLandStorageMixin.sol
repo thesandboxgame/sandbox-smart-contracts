@@ -86,8 +86,8 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
         return _operators[id];
     }
 
-    function _setOperator(uint256 id, address val) internal virtual {
-        _operators[id] = val;
+    function _setOperator(uint256 id, address operator) internal virtual {
+        _operators[id] = operator;
     }
 
     function _isMinter(address who) internal view virtual returns (bool) {
@@ -102,15 +102,15 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
         return _trustedForwarder;
     }
 
-    function _setTrustedForwarder(address val) internal virtual {
-        _trustedForwarder = val;
+    function _setTrustedForwarder(address trustedForwarder) internal virtual {
+        _trustedForwarder = trustedForwarder;
     }
 
     function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry) {
         return _operatorFilterRegistry;
     }
 
-    function _setOperatorFilterRegistry(IOperatorFilterRegistry val) internal virtual {
-        _operatorFilterRegistry = val;
+    function _setOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual {
+        _operatorFilterRegistry = registry;
     }
 }

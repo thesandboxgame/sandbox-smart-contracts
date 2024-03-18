@@ -413,5 +413,5 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, WithSuperOper
 
     function _getOperator(uint256 id) internal view virtual returns (address);
 
-    function _setOperator(uint256 id, address val) internal virtual;
+    function _setOperator(uint256 id, address operator) internal virtual;
 }

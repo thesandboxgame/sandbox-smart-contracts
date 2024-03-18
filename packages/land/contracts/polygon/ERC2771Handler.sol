@@ -70,7 +70,7 @@ abstract contract ERC2771Handler {
 
     function _getTrustedForwarder() internal view virtual returns (address);
 
-    function _setTrustedForwarder(address val) internal virtual;
+    function _setTrustedForwarder(address trustedForwarder) internal virtual;
 
     /**
      * @notice Checks if an address is a trusted forwarder
