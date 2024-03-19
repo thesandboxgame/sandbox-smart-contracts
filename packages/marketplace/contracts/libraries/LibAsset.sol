@@ -42,14 +42,14 @@ library LibAsset {
         keccak256("Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)");
 
     /// @notice Determine which side of a trade should bear the fee, based on the asset types.
-    /// @param leftClass The asset class type of the left side of the trade.
-    /// @param rightClass The asset class type of the right side of the trade.
+    /// @param leftAssets The asset array of the left side of the trade.
+    /// @param rightAssets The asset array of the right side of the trade.
     /// @return FeeSide representing which side should bear the fee, if any.
-    function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
-        if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
+    function getFeeSide(Asset[] memory leftAssets, Asset[] memory rightAssets) internal pure returns (FeeSide) {
+        if (leftAssets.length == 1 && leftAssets[0].assetType.assetClass == AssetClass.ERC20) {
             return FeeSide.LEFT;
         }
-        if (rightClass == AssetClass.ERC20 && leftClass != AssetClass.ERC20) {
+        if (rightAssets.length == 1 && rightAssets[0].assetType.assetClass == AssetClass.ERC20) {
             return FeeSide.RIGHT;
         }
         return FeeSide.NONE;

@@ -15,14 +15,20 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
     using AddressUpgradeable for address;
+
+    struct Signature {
+        bytes signature;
+        LibOrder.OrderType version;
+    }
+
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
         LibOrder.OrderType orderType; // Type of the Order (V1 or V2)
         LibOrder.Order orderLeft; // Left order details
-        bytes signatureLeft; // Signature of the left order
+        Signature signatureLeft; // Signature of the left order
         LibOrder.Order orderRight; // Right order details
-        bytes signatureRight; // Signature of the right order
+        Signature signatureRight; // Signature of the right order
     }
 
     /// @dev Address of the OrderValidator contract.
@@ -104,9 +110,9 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @notice Cancels a specified order.
     /// @param order Details of the order to be canceled.
     /// @param orderKeyHash The hash of the order, used for verification.
-    function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash, LibOrder.OrderType orderType) internal {
+    function _cancel(LibOrder.Order calldata order, bytes32 orderKeyHash, LibOrder.OrderType version) internal {
         require(order.salt != 0, "0 salt can't be used");
-        bytes32 _orderKeyHash = LibOrder.hashKey(order, orderType);
+        bytes32 _orderKeyHash = LibOrder.hashKey(order, version);
         require(_orderKeyHash == orderKeyHash, "invalid orderHash");
         fills[orderKeyHash] = type(uint256).max;
         emit Cancel(orderKeyHash, order);
@@ -121,8 +127,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         require(len <= matchOrdersLimit, "too many ExchangeMatch");
         for (uint256 i; i < len; i++) {
             ExchangeMatch calldata m = matchedOrders[i];
-            _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight, m.orderType);
-            _matchAndTransfer(sender, m.orderLeft, m.orderRight, m.orderType);
+            _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
+            _matchAndTransfer(sender, m.orderLeft, m.orderRight, m.signatureLeft.version, m.signatureRight.version);
         }
     }
 
@@ -132,18 +138,16 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @param signatureLeft Signature of the left order.
     /// @param orderRight Details of the right order.
     /// @param signatureRight Signature of the right order.
-    /// @param orderType Order struct version - V1 or V2
     function _validateOrders(
         address sender,
         LibOrder.Order memory orderLeft,
-        bytes memory signatureLeft,
+        Signature memory signatureLeft,
         LibOrder.Order memory orderRight,
-        bytes memory signatureRight,
-        LibOrder.OrderType orderType
+        Signature memory signatureRight
     ) internal view {
         // validate must force order.maker != address(0)
-        orderValidator.validate(orderLeft, signatureLeft, sender, orderType);
-        orderValidator.validate(orderRight, signatureRight, sender, orderType);
+        orderValidator.validate(orderLeft, signatureLeft.signature, sender, signatureLeft.version);
+        orderValidator.validate(orderRight, signatureRight.signature, sender, signatureRight.version);
         if (orderLeft.taker != address(0)) {
             require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
@@ -156,49 +160,61 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @param sender Address initiating the match.
     /// @param orderLeft The left order.
     /// @param orderRight The right order.
-    /// @param orderType Order struct version - V1 or V2
     function _matchAndTransfer(
         address sender,
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight,
-        LibOrder.OrderType orderType
+        LibOrder.OrderType sigLeftVersion,
+        LibOrder.OrderType sigRightVersion
     ) internal {
-        uint256 makeAssetLength = orderLeft.makeAsset.length;
+        uint256 makeAssetLength = orderLeft.makeAsset.asset.length;
         LibAsset.AssetType[] memory makeMatch = new LibAsset.AssetType[](makeAssetLength);
 
-        uint256 takeAssetLength = orderLeft.takeAsset.length;
+        uint256 takeAssetLength = orderLeft.takeAsset.asset.length;
         LibAsset.AssetType[] memory takeMatch = new LibAsset.AssetType[](takeAssetLength);
 
+        require(makeAssetLength == orderRight.takeAsset.asset.length, "wrong make order length");
+        require(takeAssetLength == orderRight.makeAsset.asset.length, "wrong take order length");
+
+        // ToDo: Check if we gonna still need the asset matched type (makeMatch and takeMatch)
+        // maybe, now, only verifying the assetType is enough
         for (uint i = 0; i < makeAssetLength; i++){
              makeMatch[i] = LibAsset.matchAssets(
-                orderLeft.makeAsset[i].assetType,
-                orderRight.takeAsset[i].assetType
-            );
-            takeMatch[i] = LibAsset.matchAssets(
-                orderLeft.takeAsset[i].assetType,
-                orderRight.makeAsset[i].assetType
+                orderLeft.makeAsset.asset[i].assetType,
+                orderRight.takeAsset.asset[i].assetType
             );
         }
 
-        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight, orderType);
+        for (uint i = 0; i < takeAssetLength; i++){
+             takeMatch[i] = LibAsset.matchAssets(
+                orderLeft.takeAsset.asset[i].assetType,
+                orderRight.makeAsset.asset[i].assetType
+            );
+        }
 
-        // ToDo: Check this loop
-        // ToDo: check newFill values for bundles
-        for(uint i = 0; i < makeAssetLength; i++){
-            doTransfers(
+        // ToDo: Check what to do with newFill
+        // Maybe: add a new field in the DealSide -> Amount
+        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight, sigLeftVersion, sigRightVersion);
+
+        LibAsset.FeeSide feeSide = LibAsset.getFeeSide(orderLeft.makeAsset.asset, orderLeft.takeAsset.asset);
+
+        doTransfers(
             ITransferManager.DealSide(
-                LibAsset.Asset(makeMatch[i], newFill.leftValue),
+                // LibAsset.Asset(makeMatch, newFill.leftValue),
+                orderLeft.makeAsset.asset,
                 orderLeft.maker,
-                orderLeft.makeRecipient
+                orderLeft.makeRecipient,
+                newFill.leftValue // ToDo: check
             ),
             ITransferManager.DealSide(
-                LibAsset.Asset(takeMatch[i], newFill.rightValue),
+                // LibAsset.Asset(takeMatch, newFill.rightValue),
+                orderLeft.makeAsset.asset,
                 orderRight.maker,
-                orderRight.makeRecipient
+                orderRight.makeRecipient,
+                newFill.rightValue // ToDo: check
             ),
-            LibAsset.getFeeSide(makeMatch[i].assetClass, takeMatch[i].assetClass)
+            feeSide
         );
-        }
     }
 
     /// @notice Parse orders to get the order data, then create a new fill with setFillEmitMatch()
@@ -206,15 +222,15 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @param orderLeft Left order
     /// @param orderRight Right order
     /// @return newFill Fill result
-    /// @param orderType Order struct version - V1 or V2
     function _parseOrdersSetFillEmitMatch(
         address sender,
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight,
-        LibOrder.OrderType orderType
+        LibOrder.OrderType sigLeftVersion,
+        LibOrder.OrderType sigRightVersion
     ) internal returns (LibOrder.FillResult memory newFill) {
-        bytes32 orderKeyHashLeft = LibOrder.hashKey(orderLeft, orderType);
-        bytes32 orderKeyHashRight = LibOrder.hashKey(orderRight,orderType);
+        bytes32 orderKeyHashLeft = LibOrder.hashKey(orderLeft, sigLeftVersion);
+        bytes32 orderKeyHashRight = LibOrder.hashKey(orderRight, sigRightVersion);
 
         uint256 leftOrderFill = _getOrderFill(orderLeft.salt, orderKeyHashLeft);
         uint256 rightOrderFill = _getOrderFill(orderRight.salt, orderKeyHashRight);

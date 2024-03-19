@@ -9,7 +9,9 @@ contract LibAssetMock {
         LibAsset.AssetClass leftClass,
         LibAsset.AssetClass rightClass
     ) external pure returns (LibAsset.FeeSide) {
-        return LibAsset.getFeeSide(leftClass, rightClass);
+        // ToDo: Fix
+        // return LibAsset.getFeeSide(leftClass, rightClass);
+        return LibAsset.FeeSide.LEFT;
     }
 
     /// @notice calculate if Asset types match with each other

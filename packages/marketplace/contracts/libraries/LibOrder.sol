@@ -15,19 +15,25 @@ library LibOrder {
         );
     bytes32 internal constant ORDER_TYPEHASH_V2 =
         keccak256(
-            "Order(address maker,Asset[] makeAsset,address taker,Asset[] takeAsset,address makeRecipient, uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+            "Order(address maker,Bundle makeAsset,address taker,Bundle takeAsset,address makeRecipient, uint256 salt,uint256 start,uint256 end)Bundle(Asset[] asset,uint256 amount)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
 
     enum OrderType {
         V1, // Represents order struct in the V1 format
         V2 // Represents order struct in the V2 format
     }
+
+    struct Bundle {
+        LibAsset.Asset[] asset;
+        uint256 amount;
+    }
+
     /// @dev Represents the structure of an order - V2.
     struct Order {
         address maker; // Address of the maker.
-        LibAsset.Asset[] makeAsset; // Asset the maker is providing.
+        Bundle makeAsset;
         address taker; // Address of the taker.
-        LibAsset.Asset[] takeAsset; // Asset the taker is providing.
+        Bundle takeAsset; // Asset the taker is providing.
         // uint256[] royalties // ToDo: apply royalties % on bundles
         address makeRecipient; // recipient address for maker.
         uint256 salt; // Random number to ensure unique order hash.
@@ -43,36 +49,28 @@ library LibOrder {
 
     /// @notice Computes the unique hash of an order.
     /// @param order The order data.
-    /// @param version Order struct version - V1 or V2
     /// @return The unique hash of the order.
     function hashKey(Order calldata order, OrderType version) internal pure returns (bytes32) {
+        // ToDo: Try other ways of checking the order version to avoid if/else
         if(version == OrderType.V1){
             return keccak256(
                     abi.encode(
                         order.maker,
                         order.makeRecipient,
-                        LibAsset.hash(order.makeAsset[0].assetType),
-                        LibAsset.hash(order.takeAsset[0].assetType),
+                        LibAsset.hash(order.makeAsset.asset[0].assetType),
+                        LibAsset.hash(order.takeAsset.asset[0].assetType),
                         order.salt
                     )
                 );
         } else {
-            bytes memory makeAssetsTypeEncoded;
-            for (uint i = 0; i < order.makeAsset.length; i++) {
-                makeAssetsTypeEncoded = abi.encodePacked(makeAssetsTypeEncoded, LibAsset.hash(order.makeAsset[i].assetType));
-            }
-
-            bytes memory takeAssetsTypeEncoded;
-            for (uint i = 0; i < order.takeAsset.length; i++) {
-                takeAssetsTypeEncoded = abi.encodePacked(takeAssetsTypeEncoded, LibAsset.hash(order.takeAsset[i].assetType));
-            }
-
+            bytes memory makeAssetsEncoded = encodeAssets(order.makeAsset.asset);
+            bytes memory takeAssetsEncoded = encodeAssets(order.takeAsset.asset);
             return keccak256(
                     abi.encode(
                         order.maker,
                         order.makeRecipient,
-                        keccak256(makeAssetsTypeEncoded),
-                        keccak256(takeAssetsTypeEncoded),
+                        keccak256(makeAssetsEncoded),
+                        keccak256(takeAssetsEncoded),
                         order.salt
                     )
                 );
@@ -81,9 +79,9 @@ library LibOrder {
 
     /// @notice Computes the complete hash of an order, including domain-specific data.
     /// @param order The order data.
-    /// @param version Order struct version - V1 or V2
     /// @return The complete hash of the order.
     function hash(Order calldata order, OrderType version) internal pure returns (bytes32) {
+        // ToDo: Try other ways of checking the order version to avoid if/else
         if(version == OrderType.V1){
             return
             keccak256(
@@ -91,9 +89,9 @@ library LibOrder {
                 abi.encode(
                     ORDER_TYPEHASH_V1,
                     order.maker,
-                    LibAsset.hash(order.makeAsset[0]),
+                    LibAsset.hash(order.makeAsset.asset[0]),
                     order.taker,
-                    LibAsset.hash(order.takeAsset[0]),
+                    LibAsset.hash(order.takeAsset.asset[0]),
                     order.makeRecipient,
                     order.salt,
                     order.start,
@@ -101,28 +99,35 @@ library LibOrder {
                 )
             );
         } else {
-            bytes memory makeAssetsEncoded;
-            for (uint i = 0; i < order.makeAsset.length; i++) {
-                makeAssetsEncoded = abi.encodePacked(makeAssetsEncoded, LibAsset.hash(order.makeAsset[i]));
-            }
-
-            bytes memory takeAssetsEncoded;
-            for (uint i = 0; i < order.takeAsset.length; i++) {
-                takeAssetsEncoded = abi.encodePacked(takeAssetsEncoded, LibAsset.hash(order.takeAsset[i]));
-            }
-
             return keccak256(abi.encode(
                 ORDER_TYPEHASH_V2,
                 order.maker,
-                keccak256(makeAssetsEncoded), // Hash of all makeAssets
+                hashBundle(order.makeAsset),
                 order.taker,
-                keccak256(takeAssetsEncoded), // Hash of all takeAssets
+                hashBundle(order.takeAsset),
                 order.makeRecipient,
                 order.salt,
                 order.start,
                 order.end
             ));
         }
+    }
+
+    function encodeAssets(LibAsset.Asset[] memory assets) internal pure returns (bytes memory) {
+        bytes memory encodedAssets = abi.encodePacked();
+        for (uint i = 0; i < assets.length; i++) {
+            // Concatenate the hash of each asset
+            encodedAssets = abi.encodePacked(encodedAssets, LibAsset.hash(assets[i]));
+        }
+
+        return encodedAssets;
+    }
+
+    function hashBundle(Bundle memory bundle) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(
+            encodeAssets(bundle.asset),
+            bundle.amount
+        ));
     }
 
     /// @notice Validates order time
@@ -154,11 +159,10 @@ library LibOrder {
         (uint256 leftMakeValue, uint256 leftTakeValue) = calculateRemaining(leftOrder, leftOrderFill);
         (uint256 rightMakeValue, uint256 rightTakeValue) = calculateRemaining(rightOrder, rightOrderFill);
 
-        // ToDo: Fix order filling for bundles here
         if (rightTakeValue > leftMakeValue) {
-            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset[0].value, rightOrder.takeAsset[0].value);
+            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset.amount, rightOrder.takeAsset.amount);
         }
-        return _fillRight(leftOrder.makeAsset[0].value, leftOrder.takeAsset[0].value, rightMakeValue, rightTakeValue);
+        return _fillRight(leftOrder.makeAsset.amount, leftOrder.takeAsset.amount, rightMakeValue, rightTakeValue);
     }
 
     /// @notice Computes the remaining fillable amount of an order.
@@ -170,10 +174,9 @@ library LibOrder {
         LibOrder.Order calldata order,
         uint256 fill
     ) internal pure returns (uint256 makeValue, uint256 takeValue) {
-        // ToDo: Fix order filling for bundles here
-        require(order.takeAsset[0].value >= fill, "filling more than order permits");
-        takeValue = order.takeAsset[0].value - fill;
-        makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset[0].value, order.takeAsset[0].value, takeValue);
+        require(order.takeAsset.amount >= fill, "filling more than order permits");
+        takeValue = order.takeAsset.amount - fill;
+        makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.amount, order.takeAsset.amount, takeValue);
     }
 
     /// @notice Computes the fill values for a situation where the right order is expected to fill the left order.

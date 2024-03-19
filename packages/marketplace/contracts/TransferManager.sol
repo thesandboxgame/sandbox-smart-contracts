@@ -98,11 +98,13 @@ abstract contract TransferManager is Initializable, ITransferManager {
             paymentSide = right;
             nftSide = left;
         }
-        // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSide.recipient);
+         for (uint i = 0; i < nftSide.asset.length; i++) {
+            // Transfer NFT or left side if FeeSide.NONE
+            _transfer(nftSide.asset[i], nftSide.account, paymentSide.recipient);
+         }
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
-            _transfer(paymentSide.asset, paymentSide.account, nftSide.recipient);
+            _transfer(paymentSide.asset[0], paymentSide.account, nftSide.recipient);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
         }
@@ -143,7 +145,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param nftSide DealSide of the nft-side order
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 fees;
-        uint256 remainder = paymentSide.asset.value;
+        uint256 remainder = paymentSide.asset[0].value;
+        // ToDo: fix that for bundles
         if (_isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             // No royalties
@@ -155,7 +158,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.recipient);
+            _transfer(LibAsset.Asset(paymentSide.asset[0].assetType, remainder), paymentSide.account, nftSide.recipient);
         }
     }
 
@@ -163,7 +166,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param nftSide DealSide of the nft-side order
     /// @return creator Address or zero if is not able to retrieve it
     function _isPrimaryMarket(DealSide memory nftSide) internal view returns (bool) {
-        address creator = _getCreator(nftSide.asset.assetType);
+        // ToDo: fix that for bundles
+        address creator = _getCreator(nftSide.asset[0].assetType);
         return creator != address(0) && nftSide.account == creator;
     }
 
@@ -177,7 +181,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
+        // ToDo: fix that for bundles
+        (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset[0].assetType);
         IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
@@ -208,8 +213,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 percentage,
         uint256 multiplier
     ) internal returns (uint256) {
-        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
-        uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
+        // ToDo: fix that for bundles
+        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset[0].assetType, 0);
+        uint256 fee = (paymentSide.asset[0].value * percentage) / multiplier;
         if (remainder > fee) {
             remainder = remainder - fee;
             payment.value = fee;
