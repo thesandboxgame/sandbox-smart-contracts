@@ -107,13 +107,6 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace1,
       } = await loadFixture(setupLand);
 
-      await LandRegistryNotSetAsDeployer.mintQuadWithOutMinterCheck(
-        other,
-        1,
-        0,
-        0,
-        '0x',
-      );
       await LandRegistryNotSetAsDeployer.registerFilterer(
         operatorFilterSubscription,
         true,
@@ -131,6 +124,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
     it('Black listed market places can transfer token if operator filterer registry is not set on Land', async function () {
       const {
+        LandRegistryNotSetAsMinter,
         LandRegistryNotSetAsDeployer,
         LandRegistryNotSetAsOther,
         operatorFilterSubscription,
@@ -139,13 +133,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace1,
       } = await loadFixture(setupLand);
 
-      await LandRegistryNotSetAsDeployer.mintQuadWithOutMinterCheck(
-        other,
-        1,
-        0,
-        0,
-        '0x',
-      );
+      await LandRegistryNotSetAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await LandRegistryNotSetAsDeployer.registerFilterer(
         operatorFilterSubscription,
@@ -182,8 +170,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to transfer land if from is the owner of token', async function () {
-      const {LandAsOther, other, other1} = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.transferFrom(other, other1, id);
@@ -192,15 +181,16 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should revert for minted invalid size', async function () {
-      const {LandAsOther, other} = await loadFixture(setupLand);
+      const {LandAsMinter, other} = await loadFixture(setupLand);
       await expect(
-        LandAsOther.mintQuadWithOutMinterCheck(other, 25, 0, 0, '0x'),
+        LandAsMinter.mintQuad(other, 25, 0, 0, '0x'),
       ).to.be.revertedWith('Invalid size');
     });
 
     it('should be able to safe transfer land if from is the owner of token', async function () {
-      const {LandAsOther, other, other1} = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther['safeTransferFrom(address,address,uint256)'](
@@ -213,8 +203,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to safe transfer(with data) land if from is the owner of token', async function () {
-      const {LandAsOther, other, other1} = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther['safeTransferFrom(address,address,uint256,bytes)'](
@@ -228,10 +219,11 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to safe batch transfer Land if from is the owner of token', async function () {
-      const {LandAsOther, other, other1} = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await LandAsOther.safeBatchTransferFrom(other, other1, [id1, id2], '0x');
@@ -240,11 +232,12 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to batch transfer Land if from is the owner of token', async function () {
-      const {LandAsOther, other, other1} = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await LandAsOther.batchTransferFrom(other, other1, [id1, id2], '0x');
@@ -253,9 +246,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
-      const {MockMarketPlace1, LandAsOther, other} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.transferFrom(other, MockMarketPlace1, id);
@@ -264,9 +257,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to safe transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
-      const {MockMarketPlace1, LandAsOther, other} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther['safeTransferFrom(address,address,uint256)'](
@@ -279,9 +272,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to safe transfer(with data) token if from is the owner of token and to is a blacklisted marketplace', async function () {
-      const {MockMarketPlace1, LandAsOther, other} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther['safeTransferFrom(address,address,uint256,bytes)'](
@@ -295,11 +288,11 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to safe batch transfer Land if from is the owner of token and to is a blacklisted marketplace', async function () {
-      const {MockMarketPlace1, LandAsOther, other} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await LandAsOther.safeBatchTransferFrom(
@@ -313,12 +306,12 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('should be able to batch transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
-      const {MockMarketPlace1, LandAsOther, other} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await LandAsOther.batchTransferFrom(
@@ -358,10 +351,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should approve non blacklisted market places', async function () {
-      const {MockMarketPlace3, LandAsOther, other} =
+      const {MockMarketPlace3, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.approve(MockMarketPlace3, id);
@@ -369,9 +362,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should approveFor non blacklisted market places', async function () {
-      const {MockMarketPlace3, LandAsOther, other} =
+      const {MockMarketPlace3, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
       await LandAsOther.approveFor(other, MockMarketPlace3, id);
       expect(await LandAsOther.getApproved(id)).to.be.equal(MockMarketPlace3);
@@ -400,10 +393,11 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace3,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
       await LandAsOther.approve(MockMarketPlace3, id1);
 
@@ -415,7 +409,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         true,
       );
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -428,10 +422,11 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace3,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
       await LandAsOther.approveFor(other, MockMarketPlace3, id1);
 
@@ -443,7 +438,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         true,
       );
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -509,6 +504,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace3,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
@@ -516,7 +512,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       const MockMarketPlace3CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
       await LandAsOther.approve(MockMarketPlace3, id1);
 
@@ -528,7 +524,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         true,
       );
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -541,6 +537,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace3,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
@@ -548,7 +545,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       const MockMarketPlace3CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace3);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
       await LandAsOther.approveFor(other, MockMarketPlace3, id1);
 
@@ -560,7 +557,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         true,
       );
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -634,6 +631,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace1,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
@@ -641,7 +639,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       const MockMarketPlace1CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await expect(
@@ -670,6 +668,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace1,
         OperatorFilterRegistry,
         operatorFilterSubscription,
+        LandAsMinter,
         LandAsOther,
         other,
       } = await loadFixture(setupLand);
@@ -677,7 +676,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       const MockMarketPlace1CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await expect(
@@ -771,9 +770,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should not be able to transfer through blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther, other, other1} =
+      const {MockMarketPlace1, LandAsMinter, LandAsOther, other, other1} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace1, true);
@@ -791,13 +790,14 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should not be able to transfer through market places after they are blacklisted', async function () {
       const {
         MockMarketPlace3,
+        LandAsMinter,
         LandAsOther,
         other,
         other1,
         OperatorFilterRegistry,
         operatorFilterSubscription,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -814,7 +814,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         true,
       );
 
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -829,9 +829,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should be able to transfer through non blacklisted market places', async function () {
-      const {MockMarketPlace3, LandAsOther, other, other1} =
+      const {MockMarketPlace3, LandAsMinter, LandAsOther, other, other1} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -845,13 +845,14 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should not be able to transfer through non blacklisted market places after their codeHash is blacklisted', async function () {
       const {
         MockMarketPlace3,
+        LandAsMinter,
         LandAsOther,
         other,
         other1,
         OperatorFilterRegistry,
         operatorFilterSubscription,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id1 = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -868,7 +869,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         MockMarketPlace3CodeHash,
         true,
       );
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 1, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 1, '0x');
       const id2 = getId(1, 0, 1);
 
       await expect(
@@ -885,6 +886,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
       const {
         MockMarketPlace1,
+        LandAsMinter,
         LandAsOther,
         other,
         other1,
@@ -893,7 +895,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       } = await loadFixture(setupLand);
       const MockMarketPlace1CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace1, true);
@@ -927,9 +929,15 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should not be able to transfer(without data) through blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther, LandAsOther1, other, other1} =
-        await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      const {
+        MockMarketPlace1,
+        LandAsMinter,
+        LandAsOther,
+        LandAsOther1,
+        other,
+        other1,
+      } = await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther1.setApprovalForAllWithOutFilter(MockMarketPlace1, true);
@@ -944,9 +952,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should be able to transfer(without data) through non blacklisted market places', async function () {
-      const {MockMarketPlace3, LandAsOther, other, other1} =
+      const {MockMarketPlace3, LandAsMinter, LandAsOther, other, other1} =
         await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -964,6 +972,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should be not be able to transfer(without data) through market places after they are blacklisted', async function () {
       const {
         MockMarketPlace3,
+        LandAsMinter,
         LandAsOther,
         LandAsOther1,
         other,
@@ -971,7 +980,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         OperatorFilterRegistry,
         operatorFilterSubscription,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -1006,6 +1015,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should be not be able to transfer(without data) through market places after their codeHash is blackListed', async function () {
       const {
         MockMarketPlace3,
+        LandAsMinter,
         LandAsOther,
         LandAsOther1,
         other,
@@ -1013,7 +1023,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         OperatorFilterRegistry,
         operatorFilterSubscription,
       } = await loadFixture(setupLand);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace3, true);
@@ -1051,6 +1061,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     it('it should be able to transfer(without data) through blacklisted market places after they are removed from blacklist', async function () {
       const {
         MockMarketPlace1,
+        LandAsMinter,
         LandAsOther,
         other,
         other1,
@@ -1059,7 +1070,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       } = await loadFixture(setupLand);
       const MockMarketPlace1CodeHash =
         await OperatorFilterRegistry.codeHashOf(MockMarketPlace1);
-      await LandAsOther.mintQuadWithOutMinterCheck(other, 1, 0, 0, '0x');
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
       await LandAsOther.setApprovalForAllWithOutFilter(MockMarketPlace1, true);

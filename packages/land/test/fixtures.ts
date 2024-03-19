@@ -228,7 +228,7 @@ export async function setupLandOperatorFilter() {
   );
   const MetadataRegistryContract = await MetadataRegistryFactory.deploy();
 
-  const LandFactory = await ethers.getContractFactory('LandMockWithoutCheck');
+  const LandFactory = await ethers.getContractFactory('LandMock');
   const LandContract = await LandFactory.deploy();
 
   await LandContract.initialize(landAdmin);
@@ -448,6 +448,7 @@ export async function setupPolygonLandOperatorFilter() {
     other,
     other1,
     landAdmin,
+    landMinter,
     operatorFilterSubscription,
     defaultSubscription,
   ] = await ethers.getSigners();
@@ -485,9 +486,7 @@ export async function setupPolygonLandOperatorFilter() {
   );
   const MetadataRegistryContract = await MetadataRegistryFactory.deploy();
 
-  const PolygonLandFactory = await ethers.getContractFactory(
-    'PolygonLandMockWithoutCheck',
-  );
+  const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
   const LandContract = await upgrades.deployProxy(
     PolygonLandFactory,
     [await landAdmin.getAddress()],
@@ -497,6 +496,8 @@ export async function setupPolygonLandOperatorFilter() {
   );
 
   const LandAsAdmin = LandContract.connect(landAdmin);
+  await LandAsAdmin.setMinter(landMinter, true);
+  const LandAsMinter = LandContract.connect(landMinter);
   await LandAsAdmin.setTrustedForwarder(TrustedForwarderContract);
   await LandAsAdmin.setMetadataRegistry(MetadataRegistryContract);
   await LandAsAdmin.transferOwnership(landOwner);
@@ -541,15 +542,20 @@ export async function setupPolygonLandOperatorFilter() {
   const LandRegistryNotSetAsDeployer =
     PolygonLandMockContract.connect(deployer);
   const LandRegistryNotSetAsAdmin = PolygonLandMockContract.connect(landAdmin);
+  await LandRegistryNotSetAsAdmin.setMinter(landMinter, true);
+  const LandRegistryNotSetAsMinter =
+    PolygonLandMockContract.connect(landMinter);
   const LandRegistryNotSetAsOther = PolygonLandMockContract.connect(other);
   return {
     LandContract,
     LandAsAdmin,
+    LandAsMinter,
     LandAsOther,
     LandAsOther1,
     OperatorFilterRegistry,
     LandRegistryNotSetAsDeployer,
     LandRegistryNotSetAsAdmin,
+    LandRegistryNotSetAsMinter,
     LandRegistryNotSetAsOther,
     MockMarketPlace1,
     MockMarketPlace2,
