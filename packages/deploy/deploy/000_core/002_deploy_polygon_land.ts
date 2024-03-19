@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonOperatorFilterRegistry'
   );
 
-  const TRUSTED_FORWARDER = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0';
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
 
   await deploy('PolygonLand', {
     from: deployer,
@@ -26,9 +26,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [TRUSTED_FORWARDER],
+          args: [TRUSTED_FORWARDER.address],
         },
       },
+      upgradeIndex: 0,
     },
     log: true,
   });
