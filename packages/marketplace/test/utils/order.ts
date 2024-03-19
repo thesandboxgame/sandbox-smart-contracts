@@ -12,7 +12,7 @@ import {
 
 export const ORDER_TYPEHASH = keccak256(
   Buffer.from(
-    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
+    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
   )
 );
 
@@ -24,6 +24,7 @@ export type Order = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
+  makeRecipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -36,13 +37,15 @@ export const OrderDefault = async (
   takeAsset: Asset,
   salt: Numeric,
   start: Numeric,
-  end: Numeric
+  end: Numeric,
+  makeRecipient?: Address
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
   taker:
     taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
+  makeRecipient: makeRecipient || (await maker.getAddress()), // Use makerAddress if makeRecipient is not provided
   salt,
   start,
   end,
@@ -50,9 +53,10 @@ export const OrderDefault = async (
 
 export function hashKey(order: Order): string {
   const encoded = AbiCoder.defaultAbiCoder().encode(
-    ['address', 'bytes32', 'bytes32', 'uint256'],
+    ['address', 'address', 'bytes32', 'bytes32', 'uint256'],
     [
       order.maker,
+      order.makeRecipient,
       hashAssetType(order.makeAsset.assetType),
       hashAssetType(order.takeAsset.assetType),
       order.salt,
@@ -72,7 +76,11 @@ export const getSymmetricOrder = async (
     takeAsset: o.makeAsset,
   };
   if (taker) {
-    return {...ret, maker: await taker.getAddress()};
+    return {
+      ...ret,
+      maker: await taker.getAddress(),
+      makeRecipient: await taker.getAddress(),
+    };
   }
   if (o.taker === ZeroAddress) {
     throw new Error(
@@ -90,6 +98,7 @@ export function hashOrder(order: Order): string {
       'bytes32',
       'address',
       'bytes32',
+      'address',
       'uint256',
       'uint256',
       'uint256',
@@ -100,6 +109,7 @@ export function hashOrder(order: Order): string {
       hashAsset(order.makeAsset),
       order.taker,
       hashAsset(order.takeAsset),
+      order.makeRecipient,
       order.salt,
       order.start,
       order.end,
@@ -135,6 +145,7 @@ export async function signOrder(
         {name: 'makeAsset', type: 'Asset'},
         {name: 'taker', type: 'address'},
         {name: 'takeAsset', type: 'Asset'},
+        {name: 'makeRecipient', type: 'address'},
         {name: 'salt', type: 'uint256'},
         {name: 'start', type: 'uint256'},
         {name: 'end', type: 'uint256'},

@@ -2,6 +2,7 @@ import '@nomicfoundation/hardhat-toolbox';
 import {HardhatUserConfig} from 'hardhat/config';
 import 'hardhat-storage-layout';
 import 'hardhat-contract-sizer';
+import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
   // solidity compiler version may be updated for new packages as required
@@ -18,6 +19,13 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  mocha: {
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
+  },
+  // TODO: Remove or at least check that the only contracts over the max size are mocks.
+  networks: {
+    hardhat: {allowUnlimitedContractSize: true},
   },
 };
 export default config;

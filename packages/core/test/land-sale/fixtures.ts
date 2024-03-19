@@ -1,9 +1,10 @@
 import {ethers, getNamedAccounts} from 'hardhat';
 import fs from 'fs-extra';
 import {SaltedProofSaleLandInfo} from '../../lib/merkleTreeHelper';
-import {Wallet} from 'ethers';
+import {BigNumber, Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {withSnapshot} from '../utils';
+import {originalAssetFixtures} from '../common/fixtures/asset';
 
 export const backendAuthWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
@@ -55,7 +56,7 @@ export const setupAuthValidator = withSnapshot(
 );
 
 export const setupEstateSale = withSnapshot(
-  ['EstateSaleWithAuth'],
+  ['EstateSaleWithAuth', 'AssetV1', 'Sand'],
   async function (hre) {
     const authValidatorContract = await ethers.getContract('AuthValidator');
     const estateSaleWithAuthContract = await ethers.getContract(
@@ -65,6 +66,16 @@ export const setupEstateSale = withSnapshot(
     const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
       './secret/estate-sale/hardhat/.proofs_0.json'
     );
+
+    // Set up asset for lands with bundleIds
+    const {originalAsset, mintAsset} = await originalAssetFixtures();
+    const {deployer} = await getNamedAccounts();
+    const tokenId = await mintAsset(deployer, 11);
+    await originalAsset[
+      'safeTransferFrom(address,address,uint256,uint256,bytes)'
+    ](deployer, estateSaleWithAuthContract.address, tokenId, 11, '0x');
+    // ---
+
     await transferSandToDeployer(proofs);
     const approveSandForEstateSale = async (address: string, price: string) => {
       const sandContractAsUser = sandContract.connect(
@@ -83,15 +94,18 @@ export const setupEstateSale = withSnapshot(
       proofs,
       hre,
       getNamedAccounts,
+      tokenId,
     };
   }
 );
 
 async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContract = await ethers.getContract('Sand');
-  const {deployer, sandBeneficiary} = await getNamedAccounts();
+  const {deployer, sandBeneficiary, sandboxAccount} = await getNamedAccounts();
   const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
-  await sandContractAsSandBeneficiary.transfer(deployer, proofs[0].price);
+  const sandAmount = BigNumber.from(proofs[2].price); // note: lands with asset bundleId carry premium price
+  await sandContractAsSandBeneficiary.transfer(deployer, sandAmount);
+  await sandContractAsSandBeneficiary.transfer(sandboxAccount, sandAmount); // reserved address
 }

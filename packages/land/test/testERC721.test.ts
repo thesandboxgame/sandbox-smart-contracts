@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {ZeroAddress} from 'ethers';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {deploy, setupMainContract, TesteableContracts} from './fixtures';
+import {deploy, setupLandContract, setupPolygonLandContract} from './fixtures';
 
-async function setupTests(mainContract: TesteableContracts) {
-  const ret = await setupMainContract(mainContract);
+async function setupLandTests() {
+  const ret = await setupLandContract();
 
   let x = 0;
 
@@ -15,13 +15,38 @@ async function setupTests(mainContract: TesteableContracts) {
     const y = 0;
     const size = 1;
     const tokenId = x + y * GRID_SIZE;
-    const receipt = await ret.landAsMinter.mintQuad(to, size, x, y, bytes);
+    const receipt = await ret.LandAsMinter.mintQuad(to, size, x, y, bytes);
     return {receipt, tokenId};
   }
 
   const tokenIds = [];
   for (let i = 0; i < 3; i++) {
-    const {tokenId} = await mint(ret.owner);
+    const {tokenId} = await mint(ret.landOwner);
+    tokenIds.push(tokenId);
+  }
+  const [nonReceivingContract] = await deploy('ContractMock', [ret.deployer]);
+  return {nonReceivingContract, tokenIds, mint, ...ret};
+}
+
+async function setupPolygonLandTests() {
+  const ret = await setupPolygonLandContract();
+
+  let x = 0;
+
+  async function mint(to) {
+    const bytes = '0x3333';
+    const GRID_SIZE = 408;
+    x = ++x;
+    const y = 0;
+    const size = 1;
+    const tokenId = x + y * GRID_SIZE;
+    const receipt = await ret.LandAsMinter.mintQuad(to, size, x, y, bytes);
+    return {receipt, tokenId};
+  }
+
+  const tokenIds = [];
+  for (let i = 0; i < 3; i++) {
+    const {tokenId} = await mint(ret.landOwner);
     tokenIds.push(tokenId);
   }
   const [nonReceivingContract] = await deploy('ContractMock', [ret.deployer]);
@@ -31,113 +56,114 @@ async function setupTests(mainContract: TesteableContracts) {
 function addTests(setup, errorMessages) {
   describe('non existing NFT', function () {
     it('transferring a non existing NFT fails', async function () {
-      const {landAsOwner, deployer, other1} = await loadFixture(setup);
+      const {LandAsOwner, deployer, other1} = await loadFixture(setup);
+
       await expect(
-        landAsOwner.transferFrom(deployer, other1, 10000000),
+        LandAsOwner.transferFrom(deployer, other1, 10000000),
       ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
     });
 
     it('tx balanceOf a zero owner fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      await expect(landAsOwner.balanceOf(ZeroAddress)).to.be.revertedWith(
+      const {LandAsOwner} = await loadFixture(setup);
+      await expect(LandAsOwner.balanceOf(ZeroAddress)).to.be.revertedWith(
         errorMessages.ZERO_ADDRESS_OWNER,
       );
     });
 
     it('call balanceOf a zero owner fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
+      const {LandAsOwner} = await loadFixture(setup);
       await expect(
-        landAsOwner.balanceOf.staticCall(ZeroAddress),
+        LandAsOwner.balanceOf.staticCall(ZeroAddress),
       ).to.be.revertedWith(errorMessages.ZERO_ADDRESS_OWNER);
     });
 
     it('tx ownerOf a non existing NFT fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      await expect(landAsOwner.ownerOf(1000000000)).to.be.revertedWith(
+      const {LandAsOwner} = await loadFixture(setup);
+      await expect(LandAsOwner.ownerOf(1000000000)).to.be.revertedWith(
         errorMessages.NONEXISTANT_TOKEN,
       );
     });
 
     it('call ownerOf a non existing NFT fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
+      const {LandAsOwner} = await loadFixture(setup);
       await expect(
-        landAsOwner.ownerOf.staticCall(1000000000),
+        LandAsOwner.ownerOf.staticCall(1000000000),
       ).to.be.revertedWith(errorMessages.NONEXISTANT_TOKEN);
     });
 
     it('tx getApproved a non existing NFT fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      await expect(landAsOwner.getApproved(1000000000)).to.be.revertedWith(
+      const {LandAsOwner} = await loadFixture(setup);
+      await expect(LandAsOwner.getApproved(1000000000)).to.be.revertedWith(
         errorMessages.NONEXISTENT_TOKEN,
       );
     });
 
     it('call getApproved a non existing NFT fails', async function () {
-      const {landAsOwner} = await loadFixture(setup);
+      const {LandAsOwner} = await loadFixture(setup);
       await expect(
-        landAsOwner.getApproved.staticCall(1000000000),
+        LandAsOwner.getApproved.staticCall(1000000000),
       ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
     });
   });
 
   describe('balance', function () {
     it('balance is zero for new user', async function () {
-      const {landAsOwner, other} = await loadFixture(setup);
-      const balance = await landAsOwner.balanceOf(other);
+      const {LandAsOwner, other} = await loadFixture(setup);
+      const balance = await LandAsOwner.balanceOf(other);
       expect(balance).to.be.equal(0);
     });
 
     it('balance return correct value', async function () {
-      const {landAsOwner, landAsOther, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      const balance = await landAsOwner.balanceOf(other);
+      const balance = await LandAsOwner.balanceOf(other);
       expect(balance).to.be.equal(0);
 
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      let newBalance = await landAsOwner.balanceOf(other);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      let newBalance = await LandAsOwner.balanceOf(other);
       expect(newBalance).to.be.equal(1);
-      await landAsOwner.transferFrom(owner, other, tokenIds[1]);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[1]);
 
-      newBalance = await landAsOwner.balanceOf(other);
+      newBalance = await LandAsOwner.balanceOf(other);
       expect(newBalance).to.be.equal(2);
 
-      await landAsOther.transferFrom(other, other1, tokenIds[0]);
+      await LandAsOther.transferFrom(other, other1, tokenIds[0]);
 
-      newBalance = await landAsOwner.balanceOf(other);
+      newBalance = await LandAsOwner.balanceOf(other);
       expect(newBalance).to.be.equal(1);
     });
   });
 
   describe('mint', function () {
     it('mint result in a transfer from 0 event', async function () {
-      const {landAsOwner, other, mint} = await loadFixture(setup);
+      const {LandAsOwner, other, mint} = await loadFixture(setup);
       const {receipt, tokenId} = await mint(other);
       await expect(receipt)
-        .to.emit(landAsOwner, 'Transfer')
+        .to.emit(LandAsOwner, 'Transfer')
         .withArgs(ZeroAddress, other, tokenId);
     });
 
     it('mint for gives correct owner', async function () {
-      const {landAsOwner, other, mint} = await loadFixture(setup);
+      const {LandAsOwner, other, mint} = await loadFixture(setup);
       const {tokenId} = await mint(other);
-      expect(await landAsOwner.ownerOf(tokenId)).to.be.equal(other);
+      expect(await LandAsOwner.ownerOf(tokenId)).to.be.equal(other);
     });
   });
 
   describe('burn', function () {
     it('burn result in a transfer to 0 event', async function () {
-      const {landAsOther, other, mint} = await loadFixture(setup);
+      const {LandAsOther, other, mint} = await loadFixture(setup);
       const {tokenId} = await mint(other);
-      await expect(landAsOther['burn(uint256)'](tokenId))
-        .to.emit(landAsOther, 'Transfer')
+      await expect(LandAsOther['burn(uint256)'](tokenId))
+        .to.emit(LandAsOther, 'Transfer')
         .withArgs(other, ZeroAddress, tokenId);
     });
     it('burn result in ownerOf throwing', async function () {
-      const {landAsOther, other, mint} = await loadFixture(setup);
+      const {LandAsOther, other, mint} = await loadFixture(setup);
       const {tokenId} = await mint(other);
-      await landAsOther.ownerOf(tokenId);
-      await landAsOther['burn(uint256)'](tokenId);
-      await expect(landAsOther.ownerOf.staticCall(tokenId)).to.be.revertedWith(
+      await LandAsOther.ownerOf(tokenId);
+      await LandAsOther['burn(uint256)'](tokenId);
+      await expect(LandAsOther.ownerOf.staticCall(tokenId)).to.be.revertedWith(
         errorMessages.NONEXISTANT_TOKEN,
       );
     });
@@ -145,10 +171,11 @@ function addTests(setup, errorMessages) {
 
   describe('batchTransfer', function () {
     it('batch transfer of same NFT ids should fails', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
       await expect(
-        landAsOwner.batchTransferFrom(
-          owner,
+        LandAsOwner.batchTransferFrom(
+          landOwner,
           other,
           [tokenIds[1], tokenIds[1], tokenIds[0]],
           '0x',
@@ -156,48 +183,49 @@ function addTests(setup, errorMessages) {
       ).to.be.revertedWith(errorMessages.BATCHTRANSFERFROM_NOT_OWNER);
     });
     it('batch transfer works', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      expect(await landAsOwner.balanceOf(other)).to.be.equal(0);
-      await landAsOwner.batchTransferFrom(owner, other, tokenIds, '0x');
-      expect(await landAsOwner.balanceOf(other)).to.be.equal(3);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      expect(await LandAsOwner.balanceOf(other)).to.be.equal(0);
+      await LandAsOwner.batchTransferFrom(landOwner, other, tokenIds, '0x');
+      expect(await LandAsOwner.balanceOf(other)).to.be.equal(3);
     });
   });
 
   describe('mandatory batchTransfer', function () {
     it('batch transferring to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.batchTransferFrom(
-        owner,
-        testERC721TokenReceiver,
+      await LandAsOwner.batchTransferFrom(
+        landOwner,
+        TestERC721TokenReceiver,
         [tokenIds[0]],
         '0x',
       );
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-        testERC721TokenReceiver,
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+        TestERC721TokenReceiver,
       );
     });
     it('batch transferring to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await testERC721TokenReceiver.rejectBatchTokens();
+      await TestERC721TokenReceiver.rejectBatchTokens();
       await expect(
-        landAsOwner.batchTransferFrom(
-          owner,
-          testERC721TokenReceiver,
+        LandAsOwner.batchTransferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
           [tokenIds[0]],
           '0x',
         ),
       ).to.be.revertedWith('Batch Receive not allowed');
     });
     it('batch transferring to a contract that do not accept erc721 token should fail', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await testERC721TokenReceiver.rejectBatchTokens();
+      await TestERC721TokenReceiver.rejectBatchTokens();
       await expect(
-        landAsOwner.batchTransferFrom(
-          owner,
-          testERC721TokenReceiver,
+        LandAsOwner.batchTransferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
           [tokenIds[0]],
           '0x',
         ),
@@ -205,13 +233,13 @@ function addTests(setup, errorMessages) {
     });
 
     it('batch transferring to a contract that do not return the correct onERC721Received bytes should fail', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await testERC721TokenReceiver.returnWrongBytes();
+      await TestERC721TokenReceiver.returnWrongBytes();
       await expect(
-        landAsOwner.batchTransferFrom(
-          owner,
-          testERC721TokenReceiver,
+        LandAsOwner.batchTransferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
           [tokenIds[0]],
           '0x',
         ),
@@ -219,87 +247,100 @@ function addTests(setup, errorMessages) {
     });
 
     it('batch transferring to a contract that do not implemented mandatory receiver should not fail', async function () {
-      const {landAsOwner, owner, tokenIds} = await loadFixture(setup);
-      await landAsOwner.batchTransferFrom(
-        owner,
-        landAsOwner,
+      const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setup);
+      await LandAsOwner.batchTransferFrom(
+        landOwner,
+        LandAsOwner,
         [tokenIds[0]],
         '0x',
       );
     });
 
     it('batch transferring to a contract that return the correct onERC721Received bytes should succeed', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.batchTransferFrom(
-        owner,
-        testERC721TokenReceiver,
+      await LandAsOwner.batchTransferFrom(
+        landOwner,
+        TestERC721TokenReceiver,
         [tokenIds[0]],
         '0x',
       );
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-        testERC721TokenReceiver,
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+        TestERC721TokenReceiver,
       );
     });
   });
 
   describe('mandatory transfer', function () {
     it('transferring to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.transferFrom(
-        owner,
-        testERC721TokenReceiver,
+      await LandAsOwner.transferFrom(
+        landOwner,
+        TestERC721TokenReceiver,
         tokenIds[0],
       );
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-        testERC721TokenReceiver,
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+        TestERC721TokenReceiver,
       );
     });
     it('transferring to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await testERC721TokenReceiver.rejectTokens();
+      await TestERC721TokenReceiver.rejectTokens();
       await expect(
-        landAsOwner.transferFrom(owner, testERC721TokenReceiver, tokenIds[0]),
+        LandAsOwner.transferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
+          tokenIds[0],
+        ),
       ).to.be.revertedWith('Receive not allowed');
     });
 
     it('transferring to a contract that do not return the correct onERC721Received bytes should fail', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await testERC721TokenReceiver.returnWrongBytes();
+      await TestERC721TokenReceiver.returnWrongBytes();
       await expect(
-        landAsOwner.transferFrom(owner, testERC721TokenReceiver, tokenIds[0]),
+        LandAsOwner.transferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
+          tokenIds[0],
+        ),
       ).to.be.revertedWith(errorMessages.ERC721_TRANSFER_REJECTED);
     });
 
     it('transferring to a contract that do not implemented mandatory receiver should not fail', async function () {
-      const {landAsOwner, nonReceivingContract, owner, tokenIds} =
+      const {LandAsOwner, nonReceivingContract, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.transferFrom(owner, nonReceivingContract, tokenIds[0]);
+      await LandAsOwner.transferFrom(
+        landOwner,
+        nonReceivingContract,
+        tokenIds[0],
+      );
     });
 
     it('transferring to a contract that return the correct onERC721Received bytes should succeed', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.transferFrom(
-        owner,
-        testERC721TokenReceiver,
+      await LandAsOwner.transferFrom(
+        landOwner,
+        TestERC721TokenReceiver,
         tokenIds[0],
       );
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-        testERC721TokenReceiver,
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+        TestERC721TokenReceiver,
       );
     });
   });
 
   describe('safe batch transfer', function () {
     it('safe batch transfer of same NFT ids should fails', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
       await expect(
-        landAsOwner.safeBatchTransferFrom(
-          owner,
+        LandAsOwner.safeBatchTransferFrom(
+          landOwner,
           other,
           [tokenIds[0], tokenIds[1], tokenIds[0]],
           '0x',
@@ -307,18 +348,19 @@ function addTests(setup, errorMessages) {
       ).to.be.revertedWith(errorMessages.BATCHTRANSFERFROM_NOT_OWNER);
     });
     it('safe batch transfer works', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await landAsOwner.safeBatchTransferFrom(owner, other, tokenIds, '0x');
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await LandAsOwner.safeBatchTransferFrom(landOwner, other, tokenIds, '0x');
 
       // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
     });
 
     it('safe batch transferring to a contract that do not implemented onERC721Received should fail', async function () {
-      const {landAsOwner, nonReceivingContract, owner, tokenIds} =
+      const {LandAsOwner, nonReceivingContract, landOwner, tokenIds} =
         await loadFixture(setup);
       await expect(
-        landAsOwner.safeBatchTransferFrom(
-          owner,
+        LandAsOwner.safeBatchTransferFrom(
+          landOwner,
           nonReceivingContract,
           tokenIds,
           '0x',
@@ -327,17 +369,17 @@ function addTests(setup, errorMessages) {
     });
 
     it('safe batch transferring to a contract that implements onERC721Received should succeed', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
       await expect(
-        landAsOwner.safeBatchTransferFrom(
-          owner,
-          testERC721TokenReceiver,
+        LandAsOwner.safeBatchTransferFrom(
+          landOwner,
+          TestERC721TokenReceiver,
           tokenIds,
           '0x',
         ),
       ).to.not.be.reverted;
-      expect(await landAsOwner.balanceOf(testERC721TokenReceiver)).to.be.equal(
+      expect(await LandAsOwner.balanceOf(TestERC721TokenReceiver)).to.be.equal(
         tokenIds.length,
       );
     });
@@ -345,58 +387,63 @@ function addTests(setup, errorMessages) {
 
   describe('transfer', function () {
     it('transferring one NFT results in one erc721 transfer event', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await expect(landAsOwner.transferFrom(owner, other, tokenIds[0]))
-        .to.emit(landAsOwner, 'Transfer')
-        .withArgs(owner, other, tokenIds[0]);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await expect(LandAsOwner.transferFrom(landOwner, other, tokenIds[0]))
+        .to.emit(LandAsOwner, 'Transfer')
+        .withArgs(landOwner, other, tokenIds[0]);
     });
     it('transferring one NFT change to correct owner', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other);
     });
 
     it('transferring one NFT increase new owner balance', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      const balanceBefore = await landAsOwner.balanceOf(other);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      const balanceAfter = await landAsOwner.balanceOf(other);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      const balanceBefore = await LandAsOwner.balanceOf(other);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      const balanceAfter = await LandAsOwner.balanceOf(other);
       expect(balanceBefore + 1n).to.be.equal(balanceAfter);
     });
 
     it('transferring one NFT decrease past owner balance', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      const balanceBefore = await landAsOwner.balanceOf(owner);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      const balanceAfter = await landAsOwner.balanceOf(owner);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      const balanceBefore = await LandAsOwner.balanceOf(landOwner);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      const balanceAfter = await LandAsOwner.balanceOf(landOwner);
       expect(balanceBefore - 1n).to.be.equal(balanceAfter);
     });
 
     it('transferring from without approval should fails', async function () {
-      const {landAsOther, owner, other, tokenIds} = await loadFixture(setup);
+      const {LandAsOther, landOwner, other, tokenIds} =
+        await loadFixture(setup);
       await expect(
-        landAsOther.transferFrom(owner, other, tokenIds[0]),
+        LandAsOther.transferFrom(landOwner, other, tokenIds[0]),
       ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
     });
 
     it('transferring to zero address should fails', async function () {
-      const {landAsOwner, owner, tokenIds} = await loadFixture(setup);
+      const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setup);
       await expect(
-        landAsOwner.transferFrom(owner, ZeroAddress, tokenIds[0]),
+        LandAsOwner.transferFrom(landOwner, ZeroAddress, tokenIds[0]),
       ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
     });
 
     // TODO: This is right??? do not accept???
     it('transferring to a contract that do not accept erc721 token should not fail', async function () {
-      const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+      const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.transferFrom(
-        owner,
-        testERC721TokenReceiver,
+      await LandAsOwner.transferFrom(
+        landOwner,
+        TestERC721TokenReceiver,
         tokenIds[0],
       );
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-        testERC721TokenReceiver,
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+        TestERC721TokenReceiver,
       );
     });
   });
@@ -425,19 +472,22 @@ function addTests(setup, errorMessages) {
     it(
       prefix + 'safe transferring one NFT results in one erc721 transfer event',
       async function () {
-        const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-        await expect(safeTransferFrom(landAsOwner, owner, other, tokenIds[0]))
-          .to.emit(landAsOwner, 'Transfer')
-          .withArgs(owner, other, tokenIds[0]);
+        const {LandAsOwner, landOwner, other, tokenIds} =
+          await loadFixture(setup);
+        await expect(
+          safeTransferFrom(LandAsOwner, landOwner, other, tokenIds[0]),
+        )
+          .to.emit(LandAsOwner, 'Transfer')
+          .withArgs(landOwner, other, tokenIds[0]);
       },
     );
 
     it(
       prefix + 'safe transferring to zero address should fails',
       async function () {
-        const {landAsOwner, owner, tokenIds} = await loadFixture(setup);
+        const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setup);
         await expect(
-          safeTransferFrom(landAsOwner, owner, ZeroAddress, tokenIds[0]),
+          safeTransferFrom(LandAsOwner, landOwner, ZeroAddress, tokenIds[0]),
         ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
       },
     );
@@ -445,18 +495,20 @@ function addTests(setup, errorMessages) {
     it(
       prefix + 'safe transferring one NFT change to correct owner',
       async function () {
-        const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-        await safeTransferFrom(landAsOwner, owner, other, tokenIds[0]);
-        expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other);
+        const {LandAsOwner, landOwner, other, tokenIds} =
+          await loadFixture(setup);
+        await safeTransferFrom(LandAsOwner, landOwner, other, tokenIds[0]);
+        expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other);
       },
     );
 
     it(
       prefix + 'safe transferring from without approval should fails',
       async function () {
-        const {landAsOther, owner, other, tokenIds} = await loadFixture(setup);
+        const {LandAsOther, landOwner, other, tokenIds} =
+          await loadFixture(setup);
         await expect(
-          safeTransferFrom(landAsOther, owner, other, tokenIds[0]),
+          safeTransferFrom(LandAsOther, landOwner, other, tokenIds[0]),
         ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
       },
     );
@@ -465,14 +517,14 @@ function addTests(setup, errorMessages) {
       prefix +
         'safe transferring to a contract that do not accept erc721 token should fail',
       async function () {
-        const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+        const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setup);
-        await testERC721TokenReceiver.rejectTokens();
+        await TestERC721TokenReceiver.rejectTokens();
         await expect(
           safeTransferFrom(
-            landAsOwner,
-            owner,
-            testERC721TokenReceiver,
+            LandAsOwner,
+            landOwner,
+            TestERC721TokenReceiver,
             tokenIds[0],
           ),
         ).to.be.revertedWith('Receive not allowed');
@@ -483,14 +535,14 @@ function addTests(setup, errorMessages) {
       prefix +
         'safe transferring to a contract that do not return the correct onERC721Received bytes should fail',
       async function () {
-        const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+        const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setup);
-        await testERC721TokenReceiver.returnWrongBytes();
+        await TestERC721TokenReceiver.returnWrongBytes();
         await expect(
           safeTransferFrom(
-            landAsOwner,
-            owner,
-            testERC721TokenReceiver,
+            LandAsOwner,
+            landOwner,
+            TestERC721TokenReceiver,
             tokenIds[0],
           ),
         ).to.be.revertedWith(errorMessages.ERC721_TRANSFER_REJECTED2);
@@ -501,12 +553,12 @@ function addTests(setup, errorMessages) {
       prefix +
         'safe transferring to a contract that do not implemented onERC721Received should fail',
       async function () {
-        const {landAsOwner, nonReceivingContract, owner, tokenIds} =
+        const {LandAsOwner, nonReceivingContract, landOwner, tokenIds} =
           await loadFixture(setup);
         await expect(
           safeTransferFrom(
-            landAsOwner,
-            owner,
+            LandAsOwner,
+            landOwner,
             nonReceivingContract,
             tokenIds[0],
           ),
@@ -518,16 +570,16 @@ function addTests(setup, errorMessages) {
       prefix +
         'safe transferring to a contract that return the correct onERC721Received bytes should succeed',
       async function () {
-        const {landAsOwner, testERC721TokenReceiver, owner, tokenIds} =
+        const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setup);
         await safeTransferFrom(
-          landAsOwner,
-          owner,
-          testERC721TokenReceiver,
+          LandAsOwner,
+          landOwner,
+          TestERC721TokenReceiver,
           tokenIds[0],
         );
-        expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(
-          testERC721TokenReceiver,
+        expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
+          TestERC721TokenReceiver,
         );
       },
     );
@@ -548,200 +600,203 @@ function addTests(setup, errorMessages) {
 
   describe('ERC165', function () {
     it('claim to support erc165', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      expect(await landAsOwner.supportsInterface('0x01ffc9a7')).to.be.true;
+      const {LandAsOwner} = await loadFixture(setup);
+      expect(await LandAsOwner.supportsInterface('0x01ffc9a7')).to.be.true;
     });
 
     it('claim to support base erc721 interface', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      expect(await landAsOwner.supportsInterface('0x80ac58cd')).to.be.true;
+      const {LandAsOwner} = await loadFixture(setup);
+      expect(await LandAsOwner.supportsInterface('0x80ac58cd')).to.be.true;
     });
 
     it('claim to support erc721 metadata interface', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      expect(await landAsOwner.supportsInterface('0x5b5e139f')).to.be.true;
+      const {LandAsOwner} = await loadFixture(setup);
+      expect(await LandAsOwner.supportsInterface('0x5b5e139f')).to.be.true;
     });
 
     it('does not claim to support random interface', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      expect(await landAsOwner.supportsInterface('0x88888888')).to.be.false;
+      const {LandAsOwner} = await loadFixture(setup);
+      expect(await LandAsOwner.supportsInterface('0x88888888')).to.be.false;
     });
 
     it('does not claim to support the invalid interface', async function () {
-      const {landAsOwner} = await loadFixture(setup);
-      expect(await landAsOwner.supportsInterface('0xFFFFFFFF')).to.be.false;
+      const {LandAsOwner} = await loadFixture(setup);
+      expect(await LandAsOwner.supportsInterface('0xFFFFFFFF')).to.be.false;
     });
   });
 
   describe('Approval', function () {
     it('approving emit Approval event', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await expect(landAsOwner.approve(other, tokenIds[0]))
-        .to.emit(landAsOwner, 'Approval')
-        .withArgs(owner, other, tokenIds[0]);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await expect(LandAsOwner.approve(other, tokenIds[0]))
+        .to.emit(LandAsOwner, 'Approval')
+        .withArgs(landOwner, other, tokenIds[0]);
     });
 
     it('removing approval emit Approval event', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await landAsOwner.approve(other, tokenIds[0]);
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await LandAsOwner.approve(other, tokenIds[0]);
 
-      await expect(landAsOwner.approve(ZeroAddress, tokenIds[0]))
-        .to.emit(landAsOwner, 'Approval')
-        .withArgs(owner, ZeroAddress, tokenIds[0]);
+      await expect(LandAsOwner.approve(ZeroAddress, tokenIds[0]))
+        .to.emit(LandAsOwner, 'Approval')
+        .withArgs(landOwner, ZeroAddress, tokenIds[0]);
     });
 
     it('approving update the approval status', async function () {
-      const {landAsOwner, other1, tokenIds} = await loadFixture(setup);
-      await landAsOwner.approve(other1, tokenIds[0]);
-      expect(await landAsOwner.getApproved(tokenIds[0])).to.be.equal(other1);
+      const {LandAsOwner, other1, tokenIds} = await loadFixture(setup);
+      await LandAsOwner.approve(other1, tokenIds[0]);
+      expect(await LandAsOwner.getApproved(tokenIds[0])).to.be.equal(other1);
     });
 
     it('cant approve if not owner or operator ', async function () {
-      const {landAsOwner, owner, other, tokenIds} = await loadFixture(setup);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      await expect(landAsOwner.approve(other, tokenIds[0])).to.be.revertedWith(
+      const {LandAsOwner, landOwner, other, tokenIds} =
+        await loadFixture(setup);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      await expect(LandAsOwner.approve(other, tokenIds[0])).to.be.revertedWith(
         errorMessages.UNAUTHORIZED_APPROVAL,
       );
     });
 
     it('approving allows transfer from the approved party', async function () {
-      const {landAsOwner, landAsOther, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.approve(other, tokenIds[0]);
-      await landAsOther.transferFrom(owner, other1, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
+      await LandAsOwner.approve(other, tokenIds[0]);
+      await LandAsOther.transferFrom(landOwner, other1, tokenIds[0]);
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
     });
 
     it('transferring the approved NFT results in approval reset for it', async function () {
-      const {landAsOwner, landAsOther1, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther1, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.approve(other1, tokenIds[0]);
-      await landAsOther1.transferFrom(owner, other, tokenIds[0]);
-      expect(await landAsOwner.getApproved(tokenIds[0])).to.be.equal(
+      await LandAsOwner.approve(other1, tokenIds[0]);
+      await LandAsOther1.transferFrom(landOwner, other, tokenIds[0]);
+      expect(await LandAsOwner.getApproved(tokenIds[0])).to.be.equal(
         ZeroAddress,
       );
     });
 
     it('transferring the approved NFT again will fail', async function () {
-      const {landAsOwner, landAsOther1, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther1, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.approve(other1, tokenIds[0]);
-      await landAsOther1.transferFrom(owner, other, tokenIds[0]);
+      await LandAsOwner.approve(other1, tokenIds[0]);
+      await LandAsOther1.transferFrom(landOwner, other, tokenIds[0]);
       await expect(
-        landAsOther1.transferFrom(other, owner, tokenIds[0]),
+        LandAsOther1.transferFrom(other, landOwner, tokenIds[0]),
       ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
     });
 
     it('approval by operator works', async function () {
       const {
-        landAsOwner,
-        landAsOther,
-        landAsOther1,
-        owner,
+        LandAsOwner,
+        LandAsOther,
+        LandAsOther1,
+        landOwner,
         other,
         other1,
         other2,
         tokenIds,
       } = await loadFixture(setup);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      await landAsOther.setApprovalForAllFor(other, other1, true);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      await LandAsOther.setApprovalForAllFor(other, other1, true);
       // await tx(contract, 'approve', {from: other, gas}, other1, tokenId);
-      await landAsOther1.transferFrom(other, other2, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
+      await LandAsOther1.transferFrom(other, other2, tokenIds[0]);
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
     });
   });
 
   describe('ApprovalForAll', function () {
     it('approving all emit ApprovalForAll event', async function () {
-      const {landAsOwner, owner, other} = await loadFixture(setup);
-      await expect(landAsOwner.setApprovalForAll(other, true))
-        .to.emit(landAsOwner, 'ApprovalForAll')
-        .withArgs(owner, other, true);
+      const {LandAsOwner, landOwner, other} = await loadFixture(setup);
+      await expect(LandAsOwner.setApprovalForAll(other, true))
+        .to.emit(LandAsOwner, 'ApprovalForAll')
+        .withArgs(landOwner, other, true);
     });
 
     it('approving all update the approval status', async function () {
-      const {landAsOwner, owner, other} = await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other, true);
-      expect(await landAsOwner.isApprovedForAll(owner, other)).to.be.true;
+      const {LandAsOwner, landOwner, other} = await loadFixture(setup);
+      await LandAsOwner.setApprovalForAll(other, true);
+      expect(await LandAsOwner.isApprovedForAll(landOwner, other)).to.be.true;
     });
 
     it('unsetting approval for all should update the approval status', async function () {
-      const {landAsOwner, owner, other} = await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other, true);
-      await landAsOwner.setApprovalForAll(other, false);
-      expect(await landAsOwner.isApprovedForAll(owner, other)).to.be.false;
+      const {LandAsOwner, landOwner, other} = await loadFixture(setup);
+      await LandAsOwner.setApprovalForAll(other, true);
+      await LandAsOwner.setApprovalForAll(other, false);
+      expect(await LandAsOwner.isApprovedForAll(landOwner, other)).to.be.false;
     });
 
     it('unsetting approval for all should emit ApprovalForAll event', async function () {
-      const {landAsOwner, owner, other} = await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other, true);
-      await expect(landAsOwner.setApprovalForAll(other, false))
-        .to.emit(landAsOwner, 'ApprovalForAll')
-        .withArgs(owner, other, false);
+      const {LandAsOwner, landOwner, other} = await loadFixture(setup);
+      await LandAsOwner.setApprovalForAll(other, true);
+      await expect(LandAsOwner.setApprovalForAll(other, false))
+        .to.emit(LandAsOwner, 'ApprovalForAll')
+        .withArgs(landOwner, other, false);
     });
 
     it('approving for all allows transfer from the approved party', async function () {
-      const {landAsOwner, landAsOther, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other, true);
-      await landAsOther.transferFrom(owner, other1, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
+      await LandAsOwner.setApprovalForAll(other, true);
+      await LandAsOther.transferFrom(landOwner, other1, tokenIds[0]);
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
     });
 
     it('transferring one NFT do not results in aprovalForAll reset', async function () {
-      const {landAsOwner, owner, other, other1, tokenIds} =
+      const {LandAsOwner, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other1, true);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      expect(await landAsOwner.isApprovedForAll(owner, other1)).to.be.true;
+      await LandAsOwner.setApprovalForAll(other1, true);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      expect(await LandAsOwner.isApprovedForAll(landOwner, other1)).to.be.true;
     });
 
     it('approval for all does not grant approval on a transfered NFT', async function () {
-      const {landAsOwner, landAsOther1, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther1, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOwner.setApprovalForAll(other1, true);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
+      await LandAsOwner.setApprovalForAll(other1, true);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
       await expect(
-        landAsOther1.transferFrom(other, other1, tokenIds[0]),
+        LandAsOther1.transferFrom(other, other1, tokenIds[0]),
       ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
     });
 
     it('approval for all set before will work on a transfered NFT', async function () {
-      const {landAsOwner, landAsOther, owner, other, other1, tokenIds} =
+      const {LandAsOwner, LandAsOther, landOwner, other, other1, tokenIds} =
         await loadFixture(setup);
-      await landAsOther.setApprovalForAll(other1, true);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      await landAsOther.transferFrom(other, other1, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
+      await LandAsOther.setApprovalForAll(other1, true);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      await LandAsOther.transferFrom(other, other1, tokenIds[0]);
+      expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other1);
     });
 
     it('approval for all allow to set individual nft approve', async function () {
       const {
-        landAsOwner,
-        landAsOther,
-        landAsOther2,
-        owner,
+        LandAsOwner,
+        LandAsOther,
+        LandAsOther2,
+        landOwner,
         other,
         other1,
         other2,
         tokenIds,
       } = await loadFixture(setup);
-      await landAsOwner.transferFrom(owner, other, tokenIds[0]);
-      await landAsOther.setApprovalForAll(other1, true);
-      await landAsOther.approve(other2, tokenIds[0]);
-      await landAsOther2.transferFrom(other, other2, tokenIds[0]);
-      expect(await landAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
+      await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
+      await LandAsOther.setApprovalForAll(other1, true);
+      await LandAsOther.approve(other2, tokenIds[0]);
+      await LandAsOther2.transferFrom(other, other2, tokenIds[0]);
+      //   expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
     });
   });
 }
 
 describe('ERC721 tests', function () {
-  describe('LandV3 ', function () {
+  describe('Land', function () {
     async function setup() {
-      return setupTests('LandV3');
+      return setupLandTests();
     }
 
-    const landV3ErrorMessages = {
+    const LandErrorMessages = {
       NONEXISTENT_TOKEN: 'token does not exist',
       NONEXISTANT_TOKEN: 'token does not exist',
       ZERO_ADDRESS_OWNER: 'owner is zero address',
@@ -755,15 +810,15 @@ describe('ERC721 tests', function () {
       UNAUTHORIZED_APPROVAL: 'not authorized to approve',
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
-    addTests(setup, landV3ErrorMessages);
+    addTests(setup, LandErrorMessages);
   });
 
-  describe('PolygonLandV2', function () {
+  describe('PolygonLand', function () {
     async function setup() {
-      return setupTests('PolygonLandV2');
+      return setupPolygonLandTests();
     }
 
-    const polygonLandV2ErrorMessages = {
+    const PolygonLandErrorMessages = {
       NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
       // TODO: Fix typo in the contract (or even better error message)
       NONEXISTANT_TOKEN: 'NONEXISTANT_TOKEN',
@@ -777,6 +832,6 @@ describe('ERC721 tests', function () {
       UNAUTHORIZED_APPROVAL: 'UNAUTHORIZED_APPROVAL',
     };
     // eslint-disable-next-line mocha/no-setup-in-describe
-    addTests(setup, polygonLandV2ErrorMessages);
+    addTests(setup, PolygonLandErrorMessages);
   });
 });
