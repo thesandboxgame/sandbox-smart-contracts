@@ -3,9 +3,10 @@ pragma solidity 0.8.23;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
-import {ILandMetadataRegistry} from "./common/ILandMetadataRegistry.sol";
+import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
+import {WithRoyalties} from "./common/WithRoyalties.sol";
+import {WithOwner} from "./common/WithOwner.sol";
 import {LandBase} from "./mainnet/LandBase.sol";
 
 /// @title Land Contract
@@ -13,17 +14,8 @@ import {LandBase} from "./mainnet/LandBase.sol";
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
-contract Land is LandBase, Initializable {
-    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-
-    IRoyaltyManager private _royaltyManager;
-    address private _owner;
-    ILandMetadataRegistry private _metadataRegistry;
-
+contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
     event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
-    event RoyaltyManagerSet(address indexed royaltyManager);
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-    event MetadataRegistrySet(address indexed metadataRegistry);
 
     /**
      * @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
@@ -80,33 +72,6 @@ contract Land is LandBase, Initializable {
         super.safeTransferFrom(from, to, id, "");
     }
 
-    /// @notice Returns how much royalty is owed and to whom based on ERC2981
-    /// @dev tokenId is one of the EIP2981 args for this function can't be removed
-    /// @param _salePrice the price of token on which the royalty is calculated
-    /// @return receiver the receiver of royalty
-    /// @return royaltyAmount the amount of royalty
-    function royaltyInfo(
-        uint256 /*_tokenId */,
-        uint256 _salePrice
-    ) external view returns (address receiver, uint256 royaltyAmount) {
-        uint16 royaltyBps;
-        (receiver, royaltyBps) = _royaltyManager.getRoyaltyInfo();
-        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
-        return (receiver, royaltyAmount);
-    }
-
-    /// @notice returns the royalty manager
-    /// @return royaltyManagerAddress of royalty manager contract.
-    function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        return _royaltyManager;
-    }
-
-    /// @notice Get the address of the owner
-    /// @return ownerAddress The address of the owner.
-    function owner() external view returns (address ownerAddress) {
-        return _owner;
-    }
-
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract
@@ -121,23 +86,6 @@ contract Land is LandBase, Initializable {
      */
     function symbol() external pure returns (string memory) {
         return "LAND";
-    }
-
-    /// @notice Get the address of the Metadata Registry
-    /// @return metadataRegistry The address of the Metadata Registry
-    function getMetadataRegistry() external view returns (ILandMetadataRegistry metadataRegistry) {
-        return _metadataRegistry;
-    }
-
-    /// @notice return the metadata for one land
-    /// @param tokenId the token id
-    /// @return premium true if the land is premium
-    /// @return neighborhoodId the number that identifies the neighborhood
-    /// @return neighborhoodName the neighborhood name
-    function getMetadata(
-        uint256 tokenId
-    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {
-        return _metadataRegistry.getMetadata(tokenId);
     }
 
     /**
@@ -238,22 +186,6 @@ contract Land is LandBase, Initializable {
             id == 0x5b5e139f ||
             id == 0x7f5828d0 ||
             id == type(IERC2981Upgradeable).interfaceId;
-    }
-
-    function _setRoyaltyManager(address royaltyManager) internal {
-        _royaltyManager = IRoyaltyManager(royaltyManager);
-        emit RoyaltyManagerSet(royaltyManager);
-    }
-
-    function _setMetadataRegistry(address metadataRegistry) internal {
-        require(metadataRegistry != address(0), "Invalid registry address");
-        _metadataRegistry = ILandMetadataRegistry(metadataRegistry);
-        emit MetadataRegistrySet(metadataRegistry);
-    }
-
-    function _transferOwnership(address newOwner) internal {
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
     }
 
     function uint2str(uint256 _i) internal pure returns (string memory) {
