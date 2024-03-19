@@ -9,7 +9,7 @@ import {LibMath} from "./LibMath.sol";
 /// @title Order Handling Library
 /// @notice Provides tools for constructing, hashing, and validating orders.
 library LibOrder {
-     bytes32 internal constant ORDER_TYPEHASH_V1 =
+    bytes32 internal constant ORDER_TYPEHASH_V1 =
         keccak256(
             "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
@@ -52,8 +52,9 @@ library LibOrder {
     /// @return The unique hash of the order.
     function hashKey(Order calldata order, OrderType version) internal pure returns (bytes32) {
         // ToDo: Try other ways of checking the order version to avoid if/else
-        if(version == OrderType.V1){
-            return keccak256(
+        if (version == OrderType.V1) {
+            return
+                keccak256(
                     abi.encode(
                         order.maker,
                         order.makeRecipient,
@@ -65,7 +66,8 @@ library LibOrder {
         } else {
             bytes memory makeAssetsEncoded = encodeAssets(order.makeAsset.asset);
             bytes memory takeAssetsEncoded = encodeAssets(order.takeAsset.asset);
-            return keccak256(
+            return
+                keccak256(
                     abi.encode(
                         order.maker,
                         order.makeRecipient,
@@ -82,34 +84,37 @@ library LibOrder {
     /// @return The complete hash of the order.
     function hash(Order calldata order, OrderType version) internal pure returns (bytes32) {
         // ToDo: Try other ways of checking the order version to avoid if/else
-        if(version == OrderType.V1){
+        if (version == OrderType.V1) {
             return
-            keccak256(
-                // solhint-disable-next-line func-named-parameters
-                abi.encode(
-                    ORDER_TYPEHASH_V1,
-                    order.maker,
-                    LibAsset.hash(order.makeAsset.asset[0]),
-                    order.taker,
-                    LibAsset.hash(order.takeAsset.asset[0]),
-                    order.makeRecipient,
-                    order.salt,
-                    order.start,
-                    order.end
-                )
-            );
+                keccak256(
+                    // solhint-disable-next-line func-named-parameters
+                    abi.encode(
+                        ORDER_TYPEHASH_V1,
+                        order.maker,
+                        LibAsset.hash(order.makeAsset.asset[0]),
+                        order.taker,
+                        LibAsset.hash(order.takeAsset.asset[0]),
+                        order.makeRecipient,
+                        order.salt,
+                        order.start,
+                        order.end
+                    )
+                );
         } else {
-            return keccak256(abi.encode(
-                ORDER_TYPEHASH_V2,
-                order.maker,
-                hashBundle(order.makeAsset),
-                order.taker,
-                hashBundle(order.takeAsset),
-                order.makeRecipient,
-                order.salt,
-                order.start,
-                order.end
-            ));
+            return
+                keccak256(
+                    abi.encode(
+                        ORDER_TYPEHASH_V2,
+                        order.maker,
+                        hashBundle(order.makeAsset),
+                        order.taker,
+                        hashBundle(order.takeAsset),
+                        order.makeRecipient,
+                        order.salt,
+                        order.start,
+                        order.end
+                    )
+                );
         }
     }
 
@@ -124,10 +129,7 @@ library LibOrder {
     }
 
     function hashBundle(Bundle memory bundle) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(
-            encodeAssets(bundle.asset),
-            bundle.amount
-        ));
+        return keccak256(abi.encodePacked(encodeAssets(bundle.asset), bundle.amount));
     }
 
     /// @notice Validates order time

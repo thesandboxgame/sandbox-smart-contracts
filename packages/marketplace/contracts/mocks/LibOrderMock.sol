@@ -23,6 +23,5 @@ contract LibOrderMock {
 
     function getHash(LibOrder.Order calldata order, LibOrder.OrderType version) external pure returns (bytes32) {
         return LibOrder.hash(order, version);
-        
     }
 }

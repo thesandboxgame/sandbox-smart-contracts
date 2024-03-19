@@ -8,9 +8,7 @@ import {
   Asset,
   AssetClassType,
 } from './utils/assets.ts';
-import {
-  deployLibAssetTest,
-} from './utils/fill';
+import {deployLibAssetTest} from './utils/fill';
 import {
   hashKey,
   hashOrder,
@@ -263,7 +261,7 @@ describe('Exchange.sol', function () {
   });
 
   describe('matchOrders validation', function () {
-    beforeEach(async function () {      
+    beforeEach(async function () {
       await ERC20Contract.mint(maker.getAddress(), 10000000000);
       await ERC20Contract.connect(maker).approve(
         await ExchangeContractAsUser.getAddress(),
@@ -296,7 +294,7 @@ describe('Exchange.sol', function () {
         0
       );
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin)
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     });
 
     it('should not execute match order if Exchange Contract is paused', async function () {

@@ -24,7 +24,7 @@ export const ORDER_TYPEHASH_V2 = keccak256(
 
 export enum OrderType {
   V1,
-  V2
+  V2,
 }
 
 export const UINT256_MAX_VALUE =
@@ -113,9 +113,8 @@ export const getSymmetricOrder = async (
   return {...ret, maker: o.taker};
 };
 
-export function hashOrder(order: Order, orderType: any): string { 
-
-  if(orderType === OrderType.V1){
+export function hashOrder(order: Order, orderType: any): string {
+  if (orderType === OrderType.V1) {
     const encoded = AbiCoder.defaultAbiCoder().encode(
       [
         'bytes32',
@@ -142,10 +141,12 @@ export function hashOrder(order: Order, orderType: any): string {
     );
     return keccak256(encoded);
   } else {
-    
     // Helper function to concatenate hashes of asset arrays
     function concatenateAssetHashes(assets: any) {
-      return assets.reduce((acc: any, asset: any) => acc + hashAsset(asset).slice(2), '0x');
+      return assets.reduce(
+        (acc: any, asset: any) => acc + hashAsset(asset).slice(2),
+        '0x'
+      );
     }
 
     // Hash and concatenate all makeAssets and takeAssets
@@ -199,36 +200,40 @@ export async function signOrder(
   // Define EIP-712 types dynamically based on the order structure
   const types = {
     AssetType: [
-      { name: 'assetClass', type: 'uint256' },
-      { name: 'data', type: 'bytes' },
+      {name: 'assetClass', type: 'uint256'},
+      {name: 'data', type: 'bytes'},
     ],
     Asset: [
-      { name: 'assetType', type: 'AssetType' },
-      { name: 'value', type: 'uint256' },
+      {name: 'assetType', type: 'AssetType'},
+      {name: 'value', type: 'uint256'},
     ],
     Order: [
-      { name: 'maker', type: 'address' },
-      { name: 'makeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]' },
-      { name: 'taker', type: 'address' },
-      { name: 'takeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]' },
-      { name: 'makeRecipient', type: 'address'},
-      { name: 'salt', type: 'uint256' },
-      { name: 'start', type: 'uint256' },
-      { name: 'end', type: 'uint256' },
+      {name: 'maker', type: 'address'},
+      {name: 'makeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]'},
+      {name: 'taker', type: 'address'},
+      {name: 'takeAsset', type: isOrderV1 ? 'Asset' : 'Asset[]'},
+      {name: 'makeRecipient', type: 'address'},
+      {name: 'salt', type: 'uint256'},
+      {name: 'start', type: 'uint256'},
+      {name: 'end', type: 'uint256'},
     ],
   };
 
   // Adjust the order data structure for EIP-712 signing
   const orderData = {
     ...order,
-    makeAsset: isOrderV1 ? order.makeAsset : order.makeAsset.map(asset => ({
-      assetType: { ...asset.assetType },
-      value: asset.value,
-    })),
-    takeAsset: isOrderV1 ? order.takeAsset : order.takeAsset.map(asset => ({
-      assetType: { ...asset.assetType },
-      value: asset.value,
-    })),
+    makeAsset: isOrderV1
+      ? order.makeAsset
+      : order.makeAsset.map((asset) => ({
+          assetType: {...asset.assetType},
+          value: asset.value,
+        })),
+    takeAsset: isOrderV1
+      ? order.takeAsset
+      : order.takeAsset.map((asset) => ({
+          assetType: {...asset.assetType},
+          value: asset.value,
+        })),
   };
 
   return account.signTypedData(domain, types, orderData);

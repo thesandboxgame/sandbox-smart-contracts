@@ -90,7 +90,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, await user1.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        await user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -109,7 +114,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('maker is not tx sender');
   });
 
@@ -128,7 +138,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -147,7 +162,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -166,7 +186,12 @@ describe('OrderValidator.sol', function () {
     order.maker = ZeroAddress;
     const signature = await signOrder(order, user2, OrderValidatorAsUser);
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('no maker');
   });
 
@@ -185,7 +210,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user2, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('signature verification error');
   });
 
@@ -204,7 +234,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -245,7 +280,12 @@ describe('OrderValidator.sol', function () {
     );
 
     await expect(
-      OrderValidatorAsUser.validate(order, '0x', user1.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        '0x',
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('signature verification error');
   });
 
@@ -262,8 +302,14 @@ describe('OrderValidator.sol', function () {
       0
     );
     await ERC1271Contract.setReturnSuccessfulValidSignature(true);
-    await expect(OrderValidatorAsUser.validate(order, '0x', user1.getAddress(), OrderType.V2))
-      .to.not.be.reverted;
+    await expect(
+      OrderValidatorAsUser.validate(
+        order,
+        '0x',
+        user1.getAddress(),
+        OrderType.V2
+      )
+    ).to.not.be.reverted;
   });
 
   it('should validate when whitelist is enabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
@@ -322,7 +368,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress(), OrderType.V2)
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 

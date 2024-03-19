@@ -98,10 +98,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
             paymentSide = right;
             nftSide = left;
         }
-         for (uint i = 0; i < nftSide.asset.length; i++) {
+        for (uint i = 0; i < nftSide.asset.length; i++) {
             // Transfer NFT or left side if FeeSide.NONE
             _transfer(nftSide.asset[i], nftSide.account, paymentSide.recipient);
-         }
+        }
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
             _transfer(paymentSide.asset[0], paymentSide.account, nftSide.recipient);
@@ -158,7 +158,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset[0].assetType, remainder), paymentSide.account, nftSide.recipient);
+            _transfer(
+                LibAsset.Asset(paymentSide.asset[0].assetType, remainder),
+                paymentSide.account,
+                nftSide.recipient
+            );
         }
     }
 

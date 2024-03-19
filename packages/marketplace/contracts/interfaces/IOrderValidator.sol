@@ -12,5 +12,10 @@ interface IOrderValidator {
     /// @param order Order to be validated
     /// @param signature Signature of order
     /// @param sender Order sender
-    function validate(LibOrder.Order memory order, bytes memory signature, address sender, LibOrder.OrderType orderType) external view;
+    function validate(
+        LibOrder.Order memory order,
+        bytes memory signature,
+        address sender,
+        LibOrder.OrderType orderType
+    ) external view;
 }

@@ -9,7 +9,13 @@ import {
   Asset,
 } from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, OrderType, signOrder, Order} from '../utils/order.ts';
+import {
+  hashKey,
+  OrderDefault,
+  OrderType,
+  signOrder,
+  Order,
+} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports

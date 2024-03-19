@@ -178,15 +178,15 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
         // ToDo: Check if we gonna still need the asset matched type (makeMatch and takeMatch)
         // maybe, now, only verifying the assetType is enough
-        for (uint i = 0; i < makeAssetLength; i++){
-             makeMatch[i] = LibAsset.matchAssets(
+        for (uint i = 0; i < makeAssetLength; i++) {
+            makeMatch[i] = LibAsset.matchAssets(
                 orderLeft.makeAsset.asset[i].assetType,
                 orderRight.takeAsset.asset[i].assetType
             );
         }
 
-        for (uint i = 0; i < takeAssetLength; i++){
-             takeMatch[i] = LibAsset.matchAssets(
+        for (uint i = 0; i < takeAssetLength; i++) {
+            takeMatch[i] = LibAsset.matchAssets(
                 orderLeft.takeAsset.asset[i].assetType,
                 orderRight.makeAsset.asset[i].assetType
             );
@@ -194,7 +194,13 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
 
         // ToDo: Check what to do with newFill
         // Maybe: add a new field in the DealSide -> Amount
-        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight, sigLeftVersion, sigRightVersion);
+        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(
+            sender,
+            orderLeft,
+            orderRight,
+            sigLeftVersion,
+            sigRightVersion
+        );
 
         LibAsset.FeeSide feeSide = LibAsset.getFeeSide(orderLeft.makeAsset.asset, orderLeft.takeAsset.asset);
 
