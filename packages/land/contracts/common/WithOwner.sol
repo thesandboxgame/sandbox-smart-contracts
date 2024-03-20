@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-/// @title Owner support (not Ownable)
+/// @title Owner support (EIP173)
 /// @author The Sandbox
 /// @notice Add an owner for the stores that need it
 contract WithOwner {

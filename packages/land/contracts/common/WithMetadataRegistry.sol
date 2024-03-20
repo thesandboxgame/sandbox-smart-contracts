@@ -4,9 +4,9 @@ pragma solidity 0.8.23;
 
 import {ILandMetadataRegistry} from "./ILandMetadataRegistry.sol";
 
-/// @title WithAdmin
+/// @title WithMetadataRegistry
 /// @author The Sandbox
-/// @notice Add an admin to the contract
+/// @notice Add the metadata registry
 abstract contract WithMetadataRegistry {
     event MetadataRegistrySet(address indexed metadataRegistry);
 
