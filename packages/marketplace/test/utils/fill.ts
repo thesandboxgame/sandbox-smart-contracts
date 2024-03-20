@@ -24,24 +24,26 @@ export const fillOrder = (makeValue: Numeric, takeValue: Numeric): Order => ({
   end: 0,
   start: 0,
   salt: 0,
-  makeAsset: [
-    {
+  makeAsset: {
+    asset: [{
       assetType: {
         assetClass: AssetClassType.INVALID_ASSET_CLASS,
         data: '0x',
       },
       value: makeValue,
-    },
-  ],
-  takeAsset: [
-    {
+    }],
+    amount: makeValue,
+  },
+  takeAsset: {
+    asset: [{
       assetType: {
         assetClass: AssetClassType.INVALID_ASSET_CLASS,
         data: '0x',
       },
       value: takeValue,
-    },
-  ],
+    }],
+    amount: takeValue,
+  },
 });
 
 export async function deployLibAssetTest() {

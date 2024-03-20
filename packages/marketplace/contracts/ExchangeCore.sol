@@ -24,7 +24,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
-        LibOrder.OrderType orderType; // Type of the Order (V1 or V2)
         LibOrder.Order orderLeft; // Left order details
         Signature signatureLeft; // Signature of the left order
         LibOrder.Order orderRight; // Right order details

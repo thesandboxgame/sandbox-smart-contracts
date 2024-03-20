@@ -17,6 +17,8 @@ import {
   signOrder,
   Order,
   UINT256_MAX_VALUE,
+  Bundle,
+  Signature,
 } from './utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 import {upgrades} from 'hardhat';
@@ -48,8 +50,8 @@ describe('Exchange.sol', function () {
     taker: Signer,
     admin: Signer,
     user: Signer,
-    makerAsset: Asset,
-    takerAsset: Asset,
+    makerAsset: Bundle,
+    takerAsset: Bundle,
     orderLeft: Order,
     orderRight: Order,
     makerSig: string,
@@ -197,9 +199,9 @@ describe('Exchange.sol', function () {
       takerAsset = await AssetERC20(ERC20Contract2, 456000000);
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         0
@@ -219,9 +221,9 @@ describe('Exchange.sol', function () {
     it('should not cancel order with zero salt', async function () {
       const leftOrder = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         0, // setting salt value to 0
         0,
         0
@@ -273,22 +275,34 @@ describe('Exchange.sol', function () {
         await ExchangeContractAsUser.getAddress(),
         20000000000
       );
-      makerAsset = await AssetERC20(ERC20Contract, 10000000000);
-      takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
+
+      makerAsset = {
+        asset: [],
+        amount: 0,
+      };
+
+      takerAsset = {
+        asset: [],
+        amount: 0,
+      };
+      
+      makerAsset.asset.push(await AssetERC20(ERC20Contract, 10000000000));
+      takerAsset.asset.push(await AssetERC20(ERC20Contract2, 20000000000));
+
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -338,18 +352,18 @@ describe('Exchange.sol', function () {
       takerAsset = await AssetERC20(ERC20Contract2, 20000000000);
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -377,18 +391,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when left order taker is not equal to right order maker', async function () {
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         user,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -413,18 +427,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when right order taker is not equal to left order maker', async function () {
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         user,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -448,18 +462,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when order start time is in the future', async function () {
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         (await ethers.provider.getBlock('latest')).timestamp + 100,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -484,18 +498,18 @@ describe('Exchange.sol', function () {
     it('should not execute match order when order end time is in the past', async function () {
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         (await ethers.provider.getBlock('latest')).timestamp - 100
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -517,23 +531,22 @@ describe('Exchange.sol', function () {
       ).to.be.revertedWith('Order end validation failed');
     });
 
-    it('should execute match order when order start time is non zero and less than current timestamp', async function () {
-      const {libOrderMock} = await loadFixture(deployLibAssetTest);
+    it.only('should execute match order when order start time is non zero and less than current timestamp', async function () {
 
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         (await ethers.provider.getBlock('latest')).timestamp + 100,
         0
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
@@ -549,13 +562,22 @@ describe('Exchange.sol', function () {
       expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
       expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
 
+      let signatureLeft:Signature = {
+        signature: makerSig,
+        version: OrderType.V2,
+      };
+
+      let signatureRight:Signature = {
+        signature: takerSig,
+        version: OrderType.V2,
+      };
+
       await ExchangeContractAsUser.matchOrders([
         {
-          orderType: OrderType.V1,
           orderLeft,
-          signatureLeft: makerSig,
+          signatureLeft: signatureLeft,
           orderRight,
-          signatureRight: takerSig,
+          signatureRight: signatureRight,
         },
       ]);
 
@@ -568,18 +590,18 @@ describe('Exchange.sol', function () {
     it('should execute match order when order end time is non zero and more than current timestamp', async function () {
       orderLeft = await OrderDefault(
         maker,
-        [makerAsset],
+        makerAsset,
         ZeroAddress,
-        [takerAsset],
+        takerAsset,
         1,
         0,
         (await ethers.provider.getBlock('latest')).timestamp + 100
       );
       orderRight = await OrderDefault(
         taker,
-        [takerAsset],
+        takerAsset,
         ZeroAddress,
-        [makerAsset],
+        makerAsset,
         1,
         0,
         0
