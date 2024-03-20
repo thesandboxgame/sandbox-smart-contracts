@@ -4,9 +4,9 @@ pragma solidity 0.8.23;
 
 import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
 
-/// @title RoyaltySupport
+/// @title WithRoyalties
 /// @author The Sandbox
-/// @notice Add royalty support to land contracts
+/// @notice Add royalty support to land contracts (EIP2981 implemented with our royalty manager)
 contract WithRoyalties {
     event RoyaltyManagerSet(address indexed royaltyManager);
 
