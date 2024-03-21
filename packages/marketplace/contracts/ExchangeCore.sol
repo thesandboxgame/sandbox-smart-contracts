@@ -16,18 +16,13 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 abstract contract ExchangeCore is Initializable, ITransferManager {
     using AddressUpgradeable for address;
 
-    struct Signature {
-        bytes signature;
-        LibOrder.OrderType version;
-    }
-
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
         LibOrder.Order orderLeft; // Left order details
-        Signature signatureLeft; // Signature of the left order
+        IOrderValidator.Signature signatureLeft; // Signature of the left order
         LibOrder.Order orderRight; // Right order details
-        Signature signatureRight; // Signature of the right order
+        IOrderValidator.Signature signatureRight; // Signature of the right order
     }
 
     /// @dev Address of the OrderValidator contract.
@@ -140,13 +135,13 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     function _validateOrders(
         address sender,
         LibOrder.Order memory orderLeft,
-        Signature memory signatureLeft,
+        IOrderValidator.Signature memory signatureLeft,
         LibOrder.Order memory orderRight,
-        Signature memory signatureRight
+        IOrderValidator.Signature memory signatureRight
     ) internal view {
         // validate must force order.maker != address(0)
-        orderValidator.validate(orderLeft, signatureLeft.signature, sender, signatureLeft.version);
-        orderValidator.validate(orderRight, signatureRight.signature, sender, signatureRight.version);
+        orderValidator.validate(orderLeft, signatureLeft, sender);
+        orderValidator.validate(orderRight, signatureRight, sender);
         if (orderLeft.taker != address(0)) {
             require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
