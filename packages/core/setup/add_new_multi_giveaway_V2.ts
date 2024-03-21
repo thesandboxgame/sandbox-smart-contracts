@@ -10,7 +10,7 @@ import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createClaimMerkleTreeV2} from '../data/giveaways/getClaimsV0';
+import {createClaimMerkleTreeV2} from '../data/giveaways/getClaimsV2';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 
 const {calculateMultiClaimHash} = helpers;
