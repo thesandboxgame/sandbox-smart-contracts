@@ -79,6 +79,7 @@ const config: HardhatUserConfig = {
       sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
       mumbai_test: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+      amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
@@ -90,6 +91,7 @@ const config: HardhatUserConfig = {
       sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
       mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     operationsAdmin: {
@@ -139,6 +141,7 @@ const config: HardhatUserConfig = {
       sepolia: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
       mumbai_test: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
+      amoy: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
 
     treasury: {
@@ -161,6 +164,7 @@ const config: HardhatUserConfig = {
       goerli_test: 5,
       sepolia: 5,
       mumbai: 5,
+      amoy: 5,
       mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
       polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
@@ -174,6 +178,7 @@ const config: HardhatUserConfig = {
       sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
       mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     gemsAndCatalystsAdmin: 'sandAdmin',
@@ -187,6 +192,7 @@ const config: HardhatUserConfig = {
       sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
       mumbai_test: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+      amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -204,6 +210,7 @@ const config: HardhatUserConfig = {
       goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      amoy: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e', // is this correct?
     },
     // To be used with AuthValidator only
     backendAuthWallet: {
@@ -216,6 +223,7 @@ const config: HardhatUserConfig = {
       sepolia: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
       polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
       mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      amoy: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     backendCashbackWallet: {
       // default is computed from private key:
@@ -273,6 +281,7 @@ const config: HardhatUserConfig = {
       goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       sepolia: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
+      //amoy?
     },
     landMigrationBatchExecutor: 'ozdRelayer',
     nftCollectionAdmin: {
@@ -343,7 +352,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('sepolia'),
       tags: ['testnet', 'L1'],
       companionNetworks: {
-        l2: 'mumbai',
+        l2: 'amoy',
       },
     },
     mainnet: {
@@ -372,6 +381,15 @@ const config: HardhatUserConfig = {
       //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'goerli_test',
+      },
+    },
+    amoy: {
+      url: node_url('amoy'),
+      accounts: accounts('amoy'),
+      tags: ['testnet', 'L2'],
+      deploy: ['deploy_polygon'],
+      companionNetworks: {
+        l1: 'sepolia',
       },
     },
     polygon: {
@@ -408,6 +426,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY_SEPOLIA || '',
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
       polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
+      polygonAmoy: process.env.ETHERSCAN_API_KEY_AMOY || '',
     },
   },
 };
