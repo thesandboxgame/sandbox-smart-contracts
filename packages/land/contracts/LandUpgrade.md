@@ -27,7 +27,7 @@ Some observations:
 # Inheritance structure comparison
 
 - In each contract a Base class was added (LandBase, PolygonLandBase)
-- All the classes bellow the Base class are abstract and keep the same
+- All the classes below the Base class are abstract and keep the same
   functionality they used to have in the old implementation.
 - Any access to variables is replaced by getters and setters to be implemented
   in each contract by the mixin.
@@ -36,63 +36,64 @@ Some observations:
 - There are two different mixins with different storage structures for each
   layer (LandStorageMixin, PolygonLandStorageMixin).
 
-## L1 before
+## Ethereum Land (L1) before
 
-```plantuml
-title Ethereum Land (L1)
-Land <|-- LandBaseToken
-Land <|-- OperatorFiltererUpgradeable
-LandBaseToken <|-- ERC721BaseToken
-ERC721BaseToken <|-- SuperOperators
-ERC721BaseToken <|-- MetaTransactionReceiver
-SuperOperators <|-- Admin
-MetaTransactionReceiver <|-- Admin
-
+```mermaid
+flowchart BT;
+    LandBaseToken-->Land;
+    OperatorFiltererUpgradeable-->Land;
+    ERC721BaseToken-->LandBaseToken;
+    MetaTransactionReceiver-->ERC721BaseToken;
+    SuperOperators-->ERC721BaseToken;
+    Admin-->SuperOperators;
+    Admin-->MetaTransactionReceiver;
 ```
 
-## L1 after
+## Ethereum Land (L1) after
 
-```plantuml
-title Ethereum Land (L1)
-Land <|-- LandBase
-Land <|-- Initializable
-LandBase <|-- LandStorageMixin
-LandBase <|-- LandBaseToken
-LandBase <|-- OperatorFiltererUpgradeable
-LandBaseToken <|-- ERC721BaseToken
-ERC721BaseToken <|-- WithSuperOperators
-ERC721BaseToken <|-- MetaTransactionReceiver
-MetaTransactionReceiver <|-- WithAdmin
-WithSuperOperators <|-- WithAdmin
-
+```mermaid
+flowchart BT;
+    LandBase:::foo-->Land;
+    Initializable-->Land;
+    LandStorageMixin:::foo-->LandBase;
+    LandBaseToken-->LandBase;
+    OperatorFiltererUpgradeable-->LandBase;
+    ERC721BaseToken-->LandBaseToken;
+    MetaTransactionReceiver-->ERC721BaseToken;
+    WithSuperOperators-->ERC721BaseToken;
+    WithAdmin-->WithSuperOperators;
+    WithAdmin-->MetaTransactionReceiver;
+    classDef foo stroke:#f00
 ```
 
-## L2 before
+## Ethereum PolygonLand (L2) before
 
-```plantuml
-title Ethereum PolygonLand (L2)
-PolygonLand <|-- PolygonLandBaseToken
-PolygonLand <|-- ERC2771Handler
-PolygonLand <|-- OperatorFiltererUpgradeable
-PolygonLandBaseToken <|-- ERC721BaseToken
-ERC721BaseToken <|-- WithSuperOperators
-WithSuperOperators <|-- WithAdmin
-WithAdmin <|-- ContextUpgradeable
-ContextUpgradeable  <|-- Initializable
+```mermaid
+flowchart BT;
+    PolygonLandBaseToken-->PolygonLand;
+    ERC2771Handler-->PolygonLand;
+    OperatorFiltererUpgradeable-->PolygonLand;
+    ERC721BaseToken-->PolygonLandBaseToken;
+    WithSuperOperators-->ERC721BaseToken;
+    WithAdmin-->WithSuperOperators;
+    ContextUpgradeable-->WithAdmin;
+    Initializable-->ContextUpgradeable;
 ```
 
-## L2 after
+## Ethereum PolygonLand (L2) after
 
-```plantuml
-title Ethereum PolygonLand (L2)
-PolygonLand <|-- PolygonLandBase
-PolygonLandBase <|-- PolygonLandStorageMixin
-PolygonLandBase <|-- PolygonLandBaseToken
-PolygonLandBase <|-- ERC2771Handler
-PolygonLandBase <|-- OperatorFiltererUpgradeable
-PolygonLandBaseToken <|-- ERC721BaseToken
-ERC721BaseToken <|-- WithSuperOperators
-WithSuperOperators <|-- WithAdmin
+```mermaid
+flowchart BT;
+    PolygonLandBase:::foo-->PolygonLand;
+    Initializable-->PolygonLand;
+    PolygonLandStorageMixin:::foo-->PolygonLandBase;
+    PolygonLandBaseToken-->PolygonLandBase;
+    ERC2771Handler-->PolygonLandBase;
+    OperatorFiltererUpgradeable-->PolygonLandBase;
+    ERC721BaseToken-->PolygonLandBaseToken;
+    WithSuperOperators-->ERC721BaseToken;
+    WithAdmin-->WithSuperOperators;
+    classDef foo stroke:#f00
 ```
 
 # Initializer
