@@ -3,20 +3,27 @@
 The intended audience for .md documentation is auditors, internal developers and
 external developer contributors.
 
-The LandRegistry contract implements a metadata registry for the
-[Land](../Land.md) and [PolygonLand](../PolygonLand.md) contracts
-
 # Features
 
 A [LAND](https://sandboxgame.gitbook.io/the-sandbox/land/what-is-land) is a
 digital piece of real-estate in The Sandbox's metaverse. Each LAND is a unique
 piece of the metaverse map which is a grid of 408x408 lands.
 
-This contact add the following metadata to each Land Token:
+We want to:
 
-- Premiumness: a flag that indicates if a land is premium. This will be used to
-  give benefits to owners of the land when they stake Sand and also for
-  governance.
+- store on-chain if a LAND is premium or regular, so we can gate some features
+  based on this information.
+- add an extra information on-chain to "categorize" a LAND with its
+  neighborhood, in order to be able to detect in which area/neighborhood this
+  LAND is located.
+
+The LandRegistry contract implements a metadata registry for the
+[Land](../Land.md) and [PolygonLand](../PolygonLand.md) contracts to store the
+premium and neighborhood information.
+
+Given a land TokenId we store:
+
+- Premiumness: a flag that indicates if a land is premium.
 - Neighborhood: Lands are grouped in neighborhoods. There are 127 different
   neighborhoods.
 
