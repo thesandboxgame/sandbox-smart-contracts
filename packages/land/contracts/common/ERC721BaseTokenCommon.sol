@@ -42,6 +42,15 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, WithSup
         return _isApprovedForAll(owner, operator);
     }
 
+    /// @notice Check if the contract supports an interface.
+    /// 0x01ffc9a7 is ERC-165.
+    /// 0x80ac58cd is ERC-721
+    /// @param id The id of the interface.
+    /// @return Whether the interface is supported.
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd;
+    }
+
     /// @dev Check if receiving contract accepts erc721 transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
