@@ -170,14 +170,6 @@ export async function setupLandContract() {
     other,
     other1,
     other2,
-    mintQuad: async (
-      to: Signer | string,
-      size: number,
-      x: number,
-      y: number,
-    ) => {
-      await LandAsMinter.mintQuad(to, size, x, y, '0x');
-    },
   };
 }
 
