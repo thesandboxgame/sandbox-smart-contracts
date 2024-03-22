@@ -260,17 +260,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
     }
 
     /**
-     * @notice Check if the contract supports an interface
-     * 0x01ffc9a7 is ERC-165
-     * 0x80ac58cd is ERC-721
-     * @param id The id of the interface
-     * @return True if the interface is supported
-     */
-    function supportsInterface(bytes4 id) external pure virtual returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd;
-    }
-
-    /**
      * @notice Set the approval for an operator to manage all the tokens of the sender
      * @param sender The address giving the approval
      * @param operator The address receiving the approval
