@@ -10,11 +10,7 @@ export async function setupPolygonLand() {
     to: Addressable | string,
     data = '',
   ) {
-    return ret.TrustedForwarderContract.execute(
-      typeof from === 'string' ? from : from,
-      typeof to === 'string' ? to : to,
-      data,
-    );
+    return ret.TrustedForwarderContract.execute(from, to, data);
   }
 
   return {sendMetaTx, ...ret};
