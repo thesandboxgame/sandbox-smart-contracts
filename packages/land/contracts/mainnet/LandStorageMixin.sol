@@ -20,7 +20,7 @@ import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 contract LandStorageMixin {
     address internal _admin;
     mapping(address => bool) internal _superOperators;
-    mapping(address => bool) internal _metaTransactionContracts;
+    mapping(address => bool) internal _metaTransactionContracts; // removed from the code, obsolete.
     /// @notice Number of NFT an address own
     mapping(address => uint256) internal _numNFTPerAddress;
     /**
@@ -53,14 +53,6 @@ contract LandStorageMixin {
 
     function _setSuperOperator(address superOperator, bool enabled) internal virtual {
         _superOperators[superOperator] = enabled;
-    }
-
-    function _isMetaTransactionContract(address who) internal view virtual returns (bool) {
-        return _metaTransactionContracts[who];
-    }
-
-    function _setMetaTransactionContract(address metaTransactionProcessor, bool enabled) internal virtual {
-        _metaTransactionContracts[metaTransactionProcessor] = enabled;
     }
 
     function _getNumNFTPerAddress(address who) internal view virtual returns (uint256) {

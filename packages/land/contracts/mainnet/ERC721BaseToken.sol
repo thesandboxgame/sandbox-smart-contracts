@@ -3,7 +3,6 @@ pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
-import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
 
 /**
  * @title ERC721BaseToken
@@ -11,7 +10,7 @@ import {MetaTransactionReceiver} from "./MetaTransactionReceiver.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionReceiver {
+abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     using AddressUpgradeable for address;
 
     /**
@@ -92,10 +91,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "sender is zero address");
-        require(
-            msgSender == sender || _isMetaTransactionContract(msgSender) || _isApprovedForAll(sender, msgSender),
-            "not authorized to approve"
-        );
+        require(msgSender == sender || _isApprovedForAll(sender, msgSender), "not authorized to approve");
         require(owner == sender, "owner != sender");
         _approveFor(owner, operator, id);
     }
@@ -132,18 +128,14 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param id The id of the token
-     * @return isMetaTx is it a meta-tx
      */
-    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
+    function _checkTransfer(address from, address to, uint256 id) internal view {
         address msgSender = _msgSender();
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
         if (msgSender != from) {
-            if (_isMetaTransactionContract(msgSender)) {
-                return true;
-            }
             require(
                 (operatorEnabled && _getOperator(id) == msgSender) || _isApprovedForAll(from, msgSender),
                 "not approved to transfer"
@@ -158,13 +150,10 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
      * @param id The id of the token
      */
     function transferFrom(address from, address to, uint256 id) public virtual {
-        bool metaTx = _checkTransfer(from, to, id);
+        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(
-                _checkOnERC721Received(metaTx ? from : _msgSender(), from, to, id, ""),
-                "erc721 transfer rejected by to"
-            );
+            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "erc721 transfer rejected by to");
         }
     }
 
@@ -176,13 +165,10 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
      * @param data Additional data
      */
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
-        bool metaTx = _checkTransfer(from, to, id);
+        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(
-                _checkOnERC721Received(metaTx ? from : _msgSender(), from, to, id, data),
-                "ERC721: transfer rejected by to"
-            );
+            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721: transfer rejected by to");
         }
     }
 
@@ -216,8 +202,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
      */
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
-        bool metaTx = msgSender != from && _isMetaTransactionContract(msgSender);
-        bool authorized = msgSender == from || metaTx || _isApprovedForAll(from, msgSender);
+        bool authorized = msgSender == from || _isApprovedForAll(from, msgSender);
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -237,16 +222,10 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
 
         if (to.isContract()) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-                require(
-                    _checkOnERC721BatchReceived(metaTx ? from : msgSender, from, to, ids, data),
-                    "erc721 batchTransfer rejected"
-                );
+                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "erc721 batchTransfer rejected");
             } else if (safe) {
                 for (uint256 i = 0; i < numTokens; i++) {
-                    require(
-                        _checkOnERC721Received(metaTx ? from : msgSender, from, to, ids[i], ""),
-                        "erc721 transfer rejected"
-                    );
+                    require(_checkOnERC721Received(msgSender, from, to, ids[i], ""), "erc721 transfer rejected");
                 }
             }
         }
@@ -272,10 +251,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
         address msgSender = _msgSender();
         require(sender != address(0), "Invalid sender address");
-        require(
-            msgSender == sender || _isMetaTransactionContract(msgSender) || _isSuperOperator(msgSender),
-            "not authorized"
-        );
+        require(msgSender == sender || _isSuperOperator(msgSender), "not authorized");
 
         _setApprovalForAll(sender, operator, approved);
     }
