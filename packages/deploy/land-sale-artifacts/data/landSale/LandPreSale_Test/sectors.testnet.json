@@ -19,6 +19,12 @@
         "coordinateY": 101,
         "ownerAddress": "",
         "bundleId": ""
+      },
+      {
+        "coordinateX": 103,
+        "coordinateY": 121,
+        "ownerAddress": "",
+        "bundleId": "0"
       }
     ],
     "estates": []
