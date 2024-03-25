@@ -6,16 +6,13 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   },
   "include": [
     "hardhat.config.ts",
     "./typechain-types",
-    "./deploy",
-    "./deploy_mocks",
-    "./utils",
-    "./tasks",
     "./test",
-    "./land-sale-artifacts"
-  ]
+    "./utils",
+    "**/*.ts",
+  ],
 }

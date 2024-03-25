@@ -22,7 +22,11 @@
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
     "@sandbox-smart-contracts/faucets": "0.0.1",
     "@sandbox-smart-contracts/giveaway": "0.0.3",
-    "@sandbox-smart-contracts/marketplace": "1.0.1"
+    "@sandbox-smart-contracts/land-sale": "workspace:^",
+    "@sandbox-smart-contracts/marketplace": "1.0.1",
+    "@urql/core": "^4.3.0",
+    "fs-extra": "^11.2.0",
+    "isomorphic-unfetch": "^4.0.2"
   },
   "files": [
     "deployments"
@@ -55,6 +59,7 @@
     "@typechain/hardhat": "^8.0.0",
     "@types/chai": "^4.3.5",
     "@types/eslint": "^8",
+    "@types/fs-extra": "^11",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.2.5",
     "@types/prettier": "^2",
