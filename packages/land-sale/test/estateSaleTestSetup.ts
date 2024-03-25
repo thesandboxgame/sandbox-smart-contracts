@@ -7,7 +7,7 @@ import {parseEther} from 'ethers';
 
 export async function runEstateSaleSetup() {
   const [
-    _,
+    deployer,
     landSaleAdmin,
     landSaleBeneficiary,
     backendReferralWallet,
@@ -18,6 +18,10 @@ export async function runEstateSaleSetup() {
     landRecipient,
     trustedForwarder,
   ] = await ethers.getSigners();
+
+  const proofInfo = fs.readJSONSync(
+    './test/data/secret/estate-sale/hardhat/.proofs_0.json',
+  );
 
   const LandFactory = await ethers.getContractFactory('MockPolygonLand');
   const PolygonLandContract = await LandFactory.deploy();
@@ -62,6 +66,15 @@ export async function runEstateSaleSetup() {
     AuthValidatorContract.getAddress(),
   );
 
+  // GIVE ASSET to EstateSaleContract
+  await AssetContract.connect(deployer).mint(
+    await EstateSaleContract.getAddress(),
+    // last proof has assetIds
+    proofInfo[3].assetIds[0],
+    1,
+    '0x',
+  );
+
   const deployEstateSaleContract = async ({
     expiryTime = deadline + 10 * 365 * 24 * 60 * 60,
   } = {}) => {
@@ -85,18 +98,23 @@ export async function runEstateSaleSetup() {
   const EstateSaleContractAsAdmin = EstateSaleContract.connect(landSaleAdmin);
 
   const singleLandSandPrice = parseEther('1011');
+  const premiumLandSandPrice = parseEther('4683');
+
+  const mintSand = async (to: HardhatEthersSigner, amount: bigint) => {
+    await SandContract.mint(to.address, amount);
+  };
 
   // SAND BALANCE CHANGES
   await SandContract.mint(landBuyer.address, singleLandSandPrice);
   await SandContract.connect(landBuyer).approve(
     await EstateSaleContract.getAddress(),
-    singleLandSandPrice,
+    ethers.MaxUint256,
   );
 
   await SandContract.mint(landBuyer2.address, singleLandSandPrice);
   await SandContract.connect(landBuyer2).approve(
     await EstateSaleContract.getAddress(),
-    singleLandSandPrice,
+    ethers.MaxUint256,
   );
 
   const signAuthMessageAs = async (
@@ -155,10 +173,6 @@ export async function runEstateSaleSetup() {
     );
   };
 
-  const proofInfo = fs.readJSONSync(
-    './test/data/secret/estate-sale/hardhat/.proofs_0.json',
-  );
-
   const buyLand = async ({
     estateSaleContract = EstateSaleContract,
     from = landBuyer,
@@ -209,11 +223,14 @@ export async function runEstateSaleSetup() {
   return {
     buyLand,
     deployEstateSaleContract,
+    mintSand,
     EstateSaleContractAsAdmin,
     EstateSaleContract,
     PolygonLandContract,
+    AssetContract,
     SandContract,
     newLandSaleBeneficiary,
+    premiumLandSandPrice,
     landSaleAdmin,
     landSaleBeneficiary,
     backendReferralWallet,

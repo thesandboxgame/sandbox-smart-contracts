@@ -90,6 +90,12 @@ describe('EstateSaleWithAuth (/packages/land-sale/contracts/EstateSaleWithAuth.s
             }),
           ).to.be.revertedWith('INVALID_LAND');
         });
+        it("shoudl revert if the buyer doesn't have enough funds", async function () {
+          const {buyLand, landBuyer} = await runEstateSaleSetup();
+          await expect(
+            buyLand({buyer: landBuyer, landIndex: 3}),
+          ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+        });
       });
       describe('Success', function () {
         it('should send the 5% land fee to the specified address', async function () {
@@ -132,7 +138,25 @@ describe('EstateSaleWithAuth (/packages/land-sale/contracts/EstateSaleWithAuth.s
           const {buyLand} = await runEstateSaleSetup();
           await expect(buyLand()).to.not.be.reverted;
         });
-        it("should send assets to the to's address", async function () {});
+        it("should send assets to the to's address for premium lands", async function () {
+          const {
+            buyLand,
+            proofInfo,
+            mintSand,
+            premiumLandSandPrice,
+            landBuyer,
+            AssetContract,
+          } = await runEstateSaleSetup();
+          const landIndex = 3;
+          const {assetIds} = proofInfo[landIndex];
+          await mintSand(landBuyer, premiumLandSandPrice);
+          await buyLand({landIndex});
+          const balance = await AssetContract.balanceOfBatch(
+            [landBuyer.address],
+            assetIds,
+          );
+          expect(balance[0]).to.equal(1);
+        });
       });
       describe('Events', function () {
         it("should emit NewReceivingWallet with the new wallet's address", async function () {
