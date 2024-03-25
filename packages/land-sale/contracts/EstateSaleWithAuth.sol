@@ -6,11 +6,10 @@ import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
-import "./ILandToken.sol";
+import "./interfaces/ILandToken.sol";
 import "./BaseWithStorage/MetaTransactionReceiver.sol";
 import "./ReferralValidator/ReferralValidator.sol";
-import "./AuthValidator.sol";
-import "hardhat/console.sol";
+import "./interfaces/IAuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
@@ -231,7 +230,7 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
     address internal immutable _feeDistributor;
 
     address payable internal _wallet;
-    AuthValidator internal _authValidator;
+    IAuthValidator internal _authValidator;
     uint256 internal immutable _expiryTime;
     bytes32 internal immutable _merkleRoot;
 
@@ -276,6 +275,6 @@ contract EstateSaleWithAuth is ReentrancyGuard, MetaTransactionReceiver, Referra
         _estate = estate;
         _asset = IERC1155(asset);
         _feeDistributor = feeDistributor;
-        _authValidator = AuthValidator(authValidator);
+        _authValidator = IAuthValidator(authValidator);
     }
 }

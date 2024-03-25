@@ -28,7 +28,8 @@ export async function runEstateSaleSetup() {
   const AssetFactory = await ethers.getContractFactory('MockPolygonAsset');
   const AssetContract = await AssetFactory.deploy();
 
-  const AuthValidatorFactory = await ethers.getContractFactory('AuthValidator');
+  const AuthValidatorFactory =
+    await ethers.getContractFactory('MockAuthValidator');
   const AuthValidatorContract = await AuthValidatorFactory.deploy(
     landSaleAdmin.address,
     backendReferralWallet.address,

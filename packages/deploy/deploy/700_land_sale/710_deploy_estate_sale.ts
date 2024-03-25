@@ -19,6 +19,12 @@ type SaleDeployment = {
 };
 
 const sales: SaleDeployment[] = [
+  {
+    name: 'LandPreSale_Test',
+    skip: async (hre: HardhatRuntimeEnvironment) => {
+      return hre.network.name !== 'hardhat';
+    },
+  },
   {name: 'LandPreSale_19', skip: async () => true},
   {name: 'LandPreSale_20', skip: async () => true},
   {name: 'LandPreSale_21', skip: async () => true},
@@ -31,7 +37,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_28', skip: async () => true},
   {name: 'LandPreSale_29', skip: async () => true},
   {name: 'LandPreSale_30', skip: async () => true},
-  {name: 'LandPreSale_31', skip: async () => false},
+  {name: 'LandPreSale_31', skip: async () => true},
 ];
 
 const func: DeployFunction = async function (hre) {

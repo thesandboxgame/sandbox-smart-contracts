@@ -2,9 +2,9 @@
 pragma solidity 0.6.5;
 
 import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
-import "./BaseWithStorage/Admin.sol";
+import "../BaseWithStorage/Admin.sol";
 
-contract AuthValidator is Admin {
+contract MockAuthValidator is Admin {
     address public _signingAuthWallet;
 
     event SigningWallet(address indexed signingWallet);

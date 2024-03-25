@@ -70,6 +70,7 @@
   "dependencies": {
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
+    "@sandbox-smart-contracts/core": "^0.0.1",
     "@urql/core": "^4.2.3",
     "fs-extra": "^11.2.0",
     "hardhat-deploy": "^0.11.45",

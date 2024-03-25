@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 import {runEstateSaleSetup} from './estateSaleTestSetup';
 import {expect} from './utils/chai-setup';
 
-describe.only('EstateSaleWithAuth (/packages/land-sale/contracts/EstateSaleWithAuth.sol)', function () {
+describe('EstateSaleWithAuth (/packages/land-sale/contracts/EstateSaleWithAuth.sol)', function () {
   it('should deploy the EstateSaleWithAuth contract', async function () {
     const {deployEstateSaleContract} = await runEstateSaleSetup();
     await expect(deployEstateSaleContract()).to.not.be.reverted;

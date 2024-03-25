@@ -6,7 +6,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, sandAdmin, backendAuthWallet} = await getNamedAccounts();
   await deploy('PolygonAuthValidator', {
-    contract: 'AuthValidator',
+    contract:
+      '@sandbox-smart-contracts/core/src/solc_0.6/EstateSale/AuthValidator.sol:AuthValidator',
     from: deployer,
     args: [sandAdmin, backendAuthWallet],
     log: true,
