@@ -42,7 +42,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param sender Address of the order sender.
     function validate(
         LibOrder.Order calldata order,
-        IOrderValidator.Signature memory signature,
+        bytes memory signature,
         address sender
     ) external view {
         require(order.maker != address(0), "no maker");
@@ -64,9 +64,9 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
             return;
         }
 
-        bytes32 hash = LibOrder.hash(order, signature.version);
+        bytes32 hash = LibOrder.hash(order);
 
-        require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature.signature), "signature verification error");
+        require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
     /// @notice Verifies if the asset exchange is affected by the whitelist.

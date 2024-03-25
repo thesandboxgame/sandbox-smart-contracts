@@ -39,6 +39,7 @@ library LibOrder {
         uint256 salt; // Random number to ensure unique order hash.
         uint256 start; // Timestamp when the order becomes valid.
         uint256 end; // Timestamp when the order expires.
+        OrderType orderVersion;
     }
 
     /// @dev Represents the result of filling two orders.
@@ -50,9 +51,9 @@ library LibOrder {
     /// @notice Computes the unique hash of an order.
     /// @param order The order data.
     /// @return The unique hash of the order.
-    function hashKey(Order calldata order, OrderType version) internal pure returns (bytes32) {
+    function hashKey(Order calldata order) internal pure returns (bytes32) {
         // ToDo: Try other ways of checking the order version to avoid if/else
-        if (version == OrderType.V1) {
+        if (order.orderVersion == OrderType.V1) {
             return
                 keccak256(
                     abi.encode(
@@ -82,9 +83,9 @@ library LibOrder {
     /// @notice Computes the complete hash of an order, including domain-specific data.
     /// @param order The order data.
     /// @return The complete hash of the order.
-    function hash(Order calldata order, OrderType version) internal pure returns (bytes32) {
+    function hash(Order calldata order) internal pure returns (bytes32) {
         // ToDo: Try other ways of checking the order version to avoid if/else
-        if (version == OrderType.V1) {
+        if (order.orderVersion == OrderType.V1) {
             return
                 keccak256(
                     // solhint-disable-next-line func-named-parameters
@@ -124,7 +125,6 @@ library LibOrder {
             // Concatenate the hash of each asset
             encodedAssets = abi.encodePacked(encodedAssets, LibAsset.hash(assets[i]));
         }
-
         return encodedAssets;
     }
 
