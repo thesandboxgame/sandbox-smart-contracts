@@ -92,10 +92,6 @@ export async function setupLandContract() {
     },
   );
 
-  const MetaTransactionContractFactory =
-    await ethers.getContractFactory('ContractMock');
-  const MetaTransactionContract = await MetaTransactionContractFactory.deploy();
-
   const MetadataRegistryFactory = await ethers.getContractFactory(
     'LandMetadataRegistryMock',
   );
@@ -131,7 +127,6 @@ export async function setupLandContract() {
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
   await LandAsAdmin.transferOwnership(landOwner);
   await LandAsAdmin.setRoyaltyManager(RoyaltyManagerContract);
-  await LandAsAdmin.setMetaTransactionProcessor(MetaTransactionContract, false);
   await LandAsAdmin.setMetadataRegistry(MetadataRegistryContract);
   const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
     contractRoyaltySetter,
@@ -143,7 +138,6 @@ export async function setupLandContract() {
 
   return {
     manager: RoyaltyManagerContract,
-    MetaTransactionContract,
     RoyaltySplitter,
     LandContract,
     LandAsAdmin,
@@ -211,10 +205,6 @@ export async function setupLandOperatorFilter() {
     },
   );
 
-  const MetaTransactionContractFactory =
-    await ethers.getContractFactory('ContractMock');
-  const MetaTransactionContract = await MetaTransactionContractFactory.deploy();
-
   const MetadataRegistryFactory = await ethers.getContractFactory(
     'LandMetadataRegistryMock',
   );
@@ -228,7 +218,6 @@ export async function setupLandOperatorFilter() {
   const LandAsAdmin = LandContract.connect(landAdmin);
   await LandAsAdmin.setMinter(landMinter, true);
   const LandAsMinter = LandContract.connect(landMinter);
-  await LandAsAdmin.setMetaTransactionProcessor(MetaTransactionContract, false);
   await LandAsAdmin.setMetadataRegistry(MetadataRegistryContract);
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);

@@ -74,7 +74,6 @@ contract LandMock is Land {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
-                _isMetaTransactionContract(msg.sender) ||
                 (operatorEnabled && _getOperator(id) == msg.sender) ||
                 _isApprovedForAll(from, msg.sender),
             "not authorized to burn"
