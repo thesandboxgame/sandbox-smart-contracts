@@ -15,12 +15,11 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approve(address operator, uint256 id) public virtual override {
-        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(owner == msgSender || _isApprovedForAll(owner, msgSender), "UNAUTHORIZED_APPROVAL");
-        _approveFor(ownerData, operator, id);
+        _approveFor(owner, operator, id);
     }
 
     /// @notice Approve an operator to spend tokens on the sender behalf.
@@ -28,14 +27,13 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approveFor(address sender, address operator, uint256 id) public virtual {
-        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(msgSender == sender || _isApprovedForAll(sender, msgSender), "UNAUTHORIZED_APPROVAL");
-        require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
-        _approveFor(ownerData, operator, id);
+        require(owner == sender, "OWNER_NOT_SENDER");
+        _approveFor(owner, operator, id);
     }
 
     /// @notice Transfer a token between 2 addresses.
@@ -180,8 +178,8 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     }
 
     /// @dev See approveFor.
-    function _approveFor(uint256 ownerData, address operator, uint256 id) internal {
-        address owner = _ownerOf(id);
+    function _approveFor(address owner, address operator, uint256 id) internal {
+        uint256 ownerData = _getOwnerData(id);
         if (operator == address(0)) {
             _updateOwnerData(id, ownerData, owner, false);
         } else {
