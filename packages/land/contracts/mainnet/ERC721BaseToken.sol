@@ -25,24 +25,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     }
 
     /**
-     * @notice Return the number of Land owned by an address
-     * @param owner The address to look for
-     * @return The number of Land token owned by the address
-     */
-    function balanceOf(address owner) external view returns (uint256) {
-        require(owner != address(0), "owner is zero address");
-        return _getNumNFTPerAddress(owner);
-    }
-
-    /**
-     * @param id token id
-     * @return address of the owner
-     */
-    function _ownerOf(uint256 id) internal view virtual returns (address) {
-        return _getOwnerAddress(id);
-    }
-
-    /**
      * @param id Token id
      * @return owner Address of the token's owner
      * @return operatorEnabled Is he an operator
@@ -53,16 +35,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         uint256 data = _getOwnerData(id);
         owner = address(uint160(data));
         operatorEnabled = (data / 2 ** 255) == 1;
-    }
-
-    /**
-     * @notice Return the owner of a Land
-     * @param id The id of the Land
-     * @return owner The address of the owner
-     */
-    function ownerOf(uint256 id) external view returns (address owner) {
-        owner = _ownerOf(id);
-        require(owner != address(0), "token does not exist");
     }
 
     /**

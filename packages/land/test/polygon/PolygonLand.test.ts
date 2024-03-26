@@ -483,8 +483,9 @@ describe('PolygonLand.sol', function () {
               }
             }
 
-            await expect(LandAsOther.ownerOf(0)).to.be.revertedWith(
-              'NONEXISTANT_TOKEN',
+            await expect(LandAsOther.ownerOf(0)).to.be.revertedWithCustomError(
+              LandAsOther,
+              'ERC721NonexistentToken',
             );
 
             await expect(
@@ -499,8 +500,9 @@ describe('PolygonLand.sol', function () {
             ).to.be.revertedWith('not owner');
 
             //check override
-            await expect(LandAsOther.ownerOf(0)).to.be.revertedWith(
-              'NONEXISTANT_TOKEN',
+            await expect(LandAsOther.ownerOf(0)).to.be.revertedWithCustomError(
+              LandAsOther,
+              'ERC721NonexistentToken',
             );
           }
         }
