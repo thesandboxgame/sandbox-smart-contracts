@@ -1,55 +1,25 @@
 //SPDX-License-Identifier: MIT
-/* solhint-disable func-order, code-complexity */
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {WithSuperOperators} from "./WithSuperOperators.sol";
-import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
+import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
 
 /// @title ERC721BaseToken
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOperators {
+abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     using AddressUpgradeable for address;
-
-    bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
-    bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
-
-    bytes4 internal constant ERC165ID = 0x01ffc9a7;
-    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
-
-    uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
-    uint256 internal constant OPERATOR_FLAG = (2 ** 255);
-    uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
-    uint256 internal constant BURNED_FLAG = (2 ** 160);
-
-    mapping(address => uint256) internal _numNFTPerAddress;
-    /**
-     * @dev mapping to store owner of lands and quads.
-     * For 1x1 lands it also the 255 bit is 1 if that land has operator approved and is 0 if no operator is approved.
-     * For burned 1x1 Land 160 bit is set to 1.
-     */
-    mapping(uint256 => uint256) internal _owners;
-    mapping(address => mapping(address => bool)) internal _operatorsForAll;
-    mapping(uint256 => address) internal _operators;
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approve(address operator, uint256 id) public virtual override {
-        uint256 ownerData = _owners[_storageId(id)];
+        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(
-            owner == msgSender || _operatorsForAll[owner][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
-        );
+        require(owner == msgSender || _isApprovedForAll(owner, msgSender), "UNAUTHORIZED_APPROVAL");
         _approveFor(ownerData, operator, id);
     }
 
@@ -58,15 +28,12 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approveFor(address sender, address operator, uint256 id) public virtual {
-        uint256 ownerData = _owners[_storageId(id)];
+        uint256 ownerData = _getOwnerData(id);
         address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(
-            msgSender == sender || _operatorsForAll[sender][msgSender] || _superOperators[msgSender],
-            "UNAUTHORIZED_APPROVAL"
-        );
+        require(msgSender == sender || _isApprovedForAll(sender, msgSender), "UNAUTHORIZED_APPROVAL");
         require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
         _approveFor(ownerData, operator, id);
     }
@@ -122,7 +89,7 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
         require(sender != address(0), "Invalid sender address");
         address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "UNAUTHORIZED_APPROVE_FOR_ALL");
+        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
 
         _setApprovalForAll(sender, operator, approved);
     }
@@ -149,9 +116,8 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
         address msgSender = _msgSender();
         require(
             msgSender == from ||
-                (operatorEnabled && _operators[id] == msgSender) ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[from][msgSender],
+                (operatorEnabled && _getOperator(id) == msgSender) ||
+                _isApprovedForAll(from, msgSender),
             "UNAUTHORIZED_BURN"
         );
         _burn(from, owner, id);
@@ -162,7 +128,7 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
     /// @return The number of tokens owned by the address.
     function balanceOf(address owner) external view override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS_OWNER");
-        return _numNFTPerAddress[owner];
+        return _getNumNFTPerAddress(owner);
     }
 
     /// @notice Get the owner of a token.
@@ -180,18 +146,10 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
         if (operatorEnabled) {
-            return _operators[id];
+            return _getOperator(id);
         } else {
             return address(0);
         }
-    }
-
-    /// @notice Check if the sender approved the operator.
-    /// @param owner The address of the owner.
-    /// @param operator The address of the operator.
-    /// @return isOperator The status of the approval.
-    function isApprovedForAll(address owner, address operator) external view override returns (bool) {
-        return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
     /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
@@ -207,39 +165,17 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
         }
     }
 
-    /// @notice Check if the contract supports an interface.
-    /// 0x01ffc9a7 is ERC-165.
-    /// 0x80ac58cd is ERC-721
-    /// @param id The id of the interface.
-    /// @return Whether the interface is supported.
-    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd;
-    }
-
-    /// @dev By overriding this function in an implementation which inherits this contract,
-    /// you can enable versioned tokenIds without the extra overhead of writing to a new storage slot in _owners each time a version is incremented.
-    /// See GameToken._storageId() for an example, where the storageId is the tokenId minus the version number.
-    /// !!! Caution !!! Overriding this function without taking appropriate care could lead to
-    /// ownerOf() returning an owner for non-existent tokens. Tests should be written to
-    /// guard against introducing this bug.
-    /// @param id The id of a token.
-    /// @return The id used for storage mappings.
-    function _storageId(uint256 id) internal view virtual returns (uint256) {
-        return id;
-    }
-
     function _updateOwnerData(uint256 id, uint256 oldData, address newOwner, bool hasOperator) internal virtual {
         if (hasOperator) {
-            _owners[_storageId(id)] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner));
+            _setOwnerData(id, (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner)));
         } else {
-            _owners[_storageId(id)] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(uint160(newOwner));
+            _setOwnerData(id, ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(uint160(newOwner)));
         }
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
-        _numNFTPerAddress[from]--;
-        _numNFTPerAddress[to]++;
-        _updateOwnerData(id, _owners[_storageId(id)], to, false);
+        _transferNumNFTPerAddress(from, to, 1);
+        _updateOwnerData(id, _getOwnerData(id), to, false);
         emit Transfer(from, to, id);
     }
 
@@ -250,7 +186,7 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
             _updateOwnerData(id, ownerData, owner, false);
         } else {
             _updateOwnerData(id, ownerData, owner, true);
-            _operators[id] = operator;
+            _setOperator(id, operator);
         }
         emit Approval(owner, operator, id);
     }
@@ -258,7 +194,7 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
     /// @dev See batchTransferFrom.
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
-        bool authorized = msgSender == from || _operatorsForAll[from][msgSender] || _superOperators[msgSender];
+        bool authorized = msgSender == from || _isApprovedForAll(from, msgSender);
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
@@ -268,13 +204,12 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
             uint256 id = ids[i];
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
-            require(authorized || (operatorEnabled && _operators[id] == msgSender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, _owners[_storageId(id)], to, false);
+            require(authorized || (operatorEnabled && _getOperator(id) == msgSender), "NOT_AUTHORIZED");
+            _updateOwnerData(id, _getOwnerData(id), to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
-            _numNFTPerAddress[from] -= numTokens;
-            _numNFTPerAddress[to] += numTokens;
+            _transferNumNFTPerAddress(from, to, numTokens);
         }
 
         if (to.isContract()) {
@@ -290,60 +225,23 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
 
     /// @dev See setApprovalForAll.
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
-        require(!_superOperators[operator], "INVALID_APPROVAL_CHANGE");
-        _operatorsForAll[sender][operator] = approved;
-
+        require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
+        _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
     }
 
     /// @dev See burn.
     function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "NOT_OWNER");
-        uint256 storageId = _storageId(id);
-        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
-        _numNFTPerAddress[from]--;
+        _setOwnerData(id, (_getOwnerData(id) & NOT_OPERATOR_FLAG) | BURNED_FLAG);
+        // record as non owner but keep track of last owner
+        _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
-    }
-
-    /// @dev Check if receiving contract accepts erc721 transfers.
-    /// @param operator The address of the operator.
-    /// @param from The from address, may be different from msg.sender.
-    /// @param to The address we want to transfer to.
-    /// @param tokenId The id of the token we would like to transfer.
-    /// @param _data Any additional data to send with the transfer.
-    /// @return Whether the expected value of 0x150b7a02 is returned.
-    function _checkOnERC721Received(
-        address operator,
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
-        return (retval == _ERC721_RECEIVED);
-    }
-
-    /// @dev Check if receiving contract accepts erc721 batch transfers.
-    /// @param operator The address of the operator.
-    /// @param from The from address, may be different from msg.sender.
-    /// @param to The address we want to transfer to.
-    /// @param ids The ids of the tokens we would like to transfer.
-    /// @param _data Any additional data to send with the transfer.
-    /// @return Whether the expected value of 0x4b808c46 is returned.
-    function _checkOnERC721BatchReceived(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        bytes memory _data
-    ) internal returns (bool) {
-        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
-        return (retval == _ERC721_BATCH_RECEIVED);
     }
 
     /// @dev See ownerOf
     function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _owners[_storageId(id)];
+        uint256 data = _getOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             return address(0);
         }
@@ -357,7 +255,7 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[_storageId(id)];
+        uint256 data = _getOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
@@ -378,32 +276,9 @@ contract ERC721BaseToken is ContextUpgradeable, IERC721Upgradeable, WithSuperOpe
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(
             msgSender == owner ||
-                _superOperators[msgSender] ||
-                _operatorsForAll[from][msgSender] ||
-                (operatorEnabled && _operators[id] == msgSender),
+                _isApprovedForAll(from, msgSender) ||
+                (operatorEnabled && _getOperator(id) == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
-    }
-
-    /// @dev Check if there was enough gas.
-    /// @param _contract The address of the contract to check.
-    /// @param interfaceId The id of the interface we want to test.
-    /// @return Whether or not this check succeeded.
-    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
     }
 }

@@ -1,17 +1,18 @@
-import {setupMainContract, setupOperatorFilter} from '../fixtures';
+import {setupPolygonLandContract} from '../fixtures';
 import {Addressable} from 'ethers';
+import {ethers} from 'hardhat';
 
 export async function setupPolygonLand() {
-  const ret = await setupMainContract('PolygonLandV2');
+  const ret = await setupPolygonLandContract();
 
   async function sendMetaTx(
     from: Addressable | string,
     to: Addressable | string,
     data = '',
   ) {
-    return ret.trustedForwarder.execute(
-      typeof from === 'string' ? from : await from.getAddress(),
-      typeof to === 'string' ? to : await to.getAddress(),
+    return ret.TrustedForwarderContract.execute(
+      typeof from === 'string' ? from : from,
+      typeof to === 'string' ? to : to,
       data,
     );
   }
@@ -19,6 +20,8 @@ export async function setupPolygonLand() {
   return {sendMetaTx, ...ret};
 }
 
-export async function setupPolygonLandOperatorFilter() {
-  return setupOperatorFilter('PolygonLandV2');
+export async function setupPolygonLandMock() {
+  const LandFactory = await ethers.getContractFactory('PolygonLandMock');
+  const landContract = await LandFactory.deploy();
+  return {landContract};
 }

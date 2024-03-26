@@ -2,50 +2,30 @@
 
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {PolygonLandBaseToken} from "./polygon/PolygonLandBaseToken.sol";
-import {ERC2771Handler} from "./polygon/ERC2771Handler.sol";
-import {IOperatorFilterRegistry} from "./polygon/IOperatorFilterRegistry.sol";
-import {OperatorFiltererUpgradeable} from "./polygon/OperatorFiltererUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyManager.sol";
+import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
+import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
+import {WithRoyalties} from "./common/WithRoyalties.sol";
+import {WithOwner} from "./common/WithOwner.sol";
+import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 
 /// @title LAND token on L2
-contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
-    using AddressUpgradeable for address;
-
-    uint16 internal constant TOTAL_BASIS_POINTS = 10000;
-
-    IRoyaltyManager private royaltyManager;
-
-    event OperatorRegistrySet(address indexed registry);
-    event RoyaltyManagerSet(address indexed _royaltyManager);
+/// @author The Sandbox
+/// @notice LAND contract
+/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+/// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
+contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, WithOwner {
+    event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
 
     /**
      * @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
-     * @param trustedForwarder TrustedForwarder address
      * @param admin Admin of the contract
-     * @param _royaltyManager address of the manager contract for common royalty recipient
-     * @param version version number to which PolygonLand contract is being upgraded
      */
-    function initialize(
-        address trustedForwarder,
-        address admin,
-        address _royaltyManager,
-        uint8 version
-    ) external reinitializer(version) {
-        _admin = admin;
-        __ERC2771Handler_initialize(trustedForwarder);
-        _setRoyaltyManager(_royaltyManager);
-        emit AdminChanged(address(0), _admin);
-    }
-
-    /// @notice set royalty manager
-    /// @param _royaltyManager address of royalty manager to set
-    function _setRoyaltyManager(address _royaltyManager) internal {
-        royaltyManager = IRoyaltyManager(_royaltyManager);
-        emit RoyaltyManagerSet(_royaltyManager);
+    function initialize(address admin) external initializer {
+        // We must be able to initialize the admin if this is a fresh deploy, but we want to
+        // be backward compatible with the current deployment
+        require(_getAdmin() == address(0), "already initialized");
+        _changeAdmin(admin);
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
@@ -55,33 +35,38 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
         emit TrustedForwarderSet(trustedForwarder);
     }
 
-    /// @notice Returns how much royalty is owed and to whom based on ERC2981
-    /// @dev tokenId is one of the EIP2981 args for this function can't be removed
-    /// @param _salePrice the price of token on which the royalty is calculated
-    /// @return receiver the receiver of royalty
-    /// @return royaltyAmount the amount of royalty
-    function royaltyInfo(
-        uint256 /*_tokenId */,
-        uint256 _salePrice
-    ) external view returns (address receiver, uint256 royaltyAmount) {
-        uint16 royaltyBps;
-        (receiver, royaltyBps) = royaltyManager.getRoyaltyInfo();
-        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
-        return (receiver, royaltyAmount);
+    /// @notice set royalty manager
+    /// @param royaltyManager address of the manager contract for common royalty recipient
+    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
+        _setRoyaltyManager(royaltyManager);
     }
 
-    /// @notice returns the royalty manager
-    /// @return royaltyManagerAddress address of royalty manager contract.
-    function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
-        return royaltyManager;
+    /// @notice sets address of the Metadata Registry
+    /// @param metadataRegistry The address of the rMetadata Registry
+    function setMetadataRegistry(address metadataRegistry) external onlyAdmin {
+        _setMetadataRegistry(metadataRegistry);
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address) {
-        return ERC2771Handler._msgSender();
+    /// @notice Set the address of the new owner of the contract
+    /// @param newOwner address of new owner
+    function transferOwnership(address newOwner) external onlyAdmin {
+        _transferOwnership(newOwner);
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
+    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
+    /// @dev can only be called by admin.
+    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+    /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
+        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function setOperatorRegistry(IOperatorFilterRegistry registry) external virtual onlyAdmin {
+        _setOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /**
@@ -171,26 +156,16 @@ contract PolygonLand is PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUp
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
      * 0x5b5e139f is ERC-721 metadata
+     * 0x7f5828d0 is ERC-173
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override(PolygonLandBaseToken) returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f || id == type(IERC2981Upgradeable).interfaceId;
-    }
-
-    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
-    /// @dev can only be called by admin.
-    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
-    /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
-    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
-        _register(subscriptionOrRegistrantToCopy, subscribe);
-    }
-
-    /// @notice sets filter registry address deployed in test
-    /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external virtual onlyAdmin {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
+        return
+            id == 0x01ffc9a7 ||
+            id == 0x80ac58cd ||
+            id == 0x5b5e139f ||
+            id == 0x7f5828d0 ||
+            id == type(IERC2981Upgradeable).interfaceId;
     }
 }

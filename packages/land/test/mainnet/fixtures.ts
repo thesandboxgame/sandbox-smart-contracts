@@ -1,9 +1,12 @@
-import {setupMainContract, setupOperatorFilter} from '../fixtures';
+import {setupLandContract} from '../fixtures';
+import {ethers} from 'hardhat';
 
 export async function setupLand() {
-  return setupMainContract('LandV3');
+  return setupLandContract();
 }
 
-export async function setupLandOperatorFilter() {
-  return setupOperatorFilter('LandV3');
+export async function setupLandMock() {
+  const LandFactory = await ethers.getContractFactory('LandMock');
+  const landContract = await LandFactory.deploy();
+  return {landContract};
 }

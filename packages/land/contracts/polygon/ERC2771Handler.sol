@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
 /**
@@ -11,8 +10,6 @@ pragma solidity 0.8.23;
  * with an initializer for proxies and a mutable forwarder
  */
 abstract contract ERC2771Handler {
-    address internal _trustedForwarder;
-
     event TrustedForwarderSet(address indexed newForwarder);
 
     /**
@@ -21,8 +18,8 @@ abstract contract ERC2771Handler {
      */
     // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_initialize(address forwarder) internal {
-        _trustedForwarder = forwarder;
-        emit TrustedForwarderSet(_trustedForwarder);
+        _setTrustedForwarder(forwarder);
+        emit TrustedForwarderSet(forwarder);
     }
 
     /**
@@ -30,8 +27,8 @@ abstract contract ERC2771Handler {
      * @param forwarder address to check
      * @return is trusted
      */
-    function isTrustedForwarder(address forwarder) public view returns (bool) {
-        return forwarder == _trustedForwarder;
+    function isTrustedForwarder(address forwarder) external view returns (bool) {
+        return _isTrustedForwarder(forwarder);
     }
 
     /**
@@ -39,7 +36,7 @@ abstract contract ERC2771Handler {
      * @return trustedForwarder address of the trusted forwarder
      */
     function getTrustedForwarder() external view returns (address) {
-        return _trustedForwarder;
+        return _getTrustedForwarder();
     }
 
     /**
@@ -47,14 +44,14 @@ abstract contract ERC2771Handler {
      * @return sender address of the real sender
      */
     function _msgSender() internal view virtual returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
+        if (_isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 sender := shr(96, calldataload(sub(calldatasize(), 20)))
             }
         } else {
-            return msg.sender;
+            sender = msg.sender;
         }
     }
 
@@ -63,10 +60,23 @@ abstract contract ERC2771Handler {
      * @return the real `msg.data`
      */
     function _msgData() internal view virtual returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
+        if (_isTrustedForwarder(msg.sender)) {
             return msg.data[:msg.data.length - 20];
         } else {
             return msg.data;
         }
+    }
+
+    function _getTrustedForwarder() internal view virtual returns (address);
+
+    function _setTrustedForwarder(address trustedForwarder) internal virtual;
+
+    /**
+     * @notice Checks if an address is a trusted forwarder
+     * @param forwarder address to check
+     * @return is trusted
+     */
+    function _isTrustedForwarder(address forwarder) internal view returns (bool) {
+        return forwarder == _getTrustedForwarder();
     }
 }

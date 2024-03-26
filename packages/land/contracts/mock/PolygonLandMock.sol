@@ -2,14 +2,19 @@
 
 pragma solidity 0.8.23;
 
-import {IOperatorFilterRegistry} from "../polygon/IOperatorFilterRegistry.sol";
 import {PolygonLand} from "../PolygonLand.sol";
 
 contract PolygonLandMock is PolygonLand {
-    /// @notice sets filter registry address deployed in test
-    /// @param registry the address of the registry
-    function setOperatorRegistry(address registry) external override {
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+    struct VarsStorage {
+        uint256 _admin;
+        uint256 _superOperators;
+        uint256 _numNFTPerAddress;
+        uint256 _owners;
+        uint256 _operatorsForAll;
+        uint256 _operators;
+        uint256 _minters;
+        uint256 _trustedForwarder;
+        uint256 operatorFilterRegistry;
     }
 
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
@@ -19,23 +24,36 @@ contract PolygonLandMock is PolygonLand {
         super._setApprovalForAll(msg.sender, operator, approved);
     }
 
-    /**
-     * @notice Mint a new quad without a minter (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
-     * @param user The recipient of the new quad
-     * @param size The size of the new quad
-     * @param x The top left x coordinate of the new quad
-     * @param y The top left y coordinate of the new quad
-     * @param data extra data to pass to the transfer
-     */
-    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external override {
-        _mintQuad(user, size, x, y, data);
-    }
-
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.can only be called by admin.
     /// @dev used to register contract and subscribe to the subscriptionOrRegistrantToCopy's black list.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
     function registerFilterer(address subscriptionOrRegistrantToCopy, bool subscribe) external {
         _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    function getStorageStructure() external pure returns (VarsStorage memory ret) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let i := 0
+            mstore(add(ret, i), _admin.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _superOperators.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _numNFTPerAddress.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _owners.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _operatorsForAll.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _operators.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _minters.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _trustedForwarder.slot)
+            i := add(i, 0x20)
+            mstore(add(ret, i), _operatorFilterRegistry.slot)
+            i := add(i, 0x20)
+        }
     }
 }

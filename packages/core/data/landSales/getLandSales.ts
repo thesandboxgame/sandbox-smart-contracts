@@ -367,7 +367,7 @@ export function writeProofs(
 ): void {
   if (
     hre.network.name !== 'hardhat' ||
-    landSaleName === 'EstateSaleWithAuth_0_0'
+    landSaleName === 'EstateSaleWithAuth_0_0' // used for L1 EstateSaleWithAuth tests
   ) {
     const landsWithProof: SaltedProofSaleLandInfo[] = [];
     for (const land of landSale.saltedLands) {
