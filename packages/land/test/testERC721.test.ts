@@ -65,30 +65,30 @@ function addTests(setup, errorMessages) {
 
     it('tx balanceOf a zero owner fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
-      await expect(LandAsOwner.balanceOf(ZeroAddress)).to.be.revertedWith(
-        errorMessages.ZERO_ADDRESS_OWNER,
-      );
+      await expect(
+        LandAsOwner.balanceOf(ZeroAddress),
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidOwner');
     });
 
     it('call balanceOf a zero owner fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
       await expect(
         LandAsOwner.balanceOf.staticCall(ZeroAddress),
-      ).to.be.revertedWith(errorMessages.ZERO_ADDRESS_OWNER);
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidOwner');
     });
 
     it('tx ownerOf a non existing NFT fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
-      await expect(LandAsOwner.ownerOf(1000000000)).to.be.revertedWith(
-        errorMessages.NONEXISTANT_TOKEN,
-      );
+      await expect(
+        LandAsOwner.ownerOf(1000000000),
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken');
     });
 
     it('call ownerOf a non existing NFT fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
       await expect(
         LandAsOwner.ownerOf.staticCall(1000000000),
-      ).to.be.revertedWith(errorMessages.NONEXISTANT_TOKEN);
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken');
     });
 
     it('tx getApproved a non existing NFT fails', async function () {
@@ -163,9 +163,9 @@ function addTests(setup, errorMessages) {
       const {tokenId} = await mint(other);
       await LandAsOther.ownerOf(tokenId);
       await LandAsOther['burn(uint256)'](tokenId);
-      await expect(LandAsOther.ownerOf.staticCall(tokenId)).to.be.revertedWith(
-        errorMessages.NONEXISTANT_TOKEN,
-      );
+      await expect(
+        LandAsOther.ownerOf.staticCall(tokenId),
+      ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
     });
   });
 
@@ -798,8 +798,6 @@ describe('ERC721 tests', function () {
 
     const LandErrorMessages = {
       NONEXISTENT_TOKEN: 'token does not exist',
-      NONEXISTANT_TOKEN: 'token does not exist',
-      ZERO_ADDRESS_OWNER: 'owner is zero address',
       BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
       ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
       ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
@@ -820,9 +818,6 @@ describe('ERC721 tests', function () {
 
     const PolygonLandErrorMessages = {
       NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
-      // TODO: Fix typo in the contract (or even better error message)
-      NONEXISTANT_TOKEN: 'NONEXISTANT_TOKEN',
-      ZERO_ADDRESS_OWNER: 'ZERO_ADDRESS_OWNER',
       BATCHTRANSFERFROM_NOT_OWNER: 'BATCHTRANSFERFROM_NOT_OWNER',
       ERC721_BATCH_RECEIVED_REJECTED: 'ERC721_BATCH_RECEIVED_REJECTED',
       ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',

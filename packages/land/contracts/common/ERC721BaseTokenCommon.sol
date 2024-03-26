@@ -5,6 +5,7 @@ import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC7
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
 import {IContext} from "./IContext.sol";
+import {IERC721Errors} from "./draft-IERC6093.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /**
@@ -13,7 +14,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
  */
-abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, WithSuperOperators {
+abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
 
@@ -24,6 +25,23 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, WithSup
     uint256 internal constant OPERATOR_FLAG = (2 ** 255);
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
+
+    /// @notice Get the number of tokens owned by an address.
+    /// @param owner The address to look for.
+    /// @return The number of tokens owned by the address.
+    function balanceOf(address owner) external view override returns (uint256) {
+        if (owner == address(0)) {
+            revert ERC721InvalidOwner(address(0));
+        }
+        return _getNumNFTPerAddress(owner);
+    }
+
+    /// @notice Get the owner of a token.
+    /// @param tokenId The id of the token.
+    /// @return owner The address of the token owner.
+    function ownerOf(uint256 tokenId) external view override returns (address owner) {
+        return _requireOwned(tokenId);
+    }
 
     /**
      * @notice Return the internal owner data of a Land
@@ -49,6 +67,31 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, WithSup
     /// @return Whether the interface is supported.
     function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
+    }
+
+    /// @param id token id
+    /// @return address of the owner
+    /// @dev See ownerOf
+    function _ownerOf(uint256 id) internal view virtual returns (address) {
+        uint256 data = _getOwnerData(id);
+        if ((data & BURNED_FLAG) == BURNED_FLAG) {
+            return address(0);
+        }
+        return address(uint160(data));
+    }
+
+    /**
+     * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
+     * Returns the owner.
+     *
+     * Overrides to ownership logic should be done to {_ownerOf}.
+     */
+    function _requireOwned(uint256 tokenId) internal view returns (address) {
+        address owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        return owner;
     }
 
     /// @dev Check if receiving contract accepts erc721 transfers.

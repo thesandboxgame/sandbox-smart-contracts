@@ -99,22 +99,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Get the number of tokens owned by an address.
-    /// @param owner The address to look for.
-    /// @return The number of tokens owned by the address.
-    function balanceOf(address owner) external view override returns (uint256) {
-        require(owner != address(0), "ZERO_ADDRESS_OWNER");
-        return _getNumNFTPerAddress(owner);
-    }
-
-    /// @notice Get the owner of a token.
-    /// @param id The id of the token.
-    /// @return owner The address of the token owner.
-    function ownerOf(uint256 id) external view override returns (address owner) {
-        owner = _ownerOf(id);
-        require(owner != address(0), "NONEXISTANT_TOKEN");
-    }
-
     /// @notice Get the approved operator for a specific token.
     /// @param id The id of the token.
     /// @return The address of the operator.
@@ -213,15 +197,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         // record as non owner but keep track of last owner
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
-    }
-
-    /// @dev See ownerOf
-    function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _getOwnerData(id);
-        if ((data & BURNED_FLAG) == BURNED_FLAG) {
-            return address(0);
-        }
-        return address(uint160(data));
     }
 
     /// @dev Get the owner and operatorEnabled status of a token.
