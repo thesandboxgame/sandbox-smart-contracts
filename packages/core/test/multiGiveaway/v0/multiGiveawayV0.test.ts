@@ -23,28 +23,11 @@ import {
 const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
-const emptyBytes32 =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
 const randomMerkleTree =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
-describe('Multi_Giveaway_V2', function () {
+describe('Multi_Giveaway_V0', function () {
   describe('Multi_Giveaway_common_functionality', function () {
-    it('Default admin has the correct role', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, sandAdmin} = setUp;
-      const defaultRole = emptyBytes32;
-      expect(await giveawayContract.hasRole(defaultRole, sandAdmin)).to.be.true;
-    });
-    it('Admin has the correct role', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, multiGiveawayAdmin, multiGiveawayRole} = setUp;
-      expect(
-        await giveawayContract.hasRole(multiGiveawayRole, multiGiveawayAdmin)
-      ).to.be.true;
-    });
     it('Default admin can add a new giveaway (but only because same address is being currently used)', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
@@ -81,23 +64,6 @@ describe('Multi_Giveaway_V2', function () {
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       );
     });
-    it("Admin can't add the same giveaway twice", async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsMultiGiveawayAdmin} = setUp;
-
-      await giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
-        randomMerkleTree,
-        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
-      );
-
-      await expect(
-        giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
-          randomMerkleTree,
-          '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
-        )
-      ).to.be.revertedWith('MULTIGIVEAWAY_ALREADY_EXISTS');
-    });
 
     it('Cannot add a new giveaway if not admin', async function () {
       const options = {};
@@ -115,33 +81,22 @@ describe('Multi_Giveaway_V2', function () {
         )
       ).to.be.reverted;
     });
-    it('Returns the expiry time of a giveaway', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsAdmin, allMerkleRoots} = setUp;
-
-      expect(
-        await giveawayContractAsAdmin.getExpiryTime(allMerkleRoots[0])
-      ).to.be.equal(
-        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
-      );
-    });
     it('User can get their claimed status', async function () {
       const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others, allClaims} = setUp;
-
-      const claim = [];
-      claim.push(allClaims[0][0]);
-      claim.push(allClaims[1][0]);
+      const {giveawayContract, others, allMerkleRoots} = setUp;
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
       );
 
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
+      userMerkleRoots.push(allMerkleRoots[1]);
+
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        claim
+        userMerkleRoots
       );
 
       expect(statuses[0]).to.equal(false);
@@ -186,7 +141,7 @@ describe('Multi_Giveaway_V2', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        userClaims
+        userMerkleRoots
       );
 
       expect(statuses[0]).to.equal(false);
@@ -200,7 +155,7 @@ describe('Multi_Giveaway_V2', function () {
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        userClaims
+        userMerkleRoots
       );
 
       expect(statusesAfterClaim[0]).to.equal(true);
@@ -234,6 +189,7 @@ describe('Multi_Giveaway_V2', function () {
         allTrees[1].getProof(calculateMultiClaimHash(userClaims[1]))
       );
       const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
       userMerkleRoots.push(allMerkleRoots[1]);
 
       const giveawayContractAsUser = await giveawayContract.connect(
@@ -242,7 +198,7 @@ describe('Multi_Giveaway_V2', function () {
 
       const statuses = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        userClaims
+        userMerkleRoots
       );
 
       expect(statuses[0]).to.equal(false);
@@ -251,14 +207,14 @@ describe('Multi_Giveaway_V2', function () {
       claimOnlyOne.push(secondClaim);
 
       await giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
-        userMerkleRoots,
+        [userMerkleRoots[1]],
         claimOnlyOne,
         userProofs
       );
 
       const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
         others[0],
-        userClaims
+        userMerkleRoots
       );
 
       expect(statusesAfterClaim[0]).to.equal(false);
@@ -743,7 +699,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED');
+      ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
     });
 
     it('User cannot claim from Giveaway contract if destination is not the reserved address', async function () {
@@ -821,7 +777,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS');
+      ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
     });
 
     it('User cannot claim from Giveaway contract to destination MultiGiveaway contract address', async function () {
@@ -860,7 +816,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT');
+      ).to.be.revertedWith('DESTINATION_MULTIGIVEAWAY_CONTRACT');
     });
 
     it('User cannot claim from Giveaway if ERC1155 contract address is zeroAddress', async function () {
@@ -1125,43 +1081,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER');
-    });
-
-    it('User cannot add a giveaway if expiryTime is 0', async function () {
-      const options = {
-        mint: true,
-        sand: true,
-      };
-      const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContractAsMultiGiveawayAdmin,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
-
-      const periodFinish = BigNumber.from(0); // expiryTime 0
-      const userProofs = [];
-      const userTrees = [];
-      userTrees.push(allTrees[0]);
-      const userClaims = [];
-      const claim = allClaims[0][0];
-      userClaims.push(claim);
-      for (let i = 0; i < userClaims.length; i++) {
-        userProofs.push(
-          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
-        );
-      }
-      const userMerkleRoots = [];
-      userMerkleRoots.push(allMerkleRoots[0]);
-
-      await expect(
-        giveawayContractAsMultiGiveawayAdmin.addNewGiveaway(
-          allMerkleRoots[0],
-          periodFinish
-        )
-      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
+      ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
     });
   });
 
@@ -1453,7 +1373,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
+      ).to.be.revertedWith('INVALID_INPUT');
     });
 
     it('User cannot claim from Giveaway contract if the claims array length does not match proofs array length', async function () {
@@ -1497,7 +1417,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_INPUT');
+      ).to.be.revertedWith('INVALID_INPUT');
     });
 
     it('User cannot claim allocated tokens from Giveaway contract more than once - multiple giveaways, 2 claims', async function () {
@@ -1550,7 +1470,7 @@ describe('Multi_Giveaway_V2', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED`);
+      ).to.be.revertedWith(`DESTINATION_ALREADY_CLAIMED`);
     });
   });
 
@@ -1748,36 +1668,10 @@ describe('Multi_Giveaway_V2', function () {
       );
       await expect(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
-      ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED');
+      ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
     });
   });
-  describe('Trusted_forwarder_and_meta-tx', function () {
-    it('should fail to set the trusted forwarder if not admin', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others} = setUp;
-      const user = others[5];
-      const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(user)
-      );
-      await expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be
-        .reverted;
-    });
-
-    it('should succeed in setting the trusted forwarder if admin', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {giveawayContractAsAdmin, others} = setUp;
-      const user = others[7];
-
-      await expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
-        .reverted;
-
-      expect(await giveawayContractAsAdmin.getTrustedForwarder()).to.be.equal(
-        user
-      );
-    });
-
+  describe('TMeta-tx', function () {
     it('claim with meta-tx: user can claim from single giveaway using single claim function', async function () {
       const options = {
         mint: true,

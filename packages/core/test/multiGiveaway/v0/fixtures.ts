@@ -130,8 +130,8 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
 
   await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
     from: deployer,
-    contract: 'MultiGiveawayV2',
-    args: [sandAdmin, multiGiveawayAdmin, trustedForwarder.address],
+    contract: 'MultiGiveawayV0',
+    args: [multiGiveawayAdmin],
   });
 
   const giveawayContract = await ethers.getContract(
@@ -146,7 +146,6 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
   );
 
   // Business-related admin is MULTIGIVEAWAY_ROLE (can call addNewGiveaway)
-  const multiGiveawayRole = await await giveawayContract.MULTIGIVEAWAY_ROLE();
   const giveawayContractAsMultiGiveawayAdmin = await ethers.getContract(
     'Test_Multi_Giveaway_1_with_ERC20',
     multiGiveawayAdmin
@@ -478,6 +477,5 @@ export const setupTestGiveaway = withSnapshot(['PolygonSand'], async function (
     trustedForwarder,
     multiGiveawayAdmin,
     sandAdmin,
-    multiGiveawayRole,
   };
 });
