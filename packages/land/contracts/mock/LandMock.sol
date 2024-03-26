@@ -59,4 +59,26 @@ contract LandMock is Land {
             i := add(i, 0x20)
         }
     }
+
+    /// @notice Burns token `id`.
+    /// @param id token which will be burnt.
+    function burn(uint256 id) external {
+        _burn(msg.sender, _ownerOf(id), id);
+    }
+
+    /// @notice Burn token`id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id token which will be burnt.
+    function burnFrom(address from, uint256 id) external {
+        require(from != address(0), "Invalid sender address");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        require(
+            msg.sender == from ||
+                _isMetaTransactionContract(msg.sender) ||
+                (operatorEnabled && _getOperator(id) == msg.sender) ||
+                _isApprovedForAll(from, msg.sender),
+            "not authorized to burn"
+        );
+        _burn(from, owner, id);
+    }
 }
