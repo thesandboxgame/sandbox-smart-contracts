@@ -312,27 +312,4 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon, MetaTransactionRecei
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
     }
-
-    /// @notice Burns token `id`.
-    /// @param id token which will be burnt.
-    function burn(uint256 id) external {
-        _burn(_msgSender(), _ownerOf(id), id);
-    }
-
-    /// @notice Burn token`id` from `from`.
-    /// @param from address whose token is to be burnt.
-    /// @param id token which will be burnt.
-    function burnFrom(address from, uint256 id) external {
-        address msgSender = _msgSender();
-        require(from != address(0), "Invalid sender address");
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(
-            msgSender == from ||
-                _isMetaTransactionContract(msgSender) ||
-                (operatorEnabled && _getOperator(id) == msgSender) ||
-                _isApprovedForAll(from, msgSender),
-            "not authorized to burn"
-        );
-        _burn(from, owner, id);
-    }
 }
