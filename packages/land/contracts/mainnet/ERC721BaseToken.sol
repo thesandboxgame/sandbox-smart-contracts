@@ -140,7 +140,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721: transfer rejected by to");
+            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "erc721 transfer rejected by to");
         }
     }
 
