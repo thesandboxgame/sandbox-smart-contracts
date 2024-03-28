@@ -93,16 +93,16 @@ function addTests(setup, errorMessages) {
 
     it('tx getApproved a non existing NFT fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
-      await expect(LandAsOwner.getApproved(1000000000)).to.be.revertedWith(
-        errorMessages.NONEXISTENT_TOKEN,
-      );
+      await expect(
+        LandAsOwner.getApproved(1000000000),
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken');
     });
 
     it('call getApproved a non existing NFT fails', async function () {
       const {LandAsOwner} = await loadFixture(setup);
       await expect(
         LandAsOwner.getApproved.staticCall(1000000000),
-      ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
+      ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken');
     });
   });
 

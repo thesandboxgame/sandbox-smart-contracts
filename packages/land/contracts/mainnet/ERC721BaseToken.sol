@@ -25,19 +25,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     }
 
     /**
-     * @param id Token id
-     * @return owner Address of the token's owner
-     * @return operatorEnabled Is he an operator
-     */
-    function _ownerAndOperatorEnabledOf(
-        uint256 id
-    ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _getOwnerData(id);
-        owner = address(uint160(data));
-        operatorEnabled = (data / 2 ** 255) == 1;
-    }
-
-    /**
      * @param owner The address giving the approval
      * @param operator The address receiving the approval
      * @param id The id of the token
@@ -79,21 +66,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         require(owner != address(0), "token does not exist");
         require(owner == msgSender || _isApprovedForAll(owner, msgSender), "not authorized to approve");
         _approveFor(owner, operator, id);
-    }
-
-    /**
-     * @notice Get the approved operator for a specific token
-     * @param id The id of the token
-     * @return The address of the operator
-     */
-    function getApproved(uint256 id) external view returns (address) {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(owner != address(0), "token does not exist");
-        if (operatorEnabled) {
-            return _getOperator(id);
-        } else {
-            return address(0);
-        }
     }
 
     /**
