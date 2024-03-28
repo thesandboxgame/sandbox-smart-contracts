@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {getId} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {setupLandOperatorFilter} from '../fixtures';
+import {setupLandOperatorFilter, setupLandForERC721Tests} from '../fixtures';
 import {setupLand, setupLandMock} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
@@ -13,8 +13,20 @@ import {shouldCheckMintQuad} from '../common/MintQuad.behavior';
 import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
 import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
 import {landConfig} from '../common/Config.behavior';
+import {shouldCheckForERC721} from '../common/ERC721.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
+
+const LandErrorMessages = {
+  NONEXISTENT_TOKEN: 'token does not exist',
+  ZERO_ADDRESS_OWNER: 'owner is zero address',
+  BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
+  ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
+  ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
+  UNAUTHORIZED_TRANSFER: 'not approved to transfer',
+  NOT_TO_ZEROADDRESS: "can't send to zero address",
+  UNAUTHORIZED_APPROVAL: 'not authorized to approve',
+};
 
 describe('Land.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
@@ -43,6 +55,9 @@ describe('Land.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   landConfig(setupLand, 'Land');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForERC721(setupLandForERC721Tests, LandErrorMessages, 'Land');
 
   it('should return the name of the token contract', async function () {
     const {LandContract} = await loadFixture(setupLand);

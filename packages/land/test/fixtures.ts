@@ -548,3 +548,60 @@ export async function setupPolygonLandOperatorFilter() {
     other1,
   };
 }
+
+export async function setupLandForERC721Tests() {
+  const ret = await setupLandContract();
+
+  let x = 0;
+
+  async function mint(to) {
+    const bytes = '0x3333';
+    const GRID_SIZE = 408;
+    x = ++x;
+    const y = 0;
+    const size = 1;
+    const tokenId = x + y * GRID_SIZE;
+    const receipt = await ret.LandAsMinter.mintQuad(to, size, x, y, bytes);
+    return {receipt, tokenId};
+  }
+
+  const tokenIds = [];
+  for (let i = 0; i < 3; i++) {
+    const {tokenId} = await mint(ret.landOwner);
+    tokenIds.push(tokenId);
+  }
+  const [nonReceivingContract] = await deploy('ContractMock', [ret.deployer]);
+
+  return {nonReceivingContract, tokenIds, mint, ...ret};
+}
+
+export async function setupPolygonLandForERC721Tests() {
+  const ret = await setupPolygonLandContract();
+
+  let x = 0;
+
+  async function mint(to) {
+    const bytes = '0x3333';
+    const GRID_SIZE = 408;
+    x = ++x;
+    const y = 0;
+    const size = 1;
+    const tokenId = x + y * GRID_SIZE;
+    const receipt = await ret.LandAsMinter.mintQuad(to, size, x, y, bytes);
+    return {receipt, tokenId};
+  }
+
+  const tokenIds = [];
+  for (let i = 0; i < 3; i++) {
+    const {tokenId} = await mint(ret.landOwner);
+    tokenIds.push(tokenId);
+  }
+  const [nonReceivingContract] = await deploy('ContractMock', [ret.deployer]);
+
+  return {
+    nonReceivingContract,
+    tokenIds,
+    mint,
+    ...ret,
+  };
+}

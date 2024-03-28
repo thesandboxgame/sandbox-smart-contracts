@@ -112,7 +112,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @return owner The address of the token owner.
     function ownerOf(uint256 id) external view override returns (address owner) {
         owner = _ownerOf(id);
-        require(owner != address(0), "NONEXISTANT_TOKEN");
+        require(owner != address(0), "NONEXISTENT_TOKEN");
     }
 
     /// @notice Get the approved operator for a specific token.
