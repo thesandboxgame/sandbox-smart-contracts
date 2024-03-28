@@ -99,19 +99,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Get the approved operator for a specific token.
-    /// @param id The id of the token.
-    /// @return The address of the operator.
-    function getApproved(uint256 id) external view override returns (address) {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        if (operatorEnabled) {
-            return _getOperator(id);
-        } else {
-            return address(0);
-        }
-    }
-
     /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
@@ -197,22 +184,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         // record as non owner but keep track of last owner
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), id);
-    }
-
-    /// @dev Get the owner and operatorEnabled status of a token.
-    /// @param id The token to query.
-    /// @return owner The owner of the token.
-    /// @return operatorEnabled Whether or not operators are enabled for this token.
-    function _ownerAndOperatorEnabledOf(
-        uint256 id
-    ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _getOwnerData(id);
-        if ((data & BURNED_FLAG) == BURNED_FLAG) {
-            owner = address(0);
-        } else {
-            owner = address(uint160(data));
-        }
-        operatorEnabled = (data & OPERATOR_FLAG) == OPERATOR_FLAG;
     }
 
     /// @dev Check whether a transfer is a meta Transaction or not.
