@@ -7,7 +7,7 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {AssetERC20, AssetERC721} from './utils/assets.ts';
 import {upgrades} from 'hardhat';
-import {OrderDefault, signOrder} from './utils/order.ts';
+import {OrderDefault, OrderType, signOrder} from './utils/order.ts';
 import {Contract, Signer, ZeroAddress} from 'ethers';
 
 import {shouldSupportInterfaces} from './common/SupportsInterface.behavior.ts';
@@ -80,9 +80,9 @@ describe('OrderValidator.sol', function () {
 
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -90,7 +90,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, await user1.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        await user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -99,9 +104,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       0,
       0,
       0
@@ -109,7 +114,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('maker is not tx sender');
   });
 
@@ -118,9 +128,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       0,
       0,
       0
@@ -128,7 +138,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -137,9 +152,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -147,7 +162,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -156,9 +176,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -166,7 +186,12 @@ describe('OrderValidator.sol', function () {
     order.maker = ZeroAddress;
     const signature = await signOrder(order, user2, OrderValidatorAsUser);
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('no maker');
   });
 
@@ -175,9 +200,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -185,7 +210,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user2, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('signature verification error');
   });
 
@@ -194,9 +224,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -204,7 +234,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user2.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 
@@ -213,9 +248,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       ERC1271Contract,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -225,7 +260,8 @@ describe('OrderValidator.sol', function () {
       OrderValidatorAsUser.validate(
         order,
         '0x',
-        await ERC1271Contract.getAddress()
+        await ERC1271Contract.getAddress(),
+        OrderType.V2
       )
     ).to.not.be.reverted;
   });
@@ -235,16 +271,21 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       ERC1271Contract,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
     );
 
     await expect(
-      OrderValidatorAsUser.validate(order, '0x', user1.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        '0x',
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.be.revertedWith('signature verification error');
   });
 
@@ -253,16 +294,22 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC20(ERC20Contract, 100);
     const order = await OrderDefault(
       ERC1271Contract,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
     );
     await ERC1271Contract.setReturnSuccessfulValidSignature(true);
-    await expect(OrderValidatorAsUser.validate(order, '0x', user1.getAddress()))
-      .to.not.be.reverted;
+    await expect(
+      OrderValidatorAsUser.validate(
+        order,
+        '0x',
+        user1.getAddress(),
+        OrderType.V2
+      )
+    ).to.not.be.reverted;
   });
 
   it('should validate when whitelist is enabled, TSB_ROLE is enabled and makeTokenAddress have TSB_ROLE', async function () {
@@ -311,9 +358,9 @@ describe('OrderValidator.sol', function () {
     const takerAsset = await AssetERC721(ERC721Contract, 100);
     const order = await OrderDefault(
       user1,
-      makerAsset,
+      [makerAsset],
       ZeroAddress,
-      takerAsset,
+      [takerAsset],
       1,
       0,
       0
@@ -321,7 +368,12 @@ describe('OrderValidator.sol', function () {
     const signature = await signOrder(order, user1, OrderValidatorAsUser);
 
     await expect(
-      OrderValidatorAsUser.validate(order, signature, user1.getAddress())
+      OrderValidatorAsUser.validate(
+        order,
+        signature,
+        user1.getAddress(),
+        OrderType.V2
+      )
     ).to.not.be.reverted;
   });
 

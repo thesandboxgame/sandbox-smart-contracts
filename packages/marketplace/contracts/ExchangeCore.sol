@@ -15,6 +15,7 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
     using AddressUpgradeable for address;
+
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
@@ -158,29 +159,57 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         LibOrder.Order calldata orderLeft,
         LibOrder.Order calldata orderRight
     ) internal {
-        LibAsset.AssetType memory makeMatch = LibAsset.matchAssets(
-            orderLeft.makeAsset.assetType,
-            orderRight.takeAsset.assetType
-        );
-        LibAsset.AssetType memory takeMatch = LibAsset.matchAssets(
-            orderLeft.takeAsset.assetType,
-            orderRight.makeAsset.assetType
+        uint256 makeAssetLength = orderLeft.makeAsset.asset.length;
+        LibAsset.AssetType[] memory makeMatch = new LibAsset.AssetType[](makeAssetLength);
+
+        uint256 takeAssetLength = orderLeft.takeAsset.asset.length;
+        LibAsset.AssetType[] memory takeMatch = new LibAsset.AssetType[](takeAssetLength);
+
+        require(makeAssetLength == orderRight.takeAsset.asset.length, "wrong make order length");
+        require(takeAssetLength == orderRight.makeAsset.asset.length, "wrong take order length");
+
+        // ToDo: Check if we gonna still need the asset matched type (makeMatch and takeMatch)
+        // maybe, now, only verifying the assetType is enough
+        for (uint i = 0; i < makeAssetLength; i++) {
+            makeMatch[i] = LibAsset.matchAssets(
+                orderLeft.makeAsset.asset[i].assetType,
+                orderRight.takeAsset.asset[i].assetType
+            );
+        }
+
+        for (uint i = 0; i < takeAssetLength; i++) {
+            takeMatch[i] = LibAsset.matchAssets(
+                orderLeft.takeAsset.asset[i].assetType,
+                orderRight.makeAsset.asset[i].assetType
+            );
+        }
+
+        // ToDo: Check what to do with newFill
+        // Maybe: add a new field in the DealSide -> Amount
+        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(
+            sender,
+            orderLeft,
+            orderRight
         );
 
-        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
+        LibAsset.FeeSide feeSide = LibAsset.getFeeSide(orderLeft.makeAsset.asset, orderLeft.takeAsset.asset);
 
         doTransfers(
             ITransferManager.DealSide(
-                LibAsset.Asset(makeMatch, newFill.leftValue),
+                // LibAsset.Asset(makeMatch, newFill.leftValue),
+                orderLeft.makeAsset.asset,
                 orderLeft.maker,
-                orderLeft.makeRecipient
+                orderLeft.makeRecipient,
+                newFill.leftValue // ToDo: check
             ),
             ITransferManager.DealSide(
-                LibAsset.Asset(takeMatch, newFill.rightValue),
+                // LibAsset.Asset(takeMatch, newFill.rightValue),
+                orderLeft.makeAsset.asset,
                 orderRight.maker,
-                orderRight.makeRecipient
+                orderRight.makeRecipient,
+                newFill.rightValue // ToDo: check
             ),
-            LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
+            feeSide
         );
     }
 

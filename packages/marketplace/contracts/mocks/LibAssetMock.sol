@@ -6,10 +6,10 @@ import {LibAsset} from "../libraries/LibAsset.sol";
 
 contract LibAssetMock {
     function getFeeSide(
-        LibAsset.AssetClass leftClass,
-        LibAsset.AssetClass rightClass
+        LibAsset.Asset[] memory leftAssets, 
+        LibAsset.Asset[] memory rightAssets
     ) external pure returns (LibAsset.FeeSide) {
-        return LibAsset.getFeeSide(leftClass, rightClass);
+        return LibAsset.getFeeSide(leftAssets, rightAssets);
     }
 
     /// @notice calculate if Asset types match with each other

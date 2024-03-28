@@ -20,4 +20,8 @@ contract LibOrderMock {
     ) external pure returns (uint256 makeAmount, uint256 takeAmount) {
         return LibOrder.calculateRemaining(order, fill);
     }
+
+    function getHash(LibOrder.Order calldata order) external pure returns (bytes32) {
+        return LibOrder.hash(order);
+    }
 }
