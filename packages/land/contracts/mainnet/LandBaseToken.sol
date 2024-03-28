@@ -677,16 +677,6 @@ abstract contract LandBaseToken is ERC721BaseToken {
         }
     }
 
-    /// @param id quad id
-    /// @return address of the owner
-    function _ownerOf(uint256 id) internal view override returns (address) {
-        require(id & LAYER == 0, "Invalid token id");
-        (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
-        require(x % size == 0, "x coordinate: Invalid token id");
-        require(y % size == 0, "y coordinate: Invalid token id");
-        return _ownerOfQuad(size, x, y);
-    }
-
     /// @param id token id
     /// @return owner owner of the token
     /// @return operatorEnabled is operator enabled

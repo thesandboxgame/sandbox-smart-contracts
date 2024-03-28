@@ -43,6 +43,21 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         return _requireOwned(tokenId);
     }
 
+    /// @notice Get the approved operator for a specific token.
+    /// @param tokenId The id of the token.
+    /// @return The address of the operator.
+    function getApproved(uint256 tokenId) external view override returns (address) {
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        if (operatorEnabled) {
+            return _getOperator(tokenId);
+        } else {
+            return address(0);
+        }
+    }
+
     /**
      * @notice Return the internal owner data of a Land
      * @param id The id of the Land
@@ -70,14 +85,25 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     }
 
     /// @param id token id
-    /// @return address of the owner
-    /// @dev See ownerOf
-    function _ownerOf(uint256 id) internal view virtual returns (address) {
+    /// @return owner address of the owner
+    function _ownerOf(uint256 id) internal view returns (address owner) {
+        (owner, ) = _ownerAndOperatorEnabledOf(id);
+    }
+
+    /// @dev Get the owner and operatorEnabled status of a token.
+    /// @param id The token to query.
+    /// @return owner The owner of the token.
+    /// @return operatorEnabled Whether or not operators are enabled for this token.
+    function _ownerAndOperatorEnabledOf(
+        uint256 id
+    ) internal view virtual returns (address owner, bool operatorEnabled) {
         uint256 data = _getOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
-            return address(0);
+            owner = address(0);
+        } else {
+            owner = address(uint160(data));
         }
-        return address(uint160(data));
+        operatorEnabled = (data & OPERATOR_FLAG) == OPERATOR_FLAG;
     }
 
     /**
