@@ -311,8 +311,6 @@ export function shouldCheckForERC721(
           tokenIds,
           '0x',
         );
-
-        // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
       });
 
       it('safe batch transferring to a contract that do not implemented onERC721Received should fail', async function () {
@@ -393,8 +391,7 @@ export function shouldCheckForERC721(
         ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
       });
 
-      // TODO: This is right??? do not accept???
-      it('transferring to a contract that do not accept erc721 token should not fail', async function () {
+      it('transferring to a contract that accepts erc721 token should not fail', async function () {
         const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setupLand);
         await LandAsOwner.transferFrom(
@@ -664,7 +661,6 @@ export function shouldCheckForERC721(
         } = await loadFixture(setupLand);
         await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
         await LandAsOther.setApprovalForAllFor(other, other1, true);
-        // await tx(contract, 'approve', {from: other, gas}, other1, tokenId);
         await LandAsOther1.transferFrom(other, other2, tokenIds[0]);
         expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
       });
@@ -751,7 +747,7 @@ export function shouldCheckForERC721(
         await LandAsOther.setApprovalForAll(other1, true);
         await LandAsOther.approve(other2, tokenIds[0]);
         await LandAsOther2.transferFrom(other, other2, tokenIds[0]);
-        //   expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
+        expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
       });
     });
   });
