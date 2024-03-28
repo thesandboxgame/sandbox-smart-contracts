@@ -1,6 +1,9 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupPolygonLandOperatorFilter} from '../fixtures';
+import {
+  setupPolygonLandOperatorFilter,
+  setupPolygonLandForERC721Tests,
+} from '../fixtures';
 import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
 import {ZeroAddress} from 'ethers';
 import {getId} from '../fixtures';
@@ -13,9 +16,21 @@ import {shouldCheckMintQuad} from '../common/MintQuad.behavior';
 import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
 import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
 import {landConfig} from '../common/Config.behavior';
+import {shouldCheckForERC721} from '../common/ERC721.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
+
+const PolygonLandErrorMessages = {
+  NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
+  ZERO_ADDRESS_OWNER: 'ZERO_ADDRESS_OWNER',
+  BATCHTRANSFERFROM_NOT_OWNER: 'BATCHTRANSFERFROM_NOT_OWNER',
+  ERC721_BATCH_RECEIVED_REJECTED: 'ERC721_BATCH_RECEIVED_REJECTED',
+  ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',
+  UNAUTHORIZED_TRANSFER: 'UNAUTHORIZED_TRANSFER',
+  NOT_TO_ZEROADDRESS: 'NOT_TO_ZEROADDRESS',
+  UNAUTHORIZED_APPROVAL: 'UNAUTHORIZED_APPROVAL',
+};
 
 // TODO: some test were testing the tunnel => not anymore. We need to check if we missed something.
 describe('PolygonLand.sol', function () {
@@ -45,6 +60,13 @@ describe('PolygonLand.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   landConfig(setupPolygonLand, 'PolygonLand');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForERC721(
+    setupPolygonLandForERC721Tests,
+    PolygonLandErrorMessages,
+    'PolygonLand',
+  );
 
   it('should return the name of the token contract', async function () {
     const {LandContract} = await loadFixture(setupPolygonLand);
@@ -500,9 +522,8 @@ describe('PolygonLand.sol', function () {
             ).to.be.revertedWith('not owner');
 
             //check override
-            await expect(LandAsOther.ownerOf(0)).to.be.revertedWithCustomError(
-              LandAsOther,
-              'ERC721NonexistentToken',
+            await expect(LandAsOther.ownerOf(0)).to.be.revertedWith(
+              'NONEXISTANT_TOKEN',
             );
           }
         }
