@@ -23,7 +23,6 @@ const GRID_SIZE = 408;
 
 const PolygonLandErrorMessages = {
   NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
-  ZERO_ADDRESS_OWNER: 'ZERO_ADDRESS_OWNER',
   BATCHTRANSFERFROM_NOT_OWNER: 'BATCHTRANSFERFROM_NOT_OWNER',
   ERC721_BATCH_RECEIVED_REJECTED: 'ERC721_BATCH_RECEIVED_REJECTED',
   ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',
@@ -505,10 +504,12 @@ describe('PolygonLand.sol', function () {
               }
             }
 
-            await expect(LandAsOther.ownerOf(0)).to.be.revertedWithCustomError(
-              LandAsOther,
-              'ERC721NonexistentToken',
-            );
+            await expect(LandAsOther.ownerOf(0))
+              .to.be.revertedWithCustomError(
+                LandAsOther,
+                'ERC721NonexistentToken',
+              )
+              .withArgs(0);
 
             await expect(
               LandAsOther.transferQuad(
@@ -522,9 +523,12 @@ describe('PolygonLand.sol', function () {
             ).to.be.revertedWith('not owner');
 
             //check override
-            await expect(LandAsOther.ownerOf(0)).to.be.revertedWith(
-              'NONEXISTANT_TOKEN',
-            );
+            await expect(LandAsOther.ownerOf(0))
+              .to.be.revertedWithCustomError(
+                LandAsOther,
+                'ERC721NonexistentToken',
+              )
+              .withArgs(0);
           }
         }
       });

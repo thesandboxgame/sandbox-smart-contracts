@@ -20,30 +20,30 @@ export function shouldCheckForERC721(
 
       it('tx balanceOf a zero owner fails', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
-        await expect(LandAsOwner.balanceOf(ZeroAddress)).to.be.revertedWith(
-          errorMessages.ZERO_ADDRESS_OWNER,
-        );
+        await expect(LandAsOwner.balanceOf(ZeroAddress))
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidOwner')
+          .withArgs(ZeroAddress);
       });
 
       it('call balanceOf a zero owner fails', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
-        await expect(
-          LandAsOwner.balanceOf.staticCall(ZeroAddress),
-        ).to.be.revertedWith(errorMessages.ZERO_ADDRESS_OWNER);
+        await expect(LandAsOwner.balanceOf.staticCall(ZeroAddress))
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidOwner')
+          .withArgs(ZeroAddress);
       });
 
       it('tx ownerOf a non existing NFT fails', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
-        await expect(LandAsOwner.ownerOf(1000000000)).to.be.revertedWith(
-          errorMessages.NONEXISTENT_TOKEN,
-        );
+        await expect(LandAsOwner.ownerOf(1000000000))
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken')
+          .withArgs(1000000000);
       });
 
       it('call ownerOf a non existing NFT fails', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
-        await expect(
-          LandAsOwner.ownerOf.staticCall(1000000000),
-        ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
+        await expect(LandAsOwner.ownerOf.staticCall(1000000000))
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken')
+          .withArgs(1000000000);
       });
 
       it('tx getApproved a non existing NFT fails', async function () {
@@ -118,9 +118,9 @@ export function shouldCheckForERC721(
         const {tokenId} = await mint(other);
         await LandAsOther.ownerOf(tokenId);
         await LandAsOther['burn(uint256)'](tokenId);
-        await expect(
-          LandAsOther.ownerOf.staticCall(tokenId),
-        ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
+        await expect(LandAsOther.ownerOf.staticCall(tokenId))
+          .to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken')
+          .withArgs(tokenId);
       });
     });
 
@@ -311,8 +311,6 @@ export function shouldCheckForERC721(
           tokenIds,
           '0x',
         );
-
-        // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
       });
 
       it('safe batch transferring to a contract that do not implemented onERC721Received should fail', async function () {
@@ -393,8 +391,7 @@ export function shouldCheckForERC721(
         ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
       });
 
-      // TODO: This is right??? do not accept???
-      it('transferring to a contract that do not accept erc721 token should not fail', async function () {
+      it('transferring to a contract that accepts erc721 token should not fail', async function () {
         const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setupLand);
         await LandAsOwner.transferFrom(
@@ -664,7 +661,6 @@ export function shouldCheckForERC721(
         } = await loadFixture(setupLand);
         await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
         await LandAsOther.setApprovalForAllFor(other, other1, true);
-        // await tx(contract, 'approve', {from: other, gas}, other1, tokenId);
         await LandAsOther1.transferFrom(other, other2, tokenIds[0]);
         expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
       });
@@ -751,7 +747,7 @@ export function shouldCheckForERC721(
         await LandAsOther.setApprovalForAll(other1, true);
         await LandAsOther.approve(other2, tokenIds[0]);
         await LandAsOther2.transferFrom(other, other2, tokenIds[0]);
-        //   expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
+        expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(other2);
       });
     });
   });

@@ -19,7 +19,6 @@ const sizes = [1, 3, 6, 12, 24];
 
 const LandErrorMessages = {
   NONEXISTENT_TOKEN: 'token does not exist',
-  ZERO_ADDRESS_OWNER: 'owner is zero address',
   BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
   ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
   ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
