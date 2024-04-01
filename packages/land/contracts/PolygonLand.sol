@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.23;
 
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
 import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
@@ -15,6 +16,8 @@ import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
 contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, WithOwner {
+    using AddressUpgradeable for address;
+
     event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
 
     /**
@@ -31,7 +34,8 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
-        _trustedForwarder = trustedForwarder;
+        require(trustedForwarder.isContract(), "invalid trusted forwarder");
+        _setTrustedForwarder(trustedForwarder);
         emit TrustedForwarderSet(trustedForwarder);
     }
 

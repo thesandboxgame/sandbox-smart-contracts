@@ -64,6 +64,23 @@ describe('PolygonLand.sol', function () {
     ).to.be.revertedWith('PolygonLand: Invalid address');
   });
 
+  it('only admin can set trustedForwarder', async function () {
+    const {LandContract, TrustedForwarderContract} =
+      await loadFixture(setupPolygonLand);
+
+    await expect(
+      LandContract.setTrustedForwarder(TrustedForwarderContract),
+    ).to.be.revertedWith('only admin allowed');
+  });
+
+  it('should not accept zero address as trustedForwarder', async function () {
+    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
+
+    await expect(
+      LandAsAdmin.setTrustedForwarder(ZeroAddress),
+    ).to.be.revertedWith('invalid trusted forwarder');
+  });
+
   it(`reverts check URI for non existing token`, async function () {
     const GRID_SIZE = 408;
     const {LandContract} = await loadFixture(setupPolygonLand);
@@ -230,6 +247,15 @@ describe('PolygonLand.sol', function () {
     await expect(tx)
       .to.emit(LandAsAdmin, 'OwnershipTransferred')
       .withArgs(await landOwner.getAddress(), await other.getAddress());
+  });
+
+  it('should emit TrustedForwarderSet event', async function () {
+    const {LandAsAdmin, TrustedForwarderContract} =
+      await loadFixture(setupPolygonLand);
+    const tx = await LandAsAdmin.setTrustedForwarder(TrustedForwarderContract);
+    await expect(tx)
+      .to.emit(LandAsAdmin, 'TrustedForwarderSet')
+      .withArgs(TrustedForwarderContract);
   });
 
   it('should reverts transfers batch of quads when from is zero address', async function () {
