@@ -1,11 +1,5 @@
-import {AuthValidator} from './../../../land-sale/typechain-types/contracts/AuthValidator';
-import {EstateSaleWithAuth} from './../../../land-sale/typechain-types/contracts/EstateSaleWithAuth';
-import {deployments, ethers, getNamedAccounts, network} from 'hardhat';
-import fs from 'fs-extra';
-import {SaltedProofSaleLandInfo} from '../../land-sale-artifacts/lib/merkleTreeHelper';
+import {deployments, ethers} from 'hardhat';
 import {AbiCoder, Wallet, parseEther} from 'ethers';
-import {withSnapshot} from '../../utils/testUtils';
-import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import proofs from '../../land-sale-artifacts/secret/estate-sale/hardhat/.proofs_0.json';
 
 const backendAuthWallet = new Wallet(
@@ -46,7 +40,7 @@ const signAuthMessageAs = async (
 };
 
 export const setupEstateSale = deployments.createFixture(
-  async ({deployments, getNamedAccounts, ethers}, options) => {
+  async ({deployments, getNamedAccounts, ethers}) => {
     await deployments.fixture();
     const {deployer, sandBeneficiary, assetAdmin} = await getNamedAccounts();
     const AuthValidator = await ethers.getContract('PolygonAuthValidator');

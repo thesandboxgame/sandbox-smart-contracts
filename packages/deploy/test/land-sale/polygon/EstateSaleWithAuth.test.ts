@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {setupEstateSale} from '../fixture';
 import {ethers} from 'hardhat';
 
-describe.only('EstateSaleWithAuth', function () {
+describe('EstateSaleWithAuth', function () {
   it('should deploy the EstateSaleWithAuth contract', async function () {
     const {EstateSaleWithAuth} = await setupEstateSale();
     const address = await EstateSaleWithAuth.getAddress();
@@ -150,7 +150,6 @@ describe.only('EstateSaleWithAuth', function () {
   it('should be able to purchase a reserved land with valid signature to reserved address - no bundled assets', async function () {
     const {
       EstateSaleWithAuth,
-      deployer,
       sandBeneficiary,
       signAuthMessageAs,
       proofs,
