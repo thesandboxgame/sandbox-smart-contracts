@@ -65,6 +65,12 @@ export const setupEstateSale = deployments.createFixture(
       data
     );
 
+    await ChildChainManager.callSandDeposit(
+      await PolygonSand.getAddress(),
+      sandBeneficiary,
+      data
+    );
+
     // mint asset for testing
     const assetSigner = await ethers.getSigner(assetAdmin);
     await Asset.connect(assetSigner).grantRole(
@@ -74,9 +80,15 @@ export const setupEstateSale = deployments.createFixture(
 
     await Asset.connect(assetSigner).mint(
       await EstateSaleWithAuth.getAddress(),
-      proofs[3].assetIds[0],
-      1,
-      'hash'
+      proofs[1].assetIds[0],
+      10,
+      'hash1'
+    );
+    await Asset.connect(assetSigner).mint(
+      await EstateSaleWithAuth.getAddress(),
+      proofs[1].assetIds[1],
+      10,
+      'hash2'
     );
 
     const approveSandForEstateSale = async (wallet: string, amount: string) => {
@@ -89,7 +101,9 @@ export const setupEstateSale = deployments.createFixture(
     return {
       EstateSaleWithAuth,
       AuthValidator,
+      sandBeneficiary,
       backendAuthWallet,
+      PolygonSand,
       deployer,
       proofs,
       signAuthMessageAs,
