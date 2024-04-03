@@ -52,7 +52,7 @@ export type ERC721Claim = {
 
 function calculateLandHash(
   land: SaleLandInfo | SaltedSaleLandInfo,
-  salt?: string,
+  salt?: string
 ): string {
   const types = [
     'uint256',
@@ -81,7 +81,7 @@ function calculateLandHash(
 
 function saltLands(
   lands: SaleLandInfo[],
-  secret?: string,
+  secret?: string
 ): Array<SaltedSaleLandInfo> {
   const saltedLands = [];
   for (const land of lands) {
@@ -97,8 +97,8 @@ function saltLands(
           .update(
             calculateLandHash(
               land,
-              '0x0000000000000000000000000000000000000000000000000000000000000000',
-            ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000'
+            )
           )
           .digest('hex');
     }
@@ -117,7 +117,7 @@ function saltLands(
 
 function createDataArray(
   lands: SaltedSaleLandInfo[],
-  secret?: string,
+  secret?: string
 ): string[] {
   const data: string[] = [];
 
@@ -134,8 +134,8 @@ function createDataArray(
           .update(
             calculateLandHash(
               land,
-              '0x0000000000000000000000000000000000000000000000000000000000000000',
-            ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000'
+            )
           )
           .digest('hex');
     }
@@ -168,7 +168,7 @@ function calculateClaimableAssetHash(claim: AssetClaim, salt?: string): string {
 
 function saltClaimableAssets(
   claims: AssetClaim[],
-  secret?: string | Buffer,
+  secret?: string | Buffer
 ): Array<AssetClaim> {
   return claims.map((claim) => {
     const salt = claim.salt;
@@ -185,8 +185,8 @@ function saltClaimableAssets(
             .update(
               calculateClaimableAssetHash(
                 claim,
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-              ),
+                '0x0000000000000000000000000000000000000000000000000000000000000000'
+              )
             )
             .digest('hex'),
       };
@@ -197,7 +197,7 @@ function saltClaimableAssets(
 
 function createDataArrayClaimableAssets(
   claims: AssetClaim[],
-  secret?: string,
+  secret?: string
 ): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: string[] = [];
@@ -215,8 +215,8 @@ function createDataArrayClaimableAssets(
           .update(
             calculateClaimableAssetHash(
               claim,
-              '0x0000000000000000000000000000000000000000000000000000000000000000',
-            ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000'
+            )
           )
           .digest('hex');
     }
@@ -234,7 +234,7 @@ function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const values: any = [];
   if (!claim.salt) claim.salt = salt; // Ensure that a salt is included in the claim object to be hashed
   types.push(
-    'tuple(address to, tuple(uint256[] ids, uint256[] values, address contractAddress)[] erc1155, tuple(uint256[] ids, address contractAddress)[] erc721, tuple(uint256[] amounts, address[] contractAddresses) erc20, bytes32 salt)',
+    'tuple(address to, tuple(uint256[] ids, uint256[] values, address contractAddress)[] erc1155, tuple(uint256[] ids, address contractAddress)[] erc721, tuple(uint256[] amounts, address[] contractAddresses) erc20, bytes32 salt)'
   );
   values.push(claim);
   const abiCoder = AbiCoder.defaultAbiCoder();
@@ -243,7 +243,7 @@ function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
 
 function saltMultiClaim(
   claims: MultiClaim[],
-  secret?: string | Buffer,
+  secret?: string | Buffer
 ): Array<MultiClaim> {
   return claims.map((claim) => {
     const salt = claim.salt;
@@ -260,8 +260,8 @@ function saltMultiClaim(
             .update(
               calculateMultiClaimHash(
                 claim,
-                '0x' + crypto.randomBytes(32).toString('hex'),
-              ),
+                '0x' + crypto.randomBytes(32).toString('hex')
+              )
             )
             .digest('hex'),
       };
@@ -272,7 +272,7 @@ function saltMultiClaim(
 
 function createDataArrayMultiClaim(
   claims: MultiClaim[],
-  secret?: string,
+  secret?: string
 ): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: string[] = [];
@@ -290,8 +290,8 @@ function createDataArrayMultiClaim(
           .update(
             calculateMultiClaimHash(
               claim,
-              '0x0000000000000000000000000000000000000000000000000000000000000000',
-            ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000'
+            )
           )
           .digest('hex');
     }
