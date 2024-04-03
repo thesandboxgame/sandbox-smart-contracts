@@ -193,10 +193,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      * @param approved The determination of the approval
      */
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
-        address msgSender = _msgSender();
-        require(sender != address(0), "Invalid sender address");
-        require(msgSender == sender || _isSuperOperator(msgSender), "not authorized");
-
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -215,6 +211,9 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      * @param approved The determination of the approval
      */
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
+        address msgSender = _msgSender();
+        require(sender != address(0), "Invalid sender address");
+        require(msgSender == sender || _isSuperOperator(msgSender), "not authorized");
         require(!_isSuperOperator(operator), "can't change approvalForAll");
         _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
