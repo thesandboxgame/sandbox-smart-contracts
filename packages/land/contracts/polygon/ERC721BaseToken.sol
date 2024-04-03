@@ -41,7 +41,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @param to The recipient of the token.
     /// @param id The id of the token.
     function transferFrom(address from, address to, uint256 id) public virtual override {
-        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "ERC721_TRANSFER_REJECTED");
@@ -101,36 +100,17 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @param id The id of the token.
     /// @param data Additional data.
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual override {
-        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
 
-    function _updateOwnerData(uint256 id, address newOwner, bool hasOperator) internal virtual {
-        uint256 oldData = (_getOwnerData(id) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
-        if (hasOperator) {
-            oldData = oldData | OPERATOR_FLAG;
-        }
-        _setOwnerData(id, oldData);
-    }
-
     function _transferFrom(address from, address to, uint256 id) internal {
+        _checkTransfer(from, to, id);
         _transferNumNFTPerAddress(from, to, 1);
         _updateOwnerData(id, to, false);
         emit Transfer(from, to, id);
-    }
-
-    /// @dev See approveFor.
-    function _approveFor(address owner, address operator, uint256 id) internal {
-        if (operator == address(0)) {
-            _updateOwnerData(id, owner, false);
-        } else {
-            _updateOwnerData(id, owner, true);
-            _setOperator(id, operator);
-        }
-        emit Approval(owner, operator, id);
     }
 
     /// @dev See batchTransferFrom.
