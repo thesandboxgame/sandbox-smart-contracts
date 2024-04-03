@@ -90,6 +90,18 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         (owner, ) = _ownerAndOperatorEnabledOf(id);
     }
 
+    /// @param from sender address
+    /// @param owner owner address of the token
+    /// @param id token id to burn
+    function _burn(address from, address owner, uint256 id) internal {
+        if (from != owner) {
+            revert ERC721InvalidOwner(owner);
+        }
+        _setOwnerData(id, (_getOwnerData(id) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
+        _subNumNFTPerAddress(from, 1);
+        emit Transfer(from, address(0), id);
+    }
+
     /// @dev Get the owner and operatorEnabled status of a token.
     /// @param id The token to query.
     /// @return owner The owner of the token.

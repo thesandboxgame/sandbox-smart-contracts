@@ -219,17 +219,4 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
     }
-
-    /**
-     * @param from sender address
-     * @param owner owner address of the token
-     * @param id token id to burn
-     */
-    function _burn(address from, address owner, uint256 id) internal {
-        require(from == owner, "not owner");
-        _setOwnerData(id, 2 ** 160);
-        // cannot mint it again
-        _subNumNFTPerAddress(from, 1);
-        emit Transfer(from, address(0), id);
-    }
 }
