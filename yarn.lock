@@ -2450,7 +2450,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/core@*, @sandbox-smart-contracts/core@0.0.1, @sandbox-smart-contracts/core@workspace:packages/core":
+"@sandbox-smart-contracts/core@*, @sandbox-smart-contracts/core@0.0.1, @sandbox-smart-contracts/core@^0.0.1, @sandbox-smart-contracts/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/core@workspace:packages/core"
   dependencies:
@@ -2670,7 +2670,6 @@ __metadata:
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
     "@types/eslint": ^8
-    "@types/fs-extra": ^11
     "@types/mocha": ^10.0.1
     "@types/node": ^20.2.5
     "@types/prettier": ^2
@@ -2688,7 +2687,6 @@ __metadata:
     eslint-plugin-mocha: ^10.1.0
     eslint-plugin-prettier: ^4.2.1
     ethers: ^6.10.0
-    fs-extra: ^11.2.0
     hardhat: ^2.19.0
     hardhat-contract-sizer: ^2.10.0
     hardhat-deploy: ^0.11.43
@@ -2850,8 +2848,7 @@ __metadata:
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2"
     "@openzeppelin/contracts-upgradeable": ^4.9.5
     "@release-it/keep-a-changelog": ^5.0.0
-    "@sandbox-smart-contracts/core": "*"
-    "@sandbox-smart-contracts/land": "*"
+    "@sandbox-smart-contracts/core": ^0.0.1
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
@@ -2886,7 +2883,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/land@*, @sandbox-smart-contracts/land@workspace:packages/land":
+"@sandbox-smart-contracts/land@workspace:packages/land":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land@workspace:packages/land"
   dependencies:
