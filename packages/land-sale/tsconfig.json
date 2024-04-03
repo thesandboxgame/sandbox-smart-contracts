@@ -12,7 +12,7 @@
     "hardhat.config.ts",
     "./typechain-types",
     "./test",
-    "./utils",
+    "data",
     "**/*.ts",
   ],
 }

@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 import {getLandSales, writeProofs} from './utils/landsale-utils';
-import deadlines from '../deadlines';
+import deadlines from '../data/deadlines';
 import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import fs from 'fs-extra';
 import {parseEther} from 'ethers';
@@ -155,7 +155,7 @@ export async function runEstateSaleSetup() {
     info: (string | number)[],
     salt: string,
     reserved: string,
-    assetIds: any[],
+    assetIds: string[],
   ) => {
     const leaf = ethers.keccak256(
       ethers.solidityPacked(
@@ -171,6 +171,7 @@ export async function runEstateSaleSetup() {
         [...info, reserved, salt, assetIds],
       ),
     );
+    return leaf;
   };
 
   const buyLand = async ({

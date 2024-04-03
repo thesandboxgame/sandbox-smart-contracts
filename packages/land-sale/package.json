@@ -37,7 +37,6 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
@@ -68,6 +67,7 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.9.5",
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
     "@sandbox-smart-contracts/core": "^0.0.1",

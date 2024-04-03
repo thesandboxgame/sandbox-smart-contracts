@@ -7,10 +7,10 @@ import helpers, {
 import hre from 'hardhat';
 import MerkleTree from './merkleTree';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import deadlines from '../../deadlines';
+import deadlines from '../../data/deadlines';
 import {isTestnet} from './network-utils';
-import {excludeMinted} from '../../excludeMinted';
-import addresses from '../../addresses.json';
+import {excludeMinted} from './excludeMinted';
+import addresses from '../../data/addresses.json';
 import prices from './prices';
 import {ethers} from 'ethers';
 

@@ -219,7 +219,7 @@ describe('EstateSaleWithAuth', function () {
       await ethers.provider.getSigner(deployer)
     );
 
-    expect(
+    await expect(
       await PolygonSandContract.approveAndCall(
         await EstateSaleWithAuth.getAddress(),
         price,
@@ -265,7 +265,7 @@ describe('EstateSaleWithAuth', function () {
       await ethers.provider.getSigner(deployer)
     );
 
-    expect(
+    await expect(
       await PolygonSandContract.approveAndCall(
         await EstateSaleWithAuth.getAddress(),
         price,

@@ -29,7 +29,7 @@ const importedPackages = {
     '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
   ],
-  '@sandbox-smart-contracts/land-sale': 'contracts//EstateSaleWithAuth.sol',
+  '@sandbox-smart-contracts/land-sale': 'contracts/EstateSaleWithAuth.sol',
 };
 
 const namedAccounts = {
