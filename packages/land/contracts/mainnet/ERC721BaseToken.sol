@@ -14,18 +14,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     using AddressUpgradeable for address;
 
     /**
-     * @param from Sender address
-     * @param to Recipient address
-     * @param id Token id to transfer
-     */
-    function _transferFrom(address from, address to, uint256 id) internal {
-        _checkTransfer(from, to, id);
-        _transferNumNFTPerAddress(from, to, 1);
-        _setOwnerData(id, uint160(to));
-        emit Transfer(from, to, id);
-    }
-
-    /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
      * @param operator The address receiving the approval
@@ -51,25 +39,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         require(owner != address(0), "token does not exist");
         require(owner == msgSender || _isApprovedForAll(owner, msgSender), "not authorized to approve");
         _approveFor(owner, operator, id);
-    }
-
-    /**
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
-    function _checkTransfer(address from, address to, uint256 id) internal view {
-        address msgSender = _msgSender();
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(owner != address(0), "token does not exist");
-        require(owner == from, "not owner in _checkTransfer");
-        require(to != address(0), "can't send to zero address");
-        if (msgSender != from) {
-            require(
-                (operatorEnabled && _getOperator(id) == msgSender) || _isApprovedForAll(from, msgSender),
-                "not approved to transfer"
-            );
-        }
     }
 
     /**
@@ -186,19 +155,5 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      */
     function setApprovalForAll(address operator, bool approved) public virtual {
         _setApprovalForAll(_msgSender(), operator, approved);
-    }
-
-    /**
-     * @param sender Sender address
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
-    function _setApprovalForAll(address sender, address operator, bool approved) internal {
-        address msgSender = _msgSender();
-        require(sender != address(0), "Invalid sender address");
-        require(msgSender == sender || _isSuperOperator(msgSender), "not authorized");
-        require(!_isSuperOperator(operator), "can't change approvalForAll");
-        _setOperatorForAll(sender, operator, approved);
-        emit ApprovalForAll(sender, operator, approved);
     }
 }
