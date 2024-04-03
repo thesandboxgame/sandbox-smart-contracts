@@ -98,6 +98,40 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         emit Approval(owner, operator, id);
     }
 
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
+    /// @param to The address receiving the token.
+    /// @param tokenId The token being transferred.
+    /// @dev TODO: after merging. use custom errors
+    function _transferFrom(address from, address to, uint256 tokenId) internal {
+        address msgSender = _msgSender();
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
+        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(owner == from, "CHECKTRANSFER_NOT_OWNER");
+        require(to != address(0), "NOT_TO_ZEROADDRESS");
+        require(
+            msgSender == owner ||
+                _isApprovedForAll(from, msgSender) ||
+                (operatorEnabled && _getOperator(tokenId) == msgSender),
+            "UNAUTHORIZED_TRANSFER"
+        );
+        _transferNumNFTPerAddress(from, to, 1);
+        _updateOwnerData(tokenId, to, false);
+        emit Transfer(from, to, tokenId);
+    }
+
+    /// @param sender Sender address
+    /// @param operator The address receiving the approval
+    /// @param approved The determination of the approval
+    /// @dev TODO: after merging. use custom errors
+    function _setApprovalForAll(address sender, address operator, bool approved) internal {
+        address msgSender = _msgSender();
+        require(sender != address(0), "Invalid sender address");
+        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
+        require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
+        _setOperatorForAll(sender, operator, approved);
+        emit ApprovalForAll(sender, operator, approved);
+    }
+
     /// @param tokenId The id of the token
     /// @param newOwner The new owner of the token
     /// @param hasOperator if true the operator flag is set

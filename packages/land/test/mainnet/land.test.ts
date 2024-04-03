@@ -18,12 +18,12 @@ import {shouldCheckForERC721} from '../common/ERC721.behavior';
 const sizes = [1, 3, 6, 12, 24];
 
 const LandErrorMessages = {
-  NONEXISTENT_TOKEN: 'token does not exist',
+  NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
   BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
   ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
   ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
-  UNAUTHORIZED_TRANSFER: 'not approved to transfer',
-  NOT_TO_ZEROADDRESS: "can't send to zero address",
+  UNAUTHORIZED_TRANSFER: 'UNAUTHORIZED_TRANSFER',
+  NOT_TO_ZEROADDRESS: 'NOT_TO_ZEROADDRESS',
   UNAUTHORIZED_APPROVAL: 'not authorized to approve',
 };
 
@@ -155,7 +155,7 @@ describe('Land.sol', function () {
     const {LandAsOther, other1, deployer} = await loadFixture(setupLand);
     await expect(
       LandAsOther.setApprovalForAllFor(deployer, other1, true),
-    ).to.be.revertedWith('not authorized');
+    ).to.be.revertedWith('UNAUTHORIZED_APPROVE_FOR_ALL');
   });
 
   it('it should revert Approval for invalid token', async function () {
@@ -240,7 +240,7 @@ describe('Land.sol', function () {
 
     await expect(
       LandContract.transferFrom(other, deployer, 0),
-    ).to.be.revertedWith('not approved to transfer');
+    ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
   });
 
   it('check storage structure', async function () {

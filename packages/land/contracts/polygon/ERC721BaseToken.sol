@@ -106,13 +106,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         }
     }
 
-    function _transferFrom(address from, address to, uint256 id) internal {
-        _checkTransfer(from, to, id);
-        _transferNumNFTPerAddress(from, to, 1);
-        _updateOwnerData(id, to, false);
-        emit Transfer(from, to, id);
-    }
-
     /// @dev See batchTransferFrom.
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
@@ -143,33 +136,5 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
                 }
             }
         }
-    }
-
-    /// @dev See setApprovalForAll.
-    function _setApprovalForAll(address sender, address operator, bool approved) internal {
-        address msgSender = _msgSender();
-        require(sender != address(0), "Invalid sender address");
-        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
-        require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
-        _setOperatorForAll(sender, operator, approved);
-        emit ApprovalForAll(sender, operator, approved);
-    }
-
-    /// @dev Check whether a transfer is a meta Transaction or not.
-    /// @param from The address who initiated the transfer (may differ from msg.sender).
-    /// @param to The address receiving the token.
-    /// @param id The token being transferred.
-    function _checkTransfer(address from, address to, uint256 id) internal view {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        address msgSender = _msgSender();
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(owner == from, "CHECKTRANSFER_NOT_OWNER");
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
-        require(
-            msgSender == owner ||
-                _isApprovedForAll(from, msgSender) ||
-                (operatorEnabled && _getOperator(id) == msgSender),
-            "UNAUTHORIZED_TRANSFER"
-        );
     }
 }
