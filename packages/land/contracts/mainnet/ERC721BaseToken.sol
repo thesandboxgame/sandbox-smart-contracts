@@ -19,25 +19,10 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      * @param id Token id to transfer
      */
     function _transferFrom(address from, address to, uint256 id) internal {
+        _checkTransfer(from, to, id);
         _transferNumNFTPerAddress(from, to, 1);
         _setOwnerData(id, uint160(to));
         emit Transfer(from, to, id);
-    }
-
-    /**
-     * @param owner The address giving the approval
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
-    function _approveFor(address owner, address operator, uint256 id) internal {
-        if (operator == address(0)) {
-            _setOwnerData(id, uint160(owner));
-            // no need to resset the operator, it will be overriden next time
-        } else {
-            _setOwnerData(id, uint160(owner) + 2 ** 255);
-            _setOperator(id, operator);
-        }
-        emit Approval(owner, operator, id);
     }
 
     /**
@@ -94,7 +79,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      * @param id The id of the token
      */
     function transferFrom(address from, address to, uint256 id) public virtual {
-        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "erc721 transfer rejected by to");
@@ -109,7 +93,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      * @param data Additional data
      */
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
-        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
             require(_checkOnERC721Received(_msgSender(), from, to, id, data), "erc721 transfer rejected by to");

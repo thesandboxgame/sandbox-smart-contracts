@@ -84,6 +84,32 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
+    /// @param owner The address giving the approval
+    /// @param operator The address receiving the approval
+    /// @param id The id of the token
+    function _approveFor(address owner, address operator, uint256 id) internal {
+        if (operator == address(0)) {
+            _updateOwnerData(id, owner, false);
+        } else {
+            _updateOwnerData(id, owner, true);
+            _setOperator(id, operator);
+        }
+        emit Approval(owner, operator, id);
+    }
+
+    /// @param tokenId The id of the token
+    /// @param newOwner The new owner of the token
+    /// @param hasOperator if true the operator flag is set
+    /// @dev TODO: after merging. Check if using address for operator improve the code size and gas consumption
+    /// @dev TODO: after merging. Use this method in burn so we only call _setOwnerData from here (less error prone)
+    function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal virtual {
+        uint256 oldData = (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
+        if (hasOperator) {
+            oldData = oldData | OPERATOR_FLAG;
+        }
+        _setOwnerData(tokenId, oldData);
+    }
+
     /// @param id token id
     /// @return owner address of the owner
     function _ownerOf(uint256 id) internal view returns (address owner) {
