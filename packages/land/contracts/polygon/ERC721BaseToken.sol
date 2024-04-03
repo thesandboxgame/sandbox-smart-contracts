@@ -85,10 +85,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     /// @param operator The address receiving the approval.
     /// @param approved The determination of the approval.
     function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
-        require(sender != address(0), "Invalid sender address");
-        address msgSender = _msgSender();
-        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
-
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -112,27 +108,26 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         }
     }
 
-    function _updateOwnerData(uint256 id, uint256 oldData, address newOwner, bool hasOperator) internal virtual {
+    function _updateOwnerData(uint256 id, address newOwner, bool hasOperator) internal virtual {
+        uint256 oldData = (_getOwnerData(id) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
         if (hasOperator) {
-            _setOwnerData(id, (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(uint160(newOwner)));
-        } else {
-            _setOwnerData(id, ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(uint160(newOwner)));
+            oldData = oldData | OPERATOR_FLAG;
         }
+        _setOwnerData(id, oldData);
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
         _transferNumNFTPerAddress(from, to, 1);
-        _updateOwnerData(id, _getOwnerData(id), to, false);
+        _updateOwnerData(id, to, false);
         emit Transfer(from, to, id);
     }
 
     /// @dev See approveFor.
     function _approveFor(address owner, address operator, uint256 id) internal {
-        uint256 ownerData = _getOwnerData(id);
         if (operator == address(0)) {
-            _updateOwnerData(id, ownerData, owner, false);
+            _updateOwnerData(id, owner, false);
         } else {
-            _updateOwnerData(id, ownerData, owner, true);
+            _updateOwnerData(id, owner, true);
             _setOperator(id, operator);
         }
         emit Approval(owner, operator, id);
@@ -152,7 +147,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _getOperator(id) == msgSender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, _getOwnerData(id), to, false);
+            _updateOwnerData(id, to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -172,6 +167,9 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
 
     /// @dev See setApprovalForAll.
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
+        address msgSender = _msgSender();
+        require(sender != address(0), "Invalid sender address");
+        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
         require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
         _setOperatorForAll(sender, operator, approved);
         emit ApprovalForAll(sender, operator, approved);
