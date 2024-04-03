@@ -155,15 +155,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
         emit ApprovalForAll(sender, operator, approved);
     }
 
-    /// @dev See burn.
-    function _burn(address from, address owner, uint256 id) internal {
-        require(from == owner, "NOT_OWNER");
-        _setOwnerData(id, (_getOwnerData(id) & NOT_OPERATOR_FLAG) | BURNED_FLAG);
-        // record as non owner but keep track of last owner
-        _subNumNFTPerAddress(from, 1);
-        emit Transfer(from, address(0), id);
-    }
-
     /// @dev Check whether a transfer is a meta Transaction or not.
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param to The address receiving the token.

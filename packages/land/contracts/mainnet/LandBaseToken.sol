@@ -426,6 +426,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
         uint256 currentOwner = _getOwnerData(tokenId);
         if (currentOwner != 0) {
+            require((currentOwner & BURNED_FLAG) != BURNED_FLAG, "not owner");
             require(address(uint160(currentOwner)) == from, "not owner");
             _setOwnerData(tokenId, 0);
             return true;
@@ -687,6 +688,12 @@ abstract contract LandBaseToken is ERC721BaseToken {
         uint256 x = _getX(id);
         uint256 y = _getY(id);
         uint256 owner1x1 = _getOwnerData(id);
+
+        if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
+            owner = address(0);
+            operatorEnabled = (owner1x1 / 2 ** 255) == 1;
+            return (owner, operatorEnabled);
+        }
 
         if (owner1x1 != 0) {
             owner = address(uint160(owner1x1));
