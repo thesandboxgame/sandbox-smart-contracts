@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
@@ -8,14 +9,14 @@ import {IContext} from "./IContext.sol";
 import {IERC721Errors} from "./draft-IERC6093.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
-/**
- * @title ERC721BaseTokenCommon
- * @author The Sandbox
- * @notice Basic functionalities of a NFT
- * @dev ERC721 implementation that supports meta-transactions and super operators
- * @dev TODO: use custom errors instead of revert
- */
+/// @title ERC721BaseTokenCommon
+/// @author The Sandbox
+/// @notice Basic functionalities of a NFT
+/// @dev ERC721 implementation that supports meta-transactions and super operators
+/// @dev TODO: after merging. use custom errors
 abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
+    using AddressUpgradeable for address;
+
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
 
@@ -26,6 +27,51 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     uint256 internal constant OPERATOR_FLAG = (2 ** 255);
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
     uint256 internal constant BURNED_FLAG = (2 ** 160);
+
+    /// @notice Approve an operator to spend tokens on the senders behalf.
+    /// @param operator The address receiving the approval.
+    /// @param tokenId The id of the token.
+    function approve(address operator, uint256 tokenId) public virtual override {
+        address owner = _ownerOf(tokenId);
+        _approveFor(owner, operator, tokenId);
+    }
+
+    /// @notice Approve an operator to spend tokens on the sender behalf.
+    /// @param sender The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param tokenId The id of the token.
+    /// @dev We keep this one for backward compatibility, owner == sender aka this is the same as approve
+    function approveFor(address sender, address operator, uint256 tokenId) public virtual {
+        address owner = _ownerOf(tokenId);
+        require(owner == sender, "OWNER_NOT_SENDER");
+        _approveFor(owner, operator, tokenId);
+    }
+
+    /// @notice Transfer a token between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param tokenId The id of the token.
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override {
+        _transferFrom(from, to, tokenId);
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(_checkOnERC721Received(_msgSender(), from, to, tokenId, ""), "ERC721_TRANSFER_REJECTED");
+        }
+    }
+
+    /// @notice Set the approval for an operator to manage all the tokens of the sender.
+    /// @param sender The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param approved The determination of the approval.
+    function setApprovalForAllFor(address sender, address operator, bool approved) external virtual {
+        _setApprovalForAll(sender, operator, approved);
+    }
+
+    /// @notice Set the approval for an operator to manage all the tokens of the sender.
+    /// @param operator The address receiving the approval.
+    /// @param approved The determination of the approval.
+    function setApprovalForAll(address operator, bool approved) external virtual override {
+        _setApprovalForAll(_msgSender(), operator, approved);
+    }
 
     /// @notice Get the number of tokens owned by an address.
     /// @param owner The address to look for.
@@ -59,13 +105,11 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         }
     }
 
-    /**
-     * @notice Return the internal owner data of a Land
-     * @param id The id of the Land
-     * @dev for debugging purposes
-     */
-    function getOwnerData(uint256 id) external view returns (uint256) {
-        return _getOwnerData(id);
+    /// @notice Return the internal owner data of a Land
+    /// @param tokenId The id of the Land
+    /// @dev for debugging purposes
+    function getOwnerData(uint256 tokenId) external view returns (uint256) {
+        return _getOwnerData(tokenId);
     }
 
     /// @notice Check if the sender approved the operator.
@@ -89,6 +133,9 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param operator The address receiving the approval
     /// @param id The id of the token
     function _approveFor(address owner, address operator, uint256 id) internal {
+        address msgSender = _msgSender();
+        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(owner == msgSender || _isApprovedForAll(owner, msgSender), "UNAUTHORIZED_APPROVAL");
         if (operator == address(0)) {
             _updateOwnerData(id, owner, false);
         } else {
@@ -101,7 +148,6 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param to The address receiving the token.
     /// @param tokenId The token being transferred.
-    /// @dev TODO: after merging. use custom errors
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         address msgSender = _msgSender();
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
@@ -122,7 +168,6 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param sender Sender address
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
-    /// @dev TODO: after merging. use custom errors
     function _setApprovalForAll(address sender, address operator, bool approved) internal {
         address msgSender = _msgSender();
         require(sender != address(0), "Invalid sender address");

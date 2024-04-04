@@ -120,7 +120,7 @@ describe('PolygonLand.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(ZeroAddress, MockMarketPlace3, id),
-    ).to.be.revertedWith('ZERO_ADDRESS_SENDER');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('should revert approveFor for unauthorized user', async function () {
@@ -130,7 +130,7 @@ describe('PolygonLand.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(other1, MockMarketPlace3, id),
-    ).to.be.revertedWith('UNAUTHORIZED_APPROVAL');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('should revert approveFor zero owner of tokenId', async function () {
@@ -140,7 +140,7 @@ describe('PolygonLand.sol', function () {
     const tokenId = 2 + 2 * GRID_SIZE;
     await expect(
       LandAsOther.approveFor(other, MockMarketPlace3, tokenId),
-    ).to.be.revertedWith('NONEXISTENT_TOKEN');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('should revert approve for zero address owner of token', async function () {

@@ -14,47 +14,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     using AddressUpgradeable for address;
 
     /**
-     * @notice Approve an operator to spend tokens on the sender behalf
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
-    function approveFor(address sender, address operator, uint256 id) public virtual {
-        address owner = _ownerOf(id);
-        address msgSender = _msgSender();
-        require(sender != address(0), "sender is zero address");
-        require(msgSender == sender || _isApprovedForAll(sender, msgSender), "not authorized to approve");
-        require(owner == sender, "owner != sender");
-        _approveFor(owner, operator, id);
-    }
-
-    /**
-     * @notice Approve an operator to spend tokens on the sender behalf
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
-    function approve(address operator, uint256 id) public virtual {
-        address owner = _ownerOf(id);
-        address msgSender = _msgSender();
-        require(owner != address(0), "token does not exist");
-        require(owner == msgSender || _isApprovedForAll(owner, msgSender), "not authorized to approve");
-        _approveFor(owner, operator, id);
-    }
-
-    /**
-     * @notice Transfer a token between 2 addresses
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
-    function transferFrom(address from, address to, uint256 id) public virtual {
-        _transferFrom(from, to, id);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "erc721 transfer rejected by to");
-        }
-    }
-
-    /**
      * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
      * @param from The sender of the token
      * @param to The recipient of the token
@@ -64,7 +23,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "erc721 transfer rejected by to");
+            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
 
@@ -136,24 +95,5 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      */
     function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
         _batchTransferFrom(from, to, ids, data, true);
-    }
-
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
-    function setApprovalForAllFor(address sender, address operator, bool approved) public virtual {
-        _setApprovalForAll(sender, operator, approved);
-    }
-
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
-    function setApprovalForAll(address operator, bool approved) public virtual {
-        _setApprovalForAll(_msgSender(), operator, approved);
     }
 }
