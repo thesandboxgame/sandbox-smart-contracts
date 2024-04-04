@@ -13,6 +13,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
  * @author The Sandbox
  * @notice Basic functionalities of a NFT
  * @dev ERC721 implementation that supports meta-transactions and super operators
+ * @dev TODO: use custom errors instead of revert
  */
 abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -117,9 +118,17 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     }
 
     /// @param from sender address
-    /// @param owner owner address of the token
     /// @param id token id to burn
-    function _burn(address from, address owner, uint256 id) internal {
+    function _burn(address from, uint256 id) internal {
+        require(from != address(0), "NOT_FROM_ZEROADDRESS");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        address msgSender = _msgSender();
+        require(
+            msgSender == from ||
+                (operatorEnabled && _getOperator(id) == msgSender) ||
+                _isApprovedForAll(from, msgSender),
+            "UNAUTHORIZED_BURN"
+        );
         if (from != owner) {
             revert ERC721InvalidOwner(owner);
         }
