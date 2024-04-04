@@ -28,6 +28,7 @@ const importedPackages = {
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
+    `/src/solc_0.6/EstateSale/AuthValidator.sol`,
   ],
   '@sandbox-smart-contracts/land-sale': 'contracts/EstateSaleWithAuth.sol',
 };
