@@ -96,7 +96,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         if (msg.sender != from) {
-            require(_isApprovedForAll(from, msg.sender), "not authorized to transferQuad");
+            require(_isApprovedForAllOrSuperOperator(from, msg.sender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
         _transferNumNFTPerAddress(from, to, size * size);
@@ -123,7 +123,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(sizes.length == xs.length, "sizes's and x's are different");
         require(xs.length == ys.length, "x's and y's are different");
         if (msg.sender != from) {
-            require(_isApprovedForAll(from, msg.sender), "not authorized");
+            require(_isApprovedForAllOrSuperOperator(from, msg.sender), "not authorized");
         }
         uint256 numTokensTransferred = 0;
         for (uint256 i = 0; i < sizes.length; i++) {

@@ -66,10 +66,10 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
      * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
      * @param from The send of the token
      * @param to The recipient of the token
-     * @param id The id of the token
+     * @param tokenId The id of the token
      */
-    function safeTransferFrom(address from, address to, uint256 id) external override onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, id, "");
+    function safeTransferFrom(address from, address to, uint256 tokenId) external override onlyAllowedOperator(from) {
+        _safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
@@ -92,14 +92,14 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
      * @param operator The address receiving the approval
-     * @param id The id of the token
+     * @param tokenId The id of the token
      */
     function approveFor(
         address sender,
         address operator,
-        uint256 id
-    ) public override onlyAllowedOperatorApproval(operator) {
-        super.approveFor(sender, operator, id);
+        uint256 tokenId
+    ) external override onlyAllowedOperatorApproval(operator) {
+        _approveFor(sender, operator, tokenId);
     }
 
     /**
@@ -107,8 +107,11 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
-        super._setApprovalForAll(_msgSender(), operator, approved);
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) external override onlyAllowedOperatorApproval(operator) {
+        _setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /**
@@ -122,52 +125,53 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
         address operator,
         bool approved
     ) external override onlyAllowedOperatorApproval(operator) {
-        super._setApprovalForAll(sender, operator, approved);
+        _setApprovalForAll(sender, operator, approved);
     }
 
     /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param operator The address receiving the approval
-     * @param id The id of the token
+     * @param tokenId The id of the token
      */
-    function approve(address operator, uint256 id) public override onlyAllowedOperatorApproval(operator) {
-        super.approve(operator, id);
+    function approve(address operator, uint256 tokenId) external override onlyAllowedOperatorApproval(operator) {
+        _approveFor(_msgSender(), operator, tokenId);
     }
 
     /**
      * @notice Transfer a token between 2 addresses
      * @param from The sender of the token
      * @param to The recipient of the token
-     * @param id The id of the token
+     * @param tokenId The id of the token
+     * @dev we decided to use safeTransferFrom even for this method as a security measure
      */
-    function transferFrom(address from, address to, uint256 id) public override onlyAllowedOperator(from) {
-        super.transferFrom(from, to, id);
+    function transferFrom(address from, address to, uint256 tokenId) external override onlyAllowedOperator(from) {
+        _transferFrom(from, to, tokenId);
     }
 
     /**
      * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
      * @param from The sender of the token
      * @param to The recipient of the token
-     * @param id The id of the token
+     * @param tokenId The id of the token
      * @param data Additional data
      */
     function safeTransferFrom(
         address from,
         address to,
-        uint256 id,
+        uint256 tokenId,
         bytes memory data
-    ) public override onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, id, data);
+    ) external override onlyAllowedOperator(from) {
+        _safeTransferFrom(from, to, tokenId, data);
     }
 
     /**
      * @notice Return the URI of a specific token
-     * @param id The id of the token
+     * @param tokenId The id of the token
      * @return The URI of the token
      */
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "Land: Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(id), "/metadata.json"));
+    function tokenURI(uint256 tokenId) external view returns (string memory) {
+        require(_ownerOf(tokenId) != address(0), "Land: Id does not exist");
+        return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(tokenId), "/metadata.json"));
     }
 
     /**

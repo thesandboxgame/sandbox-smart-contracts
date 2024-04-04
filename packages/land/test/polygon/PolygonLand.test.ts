@@ -120,7 +120,7 @@ describe('PolygonLand.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(ZeroAddress, MockMarketPlace3, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
   });
 
   it('should revert approveFor for unauthorized user', async function () {
@@ -130,7 +130,7 @@ describe('PolygonLand.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(other1, MockMarketPlace3, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
   });
 
   it('should revert approveFor zero owner of tokenId', async function () {
@@ -140,16 +140,17 @@ describe('PolygonLand.sol', function () {
     const tokenId = 2 + 2 * GRID_SIZE;
     await expect(
       LandAsOther.approveFor(other, MockMarketPlace3, tokenId),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
   });
 
   it('should revert approve for zero address owner of token', async function () {
     const {LandAsOther, MockMarketPlace3} = await loadFixture(setupPolygonLand);
     const GRID_SIZE = 408;
     const tokenId = 2 + 2 * GRID_SIZE;
+    console.log(await MockMarketPlace3.getAddress());
     await expect(
       LandAsOther.approve(MockMarketPlace3, tokenId),
-    ).to.be.revertedWith('NONEXISTENT_TOKEN');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
   });
 
   it('should revert approve for ZeroAddress spender', async function () {
@@ -157,16 +158,16 @@ describe('PolygonLand.sol', function () {
       await loadFixture(setupPolygonLand);
     await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 0, 0);
-    await expect(LandAsOther1.approve(MockMarketPlace3, id)).to.be.revertedWith(
-      'UNAUTHORIZED_APPROVAL',
-    );
+    await expect(
+      LandAsOther1.approve(MockMarketPlace3, id),
+    ).to.be.revertedWithCustomError(LandAsOther1, 'ERC721InvalidOwner');
   });
 
   it('should revert setApprovalForAllFor for ZeroAddress', async function () {
     const {LandAsOther, MockMarketPlace3} = await loadFixture(setupPolygonLand);
     await expect(
       LandAsOther.setApprovalForAllFor(ZeroAddress, MockMarketPlace3, true),
-    ).to.be.revertedWith('Invalid sender address');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
   });
 
   it('should revert setApprovalForAllFor for unauthorized users', async function () {
@@ -187,7 +188,7 @@ describe('PolygonLand.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandContract.approveFor(deployer, deployer, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner');
   });
 
   it('subscription can not be zero address', async function () {

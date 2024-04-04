@@ -14,30 +14,6 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
     using AddressUpgradeable for address;
 
     /**
-     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     * @param data Additional data
-     */
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
-        _transferFrom(from, to, id);
-        if (to.isContract()) {
-            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
-        }
-    }
-
-    /**
-     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-     * @param from The send of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
-    function safeTransferFrom(address from, address to, uint256 id) external virtual {
-        safeTransferFrom(from, to, id, "");
-    }
-
-    /**
      * @notice Transfer many tokens between 2 addresses
      * @param from The sender of the token
      * @param to The recipient of the token
@@ -57,7 +33,7 @@ abstract contract ERC721BaseToken is ERC721BaseTokenCommon {
      */
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         address msgSender = _msgSender();
-        bool authorized = msgSender == from || _isApprovedForAll(from, msgSender);
+        bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
