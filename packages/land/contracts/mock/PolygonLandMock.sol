@@ -20,23 +20,14 @@ contract PolygonLandMock is PolygonLand {
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) external virtual {
-        _burn(_msgSender(), _ownerOf(id), id);
+        _burn(_msgSender(), id);
     }
 
     /// @notice Burn token `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external virtual {
-        require(from != address(0), "NOT_FROM_ZEROADDRESS");
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        address msgSender = _msgSender();
-        require(
-            msgSender == from ||
-                (operatorEnabled && _getOperator(id) == msgSender) ||
-                _isApprovedForAll(from, msgSender),
-            "UNAUTHORIZED_BURN"
-        );
-        _burn(from, owner, id);
+        _burn(from, id);
     }
 
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
