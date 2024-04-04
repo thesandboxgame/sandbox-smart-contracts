@@ -210,7 +210,7 @@ const config: HardhatUserConfig = {
       goerli_test: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
-      amoy: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e', // is this correct?
+      amoy: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
     // To be used with AuthValidator only
     backendAuthWallet: {
@@ -281,7 +281,7 @@ const config: HardhatUserConfig = {
       goerli: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       sepolia: '0x4751d4dc3d8cff421598592b51bb1d9a0fb116e9',
       mumbai: '0x3c17c97f29182aec3d16a080cda94d6f773bbd91',
-      //amoy?
+      // TODO: add amoy when it's available on OZ defender (13th April)
     },
     landMigrationBatchExecutor: 'ozdRelayer',
     nftCollectionAdmin: {
