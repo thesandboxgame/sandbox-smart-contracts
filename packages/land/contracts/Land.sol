@@ -108,7 +108,7 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
      * @param approved The determination of the approval
      */
     function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAll(operator, approved);
+        super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /**
@@ -121,8 +121,8 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
         address sender,
         address operator,
         bool approved
-    ) public override onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAllFor(sender, operator, approved);
+    ) external override onlyAllowedOperatorApproval(operator) {
+        super._setApprovalForAll(sender, operator, approved);
     }
 
     /**

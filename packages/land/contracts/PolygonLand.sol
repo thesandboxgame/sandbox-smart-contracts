@@ -134,7 +134,7 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
      * @param approved The determination of the approval
      */
     function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAll(operator, approved);
+        super._setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /**
@@ -148,7 +148,7 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
         address operator,
         bool approved
     ) public override onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAllFor(sender, operator, approved);
+        super._setApprovalForAll(sender, operator, approved);
     }
 
     /**

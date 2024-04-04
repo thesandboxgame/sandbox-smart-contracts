@@ -21,10 +21,10 @@ const LandErrorMessages = {
   NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
   BATCHTRANSFERFROM_NOT_OWNER: 'not owner in batchTransferFrom',
   ERC721_BATCH_RECEIVED_REJECTED: 'erc721 batchTransfer rejected',
-  ERC721_TRANSFER_REJECTED: 'erc721 transfer rejected by to',
+  ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',
   UNAUTHORIZED_TRANSFER: 'UNAUTHORIZED_TRANSFER',
   NOT_TO_ZEROADDRESS: 'NOT_TO_ZEROADDRESS',
-  UNAUTHORIZED_APPROVAL: 'not authorized to approve',
+  UNAUTHORIZED_APPROVAL: 'UNAUTHORIZED_APPROVAL',
 };
 
 describe('Land.sol', function () {
@@ -131,7 +131,7 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWith('not authorized to approve');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('it should revert for setApprovalForAllFor of zero address', async function () {
@@ -148,7 +148,7 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(ZeroAddress, other1, id),
-    ).to.be.revertedWith('sender is zero address');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('it should revert setApprovalForAllFor for unauthorized sender', async function () {
@@ -164,7 +164,7 @@ describe('Land.sol', function () {
     await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 2, 2);
     await expect(LandAsOther.approve(deployer, id)).to.be.revertedWith(
-      'token does not exist',
+      'NONEXISTENT_TOKEN',
     );
   });
 
@@ -175,7 +175,7 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWith('not authorized to approve');
+    ).to.be.revertedWith('OWNER_NOT_SENDER');
   });
 
   it('should revert when id is not minted', async function () {
