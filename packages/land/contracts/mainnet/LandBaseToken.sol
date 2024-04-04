@@ -691,13 +691,13 @@ abstract contract LandBaseToken is ERC721BaseToken {
 
         if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
-            operatorEnabled = (owner1x1 / 2 ** 255) == 1;
+            operatorEnabled = (owner1x1 / OPERATOR_FLAG) == 1;
             return (owner, operatorEnabled);
         }
 
         if (owner1x1 != 0) {
             owner = address(uint160(owner1x1));
-            operatorEnabled = (owner1x1 / 2 ** 255) == 1;
+            operatorEnabled = (owner1x1 / OPERATOR_FLAG) == 1;
         } else {
             owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);
             operatorEnabled = false;
