@@ -131,14 +131,14 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
   });
 
   it('it should revert for setApprovalForAllFor of zero address', async function () {
     const {LandAsOther, other1} = await loadFixture(setupLand);
     await expect(
       LandAsOther.setApprovalForAllFor(ZeroAddress, other1, true),
-    ).to.be.revertedWith('Invalid sender address');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
   });
 
   it('should revert approveFor of operator is ZeroAddress', async function () {
@@ -148,7 +148,7 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(ZeroAddress, other1, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
   });
 
   it('it should revert setApprovalForAllFor for unauthorized sender', async function () {
@@ -163,9 +163,9 @@ describe('Land.sol', function () {
       await loadFixture(setupLand);
     await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
     const id = getId(1, 2, 2);
-    await expect(LandAsOther.approve(deployer, id)).to.be.revertedWith(
-      'NONEXISTENT_TOKEN',
-    );
+    await expect(
+      LandAsOther.approve(deployer, id),
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
   });
 
   it('should revert approveFor for unauthorized sender', async function () {
@@ -175,7 +175,7 @@ describe('Land.sol', function () {
     const id = getId(1, 0, 0);
     await expect(
       LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWith('OWNER_NOT_SENDER');
+    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
   });
 
   it('should revert when id is not minted', async function () {

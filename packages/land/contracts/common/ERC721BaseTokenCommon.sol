@@ -31,31 +31,42 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param tokenId The id of the token.
-    function approve(address operator, uint256 tokenId) public virtual override {
-        address owner = _ownerOf(tokenId);
-        _approveFor(owner, operator, tokenId);
+    function approve(address operator, uint256 tokenId) external virtual override {
+        _approveFor(_msgSender(), operator, tokenId);
     }
 
     /// @notice Approve an operator to spend tokens on the sender behalf.
-    /// @param sender The address giving the approval.
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param operator The address receiving the approval.
     /// @param tokenId The id of the token.
     /// @dev We keep this one for backward compatibility, owner == sender aka this is the same as approve
-    function approveFor(address sender, address operator, uint256 tokenId) public virtual {
-        address owner = _ownerOf(tokenId);
-        require(owner == sender, "OWNER_NOT_SENDER");
-        _approveFor(owner, operator, tokenId);
+    function approveFor(address from, address operator, uint256 tokenId) external virtual {
+        _approveFor(from, operator, tokenId);
     }
 
     /// @notice Transfer a token between 2 addresses.
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param tokenId The id of the token.
-    function transferFrom(address from, address to, uint256 tokenId) public virtual override {
+    function transferFrom(address from, address to, uint256 tokenId) external virtual override {
         _transferFrom(from, to, tokenId);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(_msgSender(), from, to, tokenId, ""), "ERC721_TRANSFER_REJECTED");
-        }
+    }
+
+    ///  @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    ///  @param from The sender of the token
+    /// @param to The recipient of the token
+    /// @param id The id of the token
+    /// @param data Additional data
+    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) external virtual {
+        _safeTransferFrom(from, to, id, data);
+    }
+
+    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    /// @param from The send of the token
+    /// @param to The recipient of the token
+    /// @param id The id of the token
+    function safeTransferFrom(address from, address to, uint256 id) external virtual {
+        _safeTransferFrom(from, to, id, "");
     }
 
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
@@ -76,7 +87,7 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @notice Get the number of tokens owned by an address.
     /// @param owner The address to look for.
     /// @return The number of tokens owned by the address.
-    function balanceOf(address owner) external view override returns (uint256) {
+    function balanceOf(address owner) external view virtual override returns (uint256) {
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
@@ -86,29 +97,32 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @notice Get the owner of a token.
     /// @param tokenId The id of the token.
     /// @return owner The address of the token owner.
-    function ownerOf(uint256 tokenId) external view override returns (address owner) {
-        return _requireOwned(tokenId);
+    function ownerOf(uint256 tokenId) external view virtual override returns (address owner) {
+        owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        return owner;
     }
 
     /// @notice Get the approved operator for a specific token.
     /// @param tokenId The id of the token.
     /// @return The address of the operator.
-    function getApproved(uint256 tokenId) external view override returns (address) {
+    function getApproved(uint256 tokenId) external view virtual override returns (address) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
         if (owner == address(0)) {
             revert ERC721NonexistentToken(tokenId);
         }
         if (operatorEnabled) {
             return _getOperator(tokenId);
-        } else {
-            return address(0);
         }
+        return address(0);
     }
 
     /// @notice Return the internal owner data of a Land
     /// @param tokenId The id of the Land
     /// @dev for debugging purposes
-    function getOwnerData(uint256 tokenId) external view returns (uint256) {
+    function getOwnerData(uint256 tokenId) external view virtual returns (uint256) {
         return _getOwnerData(tokenId);
     }
 
@@ -116,8 +130,8 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param owner The address of the owner.
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
-    function isApprovedForAll(address owner, address operator) external view override returns (bool) {
-        return _isApprovedForAll(owner, operator);
+    function isApprovedForAll(address owner, address operator) external view virtual override returns (bool) {
+        return _isApprovedForAllOrSuperOperator(owner, operator);
     }
 
     /// @notice Check if the contract supports an interface.
@@ -129,20 +143,21 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
-    /// @param owner The address giving the approval
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param operator The address receiving the approval
-    /// @param id The id of the token
-    function _approveFor(address owner, address operator, uint256 id) internal {
+    /// @param tokenId The id of the token
+    function _approveFor(address from, address operator, uint256 tokenId) internal {
+        (address owner, ) = _checkFromIsOwner(from, tokenId);
+
         address msgSender = _msgSender();
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(owner == msgSender || _isApprovedForAll(owner, msgSender), "UNAUTHORIZED_APPROVAL");
+        require(owner == msgSender || _isApprovedForAllOrSuperOperator(owner, msgSender), "UNAUTHORIZED_APPROVAL");
         if (operator == address(0)) {
-            _updateOwnerData(id, owner, false);
+            _updateOwnerData(tokenId, owner, false);
         } else {
-            _updateOwnerData(id, owner, true);
-            _setOperator(id, operator);
+            _updateOwnerData(tokenId, owner, true);
+            _setOperator(tokenId, operator);
         }
-        emit Approval(owner, operator, id);
+        emit Approval(owner, operator, tokenId);
     }
 
     /// @param from The address who initiated the transfer (may differ from msg.sender).
@@ -150,13 +165,22 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param tokenId The token being transferred.
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         address msgSender = _msgSender();
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(owner == from, "CHECKTRANSFER_NOT_OWNER");
+        _doTransfer(msgSender, from, to, tokenId);
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(_checkOnERC721Received(msgSender, from, to, tokenId, ""), "ERC721_TRANSFER_REJECTED");
+        }
+    }
+
+    /// @param msgSender The sender of the transaction
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
+    /// @param to The address receiving the token.
+    /// @param tokenId The token being transferred.
+    function _doTransfer(address msgSender, address from, address to, uint256 tokenId) internal {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
+        (address owner, bool operatorEnabled) = _checkFromIsOwner(from, tokenId);
         require(
             msgSender == owner ||
-                _isApprovedForAll(from, msgSender) ||
+                _isApprovedForAllOrSuperOperator(from, msgSender) ||
                 (operatorEnabled && _getOperator(tokenId) == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
@@ -165,16 +189,31 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         emit Transfer(from, to, tokenId);
     }
 
-    /// @param sender Sender address
+    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param id The id of the token.
+    /// @param data Additional data.
+    function _safeTransferFrom(address from, address to, uint256 id, bytes memory data) internal {
+        address msgSender = _msgSender();
+        _doTransfer(msgSender, from, to, id);
+        if (to.isContract()) {
+            require(_checkOnERC721Received(msgSender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
+        }
+    }
+
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
-    function _setApprovalForAll(address sender, address operator, bool approved) internal {
+    function _setApprovalForAll(address from, address operator, bool approved) internal {
+        if (from == address(0)) {
+            revert ERC721InvalidSender(from);
+        }
         address msgSender = _msgSender();
-        require(sender != address(0), "Invalid sender address");
-        require(msgSender == sender || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
+        require(msgSender == from || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
         require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
-        _setOperatorForAll(sender, operator, approved);
-        emit ApprovalForAll(sender, operator, approved);
+        _setOperatorForAll(from, operator, approved);
+        emit ApprovalForAll(from, operator, approved);
     }
 
     /// @param tokenId The id of the token
@@ -182,7 +221,7 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param hasOperator if true the operator flag is set
     /// @dev TODO: after merging. Check if using address for operator improve the code size and gas consumption
     /// @dev TODO: after merging. Use this method in burn so we only call _setOwnerData from here (less error prone)
-    function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal virtual {
+    function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal {
         uint256 oldData = (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
         if (hasOperator) {
             oldData = oldData | OPERATOR_FLAG;
@@ -196,24 +235,44 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         (owner, ) = _ownerAndOperatorEnabledOf(id);
     }
 
-    /// @param from sender address
-    /// @param id token id to burn
-    function _burn(address from, uint256 id) internal {
-        require(from != address(0), "NOT_FROM_ZEROADDRESS");
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
+    /// @param tokenId token id to burn
+    function _burn(address from, uint256 tokenId) internal {
+        (address owner, bool operatorEnabled) = _checkFromIsOwner(from, tokenId);
+
         address msgSender = _msgSender();
         require(
-            msgSender == from ||
-                (operatorEnabled && _getOperator(id) == msgSender) ||
-                _isApprovedForAll(from, msgSender),
+            owner == msgSender ||
+                (operatorEnabled && _getOperator(tokenId) == msgSender) ||
+                _isApprovedForAllOrSuperOperator(from, msgSender),
             "UNAUTHORIZED_BURN"
         );
-        if (from != owner) {
-            revert ERC721InvalidOwner(owner);
-        }
-        _setOwnerData(id, (_getOwnerData(id) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
+        _setOwnerData(tokenId, (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
         _subNumNFTPerAddress(from, 1);
-        emit Transfer(from, address(0), id);
+        emit Transfer(from, address(0), tokenId);
+    }
+
+    /// @param from sender address
+    /// @param tokenId The id of the token
+    /// @return owner The owner of the token.
+    /// @return operatorEnabled Whether or not operators are enabled for this token.
+    /// @dev checks that the token is taken from the owner (from == owner)
+    /// @dev TODO: this routine ensures that from == owner, so, we don't need to return the owner we can use from directly
+    function _checkFromIsOwner(
+        address from,
+        uint256 tokenId
+    ) internal view returns (address owner, bool operatorEnabled) {
+        if (from == address(0)) {
+            revert ERC721InvalidSender(from);
+        }
+        (owner, operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
+        // As from == owner, this is the same check as from == address(0) but we want a specific error for this one.
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        if (from != owner) {
+            revert ERC721InvalidOwner(from);
+        }
     }
 
     /// @dev Get the owner and operatorEnabled status of a token.
@@ -230,20 +289,6 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
             owner = address(uint160(data));
         }
         operatorEnabled = (data & OPERATOR_FLAG) == OPERATOR_FLAG;
-    }
-
-    /**
-     * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
-     * Returns the owner.
-     *
-     * Overrides to ownership logic should be done to {_ownerOf}.
-     */
-    function _requireOwned(uint256 tokenId) internal view returns (address) {
-        address owner = _ownerOf(tokenId);
-        if (owner == address(0)) {
-            revert ERC721NonexistentToken(tokenId);
-        }
-        return owner;
     }
 
     /// @dev Check if receiving contract accepts erc721 transfers.
@@ -308,7 +353,7 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param owner The address of the owner.
     /// @param operator The address of the operator.
     /// @return isOperator The status of the approval.
-    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
+    function _isApprovedForAllOrSuperOperator(address owner, address operator) internal view returns (bool) {
         return _isOperatorForAll(owner, operator) || _isSuperOperator(operator);
     }
 

@@ -56,7 +56,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         require(xs.length == ys.length, "x's and y's are different");
         address msgSender = _msgSender();
         if (msgSender != from) {
-            require(_isApprovedForAll(from, msgSender), "not authorized");
+            require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized");
         }
         uint256 numTokensTransferred = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
@@ -108,7 +108,7 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         require(to != address(0), "can't send to zero address");
         address msgSender = _msgSender();
         if (msgSender != from) {
-            require(_isApprovedForAll(from, msgSender), "not authorized to transferQuad");
+            require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
         _transferNumNFTPerAddress(from, to, size * size);

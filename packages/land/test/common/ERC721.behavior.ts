@@ -15,7 +15,7 @@ export function shouldCheckForERC721(
 
         await expect(
           LandAsOwner.transferFrom(deployer, other1, 10000000),
-        ).to.be.revertedWith(errorMessages.NONEXISTENT_TOKEN);
+        ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721NonexistentToken');
       });
 
       it('tx balanceOf a zero owner fails', async function () {
@@ -617,7 +617,7 @@ export function shouldCheckForERC721(
         await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
         await expect(
           LandAsOwner.approve(other, tokenIds[0]),
-        ).to.be.revertedWith(errorMessages.UNAUTHORIZED_APPROVAL);
+        ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidOwner');
       });
 
       it('approving allows transfer from the approved party', async function () {
