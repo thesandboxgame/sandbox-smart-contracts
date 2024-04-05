@@ -17,6 +17,10 @@ import {
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IExchange, ExchangeMatch} from "./interfaces/IExchange.sol";
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /// @title AssetCreate
 /// @author The Sandbox
@@ -40,6 +44,14 @@ contract AssetCreate is
     mapping(address => uint16) public creatorNonces;
     mapping(address => uint16) public signatureNonces;
 
+    // A fee denoted in BPS that is charged when using the lazy minting feature, deducted from the creators payout
+    uint256 public lazyMintFeeInBps;
+    // The address that receives the lazy mint fee
+    address public lazyMintFeeReceiver;
+    // mapping of tokenId => maxSupply specified by the creator
+    mapping(uint256 => uint256) public availableToMint;
+    IExchange public exchangeContract;
+
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -48,6 +60,14 @@ contract AssetCreate is
     bytes32 public constant MINT_BATCH_TYPEHASH =
         keccak256(
             "MintBatch(address creator,uint16 nonce,uint8[] tiers,uint256[] amounts,bool[] revealed,string[] metadataHashes)"
+        );
+    bytes32 public constant LAZY_MINT_TYPEHASH =
+        keccak256(
+            "LazyMint(address caller,address creator,uint16 nonce,uint8 tier,uint256 amount,uint256 unitPrice,address paymentToken,string metadataHash,uint256 maxSupply)"
+        );
+    bytes32 public constant LAZY_MINT_BATCH_TYPEHASH =
+        keccak256(
+            "LazyMintBatch(address caller,address[] creators,uint16 nonce,uint8[] tiers,uint256[] amounts,uint256[] unitPrices,address[] paymentTokens,string[] metadataHashes,uint256[] maxSupplies)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -354,5 +374,281 @@ contract AssetCreate is
         return ERC2771HandlerUpgradeable._msgData();
     }
 
-    uint256[45] private __gap;
+    /// @notice Lazily creates a new asset with a signature
+    /// @dev Allows users to lazy mint assets
+    /// @param mintData The data for the lazy mint
+    function lazyCreateAsset(
+        address from,
+        bytes memory signature,
+        LazyMintData calldata mintData,
+        ExchangeMatch[] calldata matchedOrders
+    ) external whenNotPaused {
+        require(
+            authValidator.verify(
+                signature,
+                _hashLazyMint(
+                    mintData.caller,
+                    mintData.creator,
+                    signatureNonces[mintData.caller]++,
+                    mintData.tier,
+                    mintData.amount,
+                    mintData.unitPrice,
+                    mintData.paymentToken,
+                    mintData.metadataHash,
+                    mintData.maxSupply
+                )
+            ),
+            "AssetCreate: Invalid signature"
+        );
+
+        require(from == mintData.caller, "AssetCreate: Invalid caller");
+        // check if asset has already been minted before
+        uint256 tokenId = assetContract.getTokenIdByMetadataHash(mintData.metadataHash);
+        if (tokenId == 0) {
+            tokenId = TokenIdUtils.generateTokenId(
+                mintData.creator,
+                mintData.tier,
+                ++creatorNonces[mintData.creator],
+                mintData.tier == 1 ? 1 : 0,
+                true
+            );
+            require(mintData.amount <= mintData.maxSupply, "AssetCreate: Max supply exceeded");
+            availableToMint[tokenId] = mintData.maxSupply - mintData.amount;
+        } else {
+            require(availableToMint[tokenId] >= mintData.amount, "AssetCreate: Max supply reached");
+            availableToMint[tokenId] -= mintData.amount;
+        }
+
+        // if user does not have enough catalyst purchase remaining ones from the marketplace contract
+        uint256 catalystBalance = IERC1155(address(catalystContract)).balanceOf(mintData.caller, mintData.tier);
+
+        if (catalystBalance < mintData.amount) {
+            require(matchedOrders.length > 0, "AssetCreate: No order data");
+            exchangeContract.matchOrdersFrom(mintData.caller, matchedOrders);
+        }
+        // burn catalyst of a given tier
+        catalystContract.burnFrom(mintData.caller, mintData.tier, mintData.amount);
+        // send the payment to the creator after deducting the lazy mint fee
+        distributePayment(
+            mintData.caller,
+            mintData.unitPrice,
+            mintData.amount,
+            mintData.paymentToken,
+            mintData.creator
+        );
+        // mint the asset
+
+        assetContract.mint(mintData.caller, tokenId, mintData.amount, mintData.metadataHash);
+        emit AssetLazyMinted(
+            mintData.caller,
+            mintData.creator,
+            tokenId,
+            mintData.tier,
+            mintData.amount,
+            mintData.metadataHash
+        );
+    }
+
+    /// @notice Lazily creates multiple assets with a signature
+    /// @dev Allows users to lazy mint assets coming from multiple creators
+    /// @param mintData The data for the lazy mint
+    function lazyCreateMultipleAssets(
+        address from,
+        bytes memory signature,
+        LazyMintBatchData calldata mintData,
+        ExchangeMatch[][] calldata matchedOrdersArray
+    ) external whenNotPaused {
+        require(
+            authValidator.verify(
+                signature,
+                _hashLazyBatchMint(
+                    mintData.caller,
+                    mintData.creators,
+                    signatureNonces[mintData.caller]++,
+                    mintData.tiers,
+                    mintData.amounts,
+                    mintData.unitPrices,
+                    mintData.paymentTokens,
+                    mintData.metadataHashes,
+                    mintData.maxSupplies
+                )
+            ),
+            "AssetCreate: Invalid signature"
+        );
+
+        require(from == mintData.caller, "AssetCreate: Invalid caller");
+        uint256 expectedLength = mintData.tiers.length;
+        require(mintData.creators.length == expectedLength, "AssetCreate: 1-Array lengths");
+        require(mintData.amounts.length == expectedLength, "AssetCreate: 2-Array lengths");
+        require(mintData.unitPrices.length == expectedLength, "AssetCreate: 3-Array lengths");
+        require(mintData.paymentTokens.length == expectedLength, "AssetCreate: 4-Array lengths");
+        require(mintData.metadataHashes.length == expectedLength, "AssetCreate: 5-Array lengths");
+        require(mintData.maxSupplies.length == expectedLength, "AssetCreate: 6-Array lengths");
+
+        uint256[] memory tokenIds = new uint256[](mintData.tiers.length);
+        uint256[] memory tiersToBurn = new uint256[](mintData.tiers.length);
+        for (uint256 i = 0; i < mintData.tiers.length; i++) {
+            uint16 revealed = mintData.tiers[i] == 1 ? 1 : 0;
+            tiersToBurn[i] = mintData.tiers[i];
+            tokenIds[i] = assetContract.getTokenIdByMetadataHash(mintData.metadataHashes[i]);
+            if (tokenIds[i] == 0) {
+                tokenIds[i] = TokenIdUtils.generateTokenId(
+                    mintData.creators[i],
+                    mintData.tiers[i],
+                    ++creatorNonces[mintData.creators[i]],
+                    revealed,
+                    true
+                );
+                require(mintData.amounts[i] <= mintData.maxSupplies[i], "AssetCreate: Max supply exceeded");
+                availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];
+            } else {
+                require(availableToMint[tokenIds[i]] >= mintData.amounts[i], "AssetCreate: Max supply reached");
+                availableToMint[tokenIds[i]] -= mintData.amounts[i];
+            }
+            if (
+                IERC1155(address(catalystContract)).balanceOf(mintData.caller, mintData.tiers[i]) < mintData.amounts[i]
+            ) {
+                require(matchedOrdersArray.length > 0, "AssetCreate: No order data");
+                require(matchedOrdersArray[i].length > 0, "AssetCreate: No order data");
+                exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
+            }
+            distributePayment(
+                mintData.caller,
+                mintData.unitPrices[i],
+                mintData.amounts[i],
+                mintData.paymentTokens[i],
+                mintData.creators[i]
+            );
+        }
+
+        catalystContract.burnBatchFrom(mintData.caller, tiersToBurn, mintData.amounts);
+        assetContract.mintBatch(mintData.caller, tokenIds, mintData.amounts, mintData.metadataHashes);
+        emit AssetBatchLazyMinted(
+            mintData.caller,
+            mintData.creators,
+            tokenIds,
+            mintData.tiers,
+            mintData.amounts,
+            mintData.metadataHashes
+        );
+    }
+
+    /// @notice Splits the lazy mint payment between the creator and TSB if there is a fee
+    /// @param from The address of the sender
+    /// @param unitPrice The price of the asset
+    /// @param amount The amount of copies to mint
+    /// @param paymentToken The payment token
+    /// @param creator The address of the creator
+    function distributePayment(
+        address from,
+        uint256 unitPrice,
+        uint256 amount,
+        address paymentToken,
+        address creator
+    ) internal {
+        uint256 fee = 0;
+        if (lazyMintFeeInBps > 0) {
+            fee = (unitPrice * amount * lazyMintFeeInBps) / 10000;
+            SafeERC20.safeTransferFrom(IERC20(paymentToken), from, lazyMintFeeReceiver, fee);
+        }
+        uint256 creatorPayment = unitPrice * amount - fee;
+        SafeERC20.safeTransferFrom(IERC20(paymentToken), from, creator, creatorPayment);
+    }
+
+    /// @notice Creates a hash of the lazy mint data
+    /// @param creator The address of the creator
+    /// @param nonce The nonce of the caller
+    /// @param tier The tier of the asset
+    /// @param amount The amount of copies to mint
+    /// @param metadataHash The metadata hash of the asset
+    /// @param maxSupply The max supply of the asset
+    function _hashLazyMint(
+        address caller,
+        address creator,
+        uint16 nonce,
+        uint8 tier,
+        uint256 amount,
+        uint256 unitPrice,
+        address paymentToken,
+        string memory metadataHash,
+        uint256 maxSupply
+    ) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LAZY_MINT_TYPEHASH,
+                    caller,
+                    creator,
+                    nonce,
+                    tier,
+                    amount,
+                    unitPrice,
+                    paymentToken,
+                    keccak256((abi.encodePacked(metadataHash))),
+                    maxSupply
+                )
+            )
+        );
+    }
+
+    /// @notice Creates a hash of the lazy mint batch data
+    /// @param creators The addresses of the creators
+    /// @param nonce The nonce of the caller
+    /// @param tiers The tiers of the assets
+    /// @param amounts The amounts of copies to mint
+    /// @param unitPrices The unit prices of the assets
+    /// @param paymentTokens The payment tokens of the assets
+    /// @param metadataHashes The metadata hashes of the assets
+    /// @param maxSupplies The max supplies of the assets
+    function _hashLazyBatchMint(
+        address caller,
+        address[] memory creators,
+        uint16 nonce,
+        uint8[] memory tiers,
+        uint256[] memory amounts,
+        uint256[] memory unitPrices,
+        address[] memory paymentTokens,
+        string[] memory metadataHashes,
+        uint256[] memory maxSupplies
+    ) internal view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LAZY_MINT_BATCH_TYPEHASH,
+                    caller,
+                    keccak256(abi.encodePacked(creators)),
+                    nonce,
+                    keccak256(abi.encodePacked(tiers)),
+                    keccak256(abi.encodePacked(amounts)),
+                    keccak256(abi.encodePacked(unitPrices)),
+                    keccak256(abi.encodePacked(paymentTokens)),
+                    _encodeHashes(metadataHashes),
+                    keccak256(abi.encodePacked(maxSupplies))
+                )
+            )
+        );
+    }
+
+    /// @notice Set the lazy mint fee
+    /// @param _lazyMintFeeInBps The fee to set
+    function setLazyMintFee(uint256 _lazyMintFeeInBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_lazyMintFeeInBps <= 10000, "AssetCreate: Invalid fee");
+        lazyMintFeeInBps = _lazyMintFeeInBps;
+    }
+
+    /// @notice Set the lazy mint fee receiver
+    /// @param _lazyMintFeeReceiver The receiver to set
+    function setLazyMintFeeReceiver(address _lazyMintFeeReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_lazyMintFeeReceiver != address(0), "AssetCreate: Invalid receiver");
+        lazyMintFeeReceiver = _lazyMintFeeReceiver;
+    }
+
+    /// @notice Set the exchange contract
+    /// @param _exchangeContract The exchange contract to set
+    function setExchangeContract(address _exchangeContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_exchangeContract.isContract(), "AssetCreate: Invalid contract");
+        exchangeContract = IExchange(_exchangeContract);
+    }
+
+    uint256[41] private __gap;
 }

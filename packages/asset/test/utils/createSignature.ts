@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import hre from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -152,9 +152,122 @@ const createMockDigest = async (creator: string) => {
   return digest;
 };
 
+const createLazyMintSignature = async (
+  creator: string,
+  tier: number,
+  amount: number,
+  unitPrice: BigNumber,
+  paymentToken: string,
+  metadataHash: string,
+  maxSupply: number,
+  contract: Contract,
+  signer: SignerWithAddress,
+  txSender: SignerWithAddress
+) => {
+  const AssetCreateContract = contract;
+  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
+
+  const data = {
+    types: {
+      LazyMint: [
+        {name: 'caller', type: 'address'},
+        {name: 'creator', type: 'address'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tier', type: 'uint8'},
+        {name: 'amount', type: 'uint256'},
+        {name: 'unitPrice', type: 'uint256'},
+        {name: 'paymentToken', type: 'address'},
+        {name: 'metadataHash', type: 'string'},
+        {name: 'maxSupply', type: 'uint256'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+      verifyingContract: AssetCreateContract.address,
+    },
+    message: {
+      caller: txSender.address,
+      creator,
+      nonce,
+      tier,
+      amount,
+      unitPrice,
+      paymentToken,
+      metadataHash,
+      maxSupply,
+    },
+  };
+
+  const signature = await signer._signTypedData(
+    data.domain,
+    data.types,
+    data.message
+  );
+  return signature;
+};
+
+const createLazyMintMultipleAssetsSignature = async (
+  tiers: number[],
+  amounts: number[],
+  unitPrices: BigNumber[],
+  paymentTokens: string[],
+  metadataHashes: string[],
+  maxSupplies: number[],
+  creators: string[],
+  contract: Contract,
+  signer: SignerWithAddress,
+  txSender: SignerWithAddress
+) => {
+  const AssetCreateContract = contract;
+  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
+  const data = {
+    types: {
+      LazyMintBatch: [
+        {name: 'caller', type: 'address'},
+        {name: 'creators', type: 'address[]'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tiers', type: 'uint8[]'},
+        {name: 'amounts', type: 'uint256[]'},
+        {name: 'unitPrices', type: 'uint256[]'},
+        {name: 'paymentTokens', type: 'address[]'},
+        {name: 'metadataHashes', type: 'string[]'},
+        {name: 'maxSupplies', type: 'uint256[]'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: hre.network.config.chainId,
+      verifyingContract: AssetCreateContract.address,
+    },
+    message: {
+      caller: txSender.address,
+      creators,
+      nonce,
+      tiers,
+      amounts,
+      unitPrices,
+      paymentTokens,
+      metadataHashes,
+      maxSupplies,
+    },
+  };
+
+  const signature = await signer._signTypedData(
+    data.domain,
+    data.types,
+    data.message
+  );
+  return signature;
+};
+
 export {
   createAssetMintSignature,
   createMultipleAssetsMintSignature,
   createMockSignature,
   createMockDigest,
+  createLazyMintSignature,
+  createLazyMintMultipleAssetsSignature,
 };
