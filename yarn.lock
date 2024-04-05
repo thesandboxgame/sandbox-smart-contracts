@@ -2492,7 +2492,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/asset@1.1.0, @sandbox-smart-contracts/asset@workspace:packages/asset":
+"@sandbox-smart-contracts/asset@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@sandbox-smart-contracts/asset@npm:1.1.0"
+  dependencies:
+    "@manifoldxyz/libraries-solidity": ^1.0.4
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
+    "@openzeppelin/contracts": 4.9.3
+    "@openzeppelin/contracts-upgradeable": 4.9.3
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+  checksum: 7743dcd914c2a8965a928999833ed836e9f122ef0e382014ef339b405e253f93da67aea73140c4314021c0d4829326b0283da2cfe11041c188b461422fd800d6
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/asset@workspace:packages/asset":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/asset@workspace:packages/asset"
   dependencies:
