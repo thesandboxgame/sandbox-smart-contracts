@@ -57,7 +57,7 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param to The recipient of the token
     /// @param id The id of the token
     /// @param data Additional data
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) external virtual {
+    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) external virtual {
         _safeTransferFrom(from, to, id, data);
     }
 
@@ -67,6 +67,30 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
     /// @param id The id of the token
     function safeTransferFrom(address from, address to, uint256 id) external virtual {
         _safeTransferFrom(from, to, id, "");
+    }
+
+    /// @notice Transfer many tokens between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
+    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external virtual {
+        _batchTransferFrom(from, to, ids, data, false);
+    }
+
+    /// @notice Transfer many tokens between 2 addresses, while
+    /// ensuring the receiving contract has a receiver method.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external virtual {
+        _batchTransferFrom(from, to, ids, data, true);
     }
 
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
@@ -183,6 +207,48 @@ abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721
         _transferNumNFTPerAddress(from, to, 1);
         _updateOwnerData(tokenId, to, false);
         emit Transfer(from, to, tokenId);
+    }
+
+    /// @param from The sender of the token
+    /// @param to The recipient of the token
+    /// @param ids The ids of the tokens
+    /// @param data additional data
+    /// @param safe checks the target contract
+    /// @dev TODO: require from!=to and remove the if ? same for all transfers ?
+    function _batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes memory data,
+        bool safe
+    ) internal {
+        require(from != address(0), "NOT_FROM_ZEROADDRESS");
+        require(to != address(0), "NOT_TO_ZEROADDRESS");
+
+        address msgSender = _msgSender();
+        bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
+        uint256 numTokens = ids.length;
+        for (uint256 i = 0; i < numTokens; i++) {
+            uint256 id = ids[i];
+            (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+            require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
+            require(authorized || (operatorEnabled && _getOperator(id) == msgSender), "NOT_AUTHORIZED");
+            _updateOwnerData(id, to, false);
+            emit Transfer(from, to, id);
+        }
+        if (from != to) {
+            _transferNumNFTPerAddress(from, to, numTokens);
+        }
+
+        if (to.isContract()) {
+            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
+            } else if (safe) {
+                for (uint256 i = 0; i < numTokens; i++) {
+                    require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
+                }
+            }
+        }
     }
 
     /// @param from The address who initiated the transfer (may differ from msg.sender).
