@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-/* solhint-disable func-order, code-complexity */
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -96,13 +95,12 @@ abstract contract LandBaseToken is ERC721BaseToken {
     function transferQuad(address from, address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        bool metaTx = msg.sender != from && _isMetaTransactionContract(msg.sender);
-        if (msg.sender != from && !metaTx) {
+        if (msg.sender != from) {
             require(_isApprovedForAll(from, msg.sender), "not authorized to transferQuad");
         }
         _transferQuad(from, to, size, x, y);
         _transferNumNFTPerAddress(from, to, size * size);
-        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, data);
+        _checkBatchReceiverAcceptQuad(msg.sender, from, to, size, x, y, data);
     }
 
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
@@ -124,8 +122,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length, "sizes's and x's are different");
         require(xs.length == ys.length, "x's and y's are different");
-        bool metaTx = msg.sender != from && _isMetaTransactionContract(msg.sender);
-        if (msg.sender != from && !metaTx) {
+        if (msg.sender != from) {
             require(_isApprovedForAll(from, msg.sender), "not authorized");
         }
         uint256 numTokensTransferred = 0;
@@ -145,10 +142,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
                     counter++;
                 }
             }
-            require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
-                "erc721 batchTransfer rejected"
-            );
+            require(_checkOnERC721BatchReceived(msg.sender, from, to, ids, data), "erc721 batchTransfer rejected");
         }
     }
 
@@ -681,16 +675,6 @@ abstract contract LandBaseToken is ERC721BaseToken {
         } else {
             require(false, "Invalid token id");
         }
-    }
-
-    /// @param id quad id
-    /// @return address of the owner
-    function _ownerOf(uint256 id) internal view override returns (address) {
-        require(id & LAYER == 0, "Invalid token id");
-        (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
-        require(x % size == 0, "x coordinate: Invalid token id");
-        require(y % size == 0, "y coordinate: Invalid token id");
-        return _ownerOfQuad(size, x, y);
     }
 
     /// @param id token id

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
 /**
@@ -45,7 +44,7 @@ abstract contract ERC2771Handler {
      * @return sender address of the real sender
      */
     function _msgSender() internal view virtual returns (address sender) {
-        if (_isTrustedForwarder(msg.sender)) {
+        if (_isTrustedForwarder(msg.sender) && msg.data.length >= 20) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -61,7 +60,7 @@ abstract contract ERC2771Handler {
      * @return the real `msg.data`
      */
     function _msgData() internal view virtual returns (bytes calldata) {
-        if (_isTrustedForwarder(msg.sender)) {
+        if (_isTrustedForwarder(msg.sender) && msg.data.length >= 20) {
             return msg.data[:msg.data.length - 20];
         } else {
             return msg.data;

@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable code-complexity
-
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -697,18 +695,6 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
         } else {
             require(false, "Invalid token id");
         }
-    }
-
-    function _ownerOf(uint256 id) internal view override returns (address) {
-        require(id & LAYER == 0, "Invalid token id");
-        (uint256 size, uint256 x, uint256 y) = _getQuadById(id);
-        require(x % size == 0, "x coordinate: Invalid token id");
-        require(y % size == 0, "y coordinate: Invalid token id");
-        if (size == 1) {
-            uint256 owner1x1 = _getOwnerData(id);
-            return (owner1x1 & BURNED_FLAG) == BURNED_FLAG ? address(0) : _ownerOfQuad(size, x, y);
-        }
-        return _ownerOfQuad(size, x, y);
     }
 
     function _ownerAndOperatorEnabledOf(

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-/* solhint-disable no-empty-blocks */
 pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -33,9 +32,9 @@ contract PolygonLandStorageMixin is ContextUpgradeable {
      */
     mapping(uint256 => uint256) internal _owners;
     /// @notice Operators for each owner address for all tokens
-    mapping(address => mapping(address => bool)) public _operatorsForAll;
+    mapping(address => mapping(address => bool)) internal _operatorsForAll;
     /// @notice Operator for each token id
-    mapping(uint256 => address) public _operators;
+    mapping(uint256 => address) internal _operators;
 
     mapping(address => bool) internal _minters;
     uint256[49] private __gap;

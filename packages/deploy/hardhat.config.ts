@@ -41,6 +41,7 @@ const namedAccounts = {
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+    amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -50,6 +51,7 @@ const namedAccounts = {
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+    amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
   }, // can add super operators and change admin
 
   operationsAdmin: {
@@ -102,6 +104,7 @@ const namedAccounts = {
     goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
     sepolia: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
     mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
+    amoy: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
   },
 
   treasury: {
@@ -123,6 +126,7 @@ const namedAccounts = {
     goerli: 5,
     sepolia: 5,
     mumbai: 5,
+    amoy: 5,
     mainnet: 'sandSaleBeneficiary',
     polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
   }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
@@ -140,6 +144,7 @@ const namedAccounts = {
     goerli: 'sandAdmin',
     sepolia: 'sandAdmin',
     mumbai: 'sandAdmin',
+    amoy: 'sandAdmin',
   }, // can add super operators and change admin
 
   gemsAndCatalystsAdmin: 'sandAdmin',
@@ -151,6 +156,7 @@ const namedAccounts = {
     goerli: 'sandAdmin',
     sepolia: 'sandAdmin',
     mumbai: 'sandAdmin',
+    amoy: 'sandAdmin',
   },
 
   landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -167,6 +173,7 @@ const namedAccounts = {
     goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+    amoy: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
   },
   // To be used with AuthValidator only
   backendAuthWallet: {
@@ -178,6 +185,7 @@ const namedAccounts = {
     sepolia: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
     mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+    amoy: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
   },
   backendCashbackWallet: {
     // default is computed from private key:
@@ -274,7 +282,7 @@ const networks = {
   sepolia: {
     tags: ['L1'],
     companionNetworks: {
-      l2: 'mumbai',
+      l2: 'amoy',
     },
   },
   mainnet: {
@@ -287,6 +295,12 @@ const networks = {
     tags: ['L2'],
     companionNetworks: {
       l1: 'goerli',
+    },
+  },
+  amoy: {
+    tags: ['L2'],
+    companionNetworks: {
+      l1: 'sepolia',
     },
   },
   polygon: {

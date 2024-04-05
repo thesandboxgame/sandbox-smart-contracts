@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-/* solhint-disable no-empty-blocks */
 pragma solidity 0.8.23;
 
 import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
@@ -21,7 +20,7 @@ import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 contract LandStorageMixin {
     address internal _admin;
     mapping(address => bool) internal _superOperators;
-    mapping(address => bool) internal _metaTransactionContracts;
+    mapping(address => bool) internal _metaTransactionContracts; // removed from the code, obsolete.
     /// @notice Number of NFT an address own
     mapping(address => uint256) internal _numNFTPerAddress;
     /**
@@ -31,9 +30,9 @@ contract LandStorageMixin {
      */
     mapping(uint256 => uint256) internal _owners;
     /// @notice Operators for each owner address for all tokens
-    mapping(address => mapping(address => bool)) public _operatorsForAll;
+    mapping(address => mapping(address => bool)) internal _operatorsForAll;
     /// @notice Operator for each token id
-    mapping(uint256 => address) public _operators;
+    mapping(uint256 => address) internal _operators;
 
     bool internal _initialized; // obsolete
     uint256[49] private __gap;
@@ -54,14 +53,6 @@ contract LandStorageMixin {
 
     function _setSuperOperator(address superOperator, bool enabled) internal virtual {
         _superOperators[superOperator] = enabled;
-    }
-
-    function _isMetaTransactionContract(address who) internal view virtual returns (bool) {
-        return _metaTransactionContracts[who];
-    }
-
-    function _setMetaTransactionContract(address metaTransactionProcessor, bool enabled) internal virtual {
-        _metaTransactionContracts[metaTransactionProcessor] = enabled;
     }
 
     function _getNumNFTPerAddress(address who) internal view virtual returns (uint256) {
