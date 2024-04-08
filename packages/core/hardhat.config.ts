@@ -431,14 +431,15 @@ const config: HardhatUserConfig = {
     },
     customChains: [
       {
-        network: "polygonAmoy",
+        network: 'polygonAmoy',
         chainId: 80002,
         urls: {
-          apiURL: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/polygonAmoy",
-          browserURL: "https://www.oklink.com/amoy"
-        }
-      }
-    ]
+          apiURL:
+            'https://www.oklink.com/api/explorer/v1/contract/verify/async/api/polygonAmoy',
+          browserURL: 'https://www.oklink.com/amoy',
+        },
+      },
+    ],
   },
 };
 
