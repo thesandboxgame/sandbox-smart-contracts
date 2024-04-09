@@ -429,17 +429,6 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
       polygonAmoy: process.env.ETHERSCAN_API_KEY_AMOY || '',
     },
-    customChains: [
-      {
-        network: 'polygonAmoy',
-        chainId: 80002,
-        urls: {
-          apiURL:
-            'https://www.oklink.com/api/explorer/v1/contract/verify/async/api/polygonAmoy',
-          browserURL: 'https://www.oklink.com/amoy',
-        },
-      },
-    ],
   },
 };
 
