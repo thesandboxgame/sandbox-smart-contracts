@@ -9,7 +9,7 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
-import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
+import {LandBaseToken} from "../common/LandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
 
@@ -19,7 +19,7 @@ import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
 /// @dev There is a difference between L1 and L2 storage slots order and we want to upgrade the contract.
 /// @dev This contract uses the exact storage slots configuration that we have in `core` package so we can upgrade
 /// @dev It must be the first one in the inheritance chain for subclasses
-contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
+contract PolygonLandBase is PolygonLandStorageMixin, LandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
     function _msgSender() internal view override(IContext, Context, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
@@ -97,13 +97,11 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
         PolygonLandStorageMixin._setOperator(id, operator);
     }
 
-    function _isMinter(
-        address who
-    ) internal view override(PolygonLandStorageMixin, PolygonLandBaseToken) returns (bool) {
+    function _isMinter(address who) internal view override(PolygonLandStorageMixin, LandBaseToken) returns (bool) {
         return PolygonLandStorageMixin._isMinter(who);
     }
 
-    function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, PolygonLandBaseToken) {
+    function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, LandBaseToken) {
         PolygonLandStorageMixin._setMinter(who, enabled);
     }
 
