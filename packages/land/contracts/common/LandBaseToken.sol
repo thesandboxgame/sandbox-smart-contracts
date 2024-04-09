@@ -124,7 +124,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
      */
     function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
         _isValidQuad(size, x, y);
-        require(isMinter(_msgSender()), "!AUTHORIZED");
+        require(_isMinter(_msgSender()), "!AUTHORIZED");
         _mintQuad(user, size, x, y, data);
     }
 
@@ -139,10 +139,10 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
      * @param data extra data to pass to the transfer
      */
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external virtual {
-        require(isMinter(msg.sender), "!AUTHORIZED");
+        require(_isMinter(msg.sender), "!AUTHORIZED");
         require(to != address(0), "to is zero address");
 
-        if (exists(size, x, y)) {
+        if (_exists(size, x, y)) {
             _transferQuad(msg.sender, to, size, x, y);
             _transferNumNFTPerAddress(msg.sender, to, size * size);
             _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
@@ -192,14 +192,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
      * @notice Return the name of the token contract
      * @return The name of the token contract
      */
-    function name() public pure returns (string memory) {
+    function name() external pure virtual returns (string memory) {
         return "Sandbox's LANDs";
     }
 
     /// @notice check whether address `who` is given minter rights.
     /// @param who The address to query.
     /// @return whether the address has minter rights.
-    function isMinter(address who) public view returns (bool) {
+    function isMinter(address who) external view virtual returns (bool) {
         return _isMinter(who);
     }
 
@@ -208,22 +208,21 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param x x coordinate of the quad
     /// @param y y coordinate of the quad
     /// @return bool for if Land has been minted or not
-    function exists(uint256 size, uint256 x, uint256 y) public view override returns (bool) {
-        _isValidQuad(size, x, y);
-        return _ownerOfQuad(size, x, y) != address(0);
+    function exists(uint256 size, uint256 x, uint256 y) external view virtual override returns (bool) {
+        return _exists(size, x, y);
     }
 
     /**
      * @notice Return the symbol of the token contract
      * @return The symbol of the token contract
      */
-    function symbol() public pure returns (string memory) {
+    function symbol() external pure virtual returns (string memory) {
         return "LAND";
     }
 
     /// @notice total width of the map
     /// @return width
-    function width() public pure returns (uint256) {
+    function width() external pure virtual returns (uint256) {
         return GRID_SIZE;
     }
 
@@ -238,7 +237,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
      * @param id The id of the token
      * @return The URI of the token
      */
-    function tokenURI(uint256 id) public view returns (string memory) {
+    function tokenURI(uint256 id) external view virtual returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
         return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
     }
@@ -715,6 +714,16 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);
             operatorEnabled = false;
         }
+    }
+
+    /// @notice checks if Land has been minted or not
+    /// @param size size of the
+    /// @param x x coordinate of the quad
+    /// @param y y coordinate of the quad
+    /// @return bool for if Land has been minted or not
+    function _exists(uint256 size, uint256 x, uint256 y) internal view returns (bool) {
+        _isValidQuad(size, x, y);
+        return _ownerOfQuad(size, x, y) != address(0);
     }
 
     function _isMinter(address who) internal view virtual returns (bool);
