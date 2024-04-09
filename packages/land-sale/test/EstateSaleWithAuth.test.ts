@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {runEstateSaleSetup} from './estateSaleTestSetup';
+import {runEstateSaleSetup} from './estate-sale-test-setup';
 import {expect} from './utils/chai-setup';
 
 describe('EstateSaleWithAuth (/packages/land-sale/contracts/EstateSaleWithAuth.sol)', function () {
