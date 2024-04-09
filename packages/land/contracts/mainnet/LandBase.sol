@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
-import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";

@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.23;
 
-import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
-import {IContext} from "./IContext.sol";
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
+import {IContext} from "../interfaces/IContext.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The Sandbox

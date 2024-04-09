@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IContext} from "./IContext.sol";
+import {IContext} from "../interfaces/IContext.sol";
 
 /// @title WithAdmin
 /// @author The Sandbox

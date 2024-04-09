@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-import {ILandMetadataRegistry} from "./ILandMetadataRegistry.sol";
+import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 
 /// @title WithMetadataRegistry
 /// @author The Sandbox

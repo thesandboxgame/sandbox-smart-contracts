@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {WithAdmin} from "../common/WithAdmin.sol";
+import {WithAdmin} from "./WithAdmin.sol";
 
 /// @title WithSuperOperators
 /// @author The Sandbox

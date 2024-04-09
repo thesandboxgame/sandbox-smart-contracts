@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 // According to hardhat-storage plugin run onto the latest deployed version (@core)
 //│          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │

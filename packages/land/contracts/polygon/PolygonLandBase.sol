@@ -3,11 +3,11 @@
 pragma solidity 0.8.23;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {IContext} from "../interfaces/IContext.sol";
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
-import {IContext} from "../common/IContext.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
-import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";

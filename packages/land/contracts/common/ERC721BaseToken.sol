@@ -4,8 +4,8 @@ pragma solidity 0.8.23;
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import {IERC721MandatoryTokenReceiver} from "../common/IERC721MandatoryTokenReceiver.sol";
-import {IContext} from "./IContext.sol";
+import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
+import {IContext} from "../interfaces/IContext.sol";
 import {IERC721Errors} from "./draft-IERC6093.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 

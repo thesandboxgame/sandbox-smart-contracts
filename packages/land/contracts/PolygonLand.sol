@@ -3,7 +3,7 @@
 pragma solidity 0.8.23;
 
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {IOperatorFilterRegistry} from "./common/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
 import {WithRoyalties} from "./common/WithRoyalties.sol";
 import {WithOwner} from "./common/WithOwner.sol";

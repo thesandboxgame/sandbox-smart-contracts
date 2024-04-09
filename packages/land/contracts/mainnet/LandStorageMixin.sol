@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 // According to hardhat-storage plugin run onto the latest deployed version (@core)
 //│          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │
