@@ -7,14 +7,13 @@ import {ILandToken} from "../interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 
 /**
- * @title PolygonLandBaseToken
+ * @title LandBaseToken
  * @author The Sandbox
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
+abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     using Address for address;
-
     uint256 internal constant GRID_SIZE = 408;
 
     /* solhint-disable const-name-snakecase */
@@ -79,11 +78,12 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
-    /// @notice Enable or disable the ability of `minter` to transfer tokens of all (minter rights).
+    /// @notice Enable or disable the ability of `minter` to mint tokens
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external onlyAdmin {
-        require(minter != address(0), "PolygonLand: Invalid address");
+        require(minter != address(0), "address 0 is not allowed");
+        require(enabled != _isMinter(minter), "the status should be different");
         _setMinter(minter, enabled);
         emit Minter(minter, enabled);
     }

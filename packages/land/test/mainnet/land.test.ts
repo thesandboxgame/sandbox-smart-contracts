@@ -114,14 +114,14 @@ describe('Land.sol', function () {
     const {LandContract, deployer} = await loadFixture(setupLand);
     await expect(
       LandContract.mintQuad(deployer, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('Only a minter can mint');
+    ).to.be.revertedWith('!AUTHORIZED');
   });
 
   it('should revert when minted with zero size', async function () {
     const {LandAsMinter, deployer} = await loadFixture(setupLand);
     await expect(
       LandAsMinter.mintQuad(deployer, 0, 0, 0, '0x'),
-    ).to.be.revertedWith('size cannot be zero');
+    ).to.be.revertedWith('Invalid size');
   });
 
   it('it should revert approveFor for unauthorized sender', async function () {
@@ -182,7 +182,7 @@ describe('Land.sol', function () {
     const {LandContract} = await loadFixture(setupLand);
     const id = getId(1, 2, 2);
     await expect(LandContract.tokenURI(id)).to.be.revertedWith(
-      'Land: Id does not exist',
+      'Id does not exist',
     );
   });
 
@@ -199,7 +199,7 @@ describe('Land.sol', function () {
         [0],
         '0x',
       ),
-    ).to.be.revertedWith('from is zero address');
+    ).to.be.revertedWith('invalid from');
   });
 
   it('should revert when to is ZeroAddress (mintAndTransferQuad)', async function () {
@@ -207,14 +207,14 @@ describe('Land.sol', function () {
     await LandAsMinter.mintQuad(landAdmin, 6, 0, 0, '0x');
     await expect(
       LandAsAdmin.mintAndTransferQuad(ZeroAddress, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('to is zero address');
+    ).to.be.revertedWith('!AUTHORIZED');
   });
 
   it('should revert when signer is not a landMinter (mintAndTransferQuad)', async function () {
     const {LandContract, deployer} = await loadFixture(setupLand);
     await expect(
       LandContract.mintAndTransferQuad(deployer, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('Only a minter can mint');
+    ).to.be.revertedWith('!AUTHORIZED');
   });
 
   it('should emit RoyaltyManagerSet event', async function () {

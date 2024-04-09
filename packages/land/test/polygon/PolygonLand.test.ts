@@ -82,7 +82,7 @@ describe('PolygonLand.sol', function () {
 
     await expect(
       LandAsAdmin.setMinter('0x0000000000000000000000000000000000000000', true),
-    ).to.be.revertedWith('PolygonLand: Invalid address');
+    ).to.be.revertedWith('address 0 is not allowed');
   });
 
   it(`reverts check URI for non existing token`, async function () {

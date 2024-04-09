@@ -73,22 +73,6 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
     }
 
     /**
-     * @notice Return the name of the token contract
-     * @return The name of the token contract
-     */
-    function name() external pure returns (string memory) {
-        return "Sandbox's LANDs";
-    }
-
-    /**
-     * @notice Return the symbol of the token contract
-     * @return The symbol of the token contract
-     */
-    function symbol() external pure returns (string memory) {
-        return "LAND";
-    }
-
-    /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
      * @param operator The address receiving the approval
@@ -165,16 +149,6 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
     }
 
     /**
-     * @notice Return the URI of a specific token
-     * @param tokenId The id of the token
-     * @return The URI of the token
-     */
-    function tokenURI(uint256 tokenId) external view returns (string memory) {
-        require(_ownerOf(tokenId) != address(0), "Land: Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", uint2str(tokenId), "/metadata.json"));
-    }
-
-    /**
      * @notice Check if the contract supports an interface
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
@@ -190,23 +164,5 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
             id == 0x5b5e139f ||
             id == 0x7f5828d0 ||
             id == type(IERC2981).interfaceId;
-    }
-
-    function uint2str(uint256 _i) internal pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        while (_i != 0) {
-            bstr[--len] = bytes1(uint8(48 + (_i % 10)));
-            _i /= 10;
-        }
-        return string(bstr);
     }
 }

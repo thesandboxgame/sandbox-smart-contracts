@@ -6,7 +6,7 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
-import {LandBaseToken} from "./LandBaseToken.sol";
+import {LandBaseToken} from "../common/LandBaseToken.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 
 /// @title LAND Base L1
