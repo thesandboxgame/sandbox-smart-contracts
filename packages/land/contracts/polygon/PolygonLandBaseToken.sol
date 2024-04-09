@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
+import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {ILandToken} from "./ILandToken.sol";
 import {IPolygonLand} from "./IPolygonLand.sol";
 
@@ -13,7 +13,7 @@ import {IPolygonLand} from "./IPolygonLand.sol";
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseTokenCommon {
+abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseToken {
     using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -160,13 +160,13 @@ abstract contract PolygonLandBaseToken is IPolygonLand, ERC721BaseTokenCommon {
     }
 
     /// @dev TODO: this contract doesn't need to inherit from ILandToken/IPolygonLand we can do that in main contract.
-    /// @inheritdoc ERC721BaseTokenCommon
+    /// @inheritdoc ERC721BaseToken
     function batchTransferFrom(
         address from,
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external virtual override(ILandToken, ERC721BaseTokenCommon) {
+    ) external virtual override(ILandToken, ERC721BaseToken) {
         _batchTransferFrom(from, to, ids, data, false);
     }
 

@@ -5,7 +5,7 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
-import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
+import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 
@@ -41,28 +41,26 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
 
     function _getNumNFTPerAddress(
         address who
-    ) internal view override(LandStorageMixin, ERC721BaseTokenCommon) returns (uint256) {
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
         return LandStorageMixin._getNumNFTPerAddress(who);
     }
 
-    function _setNumNFTPerAddress(address who, uint256 num) internal override(LandStorageMixin, ERC721BaseTokenCommon) {
+    function _setNumNFTPerAddress(address who, uint256 num) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setNumNFTPerAddress(who, num);
     }
 
-    function _getOwnerData(
-        uint256 id
-    ) internal view override(LandStorageMixin, ERC721BaseTokenCommon) returns (uint256) {
+    function _getOwnerData(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
         return LandStorageMixin._getOwnerData(id);
     }
 
-    function _setOwnerData(uint256 id, uint256 data) internal override(LandStorageMixin, ERC721BaseTokenCommon) {
+    function _setOwnerData(uint256 id, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setOwnerData(id, data);
     }
 
     function _isOperatorForAll(
         address owner,
         address operator
-    ) internal view override(LandStorageMixin, ERC721BaseTokenCommon) returns (bool) {
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (bool) {
         return LandStorageMixin._isOperatorForAll(owner, operator);
     }
 
@@ -70,17 +68,15 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         address owner,
         address operator,
         bool enabled
-    ) internal override(LandStorageMixin, ERC721BaseTokenCommon) {
+    ) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setOperatorForAll(owner, operator, enabled);
     }
 
-    function _getOperator(
-        uint256 id
-    ) internal view override(LandStorageMixin, ERC721BaseTokenCommon) returns (address) {
+    function _getOperator(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {
         return LandStorageMixin._getOperator(id);
     }
 
-    function _setOperator(uint256 id, address operator) internal override(LandStorageMixin, ERC721BaseTokenCommon) {
+    function _setOperator(uint256 id, address operator) internal override(LandStorageMixin, ERC721BaseToken) {
         LandStorageMixin._setOperator(id, operator);
     }
 

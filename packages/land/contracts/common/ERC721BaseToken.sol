@@ -14,7 +14,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
 /// @dev TODO: after merging. use custom errors
-abstract contract ERC721BaseTokenCommon is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
+abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
     using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
