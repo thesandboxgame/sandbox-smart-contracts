@@ -9,6 +9,7 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
+import {LandBaseTokenCommon} from "../common/LandBaseTokenCommon.sol";
 import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
@@ -99,11 +100,11 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _isMinter(
         address who
-    ) internal view override(PolygonLandStorageMixin, PolygonLandBaseToken) returns (bool) {
+    ) internal view override(PolygonLandStorageMixin, LandBaseTokenCommon) returns (bool) {
         return PolygonLandStorageMixin._isMinter(who);
     }
 
-    function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, PolygonLandBaseToken) {
+    function _setMinter(address who, bool enabled) internal override(PolygonLandStorageMixin, LandBaseTokenCommon) {
         PolygonLandStorageMixin._setMinter(who, enabled);
     }
 

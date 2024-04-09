@@ -3,8 +3,7 @@ pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import {ILandToken} from "../interfaces/ILandToken.sol";
-import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
+import {LandBaseTokenCommon} from "../common/LandBaseTokenCommon.sol";
 
 /**
  * @title PolygonLandBaseToken
@@ -12,27 +11,8 @@ import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
+abstract contract PolygonLandBaseToken is LandBaseTokenCommon {
     using AddressUpgradeable for address;
-
-    uint256 internal constant GRID_SIZE = 408;
-
-    /* solhint-disable const-name-snakecase */
-    uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
-    /* solhint-enable const-name-snakecase */
-
-    event Minter(address indexed minter, bool enabled);
-
-    struct Land {
-        uint256 x;
-        uint256 y;
-        uint256 size;
-    }
 
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
@@ -48,7 +28,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes calldata data
-    ) external override {
+    ) external {
         require(from != address(0), "invalid from");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length, "sizes's and x's are different");
@@ -95,14 +75,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
     /// @param x The top left x coordinate of the quad
     /// @param y The top left y coordinate of the quad
     /// @param data additional data for transfer
-    function transferQuad(
-        address from,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes calldata data
-    ) external override {
+    function transferQuad(address from, address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         address msgSender = _msgSender();
@@ -122,9 +95,9 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
      * @param y The top left y coordinate of the new quad
      * @param data extra data to pass to the transfer
      */
-    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
+    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual {
         _isValidQuad(size, x, y);
-        require(isMinter(_msgSender()), "!AUTHORIZED");
+        require(_isMinter(_msgSender()), "!AUTHORIZED");
         _mintQuad(user, size, x, y, data);
     }
 
@@ -139,7 +112,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
      * @param data extra data to pass to the transfer
      */
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external virtual {
-        require(isMinter(msg.sender), "!AUTHORIZED");
+        require(_isMinter(msg.sender), "!AUTHORIZED");
         require(to != address(0), "to is zero address");
 
         if (exists(size, x, y)) {
@@ -156,17 +129,6 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
     /// @return the x coordinates
     function getX(uint256 id) external pure returns (uint256) {
         return _getX(id);
-    }
-
-    /// @dev TODO: this contract doesn't need to inherit from ILandToken/IPolygonLand we can do that in main contract.
-    /// @inheritdoc ERC721BaseToken
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external virtual override(ILandToken, ERC721BaseToken) {
-        _batchTransferFrom(from, to, ids, data, false);
     }
 
     /// @notice y coordinate of Land token
@@ -199,7 +161,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
     /// @notice check whether address `who` is given minter rights.
     /// @param who The address to query.
     /// @return whether the address has minter rights.
-    function isMinter(address who) public view returns (bool) {
+    function isMinter(address who) external view returns (bool) {
         return _isMinter(who);
     }
 
@@ -208,7 +170,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
     /// @param x x coordinate of the quad
     /// @param y y coordinate of the quad
     /// @return bool for if Land has been minted or not
-    function exists(uint256 size, uint256 x, uint256 y) public view override returns (bool) {
+    function exists(uint256 size, uint256 x, uint256 y) public view returns (bool) {
         _isValidQuad(size, x, y);
         return _ownerOfQuad(size, x, y) != address(0);
     }
@@ -719,8 +681,4 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
             operatorEnabled = false;
         }
     }
-
-    function _isMinter(address who) internal view virtual returns (bool);
-
-    function _setMinter(address who, bool enabled) internal virtual;
 }

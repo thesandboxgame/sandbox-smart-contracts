@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
+import {LandBaseTokenCommon} from "../common/LandBaseTokenCommon.sol";
 
 /**
  * @title LandBaseToken
@@ -10,27 +10,8 @@ import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
  * @notice Implement LAND and quad functionalities on top of an ERC721 token
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
-abstract contract LandBaseToken is ERC721BaseToken {
+abstract contract LandBaseToken is LandBaseTokenCommon {
     using AddressUpgradeable for address;
-    // Our grid is 408 x 408 lands
-    uint256 internal constant GRID_SIZE = 408;
-
-    /* solhint-disable const-name-snakecase */
-    uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
-    /* solhint-enable const-name-snakecase */
-
-    event Minter(address indexed superOperator, bool enabled);
-
-    struct Land {
-        uint256 x;
-        uint256 y;
-        uint256 size;
-    }
 
     /**
      * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
@@ -43,7 +24,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
         require(to != address(0), "to is zero address");
         require(size != 0, "size cannot be zero");
-        require(isMinter(msg.sender), "Only a minter can mint");
+        require(_isMinter(msg.sender), "Only a minter can mint");
 
         _isValidQuad(size, x, y);
 
@@ -74,7 +55,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
      */
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {
         require(to != address(0), "to is zero address");
-        require(isMinter(msg.sender), "Only a minter can mint");
+        require(_isMinter(msg.sender), "Only a minter can mint");
 
         if (exists(size, x, y) == true) {
             _transferQuad(msg.sender, to, size, x, y);
@@ -185,7 +166,7 @@ abstract contract LandBaseToken is ERC721BaseToken {
     /// @notice check whether address `who` is given minter rights.
     /// @param who The address to query.
     /// @return whether the address has minter rights.
-    function isMinter(address who) public view returns (bool) {
+    function isMinter(address who) external view returns (bool) {
         return _isMinter(who);
     }
 
@@ -703,8 +684,4 @@ abstract contract LandBaseToken is ERC721BaseToken {
             operatorEnabled = false;
         }
     }
-
-    function _isMinter(address who) internal view virtual returns (bool);
-
-    function _setMinter(address who, bool enabled) internal virtual;
 }

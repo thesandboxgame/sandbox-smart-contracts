@@ -6,6 +6,7 @@ import {WithAdmin} from "../common/WithAdmin.sol";
 import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
+import {LandBaseTokenCommon} from "../common/LandBaseTokenCommon.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 
@@ -80,11 +81,11 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         LandStorageMixin._setOperator(id, operator);
     }
 
-    function _isMinter(address who) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
+    function _isMinter(address who) internal view override(LandStorageMixin, LandBaseTokenCommon) returns (bool) {
         return LandStorageMixin._isMinter(who);
     }
 
-    function _setMinter(address who, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
+    function _setMinter(address who, bool enabled) internal override(LandStorageMixin, LandBaseTokenCommon) {
         LandStorageMixin._setMinter(who, enabled);
     }
 
