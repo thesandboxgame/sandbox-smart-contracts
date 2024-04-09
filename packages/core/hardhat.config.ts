@@ -388,7 +388,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('amoy'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
-      gasPrice: 200000000000, // TODO: this fixes invalid sender issue
+      //gasPrice: 600000000000, // TODO: this fixes invalid sender issue
       companionNetworks: {
         l1: 'sepolia',
       },
