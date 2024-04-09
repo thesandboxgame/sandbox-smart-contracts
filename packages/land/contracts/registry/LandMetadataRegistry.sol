@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import {ILandMetadataRegistry} from "../common/ILandMetadataRegistry.sol";
+import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 import {LandMetadataBase} from "./LandMetadataBase.sol";
 
 /**
