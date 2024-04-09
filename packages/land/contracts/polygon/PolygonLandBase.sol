@@ -8,7 +8,7 @@ import {WithSuperOperators} from "../common/WithSuperOperators.sol";
 import {IContext} from "../common/IContext.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../common/IOperatorFilterRegistry.sol";
-import {ERC721BaseTokenCommon} from "../common/ERC721BaseTokenCommon.sol";
+import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 import {PolygonLandBaseToken} from "./PolygonLandBaseToken.sol";
 import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
@@ -51,31 +51,31 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
 
     function _getNumNFTPerAddress(
         address who
-    ) internal view override(PolygonLandStorageMixin, ERC721BaseTokenCommon) returns (uint256) {
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (uint256) {
         return PolygonLandStorageMixin._getNumNFTPerAddress(who);
     }
 
     function _setNumNFTPerAddress(
         address who,
         uint256 num
-    ) internal override(PolygonLandStorageMixin, ERC721BaseTokenCommon) {
+    ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setNumNFTPerAddress(who, num);
     }
 
     function _getOwnerData(
         uint256 id
-    ) internal view override(PolygonLandStorageMixin, ERC721BaseTokenCommon) returns (uint256) {
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (uint256) {
         return PolygonLandStorageMixin._getOwnerData(id);
     }
 
-    function _setOwnerData(uint256 id, uint256 data) internal override(PolygonLandStorageMixin, ERC721BaseTokenCommon) {
+    function _setOwnerData(uint256 id, uint256 data) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setOwnerData(id, data);
     }
 
     function _isOperatorForAll(
         address owner,
         address operator
-    ) internal view override(PolygonLandStorageMixin, ERC721BaseTokenCommon) returns (bool) {
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (bool) {
         return PolygonLandStorageMixin._isOperatorForAll(owner, operator);
     }
 
@@ -83,20 +83,17 @@ contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC27
         address owner,
         address operator,
         bool enabled
-    ) internal override(PolygonLandStorageMixin, ERC721BaseTokenCommon) {
+    ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setOperatorForAll(owner, operator, enabled);
     }
 
     function _getOperator(
         uint256 id
-    ) internal view override(PolygonLandStorageMixin, ERC721BaseTokenCommon) returns (address) {
+    ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (address) {
         return PolygonLandStorageMixin._getOperator(id);
     }
 
-    function _setOperator(
-        uint256 id,
-        address operator
-    ) internal override(PolygonLandStorageMixin, ERC721BaseTokenCommon) {
+    function _setOperator(uint256 id, address operator) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
         PolygonLandStorageMixin._setOperator(id, operator);
     }
 
