@@ -33,8 +33,11 @@ export function landConfig(setupLand, Contract: string) {
       });
 
       it('should set royaltyManager', async function () {
-        const {LandAsAdmin, other, manager} = await loadFixture(setupLand);
-        expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(manager);
+        const {LandAsAdmin, other, RoyaltyManagerContract} =
+          await loadFixture(setupLand);
+        expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(
+          RoyaltyManagerContract,
+        );
         await LandAsAdmin.setRoyaltyManager(other);
         expect(await LandAsAdmin.getRoyaltyManager()).to.be.equal(other);
       });
