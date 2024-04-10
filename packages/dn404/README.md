@@ -1,6 +1,7 @@
 # <PACKAGE>
 
-PoC package for a generic DN404, an implementation of a co-joined ERC20 and ERC721 pair.
+PoC package for a generic DN404, an implementation of a co-joined ERC20 and
+ERC721 pair.
 
 ## Running the project locally
 

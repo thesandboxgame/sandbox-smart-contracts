@@ -18,12 +18,7 @@ contract SimpleDN404 is DN404, Ownable {
     string private _symbol;
     string private _baseURI;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint96 initialTokenSupply,
-        address initialSupplyOwner
-    ) {
+    constructor(string memory name_, string memory symbol_, uint96 initialTokenSupply, address initialSupplyOwner) {
         _initializeOwner(msg.sender);
 
         _name = name_;

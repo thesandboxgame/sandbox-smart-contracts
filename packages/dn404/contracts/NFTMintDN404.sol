@@ -87,7 +87,9 @@ contract NFTMintDN404 is DN404, Ownable {
         _;
     }
 
-    function mint(uint256 nftAmount)
+    function mint(
+        uint256 nftAmount
+    )
         public
         payable
         onlyLive
@@ -98,7 +100,10 @@ contract NFTMintDN404 is DN404, Ownable {
         _mint(msg.sender, nftAmount * _unit());
     }
 
-    function allowlistMint(uint256 nftAmount, bytes32[] calldata proof)
+    function allowlistMint(
+        uint256 nftAmount,
+        bytes32[] calldata proof
+    )
         public
         payable
         onlyLive
