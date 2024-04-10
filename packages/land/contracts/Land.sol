@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
 import {WithRoyalties} from "./common/WithRoyalties.sol";
@@ -189,7 +189,7 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
             id == 0x80ac58cd ||
             id == 0x5b5e139f ||
             id == 0x7f5828d0 ||
-            id == type(IERC2981).interfaceId;
+            id == type(IERC2981Upgradeable).interfaceId;
     }
 
     function uint2str(uint256 _i) internal pure returns (string memory) {

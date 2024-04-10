@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {ILandToken} from "../interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 
@@ -13,7 +13,7 @@ import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
  * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
  */
 abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
-    using Address for address;
+    using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
 
@@ -65,7 +65,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
         }
         _transferNumNFTPerAddress(from, to, numTokensTransferred);
 
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory ids = new uint256[](numTokensTransferred);
             uint256 counter = 0;
             for (uint256 j = 0; j < sizes.length; j++) {
@@ -240,7 +240,10 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
+        return
+            string(
+                abi.encodePacked("https://api.sandbox.game/lands/", StringsUpgradeable.toString(id), "/metadata.json")
+            );
     }
 
     function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {
@@ -431,7 +434,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
         uint256 y,
         bytes memory data
     ) internal {
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory ids = new uint256[](size * size);
             for (uint256 i = 0; i < size * size; i++) {
                 ids[i] = _idInPath(i, size, x, y);
@@ -460,7 +463,7 @@ abstract contract PolygonLandBaseToken is ILandToken, ERC721BaseToken {
         bytes memory data
     ) internal {
         // checks if to is a contract and supports ERC721_MANDATORY_RECEIVER interfaces. if it doesn't it just clears the owner of 1x1 lands in quad(size, x, y)
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             // array to push minted 1x1 land
             uint256[] memory idsToTransfer = new uint256[](landMinted);
             // index of last land pushed in idsToTransfer array

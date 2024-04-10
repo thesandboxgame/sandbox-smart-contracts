@@ -3,7 +3,7 @@
 // solhint-disable reason-string
 pragma solidity 0.8.23;
 
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {EnumerableSetUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 contract OperatorFilterRegistryEvents {
@@ -26,22 +26,22 @@ contract OperatorFilterRegistryEvents {
  * *       restricted according to the isOperatorAllowed function.
  */
 contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRegistryEvents {
-    using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
 
     /// @dev initialized accounts have a nonzero codehash (see https://eips.ethereum.org/EIPS/eip-1052)
     /// Note that this will also be a smart contract's codehash when making calls from its constructor.
     bytes32 public constant EOA_CODEHASH = keccak256("");
 
-    mapping(address => EnumerableSet.AddressSet) private _filteredOperators;
-    mapping(address => EnumerableSet.Bytes32Set) private _filteredCodeHashes;
+    mapping(address => EnumerableSetUpgradeable.AddressSet) private _filteredOperators;
+    mapping(address => EnumerableSetUpgradeable.Bytes32Set) private _filteredCodeHashes;
     mapping(address => address) private _registrations;
-    mapping(address => EnumerableSet.AddressSet) private _subscribers;
+    mapping(address => EnumerableSetUpgradeable.AddressSet) private _subscribers;
 
     constructor(address _defaultSubscribtion, address[] memory _blacklistedAddresses) {
         _registrations[_defaultSubscribtion] = _defaultSubscribtion;
-        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
-        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscribtion];
+        EnumerableSetUpgradeable.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
+        EnumerableSetUpgradeable.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscribtion];
         for (uint256 i; i < _blacklistedAddresses.length; i++) {
             filteredOperatorsRef.add(_blacklistedAddresses[i]);
             bytes32 codeHash = _blacklistedAddresses[i].codehash;
@@ -56,8 +56,8 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
     function isOperatorAllowed(address registrant, address operator) external view override returns (bool) {
         address registration = _registrations[registrant];
         if (registration != address(0)) {
-            EnumerableSet.AddressSet storage filteredOperatorsRef;
-            EnumerableSet.Bytes32Set storage filteredCodeHashesRef;
+            EnumerableSetUpgradeable.AddressSet storage filteredOperatorsRef;
+            EnumerableSetUpgradeable.Bytes32Set storage filteredCodeHashesRef;
 
             filteredOperatorsRef = _filteredOperators[registration];
             filteredCodeHashesRef = _filteredCodeHashes[registration];
@@ -165,7 +165,7 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
         if (registration != registrant) {
             revert("Cannot update while subscribed");
         }
-        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[registrant];
+        EnumerableSetUpgradeable.AddressSet storage filteredOperatorsRef = _filteredOperators[registrant];
 
         if (!filtered) {
             bool removed = filteredOperatorsRef.remove(operator);
@@ -195,7 +195,7 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
         if (registration != registrant) {
             revert("Cannot update while subscribed");
         }
-        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrant];
+        EnumerableSetUpgradeable.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrant];
 
         if (!filtered) {
             bool removed = filteredCodeHashesRef.remove(codeHash);
@@ -222,7 +222,7 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
         if (registration != registrant) {
             revert("Cannot update while subscribed");
         }
-        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[registrant];
+        EnumerableSetUpgradeable.AddressSet storage filteredOperatorsRef = _filteredOperators[registrant];
         uint256 operatorsLength = operators.length;
         unchecked {
             if (!filtered) {
@@ -257,7 +257,7 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
         if (registration != registrant) {
             revert("Cannot update while subscribed");
         }
-        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrant];
+        EnumerableSetUpgradeable.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrant];
         uint256 codeHashesLength = codeHashes.length;
         unchecked {
             if (!filtered) {
@@ -364,8 +364,8 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
 
     /// @dev helper to copy entries from registrantToCopy to registrant and emit events
     function _copyEntries(address registrant, address registrantToCopy) private {
-        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[registrantToCopy];
-        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrantToCopy];
+        EnumerableSetUpgradeable.AddressSet storage filteredOperatorsRef = _filteredOperators[registrantToCopy];
+        EnumerableSetUpgradeable.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[registrantToCopy];
         uint256 filteredOperatorsLength = filteredOperatorsRef.length();
         uint256 filteredCodeHashesLength = filteredCodeHashesRef.length();
         unchecked {

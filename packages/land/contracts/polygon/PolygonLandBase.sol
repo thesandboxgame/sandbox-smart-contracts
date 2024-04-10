@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IContext} from "../interfaces/IContext.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {WithAdmin} from "../common/WithAdmin.sol";
@@ -20,11 +20,11 @@ import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
 /// @dev This contract uses the exact storage slots configuration that we have in `core` package so we can upgrade
 /// @dev It must be the first one in the inheritance chain for subclasses
 contract PolygonLandBase is PolygonLandStorageMixin, PolygonLandBaseToken, ERC2771Handler, OperatorFiltererUpgradeable {
-    function _msgSender() internal view override(IContext, Context, ERC2771Handler) returns (address) {
+    function _msgSender() internal view override(IContext, ContextUpgradeable, ERC2771Handler) returns (address) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 
