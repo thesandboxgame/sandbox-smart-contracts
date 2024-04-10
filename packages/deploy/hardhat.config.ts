@@ -28,6 +28,7 @@ const importedPackages = {
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
   ],
+  '@sandbox-smart-contracts/dn404': 'contracts/',
 };
 
 const namedAccounts = {

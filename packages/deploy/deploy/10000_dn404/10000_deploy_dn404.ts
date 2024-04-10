@@ -17,14 +17,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('TSBNFTMintDN404', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/dn404/contracts/Benjamin404.sol:Benjamin404', 
+      '@sandbox-smart-contracts/dn404/contracts/NFTMintDN404.sol:NFTMintDN404', 
     log: true,
     skipIfAlreadyDeployed: true,
     args: [
       "Benjamin",
       "BENJ",
-      "0x",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
       BigNumber.from(1).mul("1000000000000000").toString(),
+      BigNumber.from(5).mul("100000000000000").toString(),
       BigNumber.from(3000).mul("1000000000000000000").toString(),
       sandAdmin
     ],
@@ -37,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('TSBSimpleDN404', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/dn404/contracts/Simples404.sol:Simples404',
+      '@sandbox-smart-contracts/dn404/contracts/SimpleDN404.sol:SimpleDN404',
     log: true,
     skipIfAlreadyDeployed: true,
     args: [
