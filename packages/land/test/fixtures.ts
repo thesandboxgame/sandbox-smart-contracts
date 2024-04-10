@@ -62,34 +62,15 @@ export async function setupLandContract() {
     other,
     other1,
     other2,
-    trustedForwarder,
     commonRoyaltyReceiver,
-    managerAdmin,
     landAdmin,
     landMinter,
-    contractRoyaltySetter,
   ] = await ethers.getSigners();
-
-  const RoyaltySplitterFactory = await ethers.getContractFactory(
-    'RoyaltySplitterMock',
-  );
-  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
     await ethers.getContractFactory('RoyaltyManagerMock');
-  const RoyaltyManagerContract = await upgrades.deployProxy(
-    RoyaltyManagerFactory,
-    [
-      commonRoyaltyReceiver.address,
-      5000,
-      await RoyaltySplitter.getAddress(),
-      managerAdmin.address,
-      contractRoyaltySetter.address,
-      trustedForwarder.address,
-    ],
-    {
-      initializer: 'initialize',
-    },
+  const RoyaltyManagerContract = await RoyaltyManagerFactory.deploy(
+    commonRoyaltyReceiver,
   );
 
   const MetadataRegistryFactory = await ethers.getContractFactory(
@@ -128,17 +109,12 @@ export async function setupLandContract() {
   await LandAsAdmin.transferOwnership(landOwner);
   await LandAsAdmin.setRoyaltyManager(RoyaltyManagerContract);
   await LandAsAdmin.setMetadataRegistry(MetadataRegistryContract);
-  const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
-    contractRoyaltySetter,
-  );
-  const contractRoyaltySetterRole =
-    await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
+
   const ERC20AsBuyer = ERC20Contract.connect(buyer);
   // End set up roles
 
   return {
-    manager: RoyaltyManagerContract,
-    RoyaltySplitter,
+    RoyaltyManagerContract,
     LandContract,
     LandAsAdmin,
     LandAsMinter,
@@ -149,11 +125,7 @@ export async function setupLandContract() {
     MockMarketPlace,
     ERC20Contract,
     TestERC721TokenReceiver,
-    managerAsRoyaltySetter,
-    contractRoyaltySetterRole,
     commonRoyaltyReceiver,
-    managerAdmin,
-    contractRoyaltySetter,
     ERC20AsBuyer,
     deployer,
     landAdmin,
@@ -172,9 +144,6 @@ export async function setupLandOperatorFilter() {
     deployer,
     landOwner,
     commonRoyaltyReceiver,
-    managerAdmin,
-    contractRoyaltySetter,
-    trustedForwarder,
     other,
     other1,
     landAdmin,
@@ -183,26 +152,10 @@ export async function setupLandOperatorFilter() {
     defaultSubscription,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory = await ethers.getContractFactory(
-    'RoyaltySplitterMock',
-  );
-  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
-
   const RoyaltyManagerFactory =
     await ethers.getContractFactory('RoyaltyManagerMock');
-  const RoyaltyManagerContract = await upgrades.deployProxy(
-    RoyaltyManagerFactory,
-    [
-      commonRoyaltyReceiver.address,
-      5000,
-      await RoyaltySplitter.getAddress(),
-      managerAdmin.address,
-      contractRoyaltySetter.address,
-      trustedForwarder.address,
-    ],
-    {
-      initializer: 'initialize',
-    },
+  const RoyaltyManagerContract = await RoyaltyManagerFactory.deploy(
+    commonRoyaltyReceiver,
   );
 
   const MetadataRegistryFactory = await ethers.getContractFactory(
@@ -289,34 +242,15 @@ export async function setupPolygonLandContract() {
     other,
     other1,
     other2,
-    trustedForwarder,
     commonRoyaltyReceiver,
-    managerAdmin,
     landAdmin,
     landMinter,
-    contractRoyaltySetter,
   ] = await ethers.getSigners();
-
-  const RoyaltySplitterFactory = await ethers.getContractFactory(
-    'RoyaltySplitterMock',
-  );
-  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
 
   const RoyaltyManagerFactory =
     await ethers.getContractFactory('RoyaltyManagerMock');
-  const RoyaltyManagerContract = await upgrades.deployProxy(
-    RoyaltyManagerFactory,
-    [
-      commonRoyaltyReceiver.address,
-      5000,
-      await RoyaltySplitter.getAddress(),
-      managerAdmin.address,
-      contractRoyaltySetter.address,
-      trustedForwarder.address,
-    ],
-    {
-      initializer: 'initialize',
-    },
+  const RoyaltyManagerContract = await RoyaltyManagerFactory.deploy(
+    commonRoyaltyReceiver,
   );
 
   const TrustedForwarderContractFactory = await ethers.getContractFactory(
@@ -375,17 +309,12 @@ export async function setupPolygonLandContract() {
   const LandAsOther2 = LandContract.connect(other2);
 
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
-  const managerAsRoyaltySetter = RoyaltyManagerContract.connect(
-    contractRoyaltySetter,
-  );
-  const contractRoyaltySetterRole =
-    await RoyaltyManagerContract.CONTRACT_ROYALTY_SETTER_ROLE();
+
   const ERC20AsBuyer = ERC20Contract.connect(buyer);
   // End set up roles
 
   return {
-    manager: RoyaltyManagerContract,
-    RoyaltySplitter,
+    RoyaltyManagerContract,
     TrustedForwarderContract,
     LandContract,
     LandAsAdmin,
@@ -400,11 +329,7 @@ export async function setupPolygonLandContract() {
     MockMarketPlace1,
     MockMarketPlace2,
     MockMarketPlace3,
-    managerAsRoyaltySetter,
-    contractRoyaltySetterRole,
     commonRoyaltyReceiver,
-    managerAdmin,
-    contractRoyaltySetter,
     ERC20AsBuyer,
     deployer,
     landAdmin,
@@ -423,9 +348,6 @@ export async function setupPolygonLandOperatorFilter() {
     deployer,
     landOwner,
     commonRoyaltyReceiver,
-    managerAdmin,
-    contractRoyaltySetter,
-    trustedForwarder,
     other,
     other1,
     landAdmin,
@@ -434,26 +356,10 @@ export async function setupPolygonLandOperatorFilter() {
     defaultSubscription,
   ] = await ethers.getSigners();
 
-  const RoyaltySplitterFactory = await ethers.getContractFactory(
-    'RoyaltySplitterMock',
-  );
-  const RoyaltySplitter = await RoyaltySplitterFactory.deploy();
-
   const RoyaltyManagerFactory =
     await ethers.getContractFactory('RoyaltyManagerMock');
-  const RoyaltyManagerContract = await upgrades.deployProxy(
-    RoyaltyManagerFactory,
-    [
-      commonRoyaltyReceiver.address,
-      5000,
-      await RoyaltySplitter.getAddress(),
-      managerAdmin.address,
-      contractRoyaltySetter.address,
-      trustedForwarder.address,
-    ],
-    {
-      initializer: 'initialize',
-    },
+  const RoyaltyManagerContract = await RoyaltyManagerFactory.deploy(
+    commonRoyaltyReceiver,
   );
 
   const TrustedForwarderContractFactory = await ethers.getContractFactory(

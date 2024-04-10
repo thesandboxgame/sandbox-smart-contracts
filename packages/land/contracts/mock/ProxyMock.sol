@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.23;
 
-import {ERC1967UpgradeUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
+import {ERC1967Utils} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 
 /// @dev just for testing don't use this code on production !!!!
-contract ProxyMock is ERC1967UpgradeUpgradeable {
+contract ProxyMock {
     constructor(address newImplementation) {
-        _upgradeTo(newImplementation);
+        ERC1967Utils.upgradeToAndCall(newImplementation, "");
     }
 
     function _delegate(address implementation) internal virtual {
@@ -27,10 +27,10 @@ contract ProxyMock is ERC1967UpgradeUpgradeable {
     }
 
     fallback() external payable {
-        _delegate(_getImplementation());
+        _delegate(ERC1967Utils.getImplementation());
     }
 
     receive() external payable {
-        _delegate(_getImplementation());
+        _delegate(ERC1967Utils.getImplementation());
     }
 }
