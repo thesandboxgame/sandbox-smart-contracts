@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 // According to hardhat-storage plugin run onto the latest deployed version (@core)
@@ -20,7 +21,13 @@ import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol
 //│         PolygonLand         │     _trustedForwarder     │     107      │   0    │                    t_address                     │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
 //│         PolygonLand         │  operatorFilterRegistry   │     108      │   0    │     t_contract(IOperatorFilterRegistry)3942      │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
 
-contract PolygonLandStorageMixin is ContextUpgradeable {
+contract PolygonLandStorageMixin is Initializable, Context {
+    // To avoid storage slot conflicts during upgrades, we add these variables.
+    // variables naming to be  upgraded
+    uint8 private _initialized;
+    bool private _initializing;
+    uint256[50] private ___gap;
+
     address internal _admin;
     mapping(address => bool) internal _superOperators;
     /// @notice Number of NFT an address own

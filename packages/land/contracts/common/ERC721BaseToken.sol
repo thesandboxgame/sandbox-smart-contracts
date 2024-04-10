@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {IERC721ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import {IContext} from "../interfaces/IContext.sol";
 import {IERC721Errors} from "./draft-IERC6093.sol";
@@ -14,8 +14,8 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
 /// @dev TODO: after merging. use custom errors
-abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors, WithSuperOperators {
-    using AddressUpgradeable for address;
+abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuperOperators {
+    using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -173,7 +173,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         address msgSender = _msgSender();
         _doTransfer(msgSender, from, to, tokenId);
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(msgSender, from, to, tokenId, ""), "ERC721_TRANSFER_REJECTED");
         }
     }
@@ -186,7 +186,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors
     function _safeTransferFrom(address from, address to, uint256 id, bytes memory data) internal {
         address msgSender = _msgSender();
         _doTransfer(msgSender, from, to, id);
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             require(_checkOnERC721Received(msgSender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
@@ -240,7 +240,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors
             _transferNumNFTPerAddress(from, to, numTokens);
         }
 
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
                 require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
             } else if (safe) {
@@ -371,7 +371,7 @@ abstract contract ERC721BaseToken is IContext, IERC721Upgradeable, IERC721Errors
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 

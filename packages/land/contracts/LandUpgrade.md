@@ -76,8 +76,8 @@ flowchart BT;
     ERC721BaseToken-->PolygonLandBaseToken;
     WithSuperOperators-->ERC721BaseToken;
     WithAdmin-->WithSuperOperators;
-    ContextUpgradeable-->WithAdmin;
-    Initializable-->ContextUpgradeable;
+    Context-->WithAdmin;
+    Initializable-->Context;
 ```
 
 ## Ethereum PolygonLand (L2) after
