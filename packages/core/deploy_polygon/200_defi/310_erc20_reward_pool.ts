@@ -9,9 +9,9 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const Sand = await deployments.get('PolygonSand');
 
-  await deployments.deploy('ERC20RewardPoolV2', {
+  await deployments.deploy('ERC20RewardPool', {
     from: deployer,
-    contract: 'ERC20RewardPoolV2',
+    contract: 'ERC20RewardPool',
     args: [Sand.address, Sand.address, TRUSTED_FORWARDER_V2.address],
     log: true,
     skipIfAlreadyDeployed: true,

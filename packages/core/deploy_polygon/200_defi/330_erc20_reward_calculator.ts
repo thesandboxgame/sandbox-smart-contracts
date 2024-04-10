@@ -6,11 +6,11 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
-  const Pool = await deployments.get('ERC20RewardPoolV2');
+  const Pool = await deployments.get('ERC20RewardPool');
 
-  await deployments.deploy('ERC20RewardCalculatorV2', {
+  await deployments.deploy('ERC20RewardCalculator', {
     from: deployer,
-    contract: 'TwoPeriodsRewardCalculatorV2',
+    contract: 'TwoPeriodsRewardCalculator',
     args: [Pool.address],
     log: true,
     skipIfAlreadyDeployed: true,
