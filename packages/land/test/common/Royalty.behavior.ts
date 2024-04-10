@@ -4,10 +4,32 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForRoyalty(setupLand, Contract: string) {
   describe(Contract + ':Royalty', function () {
-    it('land should return EIP2981 royalty recipient and royalty for other contracts', async function () {
-      const {RoyaltyManagerContract, LandContract, commonRoyaltyReceiver} =
+    it('manager contract royalty setter can set Eip 2981 royaltyBps for other contracts', async function () {
+      const {managerAsRoyaltySetter, LandContract} =
         await loadFixture(setupLand);
-      await RoyaltyManagerContract.setContractRoyalty(
+      expect(
+        await managerAsRoyaltySetter.contractRoyalty(LandContract),
+      ).to.be.equal(0);
+      await managerAsRoyaltySetter.setContractRoyalty(LandContract, 500);
+      expect(
+        await managerAsRoyaltySetter.contractRoyalty(LandContract),
+      ).to.be.equal(500);
+    });
+
+    it('only manager contract royalty setter can set Eip 2981 royaltyBps for other contracts', async function () {
+      const {manager, seller, contractRoyaltySetterRole, LandContract} =
+        await loadFixture(setupLand);
+      await expect(
+        manager.connect(seller).setContractRoyalty(LandContract, 500),
+      ).to.be.revertedWith(
+        `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${contractRoyaltySetterRole}`,
+      );
+    });
+
+    it('land should return EIP2981 royalty recipient and royalty for other contracts', async function () {
+      const {managerAsRoyaltySetter, LandContract, commonRoyaltyReceiver} =
+        await loadFixture(setupLand);
+      await managerAsRoyaltySetter.setContractRoyalty(
         await LandContract.getAddress(),
         500,
       );
@@ -19,9 +41,9 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
     });
 
     it('land should return same EIP2981 royalty recipient for different tokens contracts', async function () {
-      const {RoyaltyManagerContract, LandContract, commonRoyaltyReceiver} =
+      const {managerAsRoyaltySetter, LandContract, commonRoyaltyReceiver} =
         await loadFixture(setupLand);
-      await RoyaltyManagerContract.setContractRoyalty(
+      await managerAsRoyaltySetter.setContractRoyalty(
         await LandContract.getAddress(),
         500,
       );
@@ -46,7 +68,7 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
         LandContract,
         seller,
         buyer,
-        RoyaltyManagerContract,
+        managerAsRoyaltySetter,
         commonRoyaltyReceiver,
       } = await loadFixture(setupLand);
       await LandAsMinter.mintQuad(await seller.getAddress(), 1, 0, 0, '0x');
@@ -65,7 +87,7 @@ export function shouldCheckForRoyalty(setupLand, Contract: string) {
         0,
       );
 
-      await RoyaltyManagerContract.setContractRoyalty(LandContract, 500);
+      await managerAsRoyaltySetter.setContractRoyalty(LandContract, 500);
 
       await MockMarketPlace.distributeRoyaltyEIP2981(
         1000000,

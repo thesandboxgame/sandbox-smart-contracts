@@ -214,11 +214,8 @@ describe('LandMetadataRegistry', function () {
   describe('coverage', function () {
     it('initialization', async function () {
       const {registryAsDeployer, admin} = await loadFixture(setupRegistry);
-      await expect(
-        registryAsDeployer.initialize(admin),
-      ).to.be.revertedWithCustomError(
-        registryAsDeployer,
-        'InvalidInitialization',
+      await expect(registryAsDeployer.initialize(admin)).to.be.revertedWith(
+        'Initializable: contract is already initialized',
       );
     });
   });

@@ -25,10 +25,9 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
     });
 
     it('should return royaltyManager address', async function () {
-      const {LandContract, RoyaltyManagerContract} =
-        await loadFixture(setupLand);
+      const {LandContract, manager} = await loadFixture(setupLand);
       expect(await LandContract.getRoyaltyManager()).to.be.equal(
-        await RoyaltyManagerContract.getAddress(),
+        await manager.getAddress(),
       );
     });
 
