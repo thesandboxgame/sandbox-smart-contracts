@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
-    "@openzeppelin/contracts": "5.0.0",
-    "@openzeppelin/contracts-upgradeable": "^5.0.0",
+    "@openzeppelin/contracts": "5.0.2",
+    "@openzeppelin/contracts-upgradeable": "5.0.2",
     "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
   },

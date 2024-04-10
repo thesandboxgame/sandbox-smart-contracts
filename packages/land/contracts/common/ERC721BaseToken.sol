@@ -6,7 +6,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import {IContext} from "../interfaces/IContext.sol";
-import {IERC721Errors} from "./draft-IERC6093.sol";
+import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /// @title ERC721BaseTokenCommon
