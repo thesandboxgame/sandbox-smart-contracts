@@ -22,7 +22,10 @@
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
     "@sandbox-smart-contracts/faucets": "0.0.1",
     "@sandbox-smart-contracts/giveaway": "0.0.3",
-    "@sandbox-smart-contracts/marketplace": "1.0.1"
+    "@sandbox-smart-contracts/land-sale": "workspace:^",
+    "@sandbox-smart-contracts/marketplace": "1.0.1",
+    "@urql/core": "^4.3.0",
+    "isomorphic-unfetch": "^4.0.2"
   },
   "files": [
     "deployments"
