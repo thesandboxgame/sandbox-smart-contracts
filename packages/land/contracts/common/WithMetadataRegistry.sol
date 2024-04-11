@@ -8,6 +8,7 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 /// @author The Sandbox
 /// @notice Add the metadata registry
 abstract contract WithMetadataRegistry {
+    string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
     event MetadataRegistrySet(address indexed metadataRegistry);
 
     struct MetadataRegistryStorage {
@@ -39,13 +40,38 @@ abstract contract WithMetadataRegistry {
     function getMetadata(
         uint256 tokenId
     ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {
-        MetadataRegistryStorage storage $ = _getMetadataRegistryStorage();
-        return $._metadataRegistry.getMetadata(tokenId);
+        ILandMetadataRegistry registry = _getMetadataRegistryStorage()._metadataRegistry;
+        if (registry == ILandMetadataRegistry(address(0))) {
+            return (false, 0, UNKNOWN_NEIGHBORHOOD);
+        }
+        return registry.getMetadata(tokenId);
     }
 
+    /// @notice return true if a land is premium
+    /// @param tokenId the token id
+    function isPremium(uint256 tokenId) external view returns (bool) {
+        ILandMetadataRegistry registry = _getMetadataRegistryStorage()._metadataRegistry;
+        if (registry == ILandMetadataRegistry(address(0))) {
+            return false;
+        }
+        return registry.isPremium(tokenId);
+    }
+
+    /// @notice return the id that identifies the neighborhood
+    /// @param tokenId the token id
+    function getNeighborhoodId(uint256 tokenId) external view returns (uint256) {
+        ILandMetadataRegistry registry = _getMetadataRegistryStorage()._metadataRegistry;
+        if (registry == ILandMetadataRegistry(address(0))) {
+            return 0;
+        }
+        return registry.getNeighborhoodId(tokenId);
+    }
+
+    /// @notice set the address of the metadata registry
+    /// @param metadataRegistry the address of the metadata registry
     function _setMetadataRegistry(address metadataRegistry) internal {
+        require(metadataRegistry != address(0), "invalid registry address");
         MetadataRegistryStorage storage $ = _getMetadataRegistryStorage();
-        require(metadataRegistry != address(0), "Invalid registry address");
         $._metadataRegistry = ILandMetadataRegistry(metadataRegistry);
         emit MetadataRegistrySet(metadataRegistry);
     }
