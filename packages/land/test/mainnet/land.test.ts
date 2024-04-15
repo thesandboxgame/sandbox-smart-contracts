@@ -1,8 +1,11 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {getId} from '../fixtures';
+import {
+  getId,
+  setupLandForERC721Tests,
+  setupLandOperatorFilter,
+} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {setupLandOperatorFilter, setupLandForERC721Tests} from '../fixtures';
 import {setupLand, setupLandMock} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
@@ -14,6 +17,7 @@ import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
 import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
 import {landConfig} from '../common/Config.behavior';
 import {shouldCheckForERC721} from '../common/ERC721.behavior';
+import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 
@@ -28,6 +32,9 @@ const LandErrorMessages = {
 };
 
 describe('Land.sol', function () {
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  gasAndSizeChecks(setupLand, 'Land');
+
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForRoyalty(setupLand, 'Land');
 
