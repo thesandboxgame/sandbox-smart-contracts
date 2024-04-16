@@ -6,12 +6,10 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ILandToken} from "../interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 
-/**
- * @title LandBaseToken
- * @author The Sandbox
- * @notice Implement LAND and quad functionalities on top of an ERC721 token
- * @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
- */
+/// @title LandBaseToken
+/// @author The Sandbox
+/// @notice Implement LAND and quad functionalities on top of an ERC721 token
+/// @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
 abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     using Address for address;
     uint256 internal constant GRID_SIZE = 408;
@@ -59,6 +57,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 numTokensTransferred = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             uint256 size = sizes[i];
+            _isValidQuad(size, xs[i], ys[i]);
             _transferQuad(from, to, size, xs[i], ys[i]);
             numTokensTransferred += size * size;
         }
@@ -91,9 +90,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
     /// @param to destination
-    /// @param size size of the quad
-    /// @param x The top left x coordinate of the quad
-    /// @param y The top left y coordinate of the quad
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
     /// @param data additional data for transfer
     function transferQuad(
         address from,
@@ -109,40 +108,38 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         if (msgSender != from) {
             require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized to transferQuad");
         }
+        _isValidQuad(size, x, y);
         _transferQuad(from, to, size, x, y);
         _transferNumNFTPerAddress(from, to, size * size);
         _checkBatchReceiverAcceptQuad(msgSender, from, to, size, x, y, data);
     }
 
-    /**
-     * @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
-     * @param user The recipient of the new quad
-     * @param size The size of the new quad
-     * @param x The top left x coordinate of the new quad
-     * @param y The top left y coordinate of the new quad
-     * @param data extra data to pass to the transfer
-     */
-    function mintQuad(address user, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
-        _isValidQuad(size, x, y);
+    /// @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
+    /// @param to The recipient of the new quad
+    /// @param size The size of the new quad
+    /// @param x The bottom left x coordinate of the new quad
+    /// @param y The bottom left y coordinate of the new quad
+    /// @param data extra data to pass to the transfer
+    function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
         require(_isMinter(_msgSender()), "!AUTHORIZED");
-        _mintQuad(user, size, x, y, data);
+        _isValidQuad(size, x, y);
+        _mintQuad(to, size, x, y, data);
     }
 
-    /**
-     * @notice Checks if a parent quad has child quads already minted.
-     *  Then mints the rest child quads and transfers the parent quad.
-     *  Should only be called by the tunnel.
-     * @param to The recipient of the new quad
-     * @param size The size of the new quad
-     * @param x The top left x coordinate of the new quad
-     * @param y The top left y coordinate of the new quad
-     * @param data extra data to pass to the transfer
-     */
+    /// @notice Checks if a parent quad has child quads already minted.
+    /// @notice Then mints the rest child quads and transfers the parent quad.
+    /// @notice Should only be called by the tunnel.
+    /// @param to The recipient of the new quad
+    /// @param size The size of the new quad
+    /// @param x The bottom left x coordinate of the new quad
+    /// @param y The bottom left y coordinate of the new quad
+    /// @param data extra data to pass to the transfer
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external virtual {
         require(_isMinter(msg.sender), "!AUTHORIZED");
         require(to != address(0), "to is zero address");
 
-        if (_exists(size, x, y)) {
+        _isValidQuad(size, x, y);
+        if (_ownerOfQuad(size, x, y) != address(0)) {
             _transferQuad(msg.sender, to, size, x, y);
             _transferNumNFTPerAddress(msg.sender, to, size * size);
             _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
@@ -176,22 +173,18 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return _getY(id);
     }
 
-    /**
-     * @notice Check if the contract supports an interface
-     * 0x01ffc9a7 is ERC-165
-     * 0x80ac58cd is ERC-721
-     * 0x5b5e139f is ERC-721 metadata
-     * @param id The id of the interface
-     * @return True if the interface is supported
-     */
+    /// @notice Check if the contract supports an interface
+    /// @param id The id of the interface
+    /// @return True if the interface is supported
+    /// @dev 0x01ffc9a7 is ERC-165
+    /// @dev 0x80ac58cd is ERC-721
+    /// @dev 0x5b5e139f is ERC-721 metadata
     function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
-    /**
-     * @notice Return the name of the token contract
-     * @return The name of the token contract
-     */
+    /// @notice Return the name of the token contract
+    /// @return The name of the token contract
     function name() external pure virtual returns (string memory) {
         return "Sandbox's LANDs";
     }
@@ -204,18 +197,17 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     }
 
     /// @notice checks if Land has been minted or not
-    /// @param size size of the
-    /// @param x x coordinate of the quad
-    /// @param y y coordinate of the quad
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
     /// @return bool for if Land has been minted or not
     function exists(uint256 size, uint256 x, uint256 y) external view virtual override returns (bool) {
-        return _exists(size, x, y);
+        _isValidQuad(size, x, y);
+        return _ownerOfQuad(size, x, y) != address(0);
     }
 
-    /**
-     * @notice Return the symbol of the token contract
-     * @return The symbol of the token contract
-     */
+    /// @notice Return the symbol of the token contract
+    /// @return The symbol of the token contract
     function symbol() external pure virtual returns (string memory) {
         return "LAND";
     }
@@ -232,16 +224,19 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return GRID_SIZE;
     }
 
-    /**
-     * @notice Return the URI of a specific token
-     * @param id The id of the token
-     * @return The URI of the token
-     */
+    /// @notice Return the URI of a specific token
+    /// @param id The id of the token
+    /// @return The URI of the token
     function tokenURI(uint256 id) external view virtual returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
         return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
     }
 
+    /// @notice Check size and coordinate of a quad
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    /// @dev after calling this function we can safely use unchecked math for x,y,size
     function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {
         require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
         require(x % size == 0, "Invalid x coordinate");
@@ -250,8 +245,12 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         require(y <= GRID_SIZE - size, "y out of bounds");
     }
 
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
     function _transferQuad(address from, address to, uint256 size, uint256 x, uint256 y) internal {
-        _isValidQuad(size, x, y);
         if (size == 1) {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
@@ -266,6 +265,12 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @notice Mint a new quad
+    /// @param to The recipient of the new quad
+    /// @param size The size of the new quad
+    /// @param x The bottom left x coordinate of the new quad
+    /// @param y The bottom left y coordinate of the new quad
+    /// @param data extra data to pass to the transfer
     function _mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
         require(to != address(0), "to is zero address");
 
@@ -284,19 +289,16 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 
-    /**
-     * @dev checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
-     * It recursively checks child quad of every size(exculding Lands of 1x1 size) are minted or not.
-     * Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in
-     * the parent quad is minted or not. While checking if the every child Quad and Land is minted it
-     * also checks and clear the owner for quads which are minted. Finally it checks if the new owner
-     * if is a contract can handle ERC721 tokens or not and transfers the parent quad to new owner.
-     * @param to The address to which the ownership of the quad will be transferred
-     * @param size The size of the quad being minted and transfered
-     * @param x The x-coordinate of the top-left corner of the quad being minted.
-     * @param y The y-coordinate of the top-left corner of the quad being minted.
-     * @param y The y-coordinate of the top-left corner of the quad being minted.
-     */
+    /// @notice checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
+    /// @param to The address to which the ownership of the quad will be transferred
+    /// @param size The size of the quad being minted and transfered
+    /// @param x The x-coordinate of the top-left corner of the quad being minted.
+    /// @param y The y-coordinate of the top-left corner of the quad being minted.
+    /// @dev It recursively checks child quad of every size(exculding Lands of 1x1 size) are minted or not.
+    /// @dev Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in
+    /// @dev the parent quad is minted or not. While checking if the every child Quad and Land is minted it
+    /// @dev also checks and clear the owner for quads which are minted. Finally it checks if the new owner
+    /// @dev if is a contract can handle ERC721 tokens or not and transfers the parent quad to new owner.
     function _mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
         (uint256 layer, , ) = _getQuadLayer(size);
         uint256 quadId = _getQuadId(layer, x, y);
@@ -350,17 +352,15 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         _subNumNFTPerAddress(msg.sender, landMinted);
     }
 
-    /**
-     * @dev recursivly checks if the child quads are minted in land and push them to the quadMinted array.
-     * if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
-     * in quads which are minted. it clears the minted child quads owners.
-     * @param land the stuct which has the size x and y co-ordinate of Quad to be checked
-     * @param quadMinted array in which the minted child quad would be pushed
-     * @param landMinted total 1x1 land already minted
-     * @param index index of last element of quadMinted array
-     * @param quadCompareSize the size of the child quads to be checked.
-     * @return the index of last quad pushed in quadMinted array and the total land already minted
-     */
+    /// @notice recursively checks if the child quads are minted in land and push them to the quadMinted array.
+    /// @param land the struct which has the size x and y co-ordinate of Quad to be checked
+    /// @param quadMinted array in which the minted child quad would be pushed
+    /// @param landMinted total 1x1 land already minted
+    /// @param index index of last element of quadMinted array
+    /// @param quadCompareSize the size of the child quads to be checked.
+    /// @return the index of last quad pushed in quadMinted array and the total land already minted
+    /// @dev if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
+    /// @dev in quads which are minted. it clears the minted child quads owners.
     function _checkAndClearOwner(
         Land memory land,
         Land[] memory quadMinted,
@@ -407,7 +407,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     }
 
     /// @dev checks the owner of land with 'tokenId' to be 'from' and clears it
-    /// @param from the address to be checked agains the owner of the land
+    /// @param from the address to be checked against the owner of the land
     /// @param tokenId th id of land
     /// @return bool for if land is owned by 'from' or not.
     function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
@@ -439,15 +439,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
-    /// @dev checks if the receiver of the quad(size, x, y) is a contact. If yes can it handle ERC721 tokens. It also clears owner of 1x1 land's owned by msg.sender.
     /// @param quadMinted - an array of Land structs in which the minted child quad or Quad to be transfered are.
     /// @param landMinted - the total amount of land that has been minted
     /// @param index - the index of the last element in the quadMinted array
     /// @param to the address of the new owner of Quad to be transfered
-    /// @param size The size of the quad being minted and transfered
+    /// @param size The size of the quad
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
     /// @param y The y-coordinate of the top-left corner of the quad being minted.
-    /// @param y The y-coordinate of the top-left corner of the quad being minted.
+    /// @dev checks if the receiver of the quad(size, x, y) is a contact. If yes can it handle ERC721 tokens. It also clears owner of 1x1 land's owned by msg.sender.
     function _checkBatchReceiverAcceptQuadAndClearOwner(
         Land[] memory quadMinted,
         uint256 index,
@@ -506,17 +505,28 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
-    function _getX(uint256 id) internal pure returns (uint256) {
-        return (id & ~LAYER) % GRID_SIZE;
+    /// @notice x coordinate of Land token
+    /// @param tokenId The token id
+    /// @return the x coordinates
+    function _getX(uint256 tokenId) internal pure returns (uint256) {
+        return (tokenId & ~LAYER) % GRID_SIZE;
     }
 
-    function _getY(uint256 id) internal pure returns (uint256) {
-        return (id & ~LAYER) / GRID_SIZE;
+    /// @notice y coordinate of Land token
+    /// @param tokenId The token id
+    /// @return the y coordinates
+    function _getY(uint256 tokenId) internal pure returns (uint256) {
+        return (tokenId & ~LAYER) / GRID_SIZE;
     }
 
-    function _isQuadMinted(Land[] memory mintedLand, Land memory quad, uint256 index) internal pure returns (bool) {
+    /// @notice check if a quad is in the array of minted lands
+    /// @param quad the quad that will be searched through mintedLand
+    /// @param quadMinted array of quads that are minted in the current transaction
+    /// @param index the amount of entries in mintedQuad
+    /// @return true if a quad is minted
+    function _isQuadMinted(Land[] memory quadMinted, Land memory quad, uint256 index) internal pure returns (bool) {
         for (uint256 i = 0; i < index; i++) {
-            Land memory land = mintedLand[i];
+            Land memory land = quadMinted[i];
             if (
                 land.size > quad.size &&
                 quad.x >= land.x &&
@@ -553,8 +563,15 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @param layer the layer of the quad see: _getQuadLayer
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    /// @return the tokenId of the quad
+    /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
     function _getQuadId(uint256 layer, uint256 x, uint256 y) internal pure returns (uint256) {
-        return layer + x + y * GRID_SIZE;
+        unchecked {
+            return layer + x + y * GRID_SIZE;
+        }
     }
 
     function _checkOwner(uint256 size, uint256 x, uint256 y, uint256 quadCompareSize) internal view {
@@ -586,13 +603,21 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         if (quadCompareSize >= 3) _checkOwner(size, x, y, quadCompareSize);
     }
 
+    /// @param i the index to be added to x,y to get row and column
+    /// @param size The bottom left x coordinate of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    /// @return the tokenId of the quad
+    /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
     function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
-        uint256 row = i / size;
-        if (row % 2 == 0) {
-            // allow ids to follow a path in a quad
-            return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
-        } else {
-            return _getQuadId(LAYER_1x1, (x + size) - (1 + (i % size)), (y + row));
+        unchecked {
+            uint256 row = i / size;
+            if (row % 2 == 0) {
+                // allow ids to follow a path in a quad
+                return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
+            } else {
+                return _getQuadId(LAYER_1x1, (x + size) - (1 + (i % size)), (y + row));
+            }
         }
     }
 
@@ -674,25 +699,6 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return address(0);
     }
 
-    function _getQuadById(uint256 id) internal pure returns (uint256 size, uint256 x, uint256 y) {
-        x = _getX(id);
-        y = _getY(id);
-        uint256 layer = id & LAYER;
-        if (layer == LAYER_1x1) {
-            size = 1;
-        } else if (layer == LAYER_3x3) {
-            size = 3;
-        } else if (layer == LAYER_6x6) {
-            size = 6;
-        } else if (layer == LAYER_12x12) {
-            size = 12;
-        } else if (layer == LAYER_24x24) {
-            size = 24;
-        } else {
-            require(false, "Invalid token id");
-        }
-    }
-
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view override returns (address owner, bool operatorEnabled) {
@@ -714,16 +720,6 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);
             operatorEnabled = false;
         }
-    }
-
-    /// @notice checks if Land has been minted or not
-    /// @param size size of the
-    /// @param x x coordinate of the quad
-    /// @param y y coordinate of the quad
-    /// @return bool for if Land has been minted or not
-    function _exists(uint256 size, uint256 x, uint256 y) internal view returns (bool) {
-        _isValidQuad(size, x, y);
-        return _ownerOfQuad(size, x, y) != address(0);
     }
 
     function _isMinter(address who) internal view virtual returns (bool);

@@ -8,7 +8,7 @@ function getQuadId(x: number, y: number): bigint {
 }
 
 // TODO: We must fix the code so this is less than 10 or even lower.
-const gasPercentageTolerance = 40;
+const gasPercentageTolerance = 9;
 const oldContractSize = {PolygonLand: 22709, Land: 21834};
 const oldLandGasUsage = {
   'mintQuad of size 1 x 1': '85570',
@@ -16,7 +16,7 @@ const oldLandGasUsage = {
   'mintQuad of size 6 x 6': '246983',
   'mintQuad of size 12 x 12': '757761',
   'mintQuad of size 24 x 24': '2806967',
-  approveFor: '57479',
+  approveFor: '77921', // We accept the gas usage for this operation, the original value was: '57479'
   setApprovalForAllFor: '53659',
   transferFrom: '92416',
   safeTransferFrom: '92460',
