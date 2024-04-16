@@ -26,8 +26,8 @@ interface ILandToken {
     /// @param from current owner of the quad
     /// @param to destination
     /// @param size size of the quad
-    /// @param x The top left x coordinate of the quad
-    /// @param y The top left y coordinate of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
     /// @param data additional data
     function transferQuad(address from, address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external;
 
@@ -41,8 +41,8 @@ interface ILandToken {
     /// @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
     /// @param to The recipient of the new quad
     /// @param size The size of the new quad
-    /// @param x The top left x coordinate of the new quad
-    /// @param y The top left y coordinate of the new quad
+    /// @param x The bottom left x coordinate of the new quad
+    /// @param y The bottom left y coordinate of the new quad
     /// @param data extra data to pass to the transfer
     function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) external;
 
