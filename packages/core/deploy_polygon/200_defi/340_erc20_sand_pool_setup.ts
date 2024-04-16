@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {BigNumber} from 'ethers';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -8,6 +9,7 @@ const func: DeployFunction = async function (
   const {read, execute, catchUnknownSigner} = deployments;
   const rewardsCalculator = await deployments.get('ERC20RewardCalculator');
   const contributionRules = await deployments.get('ContributionRules');
+  const land = await deployments.get('PolygonLand');
 
   const rewardsCalculatorAddress = await deployments.read(
     'ERC20RewardPool',
@@ -69,6 +71,29 @@ const func: DeployFunction = async function (
         {from: currentAdmin, log: true},
         'setTrustedForwarder',
         TRUSTED_FORWARDER_V2.address
+      )
+    );
+  }
+
+  const isERC721MemberRequirementList = await read(
+    'ERC20RewardPool',
+    'isERC721MemberRequirementList',
+    land.address
+  );
+
+  if (isERC721MemberRequirementList === false) {
+    await catchUnknownSigner(
+      execute(
+        'ERC20RewardPool',
+        {from: currentAdmin, log: true},
+        'setERC721RequirementList',
+        land.address,
+        [],
+        true,
+        1,
+        BigNumber.from('2000000000000000000000'),
+        0,
+        0
       )
     );
   }
