@@ -102,9 +102,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 y,
         bytes calldata data
     ) external override {
+        address msgSender = _msgSender();
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        address msgSender = _msgSender();
         if (msgSender != from) {
             require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized to transferQuad");
         }
@@ -121,9 +121,10 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param y The bottom left y coordinate of the new quad
     /// @param data extra data to pass to the transfer
     function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
-        require(_isMinter(_msgSender()), "!AUTHORIZED");
+        address msgSender = _msgSender();
+        require(_isMinter(msgSender), "!AUTHORIZED");
         _isValidQuad(size, x, y);
-        _mintQuad(to, size, x, y, data);
+        _mintQuad(msgSender, to, size, x, y, data);
     }
 
     /// @notice Checks if a parent quad has child quads already minted.
@@ -135,16 +136,17 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param y The bottom left y coordinate of the new quad
     /// @param data extra data to pass to the transfer
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external virtual {
-        require(_isMinter(msg.sender), "!AUTHORIZED");
+        address msgSender = _msgSender();
+        require(_isMinter(msgSender), "!AUTHORIZED");
         require(to != address(0), "to is zero address");
 
         _isValidQuad(size, x, y);
         if (_ownerOfQuad(size, x, y) != address(0)) {
-            _transferQuad(msg.sender, to, size, x, y);
-            _transferNumNFTPerAddress(msg.sender, to, size * size);
-            _checkBatchReceiverAcceptQuad(msg.sender, msg.sender, to, size, x, y, data);
+            _transferQuad(msgSender, to, size, x, y);
+            _transferNumNFTPerAddress(msgSender, to, size * size);
+            _checkBatchReceiverAcceptQuad(msgSender, msgSender, to, size, x, y, data);
         } else {
-            _mintAndTransferQuad(to, size, x, y, data);
+            _mintAndTransferQuad(msgSender, to, size, x, y, data);
         }
     }
 
@@ -266,12 +268,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     }
 
     /// @notice Mint a new quad
+    /// @param msgSender The original sender of the transaction
     /// @param to The recipient of the new quad
     /// @param size The size of the new quad
     /// @param x The bottom left x coordinate of the new quad
     /// @param y The bottom left y coordinate of the new quad
     /// @param data extra data to pass to the transfer
-    function _mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
+    function _mintQuad(address msgSender, address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
         require(to != address(0), "to is zero address");
 
         (uint256 layer, , ) = _getQuadLayer(size);
@@ -286,10 +289,11 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
 
         _setOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
-        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
+        _checkBatchReceiverAcceptQuad(msgSender, address(0), to, size, x, y, data);
     }
 
-    /// @notice checks if the child quads in the parent quad (size, x, y) are owned by msg.sender.
+    /// @notice checks if the child quads in the parent quad (size, x, y) are owned by msgSender.
+    /// @param msgSender The original sender of the transaction
     /// @param to The address to which the ownership of the quad will be transferred
     /// @param size The size of the quad being minted and transfered
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
@@ -299,60 +303,69 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @dev the parent quad is minted or not. While checking if the every child Quad and Land is minted it
     /// @dev also checks and clear the owner for quads which are minted. Finally it checks if the new owner
     /// @dev if is a contract can handle ERC721 tokens or not and transfers the parent quad to new owner.
-    function _mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
-        (uint256 layer, , ) = _getQuadLayer(size);
-        uint256 quadId = _getQuadId(layer, x, y);
+    function _mintAndTransferQuad(
+        address msgSender,
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        unchecked {
+            (uint256 layer, , ) = _getQuadLayer(size);
+            uint256 quadId = _getQuadId(layer, x, y);
 
-        // Length of array is equal to number of 3x3 child quad a 24x24 quad can have. Would be used to push the minted Quads.
-        Land[] memory quadMinted = new Land[](64);
-        // index of last minted quad pushed on quadMinted Array
-        uint256 index;
-        uint256 landMinted;
+            // Length of array is equal to number of 3x3 child quad a 24x24 quad can have. Would be used to push the minted Quads.
+            Land[] memory quadMinted = new Land[](64);
+            // index of last minted quad pushed on quadMinted Array
+            uint256 index;
+            uint256 landMinted;
 
-        // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
-        if (size > 3) {
-            (index, landMinted) = _checkAndClearOwner(
-                Land({x: x, y: y, size: size}),
-                quadMinted,
-                landMinted,
-                index,
-                size / 2
-            );
-        }
+            // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
+            if (size > 3) {
+                (index, landMinted) = _checkAndClearOwner(
+                    msgSender,
+                    Land({x: x, y: y, size: size}),
+                    quadMinted,
+                    landMinted,
+                    index,
+                    size / 2
+                );
+            }
 
-        // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msg.sender
-        {
+            // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msgSender
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 _id = _idInPath(i, size, x, y);
                 // checking land with token id "_id" is in the quadMinted array.
                 bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
                 if (isAlreadyMinted) {
                     // if land is in the quadMinted array there just emitting transfer event
-                    emit Transfer(msg.sender, to, _id);
+                    emit Transfer(msgSender, to, _id);
                 } else {
-                    if (_getOwnerAddress(_id) == msg.sender) {
+                    if (_getOwnerAddress(_id) == msgSender) {
                         if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
                         landMinted += 1;
-                        emit Transfer(msg.sender, to, _id);
+                        emit Transfer(msgSender, to, _id);
                     } else {
-                        // else is checked if owned by the msg.sender or not. If it is not owned by msg.sender it should not have an owner.
+                        // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
                         require(_getOwnerData(_id) == 0, "Already minted");
 
                         emit Transfer(address(0), to, _id);
                     }
                 }
             }
+
+            // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
+            _checkBatchReceiverAcceptQuadAndClearOwner(msgSender, quadMinted, index, landMinted, to, size, x, y, data);
+
+            _setOwnerData(quadId, uint160(to));
+            _addNumNFTPerAddress(to, size * size);
+            _subNumNFTPerAddress(msgSender, landMinted);
         }
-
-        // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
-        _checkBatchReceiverAcceptQuadAndClearOwner(quadMinted, index, landMinted, to, size, x, y, data);
-
-        _setOwnerData(quadId, uint160(to));
-        _addNumNFTPerAddress(to, size * size);
-        _subNumNFTPerAddress(msg.sender, landMinted);
     }
 
     /// @notice recursively checks if the child quads are minted in land and push them to the quadMinted array.
+    /// @param msgSender The original sender of the transaction
     /// @param land the struct which has the size x and y co-ordinate of Quad to be checked
     /// @param quadMinted array in which the minted child quad would be pushed
     /// @param landMinted total 1x1 land already minted
@@ -362,6 +375,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @dev if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
     /// @dev in quads which are minted. it clears the minted child quads owners.
     function _checkAndClearOwner(
+        address msgSender,
         Land memory land,
         Land[] memory quadMinted,
         uint256 landMinted,
@@ -381,8 +395,8 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                 if (!isQuadChecked) {
                     uint256 id = _getQuadId(layer, xi, yi);
                     address owner = _getOwnerAddress(id);
-                    // owner of the child quad is checked to be owned by msg.sender else should not be owned by anyone.
-                    if (owner == msg.sender) {
+                    // owner of the child quad is checked to be owned by msgSender else should not be owned by anyone.
+                    if (owner == msgSender) {
                         // if child quad is minted it would be pushed in quadMinted array.
                         quadMinted[index] = Land({x: xi, y: yi, size: quadCompareSize});
                         // index of quadMinted is increased
@@ -402,7 +416,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         quadCompareSize = quadCompareSize / 2;
         // if child quad size is greater than 3 _checkAndClearOwner is checked for new child quads in the  quad in land struct.
         if (quadCompareSize >= 3)
-            (index, landMinted) = _checkAndClearOwner(land, quadMinted, landMinted, index, quadCompareSize);
+            (index, landMinted) = _checkAndClearOwner(msgSender, land, quadMinted, landMinted, index, quadCompareSize);
         return (index, landMinted);
     }
 
@@ -439,6 +453,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @param msgSender The original sender of the transaction
     /// @param quadMinted - an array of Land structs in which the minted child quad or Quad to be transfered are.
     /// @param landMinted - the total amount of land that has been minted
     /// @param index - the index of the last element in the quadMinted array
@@ -446,8 +461,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param size The size of the quad
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
     /// @param y The y-coordinate of the top-left corner of the quad being minted.
-    /// @dev checks if the receiver of the quad(size, x, y) is a contact. If yes can it handle ERC721 tokens. It also clears owner of 1x1 land's owned by msg.sender.
+    /// @dev checks if the receiver of the quad(size, x, y) is a contact. If yes can it handle ERC721 tokens. It also clears owner of 1x1 land's owned by msgSender.
     function _checkBatchReceiverAcceptQuadAndClearOwner(
+        address msgSender,
         Land[] memory quadMinted,
         uint256 index,
         uint256 landMinted,
@@ -476,8 +492,8 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                     // if land is in the quads already minted it just pushed in to the idsToTransfer array
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
-                } else if (_getOwnerAddress(id) == msg.sender) {
-                    // if it is owned by the msg.sender owner data is removed and it is pused in to idsToTransfer array
+                } else if (_getOwnerAddress(id) == msgSender) {
+                    // if it is owned by the msgSender owner data is removed and it is pused in to idsToTransfer array
                     _setOwnerData(id, 0);
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
@@ -490,17 +506,17 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
 
             // checking if "to" contact can handle ERC721 tokens
             require(
-                _checkOnERC721BatchReceived(msg.sender, address(0), to, idsToMint, data),
+                _checkOnERC721BatchReceived(msgSender, address(0), to, idsToMint, data),
                 "erc721 batchTransfer rejected"
             );
             require(
-                _checkOnERC721BatchReceived(msg.sender, msg.sender, to, idsToTransfer, data),
+                _checkOnERC721BatchReceived(msgSender, msgSender, to, idsToTransfer, data),
                 "erc721 batchTransfer rejected"
             );
         } else {
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 id = _idInPath(i, size, x, y);
-                if (_getOwnerAddress(id) == msg.sender) _setOwnerData(id, 0);
+                if (_getOwnerAddress(id) == msgSender) _setOwnerData(id, 0);
             }
         }
     }
@@ -635,38 +651,36 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 quadId = _getQuadId(layer, land.x, land.y);
         bool ownerOfAll = true;
 
-        {
-            // double for loop iterates and checks owner of all the smaller quads in land
-            for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
-                for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
-                    uint256 ownerChild;
-                    bool ownAllIndividual;
-                    if (childQuadSize < 3) {
-                        // case when the smaller quad is 1x1,
-                        ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
-                    } else {
-                        // recursively calling the _regroupQuad function to check the owner of child quads.
-                        ownAllIndividual = _regroupQuad(
-                            from,
-                            to,
-                            Land({x: xi, y: yi, size: childQuadSize}),
-                            false,
-                            childQuadSize / 2
-                        );
-                        uint256 idChild = _getQuadId(childLayer, xi, yi);
-                        ownerChild = _getOwnerData(idChild);
-                        if (ownerChild != 0) {
-                            // checking the owner of child quad
-                            if (!ownAllIndividual) {
-                                require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
-                            }
-                            // clearing owner of child quad
-                            _setOwnerData(idChild, 0);
+        // double for loop iterates and checks owner of all the smaller quads in land
+        for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
+            for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
+                uint256 ownerChild;
+                bool ownAllIndividual;
+                if (childQuadSize < 3) {
+                    // case when the smaller quad is 1x1,
+                    ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
+                } else {
+                    // recursively calling the _regroupQuad function to check the owner of child quads.
+                    ownAllIndividual = _regroupQuad(
+                        from,
+                        to,
+                        Land({x: xi, y: yi, size: childQuadSize}),
+                        false,
+                        childQuadSize / 2
+                    );
+                    uint256 idChild = _getQuadId(childLayer, xi, yi);
+                    ownerChild = _getOwnerData(idChild);
+                    if (ownerChild != 0) {
+                        // checking the owner of child quad
+                        if (!ownAllIndividual) {
+                            require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                         }
+                        // clearing owner of child quad
+                        _setOwnerData(idChild, 0);
                     }
-                    // ownerOfAll should be true if "from" is owner of all the child quads itereated over
-                    ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
+                // ownerOfAll should be true if "from" is owner of all the child quads itereated over
+                ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
             }
         }
 
