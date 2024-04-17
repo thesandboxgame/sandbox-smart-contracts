@@ -333,25 +333,23 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
 
         // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msg.sender
-        {
-            for (uint256 i = 0; i < size * size; i++) {
-                uint256 _id = _idInPath(i, size, x, y);
-                // checking land with token id "_id" is in the quadMinted array.
-                bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
-                if (isAlreadyMinted) {
-                    // if land is in the quadMinted array there just emitting transfer event
+        for (uint256 i = 0; i < size * size; i++) {
+            uint256 _id = _idInPath(i, size, x, y);
+            // checking land with token id "_id" is in the quadMinted array.
+            bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
+            if (isAlreadyMinted) {
+                // if land is in the quadMinted array there just emitting transfer event
+                emit Transfer(msgSender, to, _id);
+            } else {
+                if (_getOwnerAddress(_id) == msgSender) {
+                    if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
+                    landMinted += 1;
                     emit Transfer(msgSender, to, _id);
                 } else {
-                    if (_getOwnerAddress(_id) == msgSender) {
-                        if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
-                        landMinted += 1;
-                        emit Transfer(msgSender, to, _id);
-                    } else {
-                        // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
-                        require(_getOwnerData(_id) == 0, "Already minted");
+                    // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
+                    require(_getOwnerData(_id) == 0, "Already minted");
 
-                        emit Transfer(address(0), to, _id);
-                    }
+                    emit Transfer(address(0), to, _id);
                 }
             }
         }
@@ -651,38 +649,36 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 quadId = _getQuadId(layer, land.x, land.y);
         bool ownerOfAll = true;
 
-        {
-            // double for loop iterates and checks owner of all the smaller quads in land
-            for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
-                for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
-                    uint256 ownerChild;
-                    bool ownAllIndividual;
-                    if (childQuadSize < 3) {
-                        // case when the smaller quad is 1x1,
-                        ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
-                    } else {
-                        // recursively calling the _regroupQuad function to check the owner of child quads.
-                        ownAllIndividual = _regroupQuad(
-                            from,
-                            to,
-                            Land({x: xi, y: yi, size: childQuadSize}),
-                            false,
-                            childQuadSize / 2
-                        );
-                        uint256 idChild = _getQuadId(childLayer, xi, yi);
-                        ownerChild = _getOwnerData(idChild);
-                        if (ownerChild != 0) {
-                            // checking the owner of child quad
-                            if (!ownAllIndividual) {
-                                require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
-                            }
-                            // clearing owner of child quad
-                            _setOwnerData(idChild, 0);
+        // double for loop iterates and checks owner of all the smaller quads in land
+        for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
+            for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
+                uint256 ownerChild;
+                bool ownAllIndividual;
+                if (childQuadSize < 3) {
+                    // case when the smaller quad is 1x1,
+                    ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
+                } else {
+                    // recursively calling the _regroupQuad function to check the owner of child quads.
+                    ownAllIndividual = _regroupQuad(
+                        from,
+                        to,
+                        Land({x: xi, y: yi, size: childQuadSize}),
+                        false,
+                        childQuadSize / 2
+                    );
+                    uint256 idChild = _getQuadId(childLayer, xi, yi);
+                    ownerChild = _getOwnerData(idChild);
+                    if (ownerChild != 0) {
+                        // checking the owner of child quad
+                        if (!ownAllIndividual) {
+                            require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
                         }
+                        // clearing owner of child quad
+                        _setOwnerData(idChild, 0);
                     }
-                    // ownerOfAll should be true if "from" is owner of all the child quads itereated over
-                    ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
                 }
+                // ownerOfAll should be true if "from" is owner of all the child quads itereated over
+                ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
             }
         }
 
