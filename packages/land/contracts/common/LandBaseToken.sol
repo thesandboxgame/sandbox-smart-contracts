@@ -311,57 +311,55 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 y,
         bytes memory data
     ) internal {
-        unchecked {
-            (uint256 layer, , ) = _getQuadLayer(size);
-            uint256 quadId = _getQuadId(layer, x, y);
+        (uint256 layer, , ) = _getQuadLayer(size);
+        uint256 quadId = _getQuadId(layer, x, y);
 
-            // Length of array is equal to number of 3x3 child quad a 24x24 quad can have. Would be used to push the minted Quads.
-            Land[] memory quadMinted = new Land[](64);
-            // index of last minted quad pushed on quadMinted Array
-            uint256 index;
-            uint256 landMinted;
+        // Length of array is equal to number of 3x3 child quad a 24x24 quad can have. Would be used to push the minted Quads.
+        Land[] memory quadMinted = new Land[](64);
+        // index of last minted quad pushed on quadMinted Array
+        uint256 index;
+        uint256 landMinted;
 
-            // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
-            if (size > 3) {
-                (index, landMinted) = _checkAndClearOwner(
-                    msgSender,
-                    Land({x: x, y: y, size: size}),
-                    quadMinted,
-                    landMinted,
-                    index,
-                    size / 2
-                );
-            }
+        // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
+        if (size > 3) {
+            (index, landMinted) = _checkAndClearOwner(
+                msgSender,
+                Land({x: x, y: y, size: size}),
+                quadMinted,
+                landMinted,
+                index,
+                size / 2
+            );
+        }
 
-            // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msgSender
-            for (uint256 i = 0; i < size * size; i++) {
-                uint256 _id = _idInPath(i, size, x, y);
-                // checking land with token id "_id" is in the quadMinted array.
-                bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
-                if (isAlreadyMinted) {
-                    // if land is in the quadMinted array there just emitting transfer event
+        // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msgSender
+        for (uint256 i = 0; i < size * size; i++) {
+            uint256 _id = _idInPath(i, size, x, y);
+            // checking land with token id "_id" is in the quadMinted array.
+            bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
+            if (isAlreadyMinted) {
+                // if land is in the quadMinted array there just emitting transfer event
+                emit Transfer(msgSender, to, _id);
+            } else {
+                if (_getOwnerAddress(_id) == msgSender) {
+                    if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
+                    landMinted += 1;
                     emit Transfer(msgSender, to, _id);
                 } else {
-                    if (_getOwnerAddress(_id) == msgSender) {
-                        if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
-                        landMinted += 1;
-                        emit Transfer(msgSender, to, _id);
-                    } else {
-                        // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
-                        require(_getOwnerData(_id) == 0, "Already minted");
+                    // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
+                    require(_getOwnerData(_id) == 0, "Already minted");
 
-                        emit Transfer(address(0), to, _id);
-                    }
+                    emit Transfer(address(0), to, _id);
                 }
             }
-
-            // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
-            _checkBatchReceiverAcceptQuadAndClearOwner(msgSender, quadMinted, index, landMinted, to, size, x, y, data);
-
-            _setOwnerData(quadId, uint160(to));
-            _addNumNFTPerAddress(to, size * size);
-            _subNumNFTPerAddress(msgSender, landMinted);
         }
+
+        // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
+        _checkBatchReceiverAcceptQuadAndClearOwner(msgSender, quadMinted, index, landMinted, to, size, x, y, data);
+
+        _setOwnerData(quadId, uint160(to));
+        _addNumNFTPerAddress(to, size * size);
+        _subNumNFTPerAddress(msgSender, landMinted);
     }
 
     /// @notice recursively checks if the child quads are minted in land and push them to the quadMinted array.
