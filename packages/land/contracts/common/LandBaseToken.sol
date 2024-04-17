@@ -611,13 +611,8 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
     function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
         unchecked {
-            uint256 row = i / size;
-            if (row % 2 == 0) {
-                // allow ids to follow a path in a quad
-                return _getQuadId(LAYER_1x1, (x + (i % size)), (y + row));
-            } else {
-                return _getQuadId(LAYER_1x1, (x + size) - (1 + (i % size)), (y + row));
-            }
+            // This is an inlined/optimized version of: _getQuadId(LAYER_1x1, x + (i % size), y + (i / size))
+            return (x + (i % size)) + (y + (i / size)) * GRID_SIZE;
         }
     }
 
