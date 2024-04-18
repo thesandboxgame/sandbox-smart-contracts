@@ -1,4 +1,4 @@
-import { EventLog, Log } from 'ethers';
+import {EventLog} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -57,9 +57,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployTx = await factoryContractAsOwner.getFunction('deployBeacon')(
       avatarCollectionImplementationContract.address,
       implementationAlias
-    )
+    );
   } catch {
-
+    return;
   }
 
   if (!deployTx) {
@@ -71,10 +71,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     factoryContractAsOwner.filters.BeaconAdded()
   );
 
-  const beaconLog = (beaconAddedEvents.slice(-1)[0]) as EventLog;
+  const beaconLog = beaconAddedEvents.slice(-1)[0] as EventLog;
   const beaconAddress = beaconLog.args?.[1];
 
-  //console.log(`deployed at ${beaconAddress} (tx: ${deployTx.hash})`);
+  console.log(`deployed at ${beaconAddress} (tx: ${deployTx.hash})`);
 
   // save beacon in deployments
   const beaconContractInterface = await artifacts.readArtifact(
