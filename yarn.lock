@@ -2892,7 +2892,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/marketplace@1.0.1, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
+"@sandbox-smart-contracts/marketplace@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@sandbox-smart-contracts/marketplace@npm:1.0.1"
+  dependencies:
+    "@manifoldxyz/royalty-registry-solidity": ^3.0.0
+    "@openzeppelin/contracts": ^4.9.2
+    "@openzeppelin/contracts-upgradeable": ^4.9.2
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+  checksum: 2327ee4d9f81c5321167d675f07ceaa93673b1a1eeb8e00e22bf504bdbb9e0726f7ee836882f49938e57cd9ba9b09a68c54b725f3378e45f1b787a00a26d31c3
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
   dependencies:
