@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {LandMetadataRegistry} from "../registry/LandMetadataRegistry.sol";
+import {LandMetadataRegistry} from "../LandMetadataRegistry.sol";
 
 contract LandMetadataRegistryMock is LandMetadataRegistry {
     function getLandMetadataStorageSlot() external pure returns (uint256) {
