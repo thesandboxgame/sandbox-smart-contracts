@@ -4,6 +4,14 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForRoyalty(setupLand, Contract: string) {
   describe(Contract + ':Royalty', function () {
+    it('should emit RoyaltyManagerSet event', async function () {
+      const {LandAsAdmin, other} = await loadFixture(setupLand);
+      const tx = await LandAsAdmin.setRoyaltyManager(other);
+      await expect(tx)
+        .to.emit(LandAsAdmin, 'RoyaltyManagerSet')
+        .withArgs(other);
+    });
+
     it('land should return EIP2981 royalty recipient and royalty for other contracts', async function () {
       const {RoyaltyManagerContract, LandContract, commonRoyaltyReceiver} =
         await loadFixture(setupLand);

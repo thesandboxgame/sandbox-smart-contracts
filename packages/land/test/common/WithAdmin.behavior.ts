@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {ZeroAddress} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForAdmin(setupLand, Contract: string) {
@@ -7,6 +8,20 @@ export function shouldCheckForAdmin(setupLand, Contract: string) {
     it('should get the current admin', async function () {
       const {LandContract, landAdmin} = await loadFixture(setupLand);
       expect(await LandContract.getAdmin()).to.be.equal(landAdmin);
+    });
+
+    it('Only admin can change admin', async function () {
+      const {LandContract, deployer} = await loadFixture(setupLand);
+      await expect(LandContract.changeAdmin(deployer)).to.be.revertedWith(
+        'only admin allowed',
+      );
+    });
+
+    it('should not accept zero address as new admin', async function () {
+      const {LandAsAdmin} = await loadFixture(setupLand);
+      await expect(LandAsAdmin.changeAdmin(ZeroAddress)).to.be.revertedWith(
+        'invalid admin',
+      );
     });
 
     it('should change the admin to a new address', async function () {

@@ -6,12 +6,43 @@ import {getId} from '../fixtures';
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
   describe(Contract + ':OperatorFilterer', function () {
+    it('should not set register if caller is not admin', async function () {
+      const {LandAsOther, operatorFilterSubscription} =
+        await loadFixture(setupLand);
+      await expect(
+        LandAsOther.register(operatorFilterSubscription, true),
+      ).to.be.revertedWith('only admin allowed');
+    });
+
+    it('should not set registry if subscription is zero address', async function () {
+      const {LandAsAdmin} = await loadFixture(setupLand);
+      await expect(LandAsAdmin.register(ZeroAddress, true)).to.be.revertedWith(
+        "subscription can't be zero",
+      );
+    });
+
+    it('should not set operatorRegistry if caller is not admin', async function () {
+      const {LandAsOther, OperatorFilterRegistry} =
+        await loadFixture(setupLand);
+      await expect(
+        LandAsOther.setOperatorRegistry(OperatorFilterRegistry),
+      ).to.be.revertedWith('only admin allowed');
+    });
+
     it('should be registered', async function () {
       const {OperatorFilterRegistry, LandContract} =
         await loadFixture(setupLand);
       expect(
         await OperatorFilterRegistry.isRegistered(LandContract),
       ).to.be.equal(true);
+    });
+
+    it('should return operatorFilterRegistry address', async function () {
+      const {LandContract, OperatorFilterRegistry} =
+        await loadFixture(setupLand);
+      expect(await LandContract.operatorFilterRegistry()).to.be.equal(
+        OperatorFilterRegistry,
+      );
     });
 
     it('would not register on the operator filter registry if not set on the Land', async function () {

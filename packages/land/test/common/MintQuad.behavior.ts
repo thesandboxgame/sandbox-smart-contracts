@@ -9,6 +9,14 @@ const GRID_SIZE = 408;
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckMintQuad(setupLand, Contract: string) {
   describe(Contract + ':mintQuad', function () {
+    it('should revert if signer is not landMinter', async function () {
+      const {LandContract, deployer} = await loadFixture(setupLand);
+
+      await expect(
+        LandContract.mintQuad(deployer, 3, 0, 0, '0x'),
+      ).to.be.revertedWith('!AUTHORIZED');
+    });
+
     it('should revert when to x coordinates are wrong', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
       await expect(

@@ -104,6 +104,17 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       ).to.be.revertedWith('not owner of child Quad');
     });
 
+    it('should revert if some sub-quads are not owned by the sender', async function () {
+      const {LandAsMinter, LandAsOther, other, other1, other2} =
+        await loadFixture(setupLand);
+
+      await LandAsMinter.mintQuad(other, 6, 0, 0, '0x');
+      await LandAsOther.transferQuad(other, other2, 1, 0, 0, '0x');
+      await expect(
+        LandAsOther.transferQuad(other, other1, 6, 0, 0, '0x'),
+      ).to.be.revertedWith('not owner');
+    });
+
     it('should not revert when from is owner of all subQuads of Quad', async function () {
       const {LandContract, deployer, landAdmin, LandAsMinter} =
         await loadFixture(setupLand);
@@ -113,6 +124,56 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 3, 3, 3, '0x');
       await LandContract.transferQuad(deployer, landAdmin, 6, 0, 0, '0x');
       expect(await LandContract.balanceOf(landAdmin)).to.be.equal(36);
+    });
+
+    it('should not revert when some subquads are transferred to the sender before transferring the main quad', async function () {
+      const {LandAsMinter, LandAsOther, other, other1} =
+        await loadFixture(setupLand);
+
+      const quadSize = 6;
+      await LandAsMinter.mintQuad(other, quadSize, 0, 0, '0x');
+      await LandAsOther.transferQuad(other, other, 1, 0, 0, '0x');
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(
+        quadSize * quadSize,
+      );
+      expect(await LandAsOther.balanceOf(other1)).to.be.equal(0);
+
+      await LandAsOther.transferQuad(other, other1, quadSize, 0, 0, '0x');
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+      expect(await LandAsOther.balanceOf(other1)).to.be.equal(
+        quadSize * quadSize,
+      );
+    });
+
+    it('should transfer quads to a contract supporting ERC721 mandatory receiver', async function () {
+      const {LandAsMinter, LandAsOther, other, TestERC721TokenReceiver} =
+        await loadFixture(setupLand);
+
+      const quadSize = 6;
+      await LandAsMinter.mintQuad(other, quadSize, 0, 0, '0x');
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(
+        quadSize * quadSize,
+      );
+      expect(await LandAsOther.balanceOf(TestERC721TokenReceiver)).to.be.equal(
+        0,
+      );
+
+      await LandAsOther.transferQuad(
+        other,
+        TestERC721TokenReceiver,
+        quadSize,
+        0,
+        0,
+        '0x',
+      );
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+      expect(await LandAsOther.balanceOf(TestERC721TokenReceiver)).to.be.equal(
+        quadSize * quadSize,
+      );
     });
 
     describe('From self', function () {
@@ -654,6 +715,23 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       });
     });
 
+    it('should revert if signer is not landMinter', async function () {
+      const {LandAsOther, other} = await loadFixture(setupLand);
+
+      await expect(
+        LandAsOther.mintAndTransferQuad(other, 3, 0, 0, '0x'),
+      ).to.be.revertedWith('!AUTHORIZED');
+    });
+
+    it('should revert if to zero address', async function () {
+      const {LandAsAdmin, LandContract, deployer} =
+        await loadFixture(setupLand);
+      await LandAsAdmin.setMinter(deployer, true);
+      await expect(
+        LandContract.mintAndTransferQuad(ZeroAddress, 3, 3, 3, '0x'),
+      ).to.be.revertedWith('to is zero address');
+    });
+
     it('should revert when y is out of bound', async function () {
       const {LandAsMinter, landAdmin} = await loadFixture(setupLand);
       await expect(
@@ -747,15 +825,45 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert when x coordinate is out of bounds (mintAndTransferQuad)', async function () {
+    it('should revert when x coordinate is out of bounds', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
       await expect(
         LandAsMinter.mintAndTransferQuad(deployer, 3, 441, 441, '0x'),
       ).to.be.revertedWith('x out of bounds');
     });
+
+    it('should transfer an already minted quad using mintAndTransferQuad', async function () {
+      const {LandAsOther, LandAsAdmin, other, other1} =
+        await loadFixture(setupLand);
+      await LandAsAdmin.setMinter(other, true);
+      await LandAsOther.mintQuad(other, 1, 0, 0, '0x');
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(1);
+      expect(await LandAsOther.balanceOf(other1)).to.be.equal(0);
+
+      await LandAsOther.mintAndTransferQuad(other1, 1, 0, 0, '0x');
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+      expect(await LandAsOther.balanceOf(other1)).to.be.equal(1);
+    });
   });
 
   describe(Contract + ':batchTransferQuad', function () {
+    it('should revert when from is zero address', async function () {
+      const {LandContract, LandAsMinter, deployer, landAdmin} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
+      await expect(
+        LandContract.batchTransferQuad(
+          ZeroAddress,
+          landAdmin,
+          [6],
+          [0],
+          [0],
+          '0x',
+        ),
+      ).to.be.revertedWith('invalid from');
+    });
+
     it('should revert when sizes, x, y are not of same length', async function () {
       const {LandContract, LandAsMinter, deployer, landAdmin} =
         await loadFixture(setupLand);

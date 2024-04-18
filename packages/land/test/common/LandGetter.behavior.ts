@@ -7,12 +7,22 @@ const sizes = [1, 3, 6, 12, 24];
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckLandGetter(setupLand, Contract: string) {
   describe(Contract + ':Getters', function () {
-    it('returns the width of the grid', async function () {
+    it('should return name of the token contract', async function () {
+      const {LandContract} = await loadFixture(setupLand);
+      expect(await LandContract.name()).to.be.equal("Sandbox's LANDs");
+    });
+
+    it('should return symbol of the token contract', async function () {
+      const {LandContract} = await loadFixture(setupLand);
+      expect(await LandContract.symbol()).to.be.equal('LAND');
+    });
+
+    it('should return width of the grid', async function () {
       const {LandContract} = await loadFixture(setupLand);
       expect(await LandContract.width()).to.be.equal(408);
     });
 
-    it('returns the height of the grid', async function () {
+    it('should return height of the grid', async function () {
       const {LandContract} = await loadFixture(setupLand);
       expect(await LandContract.height()).to.be.equal(408);
     });
@@ -29,6 +39,16 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
         await loadFixture(setupLand);
       expect(await LandContract.getRoyaltyManager()).to.be.equal(
         await RoyaltyManagerContract.getAddress(),
+      );
+    });
+
+    it('should return owner data of land', async function () {
+      const {LandContract, LandAsMinter, other} = await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+
+      const ownerAddress = '15d34AAf54267DB7D7c367839AAf71A00a2C6A65';
+      expect(await LandContract.getOwnerData(0)).to.be.equal(
+        BigInt('0x' + ownerAddress),
       );
     });
 
@@ -63,6 +83,7 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
         'Invalid token id',
       );
     });
+
     it('should return owner of given quad id', async function () {
       for (let i = 1; i < sizes.length; i++) {
         const {LandAsMinter, other} = await loadFixture(setupLand);
@@ -124,6 +145,16 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
       await expect(LandContract.exists(3, 0, 500)).to.be.reverted;
 
       await expect(LandContract.exists(3, 500, 0)).to.be.reverted;
+    });
+
+    it('should revert when checking URI for a non-existing token', async function () {
+      const GRID_SIZE = 408;
+      const {LandContract} = await loadFixture(setupLand);
+
+      const tokenId = 2 + 2 * GRID_SIZE;
+      await expect(LandContract.tokenURI(tokenId)).to.be.revertedWith(
+        'Id does not exist',
+      );
     });
   });
 }

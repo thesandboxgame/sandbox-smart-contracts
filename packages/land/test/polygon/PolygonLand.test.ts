@@ -1,12 +1,10 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
-  getId,
   setupPolygonLandForERC721Tests,
   setupPolygonLandOperatorFilter,
 } from '../fixtures';
 import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
-import {ZeroAddress} from 'ethers';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
 import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
@@ -15,6 +13,7 @@ import {shouldCheckLandGetter} from '../common/LandGetter.behavior';
 import {shouldCheckMintQuad} from '../common/MintQuad.behavior';
 import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
 import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
+import {shouldCheckForMetadataRegistry} from '../common/WithMetadataRegistry.behavior';
 import {landConfig} from '../common/Config.behavior';
 import {shouldCheckForERC721} from '../common/ERC721.behavior';
 import {setupLand} from '../mainnet/fixtures';
@@ -22,16 +21,6 @@ import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
-
-const PolygonLandErrorMessages = {
-  NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
-  BATCHTRANSFERFROM_NOT_OWNER: 'BATCHTRANSFERFROM_NOT_OWNER',
-  ERC721_BATCH_RECEIVED_REJECTED: 'ERC721_BATCH_RECEIVED_REJECTED',
-  ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',
-  UNAUTHORIZED_TRANSFER: 'UNAUTHORIZED_TRANSFER',
-  NOT_TO_ZEROADDRESS: 'NOT_TO_ZEROADDRESS',
-  UNAUTHORIZED_APPROVAL: 'UNAUTHORIZED_APPROVAL',
-};
 
 // TODO: some test were testing the tunnel => not anymore. We need to check if we missed something.
 describe('PolygonLand.sol', function () {
@@ -63,23 +52,37 @@ describe('PolygonLand.sol', function () {
   shouldCheckTransferFrom(setupPolygonLand, 'PolygonLand');
 
   // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForMetadataRegistry(setupPolygonLand, 'PolygonLand');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
   landConfig(setupPolygonLand, 'PolygonLand');
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForERC721(
-    setupPolygonLandForERC721Tests,
-    PolygonLandErrorMessages,
-    'PolygonLand',
-  );
+  shouldCheckForERC721(setupPolygonLandForERC721Tests, 'PolygonLand');
 
-  it('should return the name of the token contract', async function () {
-    const {LandContract} = await loadFixture(setupPolygonLand);
-    expect(await LandContract.name()).to.be.equal("Sandbox's LANDs");
+  it('should not set trustedForwarder if caller is not admin', async function () {
+    const {LandAsOther, TrustedForwarderContract} =
+      await loadFixture(setupPolygonLand);
+    await expect(
+      LandAsOther.setTrustedForwarder(TrustedForwarderContract),
+    ).to.be.revertedWith('only admin allowed');
   });
 
-  it('should return the symbol of the token contract', async function () {
-    const {LandContract} = await loadFixture(setupPolygonLand);
-    expect(await LandContract.symbol()).to.be.equal('LAND');
+  it('should return the trusted forwarder', async function () {
+    const {LandContract, TrustedForwarderContract} =
+      await loadFixture(setupPolygonLand);
+    expect(await LandContract.getTrustedForwarder()).to.be.equal(
+      TrustedForwarderContract,
+    );
+  });
+
+  it('should verify trusted forwarder', async function () {
+    const {LandContract, TrustedForwarderContract, other} =
+      await loadFixture(setupPolygonLand);
+    expect(
+      await LandContract.isTrustedForwarder(TrustedForwarderContract),
+    ).to.be.equal(true);
+    expect(await LandContract.isTrustedForwarder(other)).to.be.equal(false);
   });
 
   it('should not accept zero address as landMinter', async function () {
@@ -88,150 +91,6 @@ describe('PolygonLand.sol', function () {
     await expect(
       LandAsAdmin.setMinter('0x0000000000000000000000000000000000000000', true),
     ).to.be.revertedWith('address 0 is not allowed');
-  });
-
-  it(`reverts check URI for non existing token`, async function () {
-    const GRID_SIZE = 408;
-    const {LandContract} = await loadFixture(setupPolygonLand);
-
-    const tokenId = 2 + 2 * GRID_SIZE;
-    await expect(LandContract.tokenURI(tokenId)).to.be.revertedWith(
-      'Id does not exist',
-    );
-  });
-
-  it('should revert if signer is not landMinter (mintAndTransferQuad)', async function () {
-    const {LandAsOther, other} = await loadFixture(setupPolygonLand);
-
-    await expect(
-      LandAsOther.mintAndTransferQuad(other, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('!AUTHORIZED');
-  });
-
-  it('should revert for transfer if to address zero (mintAndTransferQuad)', async function () {
-    const {LandAsAdmin, LandContract, deployer} =
-      await loadFixture(setupPolygonLand);
-    const bytes = '0x3333';
-    await LandAsAdmin.setMinter(deployer, true);
-    await expect(
-      LandContract.mintAndTransferQuad(ZeroAddress, 3, 3, 3, bytes),
-    ).to.be.revertedWith('to is zero address');
-  });
-
-  it('should revert approveFor for ZeroAddress spender', async function () {
-    const {LandAsMinter, LandAsOther, MockMarketPlace3, other} =
-      await loadFixture(setupPolygonLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther.approveFor(ZeroAddress, MockMarketPlace3, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
-  });
-
-  it('should revert approveFor for unauthorized user', async function () {
-    const {LandAsMinter, LandAsOther, MockMarketPlace3, other, other1} =
-      await loadFixture(setupPolygonLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther.approveFor(other1, MockMarketPlace3, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
-  });
-
-  it('should revert approveFor zero owner of tokenId', async function () {
-    const {LandAsOther, MockMarketPlace3, other} =
-      await loadFixture(setupPolygonLand);
-    const GRID_SIZE = 408;
-    const tokenId = 2 + 2 * GRID_SIZE;
-    await expect(
-      LandAsOther.approveFor(other, MockMarketPlace3, tokenId),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
-  });
-
-  it('should revert approve for zero address owner of token', async function () {
-    const {LandAsOther, MockMarketPlace3} = await loadFixture(setupPolygonLand);
-    const GRID_SIZE = 408;
-    const tokenId = 2 + 2 * GRID_SIZE;
-    console.log(await MockMarketPlace3.getAddress());
-    await expect(
-      LandAsOther.approve(MockMarketPlace3, tokenId),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
-  });
-
-  it('should revert approve for ZeroAddress spender', async function () {
-    const {LandAsMinter, LandAsOther1, MockMarketPlace3, other} =
-      await loadFixture(setupPolygonLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther1.approve(MockMarketPlace3, id),
-    ).to.be.revertedWithCustomError(LandAsOther1, 'ERC721InvalidOwner');
-  });
-
-  it('should revert setApprovalForAllFor for ZeroAddress', async function () {
-    const {LandAsOther, MockMarketPlace3} = await loadFixture(setupPolygonLand);
-    await expect(
-      LandAsOther.setApprovalForAllFor(ZeroAddress, MockMarketPlace3, true),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
-  });
-
-  it('should revert setApprovalForAllFor for unauthorized users', async function () {
-    const {LandAsOther, MockMarketPlace3} = await loadFixture(setupPolygonLand);
-    await expect(
-      LandAsOther.setApprovalForAllFor(
-        MockMarketPlace3,
-        MockMarketPlace3,
-        true,
-      ),
-    ).to.be.revertedWith('UNAUTHORIZED_APPROVE_FOR_ALL');
-  });
-
-  it('should revert approvalFor for same sender and spender', async function () {
-    const {LandContract, LandAsMinter, deployer, other} =
-      await loadFixture(setupPolygonLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandContract.approveFor(deployer, deployer, id),
-    ).to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner');
-  });
-
-  it('subscription can not be zero address', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
-    await expect(LandAsAdmin.register(ZeroAddress, true)).to.be.revertedWith(
-      "subscription can't be zero",
-    );
-  });
-
-  it('supported interfaces', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
-
-    expect(await LandAsAdmin.supportsInterface('0x01ffc9a7')).to.be.true;
-    expect(await LandAsAdmin.supportsInterface('0x80ac58cd')).to.be.true;
-    expect(await LandAsAdmin.supportsInterface('0x5b5e139f')).to.be.true;
-  });
-
-  it('should revert for incorrect id (wrong size)', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
-
-    await expect(LandAsAdmin.ownerOf(getId(9, 0, 0))).to.be.revertedWith(
-      'Invalid token id',
-    );
-  });
-
-  it('should revert if signer is not landMinter', async function () {
-    const {LandAsOther, other} = await loadFixture(setupPolygonLand);
-
-    await expect(LandAsOther.mintQuad(other, 3, 0, 0, '0x')).to.be.revertedWith(
-      '!AUTHORIZED',
-    );
-  });
-
-  it('should return correct ownerOf 1*1 quad minted', async function () {
-    const {LandAsMinter, deployer} = await loadFixture(setupPolygonLand);
-    const bytes = '0x3333';
-    await LandAsMinter.mintQuad(deployer, 1, 1, 1, bytes);
-    expect(await LandAsMinter.ownerOf(getId(1, 1, 1))).to.be.equal(deployer);
   });
 
   it('changes the admin to a new address via meta transaction', async function () {
@@ -243,48 +102,12 @@ describe('PolygonLand.sol', function () {
     expect(await LandAsAdmin.getAdmin()).to.be.equal(deployer);
   });
 
-  it('should emit RoyaltyManagerSet event', async function () {
-    const {LandAsAdmin, other} = await loadFixture(setupPolygonLand);
-    const tx = await LandAsAdmin.setRoyaltyManager(await other.getAddress());
-    await expect(tx)
-      .to.emit(LandAsAdmin, 'RoyaltyManagerSet')
-      .withArgs(await other.getAddress());
-  });
-
   it('should emit OwnershipTransferred event', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
     const tx = await LandAsAdmin.transferOwnership(await other.getAddress());
     await expect(tx)
       .to.emit(LandAsAdmin, 'OwnershipTransferred')
       .withArgs(await landOwner.getAddress(), await other.getAddress());
-  });
-
-  it('should reverts transfers batch of quads when from is zero address', async function () {
-    const {LandContract, other} = await loadFixture(setupPolygonLand);
-
-    const bytes = '0x3333';
-    await expect(
-      LandContract.batchTransferQuad(
-        '0x0000000000000000000000000000000000000000',
-        other,
-        [24, 12, 6, 3],
-        [0, 300, 30, 24],
-        [0, 300, 30, 24],
-        bytes,
-      ),
-    ).to.be.revertedWith('invalid from');
-  });
-
-  it('Transfer 1x1 without approval', async function () {
-    const {LandContract, LandAsMinter, deployer, other} =
-      await loadFixture(setupPolygonLand);
-
-    const bytes = '0x3333';
-    await LandAsMinter.mintQuad(other, 1, 0, 0, bytes);
-
-    await expect(
-      LandContract.transferFrom(other, deployer, 0),
-    ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
   });
 
   it('check storage structure', async function () {

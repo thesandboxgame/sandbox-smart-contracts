@@ -3,11 +3,7 @@ import {ZeroAddress} from 'ethers';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 
 // eslint-disable-next-line mocha/no-exports
-export function shouldCheckForERC721(
-  setupLand,
-  errorMessages,
-  Contract: string,
-) {
+export function shouldCheckForERC721(setupLand, Contract: string) {
   describe(Contract + ':ERC721Tests', function () {
     describe('non existing NFT', function () {
       it('transferring a non existing NFT fails', async function () {
@@ -113,6 +109,7 @@ export function shouldCheckForERC721(
           .to.emit(LandAsOther, 'Transfer')
           .withArgs(other, ZeroAddress, tokenId);
       });
+
       it('burn result in ownerOf throwing', async function () {
         const {LandAsOther, other, mint} = await loadFixture(setupLand);
         const {tokenId} = await mint(other);
@@ -122,9 +119,87 @@ export function shouldCheckForERC721(
           .to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken')
           .withArgs(tokenId);
       });
+
+      it('should approve operator to burn quad', async function () {
+        const {LandAsMinter, other, LandAsOther, LandAsOther1, other1} =
+          await loadFixture(setupLand);
+
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await LandAsOther.approve(other1, 0);
+        await expect(LandAsOther1.burn(0))
+          .to.emit(LandAsOther, 'Transfer')
+          .withArgs(other1, ZeroAddress, 0);
+      });
     });
 
     describe('batchTransfer', function () {
+      it('should revert batchTransfer from zero address', async function () {
+        const {LandAsOwner, other, tokenIds} = await loadFixture(setupLand);
+        await expect(
+          LandAsOwner.batchTransferFrom(ZeroAddress, other, tokenIds, '0x'),
+        ).to.be.revertedWith('NOT_FROM_ZEROADDRESS');
+      });
+
+      it('should revert batchTransfer to zero address', async function () {
+        const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setupLand);
+        await expect(
+          LandAsOwner.batchTransferFrom(landOwner, ZeroAddress, tokenIds, '0x'),
+        ).to.be.revertedWith('NOT_TO_ZEROADDRESS');
+      });
+
+      it('should revert batchTransfer from unauthorized sender', async function () {
+        const {LandAsOther, landOwner, other, tokenIds} =
+          await loadFixture(setupLand);
+        await expect(
+          LandAsOther.batchTransferFrom(landOwner, other, tokenIds, '0x'),
+        ).to.be.revertedWith('NOT_AUTHORIZED');
+      });
+
+      it('should batch transfer tokens from authorized sender', async function () {
+        const {LandAsOwner, LandAsOther, landOwner, other, tokenIds} =
+          await loadFixture(setupLand);
+        expect(await LandAsOther.balanceOf(landOwner)).to.be.equal(
+          tokenIds.length,
+        );
+        expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+
+        await LandAsOwner.setApprovalForAll(other, true);
+        await LandAsOther.batchTransferFrom(landOwner, other, tokenIds, '0x');
+
+        expect(await LandAsOther.balanceOf(landOwner)).to.be.equal(0);
+        expect(await LandAsOther.balanceOf(other)).to.be.equal(tokenIds.length);
+      });
+
+      it('should  batch transfer tokens after approval', async function () {
+        const {LandAsOwner, LandAsOther, landOwner, other, tokenIds} =
+          await loadFixture(setupLand);
+        expect(await LandAsOther.balanceOf(landOwner)).to.be.equal(
+          tokenIds.length,
+        );
+        expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+
+        for (let i = 0; i < tokenIds.length; i++) {
+          await LandAsOwner.approve(other, tokenIds[i]);
+        }
+        await LandAsOther.batchTransferFrom(landOwner, other, tokenIds, '0x');
+
+        expect(await LandAsOther.balanceOf(landOwner)).to.be.equal(0);
+        expect(await LandAsOther.balanceOf(other)).to.be.equal(tokenIds.length);
+      });
+
+      it('should not change balance for batch transfer when from and to address are same', async function () {
+        const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setupLand);
+        expect(await LandAsOwner.balanceOf(landOwner)).to.be.equal(3);
+
+        await LandAsOwner.batchTransferFrom(
+          landOwner,
+          landOwner,
+          tokenIds,
+          '0x',
+        );
+        expect(await LandAsOwner.balanceOf(landOwner)).to.be.equal(3);
+      });
+
       it('batch transfer of same NFT ids should fails', async function () {
         const {LandAsOwner, landOwner, other, tokenIds} =
           await loadFixture(setupLand);
@@ -135,8 +210,9 @@ export function shouldCheckForERC721(
             [tokenIds[1], tokenIds[1], tokenIds[0]],
             '0x',
           ),
-        ).to.be.revertedWith(errorMessages.BATCHTRANSFERFROM_NOT_OWNER);
+        ).to.be.revertedWith('BATCHTRANSFERFROM_NOT_OWNER');
       });
+
       it('batch transfer works', async function () {
         const {LandAsOwner, landOwner, other, tokenIds} =
           await loadFixture(setupLand);
@@ -160,6 +236,7 @@ export function shouldCheckForERC721(
           TestERC721TokenReceiver,
         );
       });
+
       it('batch transferring to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function () {
         const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setupLand);
@@ -173,6 +250,7 @@ export function shouldCheckForERC721(
           ),
         ).to.be.revertedWith('Batch Receive not allowed');
       });
+
       it('batch transferring to a contract that do not accept erc721 token should fail', async function () {
         const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setupLand);
@@ -198,7 +276,7 @@ export function shouldCheckForERC721(
             [tokenIds[0]],
             '0x',
           ),
-        ).to.be.revertedWith(errorMessages.ERC721_BATCH_RECEIVED_REJECTED);
+        ).to.be.revertedWith('ERC721_BATCH_RECEIVED_REJECTED');
       });
 
       it('batch transferring to a contract that do not implemented mandatory receiver should not fail', async function () {
@@ -239,6 +317,7 @@ export function shouldCheckForERC721(
           TestERC721TokenReceiver,
         );
       });
+
       it('transferring to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function () {
         const {LandAsOwner, TestERC721TokenReceiver, landOwner, tokenIds} =
           await loadFixture(setupLand);
@@ -262,7 +341,7 @@ export function shouldCheckForERC721(
             TestERC721TokenReceiver,
             tokenIds[0],
           ),
-        ).to.be.revertedWith(errorMessages.ERC721_TRANSFER_REJECTED);
+        ).to.be.revertedWith('ERC721_TRANSFER_REJECTED');
       });
 
       it('transferring to a contract that do not implemented mandatory receiver should not fail', async function () {
@@ -300,8 +379,9 @@ export function shouldCheckForERC721(
             [tokenIds[0], tokenIds[1], tokenIds[0]],
             '0x',
           ),
-        ).to.be.revertedWith(errorMessages.BATCHTRANSFERFROM_NOT_OWNER);
+        ).to.be.revertedWith('BATCHTRANSFERFROM_NOT_OWNER');
       });
+
       it('safe batch transfer works', async function () {
         const {LandAsOwner, landOwner, other, tokenIds} =
           await loadFixture(setupLand);
@@ -351,6 +431,7 @@ export function shouldCheckForERC721(
           .to.emit(LandAsOwner, 'Transfer')
           .withArgs(landOwner, other, tokenIds[0]);
       });
+
       it('transferring one NFT change to correct owner', async function () {
         const {LandAsOwner, landOwner, other, tokenIds} =
           await loadFixture(setupLand);
@@ -381,14 +462,14 @@ export function shouldCheckForERC721(
           await loadFixture(setupLand);
         await expect(
           LandAsOther.transferFrom(landOwner, other, tokenIds[0]),
-        ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
+        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
       });
 
       it('transferring to zero address should fails', async function () {
         const {LandAsOwner, landOwner, tokenIds} = await loadFixture(setupLand);
         await expect(
           LandAsOwner.transferFrom(landOwner, ZeroAddress, tokenIds[0]),
-        ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
+        ).to.be.revertedWith('NOT_TO_ZEROADDRESS');
       });
 
       it('transferring to a contract that accepts erc721 token should not fail', async function () {
@@ -402,6 +483,130 @@ export function shouldCheckForERC721(
         expect(await LandAsOwner.ownerOf(tokenIds[0])).to.be.equal(
           TestERC721TokenReceiver,
         );
+      });
+    });
+
+    describe('approval functionality', function () {
+      // tests for approve function
+      it('should revert approve for non existent token', async function () {
+        const {LandAsOther, other} = await loadFixture(setupLand);
+        await expect(
+          LandAsOther.approve(other, 0),
+        ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
+      });
+
+      it('should revert approve for invalid owner', async function () {
+        const {LandAsMinter, LandAsOther1, other, other1} =
+          await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+
+        await expect(
+          LandAsOther1.approve(other1, 0),
+        ).to.be.revertedWithCustomError(LandAsOther1, 'ERC721InvalidOwner');
+      });
+
+      // tests for approveFor function
+      it('should revert approveFor from zero address', async function () {
+        const {LandAsOther, other1, other, LandAsMinter} =
+          await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await expect(
+          LandAsOther.approveFor(ZeroAddress, other1, 0),
+        ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
+      });
+
+      it('should revert approveFor for invalid owner', async function () {
+        const {LandAsOther, other, deployer, other1, LandAsMinter} =
+          await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await expect(
+          LandAsOther.approveFor(deployer, other1, 0),
+        ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
+      });
+
+      it('should revert approveFor for non existent token', async function () {
+        const {LandAsOther, other, other1} = await loadFixture(setupLand);
+        await expect(
+          LandAsOther.approveFor(other, other1, 0),
+        ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
+      });
+
+      it('should revert approveFor from unauthorized sender', async function () {
+        const {LandContract, LandAsMinter, other1, other} =
+          await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await expect(
+          LandContract.approveFor(other, other1, 0),
+        ).to.be.revertedWith('UNAUTHORIZED_APPROVAL');
+      });
+
+      it('should approveFor when sender is superOperator', async function () {
+        const {
+          LandAsAdmin,
+          LandContract,
+          LandAsMinter,
+          deployer,
+          other1,
+          other,
+        } = await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await LandAsAdmin.setSuperOperator(deployer, true);
+        await LandContract.approveFor(other, other1, 0);
+        expect(await LandContract.getApproved(0)).to.be.equal(other1);
+      });
+
+      it('should approveFor when sender is approvedForAll', async function () {
+        const {
+          LandContract,
+          LandAsAdmin,
+          LandAsMinter,
+          LandAsOther,
+          deployer,
+          other1,
+          other,
+        } = await loadFixture(setupLand);
+        await LandAsMinter.mintQuad(other1, 1, 0, 0, '0x');
+        await LandAsAdmin.setSuperOperator(deployer, true);
+        await LandContract.setApprovalForAllFor(other1, other, true);
+        await LandAsOther.approveFor(other1, other1, 0);
+        expect(await LandContract.getApproved(0)).to.be.equal(other1);
+      });
+
+      // tests for setApprovalForAllFor function
+      it('should revert setApprovalForAllFor from zero address', async function () {
+        const {LandAsOther, other1} = await loadFixture(setupLand);
+        await expect(
+          LandAsOther.setApprovalForAllFor(ZeroAddress, other1, true),
+        ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
+      });
+
+      it('should revert setApprovalForAllFor from unauthorized sender', async function () {
+        const {LandAsOther, other1, deployer} = await loadFixture(setupLand);
+        await expect(
+          LandAsOther.setApprovalForAllFor(deployer, other1, true),
+        ).to.be.revertedWith('UNAUTHORIZED_APPROVE_FOR_ALL');
+      });
+
+      it('should setApprovalForAllFor from authorized sender', async function () {
+        const {LandContract, LandAsAdmin, other, other1, deployer} =
+          await loadFixture(setupLand);
+        expect(await LandContract.isApprovedForAll(other, other1)).to.be.equal(
+          false,
+        );
+        await LandAsAdmin.setSuperOperator(deployer, true);
+        await LandContract.setApprovalForAllFor(other, other1, true);
+        expect(await LandContract.isApprovedForAll(other, other1)).to.be.equal(
+          true,
+        );
+      });
+
+      it('should revert setApprovalForAllFor when recipient is a superOperator', async function () {
+        const {LandAsOther1, LandAsAdmin, other, other1} =
+          await loadFixture(setupLand);
+        await LandAsAdmin.setSuperOperator(other1, true);
+        await expect(
+          LandAsOther1.setApprovalForAllFor(other, other1, true),
+        ).to.be.revertedWith('INVALID_APPROVAL_CHANGE');
       });
     });
 
@@ -447,7 +652,7 @@ export function shouldCheckForERC721(
             await loadFixture(setupLand);
           await expect(
             safeTransferFrom(LandAsOwner, landOwner, ZeroAddress, tokenIds[0]),
-          ).to.be.revertedWith(errorMessages.NOT_TO_ZEROADDRESS);
+          ).to.be.revertedWith('NOT_TO_ZEROADDRESS');
         },
       );
 
@@ -468,7 +673,7 @@ export function shouldCheckForERC721(
             await loadFixture(setupLand);
           await expect(
             safeTransferFrom(LandAsOther, landOwner, other, tokenIds[0]),
-          ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
+          ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
         },
       );
 
@@ -504,7 +709,7 @@ export function shouldCheckForERC721(
               TestERC721TokenReceiver,
               tokenIds[0],
             ),
-          ).to.be.revertedWith(errorMessages.ERC721_TRANSFER_REJECTED);
+          ).to.be.revertedWith('ERC721_TRANSFER_REJECTED');
         },
       );
 
@@ -573,6 +778,16 @@ export function shouldCheckForERC721(
       it('claim to support erc721 metadata interface', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0x5b5e139f')).to.be.true;
+      });
+
+      it('claim to support erc173 interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0x7f5828d0')).to.be.true;
+      });
+
+      it('claim to support royalty interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0x2a55205a')).to.be.true;
       });
 
       it('does not claim to support random interface', async function () {
@@ -645,7 +860,7 @@ export function shouldCheckForERC721(
         await LandAsOther1.transferFrom(landOwner, other, tokenIds[0]);
         await expect(
           LandAsOther1.transferFrom(other, landOwner, tokenIds[0]),
-        ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
+        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
       });
 
       it('approval by operator works', async function () {
@@ -720,7 +935,7 @@ export function shouldCheckForERC721(
         await LandAsOwner.transferFrom(landOwner, other, tokenIds[0]);
         await expect(
           LandAsOther1.transferFrom(other, other1, tokenIds[0]),
-        ).to.be.revertedWith(errorMessages.UNAUTHORIZED_TRANSFER);
+        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
       });
 
       it('approval for all set before will work on a transfered NFT', async function () {

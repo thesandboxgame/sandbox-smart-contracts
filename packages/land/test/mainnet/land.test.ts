@@ -1,10 +1,6 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {
-  getId,
-  setupLandForERC721Tests,
-  setupLandOperatorFilter,
-} from '../fixtures';
+import {setupLandForERC721Tests, setupLandOperatorFilter} from '../fixtures';
 import {ZeroAddress} from 'ethers';
 import {setupLand, setupLandMock} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
@@ -15,21 +11,10 @@ import {shouldCheckLandGetter} from '../common/LandGetter.behavior';
 import {shouldCheckMintQuad} from '../common/MintQuad.behavior';
 import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
 import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
+import {shouldCheckForMetadataRegistry} from '../common/WithMetadataRegistry.behavior';
 import {landConfig} from '../common/Config.behavior';
 import {shouldCheckForERC721} from '../common/ERC721.behavior';
 import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
-
-const sizes = [1, 3, 6, 12, 24];
-
-const LandErrorMessages = {
-  NONEXISTENT_TOKEN: 'NONEXISTENT_TOKEN',
-  BATCHTRANSFERFROM_NOT_OWNER: 'BATCHTRANSFERFROM_NOT_OWNER',
-  ERC721_BATCH_RECEIVED_REJECTED: 'ERC721_BATCH_RECEIVED_REJECTED',
-  ERC721_TRANSFER_REJECTED: 'ERC721_TRANSFER_REJECTED',
-  UNAUTHORIZED_TRANSFER: 'UNAUTHORIZED_TRANSFER',
-  NOT_TO_ZEROADDRESS: 'NOT_TO_ZEROADDRESS',
-  UNAUTHORIZED_APPROVAL: 'UNAUTHORIZED_APPROVAL',
-};
 
 describe('Land.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
@@ -60,20 +45,13 @@ describe('Land.sol', function () {
   shouldCheckTransferFrom(setupLand, 'Land');
 
   // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldCheckForMetadataRegistry(setupLand, 'Land');
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
   landConfig(setupLand, 'Land');
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForERC721(setupLandForERC721Tests, LandErrorMessages, 'Land');
-
-  it('should return the name of the token contract', async function () {
-    const {LandContract} = await loadFixture(setupLand);
-    expect(await LandContract.name()).to.be.equal("Sandbox's LANDs");
-  });
-
-  it('should return the symbol of the token contract', async function () {
-    const {LandContract} = await loadFixture(setupLand);
-    expect(await LandContract.symbol()).to.be.equal('LAND');
-  });
+  shouldCheckForERC721(setupLandForERC721Tests, 'Land');
 
   it(`should revert for invalid size`, async function () {
     const {LandContract} = await loadFixture(setupLand);
@@ -117,137 +95,12 @@ describe('Land.sol', function () {
     await expect(LandAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
   });
 
-  it('should revert when to signer is not landMinter', async function () {
-    const {LandContract, deployer} = await loadFixture(setupLand);
-    await expect(
-      LandContract.mintQuad(deployer, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('!AUTHORIZED');
-  });
-
-  it('should revert when minted with zero size', async function () {
-    const {LandAsMinter, deployer} = await loadFixture(setupLand);
-    await expect(
-      LandAsMinter.mintQuad(deployer, 0, 0, 0, '0x'),
-    ).to.be.revertedWith('Invalid size');
-  });
-
-  it('it should revert approveFor for unauthorized sender', async function () {
-    const {LandAsOther, other, deployer, other1, LandAsMinter} =
-      await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
-  });
-
-  it('it should revert for setApprovalForAllFor of zero address', async function () {
-    const {LandAsOther, other1} = await loadFixture(setupLand);
-    await expect(
-      LandAsOther.setApprovalForAllFor(ZeroAddress, other1, true),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
-  });
-
-  it('should revert approveFor of operator is ZeroAddress', async function () {
-    const {LandAsOther, other1, other, LandAsMinter} =
-      await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther.approveFor(ZeroAddress, other1, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidSender');
-  });
-
-  it('it should revert setApprovalForAllFor for unauthorized sender', async function () {
-    const {LandAsOther, other1, deployer} = await loadFixture(setupLand);
-    await expect(
-      LandAsOther.setApprovalForAllFor(deployer, other1, true),
-    ).to.be.revertedWith('UNAUTHORIZED_APPROVE_FOR_ALL');
-  });
-
-  it('it should revert Approval for invalid token', async function () {
-    const {LandAsOther, other, deployer, LandAsMinter} =
-      await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 2, 2);
-    await expect(
-      LandAsOther.approve(deployer, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721NonexistentToken');
-  });
-
-  it('should revert approveFor for unauthorized sender', async function () {
-    const {LandAsOther, other, deployer, other1, LandAsMinter} =
-      await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
-    const id = getId(1, 0, 0);
-    await expect(
-      LandAsOther.approveFor(deployer, other1, id),
-    ).to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner');
-  });
-
-  it('should revert when id is not minted', async function () {
-    const {LandContract} = await loadFixture(setupLand);
-    const id = getId(1, 2, 2);
-    await expect(LandContract.tokenURI(id)).to.be.revertedWith(
-      'Id does not exist',
-    );
-  });
-
-  it('should revert when from is zero address (batchTransferQuad)', async function () {
-    const {LandContract, LandAsMinter, deployer, landAdmin} =
-      await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
-    await expect(
-      LandContract.batchTransferQuad(
-        ZeroAddress,
-        landAdmin,
-        [6],
-        [0],
-        [0],
-        '0x',
-      ),
-    ).to.be.revertedWith('invalid from');
-  });
-
-  it('should revert when to is ZeroAddress (mintAndTransferQuad)', async function () {
-    const {LandAsAdmin, landAdmin, LandAsMinter} = await loadFixture(setupLand);
-    await LandAsMinter.mintQuad(landAdmin, 6, 0, 0, '0x');
-    await expect(
-      LandAsAdmin.mintAndTransferQuad(ZeroAddress, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('!AUTHORIZED');
-  });
-
-  it('should revert when signer is not a landMinter (mintAndTransferQuad)', async function () {
-    const {LandContract, deployer} = await loadFixture(setupLand);
-    await expect(
-      LandContract.mintAndTransferQuad(deployer, 3, 0, 0, '0x'),
-    ).to.be.revertedWith('!AUTHORIZED');
-  });
-
-  it('should emit RoyaltyManagerSet event', async function () {
-    const {LandAsAdmin, other} = await loadFixture(setupLand);
-    const tx = await LandAsAdmin.setRoyaltyManager(other);
-    await expect(tx).to.emit(LandAsAdmin, 'RoyaltyManagerSet').withArgs(other);
-  });
-
   it('should emit OwnershipTransferred event', async function () {
     const {LandAsAdmin, other, landOwner} = await loadFixture(setupLand);
     const tx = await LandAsAdmin.transferOwnership(other);
     await expect(tx)
       .to.emit(LandAsAdmin, 'OwnershipTransferred')
       .withArgs(landOwner, other);
-  });
-
-  it('Transfer 1x1 without approval', async function () {
-    const {LandContract, LandAsMinter, deployer, other} =
-      await loadFixture(setupLand);
-
-    const bytes = '0x3333';
-    await LandAsMinter.mintQuad(other, 1, 0, 0, bytes);
-
-    await expect(
-      LandContract.transferFrom(other, deployer, 0),
-    ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
   });
 
   it('check storage structure', async function () {
@@ -263,18 +116,5 @@ describe('Land.sol', function () {
     expect(slots._initialized).to.be.equal(7);
     expect(slots._minters).to.be.equal(57);
     expect(slots.operatorFilterRegistry).to.be.equal(58);
-  });
-
-  describe(`should revert for invalid coordinates`, function () {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    sizes.forEach((quadSize) => {
-      if (quadSize == 1) return;
-      it(`size ${quadSize}x${quadSize}`, async function () {
-        const {LandContract} = await loadFixture(setupLand);
-        await expect(
-          LandContract.exists(quadSize, quadSize + 1, quadSize + 1),
-        ).to.be.revertedWith('Invalid x coordinate');
-      });
-    });
   });
 });
