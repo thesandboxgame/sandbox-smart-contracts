@@ -295,7 +295,7 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
             "UNAUTHORIZED_BURN"
         );
         _setOwnerData(tokenId, (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
-        _subNumNFTPerAddress(owner, 1);
+        _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), tokenId);
     }
 
@@ -317,7 +317,7 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
         if (owner == address(0)) {
             revert ERC721NonexistentToken(tokenId);
         }
-        if (from != owner && !operatorEnabled) {
+        if (from != owner) {
             revert ERC721InvalidOwner(from);
         }
     }

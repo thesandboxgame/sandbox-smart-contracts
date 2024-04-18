@@ -126,9 +126,9 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
 
         await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
         await LandAsOther.approve(other1, 0);
-        await expect(LandAsOther1.burn(0))
+        await expect(LandAsOther1.burnFrom(other, 0))
           .to.emit(LandAsOther, 'Transfer')
-          .withArgs(other1, ZeroAddress, 0);
+          .withArgs(other, ZeroAddress, 0);
       });
     });
 
