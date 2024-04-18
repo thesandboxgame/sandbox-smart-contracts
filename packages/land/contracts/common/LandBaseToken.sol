@@ -569,11 +569,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             layer = LAYER_12x12;
             parentSize = 24;
             childLayer = LAYER_6x6;
-        } else if (size == 24) {
+        } else {
             layer = LAYER_24x24;
             childLayer = LAYER_12x12;
-        } else {
-            require(false, "Invalid size");
         }
     }
 
