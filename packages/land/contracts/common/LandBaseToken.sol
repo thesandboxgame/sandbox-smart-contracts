@@ -447,7 +447,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         quadCompareSize = quadCompareSize / 2;
         // if child quad size is greater than 3 _checkAndClearOwner is checked for new child quads in the  quad in land struct.
         if (quadCompareSize >= 3)
-            (index, landMinted) = _checkQuadIsNotMintedAndClearOwner(msgSender, land, quadMinted, landMinted, index, quadCompareSize);
+            (index, landMinted) = _checkQuadIsNotMintedAndClearOwner(
+                msgSender,
+                land,
+                quadMinted,
+                landMinted,
+                index,
+                quadCompareSize
+            );
         return (index, landMinted);
     }
 
