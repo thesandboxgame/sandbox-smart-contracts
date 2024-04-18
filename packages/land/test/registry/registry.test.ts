@@ -26,12 +26,14 @@ describe('LandMetadataRegistry', function () {
         neighborhoodId,
       );
     });
+
     it('other should fail to set metadata', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setMetadata(tokenId, true, neighborhoodId),
       ).to.revertedWith('only admin');
     });
+
     it('admin should fail to set metadata if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
       await expect(
@@ -42,6 +44,7 @@ describe('LandMetadataRegistry', function () {
       ).to.revertedWith('neighborhoodId must be <127');
     });
   });
+
   describe('premiumness', function () {
     it('admin should be able to set premiumness', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
@@ -56,6 +59,7 @@ describe('LandMetadataRegistry', function () {
         .withArgs(admin, tokenId, neighborhoodId, true, neighborhoodId, false);
       expect(await registryAsAdmin.isPremium(tokenId)).to.be.false;
     });
+
     it('other should fail to set premiumness', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(registryAsOther.setPremium(tokenId, true)).to.revertedWith(
@@ -63,6 +67,7 @@ describe('LandMetadataRegistry', function () {
       );
     });
   });
+
   describe('neighborhood number', function () {
     it('admin should be able to set neighborhood number', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
@@ -74,12 +79,14 @@ describe('LandMetadataRegistry', function () {
         neighborhoodId,
       );
     });
+
     it('other should fail to set neighborhood number', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setNeighborhoodId(tokenId, neighborhoodId),
       ).to.revertedWith('only admin');
     });
+
     it('admin should fail to set neighborhood number if the number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
       await expect(
@@ -90,6 +97,7 @@ describe('LandMetadataRegistry', function () {
       ).to.revertedWith('neighborhoodId must be <127');
     });
   });
+
   describe('neighborhood name', function () {
     it('admin should be able to set neighborhood name', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
@@ -114,12 +122,14 @@ describe('LandMetadataRegistry', function () {
         await registryAsAdmin.getNeighborhoodNameForId(neighborhoodId),
       ).to.be.equal(neighborhoodName);
     });
+
     it('other should fail to set neighborhood name', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setNeighborhoodName(neighborhoodId, neighborhoodName),
       ).to.revertedWith('only admin');
     });
+
     it('admin should fail to set neighborhood name if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
       await expect(
@@ -130,6 +140,7 @@ describe('LandMetadataRegistry', function () {
       ).to.revertedWith('neighborhoodId must be <127');
     });
   });
+
   describe('batch set metadata', function () {
     it('admin should be able to batch set metadata', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
@@ -171,6 +182,7 @@ describe('LandMetadataRegistry', function () {
         '',
       ]);
     });
+
     it('other should fail to batch set metadata', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
@@ -179,6 +191,7 @@ describe('LandMetadataRegistry', function () {
         ]),
       ).to.revertedWith('only admin');
     });
+
     it('admin should fail to batch set metadata if baseTokenId is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
       await expect(
@@ -188,12 +201,14 @@ describe('LandMetadataRegistry', function () {
       ).to.revertedWith('invalid base tokenId');
     });
   });
+
   it('storage slot', async function () {
     const {registryAsDeployer} = await loadFixture(setupRegistry);
     expect(await registryAsDeployer.getLandMetadataStorageSlot()).to.be.equal(
       getStorageSlotJS('theSandbox.storage.LandMetadataStorage'),
     );
   });
+
   it('should not be able to set land type back to unknown', async function () {
     const {registryAsAdmin} = await loadFixture(setupRegistry);
     // unknown
@@ -211,6 +226,7 @@ describe('LandMetadataRegistry', function () {
       registryAsAdmin.setMetadata(tokenId, false, 0),
     ).to.revertedWith('neighborhoodId must be >0');
   });
+
   describe('coverage', function () {
     it('initialization', async function () {
       const {registryAsDeployer, admin} = await loadFixture(setupRegistry);
@@ -222,6 +238,7 @@ describe('LandMetadataRegistry', function () {
       );
     });
   });
+
   it('@skip-on-ci @skip-on-coverage gas calculation', async function () {
     // two rows
     const numLands32InBatch = 408n * 2n; // 19.7Mgas (max is 1223, 29530015n gas)
@@ -250,6 +267,7 @@ describe('LandMetadataRegistry', function () {
       'USD',
     );
   });
+
   it('@skip-on-coverage batch set and modify the metadata', async function () {
     const CANT = 200;
     const {registryAsAdmin} = await loadFixture(setupRegistry);

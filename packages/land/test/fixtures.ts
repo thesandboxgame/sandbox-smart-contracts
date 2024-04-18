@@ -64,6 +64,7 @@ export async function setupLandContract() {
     other2,
     commonRoyaltyReceiver,
     landAdmin,
+    MetadataRegistryAdmin,
     landMinter,
   ] = await ethers.getSigners();
 
@@ -76,7 +77,14 @@ export async function setupLandContract() {
   const MetadataRegistryFactory = await ethers.getContractFactory(
     'LandMetadataRegistryMock',
   );
-  const MetadataRegistryContract = await MetadataRegistryFactory.deploy();
+  const MetadataRegistryContract = await upgrades.deployProxy(
+    MetadataRegistryFactory,
+    [await MetadataRegistryAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
+  const MetadataRegistryContract2 = await MetadataRegistryFactory.deploy();
 
   const LandFactory = await ethers.getContractFactory('LandMock');
   const LandContract = await LandFactory.deploy();
@@ -105,6 +113,9 @@ export async function setupLandContract() {
   const LandAsOther1 = LandContract.connect(other1);
   const LandAsOther2 = LandContract.connect(other2);
 
+  const MetadataRegistryAsAdmin = MetadataRegistryContract.connect(
+    MetadataRegistryAdmin,
+  );
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
   await LandAsAdmin.transferOwnership(landOwner);
   await LandAsAdmin.setRoyaltyManager(RoyaltyManagerContract);
@@ -122,6 +133,9 @@ export async function setupLandContract() {
     LandAsOther,
     LandAsOther1,
     LandAsOther2,
+    MetadataRegistryContract,
+    MetadataRegistryContract2,
+    MetadataRegistryAsAdmin,
     MockMarketPlace,
     ERC20Contract,
     TestERC721TokenReceiver,
@@ -244,6 +258,7 @@ export async function setupPolygonLandContract() {
     other2,
     commonRoyaltyReceiver,
     landAdmin,
+    MetadataRegistryAdmin,
     landMinter,
   ] = await ethers.getSigners();
 
@@ -262,7 +277,14 @@ export async function setupPolygonLandContract() {
   const MetadataRegistryFactory = await ethers.getContractFactory(
     'LandMetadataRegistryMock',
   );
-  const MetadataRegistryContract = await MetadataRegistryFactory.deploy();
+  const MetadataRegistryContract = await upgrades.deployProxy(
+    MetadataRegistryFactory,
+    [await MetadataRegistryAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
+  const MetadataRegistryContract2 = await MetadataRegistryFactory.deploy();
 
   const PolygonLandFactory = await ethers.getContractFactory('PolygonLandMock');
   const LandContract = await upgrades.deployProxy(
@@ -302,11 +324,16 @@ export async function setupPolygonLandContract() {
   await LandAsAdmin.transferOwnership(landOwner);
   await LandAsAdmin.setRoyaltyManager(RoyaltyManagerContract);
   await LandContract.connect(landAdmin).setMinter(landMinter, true);
+
   const LandAsMinter = LandContract.connect(landMinter);
   const LandAsOwner = LandContract.connect(landOwner);
   const LandAsOther = LandContract.connect(other);
   const LandAsOther1 = LandContract.connect(other1);
   const LandAsOther2 = LandContract.connect(other2);
+
+  const MetadataRegistryAsAdmin = MetadataRegistryContract.connect(
+    MetadataRegistryAdmin,
+  );
 
   await TestERC721TokenReceiver.setTokenContract(LandAsOther);
 
@@ -323,6 +350,9 @@ export async function setupPolygonLandContract() {
     LandAsOther,
     LandAsOther1,
     LandAsOther2,
+    MetadataRegistryContract,
+    MetadataRegistryContract2,
+    MetadataRegistryAsAdmin,
     TestERC721TokenReceiver,
     MockMarketPlace,
     ERC20Contract,
