@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IContext} from "../interfaces/IContext.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /// @title WithAdmin
 /// @author The Sandbox
 /// @notice Add an admin to the contract
-abstract contract WithAdmin is IContext {
+abstract contract WithAdmin is Context {
     /// @dev Emits when the contract administrator is changed.
     /// @param oldAdmin The address of the previous administrator.
     /// @param newAdmin The address of the new administrator.

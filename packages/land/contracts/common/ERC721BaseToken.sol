@@ -4,8 +4,8 @@ pragma solidity 0.8.23;
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
-import {IContext} from "../interfaces/IContext.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
@@ -13,7 +13,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuperOperators {
+abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperOperators {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;

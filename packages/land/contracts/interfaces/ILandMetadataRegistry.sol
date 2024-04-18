@@ -2,10 +2,8 @@
 
 pragma solidity 0.8.23;
 
-/// @title IContext
-/// @notice L1 Land contract doesn't use OZ context
-/// @dev We use this interface to manage that because (we don't want to affect storage)
-/// @dev Will be implemented in Land and PolygonLand
+/// @title ILandMetadataRegistry
+/// @notice Interface implemented by the LandMetadataRegistry
 interface ILandMetadataRegistry {
     /// @notice return the metadata for one land
     /// @param tokenId the token id
