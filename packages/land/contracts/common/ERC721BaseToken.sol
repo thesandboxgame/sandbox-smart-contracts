@@ -196,9 +196,9 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
     /// @param tokenId The token being transferred.
     function _doTransfer(address msgSender, address from, address to, uint256 tokenId) internal {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
-        (address owner, bool operatorEnabled) = _checkFromIsOwner(from, tokenId);
+        bool operatorEnabled = _checkFromIsOwner(from, tokenId);
         require(
-            msgSender == owner ||
+            msgSender == from ||
                 _isApprovedForAllOrSuperOperator(from, msgSender) ||
                 (operatorEnabled && _getOperator(tokenId) == msgSender),
             "UNAUTHORIZED_TRANSFER"
@@ -268,27 +268,27 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
     /// @param operator The address receiving the approval
     /// @param tokenId The id of the token
     function _approveFor(address from, address operator, uint256 tokenId) internal {
-        (address owner, ) = _checkFromIsOwner(from, tokenId);
+        _checkFromIsOwner(from, tokenId);
 
         address msgSender = _msgSender();
-        require(owner == msgSender || _isApprovedForAllOrSuperOperator(owner, msgSender), "UNAUTHORIZED_APPROVAL");
+        require(from == msgSender || _isApprovedForAllOrSuperOperator(from, msgSender), "UNAUTHORIZED_APPROVAL");
         if (operator == address(0)) {
-            _updateOwnerData(tokenId, owner, false);
+            _updateOwnerData(tokenId, from, false);
         } else {
-            _updateOwnerData(tokenId, owner, true);
+            _updateOwnerData(tokenId, from, true);
             _setOperator(tokenId, operator);
         }
-        emit Approval(owner, operator, tokenId);
+        emit Approval(from, operator, tokenId);
     }
 
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param tokenId token id to burn
     function _burn(address from, uint256 tokenId) internal {
-        (address owner, bool operatorEnabled) = _checkFromIsOwner(from, tokenId);
+        bool operatorEnabled = _checkFromIsOwner(from, tokenId);
 
         address msgSender = _msgSender();
         require(
-            owner == msgSender ||
+            from == msgSender ||
                 (operatorEnabled && _getOperator(tokenId) == msgSender) ||
                 _isApprovedForAllOrSuperOperator(from, msgSender),
             "UNAUTHORIZED_BURN"
@@ -300,18 +300,13 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
 
     /// @param from sender address
     /// @param tokenId The id of the token
-    /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
-    /// @dev checks that the token is taken from the owner (from == owner)
-    /// @dev TODO: this routine ensures that from == owner, so, we don't need to return the owner we can use from directly
-    function _checkFromIsOwner(
-        address from,
-        uint256 tokenId
-    ) internal view returns (address owner, bool operatorEnabled) {
+    /// @dev checks that the token is taken from the owner after the call (from == owner)
+    function _checkFromIsOwner(address from, uint256 tokenId) internal view returns (bool) {
         if (from == address(0)) {
             revert ERC721InvalidSender(from);
         }
-        (owner, operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
         // As from == owner, this is the same check as from == address(0) but we want a specific error for this one.
         if (owner == address(0)) {
             revert ERC721NonexistentToken(tokenId);
@@ -319,6 +314,7 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
         if (from != owner) {
             revert ERC721InvalidOwner(from);
         }
+        return operatorEnabled;
     }
 
     /// @param tokenId The id of the token
@@ -421,13 +417,19 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
     }
 
     function _addNumNFTPerAddress(address who, uint256 val) internal {
-        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+        unchecked {
+            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+        }
     }
 
+    /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
-        _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+        unchecked {
+            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+        }
     }
 
+    /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
         _subNumNFTPerAddress(from, quantity);
         _addNumNFTPerAddress(to, quantity);
