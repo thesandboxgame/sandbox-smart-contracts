@@ -213,7 +213,6 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param ids The ids of the tokens
     /// @param data additional data
     /// @param safe checks the target contract
-    /// @dev TODO: require from!=to and remove the if ? same for all transfers ?
     function _batchTransferFrom(
         address from,
         address to,
@@ -235,9 +234,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
             _updateOwnerData(id, to, false);
             emit Transfer(from, to, id);
         }
-        if (from != to) {
-            _transferNumNFTPerAddress(from, to, numTokens);
-        }
+        _transferNumNFTPerAddress(from, to, numTokens);
 
         if (to.code.length > 0) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
@@ -441,8 +438,10 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param to address to add from
     /// @param quantity how many tokens to move
     function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
-        _subNumNFTPerAddress(from, quantity);
-        _addNumNFTPerAddress(to, quantity);
+        if (from != to) {
+            _subNumNFTPerAddress(from, quantity);
+            _addNumNFTPerAddress(to, quantity);
+        }
     }
 
     /// @notice Get the number of token a user owns
