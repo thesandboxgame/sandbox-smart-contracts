@@ -1,12 +1,18 @@
-import {ethers} from 'hardhat';
-import {deployWithProxy} from '../fixtures';
+import {ethers, upgrades} from 'hardhat';
 import {Contract} from 'ethers';
 
 export async function setupRegistry() {
   const [deployer, admin, other] = await ethers.getSigners();
-  const [registryAsDeployer, registryAsAdmin, registryAsOther] =
-    await deployWithProxy('LandMetadataRegistryMock', [deployer, admin, other]);
-  await registryAsDeployer.initialize(admin);
+  const MetadataRegistryFactory = await ethers.getContractFactory(
+    'LandMetadataRegistryMock',
+  );
+  const MetadataRegistryContract = await upgrades.deployProxy(
+    MetadataRegistryFactory,
+    [await admin.getAddress()],
+  );
+  const registryAsDeployer = MetadataRegistryContract.connect(deployer);
+  const registryAsAdmin = MetadataRegistryContract.connect(admin);
+  const registryAsOther = MetadataRegistryContract.connect(other);
 
   return {
     deployer,
