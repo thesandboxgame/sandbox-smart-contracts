@@ -3,13 +3,13 @@
 pragma solidity 0.8.23;
 
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
-import {IContext} from "../interfaces/IContext.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The Sandbox
 ///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
-abstract contract OperatorFiltererUpgradeable is IContext {
+abstract contract OperatorFiltererUpgradeable is Context {
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
     function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
