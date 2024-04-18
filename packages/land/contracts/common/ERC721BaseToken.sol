@@ -13,7 +13,6 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-/// @dev TODO: after merging. use custom errors
 abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuperOperators {
     using Address for address;
 
@@ -325,8 +324,6 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
     /// @param tokenId The id of the token
     /// @param newOwner The new owner of the token
     /// @param hasOperator if true the operator flag is set
-    /// @dev TODO: after merging. Check if using address for operator improve the code size and gas consumption
-    /// @dev TODO: after merging. Use this method in burn so we only call _setOwnerData from here (less error prone)
     function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal {
         uint256 oldData = (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
         if (hasOperator) {

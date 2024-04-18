@@ -157,7 +157,6 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return _getX(id);
     }
 
-    /// @dev TODO: this contract doesn't need to inherit from ILandToken/IPolygonLand we can do that in main contract.
     /// @inheritdoc ERC721BaseToken
     function batchTransferFrom(
         address from,
@@ -280,7 +279,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         (uint256 layer, , ) = _getQuadLayer(size);
         uint256 quadId = _getQuadId(layer, x, y);
 
-        _checkOwner(size, x, y, 24);
+        _checkQuadIsNotMinted(size, x, y, 24);
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
             require(_getOwnerData(_id) == 0, "Already minted");
@@ -322,7 +321,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
 
         // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
         if (size > 3) {
-            (index, landMinted) = _checkAndClearOwner(
+            (index, landMinted) = _checkQuadIsNotMintedAndClearOwner(
                 msgSender,
                 Land({x: x, y: y, size: size}),
                 quadMinted,
@@ -362,6 +361,40 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         _subNumNFTPerAddress(msgSender, landMinted);
     }
 
+    /// @notice recursively checks if the child quads are minted.
+    /// @param size The size of the quad
+    /// @param x The x-coordinate of the top-left corner of the quad being minted.
+    /// @param y The y-coordinate of the top-left corner of the quad being minted.
+    /// @param quadCompareSize the size of the child quads to be checked.
+    function _checkQuadIsNotMinted(uint256 size, uint256 x, uint256 y, uint256 quadCompareSize) internal {
+        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
+
+        if (size <= quadCompareSize) {
+            // when the size of the quad is smaller than the quadCompareSize(size to be compared with),
+            // then it is checked if the bigger quad which encapsulates the quad to be minted
+            // of with size equals the quadCompareSize has been minted or not
+            require(
+                _getOwnerData(
+                    _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
+                ) == 0,
+                "Already minted"
+            );
+        } else {
+            // when the size is smaller than the quadCompare size the owner of all the smaller quads with size
+            // quadCompare size in the quad to be minted are checked if they are minted or not
+            uint256 toX = x + size;
+            uint256 toY = y + size;
+            for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
+                for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
+                    require(_getOwnerData(_getQuadId(layer, xi, yi)) == 0, "Already minted");
+                }
+            }
+        }
+
+        quadCompareSize = quadCompareSize / 2;
+        if (quadCompareSize >= 3) _checkQuadIsNotMinted(size, x, y, quadCompareSize);
+    }
+
     /// @notice recursively checks if the child quads are minted in land and push them to the quadMinted array.
     /// @param msgSender The original sender of the transaction
     /// @param land the struct which has the size x and y co-ordinate of Quad to be checked
@@ -372,7 +405,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @return the index of last quad pushed in quadMinted array and the total land already minted
     /// @dev if a child quad is minted in land such quads child quads will be skipped such that there is no overlapping
     /// @dev in quads which are minted. it clears the minted child quads owners.
-    function _checkAndClearOwner(
+    function _checkQuadIsNotMintedAndClearOwner(
         address msgSender,
         Land memory land,
         Land[] memory quadMinted,
@@ -414,7 +447,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         quadCompareSize = quadCompareSize / 2;
         // if child quad size is greater than 3 _checkAndClearOwner is checked for new child quads in the  quad in land struct.
         if (quadCompareSize >= 3)
-            (index, landMinted) = _checkAndClearOwner(msgSender, land, quadMinted, landMinted, index, quadCompareSize);
+            (index, landMinted) = _checkQuadIsNotMintedAndClearOwner(msgSender, land, quadMinted, landMinted, index, quadCompareSize);
         return (index, landMinted);
     }
 
@@ -584,35 +617,6 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         unchecked {
             return layer + x + y * GRID_SIZE;
         }
-    }
-
-    function _checkOwner(uint256 size, uint256 x, uint256 y, uint256 quadCompareSize) internal view {
-        (uint256 layer, , ) = _getQuadLayer(quadCompareSize);
-
-        if (size <= quadCompareSize) {
-            // when the size of the quad is smaller than the quadCompareSize(size to be compared with),
-            // then it is checked if the bigger quad which encapsulates the quad to be minted
-            // of with size equals the quadCompareSize has been minted or not
-            require(
-                _getOwnerData(
-                    _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
-                ) == 0,
-                "Already minted"
-            );
-        } else {
-            // when the size is smaller than the quadCompare size the owner of all the smaller quads with size
-            // quadCompare size in the quad to be minted are checked if they are minted or not
-            uint256 toX = x + size;
-            uint256 toY = y + size;
-            for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
-                for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    require(_getOwnerData(_getQuadId(layer, xi, yi)) == 0, "Already minted");
-                }
-            }
-        }
-
-        quadCompareSize = quadCompareSize / 2;
-        if (quadCompareSize >= 3) _checkOwner(size, x, y, quadCompareSize);
     }
 
     /// @param i the index to be added to x,y to get row and column
