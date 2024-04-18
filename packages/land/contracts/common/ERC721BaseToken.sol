@@ -416,12 +416,19 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
         return _isOperatorForAll(owner, operator) || _isSuperOperator(operator);
     }
 
+    /// @notice Add tokens to the owner balance
+    /// @param who the owner of the token
+    /// @param val how must to add to the owner balance
+    /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _addNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
             _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
         }
     }
 
+    /// @notice Subtract tokens to the owner balance
+    /// @param who the owner of the token
+    /// @param val how must to subtract to the owner balance
     /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
@@ -429,29 +436,62 @@ abstract contract ERC721BaseToken is IContext, IERC721, IERC721Errors, WithSuper
         }
     }
 
-    /// @dev we can use unchecked becase there is a limited number of lands 408x408
+    /// @notice Move balance between to users
+    /// @param from address to subtract from
+    /// @param to address to add from
+    /// @param quantity how many tokens to move
     function _transferNumNFTPerAddress(address from, address to, uint256 quantity) internal virtual {
         _subNumNFTPerAddress(from, quantity);
         _addNumNFTPerAddress(to, quantity);
     }
 
+    /// @notice Get the number of token a user owns
+    /// @param who address to query the number of tokens from
+    /// @return the number of tokens
     function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
 
+    /// @notice Set the number of token a user owns
+    /// @param who address to set the number of tokens from
+    /// @param val amount of tokens to set
     function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
 
-    function _getOwnerData(uint256 id) internal view virtual returns (uint256);
+    /// @notice Get the owner data of a token for a user
+    /// @notice The owner data has three fields: owner address, operator flag and burn flag.
+    /// @param tokenId The id of the token.
+    /// @return the owner data
+    function _getOwnerData(uint256 tokenId) internal view virtual returns (uint256);
 
-    function _getOwnerAddress(uint256 id) internal view virtual returns (address) {
-        return address(uint160(_getOwnerData(id)));
+    /// @notice Get the owner address of a token (included in the ownerData, see: _getOwnerData)
+    /// @param tokenId The id of the token.
+    /// @return the owner address
+    function _getOwnerAddress(uint256 tokenId) internal view virtual returns (address) {
+        return address(uint160(_getOwnerData(tokenId)));
     }
 
-    function _setOwnerData(uint256 id, uint256 data) internal virtual;
+    /// @notice Set the owner data of a token
+    /// @notice The owner data has three fields: owner address, operator flag and burn flag.
+    /// @param tokenId The id of the token.
+    function _setOwnerData(uint256 tokenId, uint256 data) internal virtual;
 
+    /// @notice true if an operator has access to all the tokens of a owner
+    /// @param owner the address of the owner
+    /// @param operator the operator address
+    /// @return true if the operator has access
     function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
 
+    /// @notice Let an operator to access to all the tokens of a owner
+    /// @param owner the address of the owner
+    /// @param operator the operator address
+    /// @param enabled if true give access to the operator, else disable it
     function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 
-    function _getOperator(uint256 id) internal view virtual returns (address);
+    /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId The id of the token.
+    /// @return the operator address
+    function _getOperator(uint256 tokenId) internal view virtual returns (address);
 
-    function _setOperator(uint256 id, address operator) internal virtual;
+    /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId the id of the token.
+    /// @param operator the operator address
+    function _setOperator(uint256 tokenId, address operator) internal virtual;
 }
