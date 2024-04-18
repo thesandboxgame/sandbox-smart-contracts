@@ -1,8 +1,12 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupLandForERC721Tests, setupLandOperatorFilter} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {setupLand, setupLandMock} from './fixtures';
+import {
+  setupLand,
+  setupLandForERC721Tests,
+  setupLandMock,
+  setupLandOperatorFilter,
+} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
 import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';

@@ -1,11 +1,11 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
-  getStorageSlotJS,
+  setupPolygonLand,
   setupPolygonLandForERC721Tests,
+  setupPolygonLandMock,
   setupPolygonLandOperatorFilter,
-} from '../fixtures';
-import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
+} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
 import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
@@ -18,6 +18,7 @@ import {shouldCheckForMetadataRegistry} from '../common/WithMetadataRegistry.beh
 import {landConfig} from '../common/Config.behavior';
 import {shouldCheckForERC721} from '../common/ERC721.behavior';
 import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
+import {getStorageSlotJS} from '../fixtures';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
