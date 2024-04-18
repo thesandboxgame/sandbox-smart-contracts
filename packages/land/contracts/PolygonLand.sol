@@ -31,7 +31,7 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
-        _trustedForwarder = trustedForwarder;
+        _setTrustedForwarder(trustedForwarder);
         emit TrustedForwarderSet(trustedForwarder);
     }
 
