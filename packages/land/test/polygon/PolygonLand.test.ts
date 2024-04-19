@@ -16,7 +16,6 @@ import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
 import {shouldCheckForMetadataRegistry} from '../common/WithMetadataRegistry.behavior';
 import {landConfig} from '../common/Config.behavior';
 import {shouldCheckForERC721} from '../common/ERC721.behavior';
-import {setupLand} from '../mainnet/fixtures';
 import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
 
 const sizes = [1, 3, 6, 12, 24];
@@ -25,7 +24,7 @@ const GRID_SIZE = 408;
 // TODO: some test were testing the tunnel => not anymore. We need to check if we missed something.
 describe('PolygonLand.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
-  gasAndSizeChecks(setupLand, 'PolygonLand');
+  gasAndSizeChecks(setupPolygonLand, 'PolygonLand');
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForRoyalty(setupPolygonLand, 'PolygonLand');
