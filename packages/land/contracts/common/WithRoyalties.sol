@@ -30,17 +30,17 @@ contract WithRoyalties {
 
     /// @notice Returns how much royalty is owed and to whom based on ERC2981
     /// @dev tokenId is one of the EIP2981 args for this function can't be removed
-    /// @param _salePrice the price of token on which the royalty is calculated
+    /// @param salePrice the price of token on which the royalty is calculated
     /// @return receiver the receiver of royalty
     /// @return royaltyAmount the amount of royalty
     function royaltyInfo(
         uint256 /*_tokenId */,
-        uint256 _salePrice
+        uint256 salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         RoyaltiesStorage storage $ = _getRoyaltiesStorage();
         uint16 royaltyBps;
         (receiver, royaltyBps) = $._royaltyManager.getRoyaltyInfo();
-        royaltyAmount = (_salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
+        royaltyAmount = (salePrice * royaltyBps) / TOTAL_BASIS_POINTS;
         return (receiver, royaltyAmount);
     }
 
