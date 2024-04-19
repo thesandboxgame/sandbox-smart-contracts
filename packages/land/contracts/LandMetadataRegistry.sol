@@ -169,6 +169,8 @@ contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableU
         return ret;
     }
 
+    /// @notice checks if a neighborhoodId is in range
+    /// @param neighborhoodId the number that identifies the neighborhood
     function _isValidNeighborhoodId(uint256 neighborhoodId) internal pure {
         // Cannot set it to unknown (zero).
         require(neighborhoodId > 0, "neighborhoodId must be >0");

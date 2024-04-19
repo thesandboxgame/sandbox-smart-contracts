@@ -7,11 +7,12 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 /// @author The Sandbox
 /// @notice Add an admin to the contract
 abstract contract WithAdmin is Context {
-    /// @dev Emits when the contract administrator is changed.
+    /// @notice Emits when the contract administrator is changed.
     /// @param oldAdmin The address of the previous administrator.
     /// @param newAdmin The address of the new administrator.
     event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
 
+    /// @notice checks if the sender is admin
     modifier onlyAdmin() {
         require(_msgSender() == _getAdmin(), "only admin allowed");
         _;
@@ -34,6 +35,9 @@ abstract contract WithAdmin is Context {
         _changeAdmin(newAdmin);
     }
 
+    /// @notice Change the admin of the contract
+    /// @dev Change the administrator to be `newAdmin`.
+    /// @param newAdmin The address of the new administrator.
     function _changeAdmin(address newAdmin) internal {
         require(newAdmin != address(0), "invalid admin");
         address oldAdmin = _getAdmin();
@@ -41,9 +45,13 @@ abstract contract WithAdmin is Context {
         _setAdmin(newAdmin);
     }
 
+    /// @notice get the admin address
+    /// @return the admin address
     ///@dev Implement
     function _getAdmin() internal view virtual returns (address);
 
+    /// @notice set the admin address
+    /// @param admin the admin address
     ///@dev Implement
-    function _setAdmin(address) internal virtual;
+    function _setAdmin(address admin) internal virtual;
 }
