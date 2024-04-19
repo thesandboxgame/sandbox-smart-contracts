@@ -16,22 +16,36 @@ import {LandStorageMixin} from "./LandStorageMixin.sol";
 /// @dev This contract uses the exact storage slots configuration that we have in `core` package so we can upgrade
 /// @dev It must be the first one in the inheritance chain for subclasses
 contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeable {
+    /// @notice Implements the Context msg sender
+    /// @return the address of the message sender
     function _msgSender() internal view virtual override returns (address) {
         return msg.sender;
     }
 
+    /// @notice get the admin address
+    /// @return the admin address
     function _getAdmin() internal view override(LandStorageMixin, WithAdmin) returns (address) {
         return LandStorageMixin._getAdmin();
     }
 
-    function _setAdmin(address a) internal override(LandStorageMixin, WithAdmin) {
-        LandStorageMixin._setAdmin(a);
+    /// @notice set the admin address
+    /// @param admin the admin address
+    function _setAdmin(address admin) internal override(LandStorageMixin, WithAdmin) {
+        LandStorageMixin._setAdmin(admin);
     }
 
-    function _isSuperOperator(address who) internal view override(LandStorageMixin, WithSuperOperators) returns (bool) {
-        return LandStorageMixin._isSuperOperator(who);
+    /// @notice check if an address is a super-operator
+    /// @param superOperator the operator address to check
+    /// @return true if an address is a super-operator
+    function _isSuperOperator(
+        address superOperator
+    ) internal view override(LandStorageMixin, WithSuperOperators) returns (bool) {
+        return LandStorageMixin._isSuperOperator(superOperator);
     }
 
+    /// @notice enable an address to be super-operator
+    /// @param superOperator the address to set
+    /// @param enabled true enable the address, false disable it.
     function _setSuperOperator(
         address superOperator,
         bool enabled
@@ -39,24 +53,45 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         LandStorageMixin._setSuperOperator(superOperator, enabled);
     }
 
+    /// @notice get the number of nft for an address
+    /// @param owner address to check
+    /// @return the number of nfts
     function _getNumNFTPerAddress(
-        address who
+        address owner
     ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
-        return LandStorageMixin._getNumNFTPerAddress(who);
+        return LandStorageMixin._getNumNFTPerAddress(owner);
     }
 
-    function _setNumNFTPerAddress(address who, uint256 num) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setNumNFTPerAddress(who, num);
+    /// @notice set the number of nft for an address
+    /// @param owner address to set
+    /// @param quantity the number of nfts to set for the owner
+    function _setNumNFTPerAddress(
+        address owner,
+        uint256 quantity
+    ) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setNumNFTPerAddress(owner, quantity);
     }
 
-    function _getOwnerData(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
-        return LandStorageMixin._getOwnerData(id);
+    /// @notice get the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
+    /// @param tokenId the token Id
+    /// @return the owner data
+    function _getOwnerData(
+        uint256 tokenId
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return LandStorageMixin._getOwnerData(tokenId);
     }
 
-    function _setOwnerData(uint256 id, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setOwnerData(id, data);
+    /// @notice set the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
+    /// @param tokenId the token Id
+    /// @param data the owner data
+    function _setOwnerData(uint256 tokenId, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setOwnerData(tokenId, data);
     }
 
+    /// @notice check if an operator was enabled by a given owner
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
+    /// @return true if the operator has access
     function _isOperatorForAll(
         address owner,
         address operator
@@ -64,6 +99,10 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         return LandStorageMixin._isOperatorForAll(owner, operator);
     }
 
+    /// @notice Let an operator to access to all the tokens of a owner
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
+    /// @param enabled if true give access to the operator, else disable it
     function _setOperatorForAll(
         address owner,
         address operator,
@@ -72,22 +111,36 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         LandStorageMixin._setOperatorForAll(owner, operator, enabled);
     }
 
-    function _getOperator(uint256 id) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {
-        return LandStorageMixin._getOperator(id);
+    /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId The id of the token.
+    /// @return the operator addressn
+    function _getOperator(uint256 tokenId) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {
+        return LandStorageMixin._getOperator(tokenId);
     }
 
-    function _setOperator(uint256 id, address operator) internal override(LandStorageMixin, ERC721BaseToken) {
-        LandStorageMixin._setOperator(id, operator);
+    /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId the id of the token.
+    /// @param operator the operator address
+    function _setOperator(uint256 tokenId, address operator) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._setOperator(tokenId, operator);
     }
 
-    function _isMinter(address who) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
-        return LandStorageMixin._isMinter(who);
+    /// @notice checks if an address is enabled as minter
+    /// @param minter the address to check
+    /// @return true if the address is a minter
+    function _isMinter(address minter) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
+        return LandStorageMixin._isMinter(minter);
     }
 
-    function _setMinter(address who, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
-        LandStorageMixin._setMinter(who, enabled);
+    /// @notice set an address as minter
+    /// @param minter the address to set
+    /// @param enabled true enable the address, false disable it.
+    function _setMinter(address minter, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
+        LandStorageMixin._setMinter(minter, enabled);
     }
 
+    /// @notice get the OpenSea operator filter
+    /// @return the address of the OpenSea operator filter registry
     function _getOperatorFilterRegistry()
         internal
         view
@@ -97,9 +150,11 @@ contract LandBase is LandStorageMixin, LandBaseToken, OperatorFiltererUpgradeabl
         return LandStorageMixin._getOperatorFilterRegistry();
     }
 
+    /// @notice set the OpenSea operator filter
+    /// @param registry the address of the OpenSea operator filter registry
     function _setOperatorFilterRegistry(
-        IOperatorFilterRegistry trustedForwarder
+        IOperatorFilterRegistry registry
     ) internal override(LandStorageMixin, OperatorFiltererUpgradeable) {
-        LandStorageMixin._setOperatorFilterRegistry(trustedForwarder);
+        LandStorageMixin._setOperatorFilterRegistry(registry);
     }
 }

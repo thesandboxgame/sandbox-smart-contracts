@@ -7,36 +7,20 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 ///@title OperatorFiltererUpgradeable
 ///@author The Sandbox
-///@notice This contract would subscibe or copy or just to the subscription provided or just register to default subscription list
+///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is Context {
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
 
-    function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
-        return _getOperatorFilterRegistry();
-    }
-
-    /**
-     * @notice Register this contract into the registry
-     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
-     * @param subscribe should it subscribe
-     */
-    function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
+    modifier onlyAllowedOperatorApproval(address operator) virtual {
         IOperatorFilterRegistry registry = _getOperatorFilterRegistry();
+        // Check registry code length to facilitate testing in environments without a deployed registry.
         if (address(registry).code.length > 0) {
-            if (!registry.isRegistered(address(this))) {
-                if (subscribe) {
-                    registry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
-                } else {
-                    if (subscriptionOrRegistrantToCopy != address(0)) {
-                        registry.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);
-                    } else {
-                        registry.register(address(this));
-                    }
-                }
+            if (!registry.isOperatorAllowed(address(this), operator)) {
+                revert("Operator Not Allowed");
             }
         }
-        emit ContractRegistered(subscriptionOrRegistrantToCopy, subscribe);
+        _;
     }
 
     modifier onlyAllowedOperator(address from) virtual {
@@ -57,18 +41,38 @@ abstract contract OperatorFiltererUpgradeable is Context {
         _;
     }
 
-    modifier onlyAllowedOperatorApproval(address operator) virtual {
-        IOperatorFilterRegistry registry = _getOperatorFilterRegistry();
-        // Check registry code length to facilitate testing in environments without a deployed registry.
-        if (address(registry).code.length > 0) {
-            if (!registry.isOperatorAllowed(address(this), operator)) {
-                revert("Operator Not Allowed");
-            }
-        }
-        _;
+    /// @notice return the address of the operator filter registry
+    /// @return the address of  the operator filter registry
+    function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
+        return _getOperatorFilterRegistry();
     }
 
+    /// @notice Register this contract into the registry
+    /// @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+    /// @param subscribe should it subscribe
+    function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
+        IOperatorFilterRegistry registry = _getOperatorFilterRegistry();
+        if (address(registry).code.length > 0) {
+            if (!registry.isRegistered(address(this))) {
+                if (subscribe) {
+                    registry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
+                } else {
+                    if (subscriptionOrRegistrantToCopy != address(0)) {
+                        registry.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);
+                    } else {
+                        registry.register(address(this));
+                    }
+                }
+            }
+        }
+        emit ContractRegistered(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice get the OpenSea operator filter
+    /// @return the address of the OpenSea operator filter registry
     function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry);
 
+    /// @notice set the OpenSea operator filter
+    /// @param registry the address of the OpenSea operator filter registry
     function _setOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual;
 }

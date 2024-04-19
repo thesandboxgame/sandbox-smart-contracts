@@ -6,11 +6,12 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 
 /// @title WithMetadataRegistry
 /// @author The Sandbox
-/// @notice Add the metadata registry
+/// @notice Add support for the metadata registry
 abstract contract WithMetadataRegistry {
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
     event MetadataRegistrySet(address indexed metadataRegistry);
 
+    /// @custom:storage-location theSandbox.storage.MetadataRegistryStorage
     struct MetadataRegistryStorage {
         ILandMetadataRegistry _metadataRegistry;
     }

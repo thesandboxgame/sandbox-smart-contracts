@@ -295,10 +295,10 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         emit Transfer(from, address(0), tokenId);
     }
 
+    /// @notice checks that the token is taken from the owner after the call (from == owner)
     /// @param from sender address
     /// @param tokenId The id of the token
     /// @return operatorEnabled Whether or not operators are enabled for this token.
-    /// @dev checks that the token is taken from the owner after the call (from == owner)
     function _checkFromIsOwner(address from, uint256 tokenId) internal view returns (bool) {
         if (from == address(0)) {
             revert ERC721InvalidSender(from);
@@ -331,7 +331,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         (owner, ) = _ownerAndOperatorEnabledOf(id);
     }
 
-    /// @dev Get the owner and operatorEnabled status of a token.
+    /// @notice Get the owner and operatorEnabled flag of a token.
     /// @param id The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
@@ -347,7 +347,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         operatorEnabled = (data & OPERATOR_FLAG) == OPERATOR_FLAG;
     }
 
-    /// @dev Check if receiving contract accepts erc721 transfers.
+    /// @notice Check if receiving contract accepts erc721 transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
     /// @param to The address we want to transfer to.
@@ -365,7 +365,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         return (retval == _ERC721_RECEIVED);
     }
 
-    /// @dev Check if receiving contract accepts erc721 batch transfers.
+    /// @notice Check if receiving contract accepts erc721 batch transfers.
     /// @param operator The address of the operator.
     /// @param from The from address, may be different from msg.sender.
     /// @param to The address we want to transfer to.
@@ -383,7 +383,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 
-    /// @dev Check if there was enough gas.
+    /// @notice Check if there was enough gas.
     /// @param _contract The address of the contract to check.
     /// @param interfaceId The id of the interface we want to test.
     /// @return Whether or not this check succeeded.
@@ -444,20 +444,20 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         }
     }
 
-    /// @notice Get the number of token a user owns
-    /// @param who address to query the number of tokens from
-    /// @return the number of tokens
-    function _getNumNFTPerAddress(address who) internal view virtual returns (uint256);
+    /// @notice get the number of nft for an address
+    /// @param owner address to check
+    /// @return the number of nfts
+    function _getNumNFTPerAddress(address owner) internal view virtual returns (uint256);
 
-    /// @notice Set the number of token a user owns
-    /// @param who address to set the number of tokens from
-    /// @param val amount of tokens to set
-    function _setNumNFTPerAddress(address who, uint256 val) internal virtual;
+    /// @notice set the number of nft for an address
+    /// @param owner address to set
+    /// @param quantity the number of nfts to set for the owner
+    function _setNumNFTPerAddress(address owner, uint256 quantity) internal virtual;
 
     /// @notice Get the owner data of a token for a user
-    /// @notice The owner data has three fields: owner address, operator flag and burn flag.
     /// @param tokenId The id of the token.
     /// @return the owner data
+    /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
     function _getOwnerData(uint256 tokenId) internal view virtual returns (uint256);
 
     /// @notice Get the owner address of a token (included in the ownerData, see: _getOwnerData)
@@ -468,19 +468,20 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     }
 
     /// @notice Set the owner data of a token
-    /// @notice The owner data has three fields: owner address, operator flag and burn flag.
-    /// @param tokenId The id of the token.
+    /// @param tokenId the token Id
+    /// @param data the owner data
+    /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
     function _setOwnerData(uint256 tokenId, uint256 data) internal virtual;
 
-    /// @notice true if an operator has access to all the tokens of a owner
-    /// @param owner the address of the owner
-    /// @param operator the operator address
+    /// @notice check if an operator was enabled by a given owner
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
     /// @return true if the operator has access
     function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
 
     /// @notice Let an operator to access to all the tokens of a owner
-    /// @param owner the address of the owner
-    /// @param operator the operator address
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
     /// @param enabled if true give access to the operator, else disable it
     function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 

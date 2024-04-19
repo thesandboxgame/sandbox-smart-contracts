@@ -21,14 +21,22 @@ abstract contract WithSuperOperators is WithAdmin {
         emit SuperOperator(superOperator, enabled);
     }
 
-    /// @notice check whether address `who` is given superOperator rights.
-    /// @param who The address to query.
-    /// @return whether the address has superOperator rights.
-    function isSuperOperator(address who) external view returns (bool) {
-        return _isSuperOperator(who);
+    /// @notice check if an address is a super-operator
+    /// @param superOperator the operator address to check
+    /// @return true if an address is a super-operator
+    function isSuperOperator(address superOperator) external view returns (bool) {
+        return _isSuperOperator(superOperator);
     }
 
-    function _isSuperOperator(address who) internal view virtual returns (bool);
+    /// @notice check if an address is a super-operator
+    /// @param superOperator the operator address to check
+    /// @return true if an address is a super-operator
+    /// @dev Implement
+    function _isSuperOperator(address superOperator) internal view virtual returns (bool);
 
+    /// @notice enable an address to be super-operator
+    /// @param superOperator the address to set
+    /// @param enabled true enable the address, false disable it.
+    /// @dev Implement
     function _setSuperOperator(address superOperator, bool enabled) internal virtual;
 }

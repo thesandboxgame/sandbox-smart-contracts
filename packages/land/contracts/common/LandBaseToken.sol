@@ -25,6 +25,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
 
     event Minter(address indexed minter, bool enabled);
 
+    /// @dev helper struct to store arguments in memory instead of the stack.
     struct Land {
         uint256 x;
         uint256 y;
@@ -594,6 +595,11 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return false;
     }
 
+    /// @notice get size related information (there is one-to-one relationship between layer and size)
+    /// @param size The size of the quad
+    /// @return layer the layers that corresponds to the size
+    /// @return parentSize the size of the parent (bigger quad that contains the current one)
+    /// @return childLayer the layer of the child (smaller quad contained by this one)
     function _getQuadLayer(uint256 size) internal pure returns (uint256 layer, uint256 parentSize, uint256 childLayer) {
         if (size == 1) {
             layer = LAYER_1x1;
@@ -615,6 +621,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @notice get the quad id given the layer and coordinates.
     /// @param layer the layer of the quad see: _getQuadLayer
     /// @param x The bottom left x coordinate of the quad
     /// @param y The bottom left y coordinate of the quad
@@ -626,6 +633,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @notice return the quadId given and index, size and coordinates
     /// @param i the index to be added to x,y to get row and column
     /// @param size The bottom left x coordinate of the quad
     /// @param x The bottom left x coordinate of the quad
@@ -639,14 +647,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
-    /// @dev checks if the Land's child quads are owned by the from address and clears all the previous owners
-    /// if all the child quads are not owned by the "from" address then the owner of parent quad to the land
-    /// is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
+    /// @notice checks if the Land's child quads are owned by the from address and clears all the previous owners
     /// @param from address of the previous owner
     /// @param to address of the new owner
     /// @param land the quad to be regrouped and transferred
     /// @param set for setting the new owner
     /// @param childQuadSize  size of the child quad to be checked for owner in the regrouping
+    /// @dev if all the child quads are not owned by the "from" address then the owner of parent quad to the land
+    /// @dev is checked if owned by the "from" address. If from is the owner then land owner is set to "to" address
     function _regroupQuad(
         address from,
         address to,
@@ -704,6 +712,11 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return ownerOfAll;
     }
 
+    /// @notice return the owner of a quad given his size and coordinates or zero if is not minted yet.
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    /// @return the address of the owner
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         (uint256 layer, uint256 parentSize, ) = _getQuadLayer(size);
         address owner = _getOwnerAddress(_getQuadId(layer, (x / size) * size, (y / size) * size));
@@ -715,6 +728,10 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         return address(0);
     }
 
+    /// @notice Get the owner and operatorEnabled flag of a token.
+    /// @param id The token to query.
+    /// @return owner The owner of the token.
+    /// @return operatorEnabled Whether or not operators are enabled for this token.
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view override returns (address owner, bool operatorEnabled) {
@@ -738,7 +755,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
-    function _isMinter(address who) internal view virtual returns (bool);
+    /// @notice checks if an address is enabled as minter
+    /// @param minter the address to check
+    /// @return true if the address is a minter
+    function _isMinter(address minter) internal view virtual returns (bool);
 
-    function _setMinter(address who, bool enabled) internal virtual;
+    /// @notice set an address as minter
+    /// @param minter the address to set
+    /// @param enabled true enable the address, false disable it.
+    function _setMinter(address minter, bool enabled) internal virtual;
 }

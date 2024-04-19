@@ -12,9 +12,11 @@ contract WithRoyalties {
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
+    /// @custom:storage-location theSandbox.storage.RoyaltiesStorage
     struct RoyaltiesStorage {
         IRoyaltyManager _royaltyManager;
     }
+
     // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.RoyaltiesStorage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant ROYALTIES_STORAGE_LOCATION =
         0x1a6194bb08d9fddff76c6cbfbe499d387a7d0faaf411154328fd64df138f8200;
@@ -43,12 +45,14 @@ contract WithRoyalties {
     }
 
     /// @notice returns the royalty manager
-    /// @return royaltyManagerAddress address of royalty manager contract.
-    function getRoyaltyManager() external view returns (IRoyaltyManager royaltyManagerAddress) {
+    /// @return the address of royalty manager contract.
+    function getRoyaltyManager() external view returns (IRoyaltyManager) {
         RoyaltiesStorage storage $ = _getRoyaltiesStorage();
         return $._royaltyManager;
     }
 
+    /// @notice set the address of the royalty manager
+    /// @param royaltyManager the address of royalty manager contract.
     function _setRoyaltyManager(address royaltyManager) internal {
         RoyaltiesStorage storage $ = _getRoyaltiesStorage();
         $._royaltyManager = IRoyaltyManager(royaltyManager);
