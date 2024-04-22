@@ -2698,7 +2698,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/dependency-operator-filter@1.0.1, @sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
+"@sandbox-smart-contracts/dependency-operator-filter@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@sandbox-smart-contracts/dependency-operator-filter@npm:1.0.1"
+  dependencies:
+    "@openzeppelin/contracts": ^4.9.0
+    "@openzeppelin/contracts-upgradeable": ^4.9.0
+  checksum: aa28deaab99de961f9a46f7b99f50ba1571cfc3cbb8c8f23a0b2e125c780c33d84daeefbde27efbdbb1ad6e6561cfda590e9f821ccb3fa0c3c3ca61462979391
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/dependency-operator-filter@workspace:packages/dependency-operator-filter"
   dependencies:
