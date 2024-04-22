@@ -14,7 +14,13 @@ import './tasks/importedPackages';
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/avatar': 'contracts/',
-  '@sandbox-smart-contracts/asset': 'contracts/',
+  '@sandbox-smart-contracts/asset': [
+    'contracts/Asset.sol',
+    'contracts/AssetCreate.sol',
+    'contracts/AssetReveal.sol',
+    'contracts/Catalyst.sol',
+    'contracts/AuthSuperValidator.sol',
+  ],
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
   '@sandbox-smart-contracts/marketplace': [
@@ -22,8 +28,20 @@ const importedPackages = {
     'contracts/OrderValidator.sol',
     'contracts/Exchange.sol',
   ],
-  '@sandbox-smart-contracts/dependency-operator-filter': 'contracts/',
-  '@sandbox-smart-contracts/dependency-royalty-management': 'contracts/',
+  '@sandbox-smart-contracts/dependency-operator-filter': [
+    'contracts/OperatorFilterSubscription.sol',
+    'contracts/OperatorFiltererUpgradeable.sol',
+    'contracts/mock/MockMarketPlace1.sol',
+    'contracts/mock/MockMarketPlace2.sol',
+    'contracts/mock/MockMarketPlace3.sol',
+    'contracts/mock/MockMarketPlace4.sol',
+  ],
+  '@sandbox-smart-contracts/dependency-royalty-management': [
+    'contracts/MultiRoyaltyDistributor.sol',
+    'contracts/RoyaltyDistributor.sol',
+    'contracts/RoyaltyManager.sol',
+    'contracts/RoyaltySplitter.sol',
+  ],
   '@sandbox-smart-contracts/core': [
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
