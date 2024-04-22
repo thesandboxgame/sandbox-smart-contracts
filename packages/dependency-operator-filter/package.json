@@ -41,7 +41,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.0",
-    "@openzeppelin/contracts-upgradeable": "^4.9.0"
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
+    "operator-filter-registry": "^1.4.2"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -52,7 +54,6 @@
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
-    "@sandbox-smart-contracts/dependency-metatx": "*",
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.3.5",
@@ -69,7 +70,6 @@
     "ethers": "^5.7.2",
     "hardhat": "^2.14.1",
     "hardhat-gas-reporter": "^1.0.9",
-    "operator-filter-registry": "^1.4.2",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "1.0.0-beta.11",
     "solhint": "^3.6.2",
