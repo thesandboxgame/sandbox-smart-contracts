@@ -12,14 +12,13 @@ contract WithRoyalties {
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;
 
-    /// @custom:storage-location theSandbox.storage.RoyaltiesStorage
     struct RoyaltiesStorage {
         IRoyaltyManager _royaltyManager;
     }
 
-    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.RoyaltiesStorage")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant ROYALTIES_STORAGE_LOCATION =
-        0x1a6194bb08d9fddff76c6cbfbe499d387a7d0faaf411154328fd64df138f8200;
+    /// @custom:storage-location erc7201:thesandbox.storage.land.common.WithRoyalties
+    bytes32 internal constant ROYALTIES_STORAGE_LOCATION =
+        0xf7bae505580fc5d233bb20f4fb93f39f43d44ecc81ed63dd6455097b4c455000;
 
     function _getRoyaltiesStorage() private pure returns (RoyaltiesStorage storage $) {
         // solhint-disable-next-line no-inline-assembly

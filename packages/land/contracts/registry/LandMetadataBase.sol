@@ -16,7 +16,6 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     uint256 public constant PREMIUM_MASK = 0x80;
     uint256 public constant NEIGHBORHOOD_MASK = 0x7F;
 
-    /// @custom:storage-location theSandbox.storage.LandMetadataStorage
     struct LandMetadataStorage {
         /// @dev tokenId / 32 => premiumness + neighborhood metadata
         /// @dev zero means no metadata definition
@@ -25,13 +24,14 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
         mapping(uint256 => string) _neighborhoodName;
     }
 
-    // keccak256(abi.encode(uint256(keccak256("theSandbox.storage.LandMetadataStorage")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant STORAGE_LOCATION = 0x211b9a5c8762b761337e54196bb1552ce69a1bc2cc5281f221853308c0bc6800;
+    /// @custom:storage-location erc7201:thesandbox.storage.land.registry.LandMetadataBase
+    bytes32 internal constant METADATA_STORAGE_LOCATION =
+        0x8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00;
 
-    function _getLandMetadataStorage() internal pure returns (LandMetadataStorage storage $) {
+    function _getLandMetadataStorage() private pure returns (LandMetadataStorage storage $) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            $.slot := STORAGE_LOCATION
+            $.slot := METADATA_STORAGE_LOCATION
         }
     }
 

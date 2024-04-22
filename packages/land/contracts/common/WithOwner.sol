@@ -8,14 +8,13 @@ pragma solidity 0.8.23;
 contract WithOwner {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /// @custom:storage-location theSandbox.storage.OwnerStorage
     struct OwnerStorage {
         address _owner;
     }
 
-    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.OwnerStorage")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant OWNER_STORAGE_LOCATION =
-        0x874ec33bbe0a683b1266b351c71e55906567133dfd607041d3c0d85ae30f2b00;
+    /// @custom:storage-location erc7201:thesandbox.storage.land.common.WithOwner
+    bytes32 internal constant OWNER_STORAGE_LOCATION =
+        0x1836e2fa424a35b79c13fd66f8e282cb3a31513f9610d6e7a99baf7ffe56ec00;
 
     function _getOwnerStorage() private pure returns (OwnerStorage storage $) {
         // solhint-disable-next-line no-inline-assembly

@@ -205,7 +205,7 @@ describe('LandMetadataRegistry', function () {
   it('storage slot', async function () {
     const {registryAsDeployer} = await loadFixture(setupRegistry);
     expect(await registryAsDeployer.getLandMetadataStorageSlot()).to.be.equal(
-      getStorageSlotJS('theSandbox.storage.LandMetadataStorage'),
+      getStorageSlotJS('thesandbox.storage.land.registry.LandMetadataStorage'),
     );
   });
 
