@@ -14,6 +14,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(hasRole).to.equal(true);
     });
+
     it('should not allow DEFAULT_ADMIN_ROLE to be renounced', async function () {
       const {authValidatorAdmin, AuthValidatorContract} = await runSetup();
       const DEFAULT_ADMIN_ROLE =
@@ -25,6 +26,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
         )
       ).to.be.revertedWith('AuthSuperValidator: Admin needed');
     });
+
     it('should allow admin to set signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContractAsAdmin, backendSigner} =
         await runSetup();
@@ -39,6 +41,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(assignedSigner).to.equal(backendSigner.address);
     });
+
     it('should not allow non-admin to set signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContract, backendSigner, deployer} =
         await runSetup();
@@ -53,6 +56,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
         `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
       );
     });
+
     it('should allow admin to remove signer for a given contract address', async function () {
       const {MockContract, AuthValidatorContractAsAdmin, backendSigner} =
         await runSetup();
@@ -69,6 +73,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(assignedSigner).to.equal(ethers.constants.AddressZero);
     });
+
     it('should not allow non-admin to remove signer for a given contract address', async function () {
       const {
         MockContract,
@@ -93,6 +98,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
     });
   });
+
   describe('Signature verification', function () {
     it('should correctly verify signature when a signer is set', async function () {
       const {
@@ -115,6 +121,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(isValid).to.equal(true);
     });
+
     it('should revert when signature is not valid', async function () {
       const {
         AuthValidatorContractAsAdmin,
@@ -140,6 +147,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
       );
       expect(isValid).to.equal(false);
     });
+
     it('should revert when there is no signer assigned for a given contract address', async function () {
       const {
         AuthValidatorContractAsAdmin,

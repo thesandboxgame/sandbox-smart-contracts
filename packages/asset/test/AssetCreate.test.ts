@@ -10,6 +10,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
       expect(AssetCreateContract.address).to.be.properAddress;
     });
+
     it('should have auth validators contract address set correctly', async function () {
       const {AssetCreateContract, AuthValidatorContract} =
         await runCreateTestSetup();
@@ -17,6 +18,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         AuthValidatorContract.address
       );
     });
+
     it('should have catalyst contract address set correctly', async function () {
       const {AssetCreateContract, CatalystContract} =
         await runCreateTestSetup();
@@ -24,6 +26,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         CatalystContract.address
       );
     });
+
     it('should have asset contract address set correctly', async function () {
       const {AssetCreateContract, AssetContract} = await runCreateTestSetup();
       expect(await AssetCreateContract.getAssetContract()).to.equal(
@@ -31,6 +34,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       );
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('should allow to read the trusted forwarder', async function () {
       const {AssetCreateContract, trustedForwarder} =
@@ -39,6 +43,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         trustedForwarder.address
       );
     });
+
     it('should correctly check if an address is a trusted forwarder or not', async function () {
       const {AssetCreateContract, trustedForwarder} =
         await runCreateTestSetup();
@@ -51,6 +56,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         )
       ).to.be.false;
     });
+
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetCreateContractAsAdmin} = await runCreateTestSetup();
       const randomContract = ethers.Wallet.createRandom().address;
@@ -64,6 +70,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await AssetCreateContractAsAdmin.getTrustedForwarder()
       ).to.be.equal(randomContract);
     });
+
     it('should not allow non DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetCreateContractAsUser, user, AdminRole} =
         await runCreateTestSetup();
@@ -74,18 +81,21 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${AdminRole}`
       );
     });
+
     it('should return correct msgData', async function () {
       const {MockAssetCreateContract} = await runCreateTestSetup();
       // call the function to satisfy the coverage only, but we don't need to check the result
       await MockAssetCreateContract.msgData();
     });
   });
+
   describe('Pausable', function () {
     it('should allow pauser to pause the contract', async function () {
       const {AssetCreateContract, pause} = await runCreateTestSetup();
       await pause();
       expect(await AssetCreateContract.paused()).to.be.true;
     });
+
     it('should not allow non pauser to pause the contract', async function () {
       const {AssetCreateContractAsUser, user, PauserRole} =
         await runCreateTestSetup();
@@ -93,6 +103,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
       );
     });
+
     it('should allow pauser to unpause the contract', async function () {
       const {AssetCreateContract, pause, unpause} = await runCreateTestSetup();
       await pause();
@@ -100,6 +111,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       await unpause();
       expect(await AssetCreateContract.paused()).to.be.false;
     });
+
     it('should not allow non pauser to unpause the contract', async function () {
       const {AssetCreateContractAsUser, user, PauserRole} =
         await runCreateTestSetup();
@@ -107,6 +119,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
       );
     });
+
     it('should not allow createAsset to be called when paused', async function () {
       const {
         user,
@@ -129,6 +142,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow createMultipleAssets to be called when paused', async function () {
       const {
         user,
@@ -158,6 +172,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         )
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow createSpecialAsset to be called when paused', async function () {
       const {
         user,
@@ -180,6 +195,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         mintSpecialAsset(signature, 1, metadataHashes[0])
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should allow createAsset to be called when unpaused', async function () {
       const {
         user,
@@ -203,6 +219,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0])).to
         .not.be.reverted;
     });
+
     it('should allow createMultipleAssets to be called when unpaused', async function () {
       const {
         user,
@@ -234,6 +251,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         )
       ).to.not.be.reverted;
     });
+
     it('should allow createSpecialAsset to be called when unpaused', async function () {
       const {
         user,
@@ -258,6 +276,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         .reverted;
     });
   });
+
   describe('Single asset mint', function () {
     describe('Success', function () {
       it('should mint a single asset successfully if all conditions are met', async function () {
@@ -280,6 +299,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await expect(mintSingleAsset(signature, 4, 1, true, metadataHashes[0]))
           .to.not.be.reverted;
       });
+
       it('should increment the creator nonce correctly', async function () {
         const {
           user,
@@ -303,6 +323,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         expect(await getCreatorNonce(user.address)).to.equal(BigNumber.from(1));
       });
+
       it('should mint the correct amount of assets', async function () {
         const {
           user,
@@ -337,6 +358,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           BigNumber.from(5)
         );
       });
+
       it('should mint the correct tier of assets', async function () {
         const {
           user,
@@ -367,6 +389,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         )[0].args.tier;
         expect(tier).to.equal(4);
       });
+
       it('should mint an asset with correct metadataHash', async function () {
         const {
           user,
@@ -401,6 +424,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
       });
     });
+
     describe('Revert', function () {
       it('should revert if the signature is invalid', async function () {
         const {mintCatalyst, mintSingleAsset, metadataHashes} =
@@ -413,6 +437,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if tier mismatches signed tier', async function () {
         const {
           user,
@@ -436,6 +461,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, txSuppliedTier, 1, true, metadataHashes[0])
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if amount mismatches signed amount', async function () {
         const {
           user,
@@ -465,6 +491,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if sender is not the creator for which the signature was generated', async function () {
         const {
           mintCatalyst,
@@ -486,6 +513,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if metadataHash mismatches signed metadataHash', async function () {
         const {
           user,
@@ -507,6 +535,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 4, 1, true, '0x1234')
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if the signature has been used before', async function () {
         const {
           user,
@@ -532,6 +561,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it("should revert if user doesn't have enough catalysts", async function () {
         const {
           user,
@@ -551,6 +581,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 4, 1, true, metadataHashes[0])
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
+
       it('should not allow minting tier 0 assets using createAsset', async function () {
         const {
           user,
@@ -570,6 +601,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature, 0, 1, true, metadataHashes[0])
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
+
       it('should NOT allow minting with the same metadata twice', async function () {
         const {
           user,
@@ -599,6 +631,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintSingleAsset(signature2, 4, 2, true, metadataHashes[0])
         ).to.be.revertedWith('Asset: Hash already used');
       });
+
       it('should NOT mint same token ids', async function () {
         const {
           user,
@@ -648,6 +681,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         expect(tokenId1).to.not.equal(tokenId2);
       });
     });
+
     describe('Event', function () {
       it('should emit an AssetMinted event', async function () {
         const {
@@ -677,6 +711,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.emit(AssetCreateContract, 'AssetMinted');
       });
+
       it('should emit AssetMinted event with the correct data', async function () {
         const {
           user,
@@ -717,6 +752,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         // revealed should be true
         expect(eventData.revealed).to.be.true;
       });
+
       it('should emit catalyst burn event', async function () {
         const {
           user,
@@ -747,6 +783,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
+
   describe('Multiple assets mint', function () {
     describe('Success', function () {
       it('should correctly mint multiple assets if all conditions are met', async function () {
@@ -777,6 +814,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.not.be.reverted;
       });
+
       it('should mint correct amounts of assets', async function () {
         const {
           mintMultipleAssets,
@@ -822,6 +860,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await AssetContract.balanceOf(user.address, tokenIds[1])
         ).to.equal(5);
       });
+
       it('should mint correct tiers of assets', async function () {
         const {
           mintMultipleAssets,
@@ -862,6 +901,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         expect(tiers[0]).to.equal(3);
         expect(tiers[1]).to.equal(4);
       });
+
       it('should mint assets with correct metadataHashes', async function () {
         const {
           mintMultipleAssets,
@@ -908,6 +948,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
       });
     });
+
     describe('Revert', function () {
       it('should revert if signature is invalid', async function () {
         const {mintMultipleAssets, metadataHashes} = await runCreateTestSetup();
@@ -923,6 +964,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if tiers mismatch signed values', async function () {
         const {
           mintMultipleAssets,
@@ -951,6 +993,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if sender is not the creator for which the signature was generated', async function () {
         const {
           mintMultipleAssets,
@@ -979,6 +1022,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if tiers, amounts and metadatahashes are not of the same length', async function () {
         const {
           mintMultipleAssets,
@@ -1008,6 +1052,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: 2-Array lengths');
       });
+
       it('should revert if amounts mismatch signed values', async function () {
         const {
           mintMultipleAssets,
@@ -1036,6 +1081,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if metadataHashes mismatch signed values', async function () {
         const {
           mintMultipleAssets,
@@ -1065,6 +1111,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it('should revert if signature has already been used', async function () {
         const {
           mintMultipleAssets,
@@ -1100,6 +1147,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
+
       it("should revert if user doesn't have enough catalysts", async function () {
         const {
           mintMultipleAssets,
@@ -1126,6 +1174,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
+
       it('should revert when minting tier 0 assets using createMultipleAssets', async function () {
         const {
           mintMultipleAssets,
@@ -1152,6 +1201,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
       });
+
       it('should NOT allow minting with the same metadataHash twice', async function () {
         const {
           mintMultipleAssets,
@@ -1196,6 +1246,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         ).to.be.revertedWith('Asset: Hash already used');
       });
     });
+
     describe('Event', function () {
       it('should emit an AssetBatchMinted event', async function () {
         const {
@@ -1226,6 +1277,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.emit(AssetCreateContract, 'AssetBatchMinted');
       });
+
       it('should emit AssetBatchMinted event with the correct data', async function () {
         const {
           generateMultipleMintSignature,
@@ -1270,6 +1322,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         expect(eventData.revealed[0]).to.be.true;
         expect(eventData.revealed[1]).to.be.true;
       });
+
       it('should emit catalyst burn event', async function () {
         const {
           generateMultipleMintSignature,
@@ -1303,6 +1356,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
+
   describe('Special asset mint', function () {
     describe('Success', function () {
       it('should allow special minter role to mint special assets with tier 0 (TSB Exclusive)', async function () {
@@ -1326,6 +1380,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           .be.reverted;
       });
     });
+
     describe('Revert', function () {
       it('should NOT ALLOW unauthorized wallets to mint special assets', async function () {
         const {
@@ -1348,6 +1403,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
         );
       });
+
       it('should not allow miniting tiers other than 0 (TSB Exclusive) using createSpecialAsset', async function () {
         const {
           mintSpecialAsset,
@@ -1370,6 +1426,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
     });
+
     describe('Event', function () {
       it('should emit a SpecialAssetMinted event', async function () {
         const {
@@ -1398,6 +1455,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.emit(AssetCreateContract, 'SpecialAssetMinted');
       });
+
       it('should emit SpecialAssetMinted event with the correct data', async function () {
         const {
           mintSpecialAsset,
@@ -1433,6 +1491,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
   });
+
   describe('Multiple special assets mint', function () {
     describe('Success', function () {
       it('should allow special minter role to mint multiple special assets with tier 0 (TSB Exclusive)', async function () {
@@ -1457,6 +1516,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         ).to.not.be.reverted;
       });
     });
+
     describe('Revert', function () {
       it('should NOT ALLOW unauthorized wallets to mint multiple special assets', async function () {
         const {
@@ -1479,6 +1539,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           `AccessControl: account ${user.address.toLocaleLowerCase()} is missing role 0xb696df569c2dfecb5a24edfd39d7f55b0f442be14350cbc68dbe8eb35489d3a6`
         );
       });
+
       it('should NOT ALLOW minting tiers other than 0 (TSB Exclusive) using createMultipleSpecialAssets', async function () {
         const {
           mintMultipleSpecialAssets,
@@ -1501,6 +1562,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
     });
+
     describe('Event', function () {
       it('should emit a SpecialAssetBatchMinted event', async function () {
         const {
@@ -1529,6 +1591,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.emit(AssetCreateContract, 'SpecialAssetBatchMinted');
       });
+
       it('should emit SpecialAssetBatchMinted event with the correct data', async function () {
         const {
           mintMultipleSpecialAssets,

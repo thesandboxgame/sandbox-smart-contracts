@@ -133,6 +133,7 @@ describe('Catalyst', function () {
         await CatalystContract.hasRole(defaultAdminRole, catalystAdmin)
       ).to.be.equals(true);
     });
+
     it('minter', async function () {
       const {CatalystContract, catalystMinter} = await setupTest();
       const minterRole = await CatalystContract.MINTER_ROLE();
@@ -141,6 +142,7 @@ describe('Catalyst', function () {
       ).to.be.equals(true);
     });
   });
+
   describe('Check Royalty', function () {
     it('RoyaltyManager contract is set correctly', async function () {
       const {CatalystContract, RoyaltyManagerContract} = await setupTest();
@@ -148,6 +150,7 @@ describe('Catalyst', function () {
         RoyaltyManagerContract
       );
     });
+
     it('Contract is registered on RoyaltyManager', async function () {
       const {CatalystContract, RoyaltyManagerContract} = await setupTest();
       expect(
@@ -155,6 +158,7 @@ describe('Catalyst', function () {
       ).to.be.equal(royaltyAmount);
     });
   });
+
   describe('Operator Filter Registry', function () {
     it('catalyst contract is registered correctly', async function () {
       const {OperatorFilterRegistryContract, CatalystContract} =
@@ -163,6 +167,7 @@ describe('Catalyst', function () {
         await OperatorFilterRegistryContract.isRegistered(CatalystContract)
       ).to.be.true;
     });
+
     it('catalyst contract is subscribed to correct address', async function () {
       const {
         OperatorFilterRegistryContract,
@@ -173,6 +178,7 @@ describe('Catalyst', function () {
         await OperatorFilterRegistryContract.subscriptionOf(CatalystContract)
       ).to.be.equal(OperatorFilterCatalystSubscription);
     });
+
     it('catalyst contract has correct market places black listed', async function () {
       const {
         OperatorFilterRegistryContract,
@@ -208,6 +214,7 @@ describe('Catalyst', function () {
       ).to.be.equal(false);
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {CatalystContract, TRUSTED_FORWARDER} = await setupTest();
