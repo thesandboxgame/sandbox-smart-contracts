@@ -6,7 +6,7 @@ piece of the metaverse map which is a grid of 408x408 lands.
 
 ## Architecture
 
-The main goal of this package is to merge the base code of the 2 LAND contracts that has been deployed on ethereum & polygon networks in order to unify the features and reduce the technical differences. Learn more about the differences between the 2 contracts & this update in [this documentation](contracts/LandUpdate.md).
+The main goal of this package is to merge the base code of the 2 LAND contracts that has been deployed on ethereum & polygon networks in order to unify the features and reduce the technical differences. Learn more about the differences between the 2 contracts & this upgrade in [this documentation](contracts/LandUpgrade.md).
 
 The package contains 3 main contracts:
 
