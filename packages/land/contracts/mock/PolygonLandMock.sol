@@ -14,9 +14,14 @@ contract PolygonLandMock is PolygonLand {
         uint256 _operators;
         uint256 _minters;
         uint256 _trustedForwarder;
-        uint256 operatorFilterRegistry;
+        uint256 _operatorFilterRegistry;
     }
 
+    struct V5VarsStorage {
+        bytes32 owner;
+        bytes32 royaltiesStorage;
+        bytes32 landMetadataRegistry;
+    }
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) external virtual {
@@ -43,6 +48,17 @@ contract PolygonLandMock is PolygonLand {
     /// @param subscribe bool to signify subscription "true"" or to copy the list "false".
     function registerFilterer(address subscriptionOrRegistrantToCopy, bool subscribe) external {
         _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    function getV5VarsStorageStructure() external pure returns (V5VarsStorage memory ret) {
+        ret.owner = OWNER_STORAGE_LOCATION;
+        ret.royaltiesStorage = ROYALTIES_STORAGE_LOCATION;
+        ret.landMetadataRegistry = METADATA_REGISTRY_STORAGE_LOCATION;
+    }
+
+    function erc7201StorageSlot(string memory id) external pure returns (uint256) {
+        bytes32 ret = keccak256(abi.encode(uint256(keccak256(abi.encodePacked(id))) - 1)) & ~bytes32(uint256(0xff));
+        return uint256(ret);
     }
 
     function getStorageStructure() external pure returns (VarsStorage memory ret) {

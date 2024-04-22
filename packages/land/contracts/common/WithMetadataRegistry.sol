@@ -9,15 +9,16 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 /// @notice Add support for the metadata registry
 abstract contract WithMetadataRegistry {
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
+
     event MetadataRegistrySet(address indexed metadataRegistry);
 
-    /// @custom:storage-location theSandbox.storage.MetadataRegistryStorage
     struct MetadataRegistryStorage {
         ILandMetadataRegistry _metadataRegistry;
     }
-    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.MetadataRegistryStorage")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant METADATA_REGISTRY_STORAGE_LOCATION =
-        0x7b994d828e558930590ae1ddae4c5bd615266630f0fe588779b4fe34b2e8bb00;
+
+    /// @custom:storage-location erc7201:thesandbox.storage.land.common.WithMetadataRegistry
+    bytes32 internal constant METADATA_REGISTRY_STORAGE_LOCATION =
+        0x3899f13de39885dfce849839be8330453b5866928dd0e5933e36794349628400;
 
     function _getMetadataRegistryStorage() private pure returns (MetadataRegistryStorage storage $) {
         // solhint-disable-next-line no-inline-assembly

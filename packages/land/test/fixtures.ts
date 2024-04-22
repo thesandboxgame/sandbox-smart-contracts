@@ -40,16 +40,19 @@ export function getId(layer: number, x: number, y: number): string {
   return '0x' + h.toString(16).padStart(62, '0');
 }
 
-export function getStorageSlotJS(key: string): bigint {
+export function getStorageSlotJS(key: string): string {
   return (
-    BigInt(
-      keccak256(
-        AbiCoder.defaultAbiCoder().encode(
-          ['uint256'],
-          [BigInt(keccak256(toUtf8Bytes(key))) - 1n],
+    '0x' +
+    (
+      BigInt(
+        keccak256(
+          AbiCoder.defaultAbiCoder().encode(
+            ['uint256'],
+            [BigInt(keccak256(toUtf8Bytes(key))) - 1n],
+          ),
         ),
-      ),
-    ) & ~0xffn
+      ) & ~0xffn
+    ).toString(16)
   );
 }
 

@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
+  getStorageSlotJS,
   setupPolygonLandForERC721Tests,
   setupPolygonLandOperatorFilter,
 } from '../fixtures';
@@ -120,7 +121,22 @@ describe('PolygonLand.sol', function () {
     expect(slots._operators).to.be.equal(56);
     expect(slots._minters).to.be.equal(57);
     expect(slots._trustedForwarder).to.be.equal(107);
-    expect(slots.operatorFilterRegistry).to.be.equal(108);
+    expect(slots._operatorFilterRegistry).to.be.equal(108);
+  });
+
+  it('check V5 storage structure', async function () {
+    const {landContract} = await loadFixture(setupPolygonLandMock);
+
+    const slots = await landContract.getV5VarsStorageStructure();
+    expect(slots.owner).to.be.equal(
+      getStorageSlotJS('thesandbox.storage.land.common.WithOwner'),
+    );
+    expect(slots.landMetadataRegistry).to.be.equal(
+      getStorageSlotJS('thesandbox.storage.land.common.WithMetadataRegistry'),
+    );
+    expect(slots.royaltiesStorage).to.be.equal(
+      getStorageSlotJS('thesandbox.storage.land.common.WithRoyalties'),
+    );
   });
 
   describe('Meta transactions', function () {
