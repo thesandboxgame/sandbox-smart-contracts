@@ -27,6 +27,7 @@ describe('catalyst royalty', function () {
       `AccessControl: account ${seller.address.toLocaleLowerCase()} is missing role ${contractRoyaltySetterRole}`
     );
   });
+
   it('catalyst should return EIP2981 royalty recipient and royalty for other contracts(catalyst)', async function () {
     const {commonRoyaltyReceiver, catalystAsMinter, managerAsRoyaltySetter} =
       await catalystRoyaltyDistribution();

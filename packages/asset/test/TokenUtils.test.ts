@@ -9,6 +9,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
     expect(tokenId).to.not.be.undefined;
     expect(tokenId.toHexString()).to.have.lengthOf(46);
   });
+
   describe("Creator's address", function () {
     it('should generate a token id with correct creator - manual extraction', async function () {
       const {generateTokenId, address} = await runTokenIdUtilsSetup();
@@ -21,6 +22,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       const creator = ethers.utils.getAddress(creatorAddressHex);
       expect(creator).equal(address);
     });
+
     it('should generate a token id with correct creator - using getter function', async function () {
       const {tokenIdUtils, generateTokenId, address} =
         await runTokenIdUtilsSetup();
@@ -29,6 +31,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       expect(tokenIdAddress).equal(address);
     });
   });
+
   describe('Tier', function () {
     it('should generate a token id with correct tier - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
@@ -37,6 +40,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       const returnedTier = await tokenIdUtils.getTier(tokenId);
       expect(returnedTier).equal(tier);
     });
+
     it('should generate a token id with correct tier - manual extraction', async function () {
       const {generateTokenId, TIER_SHIFT, TIER_MASK} =
         await runTokenIdUtilsSetup();
@@ -46,6 +50,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       expect(returnedTier).equal(tier);
     });
   });
+
   describe('Creator nonce', function () {
     it('should generate a token id with correct creator nonce - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
@@ -64,6 +69,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       expect(returnedNonce).equal(creatorNonce);
     });
   });
+
   describe('Reveal nonce', function () {
     it('should generate a token id with correct reveal nonce - using getter function', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
@@ -94,6 +100,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
         .toNumber();
       expect(returnedRevealNonce).equal(revealNonce);
     });
+
     it('should return true if reveal nonce is non-zero', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const revealNonce = 777;
@@ -106,6 +113,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       const returnedRevealNonce = await tokenIdUtils.isRevealed(tokenId);
       expect(returnedRevealNonce).equal(true);
     });
+
     it('should return false if reveal nonce is zero', async function () {
       const {tokenIdUtils, generateTokenId} = await runTokenIdUtilsSetup();
       const revealNonce = 0;
@@ -151,6 +159,7 @@ describe('TokenIdUtils (/packages/asset/contracts/libraries/TokenIdUtils.ts)', f
       expect(returnedBridged).equal(bridged);
     });
   });
+
   describe('Asset Data', function () {
     it('should return correct asset data', async function () {
       const {tokenIdUtils, generateTokenId, address} =

@@ -58,6 +58,7 @@ function testContract(fixture: () => Promise<SetupType>) {
         BigNumber.from(trustedForwarder.address)
       );
     });
+
     it('get data', async function () {
       const {trustedForwarder, contractAsTrustedForwarder} = await loadFixture(
         fixture
@@ -99,6 +100,7 @@ function testContract(fixture: () => Promise<SetupType>) {
         BigNumber.from(deployer.address)
       );
     });
+
     it('get data', async function () {
       const {deployer, trustedForwarder, contractAsDeployer} =
         await loadFixture(fixture);
@@ -129,9 +131,11 @@ describe('ERC2771', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     testContract(setupERC2771);
   });
+
   describe('setupERC2771Upgradable.sol', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe
     testContract(setupAndInitializeERC2771Upgradable);
+
     it('coverage', async function () {
       const {deployer, trustedForwarder, contractAsDeployer} =
         await loadFixture(setupERC2771Upgradable);

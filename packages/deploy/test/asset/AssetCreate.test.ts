@@ -41,12 +41,14 @@ describe('Asset Create', function () {
         AuthSuperValidatorContract
       );
     });
+
     it('Asset', async function () {
       const {AssetCreateContract, AssetContract} = await setupTest();
       expect(await AssetCreateContract.getAssetContract()).to.be.equal(
         AssetContract
       );
     });
+
     it('Catalyst', async function () {
       const {AssetCreateContract, CatalystContract} = await setupTest();
       expect(await AssetCreateContract.getCatalystContract()).to.be.equal(
@@ -54,6 +56,7 @@ describe('Asset Create', function () {
       );
     });
   });
+
   describe('Roles', function () {
     it('Admin', async function () {
       const {AssetCreateContract, assetAdmin} = await setupTest();
@@ -61,18 +64,21 @@ describe('Asset Create', function () {
       expect(await AssetCreateContract.hasRole(defaultAdminRole, assetAdmin)).to
         .be.true;
     });
+
     it("Asset's Minter role is granted to AssetCreate", async function () {
       const {AssetCreateContract, AssetContract} = await setupTest();
       const minterRole = await AssetContract.MINTER_ROLE();
       expect(await AssetContract.hasRole(minterRole, AssetCreateContract)).to.be
         .true;
     });
+
     it("Catalyst's Burner role is granted to AssetCreate", async function () {
       const {AssetCreateContract, CatalystContract} = await setupTest();
       const burnerRole = await CatalystContract.BURNER_ROLE();
       expect(await CatalystContract.hasRole(burnerRole, AssetCreateContract)).to
         .be.true;
     });
+
     it('AuthSuperValidator signer is set to backendAuthWallet', async function () {
       const {
         AssetCreateContract,
@@ -86,6 +92,7 @@ describe('Asset Create', function () {
         await AuthSuperValidatorContract.getSigner(AssetCreateContract)
       ).to.be.equal(backendAuthWallet);
     });
+
     it('Pauser role is granted to assetPauser', async function () {
       const {AssetCreateContract, assetPauser} = await setupTest();
       const pauserRole = await AssetCreateContract.PAUSER_ROLE();
@@ -93,18 +100,21 @@ describe('Asset Create', function () {
         .true;
     });
   });
+
   describe('EIP712', function () {
     it("name is 'Sandbox Asset Create'", async function () {
       const {AssetCreateContract} = await setupTest();
       const eip712Domain = await AssetCreateContract.eip712Domain();
       expect(eip712Domain.name).to.be.equal('Sandbox Asset Create');
     });
+
     it("version is '1.0'", async function () {
       const {AssetCreateContract} = await setupTest();
       const eip712Domain = await AssetCreateContract.eip712Domain();
       expect(eip712Domain.version).to.be.equal('1.0');
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetCreateContract, TRUSTED_FORWARDER} = await setupTest();

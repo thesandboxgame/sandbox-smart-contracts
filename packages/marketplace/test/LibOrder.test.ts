@@ -30,6 +30,7 @@ describe('LibOrder.sol fill', function () {
           ).to.be.revertedWith('rounding error');
         });
       });
+
       it('should success when the rounding error is less than 0.1%', async function () {
         const {libOrderMock} = await loadFixture(deployLibAssetTest);
         // But if the user asks for 1000, then error is zero
@@ -37,6 +38,7 @@ describe('LibOrder.sol fill', function () {
       });
     });
   });
+
   describe('second part (fill=0): compare prices (make/take) and fill the order (giving some advantage to right)', function () {
     fillOrder4Tests({
       leftTakeValue: 10,
@@ -141,18 +143,22 @@ describe('LibOrder.sol fill', function () {
       });
     });
   });
+
   describe('both parts integrated', function () {
     describe('buySellTests', function () {
       describe('UINT_MAX vs 1', function () {
         buySellTest(UINT_MAX, 1n);
       });
+
       describe('1 vs 1', function () {
         buySellTest(1n, 1n);
       });
+
       describe('sqrt(UINT_MAX)-1 vs sqrt(UINT_MAX)', function () {
         buySellTest(SQRT_UINT_MAX - 1n, SQRT_UINT_MAX);
       });
     });
+
     describe('overflow', function () {
       it('should overflow when p1 and p2 > UINT_MAX * SQRT_UINT_MAX + 1', async function () {
         const {libOrderMock} = await loadFixture(deployLibAssetTest);
@@ -170,6 +176,7 @@ describe('LibOrder.sol fill', function () {
           libOrderMock.fillOrder(rightOrder, leftOrder, 0n, 0n)
         ).to.be.revertedWithPanic(0x11);
       });
+
       it('should underflow when p1 - fill < 0', async function () {
         const {libOrderMock} = await loadFixture(deployLibAssetTest);
         const p1 = 1n;
@@ -187,6 +194,7 @@ describe('LibOrder.sol fill', function () {
         ).to.be.revertedWith('filling more than order permits');
       });
     });
+
     describe('zero', function () {
       it('should revert with price zero', async function () {
         const {libOrderMock} = await loadFixture(deployLibAssetTest);
@@ -204,6 +212,7 @@ describe('LibOrder.sol fill', function () {
           libOrderMock.fillOrder(rightOrder, leftOrder, 0n, 0n)
         ).to.be.revertedWith('division by zero');
       });
+
       it('should success with full order (after value - fill == zero)', async function () {
         const {libOrderMock} = await loadFixture(deployLibAssetTest);
         const p1 = 100n;
@@ -231,6 +240,7 @@ describe('LibOrder.sol fill', function () {
         expect(rightFill2).to.be.equal(0);
       });
     });
+
     describe('when fill != 0 the orders are consumed on the take side, make side is not completely consumed', function () {
       // fillOrderTest({
       //   leftTakeValue: 4,

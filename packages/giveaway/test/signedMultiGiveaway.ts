@@ -26,6 +26,7 @@ describe('SignedMultiGiveaway.sol', function () {
         implementation.initialize(trustedForwarder.address, admin.address)
       ).to.revertedWith('Initializable: contract is already initialized');
     });
+
     it('initialization event', async function () {
       const {contract, deployer, trustedForwarder, admin} = await loadFixture(
         deploySignedMultiGiveaway
@@ -45,6 +46,7 @@ describe('SignedMultiGiveaway.sol', function () {
         .to.emit(contract, 'RoleGranted')
         .withArgs(defaultAdminRole, admin.address, deployer.address);
     });
+
     it('interfaces', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       const interfaces = {
@@ -62,6 +64,7 @@ describe('SignedMultiGiveaway.sol', function () {
         .false;
     });
   });
+
   describe('roles', function () {
     it('admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
@@ -192,6 +195,7 @@ describe('SignedMultiGiveaway.sol', function () {
       );
       console.log(ret);
     });
+
     it('should be able to claim multiple tokens', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -241,6 +245,7 @@ describe('SignedMultiGiveaway.sol', function () {
       await fixtures.contractAsAdmin.setMaxClaimEntries(claims.length);
       await fixtures.signAndClaim([claimId], claims);
     });
+
     it('should be able to claim with approve', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -340,6 +345,7 @@ describe('SignedMultiGiveaway.sol', function () {
           claims
         );
       });
+
       it('signatures must be in order other < signer', async function () {
         const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -391,6 +397,7 @@ describe('SignedMultiGiveaway.sol', function () {
         ).to.revertedWith('invalid order');
       });
     });
+
     it('should fail to claim if amount is zero', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -407,6 +414,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'invalid amount'
       );
     });
+
     it('should be fail to claim ERC1155 in batch if wrong len', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -471,6 +479,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.signAndClaim([claimId, 4, 5, 6], claims)
       ).to.be.revertedWith('already claimed');
     });
+
     it('should fail to claim if the signature is wrong', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -503,6 +512,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.be.revertedWith('invalid signer');
     });
+
     it('should fail to mint if the signer is invalid', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -652,6 +662,7 @@ describe('SignedMultiGiveaway.sol', function () {
       );
       expect(pos).to.be.equal(pre.sub(amount));
     });
+
     it('should fail to recover assets if not admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -687,6 +698,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contract.revokeClaims([claimId])
       ).to.be.revertedWith('only backoffice');
     });
+
     it('should fail to claim if the id was revoked', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -704,6 +716,7 @@ describe('SignedMultiGiveaway.sol', function () {
       );
     });
   });
+
   describe('pause', function () {
     it('should fail to pause if not admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
@@ -712,6 +725,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'only backoffice'
       );
     });
+
     it('should fail to unpause if not admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -720,6 +734,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'only admin'
       );
     });
+
     it('should fail to claim if paused by backoffice admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -736,6 +751,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'Pausable: paused'
       );
     });
+
     it('should fail to batchClaim if paused by backoffice admin', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       const baseClaimId = BigNumber.from(0x123);
@@ -883,6 +899,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contractAsAdmin.setNumberOfSignaturesNeeded(0)
       ).to.be.revertedWith('invalid numberOfSignaturesNeeded');
     });
+
     it('maxClaimEntries should be grater than 0', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -944,6 +961,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'wrong number of signatures'
       );
     });
+
     it('signatures should expire', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -962,6 +980,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.signAndClaim([claimId], claims, fixtures.signer, expiration)
       ).to.revertedWith('expired');
     });
+
     it('should fail to claim if over maxPerClaim per token', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -997,6 +1016,7 @@ describe('SignedMultiGiveaway.sol', function () {
         ]
       );
     });
+
     it('should success to claim if maxPerClaim is !=0 but amount is bellow maxPerClaim per token', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -1081,6 +1101,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.equal(fixtures.signer.address);
     });
+
     it('admin should be able to set the trusted forwarder', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       expect(
@@ -1155,6 +1176,7 @@ describe('SignedMultiGiveaway.sol', function () {
         domainSeparator
       );
     });
+
     it('should fail to initialize twice', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
       await expect(
@@ -1164,6 +1186,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.revertedWith('Initializable: contract is already initialized');
     });
+
     it('should fail if batch len is wrong', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -1171,6 +1194,7 @@ describe('SignedMultiGiveaway.sol', function () {
         'invalid len'
       );
     });
+
     it('should fail if token address is zero', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -1178,6 +1202,7 @@ describe('SignedMultiGiveaway.sol', function () {
         fixtures.contractAsAdmin.setMaxWeiPerClaim(constants.AddressZero, 12, 2)
       ).to.be.revertedWith('invalid token address');
     });
+
     it('should fail if invalid token type', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -1209,6 +1234,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.be.revertedWith('invalid token type');
     });
+
     it('should fail to claim with no balance', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 
@@ -1241,6 +1267,7 @@ describe('SignedMultiGiveaway.sol', function () {
         )
       ).to.revertedWith('ERC20: transfer amount exceeds balance');
     });
+
     it('should fail to claim with approve when no balance', async function () {
       const fixtures = await loadFixture(setupSignedMultiGiveaway);
 

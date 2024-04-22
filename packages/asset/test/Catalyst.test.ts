@@ -38,35 +38,42 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.highestTierIndex()).to.be.equals(6);
       expect(catalyst.address).to.be.properAddress;
     });
+
     it('Should have return correct name and symbol', async function () {
       const {catalyst} = await runCatalystSetup();
       expect(await catalyst.name()).to.be.equal("The Sandbox's CATALYSTs");
       expect(await catalyst.symbol()).to.be.equal('CATALYST');
     });
+
     describe('Interface support', function () {
       it('should support ERC165', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(ERC165InterfaceId)).to.be.true;
       });
+
       it('should support ERC1155', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(ERC1155InterfaceId)).to.be.true;
       });
+
       it('should support ERC1155MetadataURI', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(ERC1155MetadataURIInterfaceId))
           .to.be.true;
       });
+
       it('should support AccessControl', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(AccessControlInterfaceId)).to.be
           .true;
       });
+
       it('should support IERC2981', async function () {
         const {catalyst} = await runCatalystSetup();
         expect(await catalyst.supportsInterface(ERC2981InterfaceId)).to.be.true;
       });
     });
+
     it("base uri can't be empty in initialization", async function () {
       const {
         trustedForwarder,
@@ -95,6 +102,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: URI empty');
     });
+
     it("trusted forwarder can't be zero in initialization", async function () {
       const {
         catalystAdmin,
@@ -122,6 +130,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: 1-Zero address');
     });
+
     it("subscription can't be zero in initialization", async function () {
       const {
         trustedForwarder,
@@ -149,6 +158,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: 2-Zero address');
     });
+
     it("admin can't be zero in initialization", async function () {
       const {
         trustedForwarder,
@@ -176,6 +186,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: 3-Zero address');
     });
+
     it("royalty manager can't be zero in initialization", async function () {
       const {
         trustedForwarder,
@@ -203,6 +214,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: 5-Zero address');
     });
+
     it("minter can't be zero in initialization", async function () {
       const {
         trustedForwarder,
@@ -230,6 +242,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         )
       ).to.revertedWith('Catalyst: 4-Zero address');
     });
+
     it("token CID can't be zero in initialization", async function () {
       const {
         trustedForwarder,
@@ -259,6 +272,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.revertedWith('Catalyst: CID cant be empty');
     });
   });
+
   describe('Admin Role', function () {
     it('Admin can set minter', async function () {
       const {catalystAsAdmin, user1, minterRole} = await runCatalystSetup();
@@ -267,6 +281,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalystAsAdmin.hasRole(minterRole, user1.address)
       ).to.be.equal(true);
     });
+
     it('only Admin can set minter', async function () {
       const {catalyst, user1, minterRole, catalystAdminRole} =
         await runCatalystSetup();
@@ -277,6 +292,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('Admin can remove minter', async function () {
       const {catalystAsAdmin, minterRole, catalystMinter} =
         await runCatalystSetup();
@@ -288,6 +304,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalystAsAdmin.hasRole(minterRole, catalystMinter.address)
       ).to.be.equal(false);
     });
+
     it('only Admin can remove minter', async function () {
       const {catalyst, user1, minterRole, catalystAdminRole, catalystMinter} =
         await runCatalystSetup();
@@ -298,17 +315,20 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('Admin can add new catalyst', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await catalystAsAdmin.addNewCatalystType('0x01');
       expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
     });
+
     it('correctly increases highest tier index on adding new catalyst', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
       await catalystAsAdmin.addNewCatalystType('0x01');
       expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(7);
     });
+
     it('emits NewCatalystTypeAdded event on adding new catalyst with id one higher than the previous highest tier', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
@@ -316,12 +336,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         .to.emit(catalystAsAdmin, 'NewCatalystTypeAdded')
         .withArgs(7);
     });
+
     it('sets the URI for newly created catalyst tier correctly', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       expect(await catalystAsAdmin.highestTierIndex()).to.be.equal(6);
       await catalystAsAdmin.addNewCatalystType('0x01');
       expect(await catalystAsAdmin.uri(7)).to.be.equal('ipfs://0x01');
     });
+
     it('only Admin can add new catalyst', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
@@ -331,6 +353,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('Admin can set trusted forwarder', async function () {
       const {catalystAsAdmin, user1} = await runCatalystSetup();
       await catalystAsAdmin.setTrustedForwarder(user1.address);
@@ -338,6 +361,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         user1.address
       );
     });
+
     it('only Admin can set trusted forwarder', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
@@ -347,6 +371,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('Admin can set metadata hash', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       expect(await catalystAsAdmin.uri(1)).to.be.equal(
@@ -355,6 +380,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       await catalystAsAdmin.setMetadataHash(1, '0x01');
       expect(await catalystAsAdmin.uri(1)).to.be.equal('ipfs://0x01');
     });
+
     it('only Admin can set metadata hash', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
@@ -364,6 +390,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('Admin can set base uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       expect(await catalystAsAdmin.uri(1)).to.be.equal(
@@ -374,12 +401,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `ipfs////${CATALYST_IPFS_CID_PER_TIER[0]}`
       );
     });
+
     it('empty base uri cant be set ', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setBaseURI('')).to.be.revertedWith(
         'Catalyst: URI empty'
       );
     });
+
     it('only Admin can set base uri', async function () {
       const {catalyst, user1, catalystAdminRole} = await runCatalystSetup();
 
@@ -389,6 +418,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         `AccessControl: account ${user1.address.toLocaleLowerCase()} is missing role ${catalystAdminRole}`
       );
     });
+
     it('emits BaseURISet event on setting base uri', async function () {
       const {catalystAsAdmin, catalyst} = await runCatalystSetup();
 
@@ -397,30 +427,35 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         .to.emit(catalyst, 'BaseURISet')
         .withArgs(`ipfs////`);
     });
+
     it('cant add invalid token uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.addNewCatalystType('')).to.be.revertedWith(
         'Catalyst: CID cant be empty'
       );
     });
+
     it('cant set invalid trusted forwarder', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(
         catalystAsAdmin.setTrustedForwarder(zeroAddress)
       ).to.be.revertedWith('Catalyst: Zero address');
     });
+
     it('cant set metadata hash for invalid catalyst', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(
         catalystAsAdmin.setMetadataHash(0, '0x01')
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+
     it('cant set empty metadata hash', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setMetadataHash(1, '')).to.be.revertedWith(
         'Catalyst: Metadata hash empty'
       );
     });
+
     it('cant set invalid base uri', async function () {
       const {catalystAsAdmin} = await runCatalystSetup();
       await expect(catalystAsAdmin.setBaseURI('')).to.be.revertedWith(
@@ -428,12 +463,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       );
     });
   });
+
   describe('Mint Token', function () {
     it('minter can mint', async function () {
       const {catalystAsMinter, user1} = await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 6, 2);
       expect(await catalystAsMinter.balanceOf(user1.address, 6)).to.be.equal(2);
     });
+
     it('Non minter cannot mint', async function () {
       const {catalyst, user2, user1, minterRole} = await runCatalystSetup();
       await expect(
@@ -449,12 +486,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         catalystAsMinter.mint(user1.address, 7, 1)
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+
     it("Can't mint catalyst of tier 0", async function () {
       const {catalystAsMinter, user1} = await runCatalystSetup();
       await expect(
         catalystAsMinter.mint(user1.address, 0, 1)
       ).to.be.revertedWith('Catalyst: invalid catalyst id');
     });
+
     it('Minter can batch mint token', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
@@ -474,12 +513,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         ).to.be.equal(catalystArray[i] * 2);
       }
     });
+
     it('Minter can mint token', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 1, 10);
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
     });
   });
+
   describe('Total Supply', function () {
     it('Total Supply increase on minting', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
@@ -489,6 +530,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         expect(await catalyst.totalSupply(catalystArray[i])).to.be.equal(2);
       }
     });
+
     it('Total Supply increase on batch minting', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       const catalystId = [];
@@ -508,6 +550,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         );
       }
     });
+
     it('Total Supply decrease on burning', async function () {
       const {catalyst, user1, catalystAsBurner, catalystAsMinter} =
         await runCatalystSetup();
@@ -535,6 +578,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         );
       }
     });
+
     it('Total Supply decrease on batch burning', async function () {
       const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
         await runCatalystSetup();
@@ -575,6 +619,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       }
     });
   });
+
   describe('Burn catalyst', function () {
     it("minter can burn user's catalyst", async function () {
       const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
@@ -584,6 +629,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       await catalystAsBurner.burnFrom(user1.address, 1, 2);
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
     });
+
     it("minter can batch burn user's catalyst", async function () {
       const {catalyst, user1, catalystAsMinter, catalystAsBurner} =
         await runCatalystSetup();
@@ -602,6 +648,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(4);
     });
+
     it('user can burn their catalyst', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 1, 5);
@@ -609,6 +656,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       await catalyst.connect(user1).burn(user1.address, 1, 2);
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
     });
+
     it('user can batch burn their catalyst', async function () {
       const {catalyst, user1, catalystAsMinter} = await runCatalystSetup();
       await catalystAsMinter.mint(user1.address, 1, 5);
@@ -624,12 +672,14 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(3);
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(4);
     });
+
     it('should fail on burning non existing token', async function () {
       const {catalystAsBurner, user1} = await runCatalystSetup();
       await expect(
         catalystAsBurner.burnFrom(user1.address, 1, 1)
       ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
+
     it('should fail on batch burning non existing tokens', async function () {
       const {catalystAsBurner, user1} = await runCatalystSetup();
       const catalystId = [1, 2];
@@ -643,6 +693,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
     });
   });
+
   describe('Metadata', function () {
     it("user can view token's metadata", async function () {
       const {catalyst} = await runCatalystSetup();
@@ -665,6 +716,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         await catalyst.isApprovedForAll(user1.address, user2.address)
       ).to.be.equal(true);
     });
+
     it('approved operator can transfer', async function () {
       const {catalyst, user1, catalystAsMinter, user2} =
         await runCatalystSetup();
@@ -681,6 +733,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         .safeTransferFrom(user1.address, user2.address, 1, 10, zeroAddress);
       expect(await catalyst.balanceOf(user2.address, 1)).to.be.equal(10);
     });
+
     it('approved operator can batch transfer', async function () {
       const {catalyst, user1, catalystAsMinter, user2} =
         await runCatalystSetup();
@@ -707,6 +760,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user2.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user2.address, 2)).to.be.equal(10);
     });
+
     it('cannot transfer if not approved operator', async function () {
       const {catalyst, user1, catalystAsMinter, user2} =
         await runCatalystSetup();
@@ -722,6 +776,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.be.revertedWith('ERC1155: caller is not token owner or approved');
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
     });
+
     it('cannot batch transfer if not approved operator', async function () {
       const {catalyst, user1, catalystAsMinter, user2} =
         await runCatalystSetup();
@@ -747,6 +802,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       expect(await catalyst.balanceOf(user1.address, 1)).to.be.equal(10);
       expect(await catalyst.balanceOf(user1.address, 2)).to.be.equal(10);
     });
+
     it('should fail on transfering non existing token', async function () {
       const {catalyst, user1, user2} = await runCatalystSetup();
 
@@ -756,6 +812,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
           .safeTransferFrom(user1.address, user2.address, 1, 1, '0x')
       ).to.be.revertedWith('ERC1155: insufficient balance for transfer');
     });
+
     it('should fail on batch transfering non existing tokens', async function () {
       const {catalyst, user1, user2} = await runCatalystSetup();
       const catalystId = [1, 2];
@@ -773,6 +830,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
       ).to.be.revertedWith('ERC1155: insufficient balance for transfer');
     });
   });
+
   describe('OperatorFilterer', function () {
     describe('common subscription setup', function () {
       it('should be registered', async function () {
@@ -1983,6 +2041,7 @@ describe('Catalyst (/packages/asset/contracts/Catalyst.sol)', function () {
         expect(await Catalyst.balanceOf(users[1].address, 1)).to.be.equal(1);
         expect(await Catalyst.balanceOf(users[1].address, 2)).to.be.equal(1);
       });
+
       it('should not be able to batch transfer through trusted forwarder if the sender is black listed', async function () {
         const {Catalyst, users, TrustedForwarder, mockMarketPlace1} =
           await setupOperatorFilter();

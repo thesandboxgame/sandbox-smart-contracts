@@ -72,6 +72,7 @@ describe('Asset Royalties', function () {
         (1000000 * (assetRoyaltyBPS / 10000)) / 2
       );
     });
+
     it('should split ERC20 using EIP2981 using trusted forwarder', async function () {
       const {
         Asset,

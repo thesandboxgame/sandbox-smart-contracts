@@ -10,6 +10,7 @@
     ],
     "compiler-version": ["error", "^0.8.0"],
     "func-visibility": ["error", {"ignoreConstructors": true}],
+    "gas-custom-errors": "off",
     "custom-errors": "off"
   }
 }

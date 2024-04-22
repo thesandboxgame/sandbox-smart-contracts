@@ -40,6 +40,7 @@ describe('Asset Reveal', function () {
         AuthSuperValidatorContract
       );
     });
+
     it('Asset', async function () {
       const {AssetRevealContract, AssetContract} = await setupTest();
       expect(await AssetRevealContract.getAssetContract()).to.be.equal(
@@ -47,6 +48,7 @@ describe('Asset Reveal', function () {
       );
     });
   });
+
   describe('Roles', function () {
     it('Admin', async function () {
       const {AssetRevealContract, assetAdmin} = await setupTest();
@@ -54,12 +56,14 @@ describe('Asset Reveal', function () {
       expect(await AssetRevealContract.hasRole(defaultAdminRole, assetAdmin)).to
         .be.true;
     });
+
     it("Asset's Minter role is granted to AssetReveal", async function () {
       const {AssetRevealContract, AssetContract} = await setupTest();
       const minterRole = await AssetContract.MINTER_ROLE();
       expect(await AssetContract.hasRole(minterRole, AssetRevealContract)).to.be
         .true;
     });
+
     it('AuthSuperValidator signer is set to backendAuthWallet', async function () {
       const {
         AssetRevealContract,
@@ -73,6 +77,7 @@ describe('Asset Reveal', function () {
         await AuthSuperValidatorContract.getSigner(AssetRevealContract)
       ).to.be.equal(backendAuthWallet);
     });
+
     it('Pauser role is granted to assetPauser', async function () {
       const {AssetRevealContract, assetPauser} = await setupTest();
       const pauserRole = await AssetRevealContract.PAUSER_ROLE();
@@ -80,18 +85,21 @@ describe('Asset Reveal', function () {
         .true;
     });
   });
+
   describe('EIP712', function () {
     it("name is 'Sandbox Asset Reveal'", async function () {
       const {AssetRevealContract} = await setupTest();
       const eip712Domain = await AssetRevealContract.eip712Domain();
       expect(eip712Domain.name).to.be.equal('Sandbox Asset Reveal');
     });
+
     it("version is '1.0'", async function () {
       const {AssetRevealContract} = await setupTest();
       const eip712Domain = await AssetRevealContract.eip712Domain();
       expect(eip712Domain.version).to.be.equal('1.0');
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetRevealContract, TRUSTED_FORWARDER} = await setupTest();

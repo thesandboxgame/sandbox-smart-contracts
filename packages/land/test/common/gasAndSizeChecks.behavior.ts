@@ -125,6 +125,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
         oldContractSize[contractName] / 1000,
       );
     });
+
     describe('Gas Measurement', function () {
       for (const s of [1, 3, 6, 12, 24]) {
         it(`mintQuad of size ${s} x ${s}`, async function () {
@@ -141,6 +142,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
           );
         });
       }
+
       it(`approvals`, async function () {
         const {LandAsMinter, LandAsOther, other, other2} =
           await loadFixture(setupLand);
@@ -162,6 +164,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
           true,
         );
       });
+
       it(`transferFrom`, async function () {
         const methods = ['transferFrom', 'safeTransferFrom'];
         for (const m of methods) {
@@ -171,6 +174,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
           await measure(m, LandAsOther, m, other, other2, getQuadId(0, 0));
         }
       });
+
       it(`batchTransferFrom`, async function () {
         const methods = ['batchTransferFrom', 'safeBatchTransferFrom'];
         const ids = [];
@@ -194,6 +198,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
           );
         }
       });
+
       describe('transferQuad', function () {
         for (const s of [1, 3, 6, 12, 24]) {
           it(`transferQuad of size ${s} x ${s} full quad, no regroup`, async function () {
@@ -262,6 +267,7 @@ export function gasAndSizeChecks(setupLand, contractName: string) {
           });
         }
       });
+
       describe('mintAndTransferQuad', function () {
         for (const s of [1, 3, 6, 12, 24]) {
           it(`mintAndTransferQuad of size ${s} x ${s}`, async function () {
