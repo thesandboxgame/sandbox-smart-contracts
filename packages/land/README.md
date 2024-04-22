@@ -4,6 +4,18 @@ A [LAND](https://sandboxgame.gitbook.io/the-sandbox/land/what-is-land) is a
 digital piece of real-estate in The Sandbox's metaverse. Each LAND is a unique
 piece of the metaverse map which is a grid of 408x408 lands.
 
+## Architecture
+
+The main goal of this package is to merge the base code of the 2 LAND contracts that has been deployed on ethereum & polygon networks in order to unify the features and reduce the technical differences. Learn more about the differences between the 2 contracts & this update in [this documentation](contracts/LandUpdate.md).
+
+The package contains into 3 main contracts:
+
+| Component                                      | Description                                                                                                                              |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [Land](contracts/Land.md)                   | ERC721 contract handling the LAND tokens deployed on the ethereum network (L1)                   |
+| [PolygonLand](contracts/PolygonLand.md)       | ERC721 contract handling the LAND tokens deployed on the polygon network (L2)              |
+| [LandMetadataRegistry](contracts/LandMetadataRegistry.md)     | Contract managing extra metadata onchain like premiumness & neighborhood                                                                                   |
+
 ## Running the project locally
 
 Install dependencies with `yarn`
