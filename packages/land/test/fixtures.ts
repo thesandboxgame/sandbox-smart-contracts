@@ -90,9 +90,13 @@ export async function setupLandContract() {
   const MetadataRegistryContract2 = await MetadataRegistryFactory.deploy();
 
   const LandFactory = await ethers.getContractFactory('LandMock');
-  const LandContract = await LandFactory.deploy();
-
-  await LandContract.initialize(landAdmin);
+  const LandContract = await upgrades.deployProxy(
+    LandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
 
   const LandContractWithoutMetadataRegistry = await LandFactory.deploy();
   await LandContractWithoutMetadataRegistry.initialize(landAdmin);
