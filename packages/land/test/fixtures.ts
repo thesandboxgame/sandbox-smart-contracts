@@ -94,6 +94,9 @@ export async function setupLandContract() {
 
   await LandContract.initialize(landAdmin);
 
+  const LandContractWithoutMetadataRegistry = await LandFactory.deploy();
+  await LandContractWithoutMetadataRegistry.initialize(landAdmin);
+
   // deploy mocks
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
     'ERC721TokenReceiverMock',
@@ -136,6 +139,7 @@ export async function setupLandContract() {
     LandAsOther,
     LandAsOther1,
     LandAsOther2,
+    LandContractWithoutMetadataRegistry,
     MetadataRegistryContract,
     MetadataRegistryContract2,
     MetadataRegistryAsAdmin,
@@ -298,6 +302,14 @@ export async function setupPolygonLandContract() {
     },
   );
 
+  const LandContractWithoutMetadataRegistry = await upgrades.deployProxy(
+    PolygonLandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
+
   // mock contract deploy
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
     'ERC721TokenReceiverMock',
@@ -353,6 +365,7 @@ export async function setupPolygonLandContract() {
     LandAsOther,
     LandAsOther1,
     LandAsOther2,
+    LandContractWithoutMetadataRegistry,
     MetadataRegistryContract,
     MetadataRegistryContract2,
     MetadataRegistryAsAdmin,
