@@ -130,6 +130,37 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
           .to.emit(LandAsOther, 'Transfer')
           .withArgs(other, ZeroAddress, 0);
       });
+
+      it('should approve operator with approvalForAll to burn quad', async function () {
+        const {
+          LandContract,
+          LandAsAdmin,
+          LandAsMinter,
+          LandAsOther,
+          LandAsOther1,
+          deployer,
+          other,
+          other1,
+        } = await loadFixture(setupLand);
+
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await LandAsAdmin.setSuperOperator(deployer, true);
+        await LandContract.setApprovalForAllFor(other, other1, true);
+
+        await expect(LandAsOther1.burnFrom(other, 0))
+          .to.emit(LandAsOther, 'Transfer')
+          .withArgs(other, ZeroAddress, 0);
+      });
+
+      it('should revert burning tokens by unauthorized operator', async function () {
+        const {LandAsMinter, other, LandAsOther1} =
+          await loadFixture(setupLand);
+
+        await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+        await expect(LandAsOther1.burnFrom(other, 0)).to.be.revertedWith(
+          'UNAUTHORIZED_BURN',
+        );
+      });
     });
 
     describe('batchTransfer', function () {
