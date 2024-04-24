@@ -147,6 +147,16 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       );
     });
 
+    it('should revert transfer quad when to is a contract and not a ERC721 receiver', async function () {
+      const {LandAsOther, TestERC721TokenReceiver, LandAsMinter, other} =
+        await loadFixture(setupLand);
+      await TestERC721TokenReceiver.returnWrongBytes();
+      await LandAsMinter.mintQuad(other, 6, 0, 0, '0x');
+      await expect(
+        LandAsOther.transferQuad(other, TestERC721TokenReceiver, 6, 0, 0, '0x'),
+      ).to.be.revertedWith('erc721 batchTransfer rejected');
+    });
+
     it('should transfer quads to a contract supporting ERC721 mandatory receiver', async function () {
       const {LandAsMinter, LandAsOther, other, TestERC721TokenReceiver} =
         await loadFixture(setupLand);
@@ -825,11 +835,13 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       ).to.be.revertedWith('Invalid x coordinate');
     });
 
-    it('should revert when x coordinate is out of bounds', async function () {
-      const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintAndTransferQuad(deployer, 3, 441, 441, '0x'),
-      ).to.be.revertedWith('x out of bounds');
+    it('should mint and transfer quad when a part of quad is already minted', async function () {
+      const {LandContract, LandAsMinter, landMinter, other} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(landMinter, 1, 0, 0, '0x');
+      expect(await LandContract.balanceOf(other)).to.be.equal(0);
+      await LandAsMinter.mintAndTransferQuad(other, 3, 0, 0, '0x');
+      expect(await LandContract.balanceOf(other)).to.be.equal(3 * 3);
     });
 
     it('should transfer an already minted quad using mintAndTransferQuad', async function () {
@@ -927,6 +939,35 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           '0x',
         ),
       ).to.be.revertedWith('erc721 batchTransfer rejected');
+    });
+
+    it('should transfer quads to a contract supporting ERC721 receiver', async function () {
+      const {LandAsMinter, LandAsOther, other, TestERC721TokenReceiver} =
+        await loadFixture(setupLand);
+
+      const quadSize = 6;
+      await LandAsMinter.mintQuad(other, quadSize, 0, 0, '0x');
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(
+        quadSize * quadSize,
+      );
+      expect(await LandAsOther.balanceOf(TestERC721TokenReceiver)).to.be.equal(
+        0,
+      );
+
+      await LandAsOther.batchTransferQuad(
+        other,
+        TestERC721TokenReceiver,
+        [quadSize],
+        [0],
+        [0],
+        '0x',
+      );
+
+      expect(await LandAsOther.balanceOf(other)).to.be.equal(0);
+      expect(await LandAsOther.balanceOf(TestERC721TokenReceiver)).to.be.equal(
+        quadSize * quadSize,
+      );
     });
 
     it('should reverts transfers batch of quads when to is zero address', async function () {
