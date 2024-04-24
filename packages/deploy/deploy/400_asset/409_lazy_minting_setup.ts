@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const exchangeContract = await deployments.get('Exchange');
 
   const LAZY_MINTING_FEE_BPS = 0;
-  const LAZY_MINTING_FEE_RECIVER = treasury;
 
   const mintingFee = await read('AssetCreate', 'lazyMintFeeInBps');
   if (Number(mintingFee) !== LAZY_MINTING_FEE_BPS) {
@@ -27,17 +26,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const mintingFeeReceiver = await read('AssetCreate', 'lazyMintFeeReceiver');
-  if (mintingFeeReceiver !== LAZY_MINTING_FEE_RECIVER) {
+  if (mintingFeeReceiver !== treasury) {
     await catchUnknownSigner(
       execute(
         'AssetCreate',
         {from: assetAdmin, log: true},
         'setLazyMintFeeReceiver',
-        LAZY_MINTING_FEE_RECIVER
+        treasury
       )
     );
     log(
-      `[AssetCreate-Lazy Minting] Lazy minting fee receiver set to ${LAZY_MINTING_FEE_RECIVER}`
+      `[AssetCreate-Lazy Minting] Lazy minting fee receiver set to ${treasury}`
     );
   }
 
