@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.23;
 
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
@@ -14,7 +15,7 @@ import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
-contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, WithOwner {
+contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
     event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
 
     /// @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
@@ -22,7 +23,9 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
         // be backward compatible with the current deployment
-        require(_getAdmin() == address(0), "already initialized");
+        if (_getAdmin() != address(0)) {
+            revert InvalidInitialization();
+        }
         _changeAdmin(admin);
     }
 
@@ -55,7 +58,9 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        if (subscriptionOrRegistrantToCopy == address(0)) {
+            revert InvalidAddress();
+        }
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 

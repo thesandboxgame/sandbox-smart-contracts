@@ -1,12 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {IErrors} from "../interfaces/IErrors.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /// @title WithAdmin
 /// @author The Sandbox
 /// @notice Add an admin to the contract
-abstract contract WithAdmin is Context {
+abstract contract WithAdmin is IErrors, Context {
     /// @notice Emits when the contract administrator is changed.
     /// @param oldAdmin The address of the previous administrator.
     /// @param newAdmin The address of the new administrator.
@@ -14,7 +15,9 @@ abstract contract WithAdmin is Context {
 
     /// @notice checks if the sender is admin
     modifier onlyAdmin() {
-        require(_msgSender() == _getAdmin(), "only admin allowed");
+        if (_msgSender() != _getAdmin()) {
+            revert OnlyAdmin();
+        }
         _;
     }
 
@@ -30,8 +33,12 @@ abstract contract WithAdmin is Context {
     /// @param newAdmin The address of the new administrator.
     function changeAdmin(address newAdmin) external onlyAdmin {
         address oldAdmin = _getAdmin();
-        require(oldAdmin != address(0), "invalid not set yet");
-        require(oldAdmin != newAdmin, "only new admin");
+        if (oldAdmin == address(0)) {
+            revert InvalidAddress();
+        }
+        if (oldAdmin == newAdmin) {
+            revert InvalidArgument();
+        }
         _changeAdmin(newAdmin);
     }
 
@@ -39,7 +46,9 @@ abstract contract WithAdmin is Context {
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
     function _changeAdmin(address newAdmin) internal {
-        require(newAdmin != address(0), "invalid admin");
+        if (newAdmin == address(0)) {
+            revert InvalidAddress();
+        }
         address oldAdmin = _getAdmin();
         emit AdminChanged(oldAdmin, newAdmin);
         _setAdmin(newAdmin);

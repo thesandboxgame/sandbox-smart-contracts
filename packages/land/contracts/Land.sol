@@ -22,7 +22,9 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
         // be backward compatible with the current deployment
-        require(_getAdmin() == address(0), "already initialized");
+        if (_getAdmin() != address(0)) {
+            revert InvalidInitialization();
+        }
         _changeAdmin(admin);
     }
 
@@ -30,7 +32,9 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        if (subscriptionOrRegistrantToCopy == address(0)) {
+            revert InvalidAddress();
+        }
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
