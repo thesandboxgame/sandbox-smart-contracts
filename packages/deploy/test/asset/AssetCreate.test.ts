@@ -8,12 +8,13 @@ const setupTest = deployments.createFixture(
       return await ethers.getContractAt(contract.abi, contract.address);
     }
 
-    const {assetAdmin, backendAuthWallet, assetPauser} =
+    const {assetAdmin, backendAuthWallet, assetPauser, treasury} =
       await getNamedAccounts();
     await deployments.fixture();
     const AssetContract = await getEthersContract('Asset');
     const AssetCreateContract = await getEthersContract('AssetCreate');
     const CatalystContract = await getEthersContract('Catalyst');
+    const ExchangeContract = await getEthersContract('Exchange');
     const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
     const AuthSuperValidatorContract = await getEthersContract(
       'AuthSuperValidator'
@@ -23,6 +24,8 @@ const setupTest = deployments.createFixture(
       AssetContract,
       AssetCreateContract,
       CatalystContract,
+      ExchangeContract,
+      treasury,
       TRUSTED_FORWARDER,
       AuthSuperValidatorContract,
       assetAdmin,
@@ -32,7 +35,7 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe('Asset Create', function () {
+describe.only('Asset Create', function () {
   describe('Contract references', function () {
     it('AuthSuperValidator', async function () {
       const {AssetCreateContract, AuthSuperValidatorContract} =
@@ -51,6 +54,12 @@ describe('Asset Create', function () {
       const {AssetCreateContract, CatalystContract} = await setupTest();
       expect(await AssetCreateContract.getCatalystContract()).to.be.equal(
         CatalystContract
+      );
+    });
+    it('Exchange', async function () {
+      const {AssetCreateContract, ExchangeContract} = await setupTest();
+      expect(await AssetCreateContract.getExchangeContract()).to.be.equal(
+        ExchangeContract
       );
     });
   });
@@ -112,5 +121,23 @@ describe('Asset Create', function () {
         TRUSTED_FORWARDER
       );
     });
+  });
+  describe('Lazy Minting', function () {
+    it('Lazy minting fee is set to 0', async function () {
+      const {AssetCreateContract} = await setupTest();
+      expect(await AssetCreateContract.lazyMintFeeInBps()).to.be.equal(0);
+    });
+    it('Lazy minting fee receiver is set to treasury', async function () {
+      const {AssetCreateContract, treasury} = await setupTest();
+      expect(await AssetCreateContract.lazyMintFeeReceiver()).to.be.equal(
+        treasury
+      );
+    });
+
+    // TODO
+    // - Exchange contract needs to be set
+    // - A seller order needs to be created
+    // - A buyer order needs to be created
+    it('');
   });
 });
