@@ -1,12 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import {IErrors} from "../interfaces/IErrors.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 
 /// @title WithSuperOperators
 /// @author The Sandbox
 /// @notice Add super operators handled by an admin
-abstract contract WithSuperOperators is WithAdmin {
+abstract contract WithSuperOperators is IErrors, WithAdmin {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     event SuperOperator(address indexed superOperator, bool indexed enabled);
@@ -15,8 +16,12 @@ abstract contract WithSuperOperators is WithAdmin {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
-        require(superOperator != address(0), "address 0 is not allowed");
-        require(enabled != _isSuperOperator(superOperator), "invalid status");
+        if (superOperator == address(0)) {
+            revert InvalidAddress();
+        }
+        if (enabled == _isSuperOperator(superOperator)) {
+            revert InvalidArgument();
+        }
         _setSuperOperator(superOperator, enabled);
         emit SuperOperator(superOperator, enabled);
     }

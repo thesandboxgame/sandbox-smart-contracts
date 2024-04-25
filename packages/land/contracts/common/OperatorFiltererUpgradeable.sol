@@ -11,13 +11,15 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is Context {
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+    /// @notice the caller is not the operator
+    error OperatorNotAllowed();
 
     modifier onlyAllowedOperatorApproval(address operator) virtual {
         IOperatorFilterRegistry registry = _getOperatorFilterRegistry();
         // Check registry code length to facilitate testing in environments without a deployed registry.
         if (address(registry).code.length > 0) {
             if (!registry.isOperatorAllowed(address(this), operator)) {
-                revert("Operator Not Allowed");
+                revert OperatorNotAllowed();
             }
         }
         _;
@@ -35,7 +37,7 @@ abstract contract OperatorFiltererUpgradeable is Context {
                 return;
             }
             if (!registry.isOperatorAllowed(address(this), _msgSender())) {
-                revert("Operator Not Allowed");
+                revert OperatorNotAllowed();
             }
         }
         _;
