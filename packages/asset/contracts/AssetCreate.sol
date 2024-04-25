@@ -50,7 +50,7 @@ contract AssetCreate is
     address public lazyMintFeeReceiver;
     // mapping of tokenId => maxSupply specified by the creator
     mapping(uint256 => uint256) public availableToMint;
-    IExchange public exchangeContract;
+    IExchange private exchangeContract;
 
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -270,6 +270,12 @@ contract AssetCreate is
     /// @return authValidatorAddress The auth validator address
     function getAuthValidator() external view returns (address authValidatorAddress) {
         return address(authValidator);
+    }
+
+    /// @notice Get the exchange contract address
+    /// @return exchangeContractAddress The exchange contract address
+    function getExchangeContract() external view returns (address exchangeContractAddress) {
+        return address(exchangeContract);
     }
 
     /// @notice Creates a hash of the mint data
