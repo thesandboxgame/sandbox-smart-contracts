@@ -565,7 +565,7 @@ contract AssetCreate is
         address paymentToken,
         address creator
     ) private {
-        uint256 fee = 0;
+        uint256 fee;
         if (lazyMintFeeInBps > 0) {
             fee = (unitPrice * amount * lazyMintFeeInBps) / 10000;
             SafeERC20.safeTransferFrom(IERC20(paymentToken), from, lazyMintFeeReceiver, fee);
