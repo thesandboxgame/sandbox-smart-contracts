@@ -40,7 +40,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const exchangeAddress = await read('AssetCreate', 'exchangeContract');
+  const exchangeAddress = await read('AssetCreate', 'getExchangeContract');
   if (exchangeAddress !== exchangeContract.address) {
     await catchUnknownSigner(
       execute(
