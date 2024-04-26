@@ -179,7 +179,7 @@ contract AssetCreate is
                 revealed[i] ? 1 : 0,
                 false
             );
-            unchecked {i++;}
+            unchecked {++i;}
         }
 
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
@@ -231,7 +231,7 @@ contract AssetCreate is
         for (uint256 i; i < amounts.length; ) {
             revealed[i] = true;
             tier[i] = 0;
-            unchecked {i++;}
+            unchecked {++i;}
         }
 
         require(
@@ -247,7 +247,7 @@ contract AssetCreate is
         uint256[] memory tokenIds = new uint256[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
             tokenIds[i] = TokenIdUtils.generateTokenId(creator, 0, ++creatorNonces[creator], 1, false);
-            unchecked {i++;}
+            unchecked {++i;}
         }
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
@@ -352,7 +352,7 @@ contract AssetCreate is
         bytes32[] memory encodedHashes = new bytes32[](arrayLength);
         for (uint256 i; i < arrayLength; ) {
             encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
-            unchecked {i++;}
+            unchecked {++i;}
         }
 
         return keccak256(abi.encodePacked(encodedHashes));
@@ -537,7 +537,7 @@ contract AssetCreate is
                 mintData.paymentTokens[i],
                 mintData.creators[i]
             );
-            unchecked {i++;}
+            unchecked {++i;}
         }
 
         catalystContract.burnBatchFrom(mintData.caller, tiersToBurn, mintData.amounts);
