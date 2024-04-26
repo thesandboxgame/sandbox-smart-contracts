@@ -7,9 +7,9 @@ export function landConfig(setupLand, Contract: string) {
     describe('roles', function () {
       it('Only admin can set landMinter', async function () {
         const {LandContract, deployer} = await loadFixture(setupLand);
-        await expect(LandContract.setMinter(deployer, true)).to.be.revertedWith(
-          'only admin allowed',
-        );
+        await expect(
+          LandContract.setMinter(deployer, true),
+        ).to.be.revertedWithCustomError(LandContract, 'OnlyAdmin');
       });
 
       it('should enable a landMinter', async function () {
@@ -27,9 +27,9 @@ export function landConfig(setupLand, Contract: string) {
 
       it('should not set royaltyManager if caller is not admin', async function () {
         const {LandAsOther, other} = await loadFixture(setupLand);
-        await expect(LandAsOther.setRoyaltyManager(other)).to.be.revertedWith(
-          'only admin allowed',
-        );
+        await expect(
+          LandAsOther.setRoyaltyManager(other),
+        ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
       });
 
       it('should set royaltyManager', async function () {
@@ -44,9 +44,9 @@ export function landConfig(setupLand, Contract: string) {
 
       it('should not set owner if caller is not admin', async function () {
         const {LandAsOther, other} = await loadFixture(setupLand);
-        await expect(LandAsOther.transferOwnership(other)).to.be.revertedWith(
-          'only admin allowed',
-        );
+        await expect(
+          LandAsOther.transferOwnership(other),
+        ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
       });
 
       it('should set owner', async function () {

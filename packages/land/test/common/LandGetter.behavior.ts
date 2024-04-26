@@ -55,33 +55,33 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
     it('should revert when fetching owner of given quad id with wrong size', async function () {
       const {LandContract} = await loadFixture(setupLand);
       const id = getId(9, 0, 0);
-      await expect(LandContract.ownerOf(id)).to.be.revertedWith(
-        'Invalid token id',
-      );
+      await expect(LandContract.ownerOf(id))
+        .to.be.revertedWithCustomError(LandContract, 'ERC721NonexistentToken')
+        .withArgs(id);
     });
 
     it('should revert when fetching owner of given quad id with invalid token', async function () {
       const {LandContract} = await loadFixture(setupLand);
       const id = getId(3, 2, 2);
-      await expect(LandContract.ownerOf(id)).to.be.revertedWith(
-        'Invalid token id',
-      );
+      await expect(LandContract.ownerOf(id))
+        .to.be.revertedWithCustomError(LandContract, 'ERC721NonexistentToken')
+        .withArgs(id);
     });
 
     it('should revert when fetching owner of given quad id with invalid token by(x)', async function () {
       const {LandContract} = await loadFixture(setupLand);
       const id = getId(3, 2, 0);
-      await expect(LandContract.ownerOf(id)).to.be.revertedWith(
-        'Invalid token id',
-      );
+      await expect(LandContract.ownerOf(id))
+        .to.be.revertedWithCustomError(LandContract, 'ERC721NonexistentToken')
+        .withArgs(id);
     });
 
     it('should revert when fetching owner of given quad id with invalid token(y)', async function () {
       const {LandAsMinter} = await loadFixture(setupLand);
       const id = getId(3, 0, 2);
-      await expect(LandAsMinter.ownerOf(id)).to.be.revertedWith(
-        'Invalid token id',
-      );
+      await expect(LandAsMinter.ownerOf(id))
+        .to.be.revertedWithCustomError(LandAsMinter, 'ERC721NonexistentToken')
+        .withArgs(id);
     });
 
     it('should return owner of given quad id', async function () {
@@ -152,9 +152,9 @@ export function shouldCheckLandGetter(setupLand, Contract: string) {
       const {LandContract} = await loadFixture(setupLand);
 
       const tokenId = 2 + 2 * GRID_SIZE;
-      await expect(LandContract.tokenURI(tokenId)).to.be.revertedWith(
-        'Id does not exist',
-      );
+      await expect(LandContract.tokenURI(tokenId))
+        .to.be.revertedWithCustomError(LandContract, 'ERC721NonexistentToken')
+        .withArgs(tokenId);
     });
   });
 }

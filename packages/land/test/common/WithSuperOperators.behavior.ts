@@ -14,7 +14,7 @@ export function shouldCheckForSuperOperators(setupLand, Contract: string) {
       const {LandContract, deployer} = await loadFixture(setupLand);
       await expect(
         LandContract.setSuperOperator(deployer, true),
-      ).to.be.revertedWith('only admin allowed');
+      ).to.be.revertedWithCustomError(LandContract, 'OnlyAdmin');
       expect(await LandContract.isSuperOperator(deployer)).to.be.false;
     });
 
@@ -38,10 +38,10 @@ export function shouldCheckForSuperOperators(setupLand, Contract: string) {
       const {LandAsAdmin} = await loadFixture(setupLand);
       await expect(
         LandAsAdmin.setSuperOperator(ZeroAddress, false),
-      ).to.be.revertedWith('address 0 is not allowed');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
       await expect(
         LandAsAdmin.setSuperOperator(ZeroAddress, true),
-      ).to.be.revertedWith('address 0 is not allowed');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
       expect(await LandAsAdmin.isSuperOperator(ZeroAddress)).to.be.false;
     });
 
@@ -52,7 +52,7 @@ export function shouldCheckForSuperOperators(setupLand, Contract: string) {
       expect(await LandAsAdmin.isSuperOperator(landAdmin.address)).to.be.true;
       await expect(
         LandAsAdmin.setSuperOperator(landAdmin.address, true),
-      ).to.be.revertedWith('invalid status');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidArgument');
       await expect(LandAsAdmin.setSuperOperator(landAdmin.address, false)).not
         .to.be.reverted;
     });
@@ -62,7 +62,7 @@ export function shouldCheckForSuperOperators(setupLand, Contract: string) {
       expect(await LandAsAdmin.isSuperOperator(landAdmin.address)).to.be.false;
       await expect(
         LandAsAdmin.setSuperOperator(landAdmin.address, false),
-      ).to.be.revertedWith('invalid status');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidArgument');
       await expect(LandAsAdmin.setSuperOperator(landAdmin.address, true)).not.to
         .be.reverted;
     });

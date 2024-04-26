@@ -15,7 +15,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(deployer, landAdmin, 6, 1, 1, '0x'),
-      ).to.be.revertedWith('Invalid x coordinate');
+      )
+        .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
+        .withArgs(6, 1, 1);
     });
 
     it('should revert if y co-ordinate of Quad is invalid', async function () {
@@ -24,7 +26,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(deployer, landAdmin, 6, 0, 5, '0x'),
-      ).to.be.revertedWith('Invalid y coordinate');
+      )
+        .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
+        .withArgs(6, 0, 5);
     });
 
     it('should revert when x coordinate is out of bounds', async function () {
@@ -33,7 +37,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(deployer, landAdmin, 3, 441, 0, '0x'),
-      ).to.be.revertedWith('x out of bounds');
+      )
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 441, 0);
     });
 
     it('should revert when y coordinate is out of bounds', async function () {
@@ -42,7 +48,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(deployer, landAdmin, 3, 0, 441, '0x'),
-      ).to.be.revertedWith('y out of bounds');
+      )
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 0, 441);
     });
 
     it('should revert for invalid size', async function () {
@@ -51,7 +59,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(deployer, landAdmin, 9, 0, 0, '0x'),
-      ).to.be.revertedWith('Invalid size');
+      )
+        .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
+        .withArgs(9, 0, 0);
     });
 
     it('should revert when to is ZeroAddress', async function () {
@@ -60,7 +70,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(landAdmin, 3, 0, 0, '0x');
       await expect(
         LandAsAdmin.transferQuad(landAdmin, ZeroAddress, 3, 0, 0, '0x'),
-      ).to.be.revertedWith("can't send to zero address");
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
     });
 
     it('should revert when from is ZeroAddress', async function () {
@@ -69,7 +79,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(landAdmin, 3, 0, 0, '0x');
       await expect(
         LandAsAdmin.transferQuad(ZeroAddress, landAdmin, 3, 0, 0, '0x'),
-      ).to.be.revertedWith('from is zero address');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
     });
 
     it('should revert when operator is not approved', async function () {
@@ -78,30 +88,32 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(landAdmin, 3, 0, 0, '0x');
       await expect(
         LandContract.transferQuad(landAdmin, deployer, 3, 0, 0, '0x'),
-      ).to.be.revertedWith('not authorized to transferQuad');
+      )
+        .to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner')
+        .withArgs(deployer);
     });
 
     it('should revert when token does not exist', async function () {
       const {LandAsAdmin, deployer, landAdmin} = await loadFixture(setupLand);
-      await expect(
-        LandAsAdmin.transferQuad(landAdmin, deployer, 1, 0, 0, '0x'),
-      ).to.be.revertedWith('token does not exist');
+      await expect(LandAsAdmin.transferQuad(landAdmin, deployer, 1, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsAdmin, 'InvalidCoordinates')
+        .withArgs(1, 0, 0);
     });
 
     it('should revert for transfer Quad of zero size', async function () {
       const {LandAsAdmin, deployer, landAdmin} = await loadFixture(setupLand);
-      await expect(
-        LandAsAdmin.transferQuad(landAdmin, deployer, 0, 0, 0, '0x'),
-      ).to.be.revertedWith('Invalid size');
+      await expect(LandAsAdmin.transferQuad(landAdmin, deployer, 0, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsAdmin, 'InvalidCoordinates')
+        .withArgs(0, 0, 0);
     });
 
     it('should revert when sender is not owner of Quad', async function () {
       const {LandAsAdmin, deployer, landAdmin, LandAsMinter} =
         await loadFixture(setupLand);
       await LandAsMinter.mintQuad(deployer, 3, 0, 0, '0x');
-      await expect(
-        LandAsAdmin.transferQuad(landAdmin, deployer, 6, 0, 0, '0x'),
-      ).to.be.revertedWith('not owner of child Quad');
+      await expect(LandAsAdmin.transferQuad(landAdmin, deployer, 6, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsAdmin, 'NotOwner')
+        .withArgs(0, 0);
     });
 
     it('should revert if some sub-quads are not owned by the sender', async function () {
@@ -110,9 +122,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
       await LandAsMinter.mintQuad(other, 6, 0, 0, '0x');
       await LandAsOther.transferQuad(other, other2, 1, 0, 0, '0x');
-      await expect(
-        LandAsOther.transferQuad(other, other1, 6, 0, 0, '0x'),
-      ).to.be.revertedWith('not owner');
+      await expect(LandAsOther.transferQuad(other, other1, 6, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner')
+        .withArgs(other);
     });
 
     it('should not revert when from is owner of all subQuads of Quad', async function () {
@@ -154,7 +166,12 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(other, 6, 0, 0, '0x');
       await expect(
         LandAsOther.transferQuad(other, TestERC721TokenReceiver, 6, 0, 0, '0x'),
-      ).to.be.revertedWith('erc721 batchTransfer rejected');
+      )
+        .to.be.revertedWithCustomError(
+          LandAsOther,
+          'ERC721InvalidBatchReceiver',
+        )
+        .withArgs(TestERC721TokenReceiver);
     });
 
     it('should transfer quads to a contract supporting ERC721 mandatory receiver', async function () {
@@ -209,7 +226,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
             }
             await expect(
               LandContract.transferQuad(deployer, other, size1, 0, 0, '0x'),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandContract, 'NotOwner')
+              .withArgs(0, 0);
           }
         }
       });
@@ -233,9 +252,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
         await LandContract.burn(0);
 
         // should not be able to transfer a 3x3 quad that has a burnt 1x1
-        await expect(
-          LandContract.transferQuad(deployer, other, 3, 0, 0, '0x'),
-        ).to.be.revertedWith('not owner');
+        await expect(LandContract.transferQuad(deployer, other, 3, 0, 0, '0x'))
+          .to.be.revertedWithCustomError(LandContract, 'NotOwner')
+          .withArgs(0, 0);
       });
 
       it('transfers of quads of all sizes from self', async function () {
@@ -275,7 +294,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
             0,
             bytes,
           ),
-        ).to.be.revertedWith('from is zero address');
+        ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
       });
 
       it('should revert transfer quad to zero address', async function () {
@@ -292,7 +311,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
             0,
             bytes,
           ),
-        ).to.be.revertedWith("can't send to zero address");
+        ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
       });
 
       describe('With approval', function () {
@@ -313,7 +332,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
           await expect(
             LandContract.transferQuad(other, deployer, 1, 0, 0, bytes),
-          ).to.be.revertedWith('token does not exist');
+          )
+            .to.be.revertedWithCustomError(LandAsOther, 'InvalidCoordinates')
+            .withArgs(1, 0, 0);
         });
 
         it('should not transfer burned quads', async function () {
@@ -340,7 +361,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
             await expect(
               LandContract.transferQuad(other, deployer, size, 0, 0, bytes),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+              .withArgs(0, 0);
           }
         });
       });
@@ -361,7 +384,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
           await expect(
             LandContract.transferQuad(deployer, other, 1, 0, 0, bytes),
-          ).to.be.revertedWith('token does not exist');
+          )
+            .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
+            .withArgs(1, 0, 0);
         });
 
         it('should not transfer burned quads', async function () {
@@ -388,7 +413,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
             await expect(
               LandAsOther.transferQuad(other, deployer, size, 0, 0, bytes),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+              .withArgs(0, 0);
           }
         });
       });
@@ -451,7 +478,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
             await expect(
               LandContract.transferQuad(other, deployer, size, 0, 0, bytes),
-            ).to.be.revertedWith('not authorized to transferQuad');
+            )
+              .to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner')
+              .withArgs(deployer);
           }
         });
       });
@@ -483,7 +512,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
                 0,
                 '0x',
               ),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner')
+              .withArgs(deployer);
           });
         });
       });
@@ -604,7 +635,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
         await expect(
           LandAsMinter.mintQuad(deployer, 3, 3, 3, bytes),
-        ).to.be.revertedWith('Already minted');
+        ).to.be.revertedWithCustomError(LandAsOther, 'AlreadyMinted');
       });
 
       it('transferring all 1X1 quad from a 6x6', async function () {
@@ -639,7 +670,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
         await expect(
           LandAsMinter.mintQuad(deployer, 6, 6, 6, bytes),
-        ).to.be.revertedWith('Already minted');
+        ).to.be.revertedWithCustomError(LandAsOther, 'AlreadyMinted');
       });
 
       it('transferring all 1X1 quad from a 12x12', async function () {
@@ -673,7 +704,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
         await expect(
           LandAsMinter.mintQuad(deployer, 12, 12, 12, bytes),
-        ).to.be.revertedWith('Already minted');
+        ).to.be.revertedWithCustomError(LandAsOther, 'AlreadyMinted');
       });
     });
   });
@@ -696,7 +727,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
                 0,
                 '0x',
               ),
-            ).to.be.revertedWith('Already minted');
+            ).to.be.revertedWithCustomError(LandAsMinter, 'AlreadyMinted');
           });
         });
       });
@@ -708,7 +739,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
         sizes.forEach((innerSize) => {
           if (innerSize <= outerSize) return;
           it(`inner ${innerSize}x${innerSize} quad, outer ${outerSize}x${outerSize} quad`, async function () {
-            const {LandAsMinter, deployer, landAdmin} =
+            const {LandAsMinter, deployer, landAdmin, landMinter} =
               await loadFixture(setupLand);
             await LandAsMinter.mintQuad(deployer, innerSize, 0, 0, '0x');
             await expect(
@@ -719,7 +750,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
                 0,
                 '0x',
               ),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandAsMinter, 'ERC721InvalidOwner')
+              .withArgs(landMinter);
           });
         });
       });
@@ -728,9 +761,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
     it('should revert if signer is not landMinter', async function () {
       const {LandAsOther, other} = await loadFixture(setupLand);
 
-      await expect(
-        LandAsOther.mintAndTransferQuad(other, 3, 0, 0, '0x'),
-      ).to.be.revertedWith('!AUTHORIZED');
+      await expect(LandAsOther.mintAndTransferQuad(other, 3, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidOwner')
+        .withArgs(other);
     });
 
     it('should revert if to zero address', async function () {
@@ -739,21 +772,21 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsAdmin.setMinter(deployer, true);
       await expect(
         LandContract.mintAndTransferQuad(ZeroAddress, 3, 3, 3, '0x'),
-      ).to.be.revertedWith('to is zero address');
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
     });
 
     it('should revert when y is out of bound', async function () {
       const {LandAsMinter, landAdmin} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintAndTransferQuad(landAdmin, 3, 0, 441, '0x'),
-      ).to.be.revertedWith('y out of bounds');
+      await expect(LandAsMinter.mintAndTransferQuad(landAdmin, 3, 0, 441, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 0, 441);
     });
 
     it('should revert when x is out of bound', async function () {
       const {LandAsMinter, landAdmin} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintAndTransferQuad(landAdmin, 3, 441, 0, '0x'),
-      ).to.be.revertedWith('x out of bounds');
+      await expect(LandAsMinter.mintAndTransferQuad(landAdmin, 3, 441, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 441, 0);
     });
 
     it('should revert when size is invalid', async function () {
@@ -769,7 +802,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           0,
           '0x',
         ),
-      ).to.be.revertedWith('Invalid size');
+      )
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(9, 0, 0);
     });
 
     it('should revert when to is non ERC721 receiving contract', async function () {
@@ -785,7 +820,12 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           0,
           '0x',
         ),
-      ).to.be.revertedWith('erc721 batchTransfer rejected');
+      )
+        .to.be.revertedWithCustomError(
+          LandAsMinter,
+          'ERC721InvalidBatchReceiver',
+        )
+        .withArgs(TestERC721TokenReceiver);
     });
 
     it('should not revert when to is ERC721 receiving contract', async function () {
@@ -830,9 +870,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
 
     it('should revert when coordinates are wrong', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintAndTransferQuad(deployer, 3, 5, 5, '0x'),
-      ).to.be.revertedWith('Invalid x coordinate');
+      await expect(LandAsMinter.mintAndTransferQuad(deployer, 3, 5, 5, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 5, 5);
     });
 
     it('should mint and transfer quad when a part of quad is already minted', async function () {
@@ -873,7 +913,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0],
           '0x',
         ),
-      ).to.be.revertedWith('invalid from');
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
     });
 
     it('should revert when sizes, x, y are not of same length', async function () {
@@ -889,7 +929,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0, 6],
           '0x',
         ),
-      ).to.be.revertedWith("sizes's and x's are different");
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidLength');
     });
 
     it('should revert when x, y are not of same length', async function () {
@@ -905,7 +945,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [6],
           '0x',
         ),
-      ).to.be.revertedWith("x's and y's are different");
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidLength');
     });
 
     it('should revert when size, x are not of same length', async function () {
@@ -921,7 +961,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0, 6],
           '0x',
         ),
-      ).to.be.revertedWith("sizes's and x's are different");
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidLength');
     });
 
     it('should revert when to is a contract and not a ERC721 receiver', async function () {
@@ -938,7 +978,12 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0],
           '0x',
         ),
-      ).to.be.revertedWith('erc721 batchTransfer rejected');
+      )
+        .to.be.revertedWithCustomError(
+          LandContract,
+          'ERC721InvalidBatchReceiver',
+        )
+        .withArgs(TestERC721TokenReceiver);
     });
 
     it('should transfer quads to a contract supporting ERC721 receiver', async function () {
@@ -983,7 +1028,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0],
           '0x',
         ),
-      ).to.be.revertedWith("can't send to zero address");
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
     });
 
     it('should revert when size array and coordinates array are of different length', async function () {
@@ -999,7 +1044,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           [0],
           '0x',
         ),
-      ).to.be.revertedWith("can't send to zero address");
+      ).to.be.revertedWithCustomError(LandContract, 'InvalidAddress');
     });
 
     it('should revert when signer is not approved', async function () {
@@ -1008,7 +1053,9 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await LandAsMinter.mintQuad(deployer, 6, 0, 0, '0x');
       await expect(
         LandAsAdmin.batchTransferQuad(deployer, landAdmin, [6], [0], [0], '0x'),
-      ).to.be.revertedWith('not authorized');
+      )
+        .to.be.revertedWithCustomError(LandAsAdmin, 'ERC721InvalidOwner')
+        .withArgs(landAdmin);
     });
 
     it('transfers batch of quads of different sizes', async function () {

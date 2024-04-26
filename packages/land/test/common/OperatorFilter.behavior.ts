@@ -11,14 +11,14 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         await loadFixture(setupLand);
       await expect(
         LandAsOther.register(operatorFilterSubscription, true),
-      ).to.be.revertedWith('only admin allowed');
+      ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
     });
 
     it('should not set registry if subscription is zero address', async function () {
       const {LandAsAdmin} = await loadFixture(setupLand);
-      await expect(LandAsAdmin.register(ZeroAddress, true)).to.be.revertedWith(
-        "subscription can't be zero",
-      );
+      await expect(
+        LandAsAdmin.register(ZeroAddress, true),
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
     });
 
     it('should not set operatorRegistry if caller is not admin', async function () {
@@ -26,7 +26,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         await loadFixture(setupLand);
       await expect(
         LandAsOther.setOperatorRegistry(OperatorFilterRegistry),
-      ).to.be.revertedWith('only admin allowed');
+      ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
     });
 
     it('should be registered', async function () {
@@ -213,9 +213,9 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
     it('should revert for minted invalid size', async function () {
       const {LandAsMinter, other} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintQuad(other, 25, 0, 0, '0x'),
-      ).to.be.revertedWith('Invalid size');
+      await expect(LandAsMinter.mintQuad(other, 25, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(25, 0, 0);
     });
 
     it('should be able to safe transfer land if from is the owner of token', async function () {
@@ -445,7 +445,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approve(MockMarketPlace3, id2),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not be able to approveFor non blacklisted market places after they are blacklisted', async function () {
@@ -474,7 +477,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approveFor(other, MockMarketPlace3, id2),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not be able to setApprovalForAll non blacklisted market places after they are blacklisted', async function () {
@@ -500,7 +506,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther1.setApprovalForAll(MockMarketPlace3, true),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not be able to setApprovalForAllFor non blacklisted market places after they are blacklisted', async function () {
@@ -527,7 +536,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther1.setApprovalForAllFor(other1, MockMarketPlace3, true),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not be able to approve non blacklisted market places after there codeHashes are blacklisted', async function () {
@@ -560,7 +572,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approve(MockMarketPlace3, id2),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should not be able to approveFor non blacklisted market places after there codeHashes are blacklisted', async function () {
@@ -593,7 +608,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approveFor(other, MockMarketPlace3, id2),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should not be able to setApprovalForAll non blacklisted market places after there codeHashes are blacklisted', async function () {
@@ -623,7 +641,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther1.setApprovalForAll(MockMarketPlace3, true),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should not be able to setApprovalForAllFor non blacklisted market places after there codeHashes are blacklisted', async function () {
@@ -654,7 +675,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther1.setApprovalForAllFor(other1, MockMarketPlace3, true),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should be able to approve blacklisted market places after they are removed from the blacklist', async function () {
@@ -675,7 +699,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approve(MockMarketPlace1, id),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
@@ -712,7 +739,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.approveFor(other, MockMarketPlace1, id),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
@@ -745,7 +775,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.setApprovalForAll(MockMarketPlace1, true),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
@@ -779,7 +812,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
 
       await expect(
         LandAsOther.setApprovalForAllFor(other, MockMarketPlace1, true),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
@@ -801,8 +837,14 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should not be able to transfer through blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsMinter, LandAsOther, other, other1} =
-        await loadFixture(setupLand);
+      const {
+        MockMarketPlace1,
+        LandAsMinter,
+        LandAsOther,
+        OperatorFilterRegistry,
+        other,
+        other1,
+      } = await loadFixture(setupLand);
       await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
       const id = getId(1, 0, 0);
 
@@ -815,7 +857,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           id,
           '0x',
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not be able to transfer through market places after they are blacklisted', async function () {
@@ -856,7 +901,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           id2,
           '0x',
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should be able to transfer through non blacklisted market places', async function () {
@@ -911,7 +959,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           id2,
           '0x',
         ),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should be able to transfer through blacklisted market places after they are removed from blacklist', async function () {
@@ -939,7 +990,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           id,
           '0x',
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
@@ -965,6 +1019,7 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
         LandAsMinter,
         LandAsOther,
         LandAsOther1,
+        OperatorFilterRegistry,
         other,
         other1,
       } = await loadFixture(setupLand);
@@ -979,7 +1034,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           other1,
           id,
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should be able to transfer(without data) through non blacklisted market places', async function () {
@@ -1040,7 +1098,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           other,
           id,
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should be not be able to transfer(without data) through market places after their codeHash is blackListed', async function () {
@@ -1086,7 +1147,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           other,
           id,
         ),
-      ).to.be.revertedWith('Codehash is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'CodehashIsFiltered',
+      );
     });
 
     it('it should be able to transfer(without data) through blacklisted market places after they are removed from blacklist', async function () {
@@ -1112,7 +1176,10 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           other1,
           id,
         ),
-      ).to.be.revertedWith('Address is filtered');
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
 
       await OperatorFilterRegistry.updateCodeHash(
         operatorFilterSubscription,
