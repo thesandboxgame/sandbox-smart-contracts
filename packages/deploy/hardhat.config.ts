@@ -268,6 +268,12 @@ const namedAccounts = {
     mainnet: null,
     polygon: '0xF06dD9b61d480704Cc7bEF717e5Ea6efB6Af75bE', // Final admin should be 0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e
   },
+  lazyMintingTestAccount1: {
+    default: 5,
+  },
+  lazyMintingTestAccount2: {
+    default: 6,
+  },
 };
 
 /**

@@ -6,6 +6,7 @@ import {
   Signer,
   ZeroAddress,
 } from 'ethers';
+import {Address} from 'hardhat-deploy/types';
 
 export type Order = {
   maker: string;
@@ -109,16 +110,16 @@ export const OrderDefault = async (
 });
 
 export const getMatchedOrders = async (
-  atalystContract: Contract,
+  catalystContract: Contract,
   exchangeContract: Contract,
   catalystTier: number,
   amount: number,
   maker: Signer,
   taker: Signer
 ) => {
-  const makerAsset = await AssetERC1155(atalystContract, catalystTier, amount);
+  const makerAsset = await AssetERC1155(catalystContract, catalystTier, amount);
 
-  const takerAsset = await AssetERC1155(atalystContract, catalystTier, amount);
+  const takerAsset = await AssetERC1155(catalystContract, catalystTier, amount);
   const orderLeft = await OrderDefault(
     maker,
     makerAsset,

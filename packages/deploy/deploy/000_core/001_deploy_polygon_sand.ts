@@ -9,6 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
+
   await deploy('PolygonSand', {
     from: deployer,
     contract:
