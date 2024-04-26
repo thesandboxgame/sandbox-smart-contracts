@@ -31,17 +31,17 @@ describe('LandMetadataRegistry', function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setMetadata(tokenId, true, neighborhoodId),
-      ).to.revertedWith('only admin');
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
     });
 
     it('admin should fail to set metadata if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
-      await expect(
-        registryAsAdmin.setMetadata(tokenId, true, 0),
-      ).to.revertedWith('neighborhoodId must be >0');
-      await expect(
-        registryAsAdmin.setMetadata(tokenId, true, 127),
-      ).to.revertedWith('neighborhoodId must be <127');
+      await expect(registryAsAdmin.setMetadata(tokenId, true, 0))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(0);
+      await expect(registryAsAdmin.setMetadata(tokenId, true, 127))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(127);
     });
   });
 
@@ -62,9 +62,9 @@ describe('LandMetadataRegistry', function () {
 
     it('other should fail to set premiumness', async function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
-      await expect(registryAsOther.setPremium(tokenId, true)).to.revertedWith(
-        'only admin',
-      );
+      await expect(
+        registryAsOther.setPremium(tokenId, true),
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
     });
   });
 
@@ -84,17 +84,17 @@ describe('LandMetadataRegistry', function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setNeighborhoodId(tokenId, neighborhoodId),
-      ).to.revertedWith('only admin');
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
     });
 
     it('admin should fail to set neighborhood number if the number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
-      await expect(
-        registryAsAdmin.setNeighborhoodId(tokenId, 0),
-      ).to.revertedWith('neighborhoodId must be >0');
-      await expect(
-        registryAsAdmin.setNeighborhoodId(tokenId, 127),
-      ).to.revertedWith('neighborhoodId must be <127');
+      await expect(registryAsAdmin.setNeighborhoodId(tokenId, 0))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(0);
+      await expect(registryAsAdmin.setNeighborhoodId(tokenId, 127))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(127);
     });
   });
 
@@ -127,17 +127,17 @@ describe('LandMetadataRegistry', function () {
       const {registryAsOther} = await loadFixture(setupRegistry);
       await expect(
         registryAsOther.setNeighborhoodName(neighborhoodId, neighborhoodName),
-      ).to.revertedWith('only admin');
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
     });
 
     it('admin should fail to set neighborhood name if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
-      await expect(
-        registryAsAdmin.setNeighborhoodName(0, neighborhoodName),
-      ).to.revertedWith('neighborhoodId must be >0');
-      await expect(
-        registryAsAdmin.setNeighborhoodName(127, neighborhoodName),
-      ).to.revertedWith('neighborhoodId must be <127');
+      await expect(registryAsAdmin.setNeighborhoodName(0, neighborhoodName))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(0);
+      await expect(registryAsAdmin.setNeighborhoodName(127, neighborhoodName))
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+        .withArgs(127);
     });
   });
 
@@ -189,16 +189,17 @@ describe('LandMetadataRegistry', function () {
         registryAsOther.batchSetMetadata([
           {baseTokenId: tokenId, metadata: neighborhoodId | 0x80n},
         ]),
-      ).to.revertedWith('only admin');
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
     });
 
     it('admin should fail to batch set metadata if baseTokenId is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const baseTokenId = 32n * (tokenId / 32n) + 1n;
       await expect(
-        registryAsAdmin.batchSetMetadata([
-          {baseTokenId: 32n * (tokenId / 32n) + 1n, metadata: 0n},
-        ]),
-      ).to.revertedWith('invalid base tokenId');
+        registryAsAdmin.batchSetMetadata([{baseTokenId, metadata: 0n}]),
+      )
+        .to.revertedWithCustomError(registryAsAdmin, 'InvalidBaseTokenId')
+        .withArgs(baseTokenId);
     });
   });
 
@@ -219,12 +220,12 @@ describe('LandMetadataRegistry', function () {
     ]);
     // known type
     await registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId);
-    await expect(registryAsAdmin.setNeighborhoodId(tokenId, 0)).to.revertedWith(
-      'neighborhoodId must be >0',
-    );
-    await expect(
-      registryAsAdmin.setMetadata(tokenId, false, 0),
-    ).to.revertedWith('neighborhoodId must be >0');
+    await expect(registryAsAdmin.setNeighborhoodId(tokenId, 0))
+      .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+      .withArgs(0);
+    await expect(registryAsAdmin.setMetadata(tokenId, false, 0))
+      .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
+      .withArgs(0);
   });
 
   describe('coverage', function () {

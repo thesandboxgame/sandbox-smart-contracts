@@ -10,7 +10,7 @@ export function shouldCheckForMetadataRegistry(setupLand, Contract: string) {
         await loadFixture(setupLand);
       await expect(
         LandAsOther.setMetadataRegistry(MetadataRegistryContract2),
-      ).to.be.revertedWith('only admin allowed');
+      ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
     });
 
     it('should not accept zero address as metadataRegistry', async function () {
@@ -18,7 +18,7 @@ export function shouldCheckForMetadataRegistry(setupLand, Contract: string) {
 
       await expect(
         LandAsAdmin.setMetadataRegistry(ZeroAddress),
-      ).to.be.revertedWith('invalid registry address');
+      ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
     });
 
     it('should set metadataRegistry', async function () {

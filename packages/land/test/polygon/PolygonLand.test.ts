@@ -66,7 +66,7 @@ describe('PolygonLand.sol', function () {
       await loadFixture(setupPolygonLand);
     await expect(
       LandAsOther.setTrustedForwarder(TrustedForwarderContract),
-    ).to.be.revertedWith('only admin allowed');
+    ).to.be.revertedWithCustomError(LandAsOther, 'OnlyAdmin');
   });
 
   it('should return the trusted forwarder', async function () {
@@ -91,7 +91,7 @@ describe('PolygonLand.sol', function () {
 
     await expect(
       LandAsAdmin.setMinter('0x0000000000000000000000000000000000000000', true),
-    ).to.be.revertedWith('address 0 is not allowed');
+    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
   });
 
   it('changes the admin to a new address via meta transaction', async function () {
@@ -165,9 +165,9 @@ describe('PolygonLand.sol', function () {
             'transferQuad(address,address,uint256,uint256,uint256,bytes)'
           ].populateTransaction(landHolder, landReceiver, size, x, y, bytes);
 
-          await expect(sendMetaTx(landReceiver, to, data)).to.revertedWith(
-            'not authorized to transferQuad',
-          );
+          await expect(sendMetaTx(landReceiver, to, data))
+            .to.revertedWithCustomError(LandAsMinter, 'ERC721InvalidOwner')
+            .withArgs(landReceiver);
           expect(await LandAsMinter.balanceOf(landReceiver)).to.be.equal(0);
           expect(await LandAsMinter.balanceOf(landHolder)).to.be.equal(
             plotCount,
@@ -251,7 +251,12 @@ describe('PolygonLand.sol', function () {
                   y,
                   bytes,
                 ),
-              ).to.be.revertedWith(/not owner/);
+              )
+                .to.be.revertedWithCustomError(
+                  LandAsOther,
+                  'ERC721InvalidOwner',
+                )
+                .withArgs(other);
             }
           }
         }
@@ -311,7 +316,9 @@ describe('PolygonLand.sol', function () {
 
         await expect(
           LandAsOther.transferQuad(landHolder, landReceiver, size, x, y, bytes),
-        ).to.be.revertedWith('token does not exist');
+        )
+          .to.be.revertedWithCustomError(LandAsOther, 'InvalidCoordinates')
+          .withArgs(size, x, y);
       });
 
       it('should revert transfer of quad if a sub quad is burned', async function () {
@@ -365,7 +372,9 @@ describe('PolygonLand.sol', function () {
                 y,
                 bytes,
               ),
-            ).to.be.revertedWith('not owner');
+            )
+              .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+              .withArgs(x, y);
 
             //check override
             await expect(LandAsOther.ownerOf(0))
@@ -410,7 +419,9 @@ describe('PolygonLand.sol', function () {
               y,
               bytes,
             ),
-          ).to.be.revertedWith('not owner');
+          )
+            .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+            .withArgs(x, y);
         }
       });
     });
