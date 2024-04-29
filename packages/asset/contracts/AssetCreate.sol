@@ -4,16 +4,11 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
@@ -132,8 +127,13 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? 1 : 0,
+            false
+        );
 
         // burn catalyst of a given tier
         catalystContract.burnFrom(creator, tier, amount);
@@ -179,7 +179,9 @@ contract AssetCreate is
                 revealed[i] ? 1 : 0,
                 false
             );
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
@@ -231,7 +233,9 @@ contract AssetCreate is
         for (uint256 i; i < amounts.length; ) {
             revealed[i] = true;
             tier[i] = 0;
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         require(
@@ -247,143 +251,13 @@ contract AssetCreate is
         uint256[] memory tokenIds = new uint256[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
             tokenIds[i] = TokenIdUtils.generateTokenId(creator, 0, ++creatorNonces[creator], 1, false);
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
         emit SpecialAssetBatchMinted(creator, tokenIds, tier, amounts, metadataHashes, revealed);
-    }
-
-    /// @notice Pause the contracts mint and burn functions
-    function pause() external onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    /// @notice Unpause the contracts mint and burn functions
-    function unpause() external onlyRole(PAUSER_ROLE) {
-        _unpause();
-    }
-
-    /// @notice Get the asset contract address
-    /// @return assetContractAddress The asset contract address
-    function getAssetContract() external view returns (address assetContractAddress) {
-        return address(assetContract);
-    }
-
-    /// @notice Get the catalyst contract address
-    /// @return catalystContractAddress The catalyst contract address
-    function getCatalystContract() external view returns (address catalystContractAddress) {
-        return address(catalystContract);
-    }
-
-    /// @notice Get the auth validator address
-    /// @return authValidatorAddress The auth validator address
-    function getAuthValidator() external view returns (address authValidatorAddress) {
-        return address(authValidator);
-    }
-
-    /// @notice Creates a hash of the mint data
-    /// @param creator The address of the creator
-    /// @param nonce The nonce of the creator
-    /// @param tier The tier of the asset
-    /// @param amount The amount of copies to mint
-    /// @param revealed Whether the asset is revealed or not
-    /// @param metadataHash The metadata hash of the asset
-    /// @return digest The hash of the mint data
-    function _hashMint(
-        address creator,
-        uint16 nonce,
-        uint8 tier,
-        uint256 amount,
-        bool revealed,
-        string memory metadataHash
-    ) private view returns (bytes32 digest) {
-        digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    MINT_TYPEHASH,
-                    creator,
-                    nonce,
-                    tier,
-                    amount,
-                    revealed,
-                    keccak256((abi.encodePacked(metadataHash)))
-                )
-            )
-        );
-    }
-
-    /// @notice Creates a hash of the mint batch data
-    /// @param creator The address of the creator
-    /// @param nonce The nonce of the creator
-    /// @param tiers The tiers of the assets
-    /// @param amounts The amounts of copies to mint
-    /// @param revealed Whether the assets are revealed or not
-    /// @param metadataHashes The metadata hashes of the assets
-    /// @return digest The hash of the mint batch data
-    function _hashBatchMint(
-        address creator,
-        uint16 nonce,
-        uint8[] memory tiers,
-        uint256[] memory amounts,
-        bool[] memory revealed,
-        string[] memory metadataHashes
-    ) private view returns (bytes32 digest) {
-        digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    MINT_BATCH_TYPEHASH,
-                    creator,
-                    nonce,
-                    keccak256(abi.encodePacked(tiers)),
-                    keccak256(abi.encodePacked(amounts)),
-                    keccak256(abi.encodePacked(revealed)),
-                    _encodeHashes(metadataHashes)
-                )
-            )
-        );
-    }
-
-    /// @notice Encodes the hashes of the metadata for signature verification
-    /// @param metadataHashes The hashes of the metadata
-    /// @return encodedHashes The encoded hashes of the metadata
-    function _encodeHashes(string[] memory metadataHashes) private pure returns (bytes32) {
-        uint256 arrayLength = metadataHashes.length;
-        bytes32[] memory encodedHashes = new bytes32[](arrayLength);
-        for (uint256 i; i < arrayLength; ) {
-            encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
-            unchecked {++i;}
-        }
-
-        return keccak256(abi.encodePacked(encodedHashes));
-    }
-
-    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
-    /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(trustedForwarder.isContract(), "AssetCreate: Bad forwarder addr");
-        _setTrustedForwarder(trustedForwarder);
-    }
-
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (address sender)
-    {
-        return ERC2771HandlerUpgradeable._msgSender();
-    }
-
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (bytes calldata)
-    {
-        return ERC2771HandlerUpgradeable._msgData();
     }
 
     /// @notice Lazily creates a new asset with a signature
@@ -537,7 +411,9 @@ contract AssetCreate is
                 mintData.paymentTokens[i],
                 mintData.creators[i]
             );
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         catalystContract.burnBatchFrom(mintData.caller, tiersToBurn, mintData.amounts);
@@ -550,6 +426,86 @@ contract AssetCreate is
             mintData.amounts,
             mintData.metadataHashes
         );
+    }
+
+    /// @notice Pause the contracts mint and burn functions
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpause the contracts mint and burn functions
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    /// @notice Set the lazy mint fee
+    /// @param _lazyMintFeeInBps The fee to set
+    function setLazyMintFee(uint256 _lazyMintFeeInBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_lazyMintFeeInBps <= 10000, "AssetCreate: Invalid fee");
+        lazyMintFeeInBps = _lazyMintFeeInBps;
+        emit LazyMintFeeSet(_lazyMintFeeInBps);
+    }
+
+    /// @notice Set the lazy mint fee receiver
+    /// @param _lazyMintFeeReceiver The receiver to set
+    function setLazyMintFeeReceiver(address _lazyMintFeeReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_lazyMintFeeReceiver != address(0), "AssetCreate: Invalid receiver");
+        lazyMintFeeReceiver = _lazyMintFeeReceiver;
+        emit LazyMintFeeReceiverSet(_lazyMintFeeReceiver);
+    }
+
+    /// @notice Set the exchange contract
+    /// @param _exchangeContract The exchange contract to set
+    function setExchangeContract(address _exchangeContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_exchangeContract.isContract(), "AssetCreate: Invalid contract");
+        exchangeContract = IExchange(_exchangeContract);
+        emit ExchangeContractSet(_exchangeContract);
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to DEFAULT_ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(trustedForwarder.isContract(), "AssetCreate: Bad forwarder addr");
+        _setTrustedForwarder(trustedForwarder);
+    }
+
+    /// @notice Get the asset contract address
+    /// @return assetContractAddress The asset contract address
+    function getAssetContract() external view returns (address assetContractAddress) {
+        return address(assetContract);
+    }
+
+    /// @notice Get the catalyst contract address
+    /// @return catalystContractAddress The catalyst contract address
+    function getCatalystContract() external view returns (address catalystContractAddress) {
+        return address(catalystContract);
+    }
+
+    /// @notice Get the auth validator address
+    /// @return authValidatorAddress The auth validator address
+    function getAuthValidator() external view returns (address authValidatorAddress) {
+        return address(authValidator);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerUpgradeable._msgData();
     }
 
     /// @notice Splits the lazy mint payment between the creator and TSB if there is a fee
@@ -572,6 +528,68 @@ contract AssetCreate is
         }
         uint256 creatorPayment = unitPrice * amount - fee;
         SafeERC20.safeTransferFrom(IERC20(paymentToken), from, creator, creatorPayment);
+    }
+
+    /// @notice Creates a hash of the mint data
+    /// @param creator The address of the creator
+    /// @param nonce The nonce of the creator
+    /// @param tier The tier of the asset
+    /// @param amount The amount of copies to mint
+    /// @param revealed Whether the asset is revealed or not
+    /// @param metadataHash The metadata hash of the asset
+    /// @return digest The hash of the mint data
+    function _hashMint(
+        address creator,
+        uint16 nonce,
+        uint8 tier,
+        uint256 amount,
+        bool revealed,
+        string memory metadataHash
+    ) private view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    MINT_TYPEHASH,
+                    creator,
+                    nonce,
+                    tier,
+                    amount,
+                    revealed,
+                    keccak256((abi.encodePacked(metadataHash)))
+                )
+            )
+        );
+    }
+
+    /// @notice Creates a hash of the mint batch data
+    /// @param creator The address of the creator
+    /// @param nonce The nonce of the creator
+    /// @param tiers The tiers of the assets
+    /// @param amounts The amounts of copies to mint
+    /// @param revealed Whether the assets are revealed or not
+    /// @param metadataHashes The metadata hashes of the assets
+    /// @return digest The hash of the mint batch data
+    function _hashBatchMint(
+        address creator,
+        uint16 nonce,
+        uint8[] memory tiers,
+        uint256[] memory amounts,
+        bool[] memory revealed,
+        string[] memory metadataHashes
+    ) private view returns (bytes32 digest) {
+        digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    MINT_BATCH_TYPEHASH,
+                    creator,
+                    nonce,
+                    keccak256(abi.encodePacked(tiers)),
+                    keccak256(abi.encodePacked(amounts)),
+                    keccak256(abi.encodePacked(revealed)),
+                    _encodeHashes(metadataHashes)
+                )
+            )
+        );
     }
 
     /// @notice Creates a hash of the lazy mint data
@@ -648,28 +666,20 @@ contract AssetCreate is
         );
     }
 
-    /// @notice Set the lazy mint fee
-    /// @param _lazyMintFeeInBps The fee to set
-    function setLazyMintFee(uint256 _lazyMintFeeInBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_lazyMintFeeInBps <= 10000, "AssetCreate: Invalid fee");
-        lazyMintFeeInBps = _lazyMintFeeInBps;
-        emit LazyMintFeeSet(_lazyMintFeeInBps);
-    }
+    /// @notice Encodes the hashes of the metadata for signature verification
+    /// @param metadataHashes The hashes of the metadata
+    /// @return encodedHashes The encoded hashes of the metadata
+    function _encodeHashes(string[] memory metadataHashes) private pure returns (bytes32) {
+        uint256 arrayLength = metadataHashes.length;
+        bytes32[] memory encodedHashes = new bytes32[](arrayLength);
+        for (uint256 i; i < arrayLength; ) {
+            encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
+            unchecked {
+                ++i;
+            }
+        }
 
-    /// @notice Set the lazy mint fee receiver
-    /// @param _lazyMintFeeReceiver The receiver to set
-    function setLazyMintFeeReceiver(address _lazyMintFeeReceiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_lazyMintFeeReceiver != address(0), "AssetCreate: Invalid receiver");
-        lazyMintFeeReceiver = _lazyMintFeeReceiver;
-        emit LazyMintFeeReceiverSet(_lazyMintFeeReceiver);
-    }
-
-    /// @notice Set the exchange contract
-    /// @param _exchangeContract The exchange contract to set
-    function setExchangeContract(address _exchangeContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_exchangeContract.isContract(), "AssetCreate: Invalid contract");
-        exchangeContract = IExchange(_exchangeContract);
-        emit ExchangeContractSet(_exchangeContract);
+        return keccak256(abi.encodePacked(encodedHashes));
     }
 
     uint256[41] private __gap;
