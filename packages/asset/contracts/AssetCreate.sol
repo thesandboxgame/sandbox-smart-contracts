@@ -430,6 +430,13 @@ contract AssetCreate is
 
         if (catalystBalance < mintData.amount) {
             require(matchedOrders.length > 0, "AssetCreate: No order data");
+            // DELEGATE CALL
+            // bytes4 selector = bytes4(keccak256("matchOrdersFrom(address,ExchangeMatch[])"));
+            // bytes memory data = abi.encodeWithSelector(selector, mintData.caller, matchedOrders);
+            // (bool success, ) = address(exchangeContract).delegatecall(data);
+            // require(success, "AssetCreate: Match orders failed");
+
+            // REGULAR
             exchangeContract.matchOrdersFrom(mintData.caller, matchedOrders);
         }
         // burn catalyst of a given tier

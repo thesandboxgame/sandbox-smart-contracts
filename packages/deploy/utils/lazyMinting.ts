@@ -51,6 +51,20 @@ export const AssetERC1155 = async (
   value,
 });
 
+export const AssetERC20 = async (
+  tokenContract: Contract,
+  value: Numeric
+): Promise<Asset> => ({
+  assetType: {
+    assetClass: AssetClassType.ERC20_ASSET_CLASS,
+    data: AbiCoder.defaultAbiCoder().encode(
+      ['address'],
+      [await tokenContract.getAddress()]
+    ),
+  },
+  value,
+});
+
 export async function signOrder(
   order: Order,
   account: Signer,
@@ -111,15 +125,21 @@ export const OrderDefault = async (
 
 export const getMatchedOrders = async (
   catalystContract: Contract,
+  catalystPrice: Numeric,
+  sandContract: Contract,
   exchangeContract: Contract,
-  catalystTier: number,
-  amount: number,
+  catalystTier: BigInt,
+  amount: BigInt,
   maker: Signer,
   taker: Signer
 ) => {
-  const makerAsset = await AssetERC1155(catalystContract, catalystTier, amount);
+  const makerAsset = await AssetERC1155(
+    catalystContract,
+    Number(catalystTier),
+    Number(amount)
+  );
+  const takerAsset = await AssetERC20(sandContract, catalystPrice);
 
-  const takerAsset = await AssetERC1155(catalystContract, catalystTier, amount);
   const orderLeft = await OrderDefault(
     maker,
     makerAsset,

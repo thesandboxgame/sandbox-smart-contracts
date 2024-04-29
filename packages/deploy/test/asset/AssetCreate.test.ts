@@ -1,15 +1,17 @@
 import {expect} from 'chai';
 import {deployments} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
+import {getMatchedOrders} from '../../utils/lazyMinting';
+import {parseEther} from 'ethers';
 
 type LazyMintData = {
   caller: Address;
-  tier: BigInt;
-  amount: BigInt;
-  unitPrice: BigInt;
+  tier: bigint;
+  amount: bigint;
+  unitPrice: bigint;
   paymentToken: Address;
   metadataHash: string;
-  maxSupply: BigInt;
+  maxSupply: bigint;
   creator: Address;
 };
 
@@ -26,6 +28,7 @@ const setupTest = deployments.createFixture(
       assetPauser,
       treasury,
       catalystMinter,
+      lazyMintingCatSeller,
       lazyMintingTestAccount1,
       lazyMintingTestAccount2,
     } = await getNamedAccounts();
@@ -43,6 +46,15 @@ const setupTest = deployments.createFixture(
     const CatalystContractAsAdmin = CatalystContract.connect(
       await ethers.provider.getSigner(catalystMinter)
     );
+
+    // Mint 100 of each catalyst to lazyMintingCatSeller
+    for (let i = 1; i <= 5; i++) {
+      await CatalystContractAsAdmin.mint(
+        lazyMintingCatSeller,
+        BigInt(i),
+        BigInt(100)
+      );
+    }
 
     // **Manipulate the Sand contract to give user some Sand**
     // impersonate CHILD_CHAIN_MANAGER
@@ -72,6 +84,7 @@ const setupTest = deployments.createFixture(
       '0x8464135c8F25Da09e49BC8782676a84730C318bC',
     ]);
     const userSigner = await ethers.getSigner(lazyMintingTestAccount1);
+    const tsbCatSellerSigner = await ethers.getSigner(lazyMintingCatSeller);
 
     const createLazyMintSignature = async (data: LazyMintData) => {
       const {
@@ -145,6 +158,8 @@ const setupTest = deployments.createFixture(
       assetAdmin,
       backendAuthWallet,
       assetPauser,
+      tsbCatSeller: lazyMintingCatSeller,
+      tsbCatSellerSigner,
       user: lazyMintingTestAccount1,
       userSigner,
       creator: lazyMintingTestAccount2,
@@ -250,7 +265,7 @@ describe.only('Asset Create', function () {
         treasury
       );
     });
-    it('allows users to lazy mint when they have all necessary catalysts', async function () {
+    it('allows users to lazy mint when they have all necessary catalysts - direct', async function () {
       const {
         user,
         userSigner,
@@ -283,21 +298,116 @@ describe.only('Asset Create', function () {
       // Mint catalysts to user
       await CatalystContractAsAdmin.mint(user, mintData.tier, mintData.amount);
 
-      const tx = await AssetCreateContract.lazyCreateAsset(
+      await expect(
+        AssetCreateContract.lazyCreateAsset(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          []
+        )
+      ).to.emit(AssetCreateContract, 'AssetLazyMinted');
+    });
+    it('allows users to lazy mint when they have all necessary catalysts - approveAndCall', async function () {
+      const {
         user,
-        signature,
-        [...Object.values(mintData)],
-        []
+        userSigner,
+        creator,
+        SandContract,
+        createLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupTest();
+
+      const mintData: LazyMintData = {
+        caller: user,
+        tier: BigInt(2),
+        amount: BigInt(1),
+        unitPrice: BigInt(1),
+        paymentToken: await SandContract.getAddress(),
+        metadataHash: '0x',
+        maxSupply: BigInt(1),
+        creator,
+      };
+
+      // Mint catalysts to user
+      await CatalystContractAsAdmin.mint(user, mintData.tier, mintData.amount);
+
+      const signature = await createLazyMintSignature(mintData);
+
+      const encodedFunction = AssetCreateContract.interface.encodeFunctionData(
+        'lazyCreateAsset',
+        [user, signature, [...Object.values(mintData)], []]
       );
 
-      expect(tx).to.emit(AssetCreateContract, 'AssetLazyMinted');
+      await expect(
+        SandContract.connect(userSigner).approveAndCall(
+          await AssetCreateContract.getAddress(),
+          mintData.unitPrice,
+          encodedFunction
+        )
+      ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
-    it('allows lazy minting through Sand contract', async function () {});
 
-    // TODO
-    // - Exchange contract needs to be set
-    // - A seller order needs to be created
-    // - A buyer order needs to be created
-    it('successfully purchases single catalyst through exchange contract', async function () {});
+    it('allows users to lazy mint with Catalyst purchase - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createLazyMintSignature,
+        AssetCreateContract,
+        CatalystContract,
+        ExchangeContract,
+        tsbCatSellerSigner,
+      } = await setupTest();
+
+      const mintData: LazyMintData = {
+        caller: user,
+        tier: BigInt(2),
+        amount: BigInt(1),
+        unitPrice: parseEther('0.1'),
+        paymentToken: await SandContract.getAddress(),
+        metadataHash: '0x',
+        maxSupply: BigInt(10),
+        creator,
+      };
+
+      const signature = await createLazyMintSignature(mintData);
+
+      const catPurchasePrice = parseEther('1');
+
+      // approve AssetCreate to transfer Sand (to creator)
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        mintData.unitPrice
+      );
+
+      // approve exchange contract to transfer Sand (to cat seller)
+      await SandContract.connect(userSigner).approve(
+        await ExchangeContract.getAddress(),
+        catPurchasePrice * mintData.amount
+      );
+
+      const orderData = await getMatchedOrders(
+        CatalystContract,
+        parseEther('1'),
+        SandContract,
+        ExchangeContract,
+        mintData.tier,
+        mintData.amount,
+        tsbCatSellerSigner,
+        userSigner
+      );
+
+      await expect(
+        AssetCreateContract.lazyCreateAsset(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          orderData
+        )
+      ).to.emit(AssetCreateContract, 'AssetLazyMinted');
+    });
+    it('allows users to lazy mint with Catalyst purchase - approveAndCall', async function () {});
   });
 });
