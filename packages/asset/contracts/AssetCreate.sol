@@ -9,6 +9,7 @@ import {
     ContextUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
 import {
@@ -17,7 +18,6 @@ import {
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IExchange, ExchangeMatch} from "./interfaces/IExchange.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
@@ -51,6 +51,7 @@ contract AssetCreate is
     address public lazyMintFeeReceiver;
     /// @notice mapping of tokenId => maxSupply specified by the creator
     mapping(uint256 => uint256) public availableToMint;
+
     /// @notice The marketplace exchange contract to purchase catalyst
     IExchange public exchangeContract;
 
@@ -135,7 +136,7 @@ contract AssetCreate is
         uint256 tokenId =
             TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
 
-        // burn catalyst of a given tier
+        // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(creator, tier, amount);
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit AssetMinted(creator, tokenId, tier, amount, metadataHash, revealed);
@@ -309,7 +310,7 @@ contract AssetCreate is
             require(matchedOrders.length > 0, "AssetCreate: No order data");
             exchangeContract.matchOrdersFrom(mintData.caller, matchedOrders);
         }
-        // burn catalyst of a given tier
+        // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(mintData.caller, mintData.tier, mintData.amount);
         // send the payment to the creator after deducting the lazy mint fee
         distributePayment(
