@@ -53,16 +53,15 @@ flowchart BT;
 
 ```mermaid
 flowchart BT;
-    LandBase:::foo-->Land;
-    Initializable-->Land;
-    LandStorageMixin:::foo-->LandBase;
-    LandBaseToken-->LandBase;
+    LandStorageMixin:::foo-->Land:::foo;
+    LandBase-->Land;
+
+    LandBaseToken-->LandBase:::foo;
     OperatorFiltererUpgradeable-->LandBase;
+    Initializable[Initializable OZ V5]-->LandBase;
     ERC721BaseToken-->LandBaseToken;
-    MetaTransactionReceiver-->ERC721BaseToken;
     WithSuperOperators-->ERC721BaseToken;
     WithAdmin-->WithSuperOperators;
-    WithAdmin-->MetaTransactionReceiver;
     classDef foo stroke:#f00
 ```
 
@@ -84,13 +83,14 @@ flowchart BT;
 
 ```mermaid
 flowchart BT;
-    PolygonLandBase:::foo-->PolygonLand;
-    Initializable-->PolygonLand;
-    PolygonLandStorageMixin:::foo-->PolygonLandBase;
-    PolygonLandBaseToken-->PolygonLandBase;
-    ERC2771Handler-->PolygonLandBase;
-    OperatorFiltererUpgradeable-->PolygonLandBase;
-    ERC721BaseToken-->PolygonLandBaseToken;
+    PolygonLandStorageMixin:::foo-->PolygonLand:::foo;
+    LandBase-->PolygonLand;
+    ERC2771Handler-->PolygonLand;
+
+    LandBaseToken-->LandBase:::foo;
+    OperatorFiltererUpgradeable-->LandBase;
+    Initializable[Initializable OZ V5]-->LandBase;
+    ERC721BaseToken-->LandBaseToken;
     WithSuperOperators-->ERC721BaseToken;
     WithAdmin-->WithSuperOperators;
     classDef foo stroke:#f00
