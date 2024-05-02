@@ -1,150 +1,165 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
-import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
-import {WithRoyalties} from "./common/WithRoyalties.sol";
-import {WithOwner} from "./common/WithOwner.sol";
-import {LandBase} from "./mainnet/LandBase.sol";
+import {WithAdmin} from "./common/WithAdmin.sol";
+import {WithSuperOperators} from "./common/WithSuperOperators.sol";
+import {OperatorFiltererUpgradeable} from "./common/OperatorFiltererUpgradeable.sol";
+import {ERC721BaseToken} from "./common/ERC721BaseToken.sol";
+import {LandBaseToken} from "./common/LandBaseToken.sol";
+import {LandBase} from "./common/LandBase.sol";
+import {LandStorageMixin} from "./mainnet/LandStorageMixin.sol";
 
-/// @title Land Contract
+/// @title Land Contract on L1
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
-/// @notice LAND contract
-/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
-/// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
-contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
-    /// @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
-    /// @param admin Admin of the contract
-    function initialize(address admin) external initializer {
-        // We must be able to initialize the admin if this is a fresh deploy, but we want to
-        // be backward compatible with the current deployment
-        if (_readAdmin() != address(0)) {
-            revert InvalidInitialization();
-        }
-        _setAdmin(admin);
+/// @notice LAND contract on L1
+/// @dev We use the storage mixing for historical reasons.
+/// @dev There is a difference between L1 and L2 storage slots order and we want to upgrade the contract.
+/// @dev This contract uses the exact storage slots configuration that we have in `core` package so we can upgrade
+/// @dev LandStorageMixin must be the first one in the inheritance chain for subclasses
+contract Land is LandStorageMixin, LandBase {
+    /// @notice Implements the Context msg sender
+    /// @return the address of the message sender
+    function _msgSender() internal view virtual override returns (address) {
+        return msg.sender;
     }
 
-    /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
-    /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
-    /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
-    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        if (subscriptionOrRegistrantToCopy == address(0)) {
-            revert InvalidAddress();
-        }
-        _register(subscriptionOrRegistrantToCopy, subscribe);
+    /// @notice get the admin address
+    /// @return the admin address
+    function _readAdmin() internal view override(LandStorageMixin, WithAdmin) returns (address) {
+        return LandStorageMixin._readAdmin();
     }
 
-    /// @notice sets filter registry address deployed in test
-    /// @param registry the address of the registry
-    function setOperatorRegistry(IOperatorFilterRegistry registry) external virtual onlyAdmin {
-        _setOperatorRegistry(registry);
+    /// @notice set the admin address
+    /// @param admin the admin address
+    function _writeAdmin(address admin) internal override(LandStorageMixin, WithAdmin) {
+        LandStorageMixin._writeAdmin(admin);
     }
 
-    /// @notice set royalty manager
-    /// @param royaltyManager address of the manager contract for common royalty recipient
-    function setRoyaltyManager(address royaltyManager) external onlyAdmin {
-        _setRoyaltyManager(royaltyManager);
+    /// @notice check if an address is a super-operator
+    /// @param superOperator the operator address to check
+    /// @return true if an address is a super-operator
+    function _isSuperOperator(
+        address superOperator
+    ) internal view override(LandStorageMixin, WithSuperOperators) returns (bool) {
+        return LandStorageMixin._isSuperOperator(superOperator);
     }
 
-    /// @notice sets address of the Metadata Registry
-    /// @param metadataRegistry The address of the Metadata Registry
-    function setMetadataRegistry(address metadataRegistry) external onlyAdmin {
-        _setMetadataRegistry(metadataRegistry);
+    /// @notice enable an address to be super-operator
+    /// @param superOperator the address to set
+    /// @param enabled true enable the address, false disable it.
+    function _writeSuperOperator(
+        address superOperator,
+        bool enabled
+    ) internal override(LandStorageMixin, WithSuperOperators) {
+        LandStorageMixin._writeSuperOperator(superOperator, enabled);
     }
 
-    /// @notice Set the address of the new owner of the contract
-    /// @param newOwner address of new owner
-    function transferOwnership(address newOwner) external onlyAdmin {
-        _transferOwnership(newOwner);
+    /// @notice get the number of nft for an address
+    /// @param owner address to check
+    /// @return the number of nfts
+    function _readNumNFTPerAddress(
+        address owner
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return LandStorageMixin._readNumNFTPerAddress(owner);
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-    /// @param from The sender of the token
-    /// @param to The recipient of the token
-    /// @param tokenId The id of the token
-    function safeTransferFrom(address from, address to, uint256 tokenId) external override onlyAllowedOperator(from) {
-        _safeTransferFrom(from, to, tokenId, "");
+    /// @notice set the number of nft for an address
+    /// @param owner address to set
+    /// @param quantity the number of nfts to set for the owner
+    function _writeNumNFTPerAddress(
+        address owner,
+        uint256 quantity
+    ) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._writeNumNFTPerAddress(owner, quantity);
     }
 
-    /// @notice Approve an operator to spend tokens on the sender behalf
-    /// @param sender The address giving the approval
-    /// @param operator The address receiving the approval
-    /// @param tokenId The id of the token
-    function approveFor(
-        address sender,
-        address operator,
+    /// @notice get the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
+    /// @param tokenId the token Id
+    /// @return the owner data
+    function _readOwnerData(
         uint256 tokenId
-    ) external override onlyAllowedOperatorApproval(operator) {
-        _approveFor(sender, operator, tokenId);
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (uint256) {
+        return LandStorageMixin._readOwnerData(tokenId);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
-    /// @param operator The address receiving the approval
-    /// @param approved The determination of the approval
-    function setApprovalForAll(
+    /// @notice set the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
+    /// @param tokenId the token Id
+    /// @param data the owner data
+    function _writeOwnerData(uint256 tokenId, uint256 data) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._writeOwnerData(tokenId, data);
+    }
+
+    /// @notice check if an operator was enabled by a given owner
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
+    /// @return true if the operator has access
+    function _isOperatorForAll(
+        address owner,
+        address operator
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (bool) {
+        return LandStorageMixin._isOperatorForAll(owner, operator);
+    }
+
+    /// @notice Let an operator to access to all the tokens of a owner
+    /// @param owner that enabled the operator
+    /// @param operator address to check if it was enabled
+    /// @param enabled if true give access to the operator, else disable it
+    function _writeOperatorForAll(
+        address owner,
         address operator,
-        bool approved
-    ) external override onlyAllowedOperatorApproval(operator) {
-        _setApprovalForAll(_msgSender(), operator, approved);
+        bool enabled
+    ) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._writeOperatorForAll(owner, operator, enabled);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
-    /// @param sender The address giving the approval
-    /// @param operator The address receiving the approval
-    /// @param approved The determination of the approval
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external override onlyAllowedOperatorApproval(operator) {
-        _setApprovalForAll(sender, operator, approved);
+    /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId The id of the token.
+    /// @return the operator addressn
+    function _readOperator(
+        uint256 tokenId
+    ) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {
+        return LandStorageMixin._readOperator(tokenId);
     }
 
-    /// @notice Approve an operator to spend tokens on the sender behalf
-    /// @param operator The address receiving the approval
-    /// @param tokenId The id of the token
-    function approve(address operator, uint256 tokenId) external override onlyAllowedOperatorApproval(operator) {
-        _approveFor(_msgSender(), operator, tokenId);
+    /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
+    /// @param tokenId the id of the token.
+    /// @param operator the operator address
+    function _writeOperator(uint256 tokenId, address operator) internal override(LandStorageMixin, ERC721BaseToken) {
+        LandStorageMixin._writeOperator(tokenId, operator);
     }
 
-    /// @notice Transfer a token between 2 addresses
-    /// @param from The sender of the token
-    /// @param to The recipient of the token
-    /// @param tokenId The id of the token
-    function transferFrom(address from, address to, uint256 tokenId) external override onlyAllowedOperator(from) {
-        _transferFrom(from, to, tokenId);
+    /// @notice checks if an address is enabled as minter
+    /// @param minter the address to check
+    /// @return true if the address is a minter
+    function _isMinter(address minter) internal view override(LandStorageMixin, LandBaseToken) returns (bool) {
+        return LandStorageMixin._isMinter(minter);
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-    /// @param from The sender of the token
-    /// @param to The recipient of the token
-    /// @param tokenId The id of the token
-    /// @param data Additional data
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) external override onlyAllowedOperator(from) {
-        _safeTransferFrom(from, to, tokenId, data);
+    /// @notice set an address as minter
+    /// @param minter the address to set
+    /// @param enabled true enable the address, false disable it.
+    function _writeMinter(address minter, bool enabled) internal override(LandStorageMixin, LandBaseToken) {
+        LandStorageMixin._writeMinter(minter, enabled);
     }
 
-    /// @notice Check if the contract supports an interface
-    /// @param id The id of the interface
-    /// @return True if the interface is supported
-    /// @dev 0x01ffc9a7 is ERC-165
-    /// @dev 0x80ac58cd is ERC-721
-    /// @dev 0x5b5e139f is ERC-721 metadata
-    /// @dev 0x7f5828d0 is ERC-173
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
-        return
-            id == 0x01ffc9a7 ||
-            id == 0x80ac58cd ||
-            id == 0x5b5e139f ||
-            id == 0x7f5828d0 ||
-            id == type(IERC2981).interfaceId;
+    /// @notice get the OpenSea operator filter
+    /// @return the address of the OpenSea operator filter registry
+    function _readOperatorFilterRegistry()
+        internal
+        view
+        override(LandStorageMixin, OperatorFiltererUpgradeable)
+        returns (IOperatorFilterRegistry)
+    {
+        return LandStorageMixin._readOperatorFilterRegistry();
+    }
+
+    /// @notice set the OpenSea operator filter
+    /// @param registry the address of the OpenSea operator filter registry
+    function _writeOperatorFilterRegistry(
+        IOperatorFilterRegistry registry
+    ) internal override(LandStorageMixin, OperatorFiltererUpgradeable) {
+        LandStorageMixin._writeOperatorFilterRegistry(registry);
     }
 }
