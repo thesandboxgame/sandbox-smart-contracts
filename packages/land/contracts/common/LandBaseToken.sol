@@ -53,13 +53,6 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         uint256 size;
     }
 
-    /// @notice Enable or disable the ability of `minter` to mint tokens
-    /// @param minter address that will be given/removed minter right.
-    /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external onlyAdmin {
-        _setMinter(minter, enabled);
-    }
-
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
     /// @param to destination
@@ -176,16 +169,6 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         } else {
             _mintAndTransferQuad(msgSender, to, size, x, y, data);
         }
-    }
-
-    /// @inheritdoc ERC721BaseToken
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external virtual override(ILandToken, ERC721BaseToken) {
-        _batchTransferFrom(from, to, ids, data, false);
     }
 
     /// @notice x coordinate of Land token
