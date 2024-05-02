@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable one-contract-per-file
-// solhint-disable re   ason-string
 pragma solidity 0.8.23;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
