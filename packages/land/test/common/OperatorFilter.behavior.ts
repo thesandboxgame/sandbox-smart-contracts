@@ -287,6 +287,17 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
       expect(await LandAsOther.balanceOf(MockMarketPlace1)).to.be.equal(1);
     });
 
+    it('should fail when calling transfer if the registry return false because the operator is not allowed', async function () {
+      const {LandAsMinter, other, MockMarketPlace1, OperatorFilterRegistry} =
+        await loadFixture(setupLand);
+      await OperatorFilterRegistry.setReturnFalseInIsOperatorAllowed(true);
+      await LandAsMinter.mintQuad(other, 1, 0, 0, '0x');
+      const id = getId(1, 0, 0);
+      await expect(
+        LandAsMinter.transferFrom(other, MockMarketPlace1, id),
+      ).to.revertedWithCustomError(LandAsMinter, 'OperatorNotAllowed');
+    });
+
     it('should be able to safe transfer token if from is the owner of token and to is a blacklisted marketplace', async function () {
       const {MockMarketPlace1, LandAsMinter, LandAsOther, other} =
         await loadFixture(setupLand);

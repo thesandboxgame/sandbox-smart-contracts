@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {ZeroAddress} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function landConfig(setupLand, Contract: string) {
@@ -54,6 +55,26 @@ export function landConfig(setupLand, Contract: string) {
         expect(await LandAsAdmin.owner()).to.be.equal(landOwner);
         await LandAsAdmin.transferOwnership(other);
         expect(await LandAsAdmin.owner()).to.be.equal(other);
+      });
+
+      it('should not initialize twice', async function () {
+        const {LandAsAdmin, other} = await loadFixture(setupLand);
+        await expect(
+          LandAsAdmin.initialize(other),
+        ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidInitialization');
+      });
+
+      it('should not initialize twice after upgrade', async function () {
+        const {LandAsAdmin, landAdmin, other} = await loadFixture(setupLand);
+        expect(await LandAsAdmin.getAdmin()).to.be.equal(landAdmin);
+        await LandAsAdmin.simulateUpgrade(ZeroAddress);
+        await LandAsAdmin.initialize(other);
+        expect(await LandAsAdmin.getAdmin()).to.be.equal(other);
+
+        await LandAsAdmin.simulateUpgrade(landAdmin);
+        await expect(
+          LandAsAdmin.initialize(other),
+        ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidInitialization');
       });
     });
   });
