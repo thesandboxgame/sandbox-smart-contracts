@@ -5,6 +5,19 @@ pragma solidity 0.8.23;
 import {Land} from "../Land.sol";
 
 contract LandMock is Land {
+    bytes32 private constant INITIALIZABLE_STORAGE = 0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00;
+
+    function simulateUpgrade(address admin) external {
+        InitializableStorage storage $;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := INITIALIZABLE_STORAGE
+        }
+        $._initialized = 0;
+        $._initializing = false;
+        _writeAdmin(admin);
+    }
+
     struct VarsStorage {
         uint256 _admin;
         uint256 _superOperators;

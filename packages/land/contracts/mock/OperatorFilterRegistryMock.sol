@@ -58,6 +58,8 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
     mapping(address => address) private _registrations;
     mapping(address => EnumerableSet.AddressSet) private _subscribers;
 
+    bool public returnFalseInIsOperatorAllowed;
+
     constructor(address _defaultSubscribtion, address[] memory _blacklistedAddresses) {
         _registrations[_defaultSubscribtion] = _defaultSubscribtion;
         EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
@@ -69,11 +71,18 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
         }
     }
 
+    function setReturnFalseInIsOperatorAllowed(bool val) external {
+        returnFalseInIsOperatorAllowed = val;
+    }
+
     /**
      * @notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns
      *         true if supplied registrant address is not registered.
      */
     function isOperatorAllowed(address registrant, address operator) external view override returns (bool) {
+        if (returnFalseInIsOperatorAllowed) {
+            return false;
+        }
         address registration = _registrations[registrant];
         if (registration != address(0)) {
             EnumerableSet.AddressSet storage filteredOperatorsRef;
