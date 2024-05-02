@@ -21,6 +21,13 @@ abstract contract WithAdmin is IErrors, Context {
         _;
     }
 
+    /// @notice Change the admin of the contract
+    /// @dev Change the administrator to be `newAdmin`.
+    /// @param newAdmin The address of the new administrator.
+    function changeAdmin(address newAdmin) external onlyAdmin {
+        _changeAdmin(newAdmin);
+    }
+
     /// @notice Get the current admin
     /// @dev Get the current administrator of this contract.
     /// @return The current administrator of this contract.
@@ -31,7 +38,7 @@ abstract contract WithAdmin is IErrors, Context {
     /// @notice Change the admin of the contract
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
-    function changeAdmin(address newAdmin) external onlyAdmin {
+    function _changeAdmin(address newAdmin) internal {
         address oldAdmin = _readAdmin();
         if (oldAdmin == address(0)) {
             revert InvalidAddress();
@@ -39,13 +46,13 @@ abstract contract WithAdmin is IErrors, Context {
         if (oldAdmin == newAdmin) {
             revert InvalidArgument();
         }
-        _changeAdmin(newAdmin);
+        _setAdmin(newAdmin);
     }
 
     /// @notice Change the admin of the contract
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
-    function _changeAdmin(address newAdmin) internal {
+    function _setAdmin(address newAdmin) internal {
         if (newAdmin == address(0)) {
             revert InvalidAddress();
         }

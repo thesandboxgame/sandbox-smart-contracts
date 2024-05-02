@@ -16,6 +16,20 @@ abstract contract WithSuperOperators is IErrors, WithAdmin {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
+        _setSuperOperator(superOperator, enabled);
+    }
+
+    /// @notice check if an address is a super-operator
+    /// @param superOperator the operator address to check
+    /// @return true if an address is a super-operator
+    function isSuperOperator(address superOperator) external view returns (bool) {
+        return _isSuperOperator(superOperator);
+    }
+
+    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
+    /// @param superOperator address that will be given/removed superOperator right.
+    /// @param enabled set whether the superOperator is enabled or disabled.
+    function _setSuperOperator(address superOperator, bool enabled) internal {
         if (superOperator == address(0)) {
             revert InvalidAddress();
         }
@@ -24,13 +38,6 @@ abstract contract WithSuperOperators is IErrors, WithAdmin {
         }
         _writeSuperOperator(superOperator, enabled);
         emit SuperOperator(superOperator, enabled);
-    }
-
-    /// @notice check if an address is a super-operator
-    /// @param superOperator the operator address to check
-    /// @return true if an address is a super-operator
-    function isSuperOperator(address superOperator) external view returns (bool) {
-        return _isSuperOperator(superOperator);
     }
 
     /// @notice check if an address is a super-operator

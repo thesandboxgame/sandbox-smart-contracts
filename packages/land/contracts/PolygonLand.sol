@@ -24,7 +24,7 @@ contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, Wi
         if (_readAdmin() != address(0)) {
             revert InvalidInitialization();
         }
-        _changeAdmin(admin);
+        _setAdmin(admin);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-TX
