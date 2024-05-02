@@ -15,7 +15,7 @@ abstract contract WithAdmin is IErrors, Context {
 
     /// @notice checks if the sender is admin
     modifier onlyAdmin() {
-        if (_msgSender() != _getAdmin()) {
+        if (_msgSender() != _readAdmin()) {
             revert OnlyAdmin();
         }
         _;
@@ -25,14 +25,14 @@ abstract contract WithAdmin is IErrors, Context {
     /// @dev Get the current administrator of this contract.
     /// @return The current administrator of this contract.
     function getAdmin() external view returns (address) {
-        return _getAdmin();
+        return _readAdmin();
     }
 
     /// @notice Change the admin of the contract
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
     function changeAdmin(address newAdmin) external onlyAdmin {
-        address oldAdmin = _getAdmin();
+        address oldAdmin = _readAdmin();
         if (oldAdmin == address(0)) {
             revert InvalidAddress();
         }
@@ -49,18 +49,18 @@ abstract contract WithAdmin is IErrors, Context {
         if (newAdmin == address(0)) {
             revert InvalidAddress();
         }
-        address oldAdmin = _getAdmin();
+        address oldAdmin = _readAdmin();
         emit AdminChanged(oldAdmin, newAdmin);
-        _setAdmin(newAdmin);
+        _writeAdmin(newAdmin);
     }
 
     /// @notice get the admin address
     /// @return the admin address
     ///@dev Implement
-    function _getAdmin() internal view virtual returns (address);
+    function _readAdmin() internal view virtual returns (address);
 
     /// @notice set the admin address
     /// @param admin the admin address
     ///@dev Implement
-    function _setAdmin(address admin) internal virtual;
+    function _writeAdmin(address admin) internal virtual;
 }

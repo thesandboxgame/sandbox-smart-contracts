@@ -14,7 +14,7 @@ abstract contract ERC2771Handler {
     /// @param forwarder trusted forwarder address
     // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_initialize(address forwarder) internal {
-        _setTrustedForwarder(forwarder);
+        _writeTrustedForwarder(forwarder);
         emit TrustedForwarderSet(forwarder);
     }
 
@@ -25,10 +25,17 @@ abstract contract ERC2771Handler {
         return _isTrustedForwarder(forwarder);
     }
 
+    /// @notice Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function _setTrustedForwarder(address trustedForwarder) internal {
+        _writeTrustedForwarder(trustedForwarder);
+        emit TrustedForwarderSet(trustedForwarder);
+    }
+
     /// @notice Get the current trusted forwarder
     /// @return trustedForwarder address of the trusted forwarder
     function getTrustedForwarder() external view returns (address) {
-        return _getTrustedForwarder();
+        return _readTrustedForwarder();
     }
 
     /// @dev if the call comes from the trusted forwarder, it gets the real sender by checking the encoded address in the data
@@ -59,14 +66,14 @@ abstract contract ERC2771Handler {
     /// @param trustedForwarder address to check
     /// @return is trusted
     function _isTrustedForwarder(address trustedForwarder) internal view returns (bool) {
-        return trustedForwarder == _getTrustedForwarder();
+        return trustedForwarder == _readTrustedForwarder();
     }
 
     /// @notice get the address of the ERC2771 trusted forwarder
     /// @return the address of the trusted forwarder
-    function _getTrustedForwarder() internal view virtual returns (address);
+    function _readTrustedForwarder() internal view virtual returns (address);
 
     /// @notice set the address of the ERC2771 trusted forwarder
     /// @param trustedForwarder the address of the trusted forwarder
-    function _setTrustedForwarder(address trustedForwarder) internal virtual;
+    function _writeTrustedForwarder(address trustedForwarder) internal virtual;
 }

@@ -115,7 +115,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
-        return _getNumNFTPerAddress(owner);
+        return _readNumNFTPerAddress(owner);
     }
 
     /// @notice Get the owner of a token.
@@ -138,7 +138,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
             revert ERC721NonexistentToken(tokenId);
         }
         if (operatorEnabled) {
-            return _getOperator(tokenId);
+            return _readOperator(tokenId);
         }
         return address(0);
     }
@@ -147,7 +147,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @param tokenId The id of the Land
     /// @dev for debugging purposes
     function getOwnerData(uint256 tokenId) external view virtual returns (uint256) {
-        return _getOwnerData(tokenId);
+        return _readOwnerData(tokenId);
     }
 
     /// @notice Check if the sender approved the operator.
@@ -201,7 +201,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         }
         bool operatorEnabled = _checkFromIsOwner(from, tokenId);
         bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
-        if (!authorized && !(operatorEnabled && _getOperator(tokenId) == msgSender)) {
+        if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
             revert ERC721InsufficientApproval(msgSender, tokenId);
         }
         _transferNumNFTPerAddress(from, to, 1);
@@ -234,7 +234,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
             if (from != owner) {
                 revert ERC721InvalidOwner(from);
             }
-            if (!authorized && !(operatorEnabled && _getOperator(tokenId) == msgSender)) {
+            if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
                 revert ERC721InsufficientApproval(msgSender, tokenId);
             }
             _updateOwnerData(tokenId, to, false);
@@ -267,7 +267,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         if (_isSuperOperator(operator)) {
             revert ERC721InvalidOperator(operator);
         }
-        _setOperatorForAll(from, operator, approved);
+        _writeOperatorForAll(from, operator, approved);
         emit ApprovalForAll(from, operator, approved);
     }
 
@@ -286,7 +286,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
             _updateOwnerData(tokenId, from, false);
         } else {
             _updateOwnerData(tokenId, from, true);
-            _setOperator(tokenId, operator);
+            _writeOperator(tokenId, operator);
         }
         emit Approval(from, operator, tokenId);
     }
@@ -297,10 +297,10 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         bool operatorEnabled = _checkFromIsOwner(from, tokenId);
         address msgSender = _msgSender();
         bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
-        if (!authorized && !(operatorEnabled && _getOperator(tokenId) == msgSender)) {
+        if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
             revert ERC721InsufficientApproval(msgSender, tokenId);
         }
-        _setOwnerData(tokenId, (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
+        _writeOwnerData(tokenId, (_readOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), tokenId);
     }
@@ -328,11 +328,11 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @param newOwner The new owner of the token
     /// @param hasOperator if true the operator flag is set
     function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal {
-        uint256 oldData = (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
+        uint256 oldData = (_readOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
         if (hasOperator) {
             oldData = oldData | OPERATOR_FLAG;
         }
-        _setOwnerData(tokenId, oldData);
+        _writeOwnerData(tokenId, oldData);
     }
 
     /// @param id token id
@@ -348,7 +348,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _getOwnerData(id);
+        uint256 data = _readOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
@@ -431,7 +431,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _addNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
-            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+            _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) + val);
         }
     }
 
@@ -441,7 +441,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
-            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+            _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) - val);
         }
     }
 
@@ -459,31 +459,31 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @notice get the number of nft for an address
     /// @param owner address to check
     /// @return the number of nfts
-    function _getNumNFTPerAddress(address owner) internal view virtual returns (uint256);
+    function _readNumNFTPerAddress(address owner) internal view virtual returns (uint256);
 
     /// @notice set the number of nft for an address
     /// @param owner address to set
     /// @param quantity the number of nfts to set for the owner
-    function _setNumNFTPerAddress(address owner, uint256 quantity) internal virtual;
+    function _writeNumNFTPerAddress(address owner, uint256 quantity) internal virtual;
 
     /// @notice Get the owner data of a token for a user
     /// @param tokenId The id of the token.
     /// @return the owner data
     /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
-    function _getOwnerData(uint256 tokenId) internal view virtual returns (uint256);
+    function _readOwnerData(uint256 tokenId) internal view virtual returns (uint256);
 
     /// @notice Get the owner address of a token (included in the ownerData, see: _getOwnerData)
     /// @param tokenId The id of the token.
     /// @return the owner address
     function _getOwnerAddress(uint256 tokenId) internal view virtual returns (address) {
-        return address(uint160(_getOwnerData(tokenId)));
+        return address(uint160(_readOwnerData(tokenId)));
     }
 
     /// @notice Set the owner data of a token
     /// @param tokenId the token Id
     /// @param data the owner data
     /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
-    function _setOwnerData(uint256 tokenId, uint256 data) internal virtual;
+    function _writeOwnerData(uint256 tokenId, uint256 data) internal virtual;
 
     /// @notice check if an operator was enabled by a given owner
     /// @param owner that enabled the operator
@@ -495,15 +495,15 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @param owner that enabled the operator
     /// @param operator address to check if it was enabled
     /// @param enabled if true give access to the operator, else disable it
-    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
+    function _writeOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 
     /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId The id of the token.
     /// @return the operator address
-    function _getOperator(uint256 tokenId) internal view virtual returns (address);
+    function _readOperator(uint256 tokenId) internal view virtual returns (address);
 
     /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId the id of the token.
     /// @param operator the operator address
-    function _setOperator(uint256 tokenId, address operator) internal virtual;
+    function _writeOperator(uint256 tokenId, address operator) internal virtual;
 }

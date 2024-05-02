@@ -22,7 +22,7 @@ abstract contract WithSuperOperators is IErrors, WithAdmin {
         if (enabled == _isSuperOperator(superOperator)) {
             revert InvalidArgument();
         }
-        _setSuperOperator(superOperator, enabled);
+        _writeSuperOperator(superOperator, enabled);
         emit SuperOperator(superOperator, enabled);
     }
 
@@ -43,5 +43,5 @@ abstract contract WithSuperOperators is IErrors, WithAdmin {
     /// @param superOperator the address to set
     /// @param enabled true enable the address, false disable it.
     /// @dev Implement
-    function _setSuperOperator(address superOperator, bool enabled) internal virtual;
+    function _writeSuperOperator(address superOperator, bool enabled) internal virtual;
 }

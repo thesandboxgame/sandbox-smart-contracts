@@ -107,7 +107,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         if (enabled == _isMinter(minter)) {
             revert InvalidArgument();
         }
-        _setMinter(minter, enabled);
+        _writeMinter(minter, enabled);
         emit Minter(minter, enabled);
     }
 
@@ -294,7 +294,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             if (owner != from) {
                 revert ERC721InvalidOwner(from);
             }
-            _setOwnerData(id1x1, uint160(address(to)));
+            _writeOwnerData(id1x1, uint160(address(to)));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
@@ -321,13 +321,13 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         _checkQuadIsNotMinted(size, x, y, 24);
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
-            if (_getOwnerData(_id) != 0) {
+            if (_readOwnerData(_id) != 0) {
                 revert AlreadyMinted(_id);
             }
             emit Transfer(address(0), to, _id);
         }
 
-        _setOwnerData(quadId, uint160(to));
+        _writeOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _checkBatchReceiverAcceptQuad(msgSender, address(0), to, size, x, y, data);
     }
@@ -382,12 +382,12 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                 emit Transfer(msgSender, to, _id);
             } else {
                 if (_getOwnerAddress(_id) == msgSender) {
-                    if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
+                    if (_readOperator(_id) != address(0)) _writeOperator(_id, address(0));
                     landMinted += 1;
                     emit Transfer(msgSender, to, _id);
                 } else {
                     // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
-                    if (_getOwnerData(_id) != 0) {
+                    if (_readOwnerData(_id) != 0) {
                         revert AlreadyMinted(_id);
                     }
 
@@ -399,7 +399,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
         _checkBatchReceiverAcceptQuadAndClearOwner(msgSender, quadMinted, index, landMinted, to, size, x, y, data);
 
-        _setOwnerData(quadId, uint160(to));
+        _writeOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _subNumNFTPerAddress(msgSender, landMinted);
     }
@@ -421,7 +421,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                 (x / quadCompareSize) * quadCompareSize,
                 (y / quadCompareSize) * quadCompareSize
             );
-            if (_getOwnerData(id) != 0) {
+            if (_readOwnerData(id) != 0) {
                 revert AlreadyMinted(id);
             }
         } else {
@@ -432,7 +432,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
                     uint256 id = _getQuadId(layer, xi, yi);
-                    if (_getOwnerData(id) != 0) {
+                    if (_readOwnerData(id) != 0) {
                         revert AlreadyMinted(id);
                     }
                 }
@@ -483,7 +483,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                         // total land minted is increase by the number if land of 1x1 in child quad
                         landMinted += quadCompareSize * quadCompareSize;
                         //owner is cleared
-                        _setOwnerData(id, 0);
+                        _writeOwnerData(id, 0);
                     } else {
                         if (owner != address(0)) {
                             revert AlreadyMinted(id);
@@ -515,7 +515,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     /// @return bool for if land is owned by 'from' or not.
     function _checkAndClearLandOwner(address from, uint256 x, uint256 y) internal returns (bool) {
         uint256 tokenId = _getQuadId(LAYER_1x1, x, y);
-        uint256 currentOwner = _getOwnerData(tokenId);
+        uint256 currentOwner = _readOwnerData(tokenId);
         if (currentOwner != 0) {
             if ((currentOwner & BURNED_FLAG) == BURNED_FLAG) {
                 revert NotOwner(x, y);
@@ -523,7 +523,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             if (address(uint160(currentOwner)) != from) {
                 revert ERC721InvalidOwner(from);
             }
-            _setOwnerData(tokenId, 0);
+            _writeOwnerData(tokenId, 0);
             return true;
         }
         return false;
@@ -588,7 +588,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                     transferIndex++;
                 } else if (_getOwnerAddress(id) == msgSender) {
                     // if it is owned by the msgSender owner data is removed and it is pused in to idsToTransfer array
-                    _setOwnerData(id, 0);
+                    _writeOwnerData(id, 0);
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
                 } else {
@@ -604,7 +604,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         } else {
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 id = _idInPath(i, size, x, y);
-                if (_getOwnerAddress(id) == msgSender) _setOwnerData(id, 0);
+                if (_getOwnerAddress(id) == msgSender) _writeOwnerData(id, 0);
             }
         }
     }
@@ -733,14 +733,14 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                         childQuadSize / 2
                     );
                     uint256 idChild = _getQuadId(childLayer, xi, yi);
-                    ownerChild = _getOwnerData(idChild);
+                    ownerChild = _readOwnerData(idChild);
                     if (ownerChild != 0) {
                         // checking the owner of child quad
                         if (!ownAllIndividual && ownerChild != uint256(uint160(from))) {
                             revert NotOwner(xi, yi);
                         }
                         // clearing owner of child quad
-                        _setOwnerData(idChild, 0);
+                        _writeOwnerData(idChild, 0);
                     }
                 }
                 // ownerOfAll should be true if "from" is owner of all the child quads itereated over
@@ -754,7 +754,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             if (!ownerOfAll && _ownerOfQuad(land.size, land.x, land.y) != from) {
                 revert ERC721InvalidOwner(from);
             }
-            _setOwnerData(quadId, uint160(to));
+            _writeOwnerData(quadId, uint160(to));
             return true;
         }
 
@@ -789,7 +789,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         }
         uint256 x = tokenId % GRID_SIZE;
         uint256 y = tokenId / GRID_SIZE;
-        uint256 owner1x1 = _getOwnerData(tokenId);
+        uint256 owner1x1 = _readOwnerData(tokenId);
 
         if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
@@ -814,5 +814,5 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     /// @notice set an address as minter
     /// @param minter the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setMinter(address minter, bool enabled) internal virtual;
+    function _writeMinter(address minter, bool enabled) internal virtual;
 }
