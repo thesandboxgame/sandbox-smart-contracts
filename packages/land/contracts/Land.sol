@@ -23,7 +23,7 @@ contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, W
         if (_readAdmin() != address(0)) {
             revert InvalidInitialization();
         }
-        _changeAdmin(admin);
+        _setAdmin(admin);
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.

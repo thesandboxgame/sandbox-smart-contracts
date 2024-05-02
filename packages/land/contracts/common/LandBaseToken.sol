@@ -49,6 +49,13 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         uint256 size;
     }
 
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external onlyAdmin {
+        _setMinter(minter, enabled);
+    }
+
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
     /// @param to destination
@@ -95,20 +102,6 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             }
             _checkOnERC721BatchReceived(msgSender, from, to, ids, data);
         }
-    }
-
-    /// @notice Enable or disable the ability of `minter` to mint tokens
-    /// @param minter address that will be given/removed minter right.
-    /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external onlyAdmin {
-        if (minter == address(0)) {
-            revert InvalidAddress();
-        }
-        if (enabled == _isMinter(minter)) {
-            revert InvalidArgument();
-        }
-        _writeMinter(minter, enabled);
-        emit Minter(minter, enabled);
     }
 
     /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
@@ -197,6 +190,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     function getX(uint256 tokenId) external pure returns (uint256) {
         return _getX(tokenId);
     }
+
     /// @notice y coordinate of Land token
     /// @param tokenId the id of land
     /// @return the y coordinates
@@ -804,6 +798,20 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);
             operatorEnabled = false;
         }
+    }
+
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function _setMinter(address minter, bool enabled) internal {
+        if (minter == address(0)) {
+            revert InvalidAddress();
+        }
+        if (enabled == _isMinter(minter)) {
+            revert InvalidArgument();
+        }
+        _writeMinter(minter, enabled);
+        emit Minter(minter, enabled);
     }
 
     /// @notice checks if an address is enabled as minter
