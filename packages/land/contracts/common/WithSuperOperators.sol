@@ -2,23 +2,15 @@
 pragma solidity 0.8.23;
 
 import {IErrors} from "../interfaces/IErrors.sol";
-import {WithAdmin} from "./WithAdmin.sol";
 
 /// @title WithSuperOperators
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add super operators handled by an admin
-abstract contract WithSuperOperators is IErrors, WithAdmin {
+abstract contract WithSuperOperators is IErrors {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     event SuperOperator(address indexed superOperator, bool indexed enabled);
-
-    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
-    /// @param superOperator address that will be given/removed superOperator right.
-    /// @param enabled set whether the superOperator is enabled or disabled.
-    function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
-        _setSuperOperator(superOperator, enabled);
-    }
 
     /// @notice check if an address is a super-operator
     /// @param superOperator the operator address to check

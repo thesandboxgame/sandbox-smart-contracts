@@ -22,13 +22,6 @@ abstract contract WithAdmin is IErrors, Context {
         _;
     }
 
-    /// @notice Change the admin of the contract
-    /// @dev Change the administrator to be `newAdmin`.
-    /// @param newAdmin The address of the new administrator.
-    function changeAdmin(address newAdmin) external onlyAdmin {
-        _changeAdmin(newAdmin);
-    }
-
     /// @notice Get the current admin
     /// @dev Get the current administrator of this contract.
     /// @return The current administrator of this contract.

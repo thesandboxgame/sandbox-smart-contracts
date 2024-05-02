@@ -8,6 +8,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
+import {WithAdmin} from "./WithAdmin.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {WithMetadataRegistry} from "../common/WithMetadataRegistry.sol";
 import {WithRoyalties} from "../common/WithRoyalties.sol";
@@ -21,8 +22,9 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 abstract contract LandBase is
     LandBaseToken,
-    OperatorFiltererUpgradeable,
     Initializable,
+    OperatorFiltererUpgradeable,
+    WithAdmin,
     WithMetadataRegistry,
     WithRoyalties,
     WithOwner
@@ -52,6 +54,27 @@ abstract contract LandBase is
             revert InvalidAddress();
         }
         _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice Change the admin of the contract
+    /// @dev Change the administrator to be `newAdmin`.
+    /// @param newAdmin The address of the new administrator.
+    function changeAdmin(address newAdmin) external onlyAdmin {
+        _changeAdmin(newAdmin);
+    }
+
+    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
+    /// @param superOperator address that will be given/removed superOperator right.
+    /// @param enabled set whether the superOperator is enabled or disabled.
+    function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
+        _setSuperOperator(superOperator, enabled);
+    }
+
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external onlyAdmin {
+        _setMinter(minter, enabled);
     }
 
     /// @notice sets filter registry address deployed in test
@@ -86,7 +109,7 @@ abstract contract LandBase is
         address sender,
         address operator,
         uint256 tokenId
-    ) external override onlyAllowedOperatorApproval(operator) {
+    ) external onlyAllowedOperatorApproval(operator) {
         _approveFor(sender, operator, tokenId);
     }
 
@@ -108,7 +131,7 @@ abstract contract LandBase is
         address sender,
         address operator,
         bool approved
-    ) external override onlyAllowedOperatorApproval(operator) {
+    ) external onlyAllowedOperatorApproval(operator) {
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -125,6 +148,20 @@ abstract contract LandBase is
     /// @param tokenId The id of the token
     function transferFrom(address from, address to, uint256 tokenId) external override onlyAllowedOperator(from) {
         _transferFrom(from, to, tokenId);
+    }
+
+    /// @notice Transfer many tokens between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external virtual override onlyAllowedOperator(from) {
+        _batchTransferFrom(from, to, ids, data, false);
     }
 
     /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
@@ -147,6 +184,21 @@ abstract contract LandBase is
         bytes memory data
     ) external override onlyAllowedOperator(from) {
         _safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /// @notice Transfer many tokens between 2 addresses, while
+    /// ensuring the receiving contract has a receiver method.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external virtual onlyAllowedOperator(from) {
+        _batchTransferFrom(from, to, ids, data, true);
     }
 
     /// @notice Check if the contract supports an interface
