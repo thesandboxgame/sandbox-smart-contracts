@@ -39,12 +39,17 @@ const setupTest = deployments.createFixture(
     const ExchangeContract = await getEthersContract('Exchange');
     const SandContract = await getEthersContract('PolygonSand');
     const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const OrderValidatorContract = await getEthersContract('OrderValidator');
     const AuthSuperValidatorContract = await getEthersContract(
       'AuthSuperValidator'
     );
 
     const CatalystContractAsAdmin = CatalystContract.connect(
       await ethers.provider.getSigner(catalystMinter)
+    );
+
+    const lazyMintingCatSellerSigner = await ethers.provider.getSigner(
+      lazyMintingCatSeller
     );
 
     // Mint 100 of each catalyst to lazyMintingCatSeller
@@ -54,6 +59,9 @@ const setupTest = deployments.createFixture(
         BigInt(i),
         BigInt(100)
       );
+      await CatalystContract.connect(
+        lazyMintingCatSellerSigner
+      ).setApprovalForAll(await ExchangeContract.getAddress(), true);
     }
 
     // **Manipulate the Sand contract to give user some Sand**
@@ -151,6 +159,7 @@ const setupTest = deployments.createFixture(
       CatalystContractAsAdmin,
       createLazyMintSignature,
       SandContract,
+      OrderValidatorContract,
       ExchangeContract,
       treasury,
       TRUSTED_FORWARDER,
@@ -358,6 +367,7 @@ describe.only('Asset Create', function () {
         AssetCreateContract,
         CatalystContract,
         ExchangeContract,
+        OrderValidatorContract,
         tsbCatSellerSigner,
       } = await setupTest();
 
@@ -392,7 +402,7 @@ describe.only('Asset Create', function () {
         CatalystContract,
         parseEther('1'),
         SandContract,
-        ExchangeContract,
+        OrderValidatorContract,
         mintData.tier,
         mintData.amount,
         tsbCatSellerSigner,

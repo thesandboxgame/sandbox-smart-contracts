@@ -8,6 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const exchangeContract = await deployments.get('Exchange');
   const AssetCreate = await deployments.get('AssetCreate');
+  const CatalystContract = await deployments.get('Catalyst');
 
   const LAZY_MINTING_FEE_BPS = 0;
 
@@ -76,6 +77,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(
       `[AssetCreate-Lazy Minting] Granted ERC1776_OPERATOR_ROLE to AssetCreate`
     );
+  }
+
+  const TSB_ROLE = await read('OrderValidator', 'TSB_ROLE');
+  const addressesToGrant = [];
+  addressesToGrant[TSB_ROLE] = [CatalystContract.address];
+  for (const role in addressesToGrant) {
+    for (const address of addressesToGrant[role]) {
+      const hasRole = await read('OrderValidator', 'hasRole', role, address);
+
+      if (!hasRole) {
+        await catchUnknownSigner(
+          execute(
+            'OrderValidator',
+            {from: sandAdmin, log: true},
+            'grantRole',
+            role,
+            address
+          )
+        );
+      }
+    }
   }
 };
 

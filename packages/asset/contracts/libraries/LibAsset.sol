@@ -58,11 +58,10 @@ library LibAsset {
     /// @param leftType Asset type on the left side of a trade.
     /// @param rightType Asset type on the right side of a trade.
     /// @return AssetType representing the matched asset type.
-    function matchAssets(AssetType calldata leftType, AssetType calldata rightType)
-        internal
-        pure
-        returns (AssetType memory)
-    {
+    function matchAssets(
+        AssetType calldata leftType,
+        AssetType calldata rightType
+    ) internal pure returns (AssetType memory) {
         AssetClass classLeft = leftType.assetClass;
         AssetClass classRight = rightType.assetClass;
 

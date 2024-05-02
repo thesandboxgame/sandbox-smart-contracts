@@ -6,14 +6,12 @@ import {
   Signer,
   ZeroAddress,
 } from 'ethers';
-import {Address} from 'hardhat-deploy/types';
 
 export type Order = {
   maker: string;
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
-  makeRecipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -70,12 +68,11 @@ export async function signOrder(
   account: Signer,
   verifyingContract: Contract
 ) {
-  const network = await verifyingContract.runner?.provider?.getNetwork();
   return account.signTypedData(
     {
       name: 'The Sandbox Marketplace',
       version: '1.0.0',
-      chainId: network?.chainId,
+      chainId: 31337,
       verifyingContract: await verifyingContract.getAddress(),
     },
     {
@@ -92,7 +89,6 @@ export async function signOrder(
         {name: 'makeAsset', type: 'Asset'},
         {name: 'taker', type: 'address'},
         {name: 'takeAsset', type: 'Asset'},
-        {name: 'makeRecipient', type: 'address'},
         {name: 'salt', type: 'uint256'},
         {name: 'start', type: 'uint256'},
         {name: 'end', type: 'uint256'},
@@ -109,15 +105,13 @@ export const OrderDefault = async (
   takeAsset: Asset,
   salt: Numeric,
   start: Numeric,
-  end: Numeric,
-  makeRecipient?: string
+  end: Numeric
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
   taker:
     taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
-  makeRecipient: makeRecipient || (await maker.getAddress()), // Use makerAddress if makeRecipient is not provided
   salt,
   start,
   end,
@@ -127,7 +121,7 @@ export const getMatchedOrders = async (
   catalystContract: Contract,
   catalystPrice: Numeric,
   sandContract: Contract,
-  exchangeContract: Contract,
+  orderValidatorContract: Contract,
   catalystTier: BigInt,
   amount: BigInt,
   maker: Signer,
@@ -160,8 +154,8 @@ export const getMatchedOrders = async (
     0
   );
 
-  const makerSig = await signOrder(orderLeft, maker, exchangeContract);
-  const takerSig = await signOrder(orderRight, taker, exchangeContract);
+  const makerSig = await signOrder(orderLeft, maker, orderValidatorContract);
+  const takerSig = await signOrder(orderRight, taker, orderValidatorContract);
 
   const matchedOrder = [
     {
