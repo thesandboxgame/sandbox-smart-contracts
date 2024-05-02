@@ -3,6 +3,9 @@ pragma solidity 0.8.23;
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IErrors} from "../interfaces/IErrors.sol";
 import {ILandToken} from "../interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
@@ -200,13 +203,13 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     }
 
     /// @notice Check if the contract supports an interface
-    /// @param id The id of the interface
+    /// @param interfaceId The id of the interface
     /// @return True if the interface is supported
-    /// @dev 0x01ffc9a7 is ERC-165
-    /// @dev 0x80ac58cd is ERC-721
-    /// @dev 0x5b5e139f is ERC-721 metadata
-    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+    function supportsInterface(bytes4 interfaceId) public pure virtual override returns (bool) {
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     /// @notice Return the name of the token contract

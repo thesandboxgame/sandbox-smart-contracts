@@ -55,16 +55,6 @@ abstract contract ERC2771Handler {
         }
     }
 
-    /// @notice if the call comes from the trusted forwarder, it subtracts the sender address from `msg.data` to get the real `msg.data`
-    /// @return the real `msg.data`
-    function _msgData() internal view virtual returns (bytes calldata) {
-        if (_isTrustedForwarder(msg.sender) && msg.data.length >= 20) {
-            return msg.data[:msg.data.length - 20];
-        } else {
-            return msg.data;
-        }
-    }
-
     /// @notice Checks if an address is a trusted forwarder
     /// @param trustedForwarder address to check
     /// @return is trusted

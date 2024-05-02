@@ -2,6 +2,7 @@
 pragma solidity 0.8.23;
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
@@ -161,12 +162,10 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     }
 
     /// @notice Check if the contract supports an interface.
-    /// 0x01ffc9a7 is ERC-165.
-    /// 0x80ac58cd is ERC-721
-    /// @param id The id of the interface.
+    /// @param interfaceId The id of the interface.
     /// @return Whether the interface is supported.
-    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd;
+    function supportsInterface(bytes4 interfaceId) public pure virtual override returns (bool) {
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC165).interfaceId;
     }
 
     /// @param from The address who initiated the transfer (may differ from msg.sender).
