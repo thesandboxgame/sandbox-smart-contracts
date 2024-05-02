@@ -6,6 +6,30 @@ import {
   Signer,
   ZeroAddress,
 } from 'ethers';
+import {ethers} from 'hardhat';
+import {Network} from 'hardhat/types';
+
+export type LazyMintData = {
+  caller: string;
+  tier: bigint;
+  amount: bigint;
+  unitPrice: bigint;
+  paymentToken: string;
+  metadataHash: string;
+  maxSupply: bigint;
+  creator: string;
+};
+
+export type LazyMintBatchData = {
+  caller: string;
+  tiers: bigint[];
+  amounts: bigint[];
+  unitPrices: bigint[];
+  paymentTokens: string[];
+  metadataHashes: string[];
+  maxSupplies: bigint[];
+  creators: string[];
+};
 
 export type Order = {
   maker: string;
@@ -167,4 +191,161 @@ export const getMatchedOrders = async (
   ];
 
   return matchedOrder;
+};
+
+export const createLazyMintSignature = async (
+  data: LazyMintData,
+  AssetCreateContract: Contract,
+  network: Network
+) => {
+  const {
+    caller,
+    tier,
+    amount,
+    unitPrice,
+    paymentToken,
+    metadataHash,
+    maxSupply,
+    creator,
+  } = data;
+  const nonce = await AssetCreateContract.signatureNonces(caller);
+
+  const backendAuthWallet = new ethers.Wallet(
+    '0x4242424242424242424242424242424242424242424242424242424242424242'
+  );
+
+  const sigData = {
+    types: {
+      LazyMint: [
+        {name: 'caller', type: 'address'},
+        {name: 'creator', type: 'address'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tier', type: 'uint8'},
+        {name: 'amount', type: 'uint256'},
+        {name: 'unitPrice', type: 'uint256'},
+        {name: 'paymentToken', type: 'address'},
+        {name: 'metadataHash', type: 'string'},
+        {name: 'maxSupply', type: 'uint256'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: network.config.chainId,
+      verifyingContract: await AssetCreateContract.getAddress(),
+    },
+    message: {
+      caller,
+      creator,
+      nonce,
+      tier,
+      amount,
+      unitPrice,
+      paymentToken,
+      metadataHash,
+      maxSupply,
+    },
+  };
+
+  const signature = await backendAuthWallet.signTypedData(
+    sigData.domain,
+    sigData.types,
+    sigData.message
+  );
+  return signature;
+};
+
+export const createMultipleLazyMintSignature = async (
+  data: LazyMintBatchData,
+  AssetCreateContract: Contract,
+  network: Network
+) => {
+  const {
+    caller,
+    creators,
+    tiers,
+    amounts,
+    unitPrices,
+    paymentTokens,
+    metadataHashes,
+    maxSupplies,
+  } = data;
+  const nonce = await AssetCreateContract.signatureNonces(caller);
+  const backendAuthWallet = new ethers.Wallet(
+    '0x4242424242424242424242424242424242424242424242424242424242424242'
+  );
+
+  const sigData = {
+    types: {
+      LazyMintBatch: [
+        {name: 'caller', type: 'address'},
+        {name: 'creators', type: 'address[]'},
+        {name: 'nonce', type: 'uint16'},
+        {name: 'tiers', type: 'uint8[]'},
+        {name: 'amounts', type: 'uint256[]'},
+        {name: 'unitPrices', type: 'uint256[]'},
+        {name: 'paymentTokens', type: 'address[]'},
+        {name: 'metadataHashes', type: 'string[]'},
+        {name: 'maxSupplies', type: 'uint256[]'},
+      ],
+    },
+    domain: {
+      name: 'Sandbox Asset Create',
+      version: '1.0',
+      chainId: network.config.chainId,
+      verifyingContract: await AssetCreateContract.getAddress(),
+    },
+    message: {
+      caller,
+      creators,
+      nonce,
+      tiers,
+      amounts,
+      unitPrices,
+      paymentTokens,
+      metadataHashes,
+      maxSupplies,
+    },
+  };
+
+  const signature = await backendAuthWallet.signTypedData(
+    sigData.domain,
+    sigData.types,
+    sigData.message
+  );
+  return signature;
+};
+
+export const giveSandToAccount = async (
+  SandContract: Contract,
+  account: string,
+  amount: BigInt
+) => {
+  // Give sand to lazyMintingTestAccount1
+  // impersonate CHILD_CHAIN_MANAGER
+  await ethers.provider.send('hardhat_impersonateAccount', [
+    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+  ]);
+  const sandUser = await ethers.provider.getSigner(
+    '0x8464135c8F25Da09e49BC8782676a84730C318bC'
+  );
+
+  // give sandUser ether
+  await ethers.provider.send('hardhat_setBalance', [
+    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+    '0x100000000000000000000',
+  ]);
+
+  const abiCoder = new ethers.AbiCoder();
+
+  // call deposit on PolygonSand contract via function deposit(address user, bytes calldata depositData)
+  await SandContract.connect(sandUser).deposit(
+    account,
+    abiCoder.encode(['uint256'], [amount])
+  );
+
+  // stop impersonating
+  await ethers.provider.send('hardhat_stopImpersonatingAccount', [
+    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+  ]);
 };
