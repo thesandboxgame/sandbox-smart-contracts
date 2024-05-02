@@ -5,7 +5,7 @@ pragma solidity 0.8.23;
 /// @title Errors
 /// @author The Sandbox
 /// @notice Common errors
-abstract contract IErrors {
+interface IErrors {
     /// @notice an address passed as argument is invalid
     error InvalidAddress();
 
