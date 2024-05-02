@@ -16,14 +16,12 @@ import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
 contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
-    event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
-
     /// @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
         // be backward compatible with the current deployment
-        if (_getAdmin() != address(0)) {
+        if (_readAdmin() != address(0)) {
             revert InvalidInitialization();
         }
         _changeAdmin(admin);
@@ -33,7 +31,6 @@ contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, Wi
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _setTrustedForwarder(trustedForwarder);
-        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @notice set royalty manager
@@ -67,8 +64,7 @@ contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, Wi
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(IOperatorFilterRegistry registry) external virtual onlyAdmin {
-        _setOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
+        _setOperatorRegistry(registry);
     }
 
     /// @notice Approve an operator to spend tokens on the sender behalf
