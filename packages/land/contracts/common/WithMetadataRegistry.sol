@@ -33,8 +33,8 @@ abstract contract WithMetadataRegistry is IErrors {
     }
 
     /// @notice Get the address of the Metadata Registry
-    /// @return metadataRegistry The address of the Metadata Registry
-    function getMetadataRegistry() external view returns (ILandMetadataRegistry metadataRegistry) {
+    /// @return The address of the Metadata Registry
+    function getMetadataRegistry() external view returns (ILandMetadataRegistry) {
         MetadataRegistryStorage storage $ = _getMetadataRegistryStorage();
         return $._metadataRegistry;
     }
@@ -44,9 +44,7 @@ abstract contract WithMetadataRegistry is IErrors {
     /// @return premium true if the land is premium
     /// @return neighborhoodId the number that identifies the neighborhood
     /// @return neighborhoodName the neighborhood name
-    function getMetadata(
-        uint256 tokenId
-    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {
+    function getMetadata(uint256 tokenId) external view returns (bool, uint256, string memory) {
         ILandMetadataRegistry registry = _getMetadataRegistryStorage()._metadataRegistry;
         if (registry == ILandMetadataRegistry(address(0))) {
             return (false, 0, UNKNOWN_NEIGHBORHOOD);
