@@ -16,6 +16,7 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 
 /// @title Land Contract
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 abstract contract LandBase is

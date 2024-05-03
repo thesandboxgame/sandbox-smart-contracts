@@ -52,13 +52,6 @@ abstract contract OperatorFiltererUpgradeable is Context {
         _;
     }
 
-    /// @notice sets filter registry address deployed in test
-    /// @param registry the address of the registry
-    function _setOperatorRegistry(IOperatorFilterRegistry registry) internal {
-        _writeOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
-    }
-
     /// @notice return the address of the operator filter registry
     /// @return the address of  the operator filter registry
     function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
@@ -84,6 +77,13 @@ abstract contract OperatorFiltererUpgradeable is Context {
             }
         }
         emit ContractRegistered(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /// @notice sets filter registry address deployed in test
+    /// @param registry the address of the registry
+    function _setOperatorRegistry(IOperatorFilterRegistry registry) internal {
+        _writeOperatorFilterRegistry(registry);
+        emit OperatorRegistrySet(registry);
     }
 
     /// @notice get the OpenSea operator filter

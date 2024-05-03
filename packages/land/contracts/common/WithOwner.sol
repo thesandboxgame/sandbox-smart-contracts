@@ -28,8 +28,8 @@ contract WithOwner {
     }
 
     /// @notice Get the address of the owner
-    /// @return ownerAddress The address of the owner.
-    function owner() external view returns (address ownerAddress) {
+    /// @return The address of the owner.
+    function owner() external view returns (address) {
         OwnerStorage storage $ = _getOwnerStorage();
         return $._owner;
     }

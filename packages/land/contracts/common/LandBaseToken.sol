@@ -292,7 +292,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             if (owner != from) {
                 revert ERC721InvalidOwner(from);
             }
-            _writeOwnerData(id1x1, uint160(address(to)));
+            _writeOwnerData(id1x1, uint160(to));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }

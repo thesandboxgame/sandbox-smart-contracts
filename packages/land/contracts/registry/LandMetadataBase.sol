@@ -59,7 +59,8 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     function _getMetadataForTokenId(uint256 tokenId) internal view returns (uint256 neighborhoodId, bool premium) {
         uint256 bits = _getBits(tokenId);
         uint256 metadata = _getMetadata(tokenId) >> bits;
-        return (metadata & NEIGHBORHOOD_MASK, (metadata & PREMIUM_MASK) != 0);
+        neighborhoodId = metadata & NEIGHBORHOOD_MASK;
+        premium = (metadata & PREMIUM_MASK) != 0;
     }
 
     /// @notice set the packed metadata for 32 lands at once
