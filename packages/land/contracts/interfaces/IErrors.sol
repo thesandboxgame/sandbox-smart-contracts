@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @title Errors
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Common errors
 interface IErrors {
     /// @notice an address passed as argument is invalid

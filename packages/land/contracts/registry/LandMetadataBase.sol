@@ -5,6 +5,7 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
 
 /// @title LandMetadataRegistry
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
 abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     /// @notice value returned when the neighborhood is not set yet.

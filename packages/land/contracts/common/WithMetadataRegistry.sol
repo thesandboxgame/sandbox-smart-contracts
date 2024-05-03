@@ -7,6 +7,7 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 
 /// @title WithMetadataRegistry
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add support for the metadata registry
 abstract contract WithMetadataRegistry is IErrors {
     /// @notice value returned when the neighborhood is not set yet.

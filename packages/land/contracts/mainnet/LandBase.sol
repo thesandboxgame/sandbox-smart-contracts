@@ -10,6 +10,8 @@ import {LandBaseToken} from "../common/LandBaseToken.sol";
 import {LandStorageMixin} from "./LandStorageMixin.sol";
 
 /// @title LAND Base L1
+/// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This class composes everything together without adding any functionality (except for _msgSender).
 /// @dev We use the storage mixing for historical reasons.
 /// @dev There is a difference between L1 and L2 storage slots order and we want to upgrade the contract.

@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @title Owner support (EIP173)
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add an owner for the stores that need it
 contract WithOwner {
     /// @notice emitted when the ownership of the contract is changed

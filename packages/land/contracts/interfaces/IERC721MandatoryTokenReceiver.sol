@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 /// @title ERC721MandatoryTokenReceiver
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Interface for any contract that wants to support safeBatchTransfers
 /// @notice from ERC721 asset contracts.
 /// @dev The ERC-165 identifier for this interface is 0x5e8bf644.

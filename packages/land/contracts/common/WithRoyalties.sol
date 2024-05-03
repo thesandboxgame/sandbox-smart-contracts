@@ -6,6 +6,7 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-manag
 
 /// @title WithRoyalties
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add royalty support to land contracts (EIP2981 implemented with our royalty manager)
 contract WithRoyalties {
     /// @notice emitted when the royalty manager is set

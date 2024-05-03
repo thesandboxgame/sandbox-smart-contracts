@@ -13,6 +13,8 @@ import {ERC2771Handler} from "./ERC2771Handler.sol";
 import {PolygonLandStorageMixin} from "./PolygonLandStorageMixin.sol";
 
 /// @title LAND Base L2
+/// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This contract composes everything together without adding any functionality (except for _msgSender).
 /// @dev We use the storage mixing for historical reasons.
 /// @dev There is a difference between L1 and L2 storage slots order and we want to upgrade the contract.

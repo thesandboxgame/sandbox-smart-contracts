@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 /// @title ERC2771Handler
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Handle meta-transactions
 /// @dev minimal ERC2771 handler to keep bytecode-size down
 /// @dev based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol

@@ -12,6 +12,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /// @title ERC721BaseTokenCommon
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
 abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, WithSuperOperators {

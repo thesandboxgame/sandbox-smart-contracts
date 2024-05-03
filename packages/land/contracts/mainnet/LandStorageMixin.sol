@@ -5,6 +5,7 @@ import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol
 
 /// @title LandStorageMixin
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Storage structure of the mainnet implementation of Land contract
 /// @dev According to hardhat-storage plugin run onto the latest deployed version (@core)
 /// @dev |          contract           │      state_variable       │ storage_slot │ offset │                       type                       │ idx │                     artifact                      │ numberOfBytes │
