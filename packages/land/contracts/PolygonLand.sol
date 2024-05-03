@@ -12,6 +12,7 @@ import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 
 /// @title LAND token on L2
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible

@@ -6,7 +6,8 @@ import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 ///@title OperatorFiltererUpgradeable
-///@author The Sandbox
+/// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 ///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is Context {

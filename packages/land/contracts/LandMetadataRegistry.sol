@@ -8,6 +8,7 @@ import {LandMetadataBase} from "./registry/LandMetadataBase.sol";
 
 /// @title LandMetadataRegistry
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
 contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {
     /// @notice the base token id used for a batch operation is wrong

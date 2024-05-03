@@ -3,6 +3,8 @@
 pragma solidity ^0.8.0;
 
 /// @title ILandMetadataRegistry
+/// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Interface implemented by the LandMetadataRegistry
 interface ILandMetadataRegistry {
     /// @notice return the metadata for one land

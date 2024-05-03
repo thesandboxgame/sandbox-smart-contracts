@@ -3,7 +3,8 @@
 pragma solidity ^0.8.0;
 
 /// @title IOperatorFilterRegistry
-/// @author OpenSea
+/// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Interface of the operator filter registry
 /// @dev This interface comes from OpenSea https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/IOperatorFilterRegistry.sol and adapted to the 0.8.23 solidity version
 interface IOperatorFilterRegistry {

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 /// @title ILandToken
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Interface of the LAND token including quad methods
 interface ILandToken {
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)

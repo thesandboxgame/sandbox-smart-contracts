@@ -6,6 +6,7 @@ import {WithAdmin} from "./WithAdmin.sol";
 
 /// @title WithSuperOperators
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add super operators handled by an admin
 abstract contract WithSuperOperators is IErrors, WithAdmin {
     /// @param superOperator address that will be given/removed superOperator right.

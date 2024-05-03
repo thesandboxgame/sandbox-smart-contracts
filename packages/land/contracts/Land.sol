@@ -11,6 +11,7 @@ import {LandBase} from "./mainnet/LandBase.sol";
 
 /// @title Land Contract
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible

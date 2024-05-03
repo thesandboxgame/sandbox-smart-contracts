@@ -6,6 +6,7 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /// @title WithAdmin
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Add an admin to the contract
 abstract contract WithAdmin is IErrors, Context {
     /// @notice Emits when the contract administrator is changed.

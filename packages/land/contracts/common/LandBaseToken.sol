@@ -9,6 +9,7 @@ import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 
 /// @title LandBaseToken
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Implement LAND and quad functionalities on top of an ERC721 token
 /// @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
 abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
