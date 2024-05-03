@@ -75,4 +75,7 @@ interface IAssetCreate {
         uint256[] amounts,
         string[] metadataHashes
     );
+    event LazyMintFeeSet(uint256 indexed newLazyMintFee);
+    event LazyMintFeeReceiverSet(address indexed newLazyMintFeeReceived);
+    event ExchangeContractSet(address indexed exchangeContract);
 }
