@@ -143,6 +143,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
 
     /// @notice return true if a land is premium
     /// @param tokenId the token id
+    /// @return true if the land is premium
     function isPremium(uint256 tokenId) external view returns (bool) {
         (, bool premium) = _getMetadataForTokenId(tokenId);
         return premium;
@@ -150,6 +151,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
 
     /// @notice return the id that identifies the neighborhood
     /// @param tokenId the token id
+    /// @return the neighborhoodId number
     function getNeighborhoodId(uint256 tokenId) external view returns (uint256) {
         (uint256 neighborhoodId, ) = _getMetadataForTokenId(tokenId);
         return neighborhoodId;
@@ -157,6 +159,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
 
     /// @notice return the neighborhood name
     /// @param tokenId the token id
+    /// @return the neighborhood name
     function getNeighborhoodName(uint256 tokenId) external view returns (string memory) {
         (uint256 neighborhoodId, ) = _getMetadataForTokenId(tokenId);
         return _getNeighborhoodName(neighborhoodId);
@@ -164,12 +167,14 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
 
     /// @notice return the neighborhood name using neighborhood id as the key
     /// @param neighborhoodId the number that identifies the neighborhood
+    /// @return the neighborhood name
     function getNeighborhoodNameForId(uint256 neighborhoodId) external view returns (string memory) {
         return _getNeighborhoodName(neighborhoodId);
     }
 
     /// @notice return the metadata of 32 lands at once
     /// @param tokenIds the token ids
+    /// @return the raw metadata for a series of tokenIds
     /// @dev used to debug, extracting a lot of information that must be unpacked at once.
     function batchGetMetadata(uint256[] calldata tokenIds) external view returns (BatchSetData[] memory) {
         uint256 len = tokenIds.length;

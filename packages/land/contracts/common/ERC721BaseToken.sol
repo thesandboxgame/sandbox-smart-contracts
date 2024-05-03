@@ -145,6 +145,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
 
     /// @notice Return the internal owner data of a Land
     /// @param tokenId The id of the Land
+    /// @return the owner data (address + burn flag + operatorEnabled)
     /// @dev for debugging purposes
     function getOwnerData(uint256 tokenId) external view virtual returns (uint256) {
         return _readOwnerData(tokenId);
