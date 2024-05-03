@@ -1,5 +1,9 @@
 import {expect} from 'chai';
-import {LazyMintData, getMatchedOrders} from '../../utils/lazyMinting';
+import {
+  LazyMintBatchData,
+  LazyMintData,
+  getMatchedOrders,
+} from '../../utils/lazyMinting';
 import {parseEther} from 'ethers';
 import setupAssetCreateTests from './assetCreateFixture';
 
@@ -309,9 +313,598 @@ describe.only('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
-    it('allows users to batch lazy mint when they have all necessary catalysts - direct', async function () {});
-    it('allows users to batch lazy mint when they have all necessary catalysts - approveAndCall', async function () {});
-    it('allows users to batch lazy mint with Catalyst purchase - direct', async function () {});
-    it('allows users to batch lazy mint with Catalyst purchase - approveAndCall', async function () {});
+    it('allows users to batch lazy mint when they have all necessary catalysts - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2)],
+        amounts: [BigInt(1)],
+        unitPrices: [BigInt(1)],
+        paymentTokens: [await SandContract.getAddress()],
+        metadataHashes: ['0x'],
+        maxSupplies: [BigInt(1)],
+        creators: [creator],
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+      // approve Sand to AssetCreate
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        totalAmountToApprove
+      );
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          []
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('allows users to batch lazy mint when they have all necessary catalysts - approveAndCall', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2)],
+        amounts: [BigInt(1)],
+        unitPrices: [BigInt(1)],
+        paymentTokens: [await SandContract.getAddress()],
+        metadataHashes: ['0x'],
+        maxSupplies: [BigInt(1)],
+        creators: [creator],
+      };
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const encodedFunction = AssetCreateContract.interface.encodeFunctionData(
+        'lazyCreateMultipleAssets',
+        [user, signature, [...Object.values(mintData)], []]
+      );
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+
+      await expect(
+        SandContract.connect(userSigner).approveAndCall(
+          await AssetCreateContract.getAddress(),
+          totalAmountToApprove,
+          encodedFunction
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('allows users to batch lazy mint with Catalyst purchase - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContract,
+        ExchangeContract,
+        OrderValidatorContract,
+        tsbCatSellerSigner,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2)],
+        amounts: [BigInt(1)],
+        unitPrices: [parseEther('0.1')],
+        paymentTokens: [await SandContract.getAddress()],
+        metadataHashes: ['0x'],
+        maxSupplies: [BigInt(10)],
+        creators: [creator],
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const catPurchasePrice = parseEther('1');
+
+      // approve AssetCreate to transfer Sand (to creator)
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        mintData.unitPrices.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      // approve exchange contract to transfer Sand (to cat seller)
+      await SandContract.connect(userSigner).approve(
+        await ExchangeContract.getAddress(),
+        catPurchasePrice *
+          mintData.amounts.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      const orderData = await getMatchedOrders(
+        CatalystContract,
+        parseEther('1'),
+        SandContract,
+        OrderValidatorContract,
+        mintData.tiers[0],
+        mintData.amounts[0],
+        tsbCatSellerSigner,
+        userSigner
+      );
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          [orderData]
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('allows users to batch lazy mint with Catalyst purchase - approveAndCall', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContract,
+        ExchangeContract,
+        OrderValidatorContract,
+        tsbCatSellerSigner,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2)],
+        amounts: [BigInt(1)],
+        unitPrices: [parseEther('0.1')],
+        paymentTokens: [await SandContract.getAddress()],
+        metadataHashes: ['0x'],
+        maxSupplies: [BigInt(10)],
+        creators: [creator],
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const catPurchasePrice = parseEther('1');
+
+      // approve exchange contract to transfer Sand (to cat seller)
+      await SandContract.connect(userSigner).approve(
+        await ExchangeContract.getAddress(),
+        catPurchasePrice *
+          mintData.amounts.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      const orderData = await getMatchedOrders(
+        CatalystContract,
+        parseEther('1'),
+        SandContract,
+        OrderValidatorContract,
+        mintData.tiers[0],
+        mintData.amounts[0],
+        tsbCatSellerSigner,
+        userSigner
+      );
+
+      const encodedFunction = AssetCreateContract.interface.encodeFunctionData(
+        'lazyCreateMultipleAssets',
+        [user, signature, [...Object.values(mintData)], [orderData]]
+      );
+
+      await expect(
+        SandContract.connect(userSigner).approveAndCall(
+          await AssetCreateContract.getAddress(),
+          mintData.unitPrices.reduce((acc, curr) => acc + curr, 0n),
+          encodedFunction
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 3 different assets - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2), BigInt(3), BigInt(4)],
+        amounts: [BigInt(1), BigInt(1), BigInt(1)],
+        unitPrices: [BigInt(1), BigInt(1), BigInt(1)],
+        paymentTokens: [
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+        ],
+        metadataHashes: ['0x1', '0x2', '0x3'],
+        maxSupplies: [BigInt(1), BigInt(1), BigInt(1)],
+        creators: [creator, creator, creator],
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+      // approve Sand to AssetCreate
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        totalAmountToApprove
+      );
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          []
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 3 different assets - approveAndCall', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2), BigInt(3), BigInt(4)],
+        amounts: [BigInt(1), BigInt(1), BigInt(1)],
+        unitPrices: [BigInt(1), BigInt(1), BigInt(1)],
+        paymentTokens: [
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+        ],
+        metadataHashes: ['0x1', '0x2', '0x3'],
+        maxSupplies: [BigInt(1), BigInt(1), BigInt(1)],
+        creators: [creator, creator, creator],
+      };
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const encodedFunction = AssetCreateContract.interface.encodeFunctionData(
+        'lazyCreateMultipleAssets',
+        [user, signature, [...Object.values(mintData)], []]
+      );
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+
+      await expect(
+        SandContract.connect(userSigner).approveAndCall(
+          await AssetCreateContract.getAddress(),
+          totalAmountToApprove,
+          encodedFunction
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 3 different assets with catalyst purchase - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContract,
+        ExchangeContract,
+        OrderValidatorContract,
+        tsbCatSellerSigner,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: [BigInt(2), BigInt(3), BigInt(4)],
+        amounts: [BigInt(1), BigInt(1), BigInt(1)],
+        unitPrices: [parseEther('0.1'), parseEther('0.1'), parseEther('0.1')],
+        paymentTokens: [
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+          await SandContract.getAddress(),
+        ],
+        metadataHashes: ['0x1', '0x2', '0x3'],
+        maxSupplies: [BigInt(10), BigInt(10), BigInt(10)],
+        creators: [creator, creator, creator],
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const catPurchasePrice = parseEther('1');
+
+      // approve AssetCreate to transfer Sand (to creator)
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        mintData.unitPrices.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      // approve exchange contract to transfer Sand (to cat seller)
+      await SandContract.connect(userSigner).approve(
+        await ExchangeContract.getAddress(),
+        catPurchasePrice *
+          mintData.amounts.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      const orders = await Promise.all(
+        mintData.tiers.map((tier, i) =>
+          getMatchedOrders(
+            CatalystContract,
+            parseEther('1'),
+            SandContract,
+            OrderValidatorContract,
+            tier,
+            mintData.amounts[i],
+            tsbCatSellerSigner,
+            userSigner
+          )
+        )
+      );
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          orders
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 10 different assets - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const randomHashes = Array(10)
+        .fill(0)
+        .map(() => '0x' + Math.floor(Math.random() * 100000).toString(16));
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: Array(10).fill(BigInt(2)),
+        amounts: Array(10).fill(BigInt(1)),
+        unitPrices: Array(10).fill(BigInt(1)),
+        paymentTokens: Array(10).fill(await SandContract.getAddress()),
+        metadataHashes: randomHashes,
+        maxSupplies: Array(10).fill(BigInt(1)),
+        creators: Array(10).fill(creator),
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+      // approve Sand to AssetCreate
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        totalAmountToApprove
+      );
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          []
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 10 different assets - approveAndCall', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContractAsAdmin,
+      } = await setupAssetCreateTests();
+
+      const randomHashes = Array(10)
+        .fill(0)
+        .map(() => '0x' + Math.floor(Math.random() * 100000).toString(16));
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: Array(10).fill(BigInt(2)),
+        amounts: Array(10).fill(BigInt(1)),
+        unitPrices: Array(10).fill(BigInt(1)),
+        paymentTokens: Array(10).fill(await SandContract.getAddress()),
+        metadataHashes: randomHashes,
+        maxSupplies: Array(10).fill(BigInt(1)),
+        creators: Array(10).fill(creator),
+      };
+
+      // Mint catalysts to user
+      for (let i = 0; i < mintData.tiers.length; i++) {
+        await CatalystContractAsAdmin.mint(
+          user,
+          mintData.tiers[i],
+          mintData.amounts[i]
+        );
+      }
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const encodedFunction = AssetCreateContract.interface.encodeFunctionData(
+        'lazyCreateMultipleAssets',
+        [user, signature, [...Object.values(mintData)], []]
+      );
+
+      // amounts * unitPrices
+      const totalAmountToApprove = mintData.unitPrices.reduce(
+        (acc, curr, i) => acc + curr * mintData.amounts[i],
+        0n
+      );
+
+      await expect(
+        SandContract.connect(userSigner).approveAndCall(
+          await AssetCreateContract.getAddress(),
+          totalAmountToApprove,
+          encodedFunction
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
+    it('batch mints 10 different assets with catalyst purchase - direct', async function () {
+      const {
+        user,
+        userSigner,
+        creator,
+        SandContract,
+        createBatchLazyMintSignature,
+        AssetCreateContract,
+        CatalystContract,
+        ExchangeContract,
+        OrderValidatorContract,
+        tsbCatSellerSigner,
+      } = await setupAssetCreateTests();
+
+      const randomHashes = Array(10)
+        .fill(0)
+        .map(() => '0x' + Math.floor(Math.random() * 100000).toString(16));
+
+      const mintData: LazyMintBatchData = {
+        caller: user,
+        tiers: Array(10).fill(BigInt(2)),
+        amounts: Array(10).fill(BigInt(1)),
+        unitPrices: Array(10).fill(parseEther('0.1')),
+        paymentTokens: Array(10).fill(await SandContract.getAddress()),
+        metadataHashes: randomHashes,
+        maxSupplies: Array(10).fill(BigInt(10)),
+        creators: Array(10).fill(creator),
+      };
+
+      const signature = await createBatchLazyMintSignature(mintData);
+
+      const catPurchasePrice = parseEther('1');
+
+      // approve AssetCreate to transfer Sand (to creator)
+      await SandContract.connect(userSigner).approve(
+        await AssetCreateContract.getAddress(),
+        mintData.unitPrices.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      // approve exchange contract to transfer Sand (to cat seller)
+      await SandContract.connect(userSigner).approve(
+        await ExchangeContract.getAddress(),
+        catPurchasePrice *
+          mintData.amounts.reduce((acc, curr) => acc + curr, 0n)
+      );
+
+      const orders = await Promise.all(
+        mintData.tiers.map((tier, i) =>
+          getMatchedOrders(
+            CatalystContract,
+            catPurchasePrice,
+            SandContract,
+            OrderValidatorContract,
+            tier,
+            mintData.amounts[i],
+            tsbCatSellerSigner,
+            userSigner
+          )
+        )
+      );
+
+      await expect(
+        AssetCreateContract.lazyCreateMultipleAssets(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          orders
+        )
+      ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
+    });
   });
 });
