@@ -7,6 +7,14 @@ contract ERC721TokenReceiverMock {
     error BatchReceiveNotAllowed();
     error ReceiveNotAllowed();
 
+    struct BatchInfo {
+        address operator;
+        address from;
+        uint256[] ids;
+        bytes data;
+    }
+
+    BatchInfo[] internal batchCalls;
     bool public denyTokensReceived;
     bool public returnInvalidBytes;
     bool public denyBatchTokensReceived;
@@ -32,12 +40,13 @@ contract ERC721TokenReceiverMock {
         return _interfaceId == 0x01ffc9a7 || _interfaceId == 0x4e2312e0 || _interfaceId == 0x5e8bf644;
     }
 
+    /// @dev during mintAndTransferQuad this callback is called twice in the same tx.
     function onERC721BatchReceived(
-        address, // operator,
-        address, // from,
-        uint256[] calldata, // ids,
-        bytes calldata // data
-    ) external view returns (bytes4) {
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external returns (bytes4) {
         if (address(tokenContract) != msg.sender) {
             revert AcceptTokenContractOnly();
         }
@@ -47,6 +56,7 @@ contract ERC721TokenReceiverMock {
         if (returnInvalidBytes) {
             return 0x150b7a03;
         }
+        batchCalls.push(BatchInfo({operator: operator, from: from, ids: ids, data: data}));
         return _ERC721_BATCH_RECEIVED;
     }
 
@@ -90,5 +100,9 @@ contract ERC721TokenReceiverMock {
 
     function returnWrongBytes() external {
         returnInvalidBytes = true;
+    }
+
+    function getBatchCalls() external view returns (BatchInfo[] memory) {
+        return batchCalls;
     }
 }
