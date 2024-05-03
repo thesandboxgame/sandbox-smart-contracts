@@ -2257,6 +2257,63 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         expect(catalystBalanceAfter).to.equal(0);
       });
+      it('should purchase catalysts if user have enough catalysts but order data was provided', async function () {
+        const {
+          mintCatalyst,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+          user,
+          MockERC20Contract,
+          approveAndCall,
+          approveSandForExchange,
+          CatalystContract,
+          sampleExchangeOrderData,
+        } = await runCreateTestSetup();
+        const tier = 4;
+        const amount = 2;
+        const sandPrice = parseEther('0.1');
+        const maxSupply = 10;
+
+        await mintCatalyst(tier, amount, user.address);
+        const signature = await generateLazyMintSignature(
+          creator.address,
+          tier,
+          amount,
+          sandPrice,
+          MockERC20Contract.address,
+          metadataHashes[0],
+          maxSupply
+        );
+
+        await approveSandForExchange(user, parseEther('10'));
+
+        const approveAmount = sandPrice.mul(amount);
+
+        await approveAndCall(user, approveAmount, 'lazyCreateAsset', [
+          user.address,
+          signature,
+          [
+            user.address,
+            tier,
+            amount,
+            sandPrice,
+            MockERC20Contract.address,
+            metadataHashes[0],
+            maxSupply,
+            creator.address,
+          ],
+          sampleExchangeOrderData,
+        ]);
+
+        const catalystBalanceAfter = await CatalystContract.balanceOf(
+          user.address,
+          tier
+        );
+
+        // users balance should be 2
+        expect(catalystBalanceAfter).to.equal(2);
+      });
     });
     describe('Revert', function () {
       it('should revert if mintData.caller is different than from address', async function () {
@@ -2907,13 +2964,14 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('ERC20: insufficient allowance');
       });
-      it("should fail if user doesn't have enough catalysts and can't purchase, no order data", async function () {
+      it("should fail if user doesn't have enough catalysts and there is no order data", async function () {
         const {
           generateLazyMintSignature,
           metadataHashes,
           creator,
           MockERC20Contract,
           lazyMintAsset,
+          mintCatalyst,
           approveSandForExchange,
         } = await runCreateTestSetup();
         const tier = 4;
@@ -2931,6 +2989,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           maxSupply
         );
 
+        // mint some catalysts to other user
+        await mintCatalyst(tier, amount, creator.address);
+
         await approveSandForExchange(creator, parseEther('10'));
 
         await expect(
@@ -2944,8 +3005,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             maxSupply,
             creator.address
           )
-          // Fails to purchase from exchange
-        ).to.be.revertedWith('AssetCreate: No order data');
+          // Fails to burn catalysts
+        ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
       });
     });
     describe('Event', function () {
@@ -3422,7 +3483,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await lazyMintMultipleAssets(user.address, signature, mintData, user, [
           sampleExchangeOrderData,
-          sampleExchangeOrderData,
+          [],
         ]);
 
         for (const asset of assets) {
@@ -3821,6 +3882,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(assets[0].tier, assets[0].amount, user.address);
 
+        // mint cats to other user for more realistic scenario
+        await mintCatalyst(assets[1].tier, assets[1].amount, creator.address);
+
         const mintData: LazyMintBatchData = [
           assets.map((a) => a.tier),
           assets.map((a) => a.amount),
@@ -3847,7 +3911,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [],
             [],
           ])
-        ).to.be.revertedWith('AssetCreate: No order data');
+        ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
       });
       it('should rever if the mintData.caller is different than from address', async function () {
         const {

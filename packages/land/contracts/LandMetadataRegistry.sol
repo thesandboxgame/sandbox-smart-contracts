@@ -2,6 +2,7 @@
 pragma solidity 0.8.23;
 
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
+import {IErrors} from "./interfaces/IErrors.sol";
 import {ILandMetadataRegistry} from "./interfaces/ILandMetadataRegistry.sol";
 import {LandMetadataBase} from "./registry/LandMetadataBase.sol";
 
@@ -10,7 +11,15 @@ import {LandMetadataBase} from "./registry/LandMetadataBase.sol";
  * @author The Sandbox
  * @notice Store information about the lands (premiumness and neighborhood)
  */
-contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {
+contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {
+    /// @notice the base token id used for a batch operation is wrong
+    /// @param tokenId the id of the token
+    error InvalidBaseTokenId(uint256 tokenId);
+
+    /// @notice the neighborhoodId is invalid
+    /// @param neighborhoodId the invalid neighborhoodId
+    error InvalidNeighborhoodId(uint256 neighborhoodId);
+
     struct BatchSetData {
         // baseTokenId the token id floor 32
         uint256 baseTokenId;
@@ -46,7 +55,9 @@ contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableU
     event BatchMetadataSet(address indexed operator, BatchSetData[] data);
 
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "only admin");
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+            revert OnlyAdmin();
+        }
         _;
     }
 
@@ -112,7 +123,9 @@ contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableU
         uint256 len = data.length;
         for (uint256 i; i < len; i++) {
             BatchSetData calldata d = data[i];
-            require(_getBits(d.baseTokenId) == 0, "invalid base tokenId");
+            if (_getBits(d.baseTokenId) != 0) {
+                revert InvalidBaseTokenId(d.baseTokenId);
+            }
             _setMetadata(d.baseTokenId, d.metadata);
         }
         emit BatchMetadataSet(_msgSender(), data);
@@ -173,8 +186,12 @@ contract LandMetadataRegistry is ILandMetadataRegistry, AccessControlEnumerableU
     /// @param neighborhoodId the number that identifies the neighborhood
     function _isValidNeighborhoodId(uint256 neighborhoodId) internal pure {
         // Cannot set it to unknown (zero).
-        require(neighborhoodId > 0, "neighborhoodId must be >0");
+        if (neighborhoodId == 0) {
+            revert InvalidNeighborhoodId(neighborhoodId);
+        }
         // NEIGHBORHOOD_MASK (127) is left out to use as escape char if needed.
-        require(neighborhoodId < NEIGHBORHOOD_MASK, "neighborhoodId must be <127");
+        if (neighborhoodId >= NEIGHBORHOOD_MASK) {
+            revert InvalidNeighborhoodId(neighborhoodId);
+        }
     }
 }

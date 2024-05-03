@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.23;
 
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {WithMetadataRegistry} from "./common/WithMetadataRegistry.sol";
@@ -14,23 +15,22 @@ import {PolygonLandBase} from "./polygon/PolygonLandBase.sol";
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
-contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, WithOwner {
-    event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
-
+contract PolygonLand is PolygonLandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
     /// @notice Initializes the contract with the trustedForwarder, admin & royalty-manager
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
         // be backward compatible with the current deployment
-        require(_getAdmin() == address(0), "already initialized");
-        _changeAdmin(admin);
+        if (_readAdmin() != address(0)) {
+            revert InvalidInitialization();
+        }
+        _setAdmin(admin);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
         _setTrustedForwarder(trustedForwarder);
-        emit TrustedForwarderSet(trustedForwarder);
     }
 
     /// @notice set royalty manager
@@ -55,15 +55,16 @@ contract PolygonLand is PolygonLandBase, WithMetadataRegistry, WithRoyalties, Wi
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        if (subscriptionOrRegistrantToCopy == address(0)) {
+            revert InvalidAddress();
+        }
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
     function setOperatorRegistry(IOperatorFilterRegistry registry) external virtual onlyAdmin {
-        _setOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
+        _setOperatorRegistry(registry);
     }
 
     /// @notice Approve an operator to spend tokens on the sender behalf

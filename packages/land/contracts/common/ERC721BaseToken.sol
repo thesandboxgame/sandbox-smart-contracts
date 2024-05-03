@@ -5,15 +5,16 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
+import {IErrors} from "../interfaces/IErrors.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /// @title ERC721BaseTokenCommon
 /// @author The Sandbox
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperOperators {
+abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, WithSuperOperators {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -114,7 +115,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
-        return _getNumNFTPerAddress(owner);
+        return _readNumNFTPerAddress(owner);
     }
 
     /// @notice Get the owner of a token.
@@ -137,7 +138,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
             revert ERC721NonexistentToken(tokenId);
         }
         if (operatorEnabled) {
-            return _getOperator(tokenId);
+            return _readOperator(tokenId);
         }
         return address(0);
     }
@@ -146,7 +147,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param tokenId The id of the Land
     /// @dev for debugging purposes
     function getOwnerData(uint256 tokenId) external view virtual returns (uint256) {
-        return _getOwnerData(tokenId);
+        return _readOwnerData(tokenId);
     }
 
     /// @notice Check if the sender approved the operator.
@@ -173,7 +174,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         address msgSender = _msgSender();
         _doTransfer(msgSender, from, to, tokenId);
         if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(msgSender, from, to, tokenId, ""), "ERC721_TRANSFER_REJECTED");
+            _checkOnERC721Received(msgSender, from, to, tokenId, "");
         }
     }
 
@@ -186,7 +187,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         address msgSender = _msgSender();
         _doTransfer(msgSender, from, to, id);
         if (to.code.length > 0) {
-            require(_checkOnERC721Received(msgSender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
+            _checkOnERC721Received(msgSender, from, to, id, data);
         }
     }
 
@@ -195,14 +196,14 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param to The address receiving the token.
     /// @param tokenId The token being transferred.
     function _doTransfer(address msgSender, address from, address to, uint256 tokenId) internal {
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
+        if (to == address(0)) {
+            revert InvalidAddress();
+        }
         bool operatorEnabled = _checkFromIsOwner(from, tokenId);
-        require(
-            msgSender == from ||
-                _isApprovedForAllOrSuperOperator(from, msgSender) ||
-                (operatorEnabled && _getOperator(tokenId) == msgSender),
-            "UNAUTHORIZED_TRANSFER"
-        );
+        bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
+        if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
+            revert ERC721InsufficientApproval(msgSender, tokenId);
+        }
         _transferNumNFTPerAddress(from, to, 1);
         _updateOwnerData(tokenId, to, false);
         emit Transfer(from, to, tokenId);
@@ -220,28 +221,33 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         bytes memory data,
         bool safe
     ) internal {
-        require(from != address(0), "NOT_FROM_ZEROADDRESS");
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
+        if (from == address(0) || to == address(0)) {
+            revert InvalidAddress();
+        }
 
         address msgSender = _msgSender();
         bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
-            uint256 id = ids[i];
-            (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-            require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
-            require(authorized || (operatorEnabled && _getOperator(id) == msgSender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, to, false);
-            emit Transfer(from, to, id);
+            uint256 tokenId = ids[i];
+            (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(tokenId);
+            if (from != owner) {
+                revert ERC721InvalidOwner(from);
+            }
+            if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
+                revert ERC721InsufficientApproval(msgSender, tokenId);
+            }
+            _updateOwnerData(tokenId, to, false);
+            emit Transfer(from, to, tokenId);
         }
         _transferNumNFTPerAddress(from, to, numTokens);
 
         if (to.code.length > 0) {
             if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-                require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_RECEIVED_REJECTED");
+                _checkOnERC721BatchReceived(msgSender, from, to, ids, data);
             } else if (safe) {
                 for (uint256 i = 0; i < numTokens; i++) {
-                    require(_checkOnERC721Received(msgSender, from, to, ids[i], data), "ERC721_RECEIVED_REJECTED");
+                    _checkOnERC721Received(msgSender, from, to, ids[i], data);
                 }
             }
         }
@@ -255,9 +261,13 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
             revert ERC721InvalidSender(from);
         }
         address msgSender = _msgSender();
-        require(msgSender == from || _isSuperOperator(msgSender), "UNAUTHORIZED_APPROVE_FOR_ALL");
-        require(!_isSuperOperator(operator), "INVALID_APPROVAL_CHANGE");
-        _setOperatorForAll(from, operator, approved);
+        if (msgSender != from && !_isSuperOperator(msgSender)) {
+            revert ERC721InvalidApprover(msgSender);
+        }
+        if (_isSuperOperator(operator)) {
+            revert ERC721InvalidOperator(operator);
+        }
+        _writeOperatorForAll(from, operator, approved);
         emit ApprovalForAll(from, operator, approved);
     }
 
@@ -268,12 +278,15 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
         _checkFromIsOwner(from, tokenId);
 
         address msgSender = _msgSender();
-        require(from == msgSender || _isApprovedForAllOrSuperOperator(from, msgSender), "UNAUTHORIZED_APPROVAL");
+        bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
+        if (!authorized) {
+            revert ERC721InvalidApprover(msgSender);
+        }
         if (operator == address(0)) {
             _updateOwnerData(tokenId, from, false);
         } else {
             _updateOwnerData(tokenId, from, true);
-            _setOperator(tokenId, operator);
+            _writeOperator(tokenId, operator);
         }
         emit Approval(from, operator, tokenId);
     }
@@ -282,15 +295,12 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param tokenId token id to burn
     function _burn(address from, uint256 tokenId) internal {
         bool operatorEnabled = _checkFromIsOwner(from, tokenId);
-
         address msgSender = _msgSender();
-        require(
-            from == msgSender ||
-                (operatorEnabled && _getOperator(tokenId) == msgSender) ||
-                _isApprovedForAllOrSuperOperator(from, msgSender),
-            "UNAUTHORIZED_BURN"
-        );
-        _setOwnerData(tokenId, (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
+        bool authorized = msgSender == from || _isApprovedForAllOrSuperOperator(from, msgSender);
+        if (!authorized && !(operatorEnabled && _readOperator(tokenId) == msgSender)) {
+            revert ERC721InsufficientApproval(msgSender, tokenId);
+        }
+        _writeOwnerData(tokenId, (_readOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | BURNED_FLAG);
         _subNumNFTPerAddress(from, 1);
         emit Transfer(from, address(0), tokenId);
     }
@@ -318,11 +328,11 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param newOwner The new owner of the token
     /// @param hasOperator if true the operator flag is set
     function _updateOwnerData(uint256 tokenId, address newOwner, bool hasOperator) internal {
-        uint256 oldData = (_getOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
+        uint256 oldData = (_readOwnerData(tokenId) & (NOT_ADDRESS & NOT_OPERATOR_FLAG)) | uint256(uint160(newOwner));
         if (hasOperator) {
             oldData = oldData | OPERATOR_FLAG;
         }
-        _setOwnerData(tokenId, oldData);
+        _writeOwnerData(tokenId, oldData);
     }
 
     /// @param id token id
@@ -338,7 +348,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     function _ownerAndOperatorEnabledOf(
         uint256 id
     ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _getOwnerData(id);
+        uint256 data = _readOwnerData(id);
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
@@ -353,16 +363,17 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param to The address we want to transfer to.
     /// @param tokenId The id of the token we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
-    /// @return Whether the expected value of 0x150b7a02 is returned.
     function _checkOnERC721Received(
         address operator,
         address from,
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) internal returns (bool) {
+    ) internal {
         bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
-        return (retval == _ERC721_RECEIVED);
+        if (retval != _ERC721_RECEIVED) {
+            revert ERC721InvalidReceiver(to);
+        }
     }
 
     /// @notice Check if receiving contract accepts erc721 batch transfers.
@@ -371,16 +382,17 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param to The address we want to transfer to.
     /// @param ids The ids of the tokens we would like to transfer.
     /// @param _data Any additional data to send with the transfer.
-    /// @return Whether the expected value of 0x4b808c46 is returned.
     function _checkOnERC721BatchReceived(
         address operator,
         address from,
         address to,
         uint256[] memory ids,
         bytes memory _data
-    ) internal returns (bool) {
+    ) internal {
         bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
-        return (retval == _ERC721_BATCH_RECEIVED);
+        if (retval != _ERC721_BATCH_RECEIVED) {
+            revert ERC721InvalidBatchReceiver(to);
+        }
     }
 
     /// @notice Check if there was enough gas.
@@ -419,7 +431,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _addNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
-            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) + val);
+            _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) + val);
         }
     }
 
@@ -429,7 +441,7 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @dev we can use unchecked becase there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
-            _setNumNFTPerAddress(who, _getNumNFTPerAddress(who) - val);
+            _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) - val);
         }
     }
 
@@ -447,31 +459,31 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @notice get the number of nft for an address
     /// @param owner address to check
     /// @return the number of nfts
-    function _getNumNFTPerAddress(address owner) internal view virtual returns (uint256);
+    function _readNumNFTPerAddress(address owner) internal view virtual returns (uint256);
 
     /// @notice set the number of nft for an address
     /// @param owner address to set
     /// @param quantity the number of nfts to set for the owner
-    function _setNumNFTPerAddress(address owner, uint256 quantity) internal virtual;
+    function _writeNumNFTPerAddress(address owner, uint256 quantity) internal virtual;
 
     /// @notice Get the owner data of a token for a user
     /// @param tokenId The id of the token.
     /// @return the owner data
     /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
-    function _getOwnerData(uint256 tokenId) internal view virtual returns (uint256);
+    function _readOwnerData(uint256 tokenId) internal view virtual returns (uint256);
 
     /// @notice Get the owner address of a token (included in the ownerData, see: _getOwnerData)
     /// @param tokenId The id of the token.
     /// @return the owner address
     function _getOwnerAddress(uint256 tokenId) internal view virtual returns (address) {
-        return address(uint160(_getOwnerData(tokenId)));
+        return address(uint160(_readOwnerData(tokenId)));
     }
 
     /// @notice Set the owner data of a token
     /// @param tokenId the token Id
     /// @param data the owner data
     /// @dev The owner data has three fields: owner address, operator flag and burn flag. See: _owners declaration.
-    function _setOwnerData(uint256 tokenId, uint256 data) internal virtual;
+    function _writeOwnerData(uint256 tokenId, uint256 data) internal virtual;
 
     /// @notice check if an operator was enabled by a given owner
     /// @param owner that enabled the operator
@@ -483,15 +495,15 @@ abstract contract ERC721BaseToken is Context, IERC721, IERC721Errors, WithSuperO
     /// @param owner that enabled the operator
     /// @param operator address to check if it was enabled
     /// @param enabled if true give access to the operator, else disable it
-    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual;
+    function _writeOperatorForAll(address owner, address operator, bool enabled) internal virtual;
 
     /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId The id of the token.
     /// @return the operator address
-    function _getOperator(uint256 tokenId) internal view virtual returns (address);
+    function _readOperator(uint256 tokenId) internal view virtual returns (address);
 
     /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId the id of the token.
     /// @param operator the operator address
-    function _setOperator(uint256 tokenId, address operator) internal virtual;
+    function _writeOperator(uint256 tokenId, address operator) internal virtual;
 }

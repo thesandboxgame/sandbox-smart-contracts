@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
@@ -23,7 +22,7 @@ import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol
 /// @dev |         PolygonLand         │           __gap           │      58      │   0    │           t_array(t_uint256)49_storage           │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │     1568      │
 /// @dev |         PolygonLand         │     _trustedForwarder     │     107      │   0    │                    t_address                     │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
 /// @dev |         PolygonLand         │  operatorFilterRegistry   │     108      │   0    │     t_contract(IOperatorFilterRegistry)3942      │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
-contract PolygonLandStorageMixin is Initializable, Context {
+contract PolygonLandStorageMixin is Context {
     /// @dev Obsolete: This is the storage used by the OZ v4 Initializer, they are unused now.
     uint8 private _initialized; // unused
     bool private _initializing; // unused
@@ -62,13 +61,13 @@ contract PolygonLandStorageMixin is Initializable, Context {
 
     /// @notice get the admin address
     /// @return the admin address
-    function _getAdmin() internal view virtual returns (address) {
+    function _readAdmin() internal view virtual returns (address) {
         return _admin;
     }
 
     /// @notice set the admin address
     /// @param admin the admin address
-    function _setAdmin(address admin) internal virtual {
+    function _writeAdmin(address admin) internal virtual {
         _admin = admin;
     }
 
@@ -82,35 +81,35 @@ contract PolygonLandStorageMixin is Initializable, Context {
     /// @notice enable an address to be super-operator
     /// @param superOperator the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setSuperOperator(address superOperator, bool enabled) internal virtual {
+    function _writeSuperOperator(address superOperator, bool enabled) internal virtual {
         _superOperators[superOperator] = enabled;
     }
 
     /// @notice get the number of nft for an address
     /// @param owner address to check
     /// @return the number of nfts
-    function _getNumNFTPerAddress(address owner) internal view virtual returns (uint256) {
+    function _readNumNFTPerAddress(address owner) internal view virtual returns (uint256) {
         return _numNFTPerAddress[owner];
     }
 
     /// @notice set the number of nft for an address
     /// @param owner address to set
     /// @param quantity the number of nfts to set for the owner
-    function _setNumNFTPerAddress(address owner, uint256 quantity) internal virtual {
+    function _writeNumNFTPerAddress(address owner, uint256 quantity) internal virtual {
         _numNFTPerAddress[owner] = quantity;
     }
 
     /// @notice get the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
     /// @param tokenId the token Id
     /// @return the owner data
-    function _getOwnerData(uint256 tokenId) internal view virtual returns (uint256) {
+    function _readOwnerData(uint256 tokenId) internal view virtual returns (uint256) {
         return _owners[tokenId];
     }
 
     /// @notice set the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
     /// @param tokenId the token Id
     /// @param data the owner data
-    function _setOwnerData(uint256 tokenId, uint256 data) internal virtual {
+    function _writeOwnerData(uint256 tokenId, uint256 data) internal virtual {
         _owners[tokenId] = data;
     }
 
@@ -126,21 +125,21 @@ contract PolygonLandStorageMixin is Initializable, Context {
     /// @param owner that enabled the operator
     /// @param operator address to check if it was enabled
     /// @param enabled if true give access to the operator, else disable it
-    function _setOperatorForAll(address owner, address operator, bool enabled) internal virtual {
+    function _writeOperatorForAll(address owner, address operator, bool enabled) internal virtual {
         _operatorsForAll[owner][operator] = enabled;
     }
 
     /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId The id of the token.
     /// @return the operator address
-    function _getOperator(uint256 tokenId) internal view virtual returns (address) {
+    function _readOperator(uint256 tokenId) internal view virtual returns (address) {
         return _operators[tokenId];
     }
 
     /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId the id of the token.
     /// @param operator the operator address
-    function _setOperator(uint256 tokenId, address operator) internal virtual {
+    function _writeOperator(uint256 tokenId, address operator) internal virtual {
         _operators[tokenId] = operator;
     }
 
@@ -154,31 +153,31 @@ contract PolygonLandStorageMixin is Initializable, Context {
     /// @notice set an address as minter
     /// @param minter the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setMinter(address minter, bool enabled) internal virtual {
+    function _writeMinter(address minter, bool enabled) internal virtual {
         _minters[minter] = enabled;
     }
 
     /// @notice get the address of the ERC2771 trusted forwarder
     /// @return the address of the trusted forwarder
-    function _getTrustedForwarder() internal view virtual returns (address) {
+    function _readTrustedForwarder() internal view virtual returns (address) {
         return _trustedForwarder;
     }
 
     /// @notice set the address of the ERC2771 trusted forwarder
     /// @param trustedForwarder the address of the trusted forwarder
-    function _setTrustedForwarder(address trustedForwarder) internal virtual {
+    function _writeTrustedForwarder(address trustedForwarder) internal virtual {
         _trustedForwarder = trustedForwarder;
     }
 
     /// @notice get the OpenSea operator filter
     /// @return the address of the OpenSea operator filter registry
-    function _getOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry) {
+    function _readOperatorFilterRegistry() internal view virtual returns (IOperatorFilterRegistry) {
         return _operatorFilterRegistry;
     }
 
     /// @notice set the OpenSea operator filter
     /// @param registry the address of the OpenSea operator filter registry
-    function _setOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual {
+    function _writeOperatorFilterRegistry(IOperatorFilterRegistry registry) internal virtual {
         _operatorFilterRegistry = registry;
     }
 }

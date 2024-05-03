@@ -426,18 +426,7 @@ contract AssetCreate is
             availableToMint[tokenId] -= mintData.amount;
         }
 
-        // if user does not have enough catalyst purchase remaining ones from the marketplace contract
-        uint256 catalystBalance = IERC1155(address(catalystContract)).balanceOf(mintData.caller, mintData.tier);
-
-        if (catalystBalance < mintData.amount) {
-            require(matchedOrders.length > 0, "AssetCreate: No order data");
-            // DELEGATE CALL
-            // bytes4 selector = bytes4(keccak256("matchOrdersFrom(address,ExchangeMatch[])"));
-            // bytes memory data = abi.encodeWithSelector(selector, mintData.caller, matchedOrders);
-            // (bool success, ) = address(exchangeContract).delegatecall(data);
-            // require(success, "AssetCreate: Match orders failed");
-
-            // REGULAR
+        if (matchedOrders.length > 0) {
             exchangeContract.matchOrdersFrom(mintData.caller, matchedOrders);
         }
         // burn catalyst of a given tier
@@ -519,12 +508,7 @@ contract AssetCreate is
                 require(availableToMint[tokenIds[i]] >= mintData.amounts[i], "AssetCreate: Max supply reached");
                 availableToMint[tokenIds[i]] -= mintData.amounts[i];
             }
-            if (
-                IERC1155(address(catalystContract)).balanceOf(mintData.caller, mintData.tiers[i]) < mintData.amounts[i]
-            ) {
-                require(matchedOrdersArray.length > 0, "AssetCreate: No order data");
-                require(matchedOrdersArray[i].length > 0, "AssetCreate: No order data");
-
+            if (matchedOrdersArray.length > i && matchedOrdersArray[i].length > 0) {
                 exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
             }
             distributePayment(

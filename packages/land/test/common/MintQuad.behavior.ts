@@ -12,37 +12,37 @@ export function shouldCheckMintQuad(setupLand, Contract: string) {
     it('should revert if signer is not landMinter', async function () {
       const {LandContract, deployer} = await loadFixture(setupLand);
 
-      await expect(
-        LandContract.mintQuad(deployer, 3, 0, 0, '0x'),
-      ).to.be.revertedWith('!AUTHORIZED');
+      await expect(LandContract.mintQuad(deployer, 3, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandContract, 'ERC721InvalidOwner')
+        .withArgs(deployer);
     });
 
     it('should revert when to x coordinates are wrong', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintQuad(deployer, 3, 5, 5, '0x'),
-      ).to.be.revertedWith('Invalid x coordinate');
+      await expect(LandAsMinter.mintQuad(deployer, 3, 5, 5, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 5, 5);
     });
 
     it('should revert when to y coordinates are wrong', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintQuad(deployer, 3, 0, 5, '0x'),
-      ).to.be.revertedWith('Invalid y coordinate');
+      await expect(LandAsMinter.mintQuad(deployer, 3, 0, 5, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 0, 5);
     });
 
     it('should revert when x quad is out of bounds', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintQuad(deployer, 3, 441, 0, '0x'),
-      ).to.be.revertedWith('x out of bounds');
+      await expect(LandAsMinter.mintQuad(deployer, 3, 441, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 441, 0);
     });
 
     it('should revert when y quad is out of bounds)', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
-      await expect(
-        LandAsMinter.mintQuad(deployer, 3, 0, 441, '0x'),
-      ).to.be.revertedWith('y out of bounds');
+      await expect(LandAsMinter.mintQuad(deployer, 3, 0, 441, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(3, 0, 441);
     });
 
     it('should revert if to address is zero', async function () {
@@ -52,15 +52,15 @@ export function shouldCheckMintQuad(setupLand, Contract: string) {
 
       await expect(
         LandAsMinter.mintQuad(ZeroAddress, 3, 3, 3, bytes),
-      ).to.be.revertedWith('to is zero address');
+      ).to.be.revertedWithCustomError(LandAsMinter, 'InvalidAddress');
     });
 
     it('should revert for wrong size', async function () {
       const {LandAsMinter, deployer} = await loadFixture(setupLand);
 
-      await expect(
-        LandAsMinter.mintQuad(deployer, 9, 0, 0, '0x'),
-      ).to.be.revertedWith('Invalid size');
+      await expect(LandAsMinter.mintQuad(deployer, 9, 0, 0, '0x'))
+        .to.be.revertedWithCustomError(LandAsMinter, 'InvalidCoordinates')
+        .withArgs(9, 0, 0);
     });
 
     describe(`should return true for quad minted inside another quad`, function () {
@@ -99,7 +99,7 @@ export function shouldCheckMintQuad(setupLand, Contract: string) {
 
           await expect(
             LandAsMinter.mintQuad(deployer, size1, 0, 0, bytes),
-          ).to.be.revertedWith('Already minted');
+          ).to.be.revertedWithCustomError(LandAsMinter, 'AlreadyMinted');
         });
       });
     });
@@ -116,7 +116,7 @@ export function shouldCheckMintQuad(setupLand, Contract: string) {
 
           await expect(
             LandAsMinter.mintQuad(deployer, size1, 0, 0, bytes),
-          ).to.be.revertedWith('Already minted');
+          ).to.be.revertedWithCustomError(LandAsMinter, 'AlreadyMinted');
         });
       });
     });
@@ -163,7 +163,7 @@ export function shouldCheckMintQuad(setupLand, Contract: string) {
       await LandContract.burn(tokenId);
       await expect(
         LandAsMinter.mintQuad(deployer, 1, x, y, '0x'),
-      ).to.be.revertedWith('Already minted');
+      ).to.be.revertedWithCustomError(LandAsMinter, 'AlreadyMinted');
     });
   });
 

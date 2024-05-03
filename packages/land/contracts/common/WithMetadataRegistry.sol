@@ -2,12 +2,13 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
+import {IErrors} from "../interfaces/IErrors.sol";
 import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 
 /// @title WithMetadataRegistry
 /// @author The Sandbox
 /// @notice Add support for the metadata registry
-abstract contract WithMetadataRegistry {
+abstract contract WithMetadataRegistry is IErrors {
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
 
     event MetadataRegistrySet(address indexed metadataRegistry);
@@ -72,7 +73,9 @@ abstract contract WithMetadataRegistry {
     /// @notice set the address of the metadata registry
     /// @param metadataRegistry the address of the metadata registry
     function _setMetadataRegistry(address metadataRegistry) internal {
-        require(metadataRegistry != address(0), "invalid registry address");
+        if (metadataRegistry == address(0)) {
+            revert InvalidAddress();
+        }
         MetadataRegistryStorage storage $ = _getMetadataRegistryStorage();
         $._metadataRegistry = ILandMetadataRegistry(metadataRegistry);
         emit MetadataRegistrySet(metadataRegistry);

@@ -1,8 +1,12 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupLandForERC721Tests, setupLandOperatorFilter} from '../fixtures';
 import {ZeroAddress} from 'ethers';
-import {setupLand, setupLandMock} from './fixtures';
+import {
+  setupLand,
+  setupLandForERC721Tests,
+  setupLandMock,
+  setupLandOperatorFilter,
+} from './fixtures';
 import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
 import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
 import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
@@ -55,9 +59,9 @@ describe('Land.sol', function () {
 
   it(`should revert for invalid size`, async function () {
     const {LandContract} = await loadFixture(setupLand);
-    await expect(LandContract.exists(5, 5, 5)).to.be.revertedWith(
-      'Invalid size',
-    );
+    await expect(LandContract.exists(5, 5, 5))
+      .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
+      .withArgs(5, 5, 5);
   });
 
   it('should not be a landMinter by default', async function () {
@@ -67,12 +71,12 @@ describe('Land.sol', function () {
 
   it('should not accept zero address as landMinter', async function () {
     const {LandAsAdmin} = await setupLand();
-    await expect(LandAsAdmin.setMinter(ZeroAddress, false)).to.be.revertedWith(
-      'address 0 is not allowed',
-    );
-    await expect(LandAsAdmin.setMinter(ZeroAddress, true)).to.be.revertedWith(
-      'address 0 is not allowed',
-    );
+    await expect(
+      LandAsAdmin.setMinter(ZeroAddress, false),
+    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
+    await expect(
+      LandAsAdmin.setMinter(ZeroAddress, true),
+    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
     expect(await LandAsAdmin.isMinter(ZeroAddress)).to.be.false;
   });
 
@@ -80,18 +84,18 @@ describe('Land.sol', function () {
     const {LandAsAdmin, deployer} = await setupLand();
     await expect(LandAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
     expect(await LandAsAdmin.isMinter(deployer)).to.be.true;
-    await expect(LandAsAdmin.setMinter(deployer, true)).to.be.revertedWith(
-      'the status should be different',
-    );
+    await expect(
+      LandAsAdmin.setMinter(deployer, true),
+    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidArgument');
     await expect(LandAsAdmin.setMinter(deployer, false)).not.to.be.reverted;
   });
 
   it('should only be able to enable a disabled landMinter', async function () {
     const {LandAsAdmin, deployer} = await setupLand();
     expect(await LandAsAdmin.isMinter(deployer)).to.be.false;
-    await expect(LandAsAdmin.setMinter(deployer, false)).to.be.revertedWith(
-      'the status should be different',
-    );
+    await expect(
+      LandAsAdmin.setMinter(deployer, false),
+    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidArgument');
     await expect(LandAsAdmin.setMinter(deployer, true)).not.to.be.reverted;
   });
 

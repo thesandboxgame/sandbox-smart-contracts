@@ -33,14 +33,14 @@ contract PolygonLandBase is PolygonLandStorageMixin, LandBaseToken, ERC2771Handl
 
     /// @notice get the admin address
     /// @return the admin address
-    function _getAdmin() internal view override(PolygonLandStorageMixin, WithAdmin) returns (address) {
-        return PolygonLandStorageMixin._getAdmin();
+    function _readAdmin() internal view override(PolygonLandStorageMixin, WithAdmin) returns (address) {
+        return PolygonLandStorageMixin._readAdmin();
     }
 
     /// @notice set the admin address
     /// @param admin the admin address
-    function _setAdmin(address admin) internal override(PolygonLandStorageMixin, WithAdmin) {
-        PolygonLandStorageMixin._setAdmin(admin);
+    function _writeAdmin(address admin) internal override(PolygonLandStorageMixin, WithAdmin) {
+        PolygonLandStorageMixin._writeAdmin(admin);
     }
 
     /// @notice check if an address is a super-operator
@@ -55,46 +55,49 @@ contract PolygonLandBase is PolygonLandStorageMixin, LandBaseToken, ERC2771Handl
     /// @notice enable an address to be super-operator
     /// @param superOperator the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setSuperOperator(
+    function _writeSuperOperator(
         address superOperator,
         bool enabled
     ) internal override(PolygonLandStorageMixin, WithSuperOperators) {
-        PolygonLandStorageMixin._setSuperOperator(superOperator, enabled);
+        PolygonLandStorageMixin._writeSuperOperator(superOperator, enabled);
     }
 
     /// @notice get the number of nft for an address
     /// @param owner address to check
     /// @return the number of nfts
-    function _getNumNFTPerAddress(
+    function _readNumNFTPerAddress(
         address owner
     ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (uint256) {
-        return PolygonLandStorageMixin._getNumNFTPerAddress(owner);
+        return PolygonLandStorageMixin._readNumNFTPerAddress(owner);
     }
 
     /// @notice set the number of nft for an address
     /// @param owner address to set
     /// @param quantity the number of nfts to set for the owner
-    function _setNumNFTPerAddress(
+    function _writeNumNFTPerAddress(
         address owner,
         uint256 quantity
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setNumNFTPerAddress(owner, quantity);
+        PolygonLandStorageMixin._writeNumNFTPerAddress(owner, quantity);
     }
 
     /// @notice get the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
     /// @param tokenId the token Id
     /// @return the owner data
-    function _getOwnerData(
+    function _readOwnerData(
         uint256 tokenId
     ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (uint256) {
-        return PolygonLandStorageMixin._getOwnerData(tokenId);
+        return PolygonLandStorageMixin._readOwnerData(tokenId);
     }
 
     /// @notice set the owner data, this includes: owner address, burn flag and operator flag (see: _owners declaration)
     /// @param tokenId the token Id
     /// @param data the owner data
-    function _setOwnerData(uint256 tokenId, uint256 data) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setOwnerData(tokenId, data);
+    function _writeOwnerData(
+        uint256 tokenId,
+        uint256 data
+    ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
+        PolygonLandStorageMixin._writeOwnerData(tokenId, data);
     }
 
     /// @notice check if an operator was enabled by a given owner
@@ -112,31 +115,31 @@ contract PolygonLandBase is PolygonLandStorageMixin, LandBaseToken, ERC2771Handl
     /// @param owner that enabled the operator
     /// @param operator address to check if it was enabled
     /// @param enabled true enable the address, false disable it.
-    function _setOperatorForAll(
+    function _writeOperatorForAll(
         address owner,
         address operator,
         bool enabled
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setOperatorForAll(owner, operator, enabled);
+        PolygonLandStorageMixin._writeOperatorForAll(owner, operator, enabled);
     }
 
     /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId The id of the token.
     /// @return the operator address
-    function _getOperator(
+    function _readOperator(
         uint256 tokenId
     ) internal view override(PolygonLandStorageMixin, ERC721BaseToken) returns (address) {
-        return PolygonLandStorageMixin._getOperator(tokenId);
+        return PolygonLandStorageMixin._readOperator(tokenId);
     }
 
     /// @notice set the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId the id of the token.
     /// @param operator the operator address
-    function _setOperator(
+    function _writeOperator(
         uint256 tokenId,
         address operator
     ) internal override(PolygonLandStorageMixin, ERC721BaseToken) {
-        PolygonLandStorageMixin._setOperator(tokenId, operator);
+        PolygonLandStorageMixin._writeOperator(tokenId, operator);
     }
 
     /// @notice checks if an address is enabled as minter
@@ -149,40 +152,40 @@ contract PolygonLandBase is PolygonLandStorageMixin, LandBaseToken, ERC2771Handl
     /// @notice set an address as minter
     /// @param minter the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setMinter(address minter, bool enabled) internal override(PolygonLandStorageMixin, LandBaseToken) {
-        PolygonLandStorageMixin._setMinter(minter, enabled);
+    function _writeMinter(address minter, bool enabled) internal override(PolygonLandStorageMixin, LandBaseToken) {
+        PolygonLandStorageMixin._writeMinter(minter, enabled);
     }
 
     /// @notice get the address of the ERC2771 trusted forwarder
     /// @return the address of the trusted forwarder
-    function _getTrustedForwarder() internal view override(PolygonLandStorageMixin, ERC2771Handler) returns (address) {
-        return PolygonLandStorageMixin._getTrustedForwarder();
+    function _readTrustedForwarder() internal view override(PolygonLandStorageMixin, ERC2771Handler) returns (address) {
+        return PolygonLandStorageMixin._readTrustedForwarder();
     }
 
     /// @notice set the address of the ERC2771 trusted forwarder
     /// @param trustedForwarder the address of the trusted forwarder
-    function _setTrustedForwarder(
+    function _writeTrustedForwarder(
         address trustedForwarder
     ) internal virtual override(PolygonLandStorageMixin, ERC2771Handler) {
-        PolygonLandStorageMixin._setTrustedForwarder(trustedForwarder);
+        PolygonLandStorageMixin._writeTrustedForwarder(trustedForwarder);
     }
 
     /// @notice get the OpenSea operator filter
     /// @return the address of the OpenSea operator filter registry
-    function _getOperatorFilterRegistry()
+    function _readOperatorFilterRegistry()
         internal
         view
         override(PolygonLandStorageMixin, OperatorFiltererUpgradeable)
         returns (IOperatorFilterRegistry)
     {
-        return PolygonLandStorageMixin._getOperatorFilterRegistry();
+        return PolygonLandStorageMixin._readOperatorFilterRegistry();
     }
 
     /// @notice set the OpenSea operator filter
     /// @param registry the address of the OpenSea operator filter registry
-    function _setOperatorFilterRegistry(
+    function _writeOperatorFilterRegistry(
         IOperatorFilterRegistry registry
     ) internal override(PolygonLandStorageMixin, OperatorFiltererUpgradeable) {
-        PolygonLandStorageMixin._setOperatorFilterRegistry(registry);
+        PolygonLandStorageMixin._writeOperatorFilterRegistry(registry);
     }
 }

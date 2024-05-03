@@ -15,30 +15,31 @@ import {LandBase} from "./mainnet/LandBase.sol";
 /// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
 /// @dev LandBase must be the first contract in the inheritance list so we keep the storage slot backward compatible
 contract Land is LandBase, Initializable, WithMetadataRegistry, WithRoyalties, WithOwner {
-    event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
-
     /// @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
         // be backward compatible with the current deployment
-        require(_getAdmin() == address(0), "already initialized");
-        _changeAdmin(admin);
+        if (_readAdmin() != address(0)) {
+            revert InvalidInitialization();
+        }
+        _setAdmin(admin);
     }
 
     /// @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
     /// @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
     /// @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyAdmin {
-        require(subscriptionOrRegistrantToCopy != address(0), "subscription can't be zero");
+        if (subscriptionOrRegistrantToCopy == address(0)) {
+            revert InvalidAddress();
+        }
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /// @notice sets filter registry address deployed in test
     /// @param registry the address of the registry
-    function setOperatorRegistry(IOperatorFilterRegistry registry) external onlyAdmin {
-        _setOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(registry);
+    function setOperatorRegistry(IOperatorFilterRegistry registry) external virtual onlyAdmin {
+        _setOperatorRegistry(registry);
     }
 
     /// @notice set royalty manager

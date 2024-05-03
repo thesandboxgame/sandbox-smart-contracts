@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IErrors} from "../interfaces/IErrors.sol";
 import {ILandToken} from "../interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 
@@ -10,8 +11,24 @@ import {ERC721BaseToken} from "../common/ERC721BaseToken.sol";
 /// @author The Sandbox
 /// @notice Implement LAND and quad functionalities on top of an ERC721 token
 /// @dev This contract implements a quad tree structure to handle groups of ERC721 tokens at once
-abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
+abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     using Address for address;
+
+    /// @notice the coordinates are invalid
+    /// @param size The size of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    error InvalidCoordinates(uint256 size, uint256 x, uint256 y);
+
+    /// @notice is not the owner of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    error NotOwner(uint256 x, uint256 y);
+
+    /// @notice the token is already minted
+    /// @param tokenId the id of land
+    error AlreadyMinted(uint256 tokenId);
+
     uint256 internal constant GRID_SIZE = 408;
 
     /* solhint-disable const-name-snakecase */
@@ -32,6 +49,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256 size;
     }
 
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external onlyAdmin {
+        _setMinter(minter, enabled);
+    }
+
     /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
     /// @param from current owner of the quad
     /// @param to destination
@@ -47,13 +71,15 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         uint256[] calldata ys,
         bytes calldata data
     ) external override {
-        require(from != address(0), "invalid from");
-        require(to != address(0), "can't send to zero address");
-        require(sizes.length == xs.length, "sizes's and x's are different");
-        require(xs.length == ys.length, "x's and y's are different");
+        if (from == address(0) || to == address(0)) {
+            revert InvalidAddress();
+        }
+        if (sizes.length != xs.length || xs.length != ys.length) {
+            revert InvalidLength();
+        }
         address msgSender = _msgSender();
-        if (msgSender != from) {
-            require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized");
+        if (msgSender != from && !_isApprovedForAllOrSuperOperator(from, msgSender)) {
+            revert ERC721InvalidOwner(msgSender);
         }
         uint256 numTokensTransferred = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
@@ -74,18 +100,8 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                     counter++;
                 }
             }
-            require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "erc721 batchTransfer rejected");
+            _checkOnERC721BatchReceived(msgSender, from, to, ids, data);
         }
-    }
-
-    /// @notice Enable or disable the ability of `minter` to mint tokens
-    /// @param minter address that will be given/removed minter right.
-    /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external onlyAdmin {
-        require(minter != address(0), "address 0 is not allowed");
-        require(enabled != _isMinter(minter), "the status should be different");
-        _setMinter(minter, enabled);
-        emit Minter(minter, enabled);
     }
 
     /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
@@ -104,10 +120,11 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         bytes calldata data
     ) external override {
         address msgSender = _msgSender();
-        require(from != address(0), "from is zero address");
-        require(to != address(0), "can't send to zero address");
-        if (msgSender != from) {
-            require(_isApprovedForAllOrSuperOperator(from, msgSender), "not authorized to transferQuad");
+        if (from == address(0) || to == address(0)) {
+            revert InvalidAddress();
+        }
+        if (msgSender != from && !_isApprovedForAllOrSuperOperator(from, msgSender)) {
+            revert ERC721InvalidOwner(msgSender);
         }
         _isValidQuad(size, x, y);
         _transferQuad(from, to, size, x, y);
@@ -123,7 +140,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param data extra data to pass to the transfer
     function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes memory data) external virtual override {
         address msgSender = _msgSender();
-        require(_isMinter(msgSender), "!AUTHORIZED");
+        if (!_isMinter(msgSender)) {
+            revert ERC721InvalidOwner(msgSender);
+        }
         _isValidQuad(size, x, y);
         _mintQuad(msgSender, to, size, x, y, data);
     }
@@ -138,8 +157,12 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param data extra data to pass to the transfer
     function mintAndTransferQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external virtual {
         address msgSender = _msgSender();
-        require(_isMinter(msgSender), "!AUTHORIZED");
-        require(to != address(0), "to is zero address");
+        if (!_isMinter(msgSender)) {
+            revert ERC721InvalidOwner(msgSender);
+        }
+        if (to == address(0)) {
+            revert InvalidAddress();
+        }
 
         _isValidQuad(size, x, y);
         if (_ownerOfQuad(size, x, y) != address(0)) {
@@ -149,13 +172,6 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         } else {
             _mintAndTransferQuad(msgSender, to, size, x, y, data);
         }
-    }
-
-    /// @notice x coordinate of Land token
-    /// @param id tokenId
-    /// @return the x coordinates
-    function getX(uint256 id) external pure returns (uint256) {
-        return _getX(id);
     }
 
     /// @inheritdoc ERC721BaseToken
@@ -168,11 +184,18 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         _batchTransferFrom(from, to, ids, data, false);
     }
 
+    /// @notice x coordinate of Land token
+    /// @param tokenId the id of land
+    /// @return the x coordinates
+    function getX(uint256 tokenId) external pure returns (uint256) {
+        return _getX(tokenId);
+    }
+
     /// @notice y coordinate of Land token
-    /// @param id tokenId
+    /// @param tokenId the id of land
     /// @return the y coordinates
-    function getY(uint256 id) external pure returns (uint256) {
-        return _getY(id);
+    function getY(uint256 tokenId) external pure returns (uint256) {
+        return _getY(tokenId);
     }
 
     /// @notice Check if the contract supports an interface
@@ -227,11 +250,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     }
 
     /// @notice Return the URI of a specific token
-    /// @param id The id of the token
+    /// @param tokenId The id of the token
     /// @return The URI of the token
-    function tokenURI(uint256 id) external view virtual returns (string memory) {
-        require(_ownerOf(id) != address(0), "Id does not exist");
-        return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(id), "/metadata.json"));
+    function tokenURI(uint256 tokenId) external view virtual returns (string memory) {
+        if (_ownerOf(tokenId) == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        return string(abi.encodePacked("https://api.sandbox.game/lands/", Strings.toString(tokenId), "/metadata.json"));
     }
 
     /// @notice Check size and coordinate of a quad
@@ -240,11 +265,12 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param y The bottom left y coordinate of the quad
     /// @dev after calling this function we can safely use unchecked math for x,y,size
     function _isValidQuad(uint256 size, uint256 x, uint256 y) internal pure {
-        require(size == 1 || size == 3 || size == 6 || size == 12 || size == 24, "Invalid size");
-        require(x % size == 0, "Invalid x coordinate");
-        require(y % size == 0, "Invalid y coordinate");
-        require(x <= GRID_SIZE - size, "x out of bounds");
-        require(y <= GRID_SIZE - size, "y out of bounds");
+        if (size != 1 && size != 3 && size != 6 && size != 12 && size != 24) {
+            revert InvalidCoordinates(size, x, y);
+        }
+        if (x % size != 0 || y % size != 0 || x > GRID_SIZE - size || y > GRID_SIZE - size) {
+            revert InvalidCoordinates(size, x, y);
+        }
     }
 
     /// @param from current owner of the quad
@@ -256,9 +282,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         if (size == 1) {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
-            require(owner != address(0), "token does not exist");
-            require(owner == from, "not owner");
-            _setOwnerData(id1x1, uint160(address(to)));
+            if (owner == address(0)) {
+                revert InvalidCoordinates(size, x, y);
+            }
+            if (owner != from) {
+                revert ERC721InvalidOwner(from);
+            }
+            _writeOwnerData(id1x1, uint160(address(to)));
         } else {
             _regroupQuad(from, to, Land({x: x, y: y, size: size}), true, size / 2);
         }
@@ -275,7 +305,9 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @param y The bottom left y coordinate of the new quad
     /// @param data extra data to pass to the transfer
     function _mintQuad(address msgSender, address to, uint256 size, uint256 x, uint256 y, bytes memory data) internal {
-        require(to != address(0), "to is zero address");
+        if (to == address(0)) {
+            revert InvalidAddress();
+        }
 
         (uint256 layer, , ) = _getQuadLayer(size);
         uint256 quadId = _getQuadId(layer, x, y);
@@ -283,11 +315,13 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         _checkQuadIsNotMinted(size, x, y, 24);
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
-            require(_getOwnerData(_id) == 0, "Already minted");
+            if (_readOwnerData(_id) != 0) {
+                revert AlreadyMinted(_id);
+            }
             emit Transfer(address(0), to, _id);
         }
 
-        _setOwnerData(quadId, uint160(to));
+        _writeOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _checkBatchReceiverAcceptQuad(msgSender, address(0), to, size, x, y, data);
     }
@@ -342,12 +376,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                 emit Transfer(msgSender, to, _id);
             } else {
                 if (_getOwnerAddress(_id) == msgSender) {
-                    if (_getOperator(_id) != address(0)) _setOperator(_id, address(0));
+                    if (_readOperator(_id) != address(0)) _writeOperator(_id, address(0));
                     landMinted += 1;
                     emit Transfer(msgSender, to, _id);
                 } else {
                     // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
-                    require(_getOwnerData(_id) == 0, "Already minted");
+                    if (_readOwnerData(_id) != 0) {
+                        revert AlreadyMinted(_id);
+                    }
 
                     emit Transfer(address(0), to, _id);
                 }
@@ -357,7 +393,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         // checking if the new owner "to" is a contract. If yes, checking if it could handle ERC721 tokens.
         _checkBatchReceiverAcceptQuadAndClearOwner(msgSender, quadMinted, index, landMinted, to, size, x, y, data);
 
-        _setOwnerData(quadId, uint160(to));
+        _writeOwnerData(quadId, uint160(to));
         _addNumNFTPerAddress(to, size * size);
         _subNumNFTPerAddress(msgSender, landMinted);
     }
@@ -374,12 +410,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             // when the size of the quad is smaller than the quadCompareSize(size to be compared with),
             // then it is checked if the bigger quad which encapsulates the quad to be minted
             // of with size equals the quadCompareSize has been minted or not
-            require(
-                _getOwnerData(
-                    _getQuadId(layer, (x / quadCompareSize) * quadCompareSize, (y / quadCompareSize) * quadCompareSize)
-                ) == 0,
-                "Already minted"
+            uint256 id = _getQuadId(
+                layer,
+                (x / quadCompareSize) * quadCompareSize,
+                (y / quadCompareSize) * quadCompareSize
             );
+            if (_readOwnerData(id) != 0) {
+                revert AlreadyMinted(id);
+            }
         } else {
             // when the size is smaller than the quadCompare size the owner of all the smaller quads with size
             // quadCompare size in the quad to be minted are checked if they are minted or not
@@ -387,7 +425,10 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             uint256 toY = y + size;
             for (uint256 xi = x; xi < toX; xi += quadCompareSize) {
                 for (uint256 yi = y; yi < toY; yi += quadCompareSize) {
-                    require(_getOwnerData(_getQuadId(layer, xi, yi)) == 0, "Already minted");
+                    uint256 id = _getQuadId(layer, xi, yi);
+                    if (_readOwnerData(id) != 0) {
+                        revert AlreadyMinted(id);
+                    }
                 }
             }
         }
@@ -436,9 +477,11 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                         // total land minted is increase by the number if land of 1x1 in child quad
                         landMinted += quadCompareSize * quadCompareSize;
                         //owner is cleared
-                        _setOwnerData(id, 0);
+                        _writeOwnerData(id, 0);
                     } else {
-                        require(owner == address(0), "Already minted");
+                        if (owner != address(0)) {
+                            revert AlreadyMinted(id);
+                        }
                     }
                 }
             }
@@ -461,14 +504,20 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
 
     /// @dev checks the owner of land with 'tokenId' to be 'from' and clears it
     /// @param from the address to be checked against the owner of the land
-    /// @param tokenId th id of land
+    /// @param x The x-coordinate of the top-left corner of the quad being minted.
+    /// @param y The y-coordinate of the top-left corner of the quad being minted.
     /// @return bool for if land is owned by 'from' or not.
-    function _checkAndClearLandOwner(address from, uint256 tokenId) internal returns (bool) {
-        uint256 currentOwner = _getOwnerData(tokenId);
+    function _checkAndClearLandOwner(address from, uint256 x, uint256 y) internal returns (bool) {
+        uint256 tokenId = _getQuadId(LAYER_1x1, x, y);
+        uint256 currentOwner = _readOwnerData(tokenId);
         if (currentOwner != 0) {
-            require((currentOwner & BURNED_FLAG) != BURNED_FLAG, "not owner");
-            require(address(uint160(currentOwner)) == from, "not owner");
-            _setOwnerData(tokenId, 0);
+            if ((currentOwner & BURNED_FLAG) == BURNED_FLAG) {
+                revert NotOwner(x, y);
+            }
+            if (address(uint160(currentOwner)) != from) {
+                revert ERC721InvalidOwner(from);
+            }
+            _writeOwnerData(tokenId, 0);
             return true;
         }
         return false;
@@ -488,7 +537,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             for (uint256 i = 0; i < size * size; i++) {
                 ids[i] = _idInPath(i, size, x, y);
             }
-            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batchTransfer rejected");
+            _checkOnERC721BatchReceived(operator, from, to, ids, data);
         }
     }
 
@@ -533,7 +582,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                     transferIndex++;
                 } else if (_getOwnerAddress(id) == msgSender) {
                     // if it is owned by the msgSender owner data is removed and it is pused in to idsToTransfer array
-                    _setOwnerData(id, 0);
+                    _writeOwnerData(id, 0);
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
                 } else {
@@ -544,18 +593,12 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
             }
 
             // checking if "to" contact can handle ERC721 tokens
-            require(
-                _checkOnERC721BatchReceived(msgSender, address(0), to, idsToMint, data),
-                "erc721 batchTransfer rejected"
-            );
-            require(
-                _checkOnERC721BatchReceived(msgSender, msgSender, to, idsToTransfer, data),
-                "erc721 batchTransfer rejected"
-            );
+            _checkOnERC721BatchReceived(msgSender, address(0), to, idsToMint, data);
+            _checkOnERC721BatchReceived(msgSender, msgSender, to, idsToTransfer, data);
         } else {
             for (uint256 i = 0; i < size * size; i++) {
                 uint256 id = _idInPath(i, size, x, y);
-                if (_getOwnerAddress(id) == msgSender) _setOwnerData(id, 0);
+                if (_getOwnerAddress(id) == msgSender) _writeOwnerData(id, 0);
             }
         }
     }
@@ -673,7 +716,7 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                 bool ownAllIndividual;
                 if (childQuadSize < 3) {
                     // case when the smaller quad is 1x1,
-                    ownAllIndividual = _checkAndClearLandOwner(from, _getQuadId(LAYER_1x1, xi, yi)) && ownerOfAll;
+                    ownAllIndividual = _checkAndClearLandOwner(from, xi, yi) && ownerOfAll;
                 } else {
                     // recursively calling the _regroupQuad function to check the owner of child quads.
                     ownAllIndividual = _regroupQuad(
@@ -684,14 +727,14 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
                         childQuadSize / 2
                     );
                     uint256 idChild = _getQuadId(childLayer, xi, yi);
-                    ownerChild = _getOwnerData(idChild);
+                    ownerChild = _readOwnerData(idChild);
                     if (ownerChild != 0) {
                         // checking the owner of child quad
-                        if (!ownAllIndividual) {
-                            require(ownerChild == uint256(uint160(from)), "not owner of child Quad");
+                        if (!ownAllIndividual && ownerChild != uint256(uint160(from))) {
+                            revert NotOwner(xi, yi);
                         }
                         // clearing owner of child quad
-                        _setOwnerData(idChild, 0);
+                        _writeOwnerData(idChild, 0);
                     }
                 }
                 // ownerOfAll should be true if "from" is owner of all the child quads itereated over
@@ -702,10 +745,10 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         // if set is true it check if the "from" is owner of all else checks for the owner of parent quad is
         // owned by "from" and sets the owner for the id of land to "to" address.
         if (set) {
-            if (!ownerOfAll) {
-                require(_ownerOfQuad(land.size, land.x, land.y) == from, "not owner");
+            if (!ownerOfAll && _ownerOfQuad(land.size, land.x, land.y) != from) {
+                revert ERC721InvalidOwner(from);
             }
-            _setOwnerData(quadId, uint160(to));
+            _writeOwnerData(quadId, uint160(to));
             return true;
         }
 
@@ -729,16 +772,18 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     }
 
     /// @notice Get the owner and operatorEnabled flag of a token.
-    /// @param id The token to query.
+    /// @param tokenId The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
     function _ownerAndOperatorEnabledOf(
-        uint256 id
+        uint256 tokenId
     ) internal view override returns (address owner, bool operatorEnabled) {
-        require(id & LAYER == 0, "Invalid token id");
-        uint256 x = id % GRID_SIZE;
-        uint256 y = id / GRID_SIZE;
-        uint256 owner1x1 = _getOwnerData(id);
+        if (tokenId & LAYER != 0) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        uint256 x = tokenId % GRID_SIZE;
+        uint256 y = tokenId / GRID_SIZE;
+        uint256 owner1x1 = _readOwnerData(tokenId);
 
         if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
@@ -755,6 +800,20 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
         }
     }
 
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function _setMinter(address minter, bool enabled) internal {
+        if (minter == address(0)) {
+            revert InvalidAddress();
+        }
+        if (enabled == _isMinter(minter)) {
+            revert InvalidArgument();
+        }
+        _writeMinter(minter, enabled);
+        emit Minter(minter, enabled);
+    }
+
     /// @notice checks if an address is enabled as minter
     /// @param minter the address to check
     /// @return true if the address is a minter
@@ -763,5 +822,5 @@ abstract contract LandBaseToken is ILandToken, ERC721BaseToken {
     /// @notice set an address as minter
     /// @param minter the address to set
     /// @param enabled true enable the address, false disable it.
-    function _setMinter(address minter, bool enabled) internal virtual;
+    function _writeMinter(address minter, bool enabled) internal virtual;
 }

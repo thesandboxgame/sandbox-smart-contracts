@@ -3,6 +3,10 @@
 pragma solidity 0.8.23;
 
 contract ERC721TokenReceiverMock {
+    error AcceptTokenContractOnly();
+    error BatchReceiveNotAllowed();
+    error ReceiveNotAllowed();
+
     bool public denyTokensReceived;
     bool public returnInvalidBytes;
     bool public denyBatchTokensReceived;
@@ -34,8 +38,12 @@ contract ERC721TokenReceiverMock {
         uint256[] calldata, // ids,
         bytes calldata // data
     ) external view returns (bytes4) {
-        require(address(tokenContract) == msg.sender, "accept tokenContract only");
-        require(!denyBatchTokensReceived, "Batch Receive not allowed");
+        if (address(tokenContract) != msg.sender) {
+            revert AcceptTokenContractOnly();
+        }
+        if (denyBatchTokensReceived) {
+            revert BatchReceiveNotAllowed();
+        }
         if (returnInvalidBytes) {
             return 0x150b7a03;
         }
@@ -48,8 +56,12 @@ contract ERC721TokenReceiverMock {
         uint256, // _tokenId,
         bytes calldata // data
     ) external view returns (bytes4) {
-        require(address(tokenContract) == msg.sender, "accept tokenContract only");
-        require(!denyTokensReceived, "Receive not allowed");
+        if (address(tokenContract) != msg.sender) {
+            revert AcceptTokenContractOnly();
+        }
+        if (denyTokensReceived) {
+            revert ReceiveNotAllowed();
+        }
         if (returnInvalidBytes) {
             return 0x150b7a03;
         }
