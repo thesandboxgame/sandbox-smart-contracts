@@ -7,7 +7,7 @@ import {
 import {parseEther} from 'ethers';
 import setupAssetCreateTests from './assetCreateFixture';
 
-describe.only('Asset Create', function () {
+describe('Asset Create', function () {
   describe('Contract references', function () {
     it('AuthSuperValidator', async function () {
       const {AssetCreateContract, AuthSuperValidatorContract} =
