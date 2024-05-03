@@ -8,6 +8,8 @@ import {IRoyaltyManager} from "@sandbox-smart-contracts/dependency-royalty-manag
 /// @author The Sandbox
 /// @notice Add royalty support to land contracts (EIP2981 implemented with our royalty manager)
 contract WithRoyalties {
+    /// @notice emitted when the royalty manager is set
+    /// @param royaltyManager the address of royalty manager contract.
     event RoyaltyManagerSet(address indexed royaltyManager);
 
     uint16 internal constant TOTAL_BASIS_POINTS = 10000;

@@ -6,6 +6,9 @@ pragma solidity 0.8.23;
 /// @author The Sandbox
 /// @notice Add an owner for the stores that need it
 contract WithOwner {
+    /// @notice emitted when the ownership of the contract is changed
+    /// @param previousOwner The old address of the owner.
+    /// @param newOwner The new address of the owner.
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     struct OwnerStorage {

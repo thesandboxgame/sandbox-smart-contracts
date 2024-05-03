@@ -8,9 +8,11 @@ pragma solidity 0.8.23;
 /// @dev based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol
 /// @dev with an initializer for proxies and a mutable forwarder
 abstract contract ERC2771Handler {
+    /// @notice emitted when a new trusted forwarder is set
+    /// @param newForwarder the new trusted forwarder
     event TrustedForwarderSet(address indexed newForwarder);
 
-    /// @dev Initializes the contract
+    /// @notice Initializes the contract
     /// @param forwarder trusted forwarder address
     // solhint-disable-next-line func-name-mixedcase
     function __ERC2771Handler_initialize(address forwarder) internal {

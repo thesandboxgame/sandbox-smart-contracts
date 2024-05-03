@@ -10,8 +10,15 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 ///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
 ///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is Context {
+    /// @notice emitted when a registry is set
+    /// @param registry address of the registry to set
     event OperatorRegistrySet(IOperatorFilterRegistry indexed registry);
+
+    /// @notice emitted when the contract is registered into the registry
+    /// @param subscriptionOrRegistrant address to subscribe or copy entries from
+    /// @param subscribe should it subscribe
     event ContractRegistered(address indexed subscriptionOrRegistrant, bool subscribe);
+
     /// @notice the caller is not the operator
     error OperatorNotAllowed();
 
