@@ -141,6 +141,10 @@ export const OrderDefault = async (
   end,
 });
 
+const getRandomInt = (max: number) => {
+  return Math.floor(Math.random() * max);
+};
+
 export const getMatchedOrders = async (
   catalystContract: Contract,
   catalystPrice: Numeric,
@@ -158,12 +162,14 @@ export const getMatchedOrders = async (
   );
   const takerAsset = await AssetERC20(sandContract, catalystPrice);
 
+  const randomSalt = getRandomInt(1000000);
+
   const orderLeft = await OrderDefault(
     maker,
     makerAsset,
     ZeroAddress,
     takerAsset,
-    1,
+    randomSalt,
     0,
     0
   );
@@ -173,7 +179,7 @@ export const getMatchedOrders = async (
     takerAsset,
     ZeroAddress,
     makerAsset,
-    1,
+    randomSalt,
     0,
     0
   );

@@ -886,7 +886,7 @@ describe.only('Asset Create', function () {
         mintData.tiers.map((tier, i) =>
           getMatchedOrders(
             CatalystContract,
-            catPurchasePrice,
+            parseEther('1'),
             SandContract,
             OrderValidatorContract,
             tier,
