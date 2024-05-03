@@ -1,10 +1,24 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {ZeroAddress} from 'ethers';
+import {Result, toUtf8Bytes, toUtf8String, ZeroAddress} from 'ethers';
 import {getId} from '../fixtures';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
+
+function getQuadIds(size: number, x0 = 0, y0 = 0) {
+  const ret = [];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      ret.push(x0 + x + (y0 + y) * 408);
+    }
+  }
+  return ret;
+}
+
+function sort(arr: Result | number[] | string[]): number[] {
+  return arr.map((x) => parseInt(x)).sort((a, b) => a - b);
+}
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldCheckTransferQuad(setupLand, Contract: string) {
@@ -842,6 +856,42 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       expect(await LandAsMinter.balanceOf(TestERC721TokenReceiver)).to.be.equal(
         36,
       );
+    });
+
+    it('should not revert when to is ERC721 receiving contract with callback check and coverage', async function () {
+      const {LandAsMinter, TestERC721TokenReceiver, landMinter} =
+        await loadFixture(setupLand);
+      await LandAsMinter.mintQuad(landMinter, 6, 0, 0, toUtf8Bytes('MINT'));
+      await LandAsMinter.mintQuad(landMinter, 3, 6, 0, toUtf8Bytes('MINT'));
+      await LandAsMinter.mintQuad(landMinter, 1, 7, 7, toUtf8Bytes('MINT'));
+      const transferredIds = sort([
+        ...getQuadIds(6, 0, 0),
+        ...getQuadIds(3, 6, 0),
+        7 + 7 * 408,
+      ]);
+      const mintedIds = getQuadIds(12).filter(
+        (x) => !transferredIds.includes(x),
+      );
+      await LandAsMinter.mintAndTransferQuad(
+        TestERC721TokenReceiver,
+        12,
+        0,
+        0,
+        toUtf8Bytes('MINT_AND_TRANSFER'),
+      );
+      expect(await LandAsMinter.balanceOf(TestERC721TokenReceiver)).to.be.equal(
+        12 * 12,
+      );
+      const callbacks = await TestERC721TokenReceiver.getBatchCalls();
+      const minted = callbacks.find((x) => x.from == ZeroAddress);
+      expect(minted.operator).to.be.equal(landMinter);
+      expect(toUtf8String(minted.data)).to.be.equal('MINT_AND_TRANSFER');
+      expect(sort(minted.ids)).to.be.eql(mintedIds);
+      const transferred = callbacks.find((x) => x.from != ZeroAddress);
+      expect(transferred.operator).to.be.equal(landMinter);
+      expect(transferred.from).to.be.equal(landMinter);
+      expect(toUtf8String(transferred.data)).to.be.equal('MINT_AND_TRANSFER');
+      expect(sort(transferred.ids)).to.be.eql(transferredIds);
     });
 
     it('should clear operator for Land when parent Quad is mintAndTransfer', async function () {
