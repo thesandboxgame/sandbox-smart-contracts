@@ -3,17 +3,21 @@ pragma solidity 0.8.23;
 
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 
-/**
- * @title LandMetadataRegistry
- * @author The Sandbox
- * @notice Store information about the lands (premiumness and neighborhood)
- */
+/// @title LandMetadataRegistry
+/// @author The Sandbox
+/// @notice Store information about the lands (premiumness and neighborhood)
 abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
+    /// @notice value returned when the neighborhood is not set yet.
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
+    /// @notice amount of land information that can be stored in one EVM word
     uint256 public constant LANDS_PER_WORD = 32;
+    /// @notice bits (8) of information stored for each land
     uint256 public constant BITS_PER_LAND = 256 / LANDS_PER_WORD;
+    /// @notice used to mask the 8 bits of information stored per land
     uint256 public constant LAND_MASK = 0xFF;
+    /// @notice mask used to extract the premium bit
     uint256 public constant PREMIUM_MASK = 0x80;
+    /// @notice mask used to extract the neighborhood number
     uint256 public constant NEIGHBORHOOD_MASK = 0x7F;
 
     struct LandMetadataStorage {

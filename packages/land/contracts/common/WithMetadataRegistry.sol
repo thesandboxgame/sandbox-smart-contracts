@@ -9,8 +9,11 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 /// @author The Sandbox
 /// @notice Add support for the metadata registry
 abstract contract WithMetadataRegistry is IErrors {
+    /// @notice value returned when the neighborhood is not set yet.
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
 
+    /// @notice emitted when the metadata registry is set
+    /// @param metadataRegistry the address of the metadata registry
     event MetadataRegistrySet(address indexed metadataRegistry);
 
     struct MetadataRegistryStorage {
