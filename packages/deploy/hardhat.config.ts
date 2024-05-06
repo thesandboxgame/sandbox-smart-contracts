@@ -53,6 +53,10 @@ const importedPackages = {
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
   ],
+  '@sandbox-smart-contracts/land': [
+    'contracts/Land.sol',
+    'contracts/PolygonLand.sol',
+  ],
 };
 
 const namedAccounts = {
@@ -343,6 +347,7 @@ const networks = {
 };
 
 const compilers = [
+  '0.8.23',
   '0.8.21',
   '0.8.19',
   '0.8.18',
