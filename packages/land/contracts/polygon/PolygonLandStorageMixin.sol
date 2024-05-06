@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 
 /// @title PolygonLandStorageMixin
@@ -23,7 +22,7 @@ import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol
 /// @dev |         PolygonLand         │           __gap           │      58      │   0    │           t_array(t_uint256)49_storage           │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │     1568      │
 /// @dev |         PolygonLand         │     _trustedForwarder     │     107      │   0    │                    t_address                     │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
 /// @dev |         PolygonLand         │  operatorFilterRegistry   │     108      │   0    │     t_contract(IOperatorFilterRegistry)3942      │  0  │ /build-info/3abb06944792151ded64cbcd19543bb1.json │      20       │
-contract PolygonLandStorageMixin is Context {
+contract PolygonLandStorageMixin {
     /// @dev Obsolete: This is the storage used by the OZ v4 Initializer, they are unused now.
     uint8 private _initialized; // unused
     bool private _initializing; // unused
