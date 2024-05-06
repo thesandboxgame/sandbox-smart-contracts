@@ -106,10 +106,11 @@ library LibOrder {
     /// @param fill The amount of the order already filled.
     /// @return makeValue The remaining fillable amount from the maker's side.
     /// @return takeValue The remaining fillable amount from the taker's side.
-    function calculateRemaining(
-        LibOrder.Order calldata order,
-        uint256 fill
-    ) internal pure returns (uint256 makeValue, uint256 takeValue) {
+    function calculateRemaining(LibOrder.Order calldata order, uint256 fill)
+        internal
+        pure
+        returns (uint256 makeValue, uint256 takeValue)
+    {
         require(order.takeAsset.value >= fill, "filling more than order permits");
         takeValue = order.takeAsset.value - fill;
         makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);
