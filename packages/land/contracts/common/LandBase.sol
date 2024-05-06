@@ -26,6 +26,12 @@ abstract contract LandBase is
     WithRoyalties,
     WithOwner
 {
+    /// @dev this protects the implementation contract from behing initialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
