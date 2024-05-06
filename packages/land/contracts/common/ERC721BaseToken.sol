@@ -22,7 +22,6 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
 
-    bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
@@ -403,7 +402,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
         bool success;
         bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
+        bytes memory callData = abi.encodeCall(IERC165.supportsInterface, (interfaceId));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let call_ptr := add(0x20, callData)
