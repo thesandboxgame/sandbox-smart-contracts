@@ -61,7 +61,7 @@ export async function setupERC721Test(ret) {
   return {nonReceivingContract, tokenIds, mint, ...ret};
 }
 
-export async function setupContract(contractName: string, withProxy = false) {
+export async function setupContract(contractName: string) {
   const [
     deployer,
     landOwner,
@@ -97,19 +97,13 @@ export async function setupContract(contractName: string, withProxy = false) {
   const MetadataRegistryContract2 = await MetadataRegistryFactory.deploy();
 
   const LandFactory = await ethers.getContractFactory(contractName);
-  let LandContract;
-  if (withProxy) {
-    LandContract = await upgrades.deployProxy(
-      LandFactory,
-      [await landAdmin.getAddress()],
-      {
-        initializer: 'initialize',
-      },
-    );
-  } else {
-    LandContract = await LandFactory.deploy();
-    await LandContract.initialize(landAdmin);
-  }
+  const LandContract = await upgrades.deployProxy(
+    LandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
   // mock contract deploy
   const TestERC721TokenReceiverFactory = await ethers.getContractFactory(
     'ERC721TokenReceiverMock',
@@ -153,8 +147,13 @@ export async function setupContract(contractName: string, withProxy = false) {
   const ERC20AsBuyer = ERC20Contract.connect(buyer);
   // End set up roles
 
-  const LandContractWithoutMetadataRegistry = await LandFactory.deploy();
-  await LandContractWithoutMetadataRegistry.initialize(landAdmin);
+  const LandContractWithoutMetadataRegistry = await upgrades.deployProxy(
+    LandFactory,
+    [await landAdmin.getAddress()],
+    {
+      initializer: 'initialize',
+    },
+  );
 
   return {
     PolygonLandFactory: LandFactory,
