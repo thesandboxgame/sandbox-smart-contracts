@@ -355,8 +355,8 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         // Length of array is equal to number of 3x3 child quad a 24x24 quad can have. Would be used to push the minted Quads.
         Land[] memory quadMinted = new Land[](64);
         // index of last minted quad pushed on quadMinted Array
-        uint256 index;
-        uint256 landMinted;
+        uint256 index = 0;
+        uint256 landMinted = 0;
 
         // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
         if (size > 3) {
@@ -570,11 +570,11 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             // array to push minted 1x1 land
             uint256[] memory idsToTransfer = new uint256[](landMinted);
             // index of last land pushed in idsToTransfer array
-            uint256 transferIndex;
+            uint256 transferIndex = 0;
             // array to push ids to be minted
             uint256[] memory idsToMint = new uint256[]((size * size) - landMinted);
             // index of last land pushed in idsToMint array
-            uint256 mintIndex;
+            uint256 mintIndex = 0;
 
             // iterating over every 1x1 land in the quad to be pushed in the above arrays
             for (uint256 i = 0; i < size * size; i++) {
