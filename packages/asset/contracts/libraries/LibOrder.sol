@@ -4,7 +4,6 @@ pragma solidity 0.8.18;
 
 import {LibAsset} from "./LibAsset.sol";
 import {LibMath} from "./LibMath.sol";
-import "hardhat/console.sol";
 
 /// @author The Sandbox
 /// @title Order Handling Library
@@ -51,20 +50,6 @@ library LibOrder {
     /// @param order The order data.
     /// @return The complete hash of the order.
     function hash(Order calldata order) internal pure returns (bytes32) {
-        console.logBytes32(
-            keccak256(
-                abi.encode(
-                    ORDER_TYPEHASH,
-                    order.maker,
-                    LibAsset.hash(order.makeAsset),
-                    order.taker,
-                    LibAsset.hash(order.takeAsset),
-                    order.salt,
-                    order.start,
-                    order.end
-                )
-            )
-        );
         return
             keccak256(
                 // solhint-disable-next-line func-named-parameters
@@ -121,11 +106,10 @@ library LibOrder {
     /// @param fill The amount of the order already filled.
     /// @return makeValue The remaining fillable amount from the maker's side.
     /// @return takeValue The remaining fillable amount from the taker's side.
-    function calculateRemaining(LibOrder.Order calldata order, uint256 fill)
-        internal
-        pure
-        returns (uint256 makeValue, uint256 takeValue)
-    {
+    function calculateRemaining(
+        LibOrder.Order calldata order,
+        uint256 fill
+    ) internal pure returns (uint256 makeValue, uint256 takeValue) {
         require(order.takeAsset.value >= fill, "filling more than order permits");
         takeValue = order.takeAsset.value - fill;
         makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);

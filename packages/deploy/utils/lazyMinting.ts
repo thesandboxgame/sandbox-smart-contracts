@@ -150,8 +150,8 @@ export const getMatchedOrders = async (
   catalystPrice: Numeric,
   sandContract: Contract,
   orderValidatorContract: Contract,
-  catalystTier: BigInt,
-  amount: BigInt,
+  catalystTier: bigint,
+  amount: bigint,
   maker: Signer,
   taker: Signer
 ) => {
@@ -325,7 +325,7 @@ export const createMultipleLazyMintSignature = async (
 export const giveSandToAccount = async (
   SandContract: Contract,
   account: string,
-  amount: BigInt
+  amount: bigint
 ) => {
   // Give sand to lazyMintingTestAccount1
   // impersonate CHILD_CHAIN_MANAGER
