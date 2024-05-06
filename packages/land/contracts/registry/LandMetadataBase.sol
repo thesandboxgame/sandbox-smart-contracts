@@ -24,9 +24,9 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     struct LandMetadataStorage {
         /// @dev tokenId / 32 => premiumness + neighborhood metadata
         /// @dev zero means no metadata definition
-        mapping(uint256 => uint256) _metadata;
+        mapping(uint256 tokenId => uint256 metadataType) _metadata;
         /// @dev neighborhood number to string mapping
-        mapping(uint256 => string) _neighborhoodName;
+        mapping(uint256 neighborhoodNumber => string neighborhoodName) _neighborhoodName;
     }
 
     /// @custom:storage-location erc7201:thesandbox.storage.land.registry.LandMetadataBase

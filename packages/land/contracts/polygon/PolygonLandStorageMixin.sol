@@ -32,24 +32,24 @@ contract PolygonLandStorageMixin {
     address internal _admin;
 
     /// @dev super operators that can transfer tokens on behalf of all the users
-    mapping(address => bool) internal _superOperators;
+    mapping(address superOperator => bool enabled) internal _superOperators;
 
     /// @dev Number of NFT an address own
-    mapping(address => uint256) internal _numNFTPerAddress;
+    mapping(address owner => uint256 numNFT) internal _numNFTPerAddress;
 
     /// @dev mapping to store owner of lands and quads.
     /// @dev For 1x1 lands the 255 bit is a flag that land has operator approved.
     /// @dev For 1x1 lands the 160 bit is a flag that indicates if the token is burned.
-    mapping(uint256 => uint256) internal _owners;
+    mapping(uint256 owner => uint256 ownerData) internal _owners;
 
     /// @dev Operators by owner address for all tokens
-    mapping(address => mapping(address => bool)) internal _operatorsForAll;
+    mapping(address owner => mapping(address operator => bool enabled)) internal _operatorsForAll;
 
     /// @dev Operator by token id, the operator flag must be also true (see: _owners)
-    mapping(uint256 => address) internal _operators;
+    mapping(uint256 tokenId => address operator) internal _operators;
 
     /// @dev Addresses authorized to mint tokens
-    mapping(address => bool) internal _minters;
+    mapping(address minter => bool enabled) internal _minters;
 
     uint256[49] private __gap;
 
