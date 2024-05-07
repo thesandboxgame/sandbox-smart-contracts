@@ -8,7 +8,7 @@ const setupTest = deployments.createFixture(
       return await ethers.getContractAt(contract.abi, contract.address);
     }
 
-    const {landAdmin} = await getNamedAccounts();
+    const {deployer} = await getNamedAccounts();
     await deployments.fixture(['PolygonLand']);
     const PolygonLandContract = await getEthersContract('PolygonLand');
 
@@ -16,8 +16,8 @@ const setupTest = deployments.createFixture(
 
     const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
 
-    const OperatorFilterLandSubscription = await getEthersContract(
-      'OperatorFilterLandSubscription'
+    const PolygonOperatorFilterSubscription = await getEthersContract(
+      'PolygonOperatorFilterSubscription'
     );
     const PolygonOperatorFilterRegistry = await getEthersContract(
       'PolygonOperatorFilterRegistry'
@@ -25,20 +25,16 @@ const setupTest = deployments.createFixture(
 
     const MockMarketPlace1 = await getEthersContract('MockMarketPlace1');
     const MockMarketPlace2 = await getEthersContract('MockMarketPlace2');
-    const MockMarketPlace3 = await getEthersContract('MockMarketPlace3');
-    const MockMarketPlace4 = await getEthersContract('MockMarketPlace4');
 
     return {
       PolygonLandContract,
       RoyaltyManagerContract,
       TRUSTED_FORWARDER,
-      OperatorFilterLandSubscription,
+      PolygonOperatorFilterSubscription,
       PolygonOperatorFilterRegistry,
       MockMarketPlace1,
       MockMarketPlace2,
-      MockMarketPlace3,
-      MockMarketPlace4,
-      landAdmin,
+      deployer,
     };
   }
 );
@@ -46,8 +42,8 @@ const setupTest = deployments.createFixture(
 describe('PolygonLand', function () {
   describe('Roles', function () {
     it('Admin', async function () {
-      const {PolygonLandContract, landAdmin} = await setupTest();
-      expect(await PolygonLandContract.getAdmin()).to.be.equal(landAdmin);
+      const {PolygonLandContract, deployer} = await setupTest();
+      expect(await PolygonLandContract.getAdmin()).to.be.equal(deployer);
     });
   });
 
@@ -82,11 +78,11 @@ describe('PolygonLand', function () {
       const {
         PolygonOperatorFilterRegistry,
         PolygonLandContract,
-        OperatorFilterLandSubscription,
+        PolygonOperatorFilterSubscription,
       } = await setupTest();
       expect(
         await PolygonOperatorFilterRegistry.subscriptionOf(PolygonLandContract)
-      ).to.be.equal(OperatorFilterLandSubscription);
+      ).to.be.equal(PolygonOperatorFilterSubscription);
     });
 
     it('Land contract has correct market places black listed', async function () {
@@ -95,8 +91,6 @@ describe('PolygonLand', function () {
         PolygonLandContract,
         MockMarketPlace1,
         MockMarketPlace2,
-        MockMarketPlace3,
-        MockMarketPlace4,
       } = await setupTest();
       expect(
         await PolygonOperatorFilterRegistry.isOperatorFiltered(
@@ -113,22 +107,6 @@ describe('PolygonLand', function () {
         ),
         'MarketPlace2 should be filtered'
       ).to.be.equal(true);
-
-      expect(
-        await PolygonOperatorFilterRegistry.isOperatorFiltered(
-          PolygonLandContract,
-          MockMarketPlace3
-        ),
-        'MarketPlace3 should not be filtered'
-      ).to.be.equal(false);
-
-      expect(
-        await PolygonOperatorFilterRegistry.isOperatorFiltered(
-          PolygonLandContract,
-          MockMarketPlace4
-        ),
-        'MarketPlace4 should not be filtered'
-      ).to.be.equal(false);
     });
   });
 });

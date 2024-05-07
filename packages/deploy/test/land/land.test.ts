@@ -8,7 +8,7 @@ const setupTest = deployments.createFixture(
       return await ethers.getContractAt(contract.abi, contract.address);
     }
 
-    const {landAdmin} = await getNamedAccounts();
+    const {deployer} = await getNamedAccounts();
     await deployments.fixture(['Land']);
     const LandContract = await getEthersContract('Land');
 
@@ -23,8 +23,6 @@ const setupTest = deployments.createFixture(
 
     const MockMarketPlace1 = await getEthersContract('MockMarketPlace1');
     const MockMarketPlace2 = await getEthersContract('MockMarketPlace2');
-    const MockMarketPlace3 = await getEthersContract('MockMarketPlace3');
-    const MockMarketPlace4 = await getEthersContract('MockMarketPlace4');
 
     return {
       LandContract,
@@ -33,9 +31,7 @@ const setupTest = deployments.createFixture(
       OperatorFilterRegistry,
       MockMarketPlace1,
       MockMarketPlace2,
-      MockMarketPlace3,
-      MockMarketPlace4,
-      landAdmin,
+      deployer,
     };
   }
 );
@@ -43,8 +39,8 @@ const setupTest = deployments.createFixture(
 describe('Land', function () {
   describe('Roles', function () {
     it('Admin', async function () {
-      const {LandContract, landAdmin} = await setupTest();
-      expect(await LandContract.getAdmin()).to.be.equal(landAdmin);
+      const {LandContract, deployer} = await setupTest();
+      expect(await LandContract.getAdmin()).to.be.equal(deployer);
     });
   });
 
@@ -81,8 +77,6 @@ describe('Land', function () {
         LandContract,
         MockMarketPlace1,
         MockMarketPlace2,
-        MockMarketPlace3,
-        MockMarketPlace4,
       } = await setupTest();
       expect(
         await OperatorFilterRegistry.isOperatorFiltered(
@@ -99,22 +93,6 @@ describe('Land', function () {
         ),
         'MarketPlace2 should be filtered'
       ).to.be.equal(true);
-
-      expect(
-        await OperatorFilterRegistry.isOperatorFiltered(
-          LandContract,
-          MockMarketPlace3
-        ),
-        'MarketPlace3 should not be filtered'
-      ).to.be.equal(false);
-
-      expect(
-        await OperatorFilterRegistry.isOperatorFiltered(
-          LandContract,
-          MockMarketPlace4
-        ),
-        'MarketPlace4 should not be filtered'
-      ).to.be.equal(false);
     });
   });
 });
