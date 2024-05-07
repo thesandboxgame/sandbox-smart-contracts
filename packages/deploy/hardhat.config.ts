@@ -52,6 +52,13 @@ const importedPackages = {
   '@sandbox-smart-contracts/core': [
     '/src/solc_0.8/polygon/child/sand/PolygonSand.sol',
     '/src/solc_0.8/test/FakeChildChainManager.sol',
+    '/src/solc_0.8/test/MockOperatorFilterRegistry.sol',
+    '/src/solc_0.8/OperatorFilterer/contracts/OperatorFilterRegistrant.sol',
+    'src/solc_0.5/Land.sol',
+    'src/solc_0.5/LandV2.sol',
+    'src/solc_0.5/LandV3.sol',
+    '/src/solc_0.8/polygon/child/land/PolygonLandV1.sol',
+    '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
   ],
   '@sandbox-smart-contracts/land': [
     'contracts/Land.sol',

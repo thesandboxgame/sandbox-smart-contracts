@@ -3,30 +3,22 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, execute} = deployments;
+  const {deploy} = deployments;
 
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   await deploy('Land', {
     from: deployer,
-    contract: '@sandbox-smart-contracts/land/contracts/Land.sol:Land',
+    contract: '@sandbox-smart-contracts/core/src/solc_0.5/LandV2.sol:LandV2',
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      upgradeIndex: 3,
+      upgradeIndex: 1,
     },
     log: true,
   });
-
-  const RoyaltyManager = await deployments.get('RoyaltyManager');
-  await execute(
-    'Land',
-    {from: deployer, log: true},
-    'setRoyaltyManager',
-    RoyaltyManager.address
-  );
 };
 
 export default func;
-func.tags = ['Land', 'LandV4', 'LandV4_deploy'];
-func.dependencies = ['RoyaltyManager_deploy'];
+func.tags = ['Land', 'LandV2', 'LandV2_deploy'];
+func.dependencies = ['Land_deploy'];
