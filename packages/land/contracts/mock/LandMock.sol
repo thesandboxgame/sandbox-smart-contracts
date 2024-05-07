@@ -85,4 +85,8 @@ contract LandMock is Land {
     function burnFrom(address from, uint256 id) external {
         _burn(from, id);
     }
+
+    function changeAdminWithoutPerms(address newAdmin) external {
+        _changeAdmin(newAdmin);
+    }
 }

@@ -8,6 +8,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
+import {IERC721BatchOps} from "../interfaces/IERC721BatchOps.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
 import {WithMetadataRegistry} from "../common/WithMetadataRegistry.sol";
@@ -207,6 +208,7 @@ abstract contract LandBase is
     function supportsInterface(bytes4 interfaceId) public pure override returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721BatchOps).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId ||
             interfaceId == type(IERC173).interfaceId ||

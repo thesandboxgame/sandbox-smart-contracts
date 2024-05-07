@@ -9,6 +9,7 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import {IErrors} from "../interfaces/IErrors.sol";
+import {IERC721BatchOps} from "../interfaces/IERC721BatchOps.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /// @title ERC721BaseTokenCommon
@@ -16,7 +17,7 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Basic functionalities of a NFT
 /// @dev ERC721 implementation that supports meta-transactions and super operators
-abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, WithSuperOperators {
+abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IErrors, Context, WithSuperOperators {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -80,13 +81,6 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         return _isApprovedForAllOrSuperOperator(owner, operator);
     }
 
-    /// @notice Check if the contract supports an interface.
-    /// @param interfaceId The id of the interface.
-    /// @return Whether the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public pure virtual override returns (bool) {
-        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC165).interfaceId;
-    }
-
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param to The address receiving the token.
     /// @param tokenId The token being transferred.
@@ -101,13 +95,13 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
     /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
-    /// @param id The id of the token.
+    /// @param tokenId The id of the token.
     /// @param data Additional data.
-    function _safeTransferFrom(address from, address to, uint256 id, bytes memory data) internal {
+    function _safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) internal {
         address msgSender = _msgSender();
-        _doTransfer(msgSender, from, to, id);
+        _doTransfer(msgSender, from, to, tokenId);
         if (to.code.length > 0) {
-            _checkOnERC721Received(msgSender, from, to, id, data);
+            _checkOnERC721Received(msgSender, from, to, tokenId, data);
         }
     }
 
@@ -255,27 +249,20 @@ abstract contract ERC721BaseToken is IERC721, IERC721Errors, IErrors, Context, W
         _writeOwnerData(tokenId, oldData);
     }
 
-    /// @param id token id
+    /// @param tokenId token id
     /// @return owner address of the owner
-    function _ownerOf(uint256 id) internal view returns (address owner) {
-        (owner, ) = _ownerAndOperatorEnabledOf(id);
+    function _ownerOf(uint256 tokenId) internal view returns (address owner) {
+        (owner, ) = _ownerAndOperatorEnabledOf(tokenId);
     }
 
     /// @notice Get the owner and operatorEnabled flag of a token.
-    /// @param id The token to query.
+    /// @param tokenId The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
+    /// @dev must extract the owner, burn and operator flag from _readOwnerData(tokenId) if burned must return owner = address(0)
     function _ownerAndOperatorEnabledOf(
-        uint256 id
-    ) internal view virtual returns (address owner, bool operatorEnabled) {
-        uint256 data = _readOwnerData(id);
-        if ((data & BURNED_FLAG) == BURNED_FLAG) {
-            owner = address(0);
-        } else {
-            owner = address(uint160(data));
-        }
-        operatorEnabled = (data & OPERATOR_FLAG) == OPERATOR_FLAG;
-    }
+        uint256 tokenId
+    ) internal view virtual returns (address owner, bool operatorEnabled);
 
     /// @notice Check if receiving contract accepts erc721 transfers.
     /// @param operator The address of the operator.
