@@ -5,14 +5,7 @@ pragma solidity 0.8.23;
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-
-interface IToken {
-    function safeTransferFrom(address from, address to, uint256 id) external;
-
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) external;
-
-    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external;
-}
+import {IERC721BatchOps} from "../interfaces/IERC721BatchOps.sol";
 
 contract MarketPlaceMock {
     bytes4 private constant ERC721_IS_RECEIVER = 0x150b7a02;
@@ -26,7 +19,16 @@ contract MarketPlaceMock {
     /// @param id the token type transfered.
     /// @param data aditional data accompanying the transfer.
     function transferLand(address land, address from, address to, uint256 id, bytes memory data) external {
-        IToken(land).safeTransferFrom(from, to, id, data);
+        IERC721(land).safeTransferFrom(from, to, id, data);
+    }
+
+    /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
+    /// @param land the contract address on which the token transfer will take place
+    /// @param from The sender of the tokens.
+    /// @param to The recipient of the tokens.
+    /// @param id The id of the token to be transferred.
+    function transferLand(address land, address from, address to, uint256 id) external {
+        IERC721(land).safeTransferFrom(from, to, id);
     }
 
     /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
@@ -35,7 +37,7 @@ contract MarketPlaceMock {
     /// @param to Recipient.
     /// @param id The token id to be transferred.
     function transferTokenERC721(address asset, address from, address to, uint256 id) external {
-        IToken(asset).safeTransferFrom(from, to, id);
+        IERC721(asset).safeTransferFrom(from, to, id);
     }
 
     /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
@@ -51,16 +53,23 @@ contract MarketPlaceMock {
         uint256[] memory ids,
         bytes memory data
     ) external {
-        IToken(asset).safeBatchTransferFrom(from, to, ids, data);
+        IERC721BatchOps(asset).batchTransferFrom(from, to, ids, data);
     }
 
     /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
-    /// @param land the contract address on which the token transfer will take place
+    /// @param asset the contract address on which the token transfer will take place
     /// @param from The sender of the tokens.
     /// @param to The recipient of the tokens.
-    /// @param id The id of the token to be transferred.
-    function transferLand(address land, address from, address to, uint256 id) external {
-        IToken(land).safeTransferFrom(from, to, id);
+    /// @param ids The ids of the tokens to be transferred.
+    /// @param data Additional data.
+    function safeBatchTransferTokenERC721(
+        address asset,
+        address from,
+        address to,
+        uint256[] memory ids,
+        bytes memory data
+    ) external {
+        IERC721BatchOps(asset).safeBatchTransferFrom(from, to, ids, data);
     }
 
     function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {

@@ -32,13 +32,6 @@ interface ILandToken {
     /// @param data additional data
     function transferQuad(address from, address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external;
 
-    /// @notice Transfer many tokens between 2 addresses.
-    /// @param from The sender of the token.
-    /// @param to The recipient of the token.
-    /// @param ids The ids of the tokens.
-    /// @param data Additional data.
-    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external;
-
     /// @notice Mint a new quad (aligned to a quad tree with size 1, 3, 6, 12 or 24 only)
     /// @param to The recipient of the new quad
     /// @param size The size of the new quad

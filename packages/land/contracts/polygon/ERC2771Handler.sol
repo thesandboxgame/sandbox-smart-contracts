@@ -13,14 +13,6 @@ abstract contract ERC2771Handler {
     /// @param newForwarder the new trusted forwarder
     event TrustedForwarderSet(address indexed newForwarder);
 
-    /// @notice Initializes the contract
-    /// @param forwarder trusted forwarder address
-    // solhint-disable-next-line func-name-mixedcase
-    function __ERC2771Handler_initialize(address forwarder) internal {
-        _writeTrustedForwarder(forwarder);
-        emit TrustedForwarderSet(forwarder);
-    }
-
     /// @notice Checks if an address is a trusted forwarder
     /// @param forwarder address to check
     /// @return is trusted

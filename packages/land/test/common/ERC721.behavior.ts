@@ -853,12 +853,17 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
         expect(await LandAsOwner.supportsInterface('0x5b5e139f')).to.be.true;
       });
 
+      it('claim to support base erc721 batch interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0x3d127873')).to.be.true;
+      });
+
       it('claim to support erc173 interface', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0x7f5828d0')).to.be.true;
       });
 
-      it('claim to support royalty interface', async function () {
+      it('claim to support royalty (erc2981) interface', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0x2a55205a')).to.be.true;
       });

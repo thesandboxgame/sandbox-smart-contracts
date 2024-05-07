@@ -48,6 +48,10 @@ contract PolygonLandMock is PolygonLand {
         _burn(from, id);
     }
 
+    function changeAdminWithoutPerms(address newAdmin) external {
+        _changeAdmin(newAdmin);
+    }
+
     /// @notice sets Approvals with operator filterer check in case to test the transfer.
     /// @param operator address of the operator to be approved
     /// @param approved bool value denoting approved (true) or not Approved(false)

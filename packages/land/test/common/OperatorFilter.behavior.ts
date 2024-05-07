@@ -367,29 +367,56 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
     });
 
     it('it should not approve blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther} = await loadFixture(setupLand);
-      await expect(LandAsOther.approve(MockMarketPlace1, 1)).to.be.reverted;
+      const {MockMarketPlace1, OperatorFilterRegistry, LandAsOther} =
+        await loadFixture(setupLand);
+      await expect(
+        LandAsOther.approve(MockMarketPlace1, 1),
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not approveFor blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther1, other} =
+      const {MockMarketPlace1, OperatorFilterRegistry, LandAsOther1, other} =
         await loadFixture(setupLand);
-      await expect(LandAsOther1.approveFor(other, MockMarketPlace1, 1)).to.be
-        .reverted;
+      await expect(
+        LandAsOther1.approveFor(other, MockMarketPlace1, 1),
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
+    });
+
+    it('should fail when calling approveFor if the registry return false because the operator is not allowed', async function () {
+      const {MockMarketPlace1, LandAsOther1, other, OperatorFilterRegistry} =
+        await loadFixture(setupLand);
+      await OperatorFilterRegistry.setReturnFalseInIsOperatorAllowed(true);
+      await expect(
+        LandAsOther1.approveFor(other, MockMarketPlace1, 1),
+      ).to.revertedWithCustomError(LandAsOther1, 'OperatorNotAllowed');
     });
 
     it('it should not setApprovalForAll blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther1} = await loadFixture(setupLand);
-      await expect(LandAsOther1.setApprovalForAll(MockMarketPlace1, true)).to.be
-        .reverted;
+      const {MockMarketPlace1, OperatorFilterRegistry, LandAsOther1} =
+        await loadFixture(setupLand);
+      await expect(
+        LandAsOther1.setApprovalForAll(MockMarketPlace1, true),
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should not setApprovalForAllFor blacklisted market places', async function () {
-      const {MockMarketPlace1, LandAsOther1, other} =
+      const {MockMarketPlace1, OperatorFilterRegistry, LandAsOther1, other} =
         await loadFixture(setupLand);
       await expect(
         LandAsOther1.setApprovalForAllFor(other, MockMarketPlace1, true),
-      ).to.be.reverted;
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
     });
 
     it('it should approve non blacklisted market places', async function () {
@@ -866,6 +893,52 @@ export function shouldCheckForOperatorFilter(setupLand, Contract: string) {
           other,
           other1,
           id,
+          '0x',
+        ),
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
+    });
+
+    it('it should not be able to batch transfer through blacklisted market places', async function () {
+      const {
+        MockMarketPlace1,
+        LandAsOther,
+        OperatorFilterRegistry,
+        other,
+        other1,
+      } = await loadFixture(setupLand);
+      const id = getId(1, 0, 0);
+      await expect(
+        MockMarketPlace1.batchTransferTokenERC721(
+          LandAsOther,
+          other,
+          other1,
+          [id],
+          '0x',
+        ),
+      ).to.be.revertedWithCustomError(
+        OperatorFilterRegistry,
+        'AddressIsFiltered',
+      );
+    });
+
+    it('it should not be able to safe batch transfer through blacklisted market places', async function () {
+      const {
+        MockMarketPlace1,
+        LandAsOther,
+        OperatorFilterRegistry,
+        other,
+        other1,
+      } = await loadFixture(setupLand);
+      const id = getId(1, 0, 0);
+      await expect(
+        MockMarketPlace1.safeBatchTransferTokenERC721(
+          LandAsOther,
+          other,
+          other1,
+          [id],
           '0x',
         ),
       ).to.be.revertedWithCustomError(

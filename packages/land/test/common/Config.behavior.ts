@@ -76,6 +76,15 @@ export function landConfig(setupLand, Contract: string) {
           LandAsAdmin.initialize(other),
         ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidInitialization');
       });
+
+      it('should not change admin if old admin is zero', async function () {
+        const {LandAsAdmin, landAdmin, other} = await loadFixture(setupLand);
+        expect(await LandAsAdmin.getAdmin()).to.be.equal(landAdmin);
+        await LandAsAdmin.simulateUpgrade(ZeroAddress);
+        await expect(
+          LandAsAdmin.changeAdminWithoutPerms(other),
+        ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
+      });
     });
   });
 }
