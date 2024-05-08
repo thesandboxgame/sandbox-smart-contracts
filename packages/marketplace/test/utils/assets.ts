@@ -129,6 +129,7 @@ export function hashAsset(a: Asset) {
 }
 
 export const Bundle = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bundleInformation: any // TODO: type
 ): Promise<Asset> => ({
   assetType: {
