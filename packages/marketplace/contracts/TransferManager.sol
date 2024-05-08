@@ -296,7 +296,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             for (uint256 i; i < erc1155Length; i++) {
                 address token = bundle.bundledERC1155[i].erc1155Address;
                 uint256 idLength = bundle.bundledERC1155[i].ids.length;
-                require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 arrray error");
+                require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
                 for (uint256 j; j < idLength; j++) {
                     _transferERC1155(
                         token,
