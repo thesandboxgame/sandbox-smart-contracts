@@ -242,17 +242,79 @@ abstract contract TransferManager is Initializable, ITransferManager {
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             address token = LibAsset.decodeAddress(asset.assetType);
             // slither-disable-next-line arbitrary-send-erc20
-            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, asset.value);
+            _transferERC20(token, from, to, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC721) {
             (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
             require(asset.value == 1, "erc721 value error");
-            IERC721Upgradeable(token).safeTransferFrom(from, to, tokenId);
+            _transferERC721(token, from, to, tokenId);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
             (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
-            IERC1155Upgradeable(token).safeTransferFrom(from, to, tokenId, asset.value, "");
+            _transferERC1155(token, from, to, tokenId, asset.value);
+        } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
+            LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
+            require(asset.value == 1, "bundle value error");
+            uint256 erc20Length = bundle.bundledERC20.length;
+            uint256 erc721Length = bundle.bundledERC721.length;
+            uint256 erc1155Length = bundle.bundledERC721.length;
+            for (uint256 i; i < erc20Length; i++) {
+                address token = bundle.bundledERC20[i].erc20Address;
+                _transferERC20(token, from, to, bundle.bundledERC20[i].value);
+            }
+            for (uint256 i; i < erc721Length; i++) {
+                address token = bundle.bundledERC721[i].erc721Address;
+                uint256 idLength = bundle.bundledERC721[i].ids.length;
+                for (uint256 j; j < idLength; j++) {
+                    // TODO: currently no value for erc721 in bundle, require bundle.value to be 1 ?
+                    _transferERC721(token, from, to, bundle.bundledERC721[i].ids[j]);
+                }
+            }
+            for (uint256 i; i < erc1155Length; i++) {
+                address token = bundle.bundledERC1155[i].erc1155Address;
+                uint256 idLength = bundle.bundledERC1155[i].ids.length;
+                require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 arrray error");
+                for (uint256 j; j < idLength; j++) {
+                    _transferERC1155(
+                        token,
+                        from,
+                        to,
+                        bundle.bundledERC1155[i].ids[j],
+                        bundle.bundledERC1155[i].supplies[j]
+                    );
+                }
+            }
+            // TODO: other bundle validation TBC (review OrderValidator steps)
         } else {
             revert("invalid asset class");
         }
+    }
+
+    /// @notice Function should be able to transfer ERC20 Asset
+    /// @param token ERC20 token contract address
+    /// @param from Account holding the asset
+    /// @param to Account that will receive the asset
+    /// @param assetValue The value to be transferred
+    function _transferERC20(address token, address from, address to, uint256 assetValue) internal {
+        // slither-disable-next-line arbitrary-send-erc20
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, assetValue);
+    }
+
+    /// @notice Function should be able to transfer ERC721 Asset
+    /// @param token ERC721 token contract address
+    /// @param from Account holding the asset
+    /// @param to Account that will receive the asset
+    /// @param id The token id to be transferred
+    function _transferERC721(address token, address from, address to, uint256 id) internal {
+        IERC721Upgradeable(token).safeTransferFrom(from, to, id);
+    }
+
+    /// @notice Function should be able to transfer ERC1155 Asset
+    /// @param token ERC1155 token contract address
+    /// @param from Account holding the asset
+    /// @param to Account that will receive the asset
+    /// @param id The token id to be transferred
+    /// @param supply The supply of that token id to be transferred
+    function _transferERC1155(address token, address from, address to, uint256 id, uint256 supply) internal {
+        IERC1155Upgradeable(token).safeTransferFrom(from, to, id, supply, "");
     }
 
     /// @notice Function deciding if the fees are applied or not, to be override
