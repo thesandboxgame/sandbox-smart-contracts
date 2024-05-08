@@ -686,8 +686,8 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         // double for loop iterates and checks owner of all the smaller quads in land
         for (uint256 xi = land.x; xi < land.x + land.size; xi += childQuadSize) {
             for (uint256 yi = land.y; yi < land.y + land.size; yi += childQuadSize) {
-                uint256 ownerChild;
-                bool ownAllIndividual;
+                uint256 ownerChild = 0;
+                bool ownAllIndividual = false;
                 if (childQuadSize < 3) {
                     // case when the smaller quad is 1x1,
                     ownAllIndividual = _checkAndClearLandOwner(from, xi, yi) && ownerOfAll;
