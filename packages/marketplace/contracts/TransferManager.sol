@@ -252,7 +252,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             _transferERC1155(token, from, to, tokenId, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-            require(asset.value == 1, "bundle value error");
+            require(asset.value == 1, "bundle value error"); // TODO: replace with count using array lengths
             uint256 erc20Length = bundle.bundledERC20.length;
             uint256 erc721Length = bundle.bundledERC721.length;
             uint256 erc1155Length = bundle.bundledERC721.length;
