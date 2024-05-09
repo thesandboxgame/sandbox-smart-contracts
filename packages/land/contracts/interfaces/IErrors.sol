@@ -18,8 +18,4 @@ interface IErrors {
 
     /// @notice only admin can call this function
     error OnlyAdmin();
-
-    /// @notice when calling onERC721BatchReceived callback the target contract rejected the call
-    /// @param receiver the receiving contract
-    error ERC721InvalidBatchReceiver(address receiver);
 }

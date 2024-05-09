@@ -181,10 +181,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
       await expect(
         LandAsOther.transferQuad(other, TestERC721TokenReceiver, 6, 0, 0, '0x'),
       )
-        .to.be.revertedWithCustomError(
-          LandAsOther,
-          'ERC721InvalidBatchReceiver',
-        )
+        .to.be.revertedWithCustomError(LandAsOther, 'ERC721InvalidReceiver')
         .withArgs(TestERC721TokenReceiver);
     });
 
@@ -835,10 +832,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           '0x',
         ),
       )
-        .to.be.revertedWithCustomError(
-          LandAsMinter,
-          'ERC721InvalidBatchReceiver',
-        )
+        .to.be.revertedWithCustomError(LandAsMinter, 'ERC721InvalidReceiver')
         .withArgs(TestERC721TokenReceiver);
     });
 
@@ -1029,10 +1023,7 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           '0x',
         ),
       )
-        .to.be.revertedWithCustomError(
-          LandContract,
-          'ERC721InvalidBatchReceiver',
-        )
+        .to.be.revertedWithCustomError(LandContract, 'ERC721InvalidReceiver')
         .withArgs(TestERC721TokenReceiver);
     });
 
