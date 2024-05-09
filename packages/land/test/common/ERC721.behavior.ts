@@ -289,10 +289,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
             [tokenIds[0]],
             '0x',
           ),
-        ).to.be.revertedWithCustomError(
-          TestERC721TokenReceiver,
-          'BatchReceiveNotAllowed',
-        );
+        ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver');
       });
 
       it('batch transferring to a contract that do not accept erc721 token should fail', async function () {
@@ -306,10 +303,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
             [tokenIds[0]],
             '0x',
           ),
-        ).to.be.revertedWithCustomError(
-          TestERC721TokenReceiver,
-          'BatchReceiveNotAllowed',
-        );
+        ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver');
       });
 
       it('batch transferring to a contract that do not return the correct onERC721Received bytes should fail', async function () {
@@ -324,10 +318,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
             '0x',
           ),
         )
-          .to.be.revertedWithCustomError(
-            LandAsOwner,
-            'ERC721InvalidBatchReceiver',
-          )
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver')
           .withArgs(TestERC721TokenReceiver);
       });
 
@@ -380,10 +371,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
             TestERC721TokenReceiver,
             tokenIds[0],
           ),
-        ).to.be.revertedWithCustomError(
-          TestERC721TokenReceiver,
-          'ReceiveNotAllowed',
-        );
+        ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver');
       });
 
       it('transferring to a contract that do not return the correct onERC721Received bytes should fail', async function () {
@@ -462,7 +450,9 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
             tokenIds,
             '0x',
           ),
-        ).to.be.revertedWithoutReason();
+        )
+          .to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver')
+          .withArgs(nonReceivingContract);
       });
 
       it('safe batch transferring to a contract that implements onERC721Received should succeed', async function () {
@@ -759,10 +749,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
               TestERC721TokenReceiver,
               tokenIds[0],
             ),
-          ).to.be.revertedWithCustomError(
-            TestERC721TokenReceiver,
-            'ReceiveNotAllowed',
-          );
+          ).to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver');
         },
       );
 
@@ -799,7 +786,9 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
               nonReceivingContract,
               tokenIds[0],
             ),
-          ).to.be.revertedWithoutReason();
+          )
+            .to.be.revertedWithCustomError(LandAsOwner, 'ERC721InvalidReceiver')
+            .withArgs(nonReceivingContract);
         },
       );
 

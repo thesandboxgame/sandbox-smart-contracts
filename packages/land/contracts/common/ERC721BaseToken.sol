@@ -2,9 +2,9 @@
 pragma solidity 0.8.23;
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC721MandatoryTokenReceiver} from "../interfaces/IERC721MandatoryTokenReceiver.sol";
@@ -19,11 +19,6 @@ import {WithSuperOperators} from "./WithSuperOperators.sol";
 /// @dev ERC721 implementation that supports meta-transactions and super operators
 abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IErrors, Context, WithSuperOperators {
     using Address for address;
-
-    bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
-    bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
-
-    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
     uint256 internal constant OPERATOR_FLAG = (2 ** 255);
@@ -87,7 +82,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         address msgSender = _msgSender();
         _doTransfer(msgSender, from, to, tokenId);
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkIERC721MandatoryTokenReceiver(to)) {
             _checkOnERC721Received(msgSender, from, to, tokenId, "");
         }
     }
@@ -157,7 +152,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
         _transferNumNFTPerAddress(from, to, numTokens);
 
         if (to.code.length > 0) {
-            if (_checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            if (_checkIERC721MandatoryTokenReceiver(to)) {
                 _checkOnERC721BatchReceived(msgSender, from, to, ids, data);
             } else if (safe) {
                 for (uint256 i = 0; i < numTokens; i++) {
@@ -269,18 +264,22 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
     /// @param from The from address, may be different from msg.sender.
     /// @param to The address we want to transfer to.
     /// @param tokenId The id of the token we would like to transfer.
-    /// @param _data Any additional data to send with the transfer.
+    /// @param data Any additional data to send with the transfer.
     function _checkOnERC721Received(
         address operator,
         address from,
         address to,
         uint256 tokenId,
-        bytes memory _data
+        bytes memory data
     ) internal {
-        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
-        if (retval != _ERC721_RECEIVED) {
-            revert ERC721InvalidReceiver(to);
-        }
+        /* solhint-disable no-empty-blocks */
+        try IERC721Receiver(to).onERC721Received(operator, from, tokenId, data) returns (bytes4 retval) {
+            if (retval == IERC721Receiver.onERC721Received.selector) {
+                return;
+            }
+        } catch (bytes memory) {}
+        /* solhint-enable no-empty-blocks */
+        revert ERC721InvalidReceiver(to);
     }
 
     /// @notice Check if receiving contract accepts erc721 batch transfers.
@@ -296,32 +295,23 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
         uint256[] memory ids,
         bytes memory _data
     ) internal {
-        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
-        if (retval != _ERC721_BATCH_RECEIVED) {
-            revert ERC721InvalidBatchReceiver(to);
-        }
+        /* solhint-disable no-empty-blocks */
+        try IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data) returns (
+            bytes4 retval
+        ) {
+            if (retval == IERC721MandatoryTokenReceiver.onERC721BatchReceived.selector) {
+                return;
+            }
+        } catch (bytes memory) {}
+        /* solhint-enable no-empty-blocks */
+        revert ERC721InvalidReceiver(to);
     }
 
     /// @notice Check if there was enough gas.
-    /// @param _contract The address of the contract to check.
-    /// @param interfaceId The id of the interface we want to test.
+    /// @param to The address of the contract to check.
     /// @return Whether or not this check succeeded.
-    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeCall(IERC165.supportsInterface, (interfaceId));
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
+    function _checkIERC721MandatoryTokenReceiver(address to) internal view returns (bool) {
+        return ERC165Checker.supportsERC165InterfaceUnchecked(to, type(IERC721MandatoryTokenReceiver).interfaceId);
     }
 
     /// @notice Check if the sender approved the operator.

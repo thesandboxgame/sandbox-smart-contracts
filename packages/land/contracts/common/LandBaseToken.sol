@@ -84,7 +84,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         }
         _transferNumNFTPerAddress(from, to, numTokensTransferred);
 
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkIERC721MandatoryTokenReceiver(to)) {
             uint256[] memory ids = new uint256[](numTokensTransferred);
             uint256 counter = 0;
             for (uint256 j = 0; j < sizes.length; j++) {
@@ -506,7 +506,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         uint256 y,
         bytes memory data
     ) internal {
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkIERC721MandatoryTokenReceiver(to)) {
             uint256[] memory ids = new uint256[](size * size);
             for (uint256 i = 0; i < size * size; i++) {
                 ids[i] = _idInPath(i, size, x, y);
@@ -536,7 +536,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         bytes memory data
     ) internal {
         // checks if to is a contract and supports ERC721_MANDATORY_RECEIVER interfaces. if it doesn't it just clears the owner of 1x1 lands in quad(size, x, y)
-        if (to.code.length > 0 && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+        if (to.code.length > 0 && _checkIERC721MandatoryTokenReceiver(to)) {
             // array to push minted 1x1 land
             uint256[] memory idsToTransfer = new uint256[](landMinted);
             // index of last land pushed in idsToTransfer array

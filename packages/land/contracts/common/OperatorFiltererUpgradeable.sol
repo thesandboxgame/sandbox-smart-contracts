@@ -24,30 +24,18 @@ abstract contract OperatorFiltererUpgradeable is Context {
     error OperatorNotAllowed();
 
     modifier onlyAllowedOperatorApproval(address operator) virtual {
-        IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
-        // Check registry code length to facilitate testing in environments without a deployed registry.
-        if (address(registry).code.length > 0) {
-            if (!registry.isOperatorAllowed(address(this), operator)) {
-                revert OperatorNotAllowed();
-            }
-        }
+        _checkIsOperatorAllowed(address(this), operator);
         _;
     }
 
     modifier onlyAllowedOperator(address from) virtual {
         IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
         // Check registry code length to facilitate testing in environments without a deployed registry.
-        if (address(registry).code.length > 0) {
-            // Allow spending tokens from addresses with balance
-            // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
-            // from an EOA.
-            if (from == _msgSender()) {
-                _;
-                return;
-            }
-            if (!registry.isOperatorAllowed(address(this), _msgSender())) {
-                revert OperatorNotAllowed();
-            }
+        // Allow spending tokens from addresses with balance
+        // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
+        // from an EOA.
+        if (from != _msgSender()) {
+            _checkIsOperatorAllowed(address(this), _msgSender());
         }
         _;
     }
@@ -84,6 +72,24 @@ abstract contract OperatorFiltererUpgradeable is Context {
     function _setOperatorRegistry(IOperatorFilterRegistry registry) internal {
         _writeOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(registry);
+    }
+
+    /// @notice Check if the operator is allowed for the given registrant
+    /// @param registrant address of the registrant
+    /// @param operator operator address to check
+    function _checkIsOperatorAllowed(address registrant, address operator) internal view {
+        IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
+        // Check registry code length to facilitate testing in environments without a deployed registry.
+        if (address(registry).code.length > 0) {
+            /* solhint-disable no-empty-blocks */
+            try registry.isOperatorAllowed(registrant, operator) returns (bool retval) {
+                if (retval) {
+                    return;
+                }
+            } catch (bytes memory) {}
+            /* solhint-enable  no-empty-blocks */
+            revert OperatorNotAllowed();
+        }
     }
 
     /// @notice get the OpenSea operator filter
