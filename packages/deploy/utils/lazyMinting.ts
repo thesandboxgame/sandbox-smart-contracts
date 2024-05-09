@@ -6,7 +6,7 @@ import {
   Signer,
   ZeroAddress,
 } from 'ethers';
-import {ethers} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
 import {Network} from 'hardhat/types';
 
 export type LazyMintData = {
@@ -329,16 +329,20 @@ export const giveSandToAccount = async (
 ) => {
   // Give sand to lazyMintingTestAccount1
   // impersonate CHILD_CHAIN_MANAGER
+  const ChildChainManagerContract = await deployments.get(
+    'CHILD_CHAIN_MANAGER'
+  );
+
   await ethers.provider.send('hardhat_impersonateAccount', [
-    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+    ChildChainManagerContract.address,
   ]);
   const sandUser = await ethers.provider.getSigner(
-    '0x8464135c8F25Da09e49BC8782676a84730C318bC'
+    ChildChainManagerContract.address
   );
 
   // give sandUser ether
   await ethers.provider.send('hardhat_setBalance', [
-    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+    ChildChainManagerContract.address,
     '0x100000000000000000000',
   ]);
 
@@ -352,6 +356,6 @@ export const giveSandToAccount = async (
 
   // stop impersonating
   await ethers.provider.send('hardhat_stopImpersonatingAccount', [
-    '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+    ChildChainManagerContract.address,
   ]);
 };
