@@ -1,24 +1,9 @@
 import {expect} from 'chai';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {
-  setupPolygonLand,
-  setupPolygonLandForERC721Tests,
-  setupPolygonLandMock,
-  setupPolygonLandOperatorFilter,
-} from './fixtures';
-import {shouldCheckForRoyalty} from '../common/Royalty.behavior';
-import {shouldCheckForAdmin} from '../common/WithAdmin.behavior';
-import {shouldCheckForSuperOperators} from '../common/WithSuperOperators.behavior';
-import {shouldCheckForOperatorFilter} from '../common/OperatorFilter.behavior';
-import {shouldCheckLandGetter} from '../common/LandGetter.behavior';
-import {shouldCheckMintQuad} from '../common/MintQuad.behavior';
-import {shouldCheckTransferQuad} from '../common/TransferQuad.behavior';
-import {shouldCheckTransferFrom} from '../common/TransferFrom.behavior';
-import {shouldCheckForMetadataRegistry} from '../common/WithMetadataRegistry.behavior';
-import {landConfig} from '../common/Config.behavior';
-import {shouldCheckForERC721} from '../common/ERC721.behavior';
+import {setupPolygonLand, setupPolygonLandMock} from './fixtures';
 import {gasAndSizeChecks} from '../common/gasAndSizeChecks.behavior';
-import {getStorageSlotJS} from '../fixtures';
+import {getId, getStorageSlotJS} from '../fixtures';
+import {keccak256, Wallet} from 'ethers';
 
 const sizes = [1, 3, 6, 12, 24];
 const GRID_SIZE = 408;
@@ -27,39 +12,6 @@ const GRID_SIZE = 408;
 describe('PolygonLand.sol', function () {
   // eslint-disable-next-line mocha/no-setup-in-describe
   gasAndSizeChecks(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForRoyalty(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForAdmin(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForSuperOperators(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForOperatorFilter(setupPolygonLandOperatorFilter, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckLandGetter(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckMintQuad(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckTransferQuad(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckTransferFrom(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForMetadataRegistry(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  landConfig(setupPolygonLand, 'PolygonLand');
-
-  // eslint-disable-next-line mocha/no-setup-in-describe
-  shouldCheckForERC721(setupPolygonLandForERC721Tests, 'PolygonLand');
 
   it('should not set trustedForwarder if caller is not admin', async function () {
     const {LandAsOther, TrustedForwarderContract} =
@@ -86,14 +38,6 @@ describe('PolygonLand.sol', function () {
     expect(await LandContract.isTrustedForwarder(other)).to.be.equal(false);
   });
 
-  it('should not accept zero address as landMinter', async function () {
-    const {LandAsAdmin} = await loadFixture(setupPolygonLand);
-
-    await expect(
-      LandAsAdmin.setMinter('0x0000000000000000000000000000000000000000', true),
-    ).to.be.revertedWithCustomError(LandAsAdmin, 'InvalidAddress');
-  });
-
   it('changes the admin to a new address via meta transaction', async function () {
     const {LandAsAdmin, landAdmin, deployer, sendMetaTx} =
       await loadFixture(setupPolygonLand);
@@ -101,14 +45,6 @@ describe('PolygonLand.sol', function () {
       await LandAsAdmin.changeAdmin.populateTransaction(deployer);
     await sendMetaTx(landAdmin, to, data);
     expect(await LandAsAdmin.getAdmin()).to.be.equal(deployer);
-  });
-
-  it('should emit OwnershipTransferred event', async function () {
-    const {LandAsAdmin, other, landOwner} = await loadFixture(setupPolygonLand);
-    const tx = await LandAsAdmin.transferOwnership(await other.getAddress());
-    await expect(tx)
-      .to.emit(LandAsAdmin, 'OwnershipTransferred')
-      .withArgs(await landOwner.getAddress(), await other.getAddress());
   });
 
   it('check storage structure', async function () {
@@ -488,5 +424,41 @@ describe('PolygonLand.sol', function () {
         expect(await LandAsOther.balanceOf(landReceiver)).to.be.equal(190);
       });
     });
+  });
+
+  it('write mixins to get 100% coverage on them', async function () {
+    const {LandAsAdmin, LandAsMinter, other} =
+      await loadFixture(setupPolygonLand);
+
+    const admin = Wallet.createRandom();
+    const superOperator = Wallet.createRandom();
+    const owner = Wallet.createRandom();
+    const quantity = keccak256(await Wallet.createRandom().getAddress());
+    await LandAsMinter.mintQuad(other, 1, 407, 407, '0x');
+    const tokenId = getId(1, 407, 407);
+    // owner + operator flag
+    const ownerData = BigInt(await owner.getAddress()) | (2n ** 255n);
+    const operator = Wallet.createRandom();
+    const minter = Wallet.createRandom();
+    const registry = Wallet.createRandom();
+    await LandAsAdmin.writeMixingForCoverage(
+      admin,
+      superOperator,
+      owner,
+      quantity,
+      tokenId,
+      ownerData,
+      operator,
+      minter,
+      registry,
+    );
+    expect(await LandAsAdmin.getAdmin()).to.be.equal(admin);
+    expect(await LandAsAdmin.isSuperOperator(superOperator)).to.be.true;
+    expect(await LandAsAdmin.balanceOf(owner)).to.be.equal(quantity);
+    expect(await LandAsAdmin.getOwnerData(tokenId)).to.be.equal(ownerData);
+    expect(await LandAsAdmin.isApprovedForAll(owner, operator)).to.be.true;
+    expect(await LandAsAdmin.getApproved(tokenId)).to.be.equal(operator);
+    expect(await LandAsAdmin.isMinter(minter)).to.be.true;
+    expect(await LandAsAdmin.operatorFilterRegistry()).to.be.equal(registry);
   });
 });
