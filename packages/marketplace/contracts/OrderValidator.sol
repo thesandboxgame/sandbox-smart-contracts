@@ -72,9 +72,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
                 makeToken = bundle.bundledERC20[i].erc20Address;
                 _verifyWhitelistsRoles(makeToken);
             }
-            return;
-        }
-        makeToken = LibAsset.decodeAddress(asset.assetType);
+        } else makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
              _verifyWhitelistsRoles(makeToken);
         }
