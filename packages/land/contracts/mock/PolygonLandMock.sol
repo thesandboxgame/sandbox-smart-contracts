@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.23;
 
+import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {PolygonLand} from "../PolygonLand.sol";
 
 contract PolygonLandMock is PolygonLand {
@@ -101,5 +102,28 @@ contract PolygonLandMock is PolygonLand {
             mstore(add(ret, i), _operatorFilterRegistry.slot)
             i := add(i, 0x20)
         }
+    }
+
+    /// @dev just to get 100% coverage report
+    /// @dev just to get 100% coverage report
+    function writeMixingForCoverage(
+        address admin,
+        address superOperator,
+        address owner,
+        uint256 quantity,
+        uint256 tokenId,
+        uint256 ownerData,
+        address operator,
+        address minter,
+        IOperatorFilterRegistry registry
+    ) external {
+        _writeAdmin(admin);
+        _writeSuperOperator(superOperator, true);
+        _writeNumNFTPerAddress(owner, quantity);
+        _writeOwnerData(tokenId, ownerData);
+        _writeOperatorForAll(owner, operator, true);
+        _writeOperator(tokenId, operator);
+        _writeMinter(minter, true);
+        _writeOperatorFilterRegistry(registry);
     }
 }

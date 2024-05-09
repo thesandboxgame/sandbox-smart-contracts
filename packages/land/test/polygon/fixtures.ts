@@ -1,4 +1,4 @@
-import {setupContract, setupERC721Test, setupOperatorFilter} from '../fixtures';
+import {setupContract} from '../fixtures';
 import {Addressable} from 'ethers';
 import {ethers} from 'hardhat';
 
@@ -20,14 +20,6 @@ export async function setupPolygonLand() {
   }
 
   return {...ret, TrustedForwarderContract, sendMetaTx};
-}
-
-export async function setupPolygonLandOperatorFilter() {
-  return setupOperatorFilter(await setupPolygonLand());
-}
-
-export async function setupPolygonLandForERC721Tests() {
-  return setupERC721Test(await setupPolygonLand());
 }
 
 export async function setupPolygonLandMock() {
