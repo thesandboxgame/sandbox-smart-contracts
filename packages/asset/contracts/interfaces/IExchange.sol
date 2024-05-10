@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 import {LibOrder} from "../libraries/LibOrder.sol";
-
-pragma solidity 0.8.18;
 
 struct ExchangeMatch {
     LibOrder.Order orderLeft; // Left order details

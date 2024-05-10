@@ -53,7 +53,7 @@ contract AssetCreate is
     mapping(uint256 => uint256) public availableToMint;
 
     /// @notice The marketplace exchange contract to purchase catalyst
-    IExchange public exchangeContract;
+    IExchange private exchangeContract;
 
     /// @notice Role allowing to mint special assets
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
@@ -471,6 +471,12 @@ contract AssetCreate is
     /// @return authValidatorAddress The auth validator address
     function getAuthValidator() external view returns (address authValidatorAddress) {
         return address(authValidator);
+    }
+
+    /// @notice Get the exchange contract address
+    /// @return exchangeContractAddress The exchange contract address
+    function getExchangeContract() external view returns (address exchangeContractAddress) {
+        return address(exchangeContract);
     }
 
     function _msgSender()
