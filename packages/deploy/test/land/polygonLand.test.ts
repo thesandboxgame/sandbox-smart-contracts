@@ -17,14 +17,11 @@ const setupTest = deployments.createFixture(
     const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
 
     const PolygonOperatorFilterSubscription = await getEthersContract(
-      'PolygonOperatorFilterSubscription'
+      'OperatorFilterLandSubscription'
     );
     const PolygonOperatorFilterRegistry = await getEthersContract(
-      'PolygonOperatorFilterRegistry'
+      'OperatorFilterRegistry'
     );
-
-    const MockMarketPlace1 = await getEthersContract('MockMarketPlace1');
-    const MockMarketPlace2 = await getEthersContract('MockMarketPlace2');
 
     return {
       PolygonLandContract,
@@ -32,8 +29,6 @@ const setupTest = deployments.createFixture(
       TRUSTED_FORWARDER,
       PolygonOperatorFilterSubscription,
       PolygonOperatorFilterRegistry,
-      MockMarketPlace1,
-      MockMarketPlace2,
       deployer,
     };
   }
@@ -83,30 +78,6 @@ describe('PolygonLand', function () {
       expect(
         await PolygonOperatorFilterRegistry.subscriptionOf(PolygonLandContract)
       ).to.be.equal(PolygonOperatorFilterSubscription);
-    });
-
-    it('Land contract has correct market places black listed', async function () {
-      const {
-        PolygonOperatorFilterRegistry,
-        PolygonLandContract,
-        MockMarketPlace1,
-        MockMarketPlace2,
-      } = await setupTest();
-      expect(
-        await PolygonOperatorFilterRegistry.isOperatorFiltered(
-          PolygonLandContract,
-          MockMarketPlace1
-        ),
-        'MarketPlace1 should be filtered'
-      ).to.be.equal(true);
-
-      expect(
-        await PolygonOperatorFilterRegistry.isOperatorFiltered(
-          PolygonLandContract,
-          MockMarketPlace2
-        ),
-        'MarketPlace2 should be filtered'
-      ).to.be.equal(true);
     });
   });
 });

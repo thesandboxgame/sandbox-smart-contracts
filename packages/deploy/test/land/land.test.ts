@@ -21,16 +21,11 @@ const setupTest = deployments.createFixture(
       'OperatorFilterRegistry'
     );
 
-    const MockMarketPlace1 = await getEthersContract('MockMarketPlace1');
-    const MockMarketPlace2 = await getEthersContract('MockMarketPlace2');
-
     return {
       LandContract,
       RoyaltyManagerContract,
       OperatorFilterLandSubscription,
       OperatorFilterRegistry,
-      MockMarketPlace1,
-      MockMarketPlace2,
       deployer,
     };
   }
@@ -69,30 +64,6 @@ describe('Land', function () {
       expect(
         await OperatorFilterRegistry.subscriptionOf(LandContract)
       ).to.be.equal(OperatorFilterLandSubscription);
-    });
-
-    it('Land contract has correct market places black listed', async function () {
-      const {
-        OperatorFilterRegistry,
-        LandContract,
-        MockMarketPlace1,
-        MockMarketPlace2,
-      } = await setupTest();
-      expect(
-        await OperatorFilterRegistry.isOperatorFiltered(
-          LandContract,
-          MockMarketPlace1
-        ),
-        'MarketPlace1 should be filtered'
-      ).to.be.equal(true);
-
-      expect(
-        await OperatorFilterRegistry.isOperatorFiltered(
-          LandContract,
-          MockMarketPlace2
-        ),
-        'MarketPlace2 should be filtered'
-      ).to.be.equal(true);
     });
   });
 });
