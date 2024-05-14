@@ -2327,7 +2327,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             Object.values(mintData),
             []
           )
-        ).to.be.revertedWith('AuthSuperValidator: Signature expired');
+        ).to.be.revertedWith('AuthSuperValidator: Expired');
       });
       it('should not allow minting with invalid signature - invalid tier', async function () {
         const {
