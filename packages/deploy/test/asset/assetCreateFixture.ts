@@ -56,6 +56,10 @@ const setupAssetCreateTests = deployments.createFixture(
       parseEther('1000')
     );
 
+    const getCurrentTimestamp = async () => {
+      return (await ethers.provider.getBlock('latest'))!.timestamp;
+    };
+
     // Mint 100 of each catalyst to lazyMintingCatSeller
     for (let i = 1; i <= 5; i++) {
       await CatalystContractAsAdmin.mint(
@@ -95,6 +99,7 @@ const setupAssetCreateTests = deployments.createFixture(
       user: lazyMintingTestAccount1,
       userSigner,
       creator: lazyMintingTestAccount2,
+      getCurrentTimestamp,
     };
   }
 );

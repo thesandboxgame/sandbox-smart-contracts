@@ -18,6 +18,7 @@ export type LazyMintData = {
   metadataHash: string;
   maxSupply: bigint;
   creator: string;
+  expirationTime: bigint;
 };
 
 export type LazyMintBatchData = {
@@ -29,6 +30,7 @@ export type LazyMintBatchData = {
   metadataHashes: string[];
   maxSupplies: bigint[];
   creators: string[];
+  expirationTime: bigint;
 };
 
 export type Order = {
@@ -213,6 +215,7 @@ export const createLazyMintSignature = async (
     metadataHash,
     maxSupply,
     creator,
+    expirationTime,
   } = data;
   const nonce = await AssetCreateContract.signatureNonces(caller);
 
@@ -232,6 +235,7 @@ export const createLazyMintSignature = async (
         {name: 'paymentToken', type: 'address'},
         {name: 'metadataHash', type: 'string'},
         {name: 'maxSupply', type: 'uint256'},
+        {name: 'expirationTime', type: 'uint256'},
       ],
     },
     domain: {
@@ -250,6 +254,7 @@ export const createLazyMintSignature = async (
       paymentToken,
       metadataHash,
       maxSupply,
+      expirationTime,
     },
   };
 
@@ -275,6 +280,7 @@ export const createMultipleLazyMintSignature = async (
     paymentTokens,
     metadataHashes,
     maxSupplies,
+    expirationTime,
   } = data;
   const nonce = await AssetCreateContract.signatureNonces(caller);
   const backendAuthWallet = new ethers.Wallet(
@@ -293,6 +299,7 @@ export const createMultipleLazyMintSignature = async (
         {name: 'paymentTokens', type: 'address[]'},
         {name: 'metadataHashes', type: 'string[]'},
         {name: 'maxSupplies', type: 'uint256[]'},
+        {name: 'expirationTime', type: 'uint256'},
       ],
     },
     domain: {
@@ -311,6 +318,7 @@ export const createMultipleLazyMintSignature = async (
       paymentTokens,
       metadataHashes,
       maxSupplies,
+      expirationTime,
     },
   };
 

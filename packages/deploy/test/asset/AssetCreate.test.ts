@@ -120,6 +120,7 @@ describe('Asset Create', function () {
         createSingleLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintData = {
@@ -131,6 +132,7 @@ describe('Asset Create', function () {
         metadataHash: '0x',
         maxSupply: BigInt(1),
         creator,
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createSingleLazyMintSignature(mintData);
@@ -162,6 +164,7 @@ describe('Asset Create', function () {
         createSingleLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintData = {
@@ -173,6 +176,7 @@ describe('Asset Create', function () {
         metadataHash: '0x',
         maxSupply: BigInt(1),
         creator,
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       // Mint catalysts to user
@@ -205,6 +209,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintData = {
@@ -216,6 +221,7 @@ describe('Asset Create', function () {
         metadataHash: '0x',
         maxSupply: BigInt(10),
         creator,
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createSingleLazyMintSignature(mintData);
@@ -266,6 +272,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintData = {
@@ -277,6 +284,7 @@ describe('Asset Create', function () {
         metadataHash: '0x',
         maxSupply: BigInt(10),
         creator,
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createSingleLazyMintSignature(mintData);
@@ -322,6 +330,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -333,6 +342,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x'],
         maxSupplies: [BigInt(1)],
         creators: [creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -375,6 +385,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -386,6 +397,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x'],
         maxSupplies: [BigInt(1)],
         creators: [creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       // Mint catalysts to user
@@ -430,6 +442,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -441,6 +454,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x'],
         maxSupplies: [BigInt(10)],
         creators: [creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -492,6 +506,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -503,6 +518,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x'],
         maxSupplies: [BigInt(10)],
         creators: [creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -549,6 +565,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -564,6 +581,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x1', '0x2', '0x3'],
         maxSupplies: [BigInt(1), BigInt(1), BigInt(1)],
         creators: [creator, creator, creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -606,6 +624,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -621,6 +640,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x1', '0x2', '0x3'],
         maxSupplies: [BigInt(1), BigInt(1), BigInt(1)],
         creators: [creator, creator, creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       // Mint catalysts to user
@@ -665,6 +685,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const mintData: LazyMintBatchData = {
@@ -680,6 +701,7 @@ describe('Asset Create', function () {
         metadataHashes: ['0x1', '0x2', '0x3'],
         maxSupplies: [BigInt(10), BigInt(10), BigInt(10)],
         creators: [creator, creator, creator],
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -732,6 +754,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const randomHashes = Array(10)
@@ -747,6 +770,7 @@ describe('Asset Create', function () {
         metadataHashes: randomHashes,
         maxSupplies: Array(10).fill(BigInt(1)),
         creators: Array(10).fill(creator),
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
@@ -789,6 +813,7 @@ describe('Asset Create', function () {
         createBatchLazyMintSignature,
         AssetCreateContract,
         CatalystContractAsAdmin,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const randomHashes = Array(10)
@@ -804,6 +829,7 @@ describe('Asset Create', function () {
         metadataHashes: randomHashes,
         maxSupplies: Array(10).fill(BigInt(1)),
         creators: Array(10).fill(creator),
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       // Mint catalysts to user
@@ -848,6 +874,7 @@ describe('Asset Create', function () {
         ExchangeContract,
         OrderValidatorContract,
         tsbCatSellerSigner,
+        getCurrentTimestamp,
       } = await setupAssetCreateTests();
 
       const randomHashes = Array(10)
@@ -863,6 +890,7 @@ describe('Asset Create', function () {
         metadataHashes: randomHashes,
         maxSupplies: Array(10).fill(BigInt(10)),
         creators: Array(10).fill(creator),
+        expirationTime: BigInt(await getCurrentTimestamp()) + 1000n,
       };
 
       const signature = await createBatchLazyMintSignature(mintData);
