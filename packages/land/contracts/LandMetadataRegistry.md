@@ -64,6 +64,77 @@ Neighborhood name is stored in the following mapping:
 `mapping(uint256 => string) neighborhoodName` it maps from neighborhood number
 (1 - 127) to name.
 
+# Updating the metadata
+
+To update the metadata for a single tokenId the admin can call one of the
+following methods:
+
+- `setPremium(uint256 tokenId, bool premium)`
+- `setNeighborhoodId(uint256 tokenId, uint256 newNeighborhoodId)`
+- `setMetadata(uint256 tokenId, bool premium, uint256 newNeighborhoodId)`
+
+To update the metadata during an initial import or for a quad (see:
+[Land](../Land.md)) the admin must:
+
+1. Call `batchGetMetadata` to get the old raw internal representation of the
+   metadata in EVM words ( see: [Implementation](#implementation) ).
+2. Calculate the new raw EVM words by changing only the right bytes of metadata
+   that needs to be updated, taking into account that each EVM word contains
+   metadata for 32 tokens.
+3. Call `batchSetMetadata` to overwrite the metadata.
+
+The `updateMetadata` function in the following script is an example on how to do
+that:
+
+```typescript
+type Metadata = {
+  tokenId: bigint;
+  isPremium: boolean;
+  neighborhoodId: bigint;
+};
+
+function updateMetadataWord(metadata: bigint, batchData: Metadata[]): bigint {
+  for (const m of batchData) {
+    const bits = (m.tokenId % 32n) * 8n;
+    const mask = ~(0xffn << bits);
+    metadata =
+      (metadata & mask) |
+      ((m.neighborhoodId | (m.isPremium ? 0x80n : 0n)) << bits);
+  }
+  return metadata;
+}
+
+async function updateMetadata(
+  registryAsAdmin: Contract,
+  metadata: Metadata[],
+): Promise<void> {
+  const batchData = {};
+  for (const m of metadata) {
+    const baseTokenId = 32n * (m.tokenId / 32n);
+    if (!batchData[baseTokenId]) {
+      batchData[baseTokenId] = [];
+    }
+    batchData[baseTokenId].push(m);
+  }
+  const batchBaseTokenIds = Object.keys(batchData);
+  const numBatchesPerTx = 408 * 2; // 19.7Mgas (max is 1223, 29530015n gas)
+  for (let i = 0; i < batchBaseTokenIds.length; i += numBatchesPerTx) {
+    const tokenIds = batchBaseTokenIds.slice(i, i + numBatchesPerTx);
+    // get the old data from the contract, we can use zero[] if it is the first time or we don't care about the old data
+    const oldData = await registryAsAdmin.batchGetMetadata(tokenIds);
+    const newData = [];
+    for (const [baseTokenId, metadataWord]: [bigint, bigint] of oldData) {
+      newData.push({
+        baseTokenId,
+        metadata: updateMetadataWord(metadataWord, batchData[baseTokenId]),
+      });
+    }
+    // update the metadata in the contract
+    await registryAsAdmin.batchSetMetadata(newData);
+  }
+}
+```
+
 # Methods
 
 ### BITS_PER_LAND
