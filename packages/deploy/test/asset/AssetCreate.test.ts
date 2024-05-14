@@ -111,6 +111,39 @@ describe('Asset Create', function () {
         treasury
       );
     });
+    it('reverts when signature is expired', async function () {
+      const {
+        user,
+        creator,
+        SandContract,
+        createSingleLazyMintSignature,
+        AssetCreateContract,
+        getCurrentTimestamp,
+      } = await setupAssetCreateTests();
+
+      const mintData: LazyMintData = {
+        caller: user,
+        tier: BigInt(2),
+        amount: BigInt(1),
+        unitPrice: BigInt(1),
+        paymentToken: await SandContract.getAddress(),
+        metadataHash: '0x',
+        maxSupply: BigInt(1),
+        creator,
+        expirationTime: BigInt(await getCurrentTimestamp()) - 1000n,
+      };
+
+      const signature = await createSingleLazyMintSignature(mintData);
+
+      await expect(
+        AssetCreateContract.lazyCreateAsset(
+          user,
+          signature,
+          [...Object.values(mintData)],
+          []
+        )
+      ).to.be.revertedWith('AuthSuperValidator: Signature expired');
+    });
     it('allows users to lazy mint when they have all necessary catalysts - direct', async function () {
       const {
         user,
