@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {expect} from 'chai';
 import runSetup from './fixtures/authValidatorFixture';
 
-describe.only('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)', function () {
+describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)', function () {
   describe('General', function () {
     it('should assign DEFAULT_ADMIN_ROLE to the admin address from the constructor', async function () {
       const {authValidatorAdmin, AuthValidatorContract} = await runSetup();
