@@ -48,7 +48,11 @@ contract AuthSuperValidator is AccessControl {
     /// @param signature Signature hash
     /// @param digest Digest hash
     /// @return bool
-    function verify(bytes memory signature, bytes32 digest, uint256 expirationTime) public view returns (bool) {
+    function verify(
+        bytes memory signature,
+        bytes32 digest,
+        uint256 expirationTime
+    ) public view returns (bool) {
         require(block.timestamp <= expirationTime, "AuthSuperValidator: Expired");
         return verify(signature, digest);
     }
