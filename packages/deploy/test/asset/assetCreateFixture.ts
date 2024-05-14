@@ -57,7 +57,7 @@ const setupAssetCreateTests = deployments.createFixture(
     );
 
     const getCurrentTimestamp = async () => {
-      return (await ethers.provider.getBlock('latest'))!.timestamp;
+      return (await ethers.provider.getBlock('latest'))?.timestamp || 0;
     };
 
     // Mint 100 of each catalyst to lazyMintingCatSeller

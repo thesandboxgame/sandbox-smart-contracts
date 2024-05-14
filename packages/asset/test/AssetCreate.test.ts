@@ -3859,7 +3859,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           AssetCreateContractAsUser,
           getCurrentBlockTimestamp,
-          sampleExchangeOrderData,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4773,7 +4772,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           unitPrices: assets.map((a) => a.sandPrice),
           paymentTokens: assets.map(() => MockERC20Contract.address),
           metadataHashes: assets.map((a) => a.metadataHash),
-          maxSupplies: assets.map((a) => 10),
+          maxSupplies: assets.map(() => 10),
           creators: assets.map((a) => a.creator),
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
