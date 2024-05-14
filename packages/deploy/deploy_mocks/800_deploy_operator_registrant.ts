@@ -7,8 +7,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
-  const OperatorFilterSubscription = await deploy(
-    'PolygonOperatorFilterSubscription',
+  const OperatorFilterLandSubscription = await deploy(
+    'OperatorFilterLandSubscription',
     {
       from: deployer,
       contract:
@@ -27,29 +27,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   );
 
-  const isRegistered = await deployments.read(
-    'PolygonOperatorFilterRegistry',
-    'isRegistered',
-    OperatorFilterSubscription.address
+  const defaultSubscription = await deployments.read(
+    'OperatorFilterLandSubscription',
+    'DEFAULT_SUBSCRIPTION'
   );
-
-  if (!isRegistered) {
-    const defaultSubscription = await deployments.read(
-      'PolygonOperatorFilterSubscription',
-      'DEFAULT_SUBSCRIPTION'
-    );
-    await deployments.execute(
-      'PolygonOperatorFilterRegistry',
-      {from: deployer},
-      'registerAndCopyEntries',
-      OperatorFilterSubscription.address,
-      defaultSubscription
-    );
-  }
+  await deployments.execute(
+    'OperatorFilterRegistry',
+    {from: deployer},
+    'registerAndCopyEntries',
+    OperatorFilterLandSubscription.address,
+    defaultSubscription
+  );
 };
 export default func;
 func.tags = [
-  'PolygonOperatorFilterSubscription',
-  'PolygonOperatorFilterSubscription_deploy',
+  'OperatorFilterLandSubscription',
+  'OperatorFilterLandSubscription_deploy',
 ];
-func.dependencies = ['PolygonOperatorFilterRegistry'];
+func.dependencies = ['OperatorFilterRegistry'];
