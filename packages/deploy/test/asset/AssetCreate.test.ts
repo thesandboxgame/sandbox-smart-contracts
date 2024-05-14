@@ -142,7 +142,7 @@ describe('Asset Create', function () {
           [...Object.values(mintData)],
           []
         )
-      ).to.be.revertedWith('AuthSuperValidator: Signature expired');
+      ).to.be.revertedWith('AuthSuperValidator: Expired');
     });
     it('allows users to lazy mint when they have all necessary catalysts - direct', async function () {
       const {
