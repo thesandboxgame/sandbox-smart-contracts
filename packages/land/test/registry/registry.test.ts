@@ -8,6 +8,7 @@ import {
   updateMetadata,
 } from './fixtures';
 import {getStorageSlotJS} from '../fixtures';
+import {keccak256, Wallet} from 'ethers';
 
 const tokenId = 23n + 97n * 408n;
 const neighborhoodId = 37n;
@@ -128,6 +129,64 @@ describe('LandMetadataRegistry', function () {
       await expect(
         registryAsOther.setNeighborhoodName(neighborhoodId, neighborhoodName),
       ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
+    });
+
+    it('admin should be able to batch set neighborhood name', async function () {
+      const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
+      expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
+        'unknown',
+      );
+      const data = [
+        {
+          neighborhoodId,
+          name: neighborhoodName,
+        },
+      ];
+      await expect(registryAsAdmin.batchSetNeighborhoodName(data))
+        .to.emit(registryAsAdmin, 'NeighborhoodNameSet')
+        .withArgs(admin, neighborhoodId, neighborhoodName);
+      await registryAsAdmin.setNeighborhoodId(tokenId, neighborhoodId);
+      expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
+        neighborhoodName,
+      );
+      expect(await registryAsAdmin.getMetadata(tokenId)).to.be.eql([
+        false,
+        neighborhoodId,
+        neighborhoodName,
+      ]);
+      expect(
+        await registryAsAdmin.getNeighborhoodNameForId(neighborhoodId),
+      ).to.be.equal(neighborhoodName);
+    });
+
+    it('other should fail to batch set neighborhood name', async function () {
+      const {registryAsOther} = await loadFixture(setupRegistry);
+      const data = [
+        {
+          neighborhoodId,
+          name: neighborhoodName,
+        },
+      ];
+      await expect(
+        registryAsOther.batchSetNeighborhoodName(data),
+      ).to.revertedWithCustomError(registryAsOther, 'OnlyAdmin');
+    });
+
+    it('admin should be able to batch upload all the possible names at once', async function () {
+      const {registryAsAdmin} = await loadFixture(setupRegistry);
+      expect(await registryAsAdmin.getNeighborhoodName(tokenId)).to.be.equal(
+        'unknown',
+      );
+      const data = [];
+      for (let i = 0; i < 126; i++) {
+        data.push({
+          neighborhoodId: i + 1,
+          name: keccak256(await Wallet.createRandom().getAddress()),
+        });
+      }
+      const tx = await registryAsAdmin.batchSetNeighborhoodName(data);
+      const receipt = await tx.wait();
+      expect(receipt.cumulativeGasUsed).to.be.lt(13_000_000n);
     });
 
     it('admin should fail to set neighborhood name if the neighborhood number is invalid', async function () {

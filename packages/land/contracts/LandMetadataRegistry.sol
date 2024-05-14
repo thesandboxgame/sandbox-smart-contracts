@@ -19,6 +19,13 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
     /// @param neighborhoodId the invalid neighborhoodId
     error InvalidNeighborhoodId(uint256 neighborhoodId);
 
+    struct BatchSetNameData {
+        // the number that identifies the neighborhood
+        uint256 neighborhoodId;
+        // the name of the neighborhood
+        string name;
+    }
+
     struct BatchSetData {
         // baseTokenId the token id floor 32
         uint256 baseTokenId;
@@ -113,6 +120,17 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
         _isValidNeighborhoodId(neighborhoodId);
         _setNeighborhoodName(neighborhoodId, name);
         emit NeighborhoodNameSet(_msgSender(), neighborhoodId, name);
+    }
+
+    /// @notice set neighborhood name in batch
+    /// @param data array of neighborhood ids and names to set
+    function batchSetNeighborhoodName(BatchSetNameData[] calldata data) external onlyAdmin {
+        uint256 len = data.length;
+        for (uint256 i; i < len; i++) {
+            _isValidNeighborhoodId(data[i].neighborhoodId);
+            _setNeighborhoodName(data[i].neighborhoodId, data[i].name);
+            emit NeighborhoodNameSet(_msgSender(), data[i].neighborhoodId, data[i].name);
+        }
     }
 
     /// @notice set the metadata for 32 lands at the same time in batch
