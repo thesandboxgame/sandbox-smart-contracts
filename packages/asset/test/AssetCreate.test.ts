@@ -1,11 +1,9 @@
 import {expect} from 'chai';
 import {BigNumber, Event, ethers} from 'ethers';
-import {
-  LazyMintBatchData,
-  runCreateTestSetup,
-} from './fixtures/asset/assetCreateFixtures';
+import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 import {network} from 'hardhat';
 import {parseEther} from 'ethers/lib/utils';
+import {LazyMintBatchData, LazyMintData} from './utils/createSignature';
 
 describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
   describe('General', function () {
@@ -1587,6 +1585,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveAndCall,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const tier = 4;
@@ -1596,29 +1595,24 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -1640,6 +1634,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           AssetContract,
           AssetCreateContract,
           extractTokenIdFromEventData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -1648,30 +1643,25 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
         const approveAmount = sandPrice.mul(amount);
 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -1706,6 +1696,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           AssetContract,
           AssetCreateContract,
           extractTokenIdFromEventData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const tier = 4;
@@ -1715,63 +1706,36 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount * 2, user.address);
 
-        const firstSignature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const firstSignature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
 
         await approveAndCall(user, approveAmount, 'lazyCreateAsset', [
           user.address,
           firstSignature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           [],
         ]);
 
-        const secondSignature = await generateLazyMintSignature(
-          creator.address,
-          tier,
-          amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+        const secondSignature = await generateLazyMintSignature(mintData);
 
         const result = await approveAndCall(
           user,
           approveAmount,
           'lazyCreateAsset',
-          [
-            user.address,
-            secondSignature,
-            [
-              user.address,
-              tier,
-              amount,
-              sandPrice,
-              MockERC20Contract.address,
-              metadataHashes[0],
-              maxSupply,
-              creator.address,
-            ],
-            [],
-          ]
+          [user.address, secondSignature, Object.values(mintData), []]
         );
 
         const lazyMintEvent = result.events.filter(
@@ -1794,21 +1758,26 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           AssetCreateContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const creatorBalanceBefore = await MockERC20Contract.balanceOf(
           creator.address
@@ -1819,16 +1788,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -1858,21 +1818,25 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           AssetCreateContract,
           treasury,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const tsbTreasuryBalanceBefore = await MockERC20Contract.balanceOf(
           treasury.address
@@ -1883,16 +1847,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -1919,6 +1874,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           AssetCreateContractAsAdmin,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         await AssetCreateContractAsAdmin.setLazyMintFee(0);
         const tier = 4;
@@ -1926,15 +1882,18 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const creatorBalanceBefore = await MockERC20Contract.balanceOf(
           creator.address
@@ -1945,16 +1904,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -1979,21 +1929,25 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           CatalystContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const catalystBalanceBefore = await CatalystContract.balanceOf(
           user.address,
@@ -2005,16 +1959,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -2040,21 +1985,25 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const nonceBefore = await AssetCreateContractAsUser.signatureNonces(
           user.address
@@ -2065,16 +2014,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -2097,6 +2037,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2105,15 +2046,19 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
 
@@ -2122,16 +2067,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -2157,6 +2093,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           approveSandForExchange,
           CatalystContract,
           sampleExchangeOrderData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 3;
@@ -2164,15 +2101,18 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, 1, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -2181,16 +2121,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateAsset', [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           sampleExchangeOrderData,
         ]);
@@ -2213,21 +2144,26 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           approveSandForExchange,
           CatalystContract,
           sampleExchangeOrderData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 2;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -2236,16 +2172,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateAsset', [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           // empty match orders data
           sampleExchangeOrderData,
         ]);
@@ -2269,6 +2196,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           approveSandForExchange,
           CatalystContract,
           sampleExchangeOrderData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 2;
@@ -2276,15 +2204,20 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-        const signature = await generateLazyMintSignature(
-          creator.address,
+
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -2293,16 +2226,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateAsset', [
           user.address,
           signature,
-          [
-            user.address,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-          ],
+          Object.values(mintData),
           sampleExchangeOrderData,
         ]);
 
@@ -2316,7 +2240,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
     describe('Revert', function () {
-      it('should revert if mintData.caller is different than from address', async function () {
+      it('should revert if mintData.caller is different than "from" address', async function () {
         const {
           mintCatalyst,
           generateLazyMintSignature,
@@ -2324,8 +2248,53 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
+          AssetCreateContractAsUser,
+        } = await runCreateTestSetup();
+        const tier = 4;
+        const amount = 1;
+        const sandPrice = parseEther('0.1');
+        const maxSupply = 10;
+
+        await mintCatalyst(tier, amount, user.address);
+        const mintData: LazyMintData = {
+          caller: user.address,
+          tier,
+          amount,
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
+
+        const approveAmount = sandPrice.mul(amount);
+        await approveSandForAssetCreate(user, approveAmount);
+
+        await expect(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            creator.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid caller');
+      });
+      it('should not allow lazy minting if the signature has expired', async function () {
+        const {
+          mintCatalyst,
+          generateLazyMintSignature,
+          metadataHashes,
+          creator,
+          user,
+          MockERC20Contract,
+          AssetCreateContractAsUser,
+          approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2334,34 +2303,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) - 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-            user,
-            // wrong from address
-            creator.address
+            Object.values(mintData),
+            []
           )
-        ).to.be.revertedWith('AssetCreate: Invalid caller');
+        ).to.be.revertedWith('AuthSuperValidator: Signature expired');
       });
       it('should not allow minting with invalid signature - invalid tier', async function () {
         const {
@@ -2371,8 +2337,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2380,30 +2347,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, tier: 5};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            5,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2415,8 +2383,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2424,30 +2393,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, amount: 2};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            2,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2459,8 +2429,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2468,30 +2439,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, unitPrice: parseEther('0.001')};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            parseEther('0.2'),
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2503,8 +2475,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2512,30 +2485,30 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, maxSupply: 500};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            5,
-            creator.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2547,8 +2520,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2556,30 +2530,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, metadataHash: '0x0'};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[1],
-            maxSupply,
-            creator.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2591,8 +2566,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2600,30 +2576,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, paymentToken: user.address};
+
         await expect(
-          lazyMintAsset(
-            signature,
-            tier,
-            amount,
-            sandPrice,
+          AssetCreateContractAsUser.lazyCreateAsset(
             user.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            signature,
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2633,10 +2610,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           generateLazyMintSignature,
           metadataHashes,
           creator,
+          secondCreator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2644,30 +2623,30 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
+        const changedMintData = {...mintData, creator: secondCreator.address};
+
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            user.address
+            Object.values(changedMintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2679,8 +2658,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2688,41 +2668,36 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
-        await lazyMintAsset(
+        await AssetCreateContractAsUser.lazyCreateAsset(
+          user.address,
           signature,
-          tier,
-          amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply,
-          creator.address
+          Object.values(mintData),
+          []
         );
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Invalid signature');
       });
@@ -2734,8 +2709,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 11;
@@ -2743,30 +2719,29 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Max supply exceeded');
       });
@@ -2778,8 +2753,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 5;
@@ -2787,51 +2763,38 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 9;
 
         await mintCatalyst(tier, amount * 2, user.address);
-
-        const firstSignature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const firstSignature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
-        await lazyMintAsset(
+        await AssetCreateContractAsUser.lazyCreateAsset(
+          user.address,
           firstSignature,
-          tier,
-          amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply,
-          creator.address
+          Object.values(mintData),
+          []
         );
 
-        const secondSignature = await generateLazyMintSignature(
-          creator.address,
-          tier,
-          amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+        const secondSignature = await generateLazyMintSignature(mintData);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             secondSignature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
         ).to.be.revertedWith('AssetCreate: Max supply reached');
       });
@@ -2843,8 +2806,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2852,30 +2816,29 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const maxSupply = 10;
 
         await mintCatalyst(tier, amount, user.address);
-
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
@@ -2887,7 +2850,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -2896,26 +2860,26 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
         ).to.be.revertedWith('ERC20: insufficient allowance');
       });
@@ -2926,40 +2890,38 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           approveSandForAssetCreate,
           sampleExchangeOrderData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address,
-            undefined,
-            undefined,
+            Object.values(mintData),
             sampleExchangeOrderData
           )
         ).to.be.revertedWith('ERC20: insufficient allowance');
@@ -2969,41 +2931,45 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           generateLazyMintSignature,
           metadataHashes,
           creator,
+          user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           mintCatalyst,
           approveSandForExchange,
+          approveSandForAssetCreate,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
         const sandPrice = parseEther('0.1');
         const maxSupply = 10;
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         // mint some catalysts to other user
         await mintCatalyst(tier, amount, creator.address);
 
-        await approveSandForExchange(creator, parseEther('10'));
+        await approveSandForExchange(user, parseEther('10'));
+        await approveSandForAssetCreate(user, parseEther('10'));
 
         await expect(
-          lazyMintAsset(
+          AssetCreateContractAsUser.lazyCreateAsset(
+            user.address,
             signature,
-            tier,
-            amount,
-            sandPrice,
-            MockERC20Contract.address,
-            metadataHashes[0],
-            maxSupply,
-            creator.address
+            Object.values(mintData),
+            []
           )
           // Fails to burn catalysts
         ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
@@ -3018,10 +2984,11 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
           AssetContract,
           approveSandForAssetCreate,
           extractTokenIdFromEventData,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
         const tier = 4;
         const amount = 1;
@@ -3030,29 +2997,31 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await mintCatalyst(tier, amount, user.address);
 
-        const signature = await generateLazyMintSignature(
-          creator.address,
+        const mintData: LazyMintData = {
+          caller: user.address,
           tier,
           amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply
-        );
+          unitPrice: sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: metadataHashes[0],
+          maxSupply,
+          creator: creator.address,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
+
+        const signature = await generateLazyMintSignature(mintData);
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
 
-        const result = await lazyMintAsset(
+        const tx = await AssetCreateContractAsUser.lazyCreateAsset(
+          user.address,
           signature,
-          tier,
-          amount,
-          sandPrice,
-          MockERC20Contract.address,
-          metadataHashes[0],
-          maxSupply,
-          creator.address
+          Object.values(mintData),
+          []
         );
+
+        const result = await tx.wait();
 
         const lazyMintEvent = result.events.filter(
           (e: Event) => e.event == 'AssetLazyMinted'
@@ -3097,6 +3066,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveAndCall,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3119,15 +3089,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          [creator.address, creator.address],
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3136,7 +3108,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -3163,6 +3135,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           approveAndCall,
           AssetContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3185,15 +3158,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          [creator.address, creator.address],
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3202,7 +3177,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -3241,7 +3216,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           approveAndCall,
           AssetContract,
           approveSandForAssetCreate,
-          lazyMintAsset,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3264,26 +3240,27 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         // lazy mint the seconds asset once
         await mintCatalyst(asset2.tier, asset2.amount, user.address);
+        const singleMintData: LazyMintData = {
+          caller: user.address,
+          tier: asset2.tier,
+          amount: asset2.amount,
+          unitPrice: asset2.sandPrice,
+          paymentToken: MockERC20Contract.address,
+          metadataHash: asset2.metadataHash,
+          maxSupply: asset2.maxSupply,
+          creator: asset2.creator,
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
         await approveSandForAssetCreate(user, asset2.sandPrice);
         const singleMintSignature = await generateLazyMintSignature(
-          asset2.creator,
-          asset2.tier,
-          asset2.amount,
-          asset2.sandPrice,
-          MockERC20Contract.address,
-          asset2.metadataHash,
-          asset2.maxSupply
+          singleMintData
         );
 
-        await lazyMintAsset(
+        await AssetCreateContractAsUser.lazyCreateAsset(
+          user.address,
           singleMintSignature,
-          asset2.tier,
-          asset2.amount,
-          asset2.sandPrice,
-          MockERC20Contract.address,
-          asset2.metadataHash,
-          asset2.maxSupply,
-          creator.address
+          Object.values(singleMintData),
+          []
         );
 
         const assets = [asset1, asset2];
@@ -3292,15 +3269,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((a) => a.metadataHash),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3309,7 +3288,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         const data = [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ];
@@ -3348,6 +3327,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           approveAndCall,
           AssetContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3374,15 +3354,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount * 2, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((a) => a.metadataHash),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature1 = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3395,7 +3377,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature1,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3407,7 +3389,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature2,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3432,7 +3414,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
           AssetContract,
           sampleExchangeOrderData,
         } = await runCreateTestSetup();
@@ -3461,15 +3444,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         // approve enough sand for the exchange
         await approveSandForExchange(user, parseEther('10'));
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3481,10 +3466,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
         await approveSandForAssetCreate(user, approveAmount);
 
-        await lazyMintMultipleAssets(user.address, signature, mintData, user, [
-          sampleExchangeOrderData,
-          [],
-        ]);
+        await AssetCreateContractAsUser.lazyCreateMultipleAssets(
+          user.address,
+          signature,
+          Object.values(mintData),
+          [sampleExchangeOrderData]
+        );
 
         for (const asset of assets) {
           const tokenId = await AssetContract.getTokenIdByMetadataHash(
@@ -3504,6 +3491,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           approveAndCall,
           AssetCreateContract,
           treasury,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3527,15 +3515,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         for (const asset of assets) {
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3556,7 +3546,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3597,6 +3587,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           AssetCreateContract,
           AssetCreateContractAsAdmin,
           treasury,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         await AssetCreateContractAsAdmin.setLazyMintFee(0);
@@ -3623,15 +3614,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3652,7 +3645,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3698,6 +3691,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           approveAndCall,
           CatalystContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3722,15 +3716,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3754,7 +3750,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3787,6 +3783,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           MockERC20Contract,
           approveAndCall,
           AssetCreateContract,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3811,16 +3808,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
-
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
         );
@@ -3837,7 +3835,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveAndCall(user, approveAmount, 'lazyCreateMultipleAssets', [
           user.address,
           signature,
-          [user.address, ...mintData],
+          Object.values(mintData),
           // empty match orders data
           [],
         ]);
@@ -3859,7 +3857,9 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
+          sampleExchangeOrderData,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3885,15 +3885,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         // mint cats to other user for more realistic scenario
         await mintCatalyst(assets[1].tier, assets[1].amount, creator.address);
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3907,10 +3909,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('ERC1155: burn amount exceeds balance');
       });
       it('should rever if the mintData.caller is different than from address', async function () {
@@ -3922,7 +3926,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -3947,15 +3952,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -3969,10 +3976,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(creator.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            creator.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: Invalid caller');
       });
       it('should revert if creators array has incorrect length', async function () {
@@ -3984,7 +3993,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4007,15 +4017,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          [creator.address],
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4029,10 +4041,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 1-Array lengths');
       });
       it('should revert if amounts array has incorrect length', async function () {
@@ -4044,7 +4058,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4069,15 +4084,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          [1],
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: [1],
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4091,10 +4108,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 2-Array lengths');
       });
       it('should revert if sandPrices array has incorrect length', async function () {
@@ -4106,7 +4125,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4131,15 +4151,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          [parseEther('0.1')],
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: [parseEther('0.1')],
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4153,10 +4175,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 3-Array lengths');
       });
       it('should revert if paymentTokens array has incorrect length', async function () {
@@ -4168,7 +4192,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4193,19 +4218,21 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          [
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: [
             MockERC20Contract.address,
             MockERC20Contract.address,
             MockERC20Contract.address,
           ],
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4219,10 +4246,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 4-Array lengths');
       });
       it('should revert if metadataHashes array has incorrect length', async function () {
@@ -4234,7 +4263,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4259,15 +4289,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          [metadataHashes[0]],
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: [metadataHashes[0]],
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4281,10 +4313,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 5-Array lengths');
       });
       it('should revert if maxSupplies array has incorrect length', async function () {
@@ -4296,7 +4330,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4319,15 +4354,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          [10],
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: [10, 10, 10],
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4341,10 +4378,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: 6-Array lengths');
       });
       it('should revert if any of the tokens exceed the max supply, initial mint', async function () {
@@ -4356,7 +4395,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4381,15 +4421,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address, creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4403,10 +4445,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: Max supply exceeded');
       });
       it('should revert if any of the tokens exceed the max supply, secondary mint', async function () {
@@ -4418,7 +4462,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
         } = await runCreateTestSetup();
 
         const asset1 = {
@@ -4435,15 +4480,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map((a) => a.maxSupply),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map((a) => a.maxSupply),
+          creators: [creator.address],
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const approveAmount = assets.reduce(
           (acc, a) => acc.add(a.sandPrice.mul(a.amount)),
@@ -4456,19 +4503,23 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintData
         );
 
-        await lazyMintMultipleAssets(user.address, signature1, mintData, user, [
-          [],
-          [],
-        ]);
+        await AssetCreateContractAsUser.lazyCreateMultipleAssets(
+          user.address,
+          signature1,
+          Object.values(mintData),
+          []
+        );
         const signature2 = await generateLazyMintMultipleAssetsSignature(
           mintData
         );
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature2, mintData, user, [
-            [],
-            [],
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature2,
+            Object.values(mintData),
+            []
+          )
         ).to.be.revertedWith('AssetCreate: Max supply reached');
       });
       it('should revert when Exchange contract has not been approved for the correct amount of sand', async function () {
@@ -4480,7 +4531,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
           sampleExchangeOrderData,
         } = await runCreateTestSetup();
 
@@ -4504,15 +4556,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount - 2, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map(() => 10),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map(() => 10),
+          creators: assets.map((a) => a.creator),
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4525,10 +4579,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForAssetCreate(user, approveAmount);
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            sampleExchangeOrderData,
-            sampleExchangeOrderData,
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            [sampleExchangeOrderData, sampleExchangeOrderData]
+          )
         ).to.be.revertedWith('ERC20: insufficient allowance');
       });
       it("should revert if the user doesn't have enough sand to purchase Catalysts", async function () {
@@ -4541,7 +4597,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
           sampleExchangeOrderData,
         } = await runCreateTestSetup();
 
@@ -4565,15 +4622,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount - 2, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map(() => 10),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map(() => 10),
+          creators: assets.map((a) => a.creator),
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4594,10 +4653,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         await approveSandForExchange(user, parseEther('10'));
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            sampleExchangeOrderData,
-            sampleExchangeOrderData,
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            [sampleExchangeOrderData, sampleExchangeOrderData]
+          )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
       it("should revert if the user doesn't have enough sand to pay the creator", async function () {
@@ -4610,7 +4671,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user,
           MockERC20Contract,
           approveSandForAssetCreate,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
           sampleExchangeOrderData,
         } = await runCreateTestSetup();
 
@@ -4627,15 +4689,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount - 2, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((_, i) => metadataHashes[i]),
-          assets.map(() => 10),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((_, i) => metadataHashes[i]),
+          maxSupplies: assets.map(() => 10),
+          creators: assets.map((a) => a.creator),
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4656,10 +4720,12 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
 
         await expect(
-          lazyMintMultipleAssets(user.address, signature, mintData, user, [
-            sampleExchangeOrderData,
-            sampleExchangeOrderData,
-          ])
+          AssetCreateContractAsUser.lazyCreateMultipleAssets(
+            user.address,
+            signature,
+            Object.values(mintData),
+            [sampleExchangeOrderData]
+          )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
     });
@@ -4673,7 +4739,8 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator,
           user,
           MockERC20Contract,
-          lazyMintMultipleAssets,
+          AssetCreateContractAsUser,
+          getCurrentBlockTimestamp,
           AssetContract,
         } = await runCreateTestSetup();
 
@@ -4699,15 +4766,17 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           await mintCatalyst(asset.tier, asset.amount, user.address);
         }
 
-        const mintData: LazyMintBatchData = [
-          assets.map((a) => a.tier),
-          assets.map((a) => a.amount),
-          assets.map((a) => a.sandPrice),
-          assets.map(() => MockERC20Contract.address),
-          assets.map((a) => a.metadataHash),
-          assets.map(() => 10),
-          assets.map((a) => a.creator),
-        ];
+        const mintData: LazyMintBatchData = {
+          caller: user.address,
+          tiers: assets.map((a) => a.tier),
+          amounts: assets.map((a) => a.amount),
+          unitPrices: assets.map((a) => a.sandPrice),
+          paymentTokens: assets.map(() => MockERC20Contract.address),
+          metadataHashes: assets.map((a) => a.metadataHash),
+          maxSupplies: assets.map((a) => 10),
+          creators: assets.map((a) => a.creator),
+          expirationTime: (await getCurrentBlockTimestamp()) + 1000,
+        };
 
         const signature = await generateLazyMintMultipleAssetsSignature(
           mintData
@@ -4720,13 +4789,13 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
 
         await approveSandForAssetCreate(user, approveAmount);
 
-        const tx = await lazyMintMultipleAssets(
+        const tx = await AssetCreateContractAsUser.lazyCreateMultipleAssets(
           user.address,
           signature,
-          mintData,
-          user,
-          [[], []]
+          Object.values(mintData),
+          []
         );
+        const res = await tx.wait();
 
         const tokenId1 = await AssetContract.getTokenIdByMetadataHash(
           metadataHashes[0]
@@ -4735,7 +4804,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           metadataHashes[1]
         );
 
-        const eventData = tx.events.filter(
+        const eventData = res.events.filter(
           (e: Event) => e.event === 'AssetBatchLazyMinted'
         )[0].args;
 

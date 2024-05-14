@@ -70,12 +70,12 @@ contract AssetCreate is
     /// @notice Lazy mint signature typehash
     bytes32 public constant LAZY_MINT_TYPEHASH =
         keccak256(
-            "LazyMint(address caller,address creator,uint16 nonce,uint8 tier,uint256 amount,uint256 unitPrice,address paymentToken,string metadataHash,uint256 maxSupply)"
+            "LazyMint(address caller,address creator,uint16 nonce,uint8 tier,uint256 amount,uint256 unitPrice,address paymentToken,string metadataHash,uint256 maxSupply,uint256 expirationTime)"
         );
     /// @notice Lazy mint batch signature typehash
     bytes32 public constant LAZY_MINT_BATCH_TYPEHASH =
         keccak256(
-            "LazyMintBatch(address caller,address[] creators,uint16 nonce,uint8[] tiers,uint256[] amounts,uint256[] unitPrices,address[] paymentTokens,string[] metadataHashes,uint256[] maxSupplies)"
+            "LazyMintBatch(address caller,address[] creators,uint16 nonce,uint8[] tiers,uint256[] amounts,uint256[] unitPrices,address[] paymentTokens,string[] metadataHashes,uint256[] maxSupplies,uint256 expirationTime)"
         );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -279,8 +279,10 @@ contract AssetCreate is
                     mintData.unitPrice,
                     mintData.paymentToken,
                     mintData.metadataHash,
-                    mintData.maxSupply
-                )
+                    mintData.maxSupply,
+                    mintData.expirationTime
+                ),
+                mintData.expirationTime
             ),
             "AssetCreate: Invalid signature"
         );
@@ -353,8 +355,10 @@ contract AssetCreate is
                     mintData.unitPrices,
                     mintData.paymentTokens,
                     mintData.metadataHashes,
-                    mintData.maxSupplies
-                )
+                    mintData.maxSupplies,
+                    mintData.expirationTime
+                ),
+                mintData.expirationTime
             ),
             "AssetCreate: Invalid signature"
         );
@@ -590,6 +594,7 @@ contract AssetCreate is
     /// @param amount The amount of copies to mint
     /// @param metadataHash The metadata hash of the asset
     /// @param maxSupply The max supply of the asset
+    /// @param expirationTime The expiration timestamp of the signature
     function _hashLazyMint(
         address caller,
         address creator,
@@ -599,7 +604,8 @@ contract AssetCreate is
         uint256 unitPrice,
         address paymentToken,
         string memory metadataHash,
-        uint256 maxSupply
+        uint256 maxSupply,
+        uint256 expirationTime
     ) private view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
             keccak256(
@@ -613,7 +619,8 @@ contract AssetCreate is
                     unitPrice,
                     paymentToken,
                     keccak256((abi.encodePacked(metadataHash))),
-                    maxSupply
+                    maxSupply,
+                    expirationTime
                 )
             )
         );
@@ -628,6 +635,7 @@ contract AssetCreate is
     /// @param paymentTokens The payment tokens of the assets
     /// @param metadataHashes The metadata hashes of the assets
     /// @param maxSupplies The max supplies of the assets
+    /// @param expirationTime The expiration timestamp of the signature
     function _hashLazyBatchMint(
         address caller,
         address[] memory creators,
@@ -637,7 +645,8 @@ contract AssetCreate is
         uint256[] memory unitPrices,
         address[] memory paymentTokens,
         string[] memory metadataHashes,
-        uint256[] memory maxSupplies
+        uint256[] memory maxSupplies,
+        uint256 expirationTime
     ) private view returns (bytes32 digest) {
         digest = _hashTypedDataV4(
             keccak256(
@@ -651,7 +660,8 @@ contract AssetCreate is
                     keccak256(abi.encodePacked(unitPrices)),
                     keccak256(abi.encodePacked(paymentTokens)),
                     _encodeHashes(metadataHashes),
-                    keccak256(abi.encodePacked(maxSupplies))
+                    keccak256(abi.encodePacked(maxSupplies)),
+                    expirationTime
                 )
             )
         );

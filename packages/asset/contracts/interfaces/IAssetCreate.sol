@@ -13,6 +13,7 @@ interface IAssetCreate {
         string metadataHash;
         uint256 maxSupply;
         address creator;
+        uint256 expirationTime;
     }
 
     struct LazyMintBatchData {
@@ -24,6 +25,7 @@ interface IAssetCreate {
         string[] metadataHashes;
         uint256[] maxSupplies;
         address[] creators;
+        uint256 expirationTime;
     }
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
