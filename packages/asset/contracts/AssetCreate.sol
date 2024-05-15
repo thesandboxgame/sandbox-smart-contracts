@@ -296,7 +296,7 @@ contract AssetCreate is
                 mintData.tier,
                 ++creatorNonces[mintData.creator],
                 mintData.tier == 1 ? 1 : 0,
-                true
+                false
             );
             require(mintData.amount <= mintData.maxSupply, "AssetCreate: Max supply exceeded");
             availableToMint[tokenId] = mintData.maxSupply - mintData.amount;
@@ -384,7 +384,7 @@ contract AssetCreate is
                     mintData.tiers[i],
                     ++creatorNonces[mintData.creators[i]],
                     revealed,
-                    true
+                    false
                 );
                 require(mintData.amounts[i] <= mintData.maxSupplies[i], "AssetCreate: Max supply exceeded");
                 availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];
