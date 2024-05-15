@@ -31,6 +31,9 @@
     ]
   },
   "release-it": {
+    "npm": {
+      "versionArgs": "--no-workspaces-update"
+    },
     "git": {
       "commitMessage": "chore: @sandbox-smart-contracts/land release v${version}",
       "tagAnnotation": "@sandbox-smart-contracts/land release v${version}",

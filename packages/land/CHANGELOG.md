@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Land and PolygonLand implemented in the new `land` package
+- A lot of common code reused (see: `LandBase`) and two mixins to support the
+  storage slots specifics
+- Royalties (EIP2981 support
+- Metadata registry support (neighborhood + premiumness on chain)
+- Upgraded solc version to 0.8.23, use custom errors, contract size reduction
+- Pre-audit fixed
+
 ## [0.0.3] - 2024-01-25
 
 ### Added
