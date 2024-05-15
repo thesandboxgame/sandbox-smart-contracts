@@ -3,6 +3,30 @@ import hre from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
+export type LazyMintBatchData = {
+  caller: string;
+  tiers: number[];
+  amounts: number[];
+  unitPrices: BigNumber[];
+  paymentTokens: string[];
+  metadataHashes: string[];
+  maxSupplies: number[];
+  creators: string[];
+  expirationTime: number;
+};
+
+export type LazyMintData = {
+  caller: string;
+  tier: number;
+  amount: number;
+  unitPrice: BigNumber;
+  paymentToken: string;
+  metadataHash: string;
+  maxSupply: number;
+  creator: string;
+  expirationTime: number;
+};
+
 const createAssetMintSignature = async (
   creator: string,
   tier: number,
@@ -153,19 +177,25 @@ const createMockDigest = async (creator: string) => {
 };
 
 const createLazyMintSignature = async (
-  creator: string,
-  tier: number,
-  amount: number,
-  unitPrice: BigNumber,
-  paymentToken: string,
-  metadataHash: string,
-  maxSupply: number,
+  mintData: LazyMintData,
   contract: Contract,
-  signer: SignerWithAddress,
-  txSender: SignerWithAddress
+  signer: SignerWithAddress
 ) => {
   const AssetCreateContract = contract;
-  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
+
+  const {
+    caller,
+    creator,
+    tier,
+    amount,
+    unitPrice,
+    paymentToken,
+    metadataHash,
+    maxSupply,
+    expirationTime,
+  } = mintData;
+
+  const nonce = await AssetCreateContract.signatureNonces(caller);
 
   const data = {
     types: {
@@ -179,6 +209,7 @@ const createLazyMintSignature = async (
         {name: 'paymentToken', type: 'address'},
         {name: 'metadataHash', type: 'string'},
         {name: 'maxSupply', type: 'uint256'},
+        {name: 'expirationTime', type: 'uint256'},
       ],
     },
     domain: {
@@ -187,8 +218,9 @@ const createLazyMintSignature = async (
       chainId: hre.network.config.chainId,
       verifyingContract: AssetCreateContract.address,
     },
+
     message: {
-      caller: txSender.address,
+      caller,
       creator,
       nonce,
       tier,
@@ -197,6 +229,7 @@ const createLazyMintSignature = async (
       paymentToken,
       metadataHash,
       maxSupply,
+      expirationTime,
     },
   };
 
@@ -209,19 +242,23 @@ const createLazyMintSignature = async (
 };
 
 const createLazyMintMultipleAssetsSignature = async (
-  tiers: number[],
-  amounts: number[],
-  unitPrices: BigNumber[],
-  paymentTokens: string[],
-  metadataHashes: string[],
-  maxSupplies: number[],
-  creators: string[],
+  mintData: LazyMintBatchData,
   contract: Contract,
-  signer: SignerWithAddress,
-  txSender: SignerWithAddress
+  signer: SignerWithAddress
 ) => {
   const AssetCreateContract = contract;
-  const nonce = await AssetCreateContract.signatureNonces(txSender.address);
+  const {
+    caller,
+    creators,
+    tiers,
+    amounts,
+    unitPrices,
+    paymentTokens,
+    maxSupplies,
+    metadataHashes,
+    expirationTime,
+  } = mintData;
+  const nonce = await AssetCreateContract.signatureNonces(caller);
   const data = {
     types: {
       LazyMintBatch: [
@@ -234,6 +271,7 @@ const createLazyMintMultipleAssetsSignature = async (
         {name: 'paymentTokens', type: 'address[]'},
         {name: 'metadataHashes', type: 'string[]'},
         {name: 'maxSupplies', type: 'uint256[]'},
+        {name: 'expirationTime', type: 'uint256'},
       ],
     },
     domain: {
@@ -243,7 +281,7 @@ const createLazyMintMultipleAssetsSignature = async (
       verifyingContract: AssetCreateContract.address,
     },
     message: {
-      caller: txSender.address,
+      caller,
       creators,
       nonce,
       tiers,
@@ -252,6 +290,7 @@ const createLazyMintMultipleAssetsSignature = async (
       paymentTokens,
       metadataHashes,
       maxSupplies,
+      expirationTime,
     },
   };
 

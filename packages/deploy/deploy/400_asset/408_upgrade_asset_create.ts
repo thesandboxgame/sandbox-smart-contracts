@@ -25,8 +25,4 @@ const func: DeployFunction = async function (
 };
 export default func;
 func.tags = ['AssetCreate_upgrade', 'L2'];
-func.dependencies = [
-  'AssetCreate_deploy',
-  'AssetCreate_setup',
-  'Exchange_deploy',
-];
+func.dependencies = ['Exchange_deploy'];

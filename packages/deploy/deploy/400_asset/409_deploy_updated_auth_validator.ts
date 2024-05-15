@@ -9,10 +9,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('AuthSuperValidator', {
     from: deployer,
     contract:
-      '@sandbox-smart-contracts/asset@1.1.0/contracts/AuthSuperValidator.sol:AuthSuperValidator',
+      '@sandbox-smart-contracts/asset/contracts/AuthSuperValidator.sol:AuthSuperValidator',
     args: [assetAdmin],
     log: true,
   });
 };
 export default func;
-func.tags = ['AuthSuperValidator', 'AuthSuperValidator_deploy', 'L2'];
+func.tags = ['AuthSuperValidator_v2', 'L2'];

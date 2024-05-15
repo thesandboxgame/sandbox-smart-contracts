@@ -4,6 +4,8 @@ import {
   createMultipleAssetsMintSignature,
   createLazyMintSignature,
   createLazyMintMultipleAssetsSignature,
+  LazyMintData,
+  LazyMintBatchData,
 } from '../../utils/createSignature';
 import {
   DEFAULT_SUBSCRIPTION,
@@ -16,16 +18,6 @@ import {parseEther} from 'ethers/lib/utils';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
-
-export type LazyMintBatchData = [
-  tiers: number[],
-  amounts: number[],
-  unitPrices: BigNumber[],
-  paymentTokens: string[],
-  metadataHashes: string[],
-  maxSupplies: number[],
-  creators: string[]
-];
 
 export async function runCreateTestSetup() {
   const [
@@ -97,6 +89,11 @@ export async function runCreateTestSetup() {
     }
   );
   await RoyaltyManagerContract.deployed();
+
+  const getCurrentBlockTimestamp = async () => {
+    const block = await ethers.provider.getBlock('latest');
+    return block.timestamp;
+  };
 
   const AssetFactory = await ethers.getContractFactory('Asset');
   const AssetContract = await upgrades.deployProxy(
@@ -356,57 +353,6 @@ export async function runCreateTestSetup() {
     );
   };
 
-  const lazyMintAsset = async (
-    signature: string,
-    tier: number,
-    amount: number,
-    unitPrice: BigNumber,
-    paymentToken: string,
-    metadataHash: string,
-    maxSupply: number,
-    creator: string,
-    as: SignerWithAddress = user,
-    from: string = as.address,
-    exchangeMatch: unknown[] = []
-  ) => {
-    const tx = await AssetCreateContract.connect(as).lazyCreateAsset(
-      from,
-      signature,
-      [
-        as.address,
-        tier,
-        amount,
-        unitPrice,
-        paymentToken,
-        metadataHash,
-        maxSupply,
-        creator,
-      ],
-      exchangeMatch
-    );
-    const result = await tx.wait();
-    return result;
-  };
-
-  const lazyMintMultipleAssets = async (
-    from: string,
-    signature: string,
-    mintData: LazyMintBatchData,
-    as: SignerWithAddress = user,
-    exchangeMatch: unknown[] = []
-  ) => {
-    const tx = await AssetCreateContract.connect(
-      as || user
-    ).lazyCreateMultipleAssets(
-      from,
-      signature,
-      [as.address, ...mintData],
-      exchangeMatch
-    );
-    const result = await tx.wait();
-    return result;
-  };
-
   const getCreatorNonce = async (creator: string) => {
     const nonce = await AssetCreateContract.creatorNonces(creator);
     return nonce;
@@ -450,40 +396,22 @@ export async function runCreateTestSetup() {
     return signature;
   };
 
-  const generateLazyMintSignature = async (
-    creator: string,
-    tier: number,
-    amount: number,
-    unitPrice: BigNumber,
-    paymentToken: string,
-    metadataHash: string,
-    maxSupply: number,
-    caller: SignerWithAddress = user
-  ) => {
+  const generateLazyMintSignature = async (mintData: LazyMintData) => {
     const signature = await createLazyMintSignature(
-      creator,
-      tier,
-      amount,
-      unitPrice,
-      paymentToken,
-      metadataHash,
-      maxSupply,
+      mintData,
       AssetCreateContract,
-      backendAuthWallet,
-      caller
+      backendAuthWallet
     );
     return signature;
   };
 
   const generateLazyMintMultipleAssetsSignature = async (
-    mintData: LazyMintBatchData,
-    caller: SignerWithAddress = user
+    mintData: LazyMintBatchData
   ) => {
     const signature = await createLazyMintMultipleAssetsSignature(
-      ...mintData,
+      mintData,
       AssetCreateContract,
-      backendAuthWallet,
-      caller
+      backendAuthWallet
     );
     return signature;
   };
@@ -590,8 +518,6 @@ export async function runCreateTestSetup() {
     mintMultipleAssets,
     mintSpecialAsset,
     mintMultipleSpecialAssets,
-    lazyMintAsset,
-    lazyMintMultipleAssets,
     grantSpecialMinterRole,
     generateSingleMintSignature,
     generateMultipleMintSignature,
@@ -601,5 +527,6 @@ export async function runCreateTestSetup() {
     pause,
     unpause,
     extractTokenIdFromEventData,
+    getCurrentBlockTimestamp,
   };
 }

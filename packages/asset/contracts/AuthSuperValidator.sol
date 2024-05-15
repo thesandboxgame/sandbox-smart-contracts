@@ -43,6 +43,20 @@ contract AuthSuperValidator is AccessControl {
         return recoveredSigner == signer;
     }
 
+    /// @notice Takes the signature and the digest and returns if the signer has a backend signer role assigned and the signature is not expired
+    /// @dev Multipurpose function that can be used to verify signatures with different digests and expiration times
+    /// @param signature Signature hash
+    /// @param digest Digest hash
+    /// @return bool
+    function verify(
+        bytes memory signature,
+        bytes32 digest,
+        uint256 expirationTime
+    ) public view returns (bool) {
+        require(block.timestamp <= expirationTime, "AuthSuperValidator: Expired");
+        return verify(signature, digest);
+    }
+
     /// @notice Prevents the DEFAULT_ADMIN_ROLE from being renounced
     /// @dev This function overrides the default renounceRole function to prevent the DEFAULT_ADMIN_ROLE from being renounced
     /// @param role Role to renounce

@@ -14,6 +14,13 @@ import './tasks/importedPackages';
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/avatar': 'contracts/',
+  '@sandbox-smart-contracts/asset@1.1.0': [
+    'contracts/Asset.sol',
+    'contracts/AssetCreate.sol',
+    'contracts/AssetReveal.sol',
+    'contracts/Catalyst.sol',
+    'contracts/AuthSuperValidator.sol',
+  ],
   '@sandbox-smart-contracts/asset': [
     'contracts/Asset.sol',
     'contracts/AssetCreate.sol',

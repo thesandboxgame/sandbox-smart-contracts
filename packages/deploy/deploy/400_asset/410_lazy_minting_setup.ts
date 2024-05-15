@@ -4,11 +4,15 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, log, read, catchUnknownSigner} = deployments;
-  const {assetAdmin, treasury, sandAdmin} = await getNamedAccounts();
+  const {assetAdmin, treasury, sandAdmin, backendAuthWallet} =
+    await getNamedAccounts();
 
   const exchangeContract = await deployments.get('Exchange');
   const AssetCreate = await deployments.get('AssetCreate');
   const CatalystContract = await deployments.get('Catalyst');
+  const AuthSuperValidatorContract = await deployments.get(
+    'AuthSuperValidator'
+  );
 
   const LAZY_MINTING_FEE_BPS = 0;
 
@@ -54,6 +58,40 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
     log(
       `[AssetCreate-Lazy Minting] Exchange address set to ${exchangeContract.address}`
+    );
+  }
+
+  const authValidatorAddress = await read('AssetCreate', 'getAuthValidator');
+  if (authValidatorAddress !== AuthSuperValidatorContract.address) {
+    await catchUnknownSigner(
+      execute(
+        'AssetCreate',
+        {from: assetAdmin, log: true},
+        'setAuthValidator',
+        AuthSuperValidatorContract.address
+      )
+    );
+    log(
+      `[AssetCreate-Lazy Minting] AuthSuperValidator address set from ${authValidatorAddress} to ${AuthSuperValidatorContract.address}`
+    );
+  }
+
+  if (
+    (
+      await read('AuthSuperValidator', 'getSigner', AssetCreate.address)
+    ).toLowerCase() !== backendAuthWallet.toLowerCase()
+  ) {
+    await catchUnknownSigner(
+      execute(
+        'AuthSuperValidator',
+        {from: assetAdmin, log: true},
+        'setSigner',
+        AssetCreate.address,
+        backendAuthWallet
+      )
+    );
+    log(
+      `AuthSuperValidator signer for Asset Create set to ${backendAuthWallet}`
     );
   }
 
@@ -103,5 +141,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 
-func.tags = ['Asset', 'AssetCreate', 'AssetCreate_lazy_setup'];
-func.dependencies = ['AssetCreate_upgrade', 'Exchange_setup'];
+func.tags = ['AssetCreate_upgrade', 'AssetCreate_lazy_setup'];
+func.dependencies = ['AuthSuperValidator_v2'];

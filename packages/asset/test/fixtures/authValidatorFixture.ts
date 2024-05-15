@@ -16,6 +16,11 @@ const runSetup = async () => {
     authValidatorAdmin
   );
 
+  const getCurrentBlockTimestamp = async () => {
+    const block = await ethers.provider.getBlock('latest');
+    return block.timestamp;
+  };
+
   const MockContractFactory = await ethers.getContractFactory('MockAsset');
   const MockContract = await MockContractFactory.connect(deployer).deploy();
   await MockContract.deployed();
@@ -29,6 +34,7 @@ const runSetup = async () => {
     deployer,
     createMockDigest,
     createMockSignature,
+    getCurrentBlockTimestamp,
   };
 };
 

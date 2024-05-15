@@ -109,11 +109,64 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
         authValidatorAdmin.address,
         backendSigner
       );
-      const isValid = await AuthValidatorContractAsAdmin.verify(
-        signature,
-        digest
-      );
+      const isValid = await AuthValidatorContractAsAdmin[
+        'verify(bytes,bytes32)'
+      ](signature, digest);
       expect(isValid).to.equal(true);
+    });
+    it("should not revert when signature hasn't expired", async function () {
+      const {
+        AuthValidatorContractAsAdmin,
+        backendSigner,
+        authValidatorAdmin,
+        createMockSignature,
+        createMockDigest,
+        getCurrentBlockTimestamp,
+      } = await runSetup();
+      await AuthValidatorContractAsAdmin.setSigner(
+        authValidatorAdmin.address,
+        backendSigner.address
+      );
+
+      const digest = createMockDigest(backendSigner.address);
+      const {signature} = await createMockSignature(
+        authValidatorAdmin.address,
+        backendSigner
+      );
+      await expect(
+        AuthValidatorContractAsAdmin['verify(bytes,bytes32,uint256)'](
+          signature,
+          digest,
+          (await getCurrentBlockTimestamp()) + 10
+        )
+      ).to.not.be.reverted;
+    });
+    it('should revert when signature has expired', async function () {
+      const {
+        AuthValidatorContractAsAdmin,
+        backendSigner,
+        authValidatorAdmin,
+        createMockSignature,
+        createMockDigest,
+        getCurrentBlockTimestamp,
+      } = await runSetup();
+      await AuthValidatorContractAsAdmin.setSigner(
+        authValidatorAdmin.address,
+        backendSigner.address
+      );
+
+      const digest = createMockDigest(backendSigner.address);
+      const {signature} = await createMockSignature(
+        authValidatorAdmin.address,
+        backendSigner
+      );
+      await expect(
+        AuthValidatorContractAsAdmin['verify(bytes,bytes32,uint256)'](
+          signature,
+          digest,
+          (await getCurrentBlockTimestamp()) - 10
+        )
+      ).to.be.revertedWith('AuthSuperValidator: Expired');
     });
     it('should revert when signature is not valid', async function () {
       const {
@@ -134,10 +187,9 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
         authValidatorAdmin.address,
         backendSigner
       );
-      const isValid = await AuthValidatorContractAsAdmin.verify(
-        signature,
-        digest
-      );
+      const isValid = await AuthValidatorContractAsAdmin[
+        'verify(bytes,bytes32)'
+      ](signature, digest);
       expect(isValid).to.equal(false);
     });
     it('should revert when there is no signer assigned for a given contract address', async function () {
@@ -152,7 +204,7 @@ describe('AuthSuperValidator, (/packages/asset/contracts/AuthSuperValidator.sol)
         backendSigner
       );
       await expect(
-        AuthValidatorContractAsAdmin.verify(signature, digest)
+        AuthValidatorContractAsAdmin['verify(bytes,bytes32)'](signature, digest)
       ).to.be.revertedWith('AuthSuperValidator: No signer');
     });
   });
