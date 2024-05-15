@@ -459,6 +459,14 @@ contract AssetCreate is
         _setTrustedForwarder(trustedForwarder);
     }
 
+    /// @notice Set the auth validator contract address
+    /// @param _authValidator The auth validator contract address to set
+    function setAuthValidator(address _authValidator) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_authValidator.isContract(), "AssetCreate: Invalid contract");
+        authValidator = AuthSuperValidator(_authValidator);
+        emit AuthValidatorSet(_authValidator);
+    }
+
     /// @notice Get the asset contract address
     /// @return assetContractAddress The asset contract address
     function getAssetContract() external view returns (address assetContractAddress) {

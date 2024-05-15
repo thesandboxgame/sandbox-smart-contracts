@@ -80,4 +80,5 @@ interface IAssetCreate {
     event LazyMintFeeSet(uint256 indexed newLazyMintFee);
     event LazyMintFeeReceiverSet(address indexed newLazyMintFeeReceived);
     event ExchangeContractSet(address indexed exchangeContract);
+    event AuthValidatorSet(address indexed authValidator);
 }
