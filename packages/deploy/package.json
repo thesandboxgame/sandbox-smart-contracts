@@ -16,6 +16,7 @@
   "private": true,
   "dependencies": {
     "@sandbox-smart-contracts/asset": "1.2.0",
+    "@sandbox-smart-contracts/asset@1.1.0": "npm:@sandbox-smart-contracts/asset@1.1.0",
     "@sandbox-smart-contracts/avatar": "*",
     "@sandbox-smart-contracts/core": "*",
     "@sandbox-smart-contracts/dependency-operator-filter": "1.0.1",

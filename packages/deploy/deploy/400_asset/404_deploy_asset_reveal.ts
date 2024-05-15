@@ -44,4 +44,5 @@ func.dependencies = [
   'Asset_deploy',
   'AuthSuperValidator_deploy',
   'TRUSTED_FORWARDER_V2',
+  'AuthSuperValidator_v2', // use updated AuthSuperValidator
 ];
