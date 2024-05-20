@@ -2997,7 +2997,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/land@0.0.3, @sandbox-smart-contracts/land@workspace:packages/land":
+"@sandbox-smart-contracts/land@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@sandbox-smart-contracts/land@npm:0.0.3"
+  checksum: ba5cfbee73b782fd70af992ebeedec3f94144e8bfa99785b29420bc50aabe43630c52ffafbb2644228669ba88718b8e0f74beaef567af1acbcc612adf42fa5b8
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/land@workspace:packages/land":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land@workspace:packages/land"
   dependencies:
