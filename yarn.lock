@@ -820,6 +820,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@layerzerolabs/lz-evm-oapp-v2@npm:^2.3.8":
+  version: 2.3.8
+  resolution: "@layerzerolabs/lz-evm-oapp-v2@npm:2.3.8"
+  peerDependencies:
+    "@layerzerolabs/lz-evm-messagelib-v2": ^2.3.8
+    "@layerzerolabs/lz-evm-protocol-v2": ^2.3.8
+    "@layerzerolabs/lz-evm-v1-0.7": ^2.3.8
+    "@openzeppelin/contracts": ^4.8.1 || ^5.0.0
+    "@openzeppelin/contracts-upgradeable": ^4.8.1 || ^5.0.0
+    hardhat-deploy: ^0.11.44
+    solidity-bytes-utils: ^0.8.0
+  checksum: c89b41edbc170df220d545508ae0702a6cea2ac78b9fab2ff5da348e6eb9d5304363307048c2a47958534141491e26ff90e39fb4519c41e67c3d9d5d5ef8f069
+  languageName: node
+  linkType: hard
+
+"@layerzerolabs/lz-evm-protocol-v2@npm:^2.3.8":
+  version: 2.3.8
+  resolution: "@layerzerolabs/lz-evm-protocol-v2@npm:2.3.8"
+  peerDependencies:
+    "@openzeppelin/contracts": ^4.8.1 || ^5.0.0
+    "@openzeppelin/contracts-upgradeable": ^4.8.1 || ^5.0.0
+    hardhat-deploy: ^0.11.44
+    solidity-bytes-utils: ^0.8.0
+  checksum: ceaa1dfaa81e6c31908ab306f08ddecf8bd4a7a050c1a9083b2e53e4774cfaeae712d6b222cfda9b52cb51762cb2f6043d61e09210c7586c665d92028cab0daa
+  languageName: node
+  linkType: hard
+
 "@ljharb/through@npm:^2.3.13, @ljharb/through@npm:^2.3.9":
   version: 2.3.13
   resolution: "@ljharb/through@npm:2.3.13"
@@ -2875,6 +2902,53 @@ __metadata:
     ts-node: ^10.9.1
     typechain: ^8.2.0
     typescript: 5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@sandbox-smart-contracts/oft-sand@workspace:packages/oft-sand":
+  version: 0.0.0-use.local
+  resolution: "@sandbox-smart-contracts/oft-sand@workspace:packages/oft-sand"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@ethersproject/providers": ^5.7.2
+    "@layerzerolabs/lz-evm-oapp-v2": ^2.3.8
+    "@layerzerolabs/lz-evm-protocol-v2": ^2.3.8
+    "@nomicfoundation/hardhat-chai-matchers": ^2.0.2
+    "@nomicfoundation/hardhat-ethers": ^3.0.5
+    "@nomicfoundation/hardhat-network-helpers": ^1.0.10
+    "@nomicfoundation/hardhat-toolbox": ^4.0.0
+    "@nomicfoundation/hardhat-verify": ^2.0.2
+    "@nomiclabs/hardhat-etherscan": ^3.1.7
+    "@openzeppelin/contracts": 5.0.2
+    "@openzeppelin/contracts-upgradeable": 5.0.2
+    "@openzeppelin/hardhat-upgrades": ^3.0.2
+    "@release-it/keep-a-changelog": ^5.0.0
+    "@typechain/ethers-v6": ^0.5.1
+    "@typechain/hardhat": ^9.1.0
+    "@types/chai": ^4.3.11
+    "@types/mocha": ^10.0.6
+    "@types/node": ^20.10.4
+    "@typescript-eslint/eslint-plugin": ^6.14.0
+    "@typescript-eslint/parser": ^6.14.0
+    chai: ^4.3.10
+    eslint: ^8.55.0
+    eslint-config-prettier: ^9.1.0
+    eslint-plugin-mocha: ^10.2.0
+    eslint-plugin-prettier: ^5.0.1
+    ethers: ^6.9.0
+    hardhat: ^2.19.2
+    hardhat-contract-sizer: ^2.10.0
+    hardhat-gas-reporter: ^1.0.9
+    hardhat-storage-layout: ^0.1.7
+    prettier: ^3.1.1
+    prettier-plugin-solidity: ^1.2.0
+    release-it: ^17.0.3
+    solhint: ^4.0.0
+    solhint-plugin-prettier: ^0.1.0
+    solidity-coverage: ^0.8.5
+    ts-node: ^10.9.2
+    typechain: ^8.3.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
