@@ -10,6 +10,7 @@ import {
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
+import './tasks/steal';
 
 // Package name : solidity source code path
 const importedPackages = {
