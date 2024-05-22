@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.23;
 
-import "./ERC20BasicApproveExtension.sol";
-import "./ERC20BaseToken.sol";
+import {ERC20BasicApproveExtension} from "./ERC20BasicApproveExtension.sol";
+import {ERC20BaseToken} from "./ERC20BaseToken.sol";
 
 contract SandBaseToken is ERC20BaseToken, ERC20BasicApproveExtension {
     constructor(

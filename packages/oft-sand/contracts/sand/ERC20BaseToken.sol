@@ -2,9 +2,9 @@
 pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/utils/Context.sol";
-import "./ERC20Internal.sol";
-import "../interfaces/IERC20Extended.sol";
-import "./WithSuperOperators.sol";
+import {ERC20Internal} from "./ERC20Internal.sol";
+import {IERC20, IERC20Extended} from "../interfaces/IERC20Extended.sol";
+import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {
     string internal _name;
