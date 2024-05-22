@@ -277,10 +277,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
             _transferERC1155(token, from, to, tokenId, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-            require(asset.value == 1, "bundle value error"); // TODO: replace with count using array lengths
             uint256 erc20Length = bundle.bundledERC20.length;
             uint256 erc721Length = bundle.bundledERC721.length;
-            uint256 erc1155Length = bundle.bundledERC721.length;
+            uint256 erc1155Length = bundle.bundledERC1155.length;
+            if (erc721Length > 0) require(asset.value == 1, "bundle value error");
             for (uint256 i; i < erc20Length; i++) {
                 address token = bundle.bundledERC20[i].erc20Address;
                 _transferERC20(token, from, to, bundle.bundledERC20[i].value);
@@ -289,7 +289,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 address token = bundle.bundledERC721[i].erc721Address;
                 uint256 idLength = bundle.bundledERC721[i].ids.length;
                 for (uint256 j; j < idLength; j++) {
-                    // TODO: currently no value for erc721 in bundle, require bundle.value to be 1 ?
                     _transferERC721(token, from, to, bundle.bundledERC721[i].ids[j]);
                 }
             }

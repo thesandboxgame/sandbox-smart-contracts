@@ -157,9 +157,10 @@ export function hashAsset(a: Asset) {
   );
 }
 
-export const Bundle = async (
+export const AssetBundle = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bundleInformation: any // TODO: type
+  bundleInformation: any, // TODO: type,
+  value: number
 ): Promise<Asset> => ({
   assetType: {
     assetClass: AssetClassType.BUNDLE_ASSET_CLASS,
@@ -170,5 +171,5 @@ export const Bundle = async (
       [bundleInformation]
     ),
   },
-  value: 1,
+  value,
 });
