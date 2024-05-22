@@ -64,6 +64,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/land': [
     'contracts/Land.sol',
     'contracts/PolygonLand.sol',
+    'contracts/LandMetadataRegistry.sol',
   ],
 };
 
