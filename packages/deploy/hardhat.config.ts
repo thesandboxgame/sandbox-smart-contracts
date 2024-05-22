@@ -11,6 +11,7 @@ import {
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
 import './tasks/steal';
+import './tasks/landMetadataRegistry';
 
 // Package name : solidity source code path
 const importedPackages = {
