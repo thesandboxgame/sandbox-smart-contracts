@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-import "./WithAdmin.sol";
+import {WithAdmin} from "./WithAdmin.sol";
 
 contract WithSuperOperators is WithAdmin {
     mapping(address => bool) internal _superOperators;
