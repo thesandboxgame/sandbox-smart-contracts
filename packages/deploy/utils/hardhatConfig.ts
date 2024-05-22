@@ -58,6 +58,7 @@ export function addNodeAndMnemonic(
       },
       verify: {
         etherscan: {
+          ...(k === 'amoy' ? {apiUrl: 'https://api-amoy.polygonscan.com'} : {}),
           apiKey: getVerifyApiKey(k),
         },
       },
