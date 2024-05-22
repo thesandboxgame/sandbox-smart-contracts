@@ -74,7 +74,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
             }
         } else makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-             _verifyWhitelistsRoles(makeToken);
+            _verifyWhitelistsRoles(makeToken);
         }
     }
 
@@ -85,7 +85,7 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
     function _verifyWhitelistsRoles(address makeToken) private view {
         if (!hasRole(ERC20_ROLE, makeToken)) {
-                revert("payment token not allowed");
+            revert("payment token not allowed");
         } else {
             if (!isWhitelistsEnabled()) {
                 return;
