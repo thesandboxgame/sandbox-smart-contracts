@@ -1,3 +1,8 @@
+// This task must be used in combination with hardhat-deploy and live network forks.
+// When forking a live network it is pretty usual to need some funds on the named accounts of the live network.
+// This task "steals" funds by transferring them from the hardhat default accounts.
+// For example: `yarn fork:deploy amoy --tags "XXX" --steal sandAdmin,deployer`
+// Will move fund to sandAdmin and deployer.
 import {task, types} from 'hardhat/config';
 import {TASK_DEPLOY} from 'hardhat-deploy';
 
