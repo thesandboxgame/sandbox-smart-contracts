@@ -3,8 +3,8 @@
 pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/utils/Context.sol";
-import "./ERC20Internal.sol";
-import "../libraries/BytesUtil.sol";
+import {ERC20Internal} from "./ERC20Internal.sol";
+import {BytesUtil} from "../libraries/BytesUtil.sol";
 
 abstract contract ERC20BasicApproveExtension is ERC20Internal, Context {
     /// @notice Approve `target` to spend `amount` and call it with data.
