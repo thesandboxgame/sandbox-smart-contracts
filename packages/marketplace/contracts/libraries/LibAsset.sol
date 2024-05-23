@@ -12,6 +12,7 @@ library LibAsset {
         ERC20, // Represents an ERC20 token.
         ERC721, // Represents a single ERC721 token.
         ERC1155, // Represents an ERC1155 token.
+        QUADS, // Represents a batch of LAND ERC721 token (enables LAND quad batch transfer).
         BUNDLE // Represents a group of tokens of various types.
     }
 
@@ -60,6 +61,13 @@ library LibAsset {
         BundledERC20[] bundledERC20;
         BundledERC721[] bundledERC721;
         BundledERC1155[] bundledERC1155;
+    }
+
+    struct Quads {
+        uint256[] sizes;
+        uint256[] xs;
+        uint256[] ys;
+        bytes data;
     }
 
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
@@ -130,6 +138,13 @@ library LibAsset {
     /// @return The address of the token.
     function decodeAddress(AssetType memory assetType) internal pure returns (address) {
         return abi.decode(assetType.data, (address));
+    }
+
+    /// @notice Decode the token details (address and tokenId) from a group of AssetTypes.
+    /// @param assetType The asset type to decode.
+    /// @return Array of LAND quad information.
+    function decodeQuads(AssetType memory assetType) internal pure returns (Quads memory) {
+        return abi.decode(assetType.data, (Quads));
     }
 
     /// @notice Decode the token details (address and tokenId) from a group of AssetTypes.

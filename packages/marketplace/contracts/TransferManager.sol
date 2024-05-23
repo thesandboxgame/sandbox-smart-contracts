@@ -13,6 +13,7 @@ import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesPro
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ILandToken} from "@sandbox-smart-contracts/land/contracts/interfaces/ILandToken.sol";
 
 /// @author The Sandbox
 /// @title TransferManager
@@ -48,6 +49,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @return address of defaultFeeReceiver
     address public defaultFeeReceiver;
 
+    /// @notice LAND contract address.
+    /// @return address of LAND
+    ILandToken public landContract;
+
     /// @notice Emitted when protocol fees are updated.
     /// @param newProtocolFeePrimary fee for primary market
     /// @param newProtocolFeeSecondary fee for secondary market
@@ -60,6 +65,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Emitted when the default fee receiver is updated.
     /// @param newDefaultFeeReceiver address that gets the fees
     event DefaultFeeReceiverSet(address indexed newDefaultFeeReceiver);
+
+    /// @notice Emitted when the LAND contract address is updated.
+    /// @param newLandContract address
+    event LandContractSet(ILandToken indexed newLandContract);
 
     /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -127,6 +136,15 @@ abstract contract TransferManager is Initializable, ITransferManager {
         protocolFeeSecondary = newProtocolFeeSecondary;
 
         emit ProtocolFeeSet(newProtocolFeePrimary, newProtocolFeeSecondary);
+    }
+
+    /// @notice Sets the LAND contract address.
+    /// @param newLandContractAddress Address of new LAND contract
+    function _setLandContract(ILandToken newLandContractAddress) internal {
+        require(address(newLandContractAddress).isContract(), "invalid LAND address");
+        landContract = newLandContractAddress;
+
+        emit LandContractSet(newLandContractAddress);
     }
 
     /// @notice Sets the default fee receiver.
@@ -250,6 +268,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.ERC1155) {
             (address token, uint256 tokenId) = LibAsset.decodeToken(asset.assetType);
             _transferERC1155(token, from, to, tokenId, asset.value);
+        } else if (asset.assetType.assetClass == LibAsset.AssetClass.QUADS) {
+            LibAsset.Quads memory quads = LibAsset.decodeQuads(asset.assetType);
+            landContract.batchTransferQuad(from, to, quads.sizes, quads.xs, quads.ys, quads.data);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
             uint256 erc20Length = bundle.bundledERC20.length;
@@ -281,7 +302,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     );
                 }
             }
-            // TODO: other bundle validation TBC (review OrderValidator steps)
         } else {
             revert("invalid asset class");
         }
@@ -321,5 +341,5 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _mustSkipFees(address from) internal virtual returns (bool);
 
     // slither-disable-next-line unused-state
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 }
