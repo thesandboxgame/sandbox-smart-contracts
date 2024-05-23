@@ -2819,6 +2819,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sandbox-smart-contracts/land@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@sandbox-smart-contracts/land@npm:0.0.3"
+  checksum: ba5cfbee73b782fd70af992ebeedec3f94144e8bfa99785b29420bc50aabe43630c52ffafbb2644228669ba88718b8e0f74beaef567af1acbcc612adf42fa5b8
+  languageName: node
+  linkType: hard
+
 "@sandbox-smart-contracts/marketplace@npm:1.0.1":
   version: 1.0.1
   resolution: "@sandbox-smart-contracts/marketplace@npm:1.0.1"
@@ -2849,6 +2856,7 @@ __metadata:
     "@release-it/keep-a-changelog": ^4.0.0
     "@sandbox-smart-contracts/dependency-metatx": 1.0.1
     "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+    "@sandbox-smart-contracts/land": 0.0.3
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.6
