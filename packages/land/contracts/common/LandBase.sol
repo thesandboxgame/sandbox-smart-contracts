@@ -30,7 +30,7 @@ abstract contract LandBase is
     WithRoyalties,
     WithOwner
 {
-    /// @dev this protects the implementation contract from behing initialized.
+    /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

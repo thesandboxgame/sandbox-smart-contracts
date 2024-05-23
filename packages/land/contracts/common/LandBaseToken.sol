@@ -303,10 +303,10 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     /// @notice checks if the child quads in the parent quad (size, x, y) are owned by msgSender.
     /// @param msgSender The original sender of the transaction
     /// @param to The address to which the ownership of the quad will be transferred
-    /// @param size The size of the quad being minted and transfered
+    /// @param size The size of the quad being minted and transferred
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
     /// @param y The y-coordinate of the top-left corner of the quad being minted.
-    /// @dev It recursively checks child quad of every size(exculding Lands of 1x1 size) are minted or not.
+    /// @dev It recursively checks child quad of every size(excluding Lands of 1x1 size) are minted or not.
     /// @dev Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in
     /// @dev the parent quad is minted or not. While checking if the every child Quad and Land is minted it
     /// @dev also checks and clear the owner for quads which are minted. Finally it checks if the new owner
@@ -328,7 +328,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         uint256 index = 0;
         uint256 landMinted = 0;
 
-        // if size of the Quad in land struct to be transfered is greater than 3 we check recursivly if the child quads are minted or not.
+        // if size of the Quad in land struct to be transferred is greater than 3 we check recursively if the child quads are minted or not.
         if (size > 3) {
             (index, landMinted) = _checkQuadIsNotMintedAndClearOwner(
                 msgSender,
@@ -516,10 +516,10 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     }
 
     /// @param msgSender The original sender of the transaction
-    /// @param quadMinted - an array of Land structs in which the minted child quad or Quad to be transfered are.
+    /// @param quadMinted - an array of Land structs in which the minted child quad or Quad to be transferred are.
     /// @param landMinted - the total amount of land that has been minted
     /// @param index - the index of the last element in the quadMinted array
-    /// @param to the address of the new owner of Quad to be transfered
+    /// @param to the address of the new owner of Quad to be transferred
     /// @param size The size of the quad
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
     /// @param y The y-coordinate of the top-left corner of the quad being minted.
@@ -555,7 +555,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
                 } else if (_getOwnerAddress(id) == msgSender) {
-                    // if it is owned by the msgSender owner data is removed and it is pused in to idsToTransfer array
+                    // if it is owned by the msgSender owner data is removed and it is pushed in to idsToTransfer array
                     _writeOwnerData(id, 0);
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
@@ -711,7 +711,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                         _writeOwnerData(idChild, 0);
                     }
                 }
-                // ownerOfAll should be true if "from" is owner of all the child quads itereated over
+                // ownerOfAll should be true if "from" is owner of all the child quads iterated over
                 ownerOfAll = (ownAllIndividual || ownerChild != 0) && ownerOfAll;
             }
         }

@@ -116,7 +116,7 @@ contract Land is LandStorageMixin, LandBase {
 
     /// @notice get the operator for a specific token, the operator can transfer on the owner behalf
     /// @param tokenId The id of the token.
-    /// @return the operator addressn
+    /// @return the operator address
     function _readOperator(
         uint256 tokenId
     ) internal view override(LandStorageMixin, ERC721BaseToken) returns (address) {

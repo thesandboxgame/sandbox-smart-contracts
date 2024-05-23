@@ -998,7 +998,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
           .true;
       });
 
-      it('approval for all does not grant approval on a transfered NFT', async function () {
+      it('approval for all does not grant approval on a transferred NFT', async function () {
         const {LandAsOwner, LandAsOther1, landOwner, other, other1, tokenIds} =
           await loadFixture(setupLand);
         await LandAsOwner.setApprovalForAll(other1, true);
@@ -1011,7 +1011,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
           .withArgs(other1, tokenIds[0]);
       });
 
-      it('approval for all set before will work on a transfered NFT', async function () {
+      it('approval for all set before will work on a transferred NFT', async function () {
         const {LandAsOwner, LandAsOther, landOwner, other, other1, tokenIds} =
           await loadFixture(setupLand);
         await LandAsOther.setApprovalForAll(other1, true);
