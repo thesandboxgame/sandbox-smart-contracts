@@ -60,10 +60,10 @@ contract OperatorFilterRegistryMock is IOperatorFilterRegistry, OperatorFilterRe
 
     bool public returnFalseInIsOperatorAllowed;
 
-    constructor(address _defaultSubscribtion, address[] memory _blacklistedAddresses) {
-        _registrations[_defaultSubscribtion] = _defaultSubscribtion;
-        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscribtion];
-        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscribtion];
+    constructor(address _defaultSubscription, address[] memory _blacklistedAddresses) {
+        _registrations[_defaultSubscription] = _defaultSubscription;
+        EnumerableSet.AddressSet storage filteredOperatorsRef = _filteredOperators[_defaultSubscription];
+        EnumerableSet.Bytes32Set storage filteredCodeHashesRef = _filteredCodeHashes[_defaultSubscription];
         for (uint256 i; i < _blacklistedAddresses.length; i++) {
             filteredOperatorsRef.add(_blacklistedAddresses[i]);
             bytes32 codeHash = _blacklistedAddresses[i].codehash;

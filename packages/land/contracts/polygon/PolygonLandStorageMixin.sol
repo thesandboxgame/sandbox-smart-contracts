@@ -53,7 +53,7 @@ contract PolygonLandStorageMixin {
 
     uint256[49] private __gap;
 
-    /// @dev meta transaction ERC2771 trusted forarder
+    /// @dev meta transaction ERC2771 trusted forwarder
     address internal _trustedForwarder;
 
     /// @dev OpenSea operator filter registry address

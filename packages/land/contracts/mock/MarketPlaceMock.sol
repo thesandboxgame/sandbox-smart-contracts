@@ -14,10 +14,10 @@ contract MarketPlaceMock {
     error ERC20TokenAmountCantBeZero();
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
     /// @param land the contract address on which the token transfer will take place
-    /// @param from adderess from which tokens are transfered.
-    /// @param to address to which the token will be transfered.
-    /// @param id the token type transfered.
-    /// @param data aditional data accompanying the transfer.
+    /// @param from address from which tokens are transferred.
+    /// @param to address to which the token will be transferred.
+    /// @param id the token type transferred.
+    /// @param data additional data accompanying the transfer.
     function transferLand(address land, address from, address to, uint256 id, bytes memory data) external {
         IERC721(land).safeTransferFrom(from, to, id, data);
     }

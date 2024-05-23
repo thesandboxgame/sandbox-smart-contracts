@@ -67,7 +67,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
         _;
     }
 
-    /// @dev this protects the implementation contract from behing initialized.
+    /// @dev this protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
