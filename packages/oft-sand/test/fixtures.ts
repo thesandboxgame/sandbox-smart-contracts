@@ -22,9 +22,9 @@ export async function setupOFTSand() {
   const TrustedForwarder = await TrustedForwarderFactory.deploy();
 
   const EndpointFactory = await ethers.getContractFactory('EndpointMock');
-  const EndPointForAdapter = await EndpointFactory.deploy(eidAdapter);
-  const EndPointForOFTSand = await EndpointFactory.deploy(eidOFTSand);
-  const EndPointForOFTSand2 = await EndpointFactory.deploy(eidOFTSand2);
+  const EndpointForAdapter = await EndpointFactory.deploy(eidAdapter);
+  const EndpointForOFTSand = await EndpointFactory.deploy(eidOFTSand);
+  const EndpointForOFTSand2 = await EndpointFactory.deploy(eidOFTSand2);
 
   const SandMockFactory = await ethers.getContractFactory('SandMock');
   const SandMock = await SandMockFactory.deploy(
@@ -38,7 +38,7 @@ export async function setupOFTSand() {
     await ethers.getContractFactory('OFTAdapterForSand');
   const OFTAdapter = await OFTAdapterFactory.deploy(
     SandMock,
-    EndPointForAdapter,
+    EndpointForAdapter,
     oftAdapterOwner,
   );
 
@@ -47,7 +47,7 @@ export async function setupOFTSand() {
     TrustedForwarder,
     sandAdmin,
     executionAdmin,
-    EndPointForOFTSand,
+    EndpointForOFTSand,
     oftSandOwner,
   );
 
@@ -55,29 +55,29 @@ export async function setupOFTSand() {
     TrustedForwarder,
     sandAdmin,
     executionAdmin,
-    EndPointForOFTSand2,
+    EndpointForOFTSand2,
     oftSandOwner2,
   );
 
   // Set destination endpoints in the LZEndpoint mock for each OFTAdapter and OFTSand
-  await EndPointForAdapter.setDestLzEndpoint(
+  await EndpointForAdapter.setDestLzEndpoint(
     OFTSand.getAddress(),
-    EndPointForOFTSand.getAddress(),
+    EndpointForOFTSand.getAddress(),
   );
-  await EndPointForOFTSand.setDestLzEndpoint(
+  await EndpointForOFTSand.setDestLzEndpoint(
     OFTAdapter.getAddress(),
-    EndPointForAdapter.getAddress(),
+    EndpointForAdapter.getAddress(),
   );
 
   // Set destination endpoints in the LZEndpoint mock for each OFTSand and OFTSand2
-  await EndPointForOFTSand.setDestLzEndpoint(
+  await EndpointForOFTSand.setDestLzEndpoint(
     OFTSand2.getAddress(),
-    EndPointForOFTSand2.getAddress(),
+    EndpointForOFTSand2.getAddress(),
   );
 
-  await EndPointForOFTSand2.setDestLzEndpoint(
+  await EndpointForOFTSand2.setDestLzEndpoint(
     OFTSand.getAddress(),
-    EndPointForOFTSand.getAddress(),
+    EndpointForOFTSand.getAddress(),
   );
 
   // Setting OFTAdapter and OFTSand as a peer of the other in the mock LZEndpoint
