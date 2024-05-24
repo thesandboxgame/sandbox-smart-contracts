@@ -59,6 +59,7 @@ const importedPackages = {
     'src/solc_0.5/Land.sol',
     'src/solc_0.5/LandV2.sol',
     'src/solc_0.5/LandV3.sol',
+    'src/solc_0.5/Sand.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV1.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
   ],
@@ -66,6 +67,11 @@ const importedPackages = {
     'contracts/Land.sol',
     'contracts/PolygonLand.sol',
     'contracts/LandMetadataRegistry.sol',
+  ],
+  '@sandbox-smart-contracts/oft-sand': [
+    'contracts/OFTAdapterForSand.sol',
+    'contracts/OFTSand.sol',
+    'contracts/mock/EndpointMock.sol',
   ],
 };
 
@@ -409,6 +415,31 @@ const networks = {
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
       [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
+    },
+  },
+  // TODO : yet to complete
+  base: {
+    tags: ['L2'],
+    companionNetworks: {
+      l1: '',
+    },
+  },
+  baseSepolia: {
+    tags: ['L2'],
+    companionNetworks: {
+      l1: '',
+    },
+  },
+  bscMainnet: {
+    tags: ['L1'],
+    companionNetworks: {
+      l2: '',
+    },
+  },
+  bscTestnet: {
+    tags: ['L1'],
+    companionNetworks: {
+      l2: '',
     },
   },
 };

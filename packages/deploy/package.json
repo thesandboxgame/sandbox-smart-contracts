@@ -24,7 +24,8 @@
     "@sandbox-smart-contracts/faucets": "0.0.1",
     "@sandbox-smart-contracts/giveaway": "0.0.3",
     "@sandbox-smart-contracts/land": "1.0.0-rc.1",
-    "@sandbox-smart-contracts/marketplace": "1.0.1"
+    "@sandbox-smart-contracts/marketplace": "1.0.1",
+    "@sandbox-smart-contracts/oft-sand": "0.0.1"
   },
   "files": [
     "deployments"
@@ -72,7 +73,7 @@
     "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "ethers": "^6.10.0",
+    "ethers": "^6.12.1",
     "hardhat": "^2.19.0",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-deploy": "^0.11.43",
