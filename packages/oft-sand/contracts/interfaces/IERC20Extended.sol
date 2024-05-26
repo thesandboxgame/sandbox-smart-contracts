@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-import "./IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 interface IERC20Extended is IERC20 {
     function burnFor(address from, uint256 amount) external;
