@@ -82,8 +82,10 @@ const namedAccounts = {
     polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+    bscTestnet: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+    baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -92,8 +94,10 @@ const namedAccounts = {
     polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
   }, // can add super operators and change admin
 
   operationsAdmin: {
@@ -197,8 +201,10 @@ const namedAccounts = {
     polygon: 'sandAdmin',
     goerli: 'sandAdmin',
     sepolia: 'sandAdmin',
+    bscTestnet: 'sandAdmin',
     mumbai: 'sandAdmin',
     amoy: 'sandAdmin',
+    baseSepolia: 'sandAdmin',
   },
 
   landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -304,6 +310,11 @@ const namedAccounts = {
   lazyMintingTestAccount2: {
     default: 6,
   },
+  oftSender: {
+    sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06', // admin on Sand sepolia
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+  },
 };
 
 /**
@@ -360,29 +371,28 @@ const networks = {
       l1: 'mainnet',
     },
   },
-  // TODO : yet to complete
   base: {
     tags: ['L2'],
     companionNetworks: {
-      l1: '',
+      l1: 'mainnet',
     },
   },
   baseSepolia: {
     tags: ['L2'],
     companionNetworks: {
-      l1: '',
+      l1: 'sepolia',
     },
   },
   bscMainnet: {
     tags: ['L1'],
     companionNetworks: {
-      l2: '',
+      l2: 'polygon',
     },
   },
   bscTestnet: {
     tags: ['L1'],
     companionNetworks: {
-      l2: '',
+      l2: 'amoy',
     },
   },
 };

@@ -13,6 +13,7 @@
     "./typechain-types",
     "./deploy",
     "./deploy_mocks",
+    "./integration_test",
     "./utils",
     "./tasks",
     "./test"
