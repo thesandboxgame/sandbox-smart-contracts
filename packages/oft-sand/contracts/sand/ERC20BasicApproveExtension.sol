@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-import "@openzeppelin/contracts/utils/Context.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20Internal} from "./ERC20Internal.sol";
 import {BytesUtil} from "../libraries/BytesUtil.sol";
 
