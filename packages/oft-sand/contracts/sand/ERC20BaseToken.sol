@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "@openzeppelin/contracts/utils/Context.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20Internal} from "./ERC20Internal.sol";
 import {IERC20, IERC20Extended} from "../interfaces/IERC20Extended.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
