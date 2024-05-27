@@ -8,18 +8,26 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
 abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
+    /// @notice the base token id used for a batch operation is wrong
+    /// @param tokenId the id of the token
+    error InvalidBaseTokenId(uint256 tokenId);
+
+    /// @notice the neighborhoodId is invalid
+    /// @param neighborhoodId the invalid neighborhoodId
+    error InvalidNeighborhoodId(uint256 neighborhoodId);
+
     /// @notice value returned when the neighborhood is not set yet.
     string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
     /// @notice amount of land information that can be stored in one EVM word
-    uint256 public constant LANDS_PER_WORD = 32;
-    /// @notice bits (8) of information stored for each land
+    uint256 public constant LANDS_PER_WORD = 16;
+    /// @notice bits (8) of information stored for each land, for example: 16
     uint256 public constant BITS_PER_LAND = 256 / LANDS_PER_WORD;
-    /// @notice used to mask the 8 bits of information stored per land
-    uint256 public constant LAND_MASK = 0xFF;
-    /// @notice mask used to extract the premium bit
-    uint256 public constant PREMIUM_MASK = 0x80;
-    /// @notice mask used to extract the neighborhood number
-    uint256 public constant NEIGHBORHOOD_MASK = 0x7F;
+    /// @notice used to mask the 8 bits of information stored per land, for example: 0xFFFF
+    uint256 public constant LAND_MASK = (1 << BITS_PER_LAND) - 1;
+    /// @notice mask used to extract the premium bit, for example: 0x8000
+    uint256 public constant PREMIUM_MASK = 1 << (BITS_PER_LAND - 1);
+    /// @notice mask used to extract the neighborhood number, for example: 0x7FFF
+    uint256 public constant NEIGHBORHOOD_MASK = PREMIUM_MASK - 1;
 
     struct LandMetadataStorage {
         /// @dev tokenId / 32 => premiumness + neighborhood metadata
@@ -106,5 +114,18 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     /// @param tokenId the token id
     function _getKey(uint256 tokenId) internal pure returns (uint256) {
         return LANDS_PER_WORD * (tokenId / LANDS_PER_WORD);
+    }
+
+    /// @notice checks if a neighborhoodId is in range
+    /// @param neighborhoodId the number that identifies the neighborhood
+    function _isValidNeighborhoodId(uint256 neighborhoodId) internal pure {
+        // Cannot set it to unknown (zero).
+        if (neighborhoodId == 0) {
+            revert InvalidNeighborhoodId(neighborhoodId);
+        }
+        // NEIGHBORHOOD_MASK (32767) is left out to use as escape char if needed.
+        if (neighborhoodId >= NEIGHBORHOOD_MASK) {
+            revert InvalidNeighborhoodId(neighborhoodId);
+        }
     }
 }

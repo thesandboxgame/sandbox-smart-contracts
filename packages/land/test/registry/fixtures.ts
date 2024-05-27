@@ -25,10 +25,11 @@ export async function setupRegistry() {
 }
 
 export function getRandomMetadata(tokenIds: bigint[]): Metadata[] {
+  const maxId = 2 ** 15;
   return tokenIds.map((tokenId) => ({
     tokenId,
     isPremium: Math.random() < 0.5,
-    neighborhoodId: BigInt(Math.floor(Math.random() * 128)),
+    neighborhoodId: BigInt(Math.floor(Math.random() * maxId)),
   }));
 }
 
@@ -56,15 +57,19 @@ export type Metadata = {
 };
 
 export function updateMetadataWord(
+  LANDS_PER_WORD: bigint,
   metadata: bigint,
   batchData: Metadata[],
 ): bigint {
+  const BITS_PER_LAND = 256n / LANDS_PER_WORD;
+  const MASK = 2n ** BITS_PER_LAND - 1n;
+  const PREMIUM_MASK = 1n << (BITS_PER_LAND - 1n);
   for (const m of batchData) {
-    const bits = (m.tokenId % 32n) * 8n;
-    const mask = ~(0xffn << bits);
+    const bits = (m.tokenId % LANDS_PER_WORD) * BITS_PER_LAND;
+    const mask = ~(MASK << bits);
     metadata =
       (metadata & mask) |
-      ((m.neighborhoodId | (m.isPremium ? 0x80n : 0n)) << bits);
+      ((m.neighborhoodId | (m.isPremium ? PREMIUM_MASK : 0n)) << bits);
   }
   return metadata;
 }
@@ -73,16 +78,17 @@ export async function updateMetadata(
   registryAsAdmin: Contract,
   metadata: Metadata[],
 ): Promise<void> {
+  const LANDS_PER_WORD = await registryAsAdmin.LANDS_PER_WORD();
   const batchData = {};
   for (const m of metadata) {
-    const baseTokenId = 32n * (m.tokenId / 32n);
+    const baseTokenId = LANDS_PER_WORD * (m.tokenId / LANDS_PER_WORD);
     if (!batchData[baseTokenId]) {
       batchData[baseTokenId] = [];
     }
     batchData[baseTokenId].push(m);
   }
   const batchBaseTokenIds = Object.keys(batchData);
-  const numBatchesPerTx = 408 * 2; // 19.7Mgas (max is 1223, 29530015n gas)
+  const numBatchesPerTx = 408 * 2;
   for (let i = 0; i < batchBaseTokenIds.length; i += numBatchesPerTx) {
     const tokenIds = batchBaseTokenIds.slice(i, i + numBatchesPerTx);
     // get the old data from the contract, we can use zero[] if it is the first time or we don't care about the old data
@@ -91,7 +97,11 @@ export async function updateMetadata(
     for (const [baseTokenId, metadataWord]: [bigint, bigint] of oldData) {
       newData.push({
         baseTokenId,
-        metadata: updateMetadataWord(metadataWord, batchData[baseTokenId]),
+        metadata: updateMetadataWord(
+          LANDS_PER_WORD,
+          metadataWord,
+          batchData[baseTokenId],
+        ),
       });
     }
     // update the metadata in the contract
