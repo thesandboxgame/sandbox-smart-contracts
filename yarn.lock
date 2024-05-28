@@ -2997,7 +2997,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/land@1.0.0-rc.0, @sandbox-smart-contracts/land@workspace:packages/land":
+"@sandbox-smart-contracts/land@npm:1.0.0-rc.0":
+  version: 1.0.0-rc.0
+  resolution: "@sandbox-smart-contracts/land@npm:1.0.0-rc.0"
+  dependencies:
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
+    "@openzeppelin/contracts": 5.0.2
+    "@openzeppelin/contracts-upgradeable": 5.0.2
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+  checksum: 8897cbf3d5d14595adf7f747f7516799fa52eb2c54f77daba9aa71a3c46d3e8f23d57338ba98601a3df747cb32efa200ee6c447c0fb7292d437c99bf28658c33
+  languageName: node
+  linkType: hard
+
+"@sandbox-smart-contracts/land@workspace:packages/land":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land@workspace:packages/land"
   dependencies:
