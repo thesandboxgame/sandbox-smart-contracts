@@ -9,6 +9,7 @@ and this project adheres to
 ## [1.0.0-rc.1] - 2024-05-28
 
 ### Changed
+
 - Use 15 bits for land neighborhood id in the metadata registry.
 
 ## [1.0.0-rc.0] - 2024-05-17
