@@ -11,9 +11,12 @@ const func: DeployFunction = async function (
   const {execute} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  // destination endpoint for baseSepolia
   const eidBaseSepolia = 40245;
+  // destination endpoint for bscTestnet
   const eidBscTestnet = 40102;
 
+  // setting OFTSand(baseSepolia) as peer to OFTAdapterForSand(sepolia) using eidBaseSepolia
   await execute(
     'OFTAdapterForSand',
     {from: deployer, log: true},
@@ -22,6 +25,7 @@ const func: DeployFunction = async function (
     ethers.zeroPadValue(OFTSandBaseJson.address, 32)
   );
 
+  // set OFTSand(bscTestnet) as peer to OFTAdapterForSand(sepolia) using eidBscTestnet
   await execute(
     'OFTAdapterForSand',
     {from: deployer, log: true},
