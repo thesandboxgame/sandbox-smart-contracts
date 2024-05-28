@@ -32,4 +32,5 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['OFT_Sepolia_setup'];
+func.tags = ['OFTAdapterForSand', 'OFTAdapterForSand_sepolia_setup'];
+func.dependencies = ['OFTAdapterForSand_deploy'];
