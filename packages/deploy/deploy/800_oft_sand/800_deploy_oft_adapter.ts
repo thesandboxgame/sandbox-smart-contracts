@@ -18,5 +18,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['OFTAdapter', 'OFTAdapterForSand'];
+func.tags = ['OFTAdapterForSand', 'OFTAdapterForSand_deploy'];
 func.dependencies = ['Sand', 'EndpointV2'];

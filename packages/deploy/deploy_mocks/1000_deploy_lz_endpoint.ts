@@ -16,4 +16,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['EndpointV2'];
+func.tags = ['EndpointV2', 'EndpointV2_deploy'];
