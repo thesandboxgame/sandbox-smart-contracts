@@ -1,5 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { DeployFunction } from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const exchangeAddress = await read('AssetCreate', 'getExchangeContract');
+  const exchangeAddress = await read('AssetCreate', 'exchangeContract');
   if (exchangeAddress !== exchangeContract.address) {
     await catchUnknownSigner(
       execute(
@@ -61,7 +61,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const authValidatorAddress = await read('AssetCreate', 'getAuthValidator');
+  const authValidatorAddress = await read('AssetCreate', 'authValidator');
   if (authValidatorAddress !== AuthSuperValidatorContract.address) {
     await catchUnknownSigner(
       execute(

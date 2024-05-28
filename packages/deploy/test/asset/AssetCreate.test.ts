@@ -1,10 +1,10 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
+import { parseEther } from 'ethers';
 import {
   LazyMintBatchData,
   LazyMintData,
   getMatchedOrders,
 } from '../../utils/lazyMinting';
-import {parseEther} from 'ethers';
 import setupAssetCreateTests from './assetCreateFixture';
 
 describe('Asset Create', function () {
@@ -12,28 +12,28 @@ describe('Asset Create', function () {
     it('AuthSuperValidator', async function () {
       const {AssetCreateContract, AuthSuperValidatorContract} =
         await setupAssetCreateTests();
-      expect(await AssetCreateContract.getAuthValidator()).to.be.equal(
+      expect(await AssetCreateContract.authValidator()).to.be.equal(
         AuthSuperValidatorContract
       );
     });
     it('Asset', async function () {
       const {AssetCreateContract, AssetContract} =
         await setupAssetCreateTests();
-      expect(await AssetCreateContract.getAssetContract()).to.be.equal(
+      expect(await AssetCreateContract.assetContract()).to.be.equal(
         AssetContract
       );
     });
     it('Catalyst', async function () {
       const {AssetCreateContract, CatalystContract} =
         await setupAssetCreateTests();
-      expect(await AssetCreateContract.getCatalystContract()).to.be.equal(
+      expect(await AssetCreateContract.catalystContract()).to.be.equal(
         CatalystContract
       );
     });
     it('Exchange', async function () {
       const {AssetCreateContract, ExchangeContract} =
         await setupAssetCreateTests();
-      expect(await AssetCreateContract.getExchangeContract()).to.be.equal(
+      expect(await AssetCreateContract.exchangeContract()).to.be.equal(
         ExchangeContract
       );
     });
