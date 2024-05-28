@@ -24,5 +24,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['OFTSand'];
+func.tags = ['OFTSand', 'OFTSand_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER_V2', 'EndpointV2'];
