@@ -36,9 +36,9 @@ contract AssetCreate is
     using TokenIdUtils for uint256;
     using Address for address;
 
-    IAsset private assetContract;
-    ICatalyst private catalystContract;
-    AuthSuperValidator private authValidator;
+    IAsset public assetContract;
+    ICatalyst public catalystContract;
+    AuthSuperValidator public authValidator;
 
     /// @notice mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
@@ -53,7 +53,7 @@ contract AssetCreate is
     mapping(uint256 => uint256) public availableToMint;
 
     /// @notice The marketplace exchange contract to purchase catalyst
-    IExchange private exchangeContract;
+    IExchange public exchangeContract;
 
     /// @notice Role allowing to mint special assets
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
@@ -165,9 +165,9 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        require(tiers.length == amounts.length, "AssetCreate: 1-Array lengths");
-        require(amounts.length == metadataHashes.length, "AssetCreate: 2-Array lengths");
-        require(metadataHashes.length == revealed.length, "AssetCreate: 3-Array lengths");
+        require(amounts.length == tiers.length, "AssetCreate: 1-Array lengths");
+        require(revealed.length == tiers.length, "AssetCreate: 2-Array lengths");
+        require(metadataHashes.length == tiers.length, "AssetCreate: 3-Array lengths");
 
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
@@ -228,17 +228,17 @@ contract AssetCreate is
         address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) whenNotPaused {
         bool[] memory revealed = new bool[](amounts.length);
-        uint8[] memory tier = new uint8[](amounts.length);
+        uint8[] memory tiers = new uint8[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
             revealed[i] = true;
-            tier[i] = 0;
+            tiers[i] = 0;
             unchecked {++i;}
         }
 
         require(
             authValidator.verify(
                 signature,
-                _hashBatchMint(creator, signatureNonces[_msgSender()]++, tier, amounts, revealed, metadataHashes)
+                _hashBatchMint(creator, signatureNonces[_msgSender()]++, tiers, amounts, revealed, metadataHashes)
             ),
             "AssetCreate: Invalid signature"
         );
@@ -252,7 +252,7 @@ contract AssetCreate is
         }
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit SpecialAssetBatchMinted(creator, tokenIds, tier, amounts, metadataHashes, revealed);
+        emit SpecialAssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes, revealed);
     }
 
     /// @notice Lazily creates a new asset with a signature
@@ -311,7 +311,7 @@ contract AssetCreate is
         // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(mintData.caller, mintData.tier, mintData.amount);
         // send the payment to the creator after deducting the lazy mint fee
-        distributePayment(
+        _distributePayment(
             mintData.caller,
             mintData.unitPrice,
             mintData.amount,
@@ -372,9 +372,9 @@ contract AssetCreate is
         require(mintData.metadataHashes.length == expectedLength, "AssetCreate: 5-Array lengths");
         require(mintData.maxSupplies.length == expectedLength, "AssetCreate: 6-Array lengths");
 
-        uint256[] memory tokenIds = new uint256[](mintData.tiers.length);
-        uint256[] memory tiersToBurn = new uint256[](mintData.tiers.length);
-        for (uint256 i; i < mintData.tiers.length; ) {
+        uint256[] memory tokenIds = new uint256[](expectedLength);
+        uint256[] memory tiersToBurn = new uint256[](expectedLength);
+        for (uint256 i; i < expectedLength; ) {
             uint16 revealed = mintData.tiers[i] == 1 ? 1 : 0;
             tiersToBurn[i] = mintData.tiers[i];
             tokenIds[i] = assetContract.getTokenIdByMetadataHash(mintData.metadataHashes[i]);
@@ -395,7 +395,7 @@ contract AssetCreate is
             if (matchedOrdersArray.length > i && matchedOrdersArray[i].length > 0) {
                 exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
             }
-            distributePayment(
+            _distributePayment(
                 mintData.caller,
                 mintData.unitPrices[i],
                 mintData.amounts[i],
@@ -467,30 +467,6 @@ contract AssetCreate is
         emit AuthValidatorSet(_authValidator);
     }
 
-    /// @notice Get the asset contract address
-    /// @return assetContractAddress The asset contract address
-    function getAssetContract() external view returns (address assetContractAddress) {
-        return address(assetContract);
-    }
-
-    /// @notice Get the catalyst contract address
-    /// @return catalystContractAddress The catalyst contract address
-    function getCatalystContract() external view returns (address catalystContractAddress) {
-        return address(catalystContract);
-    }
-
-    /// @notice Get the auth validator address
-    /// @return authValidatorAddress The auth validator address
-    function getAuthValidator() external view returns (address authValidatorAddress) {
-        return address(authValidator);
-    }
-
-    /// @notice Get the exchange contract address
-    /// @return exchangeContractAddress The exchange contract address
-    function getExchangeContract() external view returns (address exchangeContractAddress) {
-        return address(exchangeContract);
-    }
-
     function _msgSender()
         internal
         view
@@ -517,7 +493,7 @@ contract AssetCreate is
     /// @param amount The amount of copies to mint
     /// @param paymentToken The payment token
     /// @param creator The address of the creator
-    function distributePayment(
+    function _distributePayment(
         address from,
         uint256 unitPrice,
         uint256 amount,
