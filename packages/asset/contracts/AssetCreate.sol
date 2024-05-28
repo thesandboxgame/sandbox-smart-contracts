@@ -233,7 +233,7 @@ contract AssetCreate is
         uint8[] memory tier = new uint8[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
             revealed[i] = true;
-            tier[i] = 0;
+            tier[i] = uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE);
             unchecked {++i;}
         }
 
