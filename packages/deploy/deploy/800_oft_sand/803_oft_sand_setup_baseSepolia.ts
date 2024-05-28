@@ -2,7 +2,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {ethers} from 'ethers';
 import OFTAdapterForSandJson from '../../deployments/sepolia/OFTAdapterForSand.json';
-import OFTSandBaseJson from '../../deployments/baseSepolia/OFTSand.json';
+import OFTSandBscJson from '../../deployments/bscTestnet/OFTSand.json';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -12,7 +12,7 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
 
   const eidSepolia = 40161;
-  const eidBaseSepolia = 40245;
+  const eidBscTestnet = 40102;
 
   await execute(
     'OFTSand',
@@ -26,10 +26,11 @@ const func: DeployFunction = async function (
     'OFTSand',
     {from: deployer, log: true},
     'setPeer',
-    eidBaseSepolia,
-    ethers.zeroPadValue(OFTSandBaseJson.address, 32)
+    eidBscTestnet,
+    ethers.zeroPadValue(OFTSandBscJson.address, 32)
   );
 };
 
 export default func;
-func.tags = ['OFT_BscTestnet_setup'];
+func.tags = ['OFTSand', 'OFTSand_baseSepolia_setup'];
+func.dependencies = ['OFTSand_deploy'];
