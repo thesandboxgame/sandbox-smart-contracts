@@ -6,6 +6,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /// @title AuthSuperValidator
 /// @author The Sandbox
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This contract is used to validate the signatures of the backend, each contract can have a separate signer assigned
 contract AuthSuperValidator is AccessControl {
     mapping(address => address) private _signers;
