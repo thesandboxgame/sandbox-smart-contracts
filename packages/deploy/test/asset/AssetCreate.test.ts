@@ -1,5 +1,5 @@
-import { expect } from 'chai';
-import { parseEther } from 'ethers';
+import {expect} from 'chai';
+import {parseEther} from 'ethers';
 import {
   LazyMintBatchData,
   LazyMintData,
