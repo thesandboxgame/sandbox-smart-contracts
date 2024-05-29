@@ -31,6 +31,8 @@ export function shouldMatchOrdersForBundle() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bundledERC1155: any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      quads: any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bundleData: any,
       orderLeft: Order,
       orderRight: Order,
@@ -106,11 +108,19 @@ export function shouldMatchOrdersForBundle() {
           },
         ];
 
+        quads = {
+          sizes: [],
+          xs: [],
+          ys: [],
+          data: "0x"
+        } // empty quads
+
         // Create bundle for passing as right order
         bundleData = {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads,
         };
 
         takerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721
@@ -270,6 +280,7 @@ export function shouldMatchOrdersForBundle() {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads
         };
 
         bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
@@ -383,6 +394,7 @@ export function shouldMatchOrdersForBundle() {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads
         };
 
         bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
@@ -454,6 +466,7 @@ export function shouldMatchOrdersForBundle() {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads
         };
 
         // ERC1155Asset for partial fill
@@ -566,6 +579,7 @@ export function shouldMatchOrdersForBundle() {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads
         };
 
         // ERC1155Asset for partial fill
@@ -776,6 +790,7 @@ export function shouldMatchOrdersForBundle() {
           bundledERC20,
           bundledERC721,
           bundledERC1155,
+          quads
         };
 
         makerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721
