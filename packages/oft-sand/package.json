@@ -46,17 +46,14 @@
       ]
     }
   },
-  "dependencies": {
+  "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
     "@layerzerolabs/lz-evm-messagelib-v2": "^2.3.11",
     "@layerzerolabs/lz-evm-oapp-v2": "^2.3.8",
     "@layerzerolabs/lz-evm-protocol-v2": "^2.3.8",
     "@layerzerolabs/lz-v2-utilities": "^2.3.11",
     "@layerzerolabs/test-devtools-evm-hardhat": "^0.2.3",
-    "@sandbox-smart-contracts/dependency-metatx": "1.0.1"
-  },
-  "devDependencies": {
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/providers": "^5.7.2",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
@@ -67,6 +64,7 @@
     "@openzeppelin/contracts-upgradeable": "5.0.2",
     "@openzeppelin/hardhat-upgrades": "^3.0.2",
     "@release-it/keep-a-changelog": "^5.0.0",
+    "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.11",
