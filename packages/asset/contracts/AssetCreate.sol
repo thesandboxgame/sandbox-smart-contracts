@@ -125,6 +125,7 @@ contract AssetCreate is
         string calldata metadataHash,
         address creator
     ) external whenNotPaused {
+        require(_msgSender() == creator, "AssetCreate: Invalid caller");
         require(
             authValidator.verify(
                 signature,
@@ -157,6 +158,7 @@ contract AssetCreate is
         string[] calldata metadataHashes,
         address creator
     ) external whenNotPaused {
+        require(_msgSender() == creator, "AssetCreate: Invalid caller");
         require(
             authValidator.verify(
                 signature,
