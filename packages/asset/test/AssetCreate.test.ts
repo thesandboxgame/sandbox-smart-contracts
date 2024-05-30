@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {BigNumber, Event, ethers} from 'ethers';
-import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
-import {network} from 'hardhat';
 import {parseEther} from 'ethers/lib/utils';
+import {network} from 'hardhat';
+import {runCreateTestSetup} from './fixtures/asset/assetCreateFixtures';
 import {LazyMintBatchData, LazyMintData} from './utils/createSignature';
 
 describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () {
@@ -404,6 +404,34 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
     describe('Revert', function () {
+      it('should revert if the creator is not the sender of the transaction', async function () {
+        const {
+          mintCatalyst,
+          mintSingleAsset,
+          generateSingleMintSignature,
+          metadataHashes,
+          otherWallet,
+        } = await runCreateTestSetup();
+        await mintCatalyst(4, 1);
+        const signature = await generateSingleMintSignature(
+          otherWallet.address,
+          4,
+          1,
+          true,
+          metadataHashes[0]
+        );
+
+        await expect(
+          mintSingleAsset(
+            signature,
+            4,
+            1,
+            true,
+            metadataHashes[0],
+            otherWallet.address
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid caller');
+      });
       it('should revert if the signature is invalid', async function () {
         const {mintCatalyst, mintSingleAsset, metadataHashes} =
           await runCreateTestSetup();
@@ -669,7 +697,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         );
 
         await expect(
-          AssetCreateContract.createAsset(
+          AssetCreateContract.connect(user).createAsset(
             signature,
             4,
             5,
@@ -911,6 +939,36 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
       });
     });
     describe('Revert', function () {
+      it('should revert if the creator is not the sender of the transaction', async function () {
+        const {
+          mintMultipleAssets,
+          generateMultipleMintSignature,
+          mintCatalyst,
+          metadataHashes,
+          otherWallet,
+        } = await runCreateTestSetup();
+        await mintCatalyst(3, 1);
+        await mintCatalyst(4, 1);
+
+        const signature = await generateMultipleMintSignature(
+          otherWallet.address,
+          [3, 4],
+          [1, 1],
+          [true, true],
+          metadataHashes
+        );
+        await expect(
+          // will try to mind as user, but signature is generated for otherWallet
+          mintMultipleAssets(
+            signature,
+            [3, 4],
+            [1, 1],
+            [true, true],
+            metadataHashes,
+            otherWallet.address
+          )
+        ).to.be.revertedWith('AssetCreate: Invalid caller');
+      });
       it('should revert if signature is invalid', async function () {
         const {mintMultipleAssets, metadataHashes} = await runCreateTestSetup();
         const signature =
@@ -1218,7 +1276,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           metadataHashes
         );
         await expect(
-          AssetCreateContract.createMultipleAssets(
+          AssetCreateContract.connect(user).createMultipleAssets(
             signature,
             [3, 4],
             [3, 5],
@@ -2981,7 +3039,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           mintCatalyst,
           generateLazyMintSignature,
           metadataHashes,
-          creator,
           user,
           MockERC20Contract,
           AssetCreateContractAsUser,
@@ -3005,7 +3062,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           paymentToken: MockERC20Contract.address,
           metadataHash: metadataHashes[0],
           maxSupply,
-          creator: creator.address,
+          creator: user.address,
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
@@ -3033,7 +3090,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
         ).to.equal(user.address);
         //creator should be creator
         expect(lazyMintEvent.args.creator, "Creator doesn't match").to.equal(
-          creator.address
+          user.address
         );
         //tokenId should be the correct tokenId
         const tokenId = extractTokenIdFromEventData(lazyMintEvent.data);
@@ -4747,7 +4804,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           tier: 4,
           amount: 10,
           sandPrice: parseEther('0.1'),
-          creator: creator.address,
+          creator: user.address,
           metadataHash: metadataHashes[0],
         };
 
@@ -4755,7 +4812,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           tier: 2,
           amount: 10,
           sandPrice: parseEther('0.1'),
-          creator: creator.address,
+          creator: user.address,
           metadataHash: metadataHashes[1],
         };
 
