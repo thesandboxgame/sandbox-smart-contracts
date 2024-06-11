@@ -7,6 +7,7 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC2771Handler} from "./sand/ERC2771Handler.sol";
 
 /// @title OFTAdapterForSand
+/// @author The Sandbox
 /// @dev contract to be used with non-upgradable SAND contract
 contract OFTAdapterForSand is OFTAdapter, ERC2771Handler {
     /// @param sandToken SAND token address on the same network as the OFT Adapter
