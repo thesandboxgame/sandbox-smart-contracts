@@ -5,6 +5,7 @@ import {OFTAdapter} from "./oft/OFTAdapter.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title OFTAdapterForSand
+/// @author The Sandbox
 /// @dev contract to be used with non-upgradable SAND contract
 contract OFTAdapterForSand is OFTAdapter {
     /// @param sandToken SAND token address on the same network as the OFT Adapter
