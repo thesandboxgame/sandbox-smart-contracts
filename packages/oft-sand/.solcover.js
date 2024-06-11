@@ -11,5 +11,7 @@ module.exports = {
     'sand/WithAdmin.sol',
     'sand/ERC20BasicApproveExtension.sol',
     'sand/ERC2771Handler.sol',
+    'oft/OFTCore.sol',
+    'oft/OFTAdapter.sol',
   ],
 };

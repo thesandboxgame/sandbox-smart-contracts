@@ -1,8 +1,7 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
-import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTCore.sol";
+import {OFTCore} from "./oft/OFTCore.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC2771Handler} from "./sand/ERC2771Handler.sol";
