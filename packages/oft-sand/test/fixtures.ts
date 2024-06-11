@@ -75,13 +75,22 @@ export async function setupOFTSand() {
     OFTSand2.getAddress(),
     EndpointForOFTSand2.getAddress(),
   );
-
   await EndpointForOFTSand2.setDestLzEndpoint(
     OFTSand.getAddress(),
     EndpointForOFTSand.getAddress(),
   );
 
-  // Setting OFTAdapter and OFTSand as a peer of the other in the mock LZEndpoint
+  // Set destination endpoints in the LZEndpoint mock for each OFTSand2 and OFTAdapter
+  await EndpointForOFTSand2.setDestLzEndpoint(
+    OFTAdapter.getAddress(),
+    EndpointForAdapter.getAddress(),
+  );
+  await EndpointForAdapter.setDestLzEndpoint(
+    OFTSand2.getAddress(),
+    EndpointForOFTSand2.getAddress(),
+  );
+
+  // Setting OFTAdapter and OFTSand as peers of each other
   await OFTAdapter.connect(oftAdapterOwner).setPeer(
     eidOFTSand,
     ethers.zeroPadValue(await OFTSand.getAddress(), 32),
@@ -91,7 +100,7 @@ export async function setupOFTSand() {
     ethers.zeroPadValue(await OFTAdapter.getAddress(), 32),
   );
 
-  // Setting OFTSand and OFTSand2 as a peer of the other in the mock LZEndpoint
+  // Setting OFTSand and OFTSand2 as peers of each other
   await OFTSand.connect(oftSandOwner).setPeer(
     eidOFTSand2,
     ethers.zeroPadValue(await OFTSand2.getAddress(), 32),
@@ -99,6 +108,16 @@ export async function setupOFTSand() {
   await OFTSand2.connect(oftSandOwner2).setPeer(
     eidOFTSand,
     ethers.zeroPadValue(await OFTSand.getAddress(), 32),
+  );
+
+  // Setting OFTSand2 and OFTAdapter as peers of each other
+  await OFTSand2.connect(oftSandOwner2).setPeer(
+    eidAdapter,
+    ethers.zeroPadValue(await OFTAdapter.getAddress(), 32),
+  );
+  await OFTAdapter.connect(oftAdapterOwner).setPeer(
+    eidOFTSand2,
+    ethers.zeroPadValue(await OFTSand2.getAddress(), 32),
   );
 
   return {
