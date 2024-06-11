@@ -133,7 +133,7 @@ describe('OFT Contracts', function () {
         .toString();
 
       const sendParam = [
-        3,
+        4, // destination endpoint not yet used to set peer for OFTAdapter
         ethers.zeroPadValue(await user2.getAddress(), 32),
         tokensToSend,
         tokensToSend,
@@ -257,7 +257,9 @@ describe('OFT Contracts', function () {
         '0x',
         '0x',
       ];
+
       const [nativeFee2] = await OFTSand.quoteSend(sendParam2, 0);
+
       await OFTSand.connect(user2).send(
         sendParam2,
         [nativeFee2, 0],
@@ -269,6 +271,121 @@ describe('OFT Contracts', function () {
 
       expect(await OFTSand.balanceOf(user2)).to.be.equal(0);
       expect(await OFTSand2.balanceOf(user3)).to.be.equal(tokensToSend);
+    });
+
+    it('should correctly set OFTAdapter and OFTSand2 as peers to each other', async function () {
+      const {OFTAdapter, OFTSand2, eidAdapter, eidOFTSand2} =
+        await loadFixture(setupOFTSand);
+      expect(await OFTAdapter.peers(eidOFTSand2)).to.be.equal(
+        ethers.zeroPadValue(await OFTSand2.getAddress(), 32),
+      );
+      expect(await OFTSand2.peers(eidAdapter)).to.be.equal(
+        ethers.zeroPadValue(await OFTAdapter.getAddress(), 32),
+      );
+    });
+
+    it('transfer ERC20 tokens among OFTAdapter, OFTSand, and OFTSand2 using LayerZero', async function () {
+      const {
+        OFTAdapter,
+        OFTSand,
+        OFTSand2,
+        SandMock,
+        user1,
+        user2,
+        user3,
+        eidAdapter,
+        eidOFTSand,
+        eidOFTSand2,
+      } = await loadFixture(setupOFTSand);
+
+      const initalBalanceUser1 = await SandMock.balanceOf(user1);
+      const tokensToSend = initalBalanceUser1 / 1000000n;
+      await SandMock.connect(user1).approve(OFTAdapter, tokensToSend);
+      expect(await OFTSand.balanceOf(user2)).to.be.equal(0);
+
+      const options = Options.newOptions()
+        .addExecutorLzReceiveOption(200000, 0)
+        .toHex()
+        .toString();
+
+      const sendParam = [
+        eidOFTSand,
+        ethers.zeroPadValue(await user2.getAddress(), 32),
+        tokensToSend,
+        tokensToSend,
+        options,
+        '0x',
+        '0x',
+      ];
+
+      const [nativeFee] = await OFTAdapter.quoteSend(sendParam, 0);
+
+      // Sending tokens from OFTAdapter to OFTSand
+      await OFTAdapter.connect(user1).send(
+        sendParam,
+        [nativeFee, 0],
+        user1.getAddress(),
+        {
+          value: nativeFee,
+        },
+      );
+
+      const balanceUser1AfterSend = await SandMock.balanceOf(user1);
+      expect(balanceUser1AfterSend).to.be.equal(
+        initalBalanceUser1 - tokensToSend,
+      );
+      expect(await OFTSand.balanceOf(user2)).to.be.equal(tokensToSend);
+
+      const sendParam2 = [
+        eidOFTSand2,
+        ethers.zeroPadValue(await user3.getAddress(), 32),
+        tokensToSend,
+        tokensToSend,
+        options,
+        '0x',
+        '0x',
+      ];
+      const [nativeFee2] = await OFTSand.quoteSend(sendParam2, 0);
+
+      // Sending tokens from OFTSand to OFTSand2
+      await OFTSand.connect(user2).send(
+        sendParam2,
+        [nativeFee2, 0],
+        user2.getAddress(),
+        {
+          value: nativeFee2,
+        },
+      );
+
+      expect(await OFTSand.balanceOf(user2)).to.be.equal(0);
+      expect(await OFTSand2.balanceOf(user3)).to.be.equal(tokensToSend);
+
+      const sendParam3 = [
+        eidAdapter,
+        ethers.zeroPadValue(await user1.getAddress(), 32),
+        tokensToSend,
+        tokensToSend,
+        options,
+        '0x',
+        '0x',
+      ];
+
+      const [nativeFee3] = await OFTSand.quoteSend(sendParam3, 0);
+
+      // Sending tokens from OFTSand2 back to OFTAdapter
+      await OFTSand2.connect(user3).send(
+        sendParam3,
+        [nativeFee3, 0],
+        user3.getAddress(),
+        {
+          value: nativeFee3,
+        },
+      );
+
+      expect(await OFTSand2.balanceOf(user3)).to.be.equal(0);
+      expect(await SandMock.balanceOf(user1)).to.be.equal(
+        balanceUser1AfterSend + tokensToSend,
+      );
     });
 
     describe('Meta transaction', function () {
