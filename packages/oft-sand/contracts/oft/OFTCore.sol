@@ -11,12 +11,10 @@ import {IOFT, SendParam, OFTLimit, OFTReceipt, OFTFeeDetail, MessagingReceipt, M
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
 
-/**
- * @title OFTCore
- * @dev Abstract contract for the OftChain (OFT) token.
- * @dev This contract is based on '@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTCore.sol'
- * but has been modified to support ERC2771 compatibility.
- */
+/// @title OFTCore
+/// @dev Abstract contract for the OftChain (OFT) token.
+/// @dev This contract is based on '@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTCore.sol'
+/// but has been modified to support ERC2771 compatibility.
 abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3 {
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;
@@ -46,64 +44,51 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
     address public msgInspector;
     event MsgInspectorSet(address inspector);
 
-    /**
-     * @dev Constructor.
-     * @param _localDecimals The decimals of the token on the local chain (this chain).
-     * @param _endpoint The address of the LayerZero endpoint.
-     * @param _delegate The delegate capable of making OApp configurations inside of the endpoint.
-     */
+    /// @dev Constructor.
+    /// @param _localDecimals The decimals of the token on the local chain (this chain).
+    /// @param _endpoint The address of the LayerZero endpoint.
+    /// @param _delegate The delegate capable of making OApp configurations inside of the endpoint.
     constructor(uint8 _localDecimals, address _endpoint, address _delegate) OApp(_endpoint, _delegate) {
         if (_localDecimals < sharedDecimals()) revert InvalidLocalDecimals();
         decimalConversionRate = 10 ** (_localDecimals - sharedDecimals());
     }
 
-    /**
-     * @notice Retrieves interfaceID and the version of the OFT.
-     * @return interfaceId The interface ID.
-     * @return version The version.
-     *
-     * @dev interfaceId: This specific interface ID is '0x02e49c2c'.
-     * @dev version: Indicates a cross-chain compatible msg encoding with other OFTs.
-     * @dev If a new feature is added to the OFT cross-chain msg encoding, the version will be incremented.
-     * ie. localOFT version(x,1) CAN send messages to remoteOFT version(x,1)
-     */
+    /// @notice Retrieves interfaceID and the version of the OFT.
+    /// @return interfaceId The interface ID.
+    /// @return version The version.
+    /// @dev interfaceId: This specific interface ID is '0x02e49c2c'.
+    /// @dev version: Indicates a cross-chain compatible msg encoding with other OFTs.
+    /// @dev If a new feature is added to the OFT cross-chain msg encoding, the version will be incremented.
+    /// ie. localOFT version(x,1) CAN send messages to remoteOFT version(x,1)
     function oftVersion() external pure virtual returns (bytes4 interfaceId, uint64 version) {
         return (type(IOFT).interfaceId, 1);
     }
 
-    /**
-     * @dev Retrieves the shared decimals of the OFT.
-     * @return The shared decimals of the OFT.
-     *
-     * @dev Sets an implicit cap on the amount of tokens, over uint64.max() will need some sort of outbound cap / totalSupply cap
-     * Lowest common decimal denominator between chains.
-     * Defaults to 6 decimal places to provide up to 18,446,744,073,709.551615 units (max uint64).
-     * For tokens exceeding this totalSupply(), they will need to override the sharedDecimals function with something smaller.
-     * ie. 4 sharedDecimals would be 1,844,674,407,370,955.1615
-     */
+    /// @dev Retrieves the shared decimals of the OFT.
+    /// @return The shared decimals of the OFT.
+    /// @dev Sets an implicit cap on the amount of tokens, over uint64.max() will need some sort of outbound cap / totalSupply cap
+    /// Lowest common decimal denominator between chains.
+    /// Defaults to 6 decimal places to provide up to 18,446,744,073,709.551615 units (max uint64).
+    /// For tokens exceeding this totalSupply(), they will need to override the sharedDecimals function with something smaller.
+    /// ie. 4 sharedDecimals would be 1,844,674,407,370,955.1615
     function sharedDecimals() public view virtual returns (uint8) {
         return 6;
     }
 
-    /**
-     * @dev Sets the message inspector address for the OFT.
-     * @param _msgInspector The address of the message inspector.
-     *
-     * @dev This is an optional contract that can be used to inspect both 'message' and 'options'.
-     * @dev Set it to address(0) to disable it, or set it to a contract address to enable it.
-     */
+    /// @dev Sets the message inspector address for the OFT.
+    /// @param _msgInspector The address of the message inspector.
+    /// @dev This is an optional contract that can be used to inspect both 'message' and 'options'.
+    /// @dev Set it to address(0) to disable it, or set it to a contract address to enable it.
     function setMsgInspector(address _msgInspector) public virtual onlyOwner {
         msgInspector = _msgInspector;
         emit MsgInspectorSet(_msgInspector);
     }
 
-    /**
-     * @notice Provides a quote for OFT-related operations.
-     * @param _sendParam The parameters for the send operation.
-     * @return oftLimit The OFT limit information.
-     * @return oftFeeDetails The details of OFT fees.
-     * @return oftReceipt The OFT receipt information.
-     */
+    /// @notice Provides a quote for OFT-related operations.
+    /// @param _sendParam The parameters for the send operation.
+    /// @return oftLimit The OFT limit information.
+    /// @return oftFeeDetails The details of OFT fees.
+    /// @return oftReceipt The OFT receipt information.
     function quoteOFT(
         SendParam calldata _sendParam
     )
@@ -131,16 +116,13 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         oftReceipt = OFTReceipt(amountSentLD, amountReceivedLD);
     }
 
-    /**
-     * @notice Provides a quote for the send() operation.
-     * @param _sendParam The parameters for the send() operation.
-     * @param _payInLzToken Flag indicating whether the caller is paying in the LZ token.
-     * @return msgFee The calculated LayerZero messaging fee from the send() operation.
-     *
-     * @dev MessagingFee: LayerZero msg fee
-     *  - nativeFee: The native fee.
-     *  - lzTokenFee: The lzToken fee.
-     */
+    /// @notice Provides a quote for the send() operation.
+    /// @param _sendParam The parameters for the send() operation.
+    /// @param _payInLzToken Flag indicating whether the caller is paying in the LZ token.
+    /// @return msgFee The calculated LayerZero messaging fee from the send() operation.
+    /// @dev MessagingFee: LayerZero msg fee
+    ///  - nativeFee: The native fee.
+    ///  - lzTokenFee: The lzToken fee.
     function quoteSend(
         SendParam calldata _sendParam,
         bool _payInLzToken
@@ -156,21 +138,18 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         return _quote(_sendParam.dstEid, message, options, _payInLzToken);
     }
 
-    /**
-     * @dev Executes the send operation.
-     * @param _sendParam The parameters for the send operation.
-     * @param _fee The calculated fee for the send() operation.
-     *      - nativeFee: The native fee.
-     *      - lzTokenFee: The lzToken fee.
-     * @param _refundAddress The address to receive any excess funds.
-     * @return msgReceipt The receipt for the send operation.
-     * @return oftReceipt The OFT receipt information.
-     *
-     * @dev MessagingReceipt: LayerZero msg receipt
-     *  - guid: The unique identifier for the sent message.
-     *  - nonce: The nonce of the sent message.
-     *  - fee: The LayerZero fee incurred for the message.
-     */
+    /// @dev Executes the send operation.
+    /// @param _sendParam The parameters for the send operation.
+    /// @param _fee The calculated fee for the send() operation.
+    ///      - nativeFee: The native fee.
+    ///      - lzTokenFee: The lzToken fee.
+    /// @param _refundAddress The address to receive any excess funds.
+    /// @return msgReceipt The receipt for the send operation.
+    /// @return oftReceipt The OFT receipt information.
+    /// @dev MessagingReceipt: LayerZero msg receipt
+    ///  - guid: The unique identifier for the sent message.
+    ///  - nonce: The nonce of the sent message.
+    ///  - fee: The LayerZero fee incurred for the message.
     function send(
         SendParam calldata _sendParam,
         MessagingFee calldata _fee,
@@ -197,13 +176,11 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         emit OFTSent(msgReceipt.guid, _sendParam.dstEid, _msgSender(), amountSentLD, amountReceivedLD);
     }
 
-    /**
-     * @dev Internal function to build the message and options.
-     * @param _sendParam The parameters for the send() operation.
-     * @param _amountLD The amount in local decimals.
-     * @return message The encoded message.
-     * @return options The encoded options.
-     */
+    /// @dev Internal function to build the message and options.
+    /// @param _sendParam The parameters for the send() operation.
+    /// @param _amountLD The amount in local decimals.
+    /// @return message The encoded message.
+    /// @return options The encoded options.
     function _buildMsgAndOptions(
         SendParam calldata _sendParam,
         uint256 _amountLD
@@ -227,17 +204,16 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         if (msgInspector != address(0)) IOAppMsgInspector(msgInspector).inspect(message, options);
     }
 
-    /**
-     * @dev Internal function to handle the receive on the LayerZero endpoint.
-     * @param _origin The origin information.
-     *  - srcEid: The source chain endpoint ID.
-     *  - sender: The sender address from the src chain.
-     *  - nonce: The nonce of the LayerZero message.
-     * @param _guid The unique identifier for the received LayerZero message.
-     * @param _message The encoded message.
-     * @dev _executor The address of the executor.
-     * @dev _extraData Additional data.
-     */
+    /// @dev Internal function to handle the receive on the LayerZero endpoint.
+    /// @param _origin The origin information.
+    ///  - srcEid: The source chain endpoint ID.
+    ///  - sender: The sender address from the src chain.
+    ///  - nonce: The nonce of the LayerZero message.
+    /// @param _guid The unique identifier for the received LayerZero message.
+    /// @param _message The encoded message.
+    /// @dev _executor The address of the executor.
+    /// @dev _extraData Additional data.
+
     function _lzReceive(
         Origin calldata _origin,
         bytes32 _guid,
@@ -271,20 +247,17 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         emit OFTReceived(_guid, _origin.srcEid, toAddress, amountReceivedLD);
     }
 
-    /**
-     * @dev Internal function to handle the OAppPreCrimeSimulator simulated receive.
-     * @param _origin The origin information.
-     *  - srcEid: The source chain endpoint ID.
-     *  - sender: The sender address from the src chain.
-     *  - nonce: The nonce of the LayerZero message.
-     * @param _guid The unique identifier for the received LayerZero message.
-     * @param _message The LayerZero message.
-     * @param _executor The address of the off-chain executor.
-     * @param _extraData Arbitrary data passed by the msg executor.
-     *
-     * @dev Enables the preCrime simulator to mock sending lzReceive() messages,
-     * routes the msg down from the OAppPreCrimeSimulator, and back up to the OAppReceiver.
-     */
+    /// @dev Internal function to handle the OAppPreCrimeSimulator simulated receive.
+    /// @param _origin The origin information.
+    ///  - srcEid: The source chain endpoint ID.
+    ///  - sender: The sender address from the src chain.
+    ///  - nonce: The nonce of the LayerZero message.
+    /// @param _guid The unique identifier for the received LayerZero message.
+    /// @param _message The LayerZero message.
+    /// @param _executor The address of the off-chain executor.
+    /// @param _extraData Arbitrary data passed by the msg executor.
+    /// @dev Enables the preCrime simulator to mock sending lzReceive() messages,
+    /// routes the msg down from the OAppPreCrimeSimulator, and back up to the OAppReceiver.
     function _lzReceiveSimulate(
         Origin calldata _origin,
         bytes32 _guid,
@@ -295,58 +268,45 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         _lzReceive(_origin, _guid, _message, _executor, _extraData);
     }
 
-    /**
-     * @dev Check if the peer is considered 'trusted' by the OApp.
-     * @param _eid The endpoint ID to check.
-     * @param _peer The peer to check.
-     * @return Whether the peer passed is considered 'trusted' by the OApp.
-     *
-     * @dev Enables OAppPreCrimeSimulator to check whether a potential Inbound Packet is from a trusted source.
-     */
+    /// @dev Check if the peer is considered 'trusted' by the OApp.
+    /// @param _eid The endpoint ID to check.
+    /// @param _peer The peer to check.
+    /// @return Whether the peer passed is considered 'trusted' by the OApp.
+    /// @dev Enables OAppPreCrimeSimulator to check whether a potential Inbound Packet is from a trusted source.
     function isPeer(uint32 _eid, bytes32 _peer) public view virtual override returns (bool) {
         return peers[_eid] == _peer;
     }
 
-    /**
-     * @dev Internal function to remove dust from the given local decimal amount.
-     * @param _amountLD The amount in local decimals.
-     * @return amountLD The amount after removing dust.
-     *
-     * @dev Prevents the loss of dust when moving amounts between chains with different decimals.
-     * @dev eg. uint(123) with a conversion rate of 100 becomes uint(100).
-     */
+    /// @dev Internal function to remove dust from the given local decimal amount.
+    /// @param _amountLD The amount in local decimals.
+    /// @return amountLD The amount after removing dust.
+    /// @dev Prevents the loss of dust when moving amounts between chains with different decimals.
+    /// @dev eg. uint(123) with a conversion rate of 100 becomes uint(100).
     function _removeDust(uint256 _amountLD) internal view virtual returns (uint256 amountLD) {
         return (_amountLD / decimalConversionRate) * decimalConversionRate;
     }
 
-    /**
-     * @dev Internal function to convert an amount from shared decimals into local decimals.
-     * @param _amountSD The amount in shared decimals.
-     * @return amountLD The amount in local decimals.
-     */
+    /// @dev Internal function to convert an amount from shared decimals into local decimals.
+    /// @param _amountSD The amount in shared decimals.
+    /// @return amountLD The amount in local decimals.
     function _toLD(uint64 _amountSD) internal view virtual returns (uint256 amountLD) {
         return _amountSD * decimalConversionRate;
     }
 
-    /**
-     * @dev Internal function to convert an amount from local decimals into shared decimals.
-     * @param _amountLD The amount in local decimals.
-     * @return amountSD The amount in shared decimals.
-     */
+    /// @dev Internal function to convert an amount from local decimals into shared decimals.
+    /// @param _amountLD The amount in local decimals.
+    /// @return amountSD The amount in shared decimals.
     function _toSD(uint256 _amountLD) internal view virtual returns (uint64 amountSD) {
         return uint64(_amountLD / decimalConversionRate);
     }
 
-    /**
-     * @dev Internal function to mock the amount mutation from a OFT debit() operation.
-     * @param _amountLD The amount to send in local decimals.
-     * @param _minAmountLD The minimum amount to send in local decimals.
-     * @dev _dstEid The destination endpoint ID.
-     * @return amountSentLD The amount sent, in local decimals.
-     * @return amountReceivedLD The amount to be received on the remote chain, in local decimals.
-     *
-     * @dev This is where things like fees would be calculated and deducted from the amount to be received on the remote.
-     */
+    /// @dev Internal function to mock the amount mutation from a OFT debit() operation.
+    /// @param _amountLD The amount to send in local decimals.
+    /// @param _minAmountLD The minimum amount to send in local decimals.
+    /// @dev _dstEid The destination endpoint ID.
+    /// @return amountSentLD The amount sent, in local decimals.
+    /// @return amountReceivedLD The amount to be received on the remote chain, in local decimals.
+    /// @dev This is where things like fees would be calculated and deducted from the amount to be received on the remote.
     function _debitView(
         uint256 _amountLD,
         uint256 _minAmountLD,
@@ -363,18 +323,15 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         }
     }
 
-    /**
-     * @dev Internal function to perform a debit operation.
-     * @param _from The address to debit.
-     * @param _amountLD The amount to send in local decimals.
-     * @param _minAmountLD The minimum amount to send in local decimals.
-     * @param _dstEid The destination endpoint ID.
-     * @return amountSentLD The amount sent in local decimals.
-     * @return amountReceivedLD The amount received in local decimals on the remote.
-     *
-     * @dev Defined here but are intended to be overriden depending on the OFT implementation.
-     * @dev Depending on OFT implementation the _amountLD could differ from the amountReceivedLD.
-     */
+    /// @dev Internal function to perform a debit operation.
+    /// @param _from The address to debit.
+    /// @param _amountLD The amount to send in local decimals.
+    /// @param _minAmountLD The minimum amount to send in local decimals.
+    /// @param _dstEid The destination endpoint ID.
+    /// @return amountSentLD The amount sent in local decimals.
+    /// @return amountReceivedLD The amount received in local decimals on the remote.
+    /// @dev Defined here but are intended to be overriden depending on the OFT implementation.
+    /// @dev Depending on OFT implementation the _amountLD could differ from the amountReceivedLD.
     function _debit(
         address _from,
         uint256 _amountLD,
@@ -382,16 +339,14 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
         uint32 _dstEid
     ) internal virtual returns (uint256 amountSentLD, uint256 amountReceivedLD);
 
-    /**
-     * @dev Internal function to perform a credit operation.
-     * @param _to The address to credit.
-     * @param _amountLD The amount to credit in local decimals.
-     * @param _srcEid The source endpoint ID.
-     * @return amountReceivedLD The amount ACTUALLY received in local decimals.
-     *
-     * @dev Defined here but are intended to be overriden depending on the OFT implementation.
-     * @dev Depending on OFT implementation the _amountLD could differ from the amountReceivedLD.
-     */
+    /// @dev Internal function to perform a credit operation.
+    /// @param _to The address to credit.
+    /// @param _amountLD The amount to credit in local decimals.
+    /// @param _srcEid The source endpoint ID.
+    /// @return amountReceivedLD The amount ACTUALLY received in local decimals.
+    /// @dev Defined here but are intended to be overriden depending on the OFT implementation.
+    /// @dev Depending on OFT implementation the _amountLD could differ from the amountReceivedLD.
+
     function _credit(
         address _to,
         uint256 _amountLD,
