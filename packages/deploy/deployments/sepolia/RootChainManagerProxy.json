@@ -1,0 +1,28 @@
+{
+    "address": "0x34F5A25B627f50Bb3f5cAb72807c4D4F405a9232",
+    "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "rootToken",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "depositData",
+              "type": "bytes"
+            }
+          ],
+          "name": "depositFor",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+     ] 
+}
