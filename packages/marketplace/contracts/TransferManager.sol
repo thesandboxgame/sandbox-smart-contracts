@@ -300,15 +300,16 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     );
                 }
             }
-            if (quadsLength > 0)
-                landContract.batchTransferQuad(
-                    from,
-                    to,
-                    bundle.quads.sizes,
-                    bundle.quads.xs,
-                    bundle.quads.ys,
-                    bundle.quads.data
-                );
+            if (quadsLength > 0) require(quadsLength == bundle.quads.ys.length, "quad error");
+            require(quadsLength == bundle.quads.sizes.length, "quad size error");
+            landContract.batchTransferQuad(
+                from,
+                to,
+                bundle.quads.sizes,
+                bundle.quads.xs,
+                bundle.quads.ys,
+                bundle.quads.data
+            );
         } else {
             revert("invalid asset class");
         }
