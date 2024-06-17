@@ -10,15 +10,18 @@ import {ZeroAddress, Contract, Signer} from 'ethers';
 export function shouldMatchOrdersForBundle() {
   describe('Exchange MatchOrders for Bundle', function () {
     let ExchangeContractAsUser: Contract,
+      ExchangeContractAsAdmin: Contract,
       OrderValidatorAsAdmin: Contract,
       ERC20Contract: Contract,
       ERC20Contract2: Contract,
       ERC721Contract: Contract,
       ERC1155Contract: Contract,
+      LandContract: Contract,
       protocolFeeSecondary: number,
       defaultFeeReceiver: Signer,
       maker: Signer,
       taker: Signer,
+      LandAsAdmin: Contract,
       makerAsset: Asset,
       takerAsset: Asset,
       bundleWithoutERC721Left: Asset,
@@ -37,9 +40,10 @@ export function shouldMatchOrdersForBundle() {
       orderLeft: Order,
       orderRight: Order,
       makerSig: string,
-      takerSig: string;
+      takerSig: string,
+      landAdmin: Signer;
 
-    describe('ERC20 x Bundle token', function () {
+    describe('ERC20 x Bundle', function () {
       beforeEach(async function () {
         ({
           ExchangeContractAsUser,
@@ -875,6 +879,207 @@ export function shouldMatchOrdersForBundle() {
         );
 
         // TODO: royalties checks for tokens
+      });
+    });
+
+    describe('ERC20 x Bundle with Quads', function () {
+      beforeEach(async function () {
+        ({
+          ExchangeContractAsUser,
+          ExchangeContractAsAdmin,
+          OrderValidatorAsAdmin,
+          ERC20Contract,
+          ERC20Contract2,
+          ERC721Contract,
+          ERC1155Contract,
+          protocolFeeSecondary,
+          defaultFeeReceiver,
+          user1: maker,
+          user2: taker,
+          LandContract,
+          LandAsAdmin,
+          landAdmin,
+        } = await loadFixture(deployFixtures));
+
+        // Set up ERC20 for maker
+        await ERC20Contract.mint(maker.getAddress(), 30000000000);
+        await ERC20Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          30000000000
+        );
+
+        // Construct makerAsset
+        makerAsset = await AssetERC20(ERC20Contract, 10000000000);
+
+        // Set up ERC20 for taker
+        await ERC20Contract2.mint(taker.getAddress(), 40000000000);
+        await ERC20Contract2.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          40000000000
+        );
+
+        // Set up ERC721 for taker
+        await ERC721Contract.mint(taker.getAddress(), 1);
+        await ERC721Contract.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        // Set up ERC1155 for taker
+        await ERC1155Contract.mint(taker.getAddress(), 1, 50);
+
+        await ERC1155Contract.connect(taker).setApprovalForAll(
+          await ExchangeContractAsUser.getAddress(),
+          true
+        );
+
+        // Make sure the land contract address is set on the Exchange
+        await ExchangeContractAsAdmin.setLandContract(
+          LandContract.getAddress()
+        );
+
+        // Land contract setup for taker -------------------------------------------------------------
+
+        // Set a minter
+        await LandAsAdmin.setMinter(landAdmin.getAddress(), true);
+
+        // Ensure that the marketplace contract is an approved operator for mock land contract
+        await LandContract.connect(taker).setApprovalForAllWithOutFilter(
+          await ExchangeContractAsUser.getAddress(),
+          true
+        );
+
+        await LandAsAdmin.mintQuad(taker.getAddress(), 3, 0, 0, '0x');
+        await LandAsAdmin.mintQuad(taker.getAddress(), 3, 0, 3, '0x');
+        await LandAsAdmin.mintQuad(taker.getAddress(), 3, 3, 0, '0x');
+        await LandAsAdmin.mintQuad(taker.getAddress(), 3, 3, 3, '0x');
+        expect(await LandContract.balanceOf(taker.getAddress())).to.be.equal(
+          36
+        );
+
+        // End land setup for taker ------------------------------------------------------------------
+
+        // Construct takerAsset bundle
+        bundledERC20 = [
+          {
+            erc20Address: ERC20Contract2.target,
+            value: 20000000000,
+          },
+        ];
+        bundledERC721 = [
+          {
+            erc721Address: ERC721Contract.target,
+            ids: [1],
+          },
+        ];
+
+        bundledERC1155 = [
+          {
+            erc1155Address: ERC1155Contract.target,
+            ids: [1],
+            supplies: [10],
+          },
+        ];
+
+        quads = {
+          sizes: [3, 3], // 3x3, 3x3 = 9+9 lands total
+          xs: [3, 0],
+          ys: [0, 3],
+          data: '0x',
+        };
+
+        // Create bundle for passing as right order
+        bundleData = {
+          bundledERC20,
+          bundledERC721,
+          bundledERC1155,
+          quads,
+        };
+
+        takerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721 / land
+      });
+
+      it('should execute a complete match order between ERC20 tokens and Bundle containing ERC20, ERC721, ERC1155 and Quads', async function () {
+        orderLeft = await OrderDefault(
+          maker, // ERC20
+          makerAsset,
+          ZeroAddress,
+          takerAsset, // Bundle
+          1,
+          0,
+          0
+        );
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset, // Bundle
+          ZeroAddress,
+          makerAsset, // ERC20
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const makerAddress = await maker.getAddress();
+        const takerAddress = await taker.getAddress();
+
+        expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
+          30000000000
+        );
+        expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(0);
+        expect(await ERC20Contract2.balanceOf(makerAddress)).to.be.equal(0);
+        expect(await ERC20Contract2.balanceOf(takerAddress)).to.be.equal(
+          40000000000
+        );
+        expect(await ERC721Contract.ownerOf(1)).to.be.equal(takerAddress);
+        expect(await ERC1155Contract.balanceOf(takerAddress, 1)).to.be.equal(
+          50
+        );
+        expect(await ERC1155Contract.balanceOf(makerAddress, 1)).to.be.equal(0);
+
+        await ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft, // passing ERC20 as left order
+            signatureLeft: makerSig,
+            orderRight, // passing Bundle as right order
+            signatureRight: takerSig,
+          },
+        ]);
+        expect(await ERC1155Contract.balanceOf(makerAddress, 1)).to.be.equal(
+          10
+        );
+        expect(await ERC721Contract.ownerOf(1)).to.be.equal(makerAddress);
+        expect(await ERC1155Contract.balanceOf(takerAddress, 1)).to.be.equal(
+          40
+        );
+
+        expect(
+          await ExchangeContractAsUser.fills(hashKey(orderLeft))
+        ).to.be.equal(1);
+        expect(
+          await ExchangeContractAsUser.fills(hashKey(orderRight))
+        ).to.be.equal(10000000000);
+
+        expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
+          9750000000 // 10000000000 - protocolFee
+        );
+
+        expect(await ERC20Contract.balanceOf(maker)).to.be.equal(20000000000);
+        expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(20000000000);
+        expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
+
+        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        expect(
+          await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
+        ).to.be.equal(
+          (Number(protocolFeeSecondary) * Number(makerAsset.value)) / 10000
+        );
+
+        // check maker received quads
+        expect(await LandContract.balanceOf(takerAddress)).to.be.equal(18);
+        expect(await LandContract.balanceOf(makerAddress)).to.be.equal(18);
       });
     });
   });
