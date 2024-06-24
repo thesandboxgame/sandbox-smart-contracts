@@ -4,12 +4,17 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {
+    AccessControlUpgradeable,
+    ContextUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {
+    ERC2771HandlerUpgradeable
+} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
@@ -141,13 +146,14 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            tier,
-            ++creatorNonces[creator],
-            revealed ? REVEALED_NONCE : NOT_REVEALED_NONCE,
-            NOT_BRIDGED
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(
+                creator,
+                tier,
+                ++creatorNonces[creator],
+                revealed ? REVEALED_NONCE : NOT_REVEALED_NONCE,
+                NOT_BRIDGED
+            );
 
         // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(creator, tier, amount);
@@ -194,9 +200,7 @@ contract AssetCreate is
                 revealed[i] ? REVEALED_NONCE : NOT_REVEALED_NONCE,
                 NOT_BRIDGED
             );
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
 
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
@@ -232,13 +236,14 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(
-            creator,
-            uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
-            ++creatorNonces[creator],
-            REVEALED_NONCE,
-            NOT_BRIDGED
-        );
+        uint256 tokenId =
+            TokenIdUtils.generateTokenId(
+                creator,
+                uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
+                ++creatorNonces[creator],
+                REVEALED_NONCE,
+                NOT_BRIDGED
+            );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
         emit SpecialAssetMinted(
@@ -270,9 +275,7 @@ contract AssetCreate is
         for (uint256 i; i < amounts.length; ) {
             revealed[i] = REVEALED;
             tiers[i] = uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE);
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
 
         require(
@@ -292,9 +295,7 @@ contract AssetCreate is
                 REVEALED_NONCE,
                 NOT_BRIDGED
             );
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
@@ -345,14 +346,10 @@ contract AssetCreate is
                 NOT_BRIDGED
             );
             require(mintData.amount <= mintData.maxSupply, "AssetCreate: Max supply exceeded");
-            unchecked {
-                availableToMint[tokenId] = mintData.maxSupply - mintData.amount;
-            }
+            unchecked {availableToMint[tokenId] = mintData.maxSupply - mintData.amount;}
         } else {
             require(availableToMint[tokenId] >= mintData.amount, "AssetCreate: Max supply reached");
-            unchecked {
-                availableToMint[tokenId] -= mintData.amount;
-            }
+            unchecked {availableToMint[tokenId] -= mintData.amount;}
         }
 
         if (matchedOrders.length > 0) {
@@ -425,9 +422,8 @@ contract AssetCreate is
         uint256[] memory tokenIds = new uint256[](expectedLength);
         uint256[] memory tiersToBurn = new uint256[](expectedLength);
         for (uint256 i; i < expectedLength; ) {
-            uint16 revealed = mintData.tiers[i] == uint8(ICatalyst.CatalystType.COMMON)
-                ? REVEALED_NONCE
-                : NOT_REVEALED_NONCE;
+            uint16 revealed =
+                mintData.tiers[i] == uint8(ICatalyst.CatalystType.COMMON) ? REVEALED_NONCE : NOT_REVEALED_NONCE;
             tiersToBurn[i] = mintData.tiers[i];
             tokenIds[i] = assetContract.getTokenIdByMetadataHash(mintData.metadataHashes[i]);
             if (tokenIds[i] == 0) {
@@ -439,14 +435,10 @@ contract AssetCreate is
                     NOT_BRIDGED
                 );
                 require(mintData.amounts[i] <= mintData.maxSupplies[i], "AssetCreate: Max supply exceeded");
-                unchecked {
-                    availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];
-                }
+                unchecked {availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];}
             } else {
                 require(availableToMint[tokenIds[i]] >= mintData.amounts[i], "AssetCreate: Max supply reached");
-                unchecked {
-                    availableToMint[tokenIds[i]] -= mintData.amounts[i];
-                }
+                unchecked {availableToMint[tokenIds[i]] -= mintData.amounts[i];}
             }
             if (matchedOrdersArray.length > i && matchedOrdersArray[i].length > 0) {
                 exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
@@ -458,9 +450,7 @@ contract AssetCreate is
                 mintData.paymentTokens[i],
                 mintData.creators[i]
             );
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
 
         catalystContract.burnBatchFrom(mintData.caller, tiersToBurn, mintData.amounts);
@@ -717,9 +707,7 @@ contract AssetCreate is
         bytes32[] memory encodedHashes = new bytes32[](arrayLength);
         for (uint256 i; i < arrayLength; ) {
             encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
 
         return keccak256(abi.encodePacked(encodedHashes));
