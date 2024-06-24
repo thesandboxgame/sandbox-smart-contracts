@@ -11,14 +11,6 @@ import {LandMetadataBase} from "./registry/LandMetadataBase.sol";
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
 contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {
-    /// @notice the base token id used for a batch operation is wrong
-    /// @param tokenId the id of the token
-    error InvalidBaseTokenId(uint256 tokenId);
-
-    /// @notice the neighborhoodId is invalid
-    /// @param neighborhoodId the invalid neighborhoodId
-    error InvalidNeighborhoodId(uint256 neighborhoodId);
-
     struct BatchSetNameData {
         // the number that identifies the neighborhood
         uint256 neighborhoodId;
@@ -202,18 +194,5 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
             ret[i] = BatchSetData({baseTokenId: _getKey(tokenIds[i]), metadata: _getMetadata(tokenIds[i])});
         }
         return ret;
-    }
-
-    /// @notice checks if a neighborhoodId is in range
-    /// @param neighborhoodId the number that identifies the neighborhood
-    function _isValidNeighborhoodId(uint256 neighborhoodId) internal pure {
-        // Cannot set it to unknown (zero).
-        if (neighborhoodId == 0) {
-            revert InvalidNeighborhoodId(neighborhoodId);
-        }
-        // NEIGHBORHOOD_MASK (127) is left out to use as escape char if needed.
-        if (neighborhoodId >= NEIGHBORHOOD_MASK) {
-            revert InvalidNeighborhoodId(neighborhoodId);
-        }
     }
 }

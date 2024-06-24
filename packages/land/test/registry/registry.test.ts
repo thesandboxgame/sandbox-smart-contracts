@@ -37,12 +37,15 @@ describe('LandMetadataRegistry', function () {
 
     it('admin should fail to set metadata if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const NEIGHBORHOOD_MASK = await registryAsAdmin.NEIGHBORHOOD_MASK();
       await expect(registryAsAdmin.setMetadata(tokenId, true, 0))
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
         .withArgs(0);
-      await expect(registryAsAdmin.setMetadata(tokenId, true, 127))
+      await expect(
+        registryAsAdmin.setMetadata(tokenId, true, NEIGHBORHOOD_MASK),
+      )
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
-        .withArgs(127);
+        .withArgs(NEIGHBORHOOD_MASK);
     });
   });
 
@@ -90,12 +93,15 @@ describe('LandMetadataRegistry', function () {
 
     it('admin should fail to set neighborhood number if the number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const NEIGHBORHOOD_MASK = await registryAsAdmin.NEIGHBORHOOD_MASK();
       await expect(registryAsAdmin.setNeighborhoodId(tokenId, 0))
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
         .withArgs(0);
-      await expect(registryAsAdmin.setNeighborhoodId(tokenId, 127))
+      await expect(
+        registryAsAdmin.setNeighborhoodId(tokenId, NEIGHBORHOOD_MASK),
+      )
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
-        .withArgs(127);
+        .withArgs(NEIGHBORHOOD_MASK);
     });
   });
 
@@ -191,12 +197,18 @@ describe('LandMetadataRegistry', function () {
 
     it('admin should fail to set neighborhood name if the neighborhood number is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
+      const NEIGHBORHOOD_MASK = await registryAsAdmin.NEIGHBORHOOD_MASK();
       await expect(registryAsAdmin.setNeighborhoodName(0, neighborhoodName))
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
         .withArgs(0);
-      await expect(registryAsAdmin.setNeighborhoodName(127, neighborhoodName))
+      await expect(
+        registryAsAdmin.setNeighborhoodName(
+          NEIGHBORHOOD_MASK,
+          neighborhoodName,
+        ),
+      )
         .to.revertedWithCustomError(registryAsAdmin, 'InvalidNeighborhoodId')
-        .withArgs(127);
+        .withArgs(NEIGHBORHOOD_MASK);
     });
   });
 
@@ -204,11 +216,16 @@ describe('LandMetadataRegistry', function () {
     it('admin should be able to batch set metadata', async function () {
       const {admin, registryAsAdmin} = await loadFixture(setupRegistry);
       const batch: {[key: string]: bigint} = {};
+      const LANDS_PER_WORD = await registryAsAdmin.LANDS_PER_WORD();
+      const BITS_PER_LAND = await registryAsAdmin.BITS_PER_LAND();
+      const PREMIUM_MASK = await registryAsAdmin.PREMIUM_MASK();
+      const NEIGHBORHOOD_MASK = await registryAsAdmin.NEIGHBORHOOD_MASK();
       for (let i = 0n; i < 408 * 4; i++) {
         const tId = tokenId + i;
-        const key = 32n * (tId / 32n);
-        const byteNum = 8n * (tId % 32n);
-        const landMetadata = (neighborhoodId + i) % 127n | 0x80n;
+        const key = LANDS_PER_WORD * (tId / LANDS_PER_WORD);
+        const byteNum = BITS_PER_LAND * (tId % LANDS_PER_WORD);
+        const landMetadata =
+          (neighborhoodId + i) % NEIGHBORHOOD_MASK | PREMIUM_MASK;
         if (!batch[key]) batch[key] = 0n;
         batch[key] = batch[key] | (landMetadata << byteNum);
       }
@@ -253,7 +270,7 @@ describe('LandMetadataRegistry', function () {
 
     it('admin should fail to batch set metadata if baseTokenId is invalid', async function () {
       const {registryAsAdmin} = await loadFixture(setupRegistry);
-      const baseTokenId = 32n * (tokenId / 32n) + 1n;
+      const baseTokenId = 16n * (tokenId / 16n) + 1n;
       await expect(
         registryAsAdmin.batchSetMetadata([{baseTokenId, metadata: 0n}]),
       )
@@ -301,20 +318,20 @@ describe('LandMetadataRegistry', function () {
 
   it('@skip-on-ci @skip-on-coverage gas calculation', async function () {
     // two rows
-    const numLands32InBatch = 408n * 2n; // 19.7Mgas (max is 1223, 29530015n gas)
-    const metadata32 =
+    const numLands16InBatch = 408n * 2n; // 19.7Mgas (max is 1223, 236249608n gas)
+    const metadata16 =
       0x8182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0n;
     const {registryAsAdmin} = await loadFixture(setupRegistry);
     const batchMetadata = [];
-    for (let i = 0n; i < numLands32InBatch; i++) {
+    for (let i = 0n; i < numLands16InBatch; i++) {
       batchMetadata.push({
-        baseTokenId: 32n * i + 32n,
-        metadata: metadata32,
+        baseTokenId: 16n * i + 16n,
+        metadata: metadata16,
       });
     }
     const tx = await registryAsAdmin.batchSetMetadata(batchMetadata);
     const receipt = await tx.wait();
-    const numLandsPerBatch = numLands32InBatch * 32n;
+    const numLandsPerBatch = numLands16InBatch * 16n;
     console.log('numLandsInBatch', numLandsPerBatch);
     const numTxs = (408n * 408n) / numLandsPerBatch;
     const totalGas = numTxs * receipt.cumulativeGasUsed;

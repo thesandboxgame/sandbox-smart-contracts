@@ -11,6 +11,7 @@ import {
 } from './utils/hardhatConfig';
 import './tasks/importedPackages';
 import './tasks/steal';
+import './tasks/landMetadataRegistry';
 
 // Package name : solidity source code path
 const importedPackages = {
@@ -64,6 +65,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/land': [
     'contracts/Land.sol',
     'contracts/PolygonLand.sol',
+    'contracts/LandMetadataRegistry.sol',
   ],
 };
 
