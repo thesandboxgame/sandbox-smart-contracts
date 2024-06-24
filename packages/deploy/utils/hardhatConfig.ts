@@ -3,24 +3,11 @@ import {HardhatUserConfig} from 'hardhat/config';
 import {NetworksUserConfig} from 'hardhat/types';
 
 export function nodeUrl(networkName: string): string {
-  if (networkName) {
-    const uri = process.env['ETH_NODE_URI_' + networkName.toUpperCase()];
-    if (uri && uri !== '') {
-      return uri;
-    }
-  }
-
-  let uri = process.env.ETH_NODE_URI;
-  if (uri) {
-    uri = uri.replace('{{networkName}}', networkName);
-  }
-  if (!uri || uri === '') {
-    // throw new Error(`environment variable "ETH_NODE_URI" not configured `);
-    return '';
-  }
-  if (uri.indexOf('{{') >= 0) {
-    throw new Error(
-      `invalid uri or network not supported by node provider : ${uri}`
+  const envName = 'ETH_NODE_URI_' + networkName.toUpperCase();
+  const uri = process.env[envName];
+  if (!uri || uri.trim() === '') {
+    console.warn(
+      `missing node url ${envName} for ${networkName}, will fail if trying to use this network`
     );
   }
   return uri;
@@ -48,23 +35,37 @@ export function getVerifyApiKey(networkName?: string): string {
 export function addNodeAndMnemonic(
   networks: NetworksUserConfig
 ): NetworksUserConfig {
+  const ret = {};
   for (const k in networks) {
-    if (k === 'localhost' || k == HARDHAT_NETWORK_NAME) continue;
-    networks[k] = {
-      ...networks[k],
-      url: nodeUrl(k),
-      accounts: {
-        mnemonic: getMnemonic(k),
-      },
-      verify: {
-        etherscan: {
-          ...(k === 'amoy' ? {apiUrl: 'https://api-amoy.polygonscan.com'} : {}),
-          apiKey: getVerifyApiKey(k),
+    if (k === 'localhost' || k == HARDHAT_NETWORK_NAME) {
+      ret[k] = networks[k];
+      continue;
+    }
+    const url = nodeUrl(k);
+    if (url) {
+      ret[k] = {
+        ...networks[k],
+        url,
+        accounts: {
+          mnemonic: getMnemonic(k),
         },
-      },
-    };
+        verify: {
+          etherscan: {
+            ...(k === 'amoy'
+              ? {apiUrl: 'https://api-amoy.polygonscan.com'}
+              : {}),
+            apiKey: getVerifyApiKey(k),
+          },
+        },
+      };
+    }
   }
-  return networks;
+  if (Object.keys(ret).length === 0) {
+    throw new Error(
+      'At least one ETH_NODE_URI must be configured in .env file'
+    );
+  }
+  return ret;
 }
 
 export function skipDeploymentsOnLiveNetworks(
