@@ -4792,7 +4792,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           generateLazyMintMultipleAssetsSignature,
           approveSandForAssetCreate,
           metadataHashes,
-          creator,
           user,
           MockERC20Contract,
           AssetCreateContractAsUser,
