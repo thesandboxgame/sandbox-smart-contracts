@@ -8,7 +8,7 @@ const setupTest = deployments.createFixture(
       return await ethers.getContractAt(contract.abi, contract.address);
     }
 
-    const {deployer} = await getNamedAccounts();
+    const {deployer, sandAdmin} = await getNamedAccounts();
     await deployments.fixture(['Land']);
     const LandContract = await getEthersContract('Land');
 
@@ -27,6 +27,7 @@ const setupTest = deployments.createFixture(
       OperatorFilterLandSubscription,
       OperatorFilterRegistry,
       deployer,
+      sandAdmin,
     };
   }
 );
@@ -34,8 +35,8 @@ const setupTest = deployments.createFixture(
 describe('Land', function () {
   describe('Roles', function () {
     it('Admin', async function () {
-      const {LandContract, deployer} = await setupTest();
-      expect(await LandContract.getAdmin()).to.be.equal(deployer);
+      const {LandContract, sandAdmin} = await setupTest();
+      expect(await LandContract.getAdmin()).to.be.equal(sandAdmin);
     });
   });
 

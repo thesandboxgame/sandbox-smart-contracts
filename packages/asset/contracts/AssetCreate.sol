@@ -4,17 +4,12 @@ pragma solidity 0.8.18;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {TokenIdUtils} from "./libraries/TokenIdUtils.sol";
 import {AuthSuperValidator} from "./AuthSuperValidator.sol";
-import {
-    ERC2771HandlerUpgradeable
-} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IAsset} from "./interfaces/IAsset.sol";
 import {ICatalyst} from "./interfaces/ICatalyst.sol";
 import {IAssetCreate} from "./interfaces/IAssetCreate.sol";
@@ -36,9 +31,9 @@ contract AssetCreate is
     using TokenIdUtils for uint256;
     using Address for address;
 
-    IAsset private assetContract;
-    ICatalyst private catalystContract;
-    AuthSuperValidator private authValidator;
+    IAsset public assetContract;
+    ICatalyst public catalystContract;
+    AuthSuperValidator public authValidator;
 
     /// @notice mapping of creator address to creator nonce, a nonce is incremented every time a creator mints a new token
     mapping(address => uint16) public creatorNonces;
@@ -53,8 +48,20 @@ contract AssetCreate is
     mapping(uint256 => uint256) public availableToMint;
 
     /// @notice The marketplace exchange contract to purchase catalyst
-    IExchange private exchangeContract;
+    IExchange public exchangeContract;
 
+    /// @notice Maximum BPS value
+    uint256 public constant MAX_BPS_IN_UNIT = 10000;
+    /// @notice Revealed status nonce value
+    uint8 public constant REVEALED_NONCE = 1;
+    /// @notice Not revealed status nonce value
+    uint8 public constant NOT_REVEALED_NONCE = 0;
+    /// @notice Revealed status flag
+    bool public constant REVEALED = true;
+    /// @notice Not revealed status flag
+    bool public constant NOT_REVEALED = false;
+    /// @notice Not bridged status flag
+    bool public constant NOT_BRIDGED = false;
     /// @notice Role allowing to mint special assets
     bytes32 public constant SPECIAL_MINTER_ROLE = keccak256("SPECIAL_MINTER_ROLE");
     /// @notice Role allowing to pause the contract
@@ -134,8 +141,13 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId =
-            TokenIdUtils.generateTokenId(creator, tier, ++creatorNonces[creator], revealed ? 1 : 0, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            tier,
+            ++creatorNonces[creator],
+            revealed ? REVEALED_NONCE : NOT_REVEALED_NONCE,
+            NOT_BRIDGED
+        );
 
         // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(creator, tier, amount);
@@ -167,9 +179,9 @@ contract AssetCreate is
             "AssetCreate: Invalid signature"
         );
 
-        require(tiers.length == amounts.length, "AssetCreate: 1-Array lengths");
-        require(amounts.length == metadataHashes.length, "AssetCreate: 2-Array lengths");
-        require(metadataHashes.length == revealed.length, "AssetCreate: 3-Array lengths");
+        require(amounts.length == tiers.length, "AssetCreate: 1-Array lengths");
+        require(revealed.length == tiers.length, "AssetCreate: 2-Array lengths");
+        require(metadataHashes.length == tiers.length, "AssetCreate: 3-Array lengths");
 
         uint256[] memory tokenIds = new uint256[](tiers.length);
         uint256[] memory tiersToBurn = new uint256[](tiers.length);
@@ -179,10 +191,12 @@ contract AssetCreate is
                 creator,
                 tiers[i],
                 ++creatorNonces[creator],
-                revealed[i] ? 1 : 0,
-                false
+                revealed[i] ? REVEALED_NONCE : NOT_REVEALED_NONCE,
+                NOT_BRIDGED
             );
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         catalystContract.burnBatchFrom(creator, tiersToBurn, amounts);
@@ -206,15 +220,35 @@ contract AssetCreate is
         require(
             authValidator.verify(
                 signature,
-                _hashMint(creator, signatureNonces[_msgSender()]++, 0, amount, true, metadataHash)
+                _hashMint(
+                    creator,
+                    signatureNonces[_msgSender()]++,
+                    uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
+                    amount,
+                    REVEALED,
+                    metadataHash
+                )
             ),
             "AssetCreate: Invalid signature"
         );
 
-        uint256 tokenId = TokenIdUtils.generateTokenId(creator, 0, ++creatorNonces[creator], 1, false);
+        uint256 tokenId = TokenIdUtils.generateTokenId(
+            creator,
+            uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
+            ++creatorNonces[creator],
+            REVEALED_NONCE,
+            NOT_BRIDGED
+        );
 
         assetContract.mint(creator, tokenId, amount, metadataHash);
-        emit SpecialAssetMinted(creator, tokenId, 0, amount, metadataHash, true);
+        emit SpecialAssetMinted(
+            creator,
+            tokenId,
+            uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
+            amount,
+            metadataHash,
+            REVEALED
+        );
     }
 
     /// @notice Create multiple special assets
@@ -232,29 +266,39 @@ contract AssetCreate is
         require(amounts.length == metadataHashes.length, "AssetCreate: Array lengths");
 
         bool[] memory revealed = new bool[](amounts.length);
-        uint8[] memory tier = new uint8[](amounts.length);
+        uint8[] memory tiers = new uint8[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
-            revealed[i] = true;
-            tier[i] = uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE);
-            unchecked {++i;}
+            revealed[i] = REVEALED;
+            tiers[i] = uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE);
+            unchecked {
+                ++i;
+            }
         }
 
         require(
             authValidator.verify(
                 signature,
-                _hashBatchMint(creator, signatureNonces[_msgSender()]++, tier, amounts, revealed, metadataHashes)
+                _hashBatchMint(creator, signatureNonces[_msgSender()]++, tiers, amounts, revealed, metadataHashes)
             ),
             "AssetCreate: Invalid signature"
         );
 
         uint256[] memory tokenIds = new uint256[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
-            tokenIds[i] = TokenIdUtils.generateTokenId(creator, 0, ++creatorNonces[creator], 1, false);
-            unchecked {++i;}
+            tokenIds[i] = TokenIdUtils.generateTokenId(
+                creator,
+                uint8(ICatalyst.CatalystType.TSB_EXCLUSIVE),
+                ++creatorNonces[creator],
+                REVEALED_NONCE,
+                NOT_BRIDGED
+            );
+            unchecked {
+                ++i;
+            }
         }
 
         assetContract.mintBatch(creator, tokenIds, amounts, metadataHashes);
-        emit SpecialAssetBatchMinted(creator, tokenIds, tier, amounts, metadataHashes, revealed);
+        emit SpecialAssetBatchMinted(creator, tokenIds, tiers, amounts, metadataHashes, revealed);
     }
 
     /// @notice Lazily creates a new asset with a signature
@@ -297,14 +341,18 @@ contract AssetCreate is
                 mintData.creator,
                 mintData.tier,
                 ++creatorNonces[mintData.creator],
-                mintData.tier == 1 ? 1 : 0,
-                false
+                mintData.tier == uint8(ICatalyst.CatalystType.COMMON) ? REVEALED_NONCE : NOT_REVEALED_NONCE,
+                NOT_BRIDGED
             );
             require(mintData.amount <= mintData.maxSupply, "AssetCreate: Max supply exceeded");
-            unchecked {availableToMint[tokenId] = mintData.maxSupply - mintData.amount;}
+            unchecked {
+                availableToMint[tokenId] = mintData.maxSupply - mintData.amount;
+            }
         } else {
             require(availableToMint[tokenId] >= mintData.amount, "AssetCreate: Max supply reached");
-            unchecked {availableToMint[tokenId] -= mintData.amount;}
+            unchecked {
+                availableToMint[tokenId] -= mintData.amount;
+            }
         }
 
         if (matchedOrders.length > 0) {
@@ -313,7 +361,7 @@ contract AssetCreate is
         // burn catalyst of a given tier, the tier is representing catalyst token id
         catalystContract.burnFrom(mintData.caller, mintData.tier, mintData.amount);
         // send the payment to the creator after deducting the lazy mint fee
-        distributePayment(
+        _distributePayment(
             mintData.caller,
             mintData.unitPrice,
             mintData.amount,
@@ -374,10 +422,12 @@ contract AssetCreate is
         require(mintData.metadataHashes.length == expectedLength, "AssetCreate: 5-Array lengths");
         require(mintData.maxSupplies.length == expectedLength, "AssetCreate: 6-Array lengths");
 
-        uint256[] memory tokenIds = new uint256[](mintData.tiers.length);
-        uint256[] memory tiersToBurn = new uint256[](mintData.tiers.length);
-        for (uint256 i; i < mintData.tiers.length; ) {
-            uint16 revealed = mintData.tiers[i] == 1 ? 1 : 0;
+        uint256[] memory tokenIds = new uint256[](expectedLength);
+        uint256[] memory tiersToBurn = new uint256[](expectedLength);
+        for (uint256 i; i < expectedLength; ) {
+            uint16 revealed = mintData.tiers[i] == uint8(ICatalyst.CatalystType.COMMON)
+                ? REVEALED_NONCE
+                : NOT_REVEALED_NONCE;
             tiersToBurn[i] = mintData.tiers[i];
             tokenIds[i] = assetContract.getTokenIdByMetadataHash(mintData.metadataHashes[i]);
             if (tokenIds[i] == 0) {
@@ -386,25 +436,31 @@ contract AssetCreate is
                     mintData.tiers[i],
                     ++creatorNonces[mintData.creators[i]],
                     revealed,
-                    false
+                    NOT_BRIDGED
                 );
                 require(mintData.amounts[i] <= mintData.maxSupplies[i], "AssetCreate: Max supply exceeded");
-                unchecked {availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];}
+                unchecked {
+                    availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];
+                }
             } else {
                 require(availableToMint[tokenIds[i]] >= mintData.amounts[i], "AssetCreate: Max supply reached");
-                unchecked {availableToMint[tokenIds[i]] -= mintData.amounts[i];}
+                unchecked {
+                    availableToMint[tokenIds[i]] -= mintData.amounts[i];
+                }
             }
             if (matchedOrdersArray.length > i && matchedOrdersArray[i].length > 0) {
                 exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
             }
-            distributePayment(
+            _distributePayment(
                 mintData.caller,
                 mintData.unitPrices[i],
                 mintData.amounts[i],
                 mintData.paymentTokens[i],
                 mintData.creators[i]
             );
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         catalystContract.burnBatchFrom(mintData.caller, tiersToBurn, mintData.amounts);
@@ -432,7 +488,7 @@ contract AssetCreate is
     /// @notice Set the lazy mint fee
     /// @param _lazyMintFeeInBps The fee to set
     function setLazyMintFee(uint256 _lazyMintFeeInBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_lazyMintFeeInBps <= 10000, "AssetCreate: Invalid fee");
+        require(_lazyMintFeeInBps <= MAX_BPS_IN_UNIT, "AssetCreate: Invalid fee");
         lazyMintFeeInBps = _lazyMintFeeInBps;
         emit LazyMintFeeSet(_lazyMintFeeInBps);
     }
@@ -469,30 +525,6 @@ contract AssetCreate is
         emit AuthValidatorSet(_authValidator);
     }
 
-    /// @notice Get the asset contract address
-    /// @return assetContractAddress The asset contract address
-    function getAssetContract() external view returns (address assetContractAddress) {
-        return address(assetContract);
-    }
-
-    /// @notice Get the catalyst contract address
-    /// @return catalystContractAddress The catalyst contract address
-    function getCatalystContract() external view returns (address catalystContractAddress) {
-        return address(catalystContract);
-    }
-
-    /// @notice Get the auth validator address
-    /// @return authValidatorAddress The auth validator address
-    function getAuthValidator() external view returns (address authValidatorAddress) {
-        return address(authValidator);
-    }
-
-    /// @notice Get the exchange contract address
-    /// @return exchangeContractAddress The exchange contract address
-    function getExchangeContract() external view returns (address exchangeContractAddress) {
-        return address(exchangeContract);
-    }
-
     function _msgSender()
         internal
         view
@@ -519,7 +551,7 @@ contract AssetCreate is
     /// @param amount The amount of copies to mint
     /// @param paymentToken The payment token
     /// @param creator The address of the creator
-    function distributePayment(
+    function _distributePayment(
         address from,
         uint256 unitPrice,
         uint256 amount,
@@ -528,7 +560,7 @@ contract AssetCreate is
     ) private {
         uint256 fee;
         if (lazyMintFeeInBps > 0) {
-            fee = (unitPrice * amount * lazyMintFeeInBps) / 10000;
+            fee = (unitPrice * amount * lazyMintFeeInBps) / MAX_BPS_IN_UNIT;
             SafeERC20.safeTransferFrom(IERC20(paymentToken), from, lazyMintFeeReceiver, fee);
         }
         uint256 creatorPayment = unitPrice * amount - fee;
@@ -685,7 +717,9 @@ contract AssetCreate is
         bytes32[] memory encodedHashes = new bytes32[](arrayLength);
         for (uint256 i; i < arrayLength; ) {
             encodedHashes[i] = keccak256((abi.encodePacked(metadataHashes[i])));
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
 
         return keccak256(abi.encodePacked(encodedHashes));

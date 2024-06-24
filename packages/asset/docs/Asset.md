@@ -5,6 +5,21 @@ ERC1155 token that includes roles for minting, burning, and administration. It
 includes extended functionality for managing base and token-specific URIs and
 maintaining a mapping between IPFS metadata hashes and token IDs.
 
+## IMPORTANT CONSIDERATIONS
+
+- Asset contract allows for the reassignment of the metadata hash to a different
+  token id. We rely on other contracts not to generate the same tokenId, it
+  could be useful to decide whether such reassignment should be blocked directly
+  in the Asset contract.
+- In TokenIdUtils contract the reveal nonce is unnecessarily set to uint16 where
+  uint8 would have been sufficient.
+
+## When upgrading the contract
+
+- There is an error in Asset documentation for burnFrom from function natspec
+  documentation says “@dev Only the minter role can burn tokens“ but it should
+  refer to the burner role.
+
 ## Roles in the Contract
 
 1. **Minter**: This role can create new tokens using the `mint` or `mintBatch`

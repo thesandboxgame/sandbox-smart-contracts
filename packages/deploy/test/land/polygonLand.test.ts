@@ -8,7 +8,7 @@ const setupTest = deployments.createFixture(
       return await ethers.getContractAt(contract.abi, contract.address);
     }
 
-    const {deployer} = await getNamedAccounts();
+    const {deployer, sandAdmin} = await getNamedAccounts();
     await deployments.fixture(['PolygonLand']);
     const PolygonLandContract = await getEthersContract('PolygonLand');
 
@@ -30,6 +30,7 @@ const setupTest = deployments.createFixture(
       PolygonOperatorFilterSubscription,
       PolygonOperatorFilterRegistry,
       deployer,
+      sandAdmin,
     };
   }
 );
@@ -37,8 +38,8 @@ const setupTest = deployments.createFixture(
 describe('PolygonLand', function () {
   describe('Roles', function () {
     it('Admin', async function () {
-      const {PolygonLandContract, deployer} = await setupTest();
-      expect(await PolygonLandContract.getAdmin()).to.be.equal(deployer);
+      const {PolygonLandContract, sandAdmin} = await setupTest();
+      expect(await PolygonLandContract.getAdmin()).to.be.equal(sandAdmin);
     });
   });
 

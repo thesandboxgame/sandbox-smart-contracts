@@ -15,20 +15,20 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
     it('should have auth validators contract address set correctly', async function () {
       const {AssetCreateContract, AuthValidatorContract} =
         await runCreateTestSetup();
-      expect(await AssetCreateContract.getAuthValidator()).to.equal(
+      expect(await AssetCreateContract.authValidator()).to.equal(
         AuthValidatorContract.address
       );
     });
     it('should have catalyst contract address set correctly', async function () {
       const {AssetCreateContract, CatalystContract} =
         await runCreateTestSetup();
-      expect(await AssetCreateContract.getCatalystContract()).to.equal(
+      expect(await AssetCreateContract.catalystContract()).to.equal(
         CatalystContract.address
       );
     });
     it('should have asset contract address set correctly', async function () {
       const {AssetCreateContract, AssetContract} = await runCreateTestSetup();
-      expect(await AssetCreateContract.getAssetContract()).to.equal(
+      expect(await AssetCreateContract.assetContract()).to.equal(
         AssetContract.address
       );
     });
@@ -1066,7 +1066,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             [true, true],
             [...metadataHashes, additionalMetadataHash]
           )
-        ).to.be.revertedWith('AssetCreate: 2-Array lengths');
+        ).to.be.revertedWith('AssetCreate: 3-Array lengths');
       });
       it('should revert if amounts mismatch signed values', async function () {
         const {
