@@ -1,20 +1,20 @@
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {BigNumber} from 'ethers';
+import {parseEther} from 'ethers/lib/utils';
 import {ethers, upgrades} from 'hardhat';
 import {
-  createAssetMintSignature,
-  createMultipleAssetsMintSignature,
-  createLazyMintSignature,
-  createLazyMintMultipleAssetsSignature,
-  LazyMintData,
-  LazyMintBatchData,
-} from '../../utils/createSignature';
-import {
-  DEFAULT_SUBSCRIPTION,
   CATALYST_BASE_URI,
   CATALYST_IPFS_CID_PER_TIER,
+  DEFAULT_SUBSCRIPTION,
 } from '../../../data/constants';
-import {BigNumber} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {parseEther} from 'ethers/lib/utils';
+import {
+  LazyMintBatchData,
+  LazyMintData,
+  createAssetMintSignature,
+  createLazyMintMultipleAssetsSignature,
+  createLazyMintSignature,
+  createMultipleAssetsMintSignature,
+} from '../../utils/createSignature';
 
 const name = 'Sandbox Asset Create';
 const version = '1.0';
@@ -249,7 +249,8 @@ export async function runCreateTestSetup() {
     tier: number,
     amount: number,
     revealed: boolean,
-    metadataHash: string
+    metadataHash: string,
+    creator?: string
   ) => {
     const tx = await AssetCreateContractAsUser.createAsset(
       signature,
@@ -257,7 +258,7 @@ export async function runCreateTestSetup() {
       amount,
       revealed,
       metadataHash,
-      user.address
+      creator || user.address
     );
     const result = await tx.wait();
     return result;
@@ -268,7 +269,8 @@ export async function runCreateTestSetup() {
     tiers: number[],
     amounts: number[],
     revealed: boolean[],
-    metadataHashes: string[]
+    metadataHashes: string[],
+    creator?: string
   ) => {
     const tx = await AssetCreateContractAsUser.createMultipleAssets(
       signature,
@@ -276,7 +278,7 @@ export async function runCreateTestSetup() {
       amounts,
       revealed,
       metadataHashes,
-      user.address
+      creator || user.address
     );
 
     const result = await tx.wait();

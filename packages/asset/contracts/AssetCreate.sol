@@ -137,6 +137,7 @@ contract AssetCreate is
         string calldata metadataHash,
         address creator
     ) external whenNotPaused {
+        require(_msgSender() == creator, "AssetCreate: Invalid caller");
         require(
             authValidator.verify(
                 signature,
@@ -175,6 +176,7 @@ contract AssetCreate is
         string[] calldata metadataHashes,
         address creator
     ) external whenNotPaused {
+        require(_msgSender() == creator, "AssetCreate: Invalid caller");
         require(
             authValidator.verify(
                 signature,
@@ -266,6 +268,8 @@ contract AssetCreate is
         string[] calldata metadataHashes,
         address creator
     ) external onlyRole(SPECIAL_MINTER_ROLE) whenNotPaused {
+        require(amounts.length == metadataHashes.length, "AssetCreate: Array lengths");
+
         bool[] memory revealed = new bool[](amounts.length);
         uint8[] memory tiers = new uint8[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
@@ -281,8 +285,6 @@ contract AssetCreate is
             ),
             "AssetCreate: Invalid signature"
         );
-
-        require(amounts.length == metadataHashes.length, "AssetCreate: Array lengths");
 
         uint256[] memory tokenIds = new uint256[](amounts.length);
         for (uint256 i; i < amounts.length; ) {
@@ -344,10 +346,10 @@ contract AssetCreate is
                 NOT_BRIDGED
             );
             require(mintData.amount <= mintData.maxSupply, "AssetCreate: Max supply exceeded");
-            availableToMint[tokenId] = mintData.maxSupply - mintData.amount;
+            unchecked {availableToMint[tokenId] = mintData.maxSupply - mintData.amount;}
         } else {
             require(availableToMint[tokenId] >= mintData.amount, "AssetCreate: Max supply reached");
-            availableToMint[tokenId] -= mintData.amount;
+            unchecked {availableToMint[tokenId] -= mintData.amount;}
         }
 
         if (matchedOrders.length > 0) {
@@ -433,10 +435,10 @@ contract AssetCreate is
                     NOT_BRIDGED
                 );
                 require(mintData.amounts[i] <= mintData.maxSupplies[i], "AssetCreate: Max supply exceeded");
-                availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];
+                unchecked {availableToMint[tokenIds[i]] = mintData.maxSupplies[i] - mintData.amounts[i];}
             } else {
                 require(availableToMint[tokenIds[i]] >= mintData.amounts[i], "AssetCreate: Max supply reached");
-                availableToMint[tokenIds[i]] -= mintData.amounts[i];
+                unchecked {availableToMint[tokenIds[i]] -= mintData.amounts[i];}
             }
             if (matchedOrdersArray.length > i && matchedOrdersArray[i].length > 0) {
                 exchangeContract.matchOrdersFrom(mintData.caller, matchedOrdersArray[i]);
