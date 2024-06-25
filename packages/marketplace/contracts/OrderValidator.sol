@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
-import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
-import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {Whitelist} from "./Whitelist.sol";
 
 /// @author The Sandbox
 /// @title OrderValidator
 /// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
-contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Whitelist {
-    using SignatureCheckerUpgradeable for address;
+contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ERC165Upgradeable, Whitelist {
+    using SignatureChecker for address;
 
     /// @dev Internal mechanism to protect the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -59,6 +61,18 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         bytes32 hash = LibOrder.hash(order);
 
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    )
+        public
+        view
+        virtual
+        override(AccessControlEnumerableUpgradeable, ERC165Upgradeable, IOrderValidator)
+        returns (bool)
+    {
+        return interfaceId == type(IOrderValidator).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @notice Verifies if the asset exchange is affected by the whitelist.

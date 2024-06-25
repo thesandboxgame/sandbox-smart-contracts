@@ -86,10 +86,10 @@
     "license": "ISC",
     "dependencies": {
         "@manifoldxyz/royalty-registry-solidity": "^3.0.0",
-        "@openzeppelin/contracts": "^4.9.2",
-        "@openzeppelin/contracts-upgradeable": "^4.9.2",
+        "@openzeppelin/contracts": "5.0.2",
+        "@openzeppelin/contracts-upgradeable": "5.0.2",
         "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
         "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
-        "@sandbox-smart-contracts/land": "0.0.3"
+        "@sandbox-smart-contracts/land": "1.0.0-rc.1"
     }
 }
