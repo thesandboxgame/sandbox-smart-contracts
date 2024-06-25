@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
-import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
-import {IERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
@@ -20,8 +20,8 @@ import {ILandToken} from "@sandbox-smart-contracts/land/contracts/interfaces/ILa
 /// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {
-    using AddressUpgradeable for address;
-    using ERC165CheckerUpgradeable for address;
+    using Address for address;
+    using ERC165Checker for address;
 
     /// @notice Defines the base for representing fees to avoid rounding: 50% == 0.5 * 10000 == 5000.
     uint256 internal constant PROTOCOL_FEE_MULTIPLIER = 10000;
@@ -120,7 +120,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Sets the royalties registry.
     /// @param newRoyaltiesRegistry Address of new royalties registry
     function _setRoyaltiesRegistry(IRoyaltiesProvider newRoyaltiesRegistry) internal {
-        require(address(newRoyaltiesRegistry).isContract(), "invalid Royalties Registry");
+        require(
+            ERC165Checker.supportsInterface(address(newRoyaltiesRegistry), type(IRoyaltiesProvider).interfaceId),
+            "invalid Royalties Registry"
+        );
         royaltiesRegistry = newRoyaltiesRegistry;
 
         emit RoyaltiesRegistrySet(newRoyaltiesRegistry);
@@ -141,7 +144,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Sets the LAND contract address.
     /// @param newLandContractAddress Address of new LAND contract
     function _setLandContract(ILandToken newLandContractAddress) internal {
-        require(address(newLandContractAddress).isContract(), "invalid LAND address");
+        // TODO: uncomment when ILandToken is supported by LandBase
+        // require(ERC165Checker.supportsInterface(address(newLandContractAddress, type(ILandToken).interfaceId), "invalid LAND address");
         landContract = newLandContractAddress;
 
         emit LandContractSet(newLandContractAddress);
@@ -300,16 +304,18 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     );
                 }
             }
-            if (quadsLength > 0) require(quadsLength == bundle.quads.ys.length, "quad error");
-            require(quadsLength == bundle.quads.sizes.length, "quad size error");
-            landContract.batchTransferQuad(
-                from,
-                to,
-                bundle.quads.sizes,
-                bundle.quads.xs,
-                bundle.quads.ys,
-                bundle.quads.data
-            );
+            if (quadsLength > 0) {
+                require(quadsLength == bundle.quads.ys.length, "quad error");
+                require(quadsLength == bundle.quads.sizes.length, "quad size error");
+                landContract.batchTransferQuad(
+                    from,
+                    to,
+                    bundle.quads.sizes,
+                    bundle.quads.xs,
+                    bundle.quads.ys,
+                    bundle.quads.data
+                );
+            }
         } else {
             revert("invalid asset class");
         }
@@ -322,7 +328,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param assetValue The value to be transferred
     function _transferERC20(address token, address from, address to, uint256 assetValue) internal {
         // slither-disable-next-line arbitrary-send-erc20
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(token), from, to, assetValue);
+        SafeERC20.safeTransferFrom(IERC20(token), from, to, assetValue);
     }
 
     /// @notice Function should be able to transfer ERC721 Asset
@@ -331,7 +337,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param to Account that will receive the asset
     /// @param id The token id to be transferred
     function _transferERC721(address token, address from, address to, uint256 id) internal {
-        IERC721Upgradeable(token).safeTransferFrom(from, to, id);
+        IERC721(token).safeTransferFrom(from, to, id);
     }
 
     /// @notice Function should be able to transfer ERC1155 Asset
@@ -341,7 +347,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param id The token id to be transferred
     /// @param supply The supply of that token id to be transferred
     function _transferERC1155(address token, address from, address to, uint256 id, uint256 supply) internal {
-        IERC1155Upgradeable(token).safeTransferFrom(from, to, id, supply, "");
+        IERC1155(token).safeTransferFrom(from, to, id, supply, "");
     }
 
     /// @notice Function deciding if the fees are applied or not, to be override

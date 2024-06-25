@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title LibMath: A library for handling specific math operations.
