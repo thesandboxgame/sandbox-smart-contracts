@@ -16,6 +16,7 @@ describe('Asset Create', function () {
         AuthSuperValidatorContract
       );
     });
+
     it('Asset', async function () {
       const {AssetCreateContract, AssetContract} =
         await setupAssetCreateTests();
@@ -23,6 +24,7 @@ describe('Asset Create', function () {
         AssetContract
       );
     });
+
     it('Catalyst', async function () {
       const {AssetCreateContract, CatalystContract} =
         await setupAssetCreateTests();
@@ -30,6 +32,7 @@ describe('Asset Create', function () {
         CatalystContract
       );
     });
+
     it('Exchange', async function () {
       const {AssetCreateContract, ExchangeContract} =
         await setupAssetCreateTests();
@@ -38,6 +41,7 @@ describe('Asset Create', function () {
       );
     });
   });
+
   describe('Roles', function () {
     it('Admin', async function () {
       const {AssetCreateContract, assetAdmin} = await setupAssetCreateTests();
@@ -45,6 +49,7 @@ describe('Asset Create', function () {
       expect(await AssetCreateContract.hasRole(defaultAdminRole, assetAdmin)).to
         .be.true;
     });
+
     it("Asset's Minter role is granted to AssetCreate", async function () {
       const {AssetCreateContract, AssetContract} =
         await setupAssetCreateTests();
@@ -52,6 +57,7 @@ describe('Asset Create', function () {
       expect(await AssetContract.hasRole(minterRole, AssetCreateContract)).to.be
         .true;
     });
+
     it("Catalyst's Burner role is granted to AssetCreate", async function () {
       const {AssetCreateContract, CatalystContract} =
         await setupAssetCreateTests();
@@ -59,6 +65,7 @@ describe('Asset Create', function () {
       expect(await CatalystContract.hasRole(burnerRole, AssetCreateContract)).to
         .be.true;
     });
+
     it('AuthSuperValidator signer is set to backendAuthWallet', async function () {
       const {
         AssetCreateContract,
@@ -72,6 +79,7 @@ describe('Asset Create', function () {
         await AuthSuperValidatorContract.getSigner(AssetCreateContract)
       ).to.be.equal(backendAuthWallet);
     });
+
     it('Pauser role is granted to assetPauser', async function () {
       const {AssetCreateContract, assetPauser} = await setupAssetCreateTests();
       const pauserRole = await AssetCreateContract.PAUSER_ROLE();
@@ -79,18 +87,21 @@ describe('Asset Create', function () {
         .true;
     });
   });
+
   describe('EIP712', function () {
     it("name is 'Sandbox Asset Create'", async function () {
       const {AssetCreateContract} = await setupAssetCreateTests();
       const eip712Domain = await AssetCreateContract.eip712Domain();
       expect(eip712Domain.name).to.be.equal('Sandbox Asset Create');
     });
+
     it("version is '1.0'", async function () {
       const {AssetCreateContract} = await setupAssetCreateTests();
       const eip712Domain = await AssetCreateContract.eip712Domain();
       expect(eip712Domain.version).to.be.equal('1.0');
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetCreateContract, TRUSTED_FORWARDER} =
@@ -100,17 +111,20 @@ describe('Asset Create', function () {
       );
     });
   });
+
   describe('Lazy Minting', function () {
     it('Lazy minting fee is set to 0', async function () {
       const {AssetCreateContract} = await setupAssetCreateTests();
       expect(await AssetCreateContract.lazyMintFeeInBps()).to.be.equal(0);
     });
+
     it('Lazy minting fee receiver is set to treasury', async function () {
       const {AssetCreateContract, treasury} = await setupAssetCreateTests();
       expect(await AssetCreateContract.lazyMintFeeReceiver()).to.be.equal(
         treasury
       );
     });
+
     it('reverts when signature is expired', async function () {
       const {
         user,
@@ -144,6 +158,7 @@ describe('Asset Create', function () {
         )
       ).to.be.revertedWith('AuthSuperValidator: Expired');
     });
+
     it('allows users to lazy mint when they have all necessary catalysts - direct', async function () {
       const {
         user,
@@ -188,6 +203,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
+
     it('allows users to lazy mint when they have all necessary catalysts - approveAndCall', async function () {
       const {
         user,
@@ -230,6 +246,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
+
     it('allows users to lazy mint with Catalyst purchase - direct', async function () {
       const {
         user,
@@ -293,6 +310,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
+
     it('allows users to lazy mint with Catalyst purchase - approveAndCall', async function () {
       const {
         user,
@@ -354,6 +372,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetLazyMinted');
     });
+
     it('allows users to batch lazy mint when they have all necessary catalysts - direct', async function () {
       const {
         user,
@@ -409,6 +428,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('allows users to batch lazy mint when they have all necessary catalysts - approveAndCall', async function () {
       const {
         user,
@@ -463,6 +483,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('allows users to batch lazy mint with Catalyst purchase - direct', async function () {
       const {
         user,
@@ -527,6 +548,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('allows users to batch lazy mint with Catalyst purchase - approveAndCall', async function () {
       const {
         user,
@@ -589,6 +611,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 3 different assets - direct', async function () {
       const {
         user,
@@ -648,6 +671,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 3 different assets - approveAndCall', async function () {
       const {
         user,
@@ -706,6 +730,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 3 different assets with catalyst purchase - direct', async function () {
       const {
         user,
@@ -778,6 +803,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 10 different assets - direct', async function () {
       const {
         user,
@@ -837,6 +863,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 10 different assets - approveAndCall', async function () {
       const {
         user,
@@ -895,6 +922,7 @@ describe('Asset Create', function () {
         )
       ).to.emit(AssetCreateContract, 'AssetBatchLazyMinted');
     });
+
     it('batch mints 10 different assets with catalyst purchase - direct', async function () {
       const {
         user,
