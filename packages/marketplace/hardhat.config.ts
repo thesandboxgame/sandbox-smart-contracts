@@ -18,15 +18,6 @@ const config: HardhatUserConfig = {
           },
         },
       },
-      {
-        version: '0.8.19',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 2000,
-          },
-        },
-      },
     ],
   },
   contractSizer: {
@@ -39,6 +30,9 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
     excludeContracts: ['mocks', '@openzeppelin'],
+  },
+  mocha: {
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
 };
 export default config;
