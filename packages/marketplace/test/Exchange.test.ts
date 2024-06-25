@@ -311,7 +311,7 @@ describe('Exchange.sol', function () {
             signatureRight: takerSig,
           },
         ])
-      ).to.be.revertedWith('Pausable: paused');
+      ).to.be.revertedWithCustomError(ExchangeContractAsUser, 'EnforcedPause');
     });
 
     it('should not execute match order with an empty order array', async function () {
