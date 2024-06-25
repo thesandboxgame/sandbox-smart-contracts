@@ -8,6 +8,9 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
+import {ILandToken} from "../interfaces/ILandToken.sol";
+import {IQuad} from "../interfaces/IQuad.sol";
+import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 import {IERC721BatchOps} from "../interfaces/IERC721BatchOps.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
@@ -217,6 +220,10 @@ abstract contract LandBase is
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId ||
             interfaceId == type(IERC173).interfaceId ||
-            interfaceId == type(IERC2981).interfaceId;
+            interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == type(ILandToken).interfaceId ||
+            interfaceId == type(ILandToken).interfaceId ^ type(IQuad).interfaceId ||
+            interfaceId == type(IQuad).interfaceId ||
+            interfaceId == type(ILandMetadataRegistry).interfaceId;
     }
 }
