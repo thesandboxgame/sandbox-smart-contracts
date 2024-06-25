@@ -18,17 +18,20 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       const {AssetRevealContract} = await runRevealTestSetup();
       expect(AssetRevealContract.address).to.be.properAddress;
     });
+
     it('Should have the asset address set correctly', async function () {
       const {AssetRevealContract, AssetContract} = await runRevealTestSetup();
       const assetAddress = await AssetRevealContract.getAssetContract();
       expect(assetAddress).to.equal(AssetContract.address);
     });
+
     it('Should have the auth validator address set correctly', async function () {
       const {AssetRevealContract, AuthValidatorContract} =
         await runRevealTestSetup();
       const authValidatorAddress = await AssetRevealContract.getAuthValidator();
       expect(authValidatorAddress).to.equal(AuthValidatorContract.address);
     });
+
     it('should give DEFAULT_ADMIN_ROLE to the defaultAdmin', async function () {
       const {AssetRevealContract, assetAdmin} = await runRevealTestSetup();
       const hasAdminRole = await AssetRevealContract.hasRole(
@@ -37,6 +40,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       );
       expect(hasAdminRole).to.equal(true);
     });
+
     it("Should increment the reveal nonce if revealing an asset that hasn't been revealed before", async function () {
       const {
         generateRevealSignature,
@@ -97,6 +101,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
 
       expect(revealNonce2.toString()).to.equal('2');
     });
+
     it('Should not increment the reveal nonce if revealing an asset that has already been revealed', async function () {
       const {
         generateRevealSignature,
@@ -155,6 +160,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       expect(revealNonce2.toString()).to.equal('1');
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('should allow to read the trusted forwarder', async function () {
       const {AssetRevealContract, trustedForwarder} =
@@ -163,6 +169,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         trustedForwarder.address
       );
     });
+
     it('should correctly check if an address is a trusted forwarder or not', async function () {
       const {AssetRevealContract, trustedForwarder} =
         await runRevealTestSetup();
@@ -175,6 +182,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         )
       ).to.be.false;
     });
+
     it('should allow DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
       const randomAddress = ethers.Wallet.createRandom().address;
@@ -183,6 +191,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         await AssetRevealContractAsAdmin.getTrustedForwarder()
       ).to.be.equal(randomAddress);
     });
+
     it('should not allow non DEFAULT_ADMIN to set the trusted forwarder ', async function () {
       const {AssetRevealContractAsUser, user, AdminRole} =
         await runRevealTestSetup();
@@ -193,18 +202,21 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${AdminRole}`
       );
     });
+
     it('should return correct msgData', async function () {
       const {MockAssetRevealContract} = await runRevealTestSetup();
       // call the function to satisfy the coverage only, but we don't need to check the result
       await MockAssetRevealContract.msgData();
     });
   });
+
   describe('Pause/Unpause', function () {
     it('should allow pauser to pause the contract', async function () {
       const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
       await AssetRevealContractAsAdmin.pause();
       expect(await AssetRevealContractAsAdmin.paused()).to.be.true;
     });
+
     it('should not allow non pauser to pause the contract', async function () {
       const {AssetRevealContractAsUser, user, PauserRole} =
         await runRevealTestSetup();
@@ -212,12 +224,14 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
       );
     });
+
     it('should allow pauser to unpause the contract', async function () {
       const {AssetRevealContractAsAdmin} = await runRevealTestSetup();
       await AssetRevealContractAsAdmin.pause();
       await AssetRevealContractAsAdmin.unpause();
       expect(await AssetRevealContractAsAdmin.paused()).to.be.false;
     });
+
     it('should not allow non pauser to unpause the contract', async function () {
       const {AssetRevealContractAsUser, user, PauserRole} =
         await runRevealTestSetup();
@@ -225,6 +239,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         `AccessControl: account ${user.address.toLowerCase()} is missing role ${PauserRole}`
       );
     });
+
     it('should not allow revealBurn to be called when paused', async function () {
       const {
         AssetRevealContractAsAdmin,
@@ -236,6 +251,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 1)
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow revealMint to be called when paused', async function () {
       const {
         unrevealedtokenId,
@@ -262,6 +278,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         ])
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow revealBatchMint to be called when paused', async function () {
       const {
         unrevealedtokenId,
@@ -288,6 +305,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         ])
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow revealBatchBurn to be called when paused', async function () {
       const {
         unrevealedtokenId,
@@ -314,6 +332,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         ])
       ).to.be.revertedWith('Pausable: paused');
     });
+
     it('should not allow burnAndReveal to be called when paused', async function () {
       const {
         AssetRevealContractAsAdmin,
@@ -348,6 +367,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       ).to.be.revertedWith('Pausable: paused');
     });
   });
+
   describe('Burning', function () {
     describe('Single burn', function () {
       describe('Success', function () {
@@ -371,6 +391,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           expect(userBalance.toString()).to.equal('9');
         });
       });
+
       describe('Revert', function () {
         it('Should not be able to burn amount less than one', async function () {
           const {AssetRevealContractAsUser, unrevealedtokenId} =
@@ -379,6 +400,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             AssetRevealContractAsUser.revealBurn(unrevealedtokenId, 0)
           ).to.be.revertedWith('AssetReveal: Invalid amount');
         });
+
         it('Should not be able to burn an asset that is already revealed', async function () {
           const {AssetRevealContractAsUser, revealedtokenId} =
             await runRevealTestSetup();
@@ -386,6 +408,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             AssetRevealContractAsUser.revealBurn(revealedtokenId, 1)
           ).to.be.revertedWith('AssetReveal: Already revealed');
         });
+
         it('Should not be able to burn more than owned by the caller', async function () {
           const {
             user,
@@ -401,6 +424,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             AssetRevealContractAsUser.revealBurn(unrevealedtokenId, balance + 1)
           ).to.be.revertedWith('ERC1155: burn amount exceeds totalSupply');
         });
+
         it("Should not be able to burn a token that doesn't exist", async function () {
           const {AssetRevealContractAsUser} = await runRevealTestSetup();
           await expect(
@@ -409,6 +433,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
     });
+
     describe('Batch burn', function () {
       describe('Success', function () {
         it('Should be able to burn multiple unrevealed owned assets', async function () {
@@ -455,6 +480,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
         });
       });
+
       describe('Revert', function () {
         it("should revert if ids array and amounts array aren't the same length", async function () {
           const {AssetRevealContractAsUser, unrevealedtokenId} =
@@ -468,6 +494,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
     });
+
     describe('Burn Events', function () {
       it('Should emit AssetRevealBurn event with correct data when burning single token', async function () {
         const {AssetRevealContractAsUser, unrevealedtokenId, user} =
@@ -486,6 +513,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         // amount
         expect(burnEvent?.args?.amount.toString()).to.equal('1');
       });
+
       it('should emit AssetRevealBatchBurn event with correct data when burning multiple tokens', async function () {
         const {
           AssetRevealContractAsUser,
@@ -514,6 +542,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
       });
     });
   });
+
   describe('Reveal Minting', function () {
     describe('Signature generation and validation', function () {
       it('Should not allow minting with invalid amount', async function () {
@@ -544,6 +573,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           )
         ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
+
       it('Should not allow minting with invalid recipient', async function () {
         const {revealAsset, unrevealedtokenId, generateRevealSignature} =
           await runRevealTestSetup();
@@ -569,6 +599,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           )
         ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
+
       it('Should not allow minting with invalid prevTokenId', async function () {
         const {
           user,
@@ -598,6 +629,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           )
         ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
+
       it('Should not allow minting with invalid metadataHashes', async function () {
         const {user, generateRevealSignature, unrevealedtokenId, revealAsset} =
           await runRevealTestSetup();
@@ -624,6 +656,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         ).to.be.revertedWith('AssetReveal: Invalid signature');
       });
     });
+
     describe('Single reveal mint', function () {
       describe('Success', function () {
         it('Should allow minting with valid signature', async function () {
@@ -662,6 +695,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
           expect(balance.toString()).to.equal('1');
         });
+
         it('Should allow minting when multiple copies revealed to the same metadata hash', async function () {
           const {
             user,
@@ -698,6 +732,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
           expect(balance.toString()).to.equal('2');
         });
+
         it('should increase the tokens supply for tokens with same metadata hash', async function () {
           const {
             user,
@@ -751,6 +786,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
           expect(balance2.toString()).to.equal('2');
         });
+
         it('Should allow revealing multiple copies at the same time', async function () {
           const {
             user,
@@ -800,6 +836,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           expect(event).to.not.be.undefined;
           expect(event?.args?.newTokenIds.length).to.equal(6);
         });
+
         it('should set the reveal hash as used after successful mint', async function () {
           const {
             user,
@@ -828,6 +865,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           expect(isUsed).to.equal(true);
         });
       });
+
       describe('Revert', function () {
         it('Should revert if amounts array is not the same length as metadataHashes array', async function () {
           const {
@@ -862,6 +900,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
+
         it('Should revert if amounts array is not the same length as revealHashes array', async function () {
           const {
             user,
@@ -895,6 +934,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
+
         it('Should not allow using the same signature twice', async function () {
           const {
             user,
@@ -935,6 +975,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           ).to.be.revertedWith('AssetReveal: Hash already used');
         });
       });
+
       describe('Events', function () {
         it('should emit AssetRevealMint event when successully revealed a token', async function () {
           const {
@@ -966,6 +1007,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           const event = findEventByName(result.events, 'AssetRevealMint');
           expect(event).to.not.be.undefined;
         });
+
         it('should emit AssetRevealMint event with correct arguments', async function () {
           const {
             user,
@@ -1015,6 +1057,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
     });
+
     describe('Batch reveal mint', function () {
       describe('Success', function () {
         it('Should allow batch reveal minting with valid signatures', async function () {
@@ -1054,6 +1097,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           const event = findEventByName(result.events, 'AssetRevealBatchMint');
           expect(event).to.not.be.undefined;
         });
+
         it("should allow batch reveal of the same token's copies", async function () {
           const {
             user,
@@ -1131,6 +1175,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           expect(balance3.toString()).to.equal('2');
         });
       });
+
       describe('Revert', function () {
         it('Should revert if ids array and amounts array are not the same length', async function () {
           const {
@@ -1164,6 +1209,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
+
         it('Should revert if ids array and metadataHashes array are not the same length', async function () {
           const {
             user,
@@ -1194,6 +1240,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
+
         it('Should revert if ids array and revealHashes array are not the same length', async function () {
           const {
             user,
@@ -1225,6 +1272,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 3-Array mismatch');
         });
+
         it('should not allow using the same signature twice', async function () {
           const {
             user,
@@ -1267,6 +1315,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           ).to.be.revertedWith('AssetReveal: Hash already used');
         });
       });
+
       describe('Events', function () {
         it('should emit multiple AssetRevealBatchMint events when successully revealed multiple tokens', async function () {
           const {
@@ -1303,6 +1352,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           );
           expect(revealEvents.length).to.equal(1);
         });
+
         it('should emit AssetRevealBatchMint events with correct arguments when successully revealed multiple tokens', async function () {
           const {
             user,
@@ -1352,6 +1402,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
         });
       });
     });
+
     describe('Burn and reveal mint', function () {
       describe('Success', function () {
         it('Should allow instant reveal when authorized by the backend for allowed tier', async function () {
@@ -1389,6 +1440,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           expect(revealMintEvent).to.not.be.undefined;
         });
       });
+
       describe('Revert', function () {
         it('should revert if the tier is not allowed to instant reveal', async function () {
           const {
@@ -1421,6 +1473,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: Not allowed');
         });
+
         it("should revert if amounts array isn't the same length as metadataHashes array", async function () {
           const {
             user,
@@ -1452,6 +1505,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
             )
           ).to.be.revertedWith('AssetReveal: 1-Array mismatch');
         });
+
         it("should revert if amounts array isn't the same length as revealHashes array", async function () {
           const {
             user,
@@ -1484,6 +1538,7 @@ describe('AssetReveal (/packages/asset/contracts/AssetReveal.sol)', function () 
           ).to.be.revertedWith('AssetReveal: 2-Array mismatch');
         });
       });
+
       describe('Events', function () {
         it('Should emit AssetRevealMint event with correct data when burning and revealing a single token', async function () {
           const {

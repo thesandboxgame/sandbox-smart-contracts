@@ -137,21 +137,25 @@ describe('Asset', function () {
       expect(await AssetContract.hasRole(defaultAdminRole, sandAdmin)).to.be
         .true;
     });
+
     it('Minter', async function () {
       const {AssetContract, AssetCreateContract} = await setupTest();
       const minterRole = await AssetContract.MINTER_ROLE();
       expect(await AssetContract.hasRole(minterRole, AssetCreateContract)).to.be
         .true;
     });
+
     it('Burner', async function () {
       // TODO Update when AssetRecycle is deployed
     });
+
     it('Moderator', async function () {
       const {AssetContract, sandAdmin} = await setupTest();
       const moderatorRole = await AssetContract.MODERATOR_ROLE();
       expect(await AssetContract.hasRole(moderatorRole, sandAdmin)).to.be.true;
     });
   });
+
   describe("Asset's Metadata", function () {
     it('Asset base URI is set correctly', async function () {
       const {AssetContract, mockMetadataHash} = await setupTest();
@@ -160,6 +164,7 @@ describe('Asset', function () {
       );
     });
   });
+
   describe('Royalties', function () {
     it('Contract is registered on RoyaltyManager', async function () {
       const {RoyaltyManagerContract, AssetContract} = await setupTest();
@@ -168,6 +173,7 @@ describe('Asset', function () {
       ).to.be.equal(DEFAULT_BPS);
     });
   });
+
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
       const {AssetContract, TRUSTED_FORWARDER} = await setupTest();
@@ -176,12 +182,14 @@ describe('Asset', function () {
       );
     });
   });
+
   describe('Operator Filter Registry', function () {
     it('Asset contract is registered correctly', async function () {
       const {OperatorFilterRegistryContract, AssetContract} = await setupTest();
       expect(await OperatorFilterRegistryContract.isRegistered(AssetContract))
         .to.be.true;
     });
+
     it('Asset contract is subscribed to correct address', async function () {
       const {
         OperatorFilterRegistryContract,
@@ -192,6 +200,7 @@ describe('Asset', function () {
         await OperatorFilterRegistryContract.subscriptionOf(AssetContract)
       ).to.be.equal(OperatorFilterAssetSubscription);
     });
+
     it('asset contract has correct market places black listed', async function () {
       const {
         OperatorFilterRegistryContract,
@@ -231,6 +240,7 @@ describe('Asset', function () {
       ).to.be.equal(false);
     });
   });
+
   describe('MultiRoyaltyDistributor', function () {
     it('RoyaltyManager contract is set correctly', async function () {
       const {AssetContract, RoyaltyManagerContract} = await setupTest();

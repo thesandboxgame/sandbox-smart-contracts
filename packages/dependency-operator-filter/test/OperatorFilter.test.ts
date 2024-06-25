@@ -496,6 +496,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(true);
     });
   });
+
   describe('common signer subscription setup', function () {
     it('should be registered', async function () {
       const {operatorFilterRegistry, ERC721} = await setupOperatorFilter();
@@ -888,6 +889,7 @@ describe('OperatorFilterer', function () {
       ).to.be.equal(true);
     });
   });
+
   describe('transfer and approval ', function () {
     it('should be able to approve black listed market places if operator filterer registry is not set on token', async function () {
       const {
@@ -955,6 +957,7 @@ describe('OperatorFilterer', function () {
         await UnregisteredToken.balanceOf(users[1].address, 1)
       ).to.be.equal(1);
     });
+
     it('should be able to safe transfer if from is the owner of token', async function () {
       const {ERC1155, users} = await setupOperatorFilter();
       await ERC1155.mintWithoutMinterRole(users[0].address, 1, 1);

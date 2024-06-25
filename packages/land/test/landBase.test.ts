@@ -60,6 +60,7 @@ describe('Land.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldCheckForERC721(setupLandBaseForERC721Tests, 'LandBase');
+
   it(`should revert for invalid size`, async function () {
     const {LandContract} = await loadFixture(setupLandBase);
     await expect(LandContract.exists(5, 5, 5))
