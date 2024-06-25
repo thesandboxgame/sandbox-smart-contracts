@@ -17,11 +17,8 @@ export function checkAccessControl(
       contractMap: {[key: string]: Contract};
 
     beforeEach(async function () {
-      ({
-        ExchangeContractAsAdmin,
-        ExchangeContractAsUser,
-        user,
-      } = await loadFixture(deployFixturesWithoutWhitelist));
+      ({ExchangeContractAsAdmin, ExchangeContractAsUser, user} =
+        await loadFixture(deployFixturesWithoutWhitelist));
       contractMap = {
         ExchangeContractAsAdmin: ExchangeContractAsAdmin,
         ExchangeContractAsUser: ExchangeContractAsUser,
