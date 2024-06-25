@@ -456,6 +456,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid caller');
       });
+
       it('should revert if the signature is invalid', async function () {
         const {mintCatalyst, mintSingleAsset, metadataHashes} =
           await runCreateTestSetup();
@@ -1010,6 +1011,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           )
         ).to.be.revertedWith('AssetCreate: Invalid caller');
       });
+
       it('should revert if signature is invalid', async function () {
         const {mintMultipleAssets, metadataHashes} = await runCreateTestSetup();
         const signature =
