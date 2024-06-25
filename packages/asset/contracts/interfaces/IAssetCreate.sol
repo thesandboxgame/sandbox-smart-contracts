@@ -71,7 +71,7 @@ interface IAssetCreate {
     );
     event AssetBatchLazyMinted(
         address indexed recipient,
-        address[] indexed creators,
+        address[] creators,
         uint256[] tokenIds,
         uint8[] tiers,
         uint256[] amounts,
