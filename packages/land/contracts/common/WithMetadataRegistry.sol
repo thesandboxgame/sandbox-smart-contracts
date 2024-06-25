@@ -11,7 +11,7 @@ import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 /// @notice Add support for the metadata registry
 abstract contract WithMetadataRegistry is IErrors {
     /// @notice value returned when the neighborhood is not set yet.
-    string public constant UNKNOWN_NEIGHBORHOOD = "unknown";
+    string private constant UNKNOWN_NEIGHBORHOOD = "unknown";
 
     /// @notice emitted when the metadata registry is set
     /// @param metadataRegistry the address of the metadata registry

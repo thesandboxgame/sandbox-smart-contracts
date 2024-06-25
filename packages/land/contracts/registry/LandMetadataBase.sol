@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
-
 /// @title LandMetadataRegistry
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
-abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
+abstract contract LandMetadataBase {
     /// @notice the base token id used for a batch operation is wrong
     /// @param tokenId the id of the token
     error InvalidBaseTokenId(uint256 tokenId);
@@ -30,7 +28,7 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     uint256 public constant NEIGHBORHOOD_MASK = PREMIUM_MASK - 1;
 
     struct LandMetadataStorage {
-        /// @dev tokenId / 32 => premiumness + neighborhood metadata
+        /// @dev tokenId / LANDS_PER_WORD => premiumness + neighborhood metadata
         /// @dev zero means no metadata definition
         mapping(uint256 tokenId => uint256 metadataType) _metadata;
         /// @dev neighborhood number to string mapping
@@ -61,7 +59,7 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
     }
 
     /// @notice get the packed metadata for a single land
-    /// @param tokenId the base token id floor 32
+    /// @param tokenId the base token id floor LANDS_PER_WORD
     /// @return neighborhoodId the number that identifies the neighborhood
     /// @return premium true if is premium
     function _getMetadataForTokenId(uint256 tokenId) internal view returns (uint256 neighborhoodId, bool premium) {
@@ -71,16 +69,16 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
         premium = (metadata & PREMIUM_MASK) != 0;
     }
 
-    /// @notice set the packed metadata for 32 lands at once
-    /// @param tokenId the base token id floor 32
-    /// @param metadata the packed metadata for 32 lands
+    /// @notice set the packed metadata for LANDS_PER_WORD lands at once
+    /// @param tokenId the base token id floor LANDS_PER_WORD
+    /// @param metadata the packed metadata for LANDS_PER_WORD lands
     function _setMetadata(uint256 tokenId, uint256 metadata) internal {
         LandMetadataStorage storage $ = _getLandMetadataStorage();
         $._metadata[_getKey(tokenId)] = metadata;
     }
 
-    /// @notice return the packed metadata for 32 lands at once
-    /// @param tokenId the base token id floor 32
+    /// @notice return the packed metadata for LANDS_PER_WORD lands at once
+    /// @param tokenId the base token id floor LANDS_PER_WORD
     function _getMetadata(uint256 tokenId) internal view returns (uint256) {
         LandMetadataStorage storage $ = _getLandMetadataStorage();
         return $._metadata[_getKey(tokenId)];
@@ -110,7 +108,7 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
         return (tokenId % LANDS_PER_WORD) * BITS_PER_LAND;
     }
 
-    /// @notice return the tokenId floor 32
+    /// @notice return the tokenId floor LANDS_PER_WORD
     /// @param tokenId the token id
     function _getKey(uint256 tokenId) internal pure returns (uint256) {
         return LANDS_PER_WORD * (tokenId / LANDS_PER_WORD);
@@ -123,7 +121,7 @@ abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
         if (neighborhoodId == 0) {
             revert InvalidNeighborhoodId(neighborhoodId);
         }
-        // NEIGHBORHOOD_MASK (32767) is left out to use as escape char if needed.
+        // the last id: NEIGHBORHOOD_MASK is left out to use as escape char if needed in the future.
         if (neighborhoodId >= NEIGHBORHOOD_MASK) {
             revert InvalidNeighborhoodId(neighborhoodId);
         }
