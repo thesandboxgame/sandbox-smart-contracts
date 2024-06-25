@@ -30,7 +30,6 @@ describe('OrderValidator.sol', function () {
     ERC20Contract: Contract,
     ERC721Contract: Contract,
     ERC1271Contract: Contract,
-    user: Signer,
     user1: Signer,
     user2: Signer;
 
@@ -43,13 +42,12 @@ describe('OrderValidator.sol', function () {
       ERC20Contract,
       ERC721Contract,
       ERC1271Contract,
-      user,
       user1,
       user2,
     } = await loadFixture(deployFixturesWithoutWhitelist));
   });
 
-  it('initialization should fail if roles and permissions lenghts are different', async function () {
+  it('initialization should fail if roles and permissions lengths are different', async function () {
     await expect(orderValidatorFailSetup()).to.be.revertedWith(
       'Mismatched input lengths'
     );
@@ -378,10 +376,11 @@ describe('OrderValidator.sol', function () {
   });
 
   it('should not set permission for token if caller is not owner', async function () {
-    await expect(OrderValidatorAsUser.enableRole(TSBRole)).to.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    await expect(
+      OrderValidatorAsUser.enableRole(TSBRole)
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -414,10 +413,9 @@ describe('OrderValidator.sol', function () {
   it('should not be able to add token to tsb list if caller is not owner', async function () {
     await expect(
       OrderValidatorAsUser.grantRole(TSBRole, await ERC20Contract.getAddress())
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -443,10 +441,9 @@ describe('OrderValidator.sol', function () {
   it('should not be able to remove token from tsb list if caller is not owner', async function () {
     await expect(
       OrderValidatorAsUser.revokeRole(TSBRole, await ERC20Contract.getAddress())
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -486,10 +483,9 @@ describe('OrderValidator.sol', function () {
         PartnerRole,
         await ERC20Contract.getAddress()
       )
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -518,10 +514,9 @@ describe('OrderValidator.sol', function () {
         PartnerRole,
         await ERC20Contract.getAddress()
       )
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -561,10 +556,9 @@ describe('OrderValidator.sol', function () {
         ERC20Role,
         await ERC20Contract.getAddress()
       )
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 
@@ -593,10 +587,9 @@ describe('OrderValidator.sol', function () {
         ERC20Role,
         await ERC20Contract.getAddress()
       )
-    ).to.be.revertedWith(
-      `AccessControl: account ${(
-        await user.getAddress()
-      ).toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+    ).to.be.revertedWithCustomError(
+      OrderValidatorAsUser,
+      'AccessControlUnauthorizedAccount'
     );
   });
 

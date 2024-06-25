@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IRoyaltiesProvider} from "../interfaces/IRoyaltiesProvider.sol";
 import {RoyaltiesRegistry} from "../RoyaltiesRegistry.sol";
 
@@ -36,7 +37,9 @@ contract Royalties2981ImplMock is RoyaltiesRegistry, IERC2981 {
         royaltiesReceiver[_tokenId] = _receiver;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC2981).interfaceId;
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165, RoyaltiesRegistry) returns (bool) {
+        return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
     }
 }

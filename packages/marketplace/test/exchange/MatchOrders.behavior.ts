@@ -881,7 +881,10 @@ export function shouldMatchOrders() {
               },
             ]
           )
-        ).to.be.revertedWith('Pausable: paused');
+        ).to.be.revertedWithCustomError(
+          ExchangeContractAsUser,
+          'EnforcedPause'
+        );
       });
 
       it('should not execute matchOrdersFrom if caller do not have ERC1776 operator role', async function () {
@@ -894,10 +897,9 @@ export function shouldMatchOrders() {
               signatureRight: takerSig,
             },
           ])
-        ).to.be.revertedWith(
-          `AccessControl: account ${(
-            await user.getAddress()
-          ).toLowerCase()} is missing role ${ERC1776_OPERATOR_ROLE}`
+        ).to.be.revertedWithCustomError(
+          ExchangeContractAsUser,
+          'AccessControlUnauthorizedAccount'
         );
       });
 
