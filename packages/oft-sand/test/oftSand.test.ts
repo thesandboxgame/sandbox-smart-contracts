@@ -272,6 +272,85 @@ describe('OFT Contracts', function () {
     });
 
     describe('Meta transaction', function () {
+      it('should not transfer ERC20 tokens using LayerZero when msg.value is not equal to nativeFee and not paying in lzToken', async function () {
+        const {
+          OFTSand,
+          OFTAdapter,
+          SandMock,
+          TrustedForwarder,
+          user1,
+          user2,
+          eidOFTSand,
+        } = await loadFixture(setupOFTSand);
+
+        const initalBalanceUser1 = await SandMock.balanceOf(user1);
+        const tokensToSend = initalBalanceUser1 / 1000000n;
+        await SandMock.connect(user1).approve(OFTAdapter, tokensToSend);
+
+        expect(await OFTSand.balanceOf(user2)).to.be.equal(0);
+
+        const options = Options.newOptions()
+          .addExecutorLzReceiveOption(200000, 0)
+          .toHex()
+          .toString();
+
+        const sendParam = [
+          eidOFTSand,
+          ethers.zeroPadValue(await user2.getAddress(), 32),
+          tokensToSend,
+          tokensToSend,
+          options,
+          '0x',
+          '0x',
+        ];
+
+        const [nativeFee] = await OFTAdapter.quoteSend(
+          sendParam,
+          0, // not paying MessagingFee with lzToken
+        );
+
+        // Send 1 ETH to TrustedForwarder to cover transaction fees
+        await user1.sendTransaction({
+          to: await TrustedForwarder.getAddress(),
+          value: ethers.parseEther('1.0'),
+        });
+
+        // Meta-transaction request with zero msg.value
+        const sendRequest = {
+          from: await user1.getAddress(),
+          to: await OFTAdapter.getAddress(),
+          value: 0,
+          gasLimit: 1000000,
+          data: OFTAdapter.interface.encodeFunctionData('send', [
+            sendParam,
+            [nativeFee, 0],
+            await user1.getAddress(),
+          ]),
+        };
+
+        // Meta-transaction request with msg.value not equal to nativeFee
+        const sendRequest2 = {
+          from: await user1.getAddress(),
+          to: await OFTAdapter.getAddress(),
+          value: Number(nativeFee) + 1,
+          gasLimit: 1000000,
+          data: OFTAdapter.interface.encodeFunctionData('send', [
+            sendParam,
+            [nativeFee, 0],
+            await user1.getAddress(),
+          ]),
+        };
+
+        // Execute the meta-transactions via the TrustedForwarder
+        await expect(TrustedForwarder.execute(sendRequest)).to.be.revertedWith(
+          'Call execution failed',
+        );
+
+        await expect(TrustedForwarder.execute(sendRequest2)).to.be.revertedWith(
+          'Call execution failed',
+        );
+      });
+
       it('should transfer ERC20 tokens from Adapter to OFTSand using LayerZero', async function () {
         const {
           OFTSand,
