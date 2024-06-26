@@ -8,6 +8,7 @@ and this project adheres to
 
 ## [Unreleased]
 
+- [AssetCreate] Add lazy minting feature
 - [AuthSuperValidator] Add signature expiration
 - [AssetCreate] Fix: Do not mark lazy minted assets as bridged
 - [AssetCreate] Fix: Improve gas inefficiencies
