@@ -13,5 +13,7 @@ module.exports = {
     'sand/ERC2771Handler.sol',
     'oft/OFTCore.sol',
     'oft/OFTAdapter.sol',
+    'oft/oapp/OAppSender.sol',
+    'oft/oapp/OApp.sol',
   ],
 };
