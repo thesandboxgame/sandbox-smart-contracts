@@ -38,7 +38,7 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
     /// @dev Retrieves the address of the underlying ERC20 implementation.
     /// @return The address of the OFT token.
     /// @dev In the case of OFT, address(this) and erc20 are the same contract.
-    function token() public view returns (address) {
+    function token() external view returns (address) {
         return address(this);
     }
 
