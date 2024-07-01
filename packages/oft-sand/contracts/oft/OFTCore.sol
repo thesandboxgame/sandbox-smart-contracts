@@ -8,7 +8,7 @@ import {IOAppMsgInspector} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/in
 import {OAppPreCrimeSimulator} from "@layerzerolabs/lz-evm-oapp-v2/contracts/precrime/OAppPreCrimeSimulator.sol";
 
 import {IOFT, SendParam, OFTLimit, OFTReceipt, OFTFeeDetail, MessagingReceipt, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+import {OFTMsgCodec} from "./libraries/OFTMsgCodec.sol";
 import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
 
 /**
@@ -215,7 +215,8 @@ abstract contract OFTCore is IOFT, OApp, OAppPreCrimeSimulator, OAppOptionsType3
             _toSD(_amountLD),
             // @dev Must be include a non empty bytes if you want to compose, EVEN if you dont need it on the remote.
             // EVEN if you dont require an arbitrary payload to be sent... eg. '0x01'
-            _sendParam.composeMsg
+            _sendParam.composeMsg,
+            _msgSender()
         );
         // @dev Change the msg type depending if its composed or not.
         uint16 msgType = hasCompose ? SEND_AND_CALL : SEND;
