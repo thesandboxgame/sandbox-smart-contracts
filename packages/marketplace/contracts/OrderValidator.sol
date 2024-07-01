@@ -40,12 +40,19 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param order The order details to be validated.
     /// @param signature The signature associated with the order.
     /// @param sender Address of the order sender.
-    function validate(LibOrder.Order calldata order, bytes memory signature, address sender) external view {
+    function validate(
+        LibOrder.Order calldata order,
+        bytes memory signature,
+        address sender
+    ) external view {
         require(order.maker != address(0), "no maker");
         require(order.makeRecipient != address(0), "no recipient");
 
         LibOrder.validateOrderTime(order);
-        _verifyWhitelists(order.makeAsset);
+
+        for (uint i = 0; i < order.makeAsset.asset.length; i++) {
+            _verifyWhitelists(order.makeAsset.asset[i]);
+        }
 
         if (order.salt == 0) {
             require(sender == order.maker, "maker is not tx sender");

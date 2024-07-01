@@ -25,18 +25,24 @@ export const fillOrder = (makeValue: Numeric, takeValue: Numeric): Order => ({
   start: 0,
   salt: 0,
   makeAsset: {
-    assetType: {
-      assetClass: AssetClassType.INVALID_ASSET_CLASS,
-      data: '0x',
-    },
-    value: makeValue,
+    asset: [{
+      assetType: {
+        assetClass: AssetClassType.INVALID_ASSET_CLASS,
+        data: '0x',
+      },
+      value: makeValue,
+    }],
+    amount: makeValue,
   },
   takeAsset: {
-    assetType: {
-      assetClass: AssetClassType.INVALID_ASSET_CLASS,
-      data: '0x',
-    },
-    value: takeValue,
+    asset: [{
+      assetType: {
+        assetClass: AssetClassType.INVALID_ASSET_CLASS,
+        data: '0x',
+      },
+      value: takeValue,
+    }],
+    amount: takeValue,
   },
 });
 

@@ -11,9 +11,10 @@ abstract contract ITransferManager {
     /// @dev Represents a side (either maker or taker) of a deal.
     /// Each side has an associated asset and an account address.
     struct DealSide {
-        LibAsset.Asset asset; // The asset associated with this side of the deal.
+        LibAsset.Asset[] asset; // The asset associated with this side of the deal.
         address account; // The account address associated with this side of the deal.
         address recipient; // The account address receiving the tokens
+        uint256 amount; // Amount of bundles (array of assets) associated with this side of the deal
     }
 
     /// @notice Executes the asset transfers associated with two matched orders.
