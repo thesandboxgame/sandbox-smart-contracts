@@ -40,6 +40,7 @@ export async function setupOFTSand() {
     SandMock,
     EndpointForAdapter,
     oftAdapterOwner,
+    TrustedForwarder,
   );
 
   const OFTSandFactoy = await ethers.getContractFactory('OFTSand');
@@ -110,6 +111,7 @@ export async function setupOFTSand() {
     eidOFTSand,
     eidOFTSand2,
     oftSandOwner,
+    oftAdapterOwner,
     user1,
     user2,
     user3,
