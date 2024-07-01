@@ -290,10 +290,15 @@ export async function getLandSaleFiles(
     rinkeby: 'testnet',
     goerli: 'testnet',
     mumbai: 'testnet',
+    amoy: 'testnet',
+    sepolia: 'testnet',
     hardhat: 'testnet',
     localhost: 'testnet',
   };
   const name = networkNameMap[networkName];
+  if (!name) {
+    throw new Error(`missing network ${networkName}, please add it in getLandSale.ts`);
+  }
   const secretPath = `./secret/.${presale}_${name}_secret`;
   const sectorPath = `./${presale}/sectors.${name}.json`;
   const bundlesPaths = [
