@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
-import {SignatureCheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
-import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {EIP712Upgradeable, Initializable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 import {Whitelist} from "./Whitelist.sol";
 
 /// @author The Sandbox
 /// @title OrderValidator
 /// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
-contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Whitelist {
-    using SignatureCheckerUpgradeable for address;
+contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ERC165Upgradeable, Whitelist {
+    using SignatureChecker for address;
 
     /// @dev Internal mechanism to protect the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -62,17 +64,42 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    )
+        public
+        view
+        virtual
+        override(AccessControlEnumerableUpgradeable, ERC165Upgradeable, IOrderValidator)
+        returns (bool)
+    {
+        return interfaceId == type(IOrderValidator).interfaceId || super.supportsInterface(interfaceId);
+    }
+
     /// @notice Verifies if the asset exchange is affected by the whitelist.
     /// @param asset Details of the asset to be verified.
-    /// @dev If the asset type is ERC20, the ERC20_ROLE is checked.
-    /// @dev if ERC20_ROLE is enabled only tokens that have the role are accepted
-    /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
     function _verifyWhitelists(LibAsset.Asset calldata asset) internal view {
-        address makeToken = LibAsset.decodeAddress(asset.assetType);
-        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            if (!hasRole(ERC20_ROLE, makeToken)) {
-                revert("payment token not allowed");
+        address makeToken;
+        if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
+            LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
+            for (uint256 i; i < bundle.bundledERC20.length; i++) {
+                makeToken = bundle.bundledERC20[i].erc20Address;
+                _verifyWhitelistsRoles(makeToken);
             }
+        } else makeToken = LibAsset.decodeAddress(asset.assetType);
+        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
+            _verifyWhitelistsRoles(makeToken);
+        }
+    }
+
+    /// @notice Verifies ERC20 whitelisted ROLEs.
+    /// @param makeToken The ERC20 token to check.
+    /// @dev As the asset type is ERC20, the ERC20_ROLE is checked.
+    /// @dev If ERC20_ROLE is enabled only tokens that have the role are accepted
+    /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
+    function _verifyWhitelistsRoles(address makeToken) private view {
+        if (!hasRole(ERC20_ROLE, makeToken)) {
+            revert("payment token not allowed");
         } else {
             if (!isWhitelistsEnabled()) {
                 return;

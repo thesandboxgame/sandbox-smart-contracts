@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 // The IRoyaltiesProvider.Part.basisPoints represents percentages in base points: 2.5 % == 0.025 * 10000 == 250.
 // We expect external contracts to return the values with this precision.
@@ -20,4 +20,6 @@ interface IRoyaltiesProvider {
     /// @param tokenId of the token we want to calculate royalties
     /// @return A part with all royalties for token
     function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }

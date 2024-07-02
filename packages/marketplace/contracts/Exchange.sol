@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
-import {TransferManager, IRoyaltiesProvider} from "./TransferManager.sol";
+import {TransferManager, IRoyaltiesProvider, ILandToken} from "./TransferManager.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
@@ -110,6 +110,12 @@ contract Exchange is
     /// @param contractAddress New OrderValidator contract address.
     function setOrderValidatorContract(IOrderValidator contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOrderValidatorContract(contractAddress);
+    }
+
+    /// @notice Set the LAND contract address.
+    /// @param contractAddress New LAND contract address.
+    function setLandContract(ILandToken contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setLandContract(contractAddress);
     }
 
     /// @notice Set the limit for matching orders.

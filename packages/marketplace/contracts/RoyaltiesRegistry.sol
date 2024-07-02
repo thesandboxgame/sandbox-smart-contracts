@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
@@ -12,8 +13,9 @@ import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesPro
 /// @author The Sandbox
 /// @title RoyaltiesRegistry
 /// @dev Contract managing the registry of royalties.
-contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
-    using ERC165CheckerUpgradeable for address;
+contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgradeable {
+    using ERC165Checker for address;
+
     /// @notice Emitted when royalties are set for a token.
     /// @param token The token address for which royalties are set.
     /// @param royalties An array of royalties set for the token.
@@ -61,7 +63,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
 
     /// @notice Royalties registry initializer
     function initialize() external initializer {
-        __Ownable_init();
+        __Ownable_init(_msgSender());
     }
 
     /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (2).
@@ -154,6 +156,12 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
 
         // case royaltiesType = 4, unknown/empty royalties
         return new Part[](0);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, IRoyaltiesProvider) returns (bool) {
+        return interfaceId == type(IRoyaltiesProvider).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @notice Returns provider address for token contract from royaltiesProviders mapping

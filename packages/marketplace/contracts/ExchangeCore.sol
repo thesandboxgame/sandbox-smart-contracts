@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -14,7 +15,9 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
-    using AddressUpgradeable for address;
+    using Address for address;
+    using ERC165Checker for address;
+
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
@@ -87,7 +90,10 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @notice Updates the OrderValidator contract address.
     /// @param contractAddress Address of the new OrderValidator contract.
     function _setOrderValidatorContract(IOrderValidator contractAddress) internal {
-        require(address(contractAddress).isContract(), "invalid order validator");
+        require(
+            ERC165Checker.supportsInterface(address(contractAddress), type(IOrderValidator).interfaceId),
+            "invalid order validator"
+        );
         orderValidator = contractAddress;
         emit OrderValidatorSet(contractAddress);
     }

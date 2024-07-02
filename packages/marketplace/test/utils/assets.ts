@@ -16,6 +16,7 @@ export enum AssetClassType {
   ERC20_ASSET_CLASS = '0x1',
   ERC721_ASSET_CLASS = '0x2',
   ERC1155_ASSET_CLASS = '0x3',
+  BUNDLE_ASSET_CLASS = '0x4',
 }
 
 export const ASSET_TYPE_TYPEHASH = keccak256(
@@ -126,3 +127,20 @@ export function hashAsset(a: Asset) {
     )
   );
 }
+
+export const AssetBundle = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bundleInformation: any, // TODO: type,
+  value: number
+): Promise<Asset> => ({
+  assetType: {
+    assetClass: AssetClassType.BUNDLE_ASSET_CLASS,
+    data: AbiCoder.defaultAbiCoder().encode(
+      [
+        'tuple(tuple(address erc20Address, uint256 value)[] bundledERC20, tuple(address erc721Address, uint256[] ids)[] bundledERC721, tuple(address erc1155Address, uint256[] ids, uint256[] supplies)[] bundledERC1155, tuple(uint256[] sizes, uint256[] xs, uint256[] ys, bytes data) quads)',
+      ],
+      [bundleInformation]
+    ),
+  },
+  value,
+});
