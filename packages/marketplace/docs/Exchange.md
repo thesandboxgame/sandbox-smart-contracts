@@ -344,7 +344,7 @@ The contract supports the ERC2771 standard to enable meta transactions.
 
 The protocol is secured with the Open Zeppelin access control component.
 
-4 roles are defined:
+6 roles are defined:
 
 - `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings
   (trusted forwarder, order validator contract addresses)
@@ -353,6 +353,10 @@ The protocol is secured with the Open Zeppelin access control component.
 - `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of
   a sender
 - `PAUSER_ROLE`: allow to control the pausing of the contract
+- `TSB_SELLER_ROLE` - allows bypassing primary market check for TSB owned seller
+  accounts
+- `FEE_WHITELIST_ROLE` - allows bypassing all fees for whitelisted accounts
+  (seller side only)
 
 ### ERC1776
 
