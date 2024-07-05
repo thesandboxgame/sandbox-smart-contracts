@@ -1,23 +1,11 @@
-import "@nomicfoundation/hardhat-chai-matchers";
-import { HardhatUserConfig } from "hardhat/config";
-import "solidity-coverage";
+import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-contract-sizer';
+import 'hardhat-storage-layout';
+import { HardhatUserConfig } from 'hardhat/config';
 
 const config: HardhatUserConfig = {
-  paths: {
-    sources: "./contracts",
-  },
-  solidity: {
-    compilers: [
-      {
-        version: "0.8.23",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 2000,
-          },
-        },
-      },
-    ],
-  },
+  solidity: "0.8.24",
 };
+
 export default config;

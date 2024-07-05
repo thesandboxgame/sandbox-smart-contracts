@@ -13,7 +13,7 @@ contract BatchTransfer is AccessControl {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     function batchTransfer(
@@ -22,7 +22,7 @@ contract BatchTransfer is AccessControl {
         uint256[][] calldata tokenIds,
         uint256[][] calldata amounts,
         bool[] calldata isERC1155
-    ) external {
+    ) external onlyRole(OPERATOR_ROLE) {
         require(
             contracts.length == recipients.length &&
                 recipients.length == tokenIds.length &&
@@ -30,7 +30,6 @@ contract BatchTransfer is AccessControl {
                 amounts.length == isERC1155.length,
             "Arrays must have the same length"
         );
-
         for (uint256 i = 0; i < contracts.length; i++) {
             address contractAddress = contracts[i];
             address recipient = recipients[i];
@@ -39,19 +38,9 @@ contract BatchTransfer is AccessControl {
             bool erc1155 = isERC1155[i];
 
             if (erc1155) {
-                IERC1155(contractAddress).safeBatchTransferFrom(
-                    msg.sender,
-                    recipient,
-                    ids,
-                    values,
-                    ""
-                );
+                IERC1155(contractAddress).safeBatchTransferFrom(_msgSender(), recipient, ids, values, "");
             } else {
-                IERC721(contractAddress).safeBatchTransferFrom(
-                    msg.sender,
-                    recipient,
-                    ids
-                );
+                IERC721(contractAddress).safeTransferFrom(_msgSender(), recipient, ids[0]);
             }
         }
     }
