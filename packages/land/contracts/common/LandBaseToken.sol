@@ -309,11 +309,11 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     /// @param size The size of the quad being minted and transferred
     /// @param x The x-coordinate of the top-left corner of the quad being minted.
     /// @param y The y-coordinate of the top-left corner of the quad being minted.
-    /// @dev It recursively checks child quad of every size(excluding Lands of 1x1 size) are minted or not.
+    /// @dev It recursively checks whether child quad of every size (excluding Lands of 1x1 size) are minted or not.
     /// @dev Quad which are minted are pushed into quadMinted to also check if every Land of size 1x1 in
-    /// @dev the parent quad is minted or not. While checking if the every child Quad and Land is minted it
-    /// @dev also checks and clear the owner for quads which are minted. Finally it checks if the new owner
-    /// @dev if is a contract can handle ERC721 tokens or not and transfers the parent quad to new owner.
+    /// @dev the parent quad is minted or not. While checking if every child Quad and Land is minted it
+    /// @dev also checks and clears the owner for quads which are minted. Finally it checks if the new owner
+    /// @dev is a contract, can handle ERC-721 tokens, and transfers the parent quad to new owner.
     function _mintAndTransferQuad(
         address msgSender,
         address to,
@@ -343,13 +343,13 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             );
         }
 
-        // Lopping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msg.sender
+        // Looping around the Quad in land struct to generate ids of 1x1 land token and checking if they are owned by msg.sender
         for (uint256 i = 0; i < size * size; i++) {
             uint256 _id = _idInPath(i, size, x, y);
             // checking land with token id "_id" is in the quadMinted array.
             bool isAlreadyMinted = _isQuadMinted(quadMinted, Land({x: _getX(_id), y: _getY(_id), size: 1}), index);
             if (isAlreadyMinted) {
-                // if land is in the quadMinted array there just emitting transfer event
+                // if land is in the quadMinted array, emit transfer event
                 emit Transfer(msgSender, to, _id);
             } else {
                 if (_getOwnerAddress(_id) == msgSender) {
@@ -357,7 +357,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                     landMinted += 1;
                     emit Transfer(msgSender, to, _id);
                 } else {
-                    // else is checked if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
+                    // else check if owned by the msgSender or not. If it is not owned by msgSender it should not have an owner.
                     if (_readOwnerData(_id) != 0) {
                         revert AlreadyMinted(_id);
                     }
@@ -436,7 +436,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
         uint256 toX = land.x + land.size;
         uint256 toY = land.y + land.size;
 
-        //Lopping around the Quad in land struct to check if the child quad are minted or not
+        // Looping around the Quad in land struct to check if the child quad are minted or not
         for (uint256 xi = land.x; xi < toX; xi += quadCompareSize) {
             for (uint256 yi = land.y; yi < toY; yi += quadCompareSize) {
                 //checking if the child Quad is minted or not. i.e Checks if the quad is in the quadMinted array.
@@ -563,7 +563,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                     idsToTransfer[transferIndex] = id;
                     transferIndex++;
                 } else {
-                    // else it is not owned by any one and and pushed in teh idsToMint array
+                    // else it is not owned by any one and and pushed in the idsToMint array
                     idsToMint[mintIndex] = id;
                     mintIndex++;
                 }
