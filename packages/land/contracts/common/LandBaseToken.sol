@@ -257,7 +257,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             uint256 id1x1 = _getQuadId(LAYER_1x1, x, y);
             address owner = _ownerOf(id1x1);
             if (owner == address(0)) {
-                revert InvalidCoordinates(size, x, y);
+                revert NotOwner(x, y);
             }
             if (owner != from) {
                 revert ERC721InvalidOwner(from);

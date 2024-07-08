@@ -253,8 +253,8 @@ describe('PolygonLand.sol', function () {
         await expect(
           LandAsOther.transferQuad(landHolder, landReceiver, size, x, y, bytes),
         )
-          .to.be.revertedWithCustomError(LandAsOther, 'InvalidCoordinates')
-          .withArgs(size, x, y);
+          .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+          .withArgs(x, y);
       });
 
       it('should revert transfer of quad if a sub quad is burned', async function () {
