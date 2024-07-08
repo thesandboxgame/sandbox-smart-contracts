@@ -114,7 +114,7 @@ abstract contract LandBase is
         _approveFor(sender, operator, tokenId);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
+    /// @notice Set the approval for an operator to manage all the tokens of the msgSender
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
     function setApprovalForAll(
@@ -124,7 +124,7 @@ abstract contract LandBase is
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
+    /// @notice Set the approval for an operator to manage all the tokens of the sender (may differ from msgSender)
     /// @param sender The address giving the approval
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
