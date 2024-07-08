@@ -19,9 +19,9 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
     }
 
     struct BatchSetData {
-        // baseTokenId the token id floor 32
+        // baseTokenId the token id floor LANDS_PER_WORD
         uint256 baseTokenId;
-        // metadata: premiumness << 8 | neighborhoodId
+        // metadata: premiumness << (BITS_PER_LAND-1) | neighborhoodId
         uint256 metadata;
     }
 
@@ -125,7 +125,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
         }
     }
 
-    /// @notice set the metadata for 32 lands at the same time in batch
+    /// @notice set the metadata for LANDS_PER_WORD lands at the same time in batch
     /// @param data token id and metadata
     /// @dev use with care, we can set to the metadata for some lands to unknown (zero)
     function batchSetMetadata(BatchSetData[] calldata data) external onlyAdmin {
@@ -183,7 +183,7 @@ contract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEn
         return _getNeighborhoodName(neighborhoodId);
     }
 
-    /// @notice return the metadata of 32 lands at once
+    /// @notice return the metadata of LANDS_PER_WORD lands at once
     /// @param tokenIds the token ids
     /// @return the raw metadata for a series of tokenIds
     /// @dev used to debug, extracting a lot of information that must be unpacked at once.
