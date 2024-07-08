@@ -30,7 +30,6 @@ abstract contract OperatorFiltererUpgradeable is Context {
 
     modifier onlyAllowedOperator(address from) virtual {
         IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
-        // Check registry code length to facilitate testing in environments without a deployed registry.
         // Allow spending tokens from addresses with balance
         // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
         // from an EOA.
