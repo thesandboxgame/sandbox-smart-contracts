@@ -41,6 +41,9 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
     /* solhint-enable const-name-snakecase */
 
+    /// @notice emitted when a minter right is changed.
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
     event Minter(address indexed minter, bool enabled);
 
     /// @dev helper struct to store arguments in memory instead of the stack.
