@@ -38,7 +38,7 @@ abstract contract LandBase is
         _disableInitializers();
     }
 
-    /// @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
+    /// @notice Initializes the contract admin
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
