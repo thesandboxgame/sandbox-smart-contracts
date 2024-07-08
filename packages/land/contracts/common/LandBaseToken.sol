@@ -396,7 +396,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
                 revert AlreadyMinted(id);
             }
         } else {
-            // when the size is smaller than the quadCompare size the owner of all the smaller quads with size
+            // when the size is greater than the quadCompare size the owner of all the greater quads with size
             // quadCompare size in the quad to be minted are checked if they are minted or not
             uint256 toX = x + size;
             uint256 toY = y + size;
