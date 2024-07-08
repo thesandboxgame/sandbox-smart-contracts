@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
-
 /// @title LandMetadataBase
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)
-abstract contract LandMetadataBase is AccessControlEnumerableUpgradeable {
+abstract contract LandMetadataBase {
     /// @notice the base token id used for a batch operation is wrong
     /// @param tokenId the id of the token
     error InvalidBaseTokenId(uint256 tokenId);
