@@ -3,7 +3,7 @@ pragma solidity 0.8.23;
 
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 
-/// @title LandMetadataRegistry
+/// @title LandMetadataBase
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Store information about the lands (premiumness and neighborhood)

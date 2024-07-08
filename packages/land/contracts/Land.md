@@ -39,7 +39,7 @@ The land contract support the following roles:
 - minters: a list of addresses that can mint lands.
 - super operators: a list of addresses that are automatically approved to
   transfer tokens between users.
-- meta transaction processor: an address that can transfer lands in behalf of
+- meta transaction processor: an address that can transfer lands on behalf of
   other users and used to implement meta-transactions. On the L2 contract this
   role is the ERC2771 meta transaction forwarder.
 

@@ -165,7 +165,7 @@ abstract contract LandBase is
         _batchTransferFrom(from, to, ids, data, false);
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer
     /// @param from The sender of the token
     /// @param to The recipient of the token
     /// @param tokenId The id of the token
@@ -173,7 +173,7 @@ abstract contract LandBase is
         _safeTransferFrom(from, to, tokenId, "");
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer
     /// @param from The sender of the token
     /// @param to The recipient of the token
     /// @param tokenId The id of the token
