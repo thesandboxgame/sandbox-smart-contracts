@@ -734,8 +734,8 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
 
     /// @notice return the owner of a quad given his size and coordinates or zero if is not minted yet.
     /// @param size The size of the quad
-    /// @param x The bottom left x coordinate of the quad
-    /// @param y The bottom left y coordinate of the quad
+    /// @param x coordinate inside the quad
+    /// @param y coordinate inside the quad
     /// @return the address of the owner
     function _ownerOfQuad(uint256 size, uint256 x, uint256 y) internal view returns (address) {
         (uint256 layer, uint256 parentSize, ) = _getQuadLayer(size);
@@ -772,7 +772,7 @@ abstract contract LandBaseToken is IErrors, ILandToken, ERC721BaseToken {
             owner = address(uint160(owner1x1));
             operatorEnabled = (owner1x1 & OPERATOR_FLAG) == OPERATOR_FLAG;
         } else {
-            owner = _ownerOfQuad(3, (x * 3) / 3, (y * 3) / 3);
+            owner = _ownerOfQuad(3, x, y);
             operatorEnabled = false;
         }
     }

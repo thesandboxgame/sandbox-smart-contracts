@@ -33,8 +33,7 @@ abstract contract OperatorFiltererUpgradeable is Context {
     /// @notice Used in transfer from operations to check if the sender of the token is allowed to call this contract
     /// @param from the sender of the token
     modifier onlyAllowedOperator(address from) virtual {
-        IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
-        // Allow spending tokens from addresses with balance
+        // Allow spending tokens from addresses with balance (from == _msgSender())
         // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
         // from an EOA.
         if (from != _msgSender()) {
