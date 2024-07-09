@@ -9,6 +9,16 @@ const func: DeployFunction = async function (
   const {execute} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  let eidEthereum, eidBsc;
+
+  if (hre.network.name == 'base') {
+    eidEthereum = process.env[`EID_${'MAINNET'}`];
+    eidBsc = process.env[`EID_${'BSCMAINNET'}`];
+  } else {
+    eidEthereum = process.env[`EID_${'SEPOLIA'}`];
+    eidBsc = process.env[`EID_${'BSCTESTNET'}`];
+  }
+
   const hreEthereum = hre.companionNetworks.ethereum;
   const deploymentsEthereum = hreEthereum.deployments;
   const OFTAdapterForSand = await deploymentsEthereum.getOrNull(
@@ -18,15 +28,6 @@ const func: DeployFunction = async function (
   const hreBsc = hre.companionNetworks.bsc;
   const deploymentsBsc = hreBsc.deployments;
   const OFTSand = await deploymentsBsc.getOrNull('OFTSand');
-
-  let eidEthereum, eidBsc;
-  if (hre.network.name == 'mainnnet') {
-    eidEthereum = process.env[`EID_${'MAINNET'}`];
-    eidBsc = process.env[`EID_${'BSCMAINNET'}`];
-  } else {
-    eidEthereum = process.env[`EID_${'SEPOLIA'}`];
-    eidBsc = process.env[`EID_${'BSCTESTNET'}`];
-  }
 
   if (OFTAdapterForSand && OFTSand) {
     // setting OFTAdapterForSand as peer to OFTSand(base) using eidEthereum

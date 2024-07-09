@@ -9,15 +9,8 @@ const func: DeployFunction = async function (
   const {execute} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  const hreBase = hre.companionNetworks.base;
-  const deploymentsBase = hreBase.deployments;
-  const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
-
-  const hreBsc = hre.companionNetworks.bsc;
-  const deploymentsBsc = hreBsc.deployments;
-  const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
-
   let eidBase, eidBsc;
+
   if (hre.network.name == 'mainnnet') {
     eidBase = process.env[`EID_${'BASE'}`];
     eidBsc = process.env[`EID_${'BSCMAINNET'}`];
@@ -25,6 +18,14 @@ const func: DeployFunction = async function (
     eidBase = process.env[`EID_${'BASESEPOLIA'}`];
     eidBsc = process.env[`EID_${'BSCTESTNET'}`];
   }
+
+  const hreBase = hre.companionNetworks.base;
+  const deploymentsBase = hreBase.deployments;
+  const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
+
+  const hreBsc = hre.companionNetworks.bsc;
+  const deploymentsBsc = hreBsc.deployments;
+  const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 
   if (OFTSandBase && OFTSandBsc) {
     //   setting OFTSand(base) as peer to OFTAdapterForSand using eidBase
