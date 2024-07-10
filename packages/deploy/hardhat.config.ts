@@ -428,30 +428,6 @@ const networks = {
       [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
     },
   },
-  base: {
-    tags: ['L2'],
-    companionNetworks: {
-      l1: 'mainnet',
-    },
-  },
-  baseSepolia: {
-    tags: ['L2'],
-    companionNetworks: {
-      l1: 'sepolia',
-    },
-  },
-  bscMainnet: {
-    tags: ['L1'],
-    companionNetworks: {
-      l2: 'polygon',
-    },
-  },
-  bscTestnet: {
-    tags: ['L1'],
-    companionNetworks: {
-      l2: 'amoy',
-    },
-  },
 };
 
 const compilers = [
