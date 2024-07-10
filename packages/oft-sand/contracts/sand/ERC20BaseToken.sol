@@ -2,11 +2,21 @@
 pragma solidity 0.8.23;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {ERC20Internal} from "./ERC20Internal.sol";
+import {IErrors} from "../interfaces/IErrors.sol";
 import {IERC20, IERC20Extended} from "../interfaces/IERC20Extended.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
-abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {
+abstract contract ERC20BaseToken is
+    IErrors,
+    WithSuperOperators,
+    IERC20,
+    IERC20Extended,
+    IERC20Errors,
+    ERC20Internal,
+    Context
+{
     string internal _name;
     string internal _symbol;
     address internal immutable _operator;
@@ -40,7 +50,9 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-                require(currentAllowance >= amount, "NOT_AUTHORIZED_ALLOWANCE");
+                if (currentAllowance < amount) {
+                    revert ERC20InsufficientAllowance(_msgSender(), currentAllowance, amount);
+                }
                 _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
@@ -117,7 +129,9 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amount The number of tokens allowed.
     /// @return success Whether or not the call succeeded.
     function approveFor(address owner, address spender, uint256 amount) public override returns (bool success) {
-        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "NOT_AUTHORIZED");
+        if (!(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator)) {
+            revert NotAuthorized();
+        }
         _approveFor(owner, spender, amount);
         return true;
     }
@@ -128,7 +142,9 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amountNeeded The amount requested to spend
     /// @return success Whether or not the call succeeded.
     function addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) public returns (bool success) {
-        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "INVALID_SENDER");
+        if (!(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator)) {
+            revert InvalidSender();
+        }
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
     }
@@ -153,7 +169,9 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amount /*(ERC20BasicApproveExtension, ERC20Internal)*/
     ) internal virtual override {
-        require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
+        if (owner == address(0) || spender == address(0)) {
+            revert InvalidOwnerOrSpender();
+        }
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
@@ -164,10 +182,13 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address to,
         uint256 amount /*(ERC20Internal, ERC20ExecuteExtension)*/
     ) internal virtual override {
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
-        require(to != address(this), "NOT_TO_THIS");
+        if (to == address(0) || to == address(this)) {
+            revert ERC20InvalidReceiver(to);
+        }
         uint256 currentBalance = _balances[from];
-        require(currentBalance >= amount, "INSUFFICIENT_FUNDS");
+        if (currentBalance < amount) {
+            revert ERC20InsufficientBalance(from, currentBalance, amount);
+        }
         _balances[from] = currentBalance - amount;
         _balances[to] += amount;
         emit Transfer(from, to, amount);
@@ -177,11 +198,17 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param to The recipient address.
     /// @param amount The number of token to mint.
     function _mint(address to, uint256 amount) internal {
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
-        require(amount > 0, "MINT_O_TOKENS");
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(to);
+        }
+        if (amount == 0) {
+            revert InvalidAmount();
+        }
         uint256 currentTotalSupply = _totalSupply;
         uint256 newTotalSupply = currentTotalSupply + amount;
-        require(newTotalSupply > currentTotalSupply, "OVERFLOW");
+        if (newTotalSupply <= currentTotalSupply) {
+            revert Overflow();
+        }
         _totalSupply = newTotalSupply;
         _balances[to] += amount;
         emit Transfer(address(0), to, amount);
@@ -191,18 +218,24 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param from The address whose tokens to burn.
     /// @param amount The number of token to burn.
     function _burn(address from, uint256 amount) internal {
-        require(amount > 0, "BURN_O_TOKENS");
+        if (amount == 0) {
+            revert InvalidAmount();
+        }
         if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-                require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
+                if (currentAllowance < amount) {
+                    revert ERC20InsufficientAllowance(_msgSender(), currentAllowance, amount);
+                }
                 _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
 
         uint256 currentBalance = _balances[from];
-        require(currentBalance >= amount, "INSUFFICIENT_FUNDS");
+        if (currentBalance < amount) {
+            revert ERC20InsufficientBalance(from, currentBalance, amount);
+        }
         _balances[from] = currentBalance - amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
