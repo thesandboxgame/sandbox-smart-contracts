@@ -330,6 +330,9 @@ const networks = {
     companionNetworks: {
       l1: 'hardhat',
       l2: 'hardhat',
+      ethereum: 'hardhat',
+      base: 'hardhat',
+      bsc: 'hardhat',
     },
     blockGasLimit:
       parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
@@ -345,12 +348,44 @@ const networks = {
     tags: ['L1'],
     companionNetworks: {
       l2: 'amoy',
+      bsc: 'bscTestnet',
+      base: 'baseSepolia',
     },
   },
   mainnet: {
     tags: ['mainnet', 'L1'],
     companionNetworks: {
       l2: 'polygon',
+      bsc: 'bscMainnet',
+      base: 'base',
+    },
+  },
+  baseSepolia: {
+    tags: ['L2'],
+    companionNetworks: {
+      ethereum: 'sepolia',
+      bsc: 'bscTestnet',
+    },
+  },
+  base: {
+    tags: ['L2'],
+    companionNetworks: {
+      ethereum: 'mainnet',
+      bsc: 'bscMainnet',
+    },
+  },
+  bscTestnet: {
+    tags: ['L1'],
+    companionNetworks: {
+      ethereum: 'sepolia',
+      base: 'baseSepolia',
+    },
+  },
+  bscMainnet: {
+    tags: ['L1'],
+    companionNetworks: {
+      ethereum: 'mainnet',
+      base: 'base',
     },
   },
   mumbai: {
@@ -369,30 +404,6 @@ const networks = {
     tags: ['mainnet', 'L2'],
     companionNetworks: {
       l1: 'mainnet',
-    },
-  },
-  base: {
-    tags: ['L2'],
-    companionNetworks: {
-      l1: 'mainnet',
-    },
-  },
-  baseSepolia: {
-    tags: ['L2'],
-    companionNetworks: {
-      l1: 'sepolia',
-    },
-  },
-  bscMainnet: {
-    tags: ['L1'],
-    companionNetworks: {
-      l2: 'polygon',
-    },
-  },
-  bscTestnet: {
-    tags: ['L1'],
-    companionNetworks: {
-      l2: 'amoy',
     },
   },
 };
