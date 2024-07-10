@@ -2,9 +2,10 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.23;
 
+import {IErrors} from "../interfaces/IErrors.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 
-contract WithSuperOperators is WithAdmin {
+contract WithSuperOperators is IErrors, WithAdmin {
     mapping(address => bool) internal _superOperators;
 
     event SuperOperator(address indexed superOperator, bool indexed enabled);
@@ -12,8 +13,7 @@ contract WithSuperOperators is WithAdmin {
     /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
-    function setSuperOperator(address superOperator, bool enabled) external {
-        require(msg.sender == _admin, "only admin is allowed to add super operators");
+    function setSuperOperator(address superOperator, bool enabled) external onlyAdmin {
         _superOperators[superOperator] = enabled;
         emit SuperOperator(superOperator, enabled);
     }
