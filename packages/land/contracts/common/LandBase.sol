@@ -22,7 +22,7 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 /// @notice LAND contract
 /// @dev LAND contract implements ERC721, quads, metadata, royalties and marketplace filtering functionalities.
 /// @dev The contract also implements EIP173 because it is needed by some marketplaces. The owner() doesn't have
-/// @dev any privileged roles within the contract. It can be is set by the admin to any value.
+/// @dev any privileged roles within the contract. It can be set by the admin to any value.
 abstract contract LandBase is
     LandBaseToken,
     Initializable,
