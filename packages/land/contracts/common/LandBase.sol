@@ -20,7 +20,9 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice LAND contract
-/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+/// @dev LAND contract implements ERC721, quads, metadata, royalties and marketplace filtering functionalities.
+/// @dev The contract also implements EIP173 because it is needed by some marketplaces. The owner() doesn't have
+/// @dev any privileged roles within the contract. It can be is set by the admin to any value.
 abstract contract LandBase is
     LandBaseToken,
     Initializable,
@@ -98,6 +100,9 @@ abstract contract LandBase is
 
     /// @notice Set the address of the new owner of the contract
     /// @param newOwner address of new owner
+    /// @dev This owner doesn't have any privileged role within this contract
+    /// @dev It is set by the admin to comply with EIP173 which is needed by some marketplaces
+    /// @dev Even when set to address(0) ownership is never permanently renounced the admin can always set any value
     function transferOwnership(address newOwner) external onlyAdmin {
         _transferOwnership(newOwner);
     }
