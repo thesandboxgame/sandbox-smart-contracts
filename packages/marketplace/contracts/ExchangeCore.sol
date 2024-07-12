@@ -173,11 +173,21 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             orderRight.makeAsset.assetType
         );
 
+        // Check if the order is a bundle and validate the bundle price
+        if (makeMatch.assetClass == LibAsset.AssetClass.BUNDLE) {
+            uint256 bundlePrice = orderRight.makeAsset.value; // colllective price provided by buyer
+            LibAsset.Bundle memory bundle = LibAsset.decodeBundle(makeMatch);
+            require(
+                bundlePrice == LibAsset.computeBundlePrice(bundle, orderLeft.makeAsset.bundlePriceDistribution),
+                "Bundle price mismatch"
+            );
+        }
+
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
-            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
-            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue), orderRight.maker),
+            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue, orderLeft.makeAsset.bundlePriceDistribution), orderLeft.maker),
+            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue, orderRight.makeAsset.bundlePriceDistribution), orderRight.maker),
             LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
     }

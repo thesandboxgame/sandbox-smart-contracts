@@ -34,6 +34,7 @@ library LibAsset {
     struct Asset {
         AssetType assetType; // The type of the asset.
         uint256 value; // The amount or value of the asset.
+        BundlePriceDistribution bundlePriceDistribution; // The price distribution for individual assets in bundle.
     }
 
     /// @dev Represents a group (i.e. bundle) of ERC20 assets on the Ethereum blockchain.
@@ -69,6 +70,14 @@ library LibAsset {
         BundledERC721[] bundledERC721;
         BundledERC1155[] bundledERC1155;
         Quads quads;
+    }
+
+    /// @dev Represents the price of each asset in a bundle.
+    struct BundlePriceDistribution {
+        uint256[] erc20Prices;
+        uint256[][] erc721Prices;
+        uint256[][] erc1155Prices;
+        uint256 quadPrice;
     }
 
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
@@ -146,6 +155,39 @@ library LibAsset {
     /// @return Bundle information.
     function decodeBundle(AssetType memory assetType) internal pure returns (Bundle memory) {
         return abi.decode(assetType.data, (Bundle));
+    }
+
+    /// @dev function to compute the total of individual prices in bundle.
+    /// @param bundle The bundle.
+    /// @param bundlePriceDistribution The bundle price details.
+    /// @return The total price of the bundle.
+    function computeBundlePrice(
+        Bundle memory bundle,
+        BundlePriceDistribution memory bundlePriceDistribution
+    ) internal pure returns (uint256) {
+        uint256 totalPrice = 0;
+
+        // total price of all bundled ERC20 assets
+        for (uint256 i = 0; i < bundlePriceDistribution.erc20Prices.length; i++) {
+            totalPrice += bundlePriceDistribution.erc20Prices[i];
+        }
+
+        // calculate the total price of all bundled ERC721 assets
+        for (uint256 i = 0; i < bundlePriceDistribution.erc721Prices.length; i++) {
+            for (uint256 j = 0; j < bundlePriceDistribution.erc721Prices[i].length; j++)
+                totalPrice += bundlePriceDistribution.erc721Prices[i][j];
+        }
+
+        // calculate the total price of all bundled ERC1155 assets
+        for (uint256 i = 0; i < bundlePriceDistribution.erc1155Prices.length; i++) {
+            for (uint256 j = 0; j < bundlePriceDistribution.erc1155Prices[i].length; j++) {
+                totalPrice += bundle.bundledERC1155[i].supplies[j] * bundlePriceDistribution.erc1155Prices[i][j];
+            }
+        }
+
+        totalPrice += bundlePriceDistribution.quadPrice;
+
+        return totalPrice;
     }
 
     /// @notice Decode the recipient address from an AssetType.
