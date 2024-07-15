@@ -1,17 +1,17 @@
-import 'dotenv/config';
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-ethers';
+import '@nomicfoundation/hardhat-network-helpers';
+import 'dotenv/config';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
+import './tasks/importedPackages';
+import './tasks/landMetadataRegistry';
+import './tasks/steal';
 import {
   addForkingSupport,
   addNodeAndMnemonic,
   skipDeploymentsOnLiveNetworks,
 } from './utils/hardhatConfig';
-import './tasks/importedPackages';
-import './tasks/steal';
-import './tasks/landMetadataRegistry';
 
 // Package name : solidity source code path
 const importedPackages = {
@@ -67,6 +67,7 @@ const importedPackages = {
     'contracts/PolygonLand.sol',
     'contracts/LandMetadataRegistry.sol',
   ],
+  '@sandbox-smart-contracts/batch-transfers': ['contracts/BatchTransfer.sol'],
 };
 
 const namedAccounts = {

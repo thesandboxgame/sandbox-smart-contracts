@@ -10,8 +10,8 @@ import "hardhat/console.sol";
 contract BatchTransfer is AccessControl {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    constructor(address defaultAdmin) {
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     }
 
     function batchTransfer(
