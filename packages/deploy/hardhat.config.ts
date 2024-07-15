@@ -303,16 +303,41 @@ const namedAccounts = {
 /**
  * TAGS:
  *  - mainnet -> production networks (you must pay for gas!!!)
- *  - L1      -> Layer 1 networks
- *  - L2      -> Layer 2 networks
+ *  - L1, L1-prod, L1-test -> Layer 1 networks
+ *  - L2, L2-prod, L2-test -> Layer 2 networks
  */
+enum NETWORKS {
+  SEPOLIA = 11155111,
+  MAINNET = 1,
+  AMOY = 80002,
+  POLYGON = 137,
+  BASESEPOLIA = 84532,
+  BASE = 8453,
+  BSCTESTNET = 97,
+  BSCMAINNET = 56,
+}
+
+enum DEPLOY_NETWORKS {
+  SEPOLIA = 'sepolia',
+  MAINNET = 'mainnet',
+  BSCTESTNET = 'bscTestnet',
+  BSCMAINNET = 'bscMainnet',
+  AMOY = 'amoy',
+  POLYGON = 'polygon',
+  BASESEPOLIA = 'baseSepolia',
+  BASE = 'base',
+}
+
 const networks = {
   hardhat: {
-    tags: ['L1', 'L2'],
+    tags: ['L1', 'L1-prod', 'L1-test', 'L2', 'L2-prod', 'L2-test'],
     deploy: ['deploy_mocks/', 'deploy/'],
     companionNetworks: {
       l1: 'hardhat',
       l2: 'hardhat',
+      ethereum: 'hardhat',
+      base: 'hardhat',
+      bsc: 'hardhat',
     },
     blockGasLimit:
       parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
@@ -324,16 +349,34 @@ const networks = {
       l2: 'mumbai',
     },
   },
-  sepolia: {
-    tags: ['L1'],
+  [DEPLOY_NETWORKS.SEPOLIA]: {
+    tags: ['L1', 'L1-test'],
     companionNetworks: {
-      l2: 'amoy',
+      [NETWORKS.AMOY]: [DEPLOY_NETWORKS.AMOY],
+      [NETWORKS.BASESEPOLIA]: [DEPLOY_NETWORKS.BASESEPOLIA],
+      [NETWORKS.BSCTESTNET]: [DEPLOY_NETWORKS.BSCTESTNET],
     },
   },
-  mainnet: {
-    tags: ['mainnet', 'L1'],
+  [DEPLOY_NETWORKS.MAINNET]: {
+    tags: ['mainnet', 'L1', 'L1-prod'],
     companionNetworks: {
-      l2: 'polygon',
+      [NETWORKS.POLYGON]: [DEPLOY_NETWORKS.POLYGON],
+      [NETWORKS.BASE]: [DEPLOY_NETWORKS.BASE],
+      [NETWORKS.BSCMAINNET]: [DEPLOY_NETWORKS.BSCMAINNET],
+    },
+  },
+  [DEPLOY_NETWORKS.BSCTESTNET]: {
+    tags: ['L1', 'L1-test'],
+    companionNetworks: {
+      [NETWORKS.SEPOLIA]: [DEPLOY_NETWORKS.SEPOLIA],
+      [NETWORKS.BASESEPOLIA]: [DEPLOY_NETWORKS.BASESEPOLIA],
+    },
+  },
+  [DEPLOY_NETWORKS.BSCMAINNET]: {
+    tags: ['L1', 'L1-prod'],
+    companionNetworks: {
+      [NETWORKS.MAINNET]: [DEPLOY_NETWORKS.MAINNET],
+      [NETWORKS.BASE]: [DEPLOY_NETWORKS.BASE],
     },
   },
   mumbai: {
@@ -342,16 +385,30 @@ const networks = {
       l1: 'goerli',
     },
   },
-  amoy: {
-    tags: ['L2'],
+  [DEPLOY_NETWORKS.AMOY]: {
+    tags: ['L2', 'L2-test'],
     companionNetworks: {
-      l1: 'sepolia',
+      [NETWORKS.SEPOLIA]: [DEPLOY_NETWORKS.SEPOLIA],
     },
   },
-  polygon: {
-    tags: ['mainnet', 'L2'],
+  [DEPLOY_NETWORKS.POLYGON]: {
+    tags: ['L2', 'L2-prod'],
     companionNetworks: {
-      l1: 'mainnet',
+      [NETWORKS.MAINNET]: [DEPLOY_NETWORKS.MAINNET],
+    },
+  },
+  [DEPLOY_NETWORKS.BASESEPOLIA]: {
+    tags: ['L2', 'L2-test'],
+    companionNetworks: {
+      [NETWORKS.SEPOLIA]: [DEPLOY_NETWORKS.SEPOLIA],
+      [NETWORKS.BSCTESTNET]: [DEPLOY_NETWORKS.BSCTESTNET],
+    },
+  },
+  [DEPLOY_NETWORKS.BASE]: {
+    tags: ['L2', 'L2-prod'],
+    companionNetworks: {
+      [NETWORKS.MAINNET]: [DEPLOY_NETWORKS.MAINNET],
+      [NETWORKS.BSCMAINNET]: [DEPLOY_NETWORKS.BSCMAINNET],
     },
   },
 };
