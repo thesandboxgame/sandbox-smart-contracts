@@ -1,5 +1,5 @@
 {
-  "name": "@sandbox-smart-contracts/batch-transfer",
+  "name": "@sandbox-smart-contracts/batch-transfers",
   "version": "1.0.0",
   "description": "Batch transfers contract",
   "files": [

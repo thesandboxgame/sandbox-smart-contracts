@@ -2379,9 +2379,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/batch-transfer@workspace:packages/batch-transfers":
+"@sandbox-smart-contracts/batch-transfers@*, @sandbox-smart-contracts/batch-transfers@workspace:packages/batch-transfers":
   version: 0.0.0-use.local
-  resolution: "@sandbox-smart-contracts/batch-transfer@workspace:packages/batch-transfers"
+  resolution: "@sandbox-smart-contracts/batch-transfers@workspace:packages/batch-transfers"
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/providers": ^5.7.2
@@ -2648,6 +2648,7 @@ __metadata:
     "@sandbox-smart-contracts/asset": 1.2.0
     "@sandbox-smart-contracts/asset@1.1.0": "npm:@sandbox-smart-contracts/asset@1.1.0"
     "@sandbox-smart-contracts/avatar": "*"
+    "@sandbox-smart-contracts/batch-transfers": "*"
     "@sandbox-smart-contracts/core": "*"
     "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
     "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
