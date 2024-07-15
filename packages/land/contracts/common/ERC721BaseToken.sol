@@ -334,7 +334,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
 
     /// @notice Subtract tokens to the owner balance
     /// @param who the owner of the token
-    /// @param val how much to add to the owner's balance
+    /// @param val how much to subtract from the owner's balance
     /// @dev we can use unchecked because there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
