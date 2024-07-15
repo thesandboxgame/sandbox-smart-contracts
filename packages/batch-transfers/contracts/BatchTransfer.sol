@@ -1,12 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// access control
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-
-error InvalidTokenContract();
+import "hardhat/console.sol";
 
 /// @custom:security-contact contact-blockchain@sandbox.game
 contract BatchTransfer is AccessControl {
@@ -18,7 +16,7 @@ contract BatchTransfer is AccessControl {
 
     function batchTransfer(
         address[] calldata contracts,
-        address[] calldata recipients,
+        address[][] calldata recipients,
         uint256[][] calldata tokenIds,
         uint256[][] calldata amounts,
         bool[] calldata isERC1155
@@ -31,16 +29,20 @@ contract BatchTransfer is AccessControl {
             "Arrays must have the same length"
         );
         for (uint256 i = 0; i < contracts.length; i++) {
-            address contractAddress = contracts[i];
-            address recipient = recipients[i];
-            uint256[] memory ids = tokenIds[i];
-            uint256[] memory values = amounts[i];
-            bool erc1155 = isERC1155[i];
-
-            if (erc1155) {
-                IERC1155(contractAddress).safeBatchTransferFrom(_msgSender(), recipient, ids, values, "");
+            if (isERC1155[i]) {
+                for (uint256 j = 0; j < recipients[i].length; j++) {
+                    IERC1155(contracts[i]).safeTransferFrom(
+                        _msgSender(),
+                        recipients[i][j],
+                        tokenIds[i][j],
+                        amounts[i][j],
+                        ""
+                    );
+                }
             } else {
-                IERC721(contractAddress).safeTransferFrom(_msgSender(), recipient, ids[0]);
+                require(tokenIds[i].length == 1, "ERC721: Only one token can be transferred at a time");
+                require(recipients[i].length == 1, "ERC721: Only one recipient can be specified");
+                IERC721(contracts[i]).safeTransferFrom(_msgSender(), recipients[i][0], tokenIds[i][0]);
             }
         }
     }
