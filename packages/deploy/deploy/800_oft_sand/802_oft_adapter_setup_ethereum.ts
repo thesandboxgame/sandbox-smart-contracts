@@ -40,7 +40,7 @@ const func: DeployFunction = async function (
       ethers.zeroPadValue(OFTSandBase.address, 32)
     );
 
-    // set OFTSand(bsc) as peer to OFTAdapterForSand using eidBsc
+    // setting OFTSand(bsc) as peer to OFTAdapterForSand using eidBsc
     await execute(
       'OFTAdapterForSand',
       {from: deployer, log: true},
