@@ -24,24 +24,30 @@ describe('OFT Contracts', function () {
       expect(await OFTSand.getTrustedForwarder()).to.be.equal(ZeroAddress);
     });
 
-    it('only OFTSand owner can enable or disable the send function', async function () {
+    it('only OFTSand admin can enable or disable the send function', async function () {
       const {OFTSand, user1} = await loadFixture(setupOFTSand);
       expect(await OFTSand.enabled()).to.be.true;
-      await expect(OFTSand.connect(user1).enable(false))
-        .to.be.revertedWithCustomError(OFTSand, 'OwnableUnauthorizedAccount')
-        .withArgs(user1.address);
+      await expect(
+        OFTSand.connect(user1).enable(false),
+      ).to.be.revertedWithCustomError(OFTSand, 'OnlyAdmin');
     });
 
-    it('OFTSand owner can enable or disable the send function', async function () {
-      const {OFTSand, oftSandOwner} = await loadFixture(setupOFTSand);
+    it('OFTSand admin can enable or disable the send function', async function () {
+      const {OFTSand, sandAdmin} = await loadFixture(setupOFTSand);
 
       expect(await OFTSand.enabled()).to.be.true;
 
-      await OFTSand.connect(oftSandOwner).enable(false);
+      await OFTSand.connect(sandAdmin).enable(false);
       expect(await OFTSand.enabled()).to.be.false;
 
-      await OFTSand.connect(oftSandOwner).enable(true);
+      await OFTSand.connect(sandAdmin).enable(true);
       expect(await OFTSand.enabled()).to.be.true;
+    });
+
+    it('should emit StateChanged event for OFTSand', async function () {
+      const {OFTSand, sandAdmin} = await loadFixture(setupOFTSand);
+      const tx = await OFTSand.connect(sandAdmin).enable(false);
+      await expect(tx).to.emit(OFTSand, 'StateChanged').withArgs(false);
     });
 
     it('should return false for approvalRequired', async function () {
@@ -79,23 +85,29 @@ describe('OFT Contracts', function () {
       expect(await OFTAdapter.getTrustedForwarder()).to.be.equal(ZeroAddress);
     });
 
-    it('only OFTAdapter owner can enable or disable the send function', async function () {
+    it('only OFTAdapter admin can enable or disable the send function', async function () {
       const {OFTAdapter, user1} = await loadFixture(setupOFTSand);
       expect(await OFTAdapter.enabled()).to.be.true;
-      await expect(OFTAdapter.connect(user1).enable(false))
-        .to.be.revertedWithCustomError(OFTAdapter, 'OwnableUnauthorizedAccount')
-        .withArgs(user1.address);
+      await expect(
+        OFTAdapter.connect(user1).enable(false),
+      ).to.be.revertedWithCustomError(OFTAdapter, 'OnlyAdmin');
     });
 
-    it('OFTAdapter owner can enable or disable the send function', async function () {
-      const {OFTAdapter, oftAdapterOwner} = await loadFixture(setupOFTSand);
+    it('OFTAdapter admin can enable or disable the send function', async function () {
+      const {OFTAdapter, oftAdapterAdmin} = await loadFixture(setupOFTSand);
       expect(await OFTAdapter.enabled()).to.be.true;
 
-      await OFTAdapter.connect(oftAdapterOwner).enable(false);
+      await OFTAdapter.connect(oftAdapterAdmin).enable(false);
       expect(await OFTAdapter.enabled()).to.be.false;
 
-      await OFTAdapter.connect(oftAdapterOwner).enable(true);
+      await OFTAdapter.connect(oftAdapterAdmin).enable(true);
       expect(await OFTAdapter.enabled()).to.be.true;
+    });
+
+    it('should emit StateChanged event for OFTAdapter', async function () {
+      const {OFTAdapter, oftAdapterAdmin} = await loadFixture(setupOFTSand);
+      const tx = await OFTAdapter.connect(oftAdapterAdmin).enable(false);
+      await expect(tx).to.emit(OFTAdapter, 'StateChanged').withArgs(false);
     });
   });
 
@@ -129,11 +141,11 @@ describe('OFT Contracts', function () {
     });
 
     it('should not transfer ERC20 tokens from OFTAdapter when send function is disabled', async function () {
-      const {OFTAdapter, oftAdapterOwner, user1, eidOFTSand} =
+      const {OFTAdapter, oftAdapterAdmin, user1, eidOFTSand} =
         await loadFixture(setupOFTSand);
 
       // disable send() in OFTAdapter
-      await OFTAdapter.connect(oftAdapterOwner).enable(false);
+      await OFTAdapter.connect(oftAdapterAdmin).enable(false);
       expect(await OFTAdapter.enabled()).to.be.false;
 
       const decimalConversionRate = await OFTAdapter.decimalConversionRate();
@@ -281,7 +293,7 @@ describe('OFT Contracts', function () {
         OFTAdapter,
         OFTSand,
         SandMock,
-        oftSandOwner,
+        sandAdmin,
         user1,
         user2,
         user3,
@@ -326,7 +338,7 @@ describe('OFT Contracts', function () {
       expect(await OFTSand.balanceOf(user2)).to.be.equal(tokensToSend);
 
       // disable send() in OFTSand
-      await OFTSand.connect(oftSandOwner).enable(false);
+      await OFTSand.connect(sandAdmin).enable(false);
       expect(await OFTSand.enabled()).to.be.false;
 
       const sendParam2 = [
