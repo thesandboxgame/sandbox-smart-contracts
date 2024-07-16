@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, sandAdmin} = await getNamedAccounts();
 
   const Sand = await deployments.get('Sand');
   const EndpointV2 = await deployments.get('EndpointV2');
@@ -18,6 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       EndpointV2.address,
       deployer,
       TRUSTED_FORWARDER_V2.address,
+      sandAdmin,
     ],
     log: true,
     skipIfAlreadyDeployed: true,
