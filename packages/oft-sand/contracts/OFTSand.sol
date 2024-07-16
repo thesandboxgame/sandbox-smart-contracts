@@ -39,7 +39,7 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
         _trustedForwarder = trustedForwarder;
     }
 
-    function enable(bool _enabled) external onlyOwner {
+    function enable(bool _enabled) external onlyAdmin {
         _enable(_enabled);
     }
 
