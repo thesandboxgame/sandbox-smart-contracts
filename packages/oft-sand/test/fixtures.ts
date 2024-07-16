@@ -4,6 +4,7 @@ export async function setupOFTSand() {
   const [
     executionAdmin,
     sandAdmin,
+    oftAdapterAdmin,
     oftAdapterOwner,
     oftSandOwner,
     oftSandOwner2,
@@ -41,6 +42,7 @@ export async function setupOFTSand() {
     EndpointForAdapter,
     oftAdapterOwner,
     TrustedForwarder,
+    oftAdapterAdmin,
   );
 
   const OFTSandFactoy = await ethers.getContractFactory('OFTSand');
@@ -130,7 +132,9 @@ export async function setupOFTSand() {
     eidOFTSand,
     eidOFTSand2,
     oftSandOwner,
+    sandAdmin,
     oftAdapterOwner,
+    oftAdapterAdmin,
     user1,
     user2,
     user3,
