@@ -28,6 +28,10 @@ contract WithAdmin is IErrors {
     /// @dev Change the administrator to be `newAdmin`.
     /// @param newAdmin The address of the new administrator.
     function changeAdmin(address newAdmin) external onlyAdmin {
+        _changeAdmin(newAdmin);
+    }
+
+    function _changeAdmin(address newAdmin) internal {
         emit AdminChanged(_admin, newAdmin);
         _admin = newAdmin;
     }
