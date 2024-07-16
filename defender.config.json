@@ -1,0 +1,9 @@
+{
+    "contract_inspector": {
+        "enabled": true,
+        "scan_directories": ["packages/land", "packages/marketplace"]
+    },
+    "dependency_checker": {
+        "enabled": false
+    }
+}
