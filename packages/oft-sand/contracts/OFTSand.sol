@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {OFTCore} from "./oft/OFTCore.sol";
+import {SendParam, OFTReceipt, MessagingReceipt, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {OFTCore} from "./oft/OFTCore.sol";
 import {ERC2771Handler} from "./sand/ERC2771Handler.sol";
 import {SandBaseToken} from "./sand/SandBaseToken.sol";
 
@@ -12,6 +13,15 @@ import {SandBaseToken} from "./sand/SandBaseToken.sol";
 /// @dev OFTSand is a contract that combines SandBaseToken, ERC2771Handler, and OFTCore functionalities.
 /// @dev It provides a token contract implementation of Sand token with LayerZero compatibility.
 contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
+    bool public enabled;
+
+    /// @notice Emitted when the enabled state changes
+    /// @param _enabled The new enabled state
+    event StateChanged(bool _enabled);
+
+    /// @notice Custom error thrown when the send function is called while disabled
+    error SendFunctionDisabled();
+
     constructor(
         address trustedForwarder,
         address sandAdmin,
@@ -20,12 +30,17 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
         address owner
     ) SandBaseToken(sandAdmin, executionAdmin, address(0), 0) OFTCore(18, layerZeroEndpoint, owner) Ownable(owner) {
         __ERC2771Handler_initialize(trustedForwarder);
+        _enable(true);
     }
 
     /// @notice Change the address of the trusted forwarder for meta-TX.
     /// @param trustedForwarder The new trustedForwarder.
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    function enable(bool _enabled) external onlyOwner {
+        _enable(_enabled);
     }
 
     /// @notice Indicates whether the OFT contract requires approval of the 'token()' to send.
@@ -40,6 +55,23 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
     /// @dev In the case of OFT, address(this) and erc20 are the same contract.
     function token() external view returns (address) {
         return address(this);
+    }
+
+    function send(
+        SendParam calldata _sendParam,
+        MessagingFee calldata _fee,
+        address _refundAddress
+    ) public payable virtual override returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
+        if (!enabled) {
+            revert SendFunctionDisabled();
+        }
+
+        super.send(_sendParam, _fee, _refundAddress);
+    }
+
+    function _enable(bool _enabled) internal {
+        enabled = _enabled;
+        emit StateChanged(_enabled);
     }
 
     /// @dev Burns tokens from the sender's specified balance.

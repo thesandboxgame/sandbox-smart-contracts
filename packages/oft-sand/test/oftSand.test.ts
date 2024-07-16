@@ -24,6 +24,26 @@ describe('OFT Contracts', function () {
       expect(await OFTSand.getTrustedForwarder()).to.be.equal(ZeroAddress);
     });
 
+    it('only OFTSand owner can enable or disable the send function', async function () {
+      const {OFTSand, user1} = await loadFixture(setupOFTSand);
+      expect(await OFTSand.enabled()).to.be.true;
+      await expect(OFTSand.connect(user1).enable(false))
+        .to.be.revertedWithCustomError(OFTSand, 'OwnableUnauthorizedAccount')
+        .withArgs(user1.address);
+    });
+
+    it('OFTSand owner can enable or disable the send function', async function () {
+      const {OFTSand, oftSandOwner} = await loadFixture(setupOFTSand);
+
+      expect(await OFTSand.enabled()).to.be.true;
+
+      await OFTSand.connect(oftSandOwner).enable(false);
+      expect(await OFTSand.enabled()).to.be.false;
+
+      await OFTSand.connect(oftSandOwner).enable(true);
+      expect(await OFTSand.enabled()).to.be.true;
+    });
+
     it('should return false for approvalRequired', async function () {
       const {OFTSand} = await loadFixture(setupOFTSand);
       expect(await OFTSand.approvalRequired()).to.equal(false);
@@ -58,6 +78,25 @@ describe('OFT Contracts', function () {
       );
       expect(await OFTAdapter.getTrustedForwarder()).to.be.equal(ZeroAddress);
     });
+
+    it('only OFTAdapter owner can enable or disable the send function', async function () {
+      const {OFTAdapter, user1} = await loadFixture(setupOFTSand);
+      expect(await OFTAdapter.enabled()).to.be.true;
+      await expect(OFTAdapter.connect(user1).enable(false))
+        .to.be.revertedWithCustomError(OFTAdapter, 'OwnableUnauthorizedAccount')
+        .withArgs(user1.address);
+    });
+
+    it('OFTAdapter owner can enable or disable the send function', async function () {
+      const {OFTAdapter, oftAdapterOwner} = await loadFixture(setupOFTSand);
+      expect(await OFTAdapter.enabled()).to.be.true;
+
+      await OFTAdapter.connect(oftAdapterOwner).enable(false);
+      expect(await OFTAdapter.enabled()).to.be.false;
+
+      await OFTAdapter.connect(oftAdapterOwner).enable(true);
+      expect(await OFTAdapter.enabled()).to.be.true;
+    });
   });
 
   describe('token transfer using send', function () {
@@ -87,6 +126,44 @@ describe('OFT Contracts', function () {
       expect(await SandMock.allowance(user1, OFTAdapter)).to.be.equal(
         ethers.parseEther('1'),
       );
+    });
+
+    it('should not transfer ERC20 tokens from OFTAdapter when send function is disabled', async function () {
+      const {OFTAdapter, oftAdapterOwner, user1, eidOFTSand} =
+        await loadFixture(setupOFTSand);
+
+      // disable send() in OFTAdapter
+      await OFTAdapter.connect(oftAdapterOwner).enable(false);
+      expect(await OFTAdapter.enabled()).to.be.false;
+
+      const decimalConversionRate = await OFTAdapter.decimalConversionRate();
+
+      const options = Options.newOptions()
+        .addExecutorLzReceiveOption(200000, 0)
+        .toHex()
+        .toString();
+
+      const sendParam = [
+        eidOFTSand,
+        ethers.zeroPadValue(await user1.getAddress(), 32),
+        decimalConversionRate,
+        decimalConversionRate,
+        options,
+        '0x',
+        '0x',
+      ];
+
+      const [nativeFee] = await OFTAdapter.quoteSend(sendParam, 0);
+      await expect(
+        OFTAdapter.connect(user1).send(
+          sendParam,
+          [nativeFee, 0],
+          user1.getAddress(),
+          {
+            value: nativeFee,
+          },
+        ),
+      ).to.be.revertedWithCustomError(OFTAdapter, 'SendFunctionDisabled');
     });
 
     it('should not transfer ERC20 tokens from OFTAdapter to OFTSand if amount to send is less than the decimalConversionRate', async function () {
@@ -197,6 +274,83 @@ describe('OFT Contracts', function () {
       expect(await OFTSand2.peers(eidOFTSand)).to.be.equal(
         ethers.zeroPadValue(await OFTSand.getAddress(), 32),
       );
+    });
+
+    it('should not transfer ERC20 tokens from OFTSand when send function is disabled', async function () {
+      const {
+        OFTAdapter,
+        OFTSand,
+        SandMock,
+        oftSandOwner,
+        user1,
+        user2,
+        user3,
+        eidOFTSand,
+        eidOFTSand2,
+      } = await loadFixture(setupOFTSand);
+
+      const initalBalanceUser1 = await SandMock.balanceOf(user1);
+      const tokensToSend = initalBalanceUser1 / 1000000n;
+      await SandMock.connect(user1).approve(OFTAdapter, tokensToSend);
+      expect(await OFTSand.balanceOf(user2)).to.be.equal(0);
+
+      const options = Options.newOptions()
+        .addExecutorLzReceiveOption(200000, 0)
+        .toHex()
+        .toString();
+
+      const sendParam = [
+        eidOFTSand,
+        ethers.zeroPadValue(await user2.getAddress(), 32),
+        tokensToSend,
+        tokensToSend,
+        options,
+        '0x',
+        '0x',
+      ];
+
+      const [nativeFee] = await OFTAdapter.quoteSend(sendParam, 0);
+
+      await OFTAdapter.connect(user1).send(
+        sendParam,
+        [nativeFee, 0],
+        user1.getAddress(),
+        {
+          value: nativeFee,
+        },
+      );
+
+      expect(await SandMock.balanceOf(user1)).to.be.equal(
+        initalBalanceUser1 - tokensToSend,
+      );
+      expect(await OFTSand.balanceOf(user2)).to.be.equal(tokensToSend);
+
+      // disable send() in OFTSand
+      await OFTSand.connect(oftSandOwner).enable(false);
+      expect(await OFTSand.enabled()).to.be.false;
+
+      const sendParam2 = [
+        eidOFTSand2,
+        ethers.zeroPadValue(await user3.getAddress(), 32),
+        tokensToSend,
+        tokensToSend,
+        options,
+        '0x',
+        '0x',
+      ];
+
+      const [nativeFee2] = await OFTSand.quoteSend(sendParam2, 0);
+
+      await expect(
+        OFTSand.connect(user2).send(
+          sendParam2,
+          [nativeFee2, 0],
+          user2.getAddress(),
+          {
+            value: nativeFee2,
+          },
+        ),
+      ).to.be.revertedWithCustomError(OFTSand, 'SendFunctionDisabled');
     });
 
     it('should transfer ERC20 tokens from OFTSand to OFTSand2 using LayerZero', async function () {
