@@ -6,7 +6,7 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {execute} = deployments;
+  const {execute, read} = deployments;
   const {deployer} = await getNamedAccounts();
 
   let eidEthereum, eidBsc;
@@ -30,26 +30,42 @@ const func: DeployFunction = async function (
 
   const hreBsc = hre.companionNetworks.bsc;
   const deploymentsBsc = hreBsc.deployments;
-  const OFTSand = await deploymentsBsc.getOrNull('OFTSand');
+  const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 
-  if (OFTAdapterForSand && OFTSand) {
-    // setting OFTAdapterForSand as peer to OFTSand(base) using eidEthereum
-    await execute(
-      'OFTSand',
-      {from: deployer, log: true},
-      'setPeer',
+  if (OFTAdapterForSand && OFTSandBsc) {
+    const isPeerForEthereum = await read(
+      'OFTAdapterForSand',
+      'isPeer',
       eidEthereum,
       ethers.zeroPadValue(OFTAdapterForSand.address, 32)
     );
+    if (!isPeerForEthereum) {
+      // setting OFTAdapterForSand as peer to OFTSand(base) using eidEthereum
+      await execute(
+        'OFTSand',
+        {from: deployer, log: true},
+        'setPeer',
+        eidEthereum,
+        ethers.zeroPadValue(OFTAdapterForSand.address, 32)
+      );
+    }
 
-    // setting OFTSand(bsc) as peer to OFTSand(base) using eidBsc
-    await execute(
-      'OFTSand',
-      {from: deployer, log: true},
-      'setPeer',
+    const isPeerForBsc = await read(
+      'OFTAdapterForSand',
+      'isPeer',
       eidBsc,
-      ethers.zeroPadValue(OFTSand.address, 32)
+      ethers.zeroPadValue(OFTSandBsc.address, 32)
     );
+    if (!isPeerForBsc) {
+      // setting OFTSand(bsc) as peer to OFTSand(base) using eidBsc
+      await execute(
+        'OFTSand',
+        {from: deployer, log: true},
+        'setPeer',
+        eidBsc,
+        ethers.zeroPadValue(OFTSandBsc.address, 32)
+      );
+    }
   }
 };
 
