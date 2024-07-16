@@ -5,12 +5,13 @@ import {SendParam, OFTReceipt, MessagingReceipt, MessagingFee} from "@layerzerol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {OFTAdapter} from "./oft/OFTAdapter.sol";
+import {WithAdmin} from "./sand/WithAdmin.sol";
 import {ERC2771Handler} from "./sand/ERC2771Handler.sol";
 
 /// @title OFTAdapterForSand
 /// @author The Sandbox
 /// @dev contract to be used with non-upgradable SAND contract
-contract OFTAdapterForSand is OFTAdapter, ERC2771Handler {
+contract OFTAdapterForSand is OFTAdapter, WithAdmin, ERC2771Handler {
     bool public enabled;
 
     /// @notice Emitted when the enabled state changes
@@ -28,9 +29,11 @@ contract OFTAdapterForSand is OFTAdapter, ERC2771Handler {
         address sandToken,
         address layerZeroEndpoint,
         address owner,
-        address trustedForwarder
+        address trustedForwarder,
+        address admin
     ) OFTAdapter(sandToken, layerZeroEndpoint, owner) Ownable(owner) {
         __ERC2771Handler_initialize(trustedForwarder);
+        _changeAdmin(admin);
         _enable(true);
     }
 
@@ -40,7 +43,7 @@ contract OFTAdapterForSand is OFTAdapter, ERC2771Handler {
         _trustedForwarder = trustedForwarder;
     }
 
-    function enable(bool _enabled) external onlyOwner {
+    function enable(bool _enabled) external onlyAdmin {
         _enable(_enabled);
     }
 
