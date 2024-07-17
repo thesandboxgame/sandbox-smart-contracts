@@ -1,7 +1,7 @@
 {
     "contract_inspector": {
         "enabled": true,
-        "scan_directories": ["packages/land", "packages/marketplace"]
+        "scan_directories": ["packages/land", "packages/marketplace", "packages/oft-sand"]
     },
     "dependency_checker": {
         "enabled": false
