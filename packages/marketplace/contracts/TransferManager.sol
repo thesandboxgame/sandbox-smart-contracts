@@ -8,6 +8,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
+import {QuadHelper} from "@sandbox-smart-contracts/land/contracts/libraries/QuadHelper.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -178,7 +179,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
         if (remainder > 0) {
             _transfer(
-                LibAsset.Asset(paymentSide.asset.assetType, remainder, paymentSide.asset.bundlePriceDistribution),
+                LibAsset.Asset(paymentSide.asset.assetType, remainder, paymentSide.asset.priceDistribution),
                 paymentSide.account,
                 nftSide.recipient
             );
@@ -203,19 +204,12 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        // code to decode for bundle: done
         // for bundle royalty is calc for loop // for a same creator club royalties
         // royalties are getting fetched
-        // decode royalties
-        //trasfer royalties
         if (paymentSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
-            uint256 erc721Length = bundle.bundledERC721.length;
-            uint256 erc1155Length = bundle.bundledERC1155.length;
-            uint256 quadsLength = bundle.quads.xs.length;
-
-            for (uint256 i; i < erc721Length; i++) {
+            for (uint256 i; i < bundle.bundledERC721.length; i++) {
                 address token = bundle.bundledERC721[i].erc721Address;
                 uint256 idLength = bundle.bundledERC721[i].ids.length;
                 for (uint256 j; j < idLength; j++) {
@@ -225,22 +219,31 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 }
             }
 
-            for (uint256 i; i < erc1155Length; i++) {
+            for (uint256 i; i < bundle.bundledERC1155.length; i++) {
                 address token = bundle.bundledERC1155[i].erc1155Address;
                 uint256 idLength = bundle.bundledERC1155[i].ids.length;
                 require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
                 for (uint256 j; j < idLength; j++) {
                     uint256 tokenId = bundle.bundledERC1155[i].ids[j];
-                    uint256 supply = bundle.bundledERC1155[i].supplies[j];
                     IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
                     remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
                 }
             }
 
-            if (quadsLength > 0) {
-                address landTokenAddress = address(landContract);
-
-                // TODO: fetch tokenId and call _applyRoyalties
+            uint256 quadSize = bundle.quads.xs.length;
+            if (quadSize > 0) {
+                for (uint256 i = 0; i < quadSize; i++) {
+                    uint256 size = bundle.quads.sizes[i];
+                    uint256 x = bundle.quads.xs[i];
+                    uint256 y = bundle.quads.ys[i];
+                    (uint256 layer, , ) = QuadHelper.getQuadLayer(size);
+                    uint256 quadId = QuadHelper.getQuadId(layer, x, y);
+                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
+                        address(landContract),
+                        quadId
+                    );
+                    remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+                }
             }
         } else {
             (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
@@ -288,7 +291,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         LibAsset.Asset memory payment = LibAsset.Asset(
             paymentSide.asset.assetType,
             0,
-            paymentSide.asset.bundlePriceDistribution
+            paymentSide.asset.priceDistribution
         );
         uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
         if (remainder > fee) {
