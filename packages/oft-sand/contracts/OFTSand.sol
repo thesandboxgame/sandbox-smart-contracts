@@ -13,11 +13,11 @@ import {SandBaseToken} from "./sand/SandBaseToken.sol";
 /// @dev OFTSand is a contract that combines SandBaseToken, ERC2771Handler, and OFTCore functionalities.
 /// @dev It provides a token contract implementation of Sand token with LayerZero compatibility.
 contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
-    bool public enabled;
+    bool internal _enabled;
 
     /// @notice Emitted when the enabled state changes
-    /// @param _enabled The new enabled state
-    event StateChanged(bool _enabled);
+    /// @param enabled The new enabled state
+    event Enabled(bool enabled);
 
     /// @notice Custom error thrown when the send function is called while disabled
     error SendFunctionDisabled();
@@ -39,8 +39,12 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
         _trustedForwarder = trustedForwarder;
     }
 
-    function enable(bool _enabled) external onlyAdmin {
-        _enable(_enabled);
+    function enable(bool enabled) external onlyAdmin {
+        _enable(enabled);
+    }
+
+    function getEnabled() external view returns (bool) {
+        return _enabled;
     }
 
     /// @notice Indicates whether the OFT contract requires approval of the 'token()' to send.
@@ -62,16 +66,16 @@ contract OFTSand is SandBaseToken, ERC2771Handler, OFTCore {
         MessagingFee calldata _fee,
         address _refundAddress
     ) public payable virtual override returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
-        if (!enabled) {
+        if (!_enabled) {
             revert SendFunctionDisabled();
         }
 
         super.send(_sendParam, _fee, _refundAddress);
     }
 
-    function _enable(bool _enabled) internal {
-        enabled = _enabled;
-        emit StateChanged(_enabled);
+    function _enable(bool enabled) internal {
+        _enabled = enabled;
+        emit Enabled(_enabled);
     }
 
     /// @dev Burns tokens from the sender's specified balance.

@@ -26,7 +26,7 @@ describe('OFT Contracts', function () {
 
     it('only OFTSand admin can enable or disable the send function', async function () {
       const {OFTSand, user1} = await loadFixture(setupOFTSand);
-      expect(await OFTSand.enabled()).to.be.true;
+      expect(await OFTSand.getEnabled()).to.be.true;
       await expect(
         OFTSand.connect(user1).enable(false),
       ).to.be.revertedWithCustomError(OFTSand, 'OnlyAdmin');
@@ -35,19 +35,19 @@ describe('OFT Contracts', function () {
     it('OFTSand admin can enable or disable the send function', async function () {
       const {OFTSand, sandAdmin} = await loadFixture(setupOFTSand);
 
-      expect(await OFTSand.enabled()).to.be.true;
+      expect(await OFTSand.getEnabled()).to.be.true;
 
       await OFTSand.connect(sandAdmin).enable(false);
-      expect(await OFTSand.enabled()).to.be.false;
+      expect(await OFTSand.getEnabled()).to.be.false;
 
       await OFTSand.connect(sandAdmin).enable(true);
-      expect(await OFTSand.enabled()).to.be.true;
+      expect(await OFTSand.getEnabled()).to.be.true;
     });
 
-    it('should emit StateChanged event for OFTSand', async function () {
+    it('should emit Enabled event for OFTSand', async function () {
       const {OFTSand, sandAdmin} = await loadFixture(setupOFTSand);
       const tx = await OFTSand.connect(sandAdmin).enable(false);
-      await expect(tx).to.emit(OFTSand, 'StateChanged').withArgs(false);
+      await expect(tx).to.emit(OFTSand, 'Enabled').withArgs(false);
     });
 
     it('should return false for approvalRequired', async function () {
@@ -87,7 +87,7 @@ describe('OFT Contracts', function () {
 
     it('only OFTAdapter admin can enable or disable the send function', async function () {
       const {OFTAdapter, user1} = await loadFixture(setupOFTSand);
-      expect(await OFTAdapter.enabled()).to.be.true;
+      expect(await OFTAdapter.getEnabled()).to.be.true;
       await expect(
         OFTAdapter.connect(user1).enable(false),
       ).to.be.revertedWithCustomError(OFTAdapter, 'OnlyAdmin');
@@ -95,19 +95,19 @@ describe('OFT Contracts', function () {
 
     it('OFTAdapter admin can enable or disable the send function', async function () {
       const {OFTAdapter, oftAdapterAdmin} = await loadFixture(setupOFTSand);
-      expect(await OFTAdapter.enabled()).to.be.true;
+      expect(await OFTAdapter.getEnabled()).to.be.true;
 
       await OFTAdapter.connect(oftAdapterAdmin).enable(false);
-      expect(await OFTAdapter.enabled()).to.be.false;
+      expect(await OFTAdapter.getEnabled()).to.be.false;
 
       await OFTAdapter.connect(oftAdapterAdmin).enable(true);
-      expect(await OFTAdapter.enabled()).to.be.true;
+      expect(await OFTAdapter.getEnabled()).to.be.true;
     });
 
-    it('should emit StateChanged event for OFTAdapter', async function () {
+    it('should emit Enabled event for OFTAdapter', async function () {
       const {OFTAdapter, oftAdapterAdmin} = await loadFixture(setupOFTSand);
       const tx = await OFTAdapter.connect(oftAdapterAdmin).enable(false);
-      await expect(tx).to.emit(OFTAdapter, 'StateChanged').withArgs(false);
+      await expect(tx).to.emit(OFTAdapter, 'Enabled').withArgs(false);
     });
   });
 
@@ -146,7 +146,7 @@ describe('OFT Contracts', function () {
 
       // disable send() in OFTAdapter
       await OFTAdapter.connect(oftAdapterAdmin).enable(false);
-      expect(await OFTAdapter.enabled()).to.be.false;
+      expect(await OFTAdapter.getEnabled()).to.be.false;
 
       const decimalConversionRate = await OFTAdapter.decimalConversionRate();
 
@@ -339,7 +339,7 @@ describe('OFT Contracts', function () {
 
       // disable send() in OFTSand
       await OFTSand.connect(sandAdmin).enable(false);
-      expect(await OFTSand.enabled()).to.be.false;
+      expect(await OFTSand.getEnabled()).to.be.false;
 
       const sendParam2 = [
         eidOFTSand2,
