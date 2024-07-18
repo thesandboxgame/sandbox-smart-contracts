@@ -12,11 +12,11 @@ import {ERC2771Handler} from "./sand/ERC2771Handler.sol";
 /// @author The Sandbox
 /// @dev contract to be used with non-upgradable SAND contract
 contract OFTAdapterForSand is OFTAdapter, WithAdmin, ERC2771Handler {
-    bool public enabled;
+    bool internal _enabled;
 
     /// @notice Emitted when the enabled state changes
-    /// @param _enabled The new enabled state
-    event StateChanged(bool _enabled);
+    /// @param enabled The new enabled state
+    event Enabled(bool enabled);
 
     /// @notice Custom error thrown when the send function is called while disabled
     error SendFunctionDisabled();
@@ -43,8 +43,12 @@ contract OFTAdapterForSand is OFTAdapter, WithAdmin, ERC2771Handler {
         _trustedForwarder = trustedForwarder;
     }
 
-    function enable(bool _enabled) external onlyAdmin {
-        _enable(_enabled);
+    function enable(bool enabled) external onlyAdmin {
+        _enable(enabled);
+    }
+
+    function getEnabled() external view returns (bool) {
+        return _enabled;
     }
 
     function send(
@@ -52,16 +56,16 @@ contract OFTAdapterForSand is OFTAdapter, WithAdmin, ERC2771Handler {
         MessagingFee calldata _fee,
         address _refundAddress
     ) public payable virtual override returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
-        if (!enabled) {
+        if (!_enabled) {
             revert SendFunctionDisabled();
         }
 
         super.send(_sendParam, _fee, _refundAddress);
     }
 
-    function _enable(bool _enabled) internal {
-        enabled = _enabled;
-        emit StateChanged(_enabled);
+    function _enable(bool enabled) internal {
+        _enabled = enabled;
+        emit Enabled(_enabled);
     }
 
     function _msgSender() internal view override(ERC2771Handler, Context) returns (address sender) {
