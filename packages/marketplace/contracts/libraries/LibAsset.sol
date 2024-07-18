@@ -34,7 +34,7 @@ library LibAsset {
     struct Asset {
         AssetType assetType; // The type of the asset.
         uint256 value; // The amount or value of the asset.
-        BundlePriceDistribution bundlePriceDistribution; // The price distribution for individual assets in bundle.
+        PriceDistribution priceDistribution; // The price distribution for individual assets in bundle.
     }
 
     /// @dev Represents a group (i.e. bundle) of ERC20 assets on the Ethereum blockchain.
@@ -73,7 +73,7 @@ library LibAsset {
     }
 
     /// @dev Represents the price of each asset in a bundle.
-    struct BundlePriceDistribution {
+    struct PriceDistribution {
         uint256[] erc20Prices;
         uint256[][] erc721Prices;
         uint256[][] erc1155Prices;
@@ -157,37 +157,42 @@ library LibAsset {
         return abi.decode(assetType.data, (Bundle));
     }
 
-    /// @dev function to compute the total of individual prices in bundle.
-    /// @param bundle The bundle.
-    /// @param bundlePriceDistribution The bundle price details.
-    /// @return The total price of the bundle.
-    function computeBundlePrice(
-        Bundle memory bundle,
-        BundlePriceDistribution memory bundlePriceDistribution
-    ) internal pure returns (uint256) {
-        uint256 totalPrice = 0;
+    /// @dev function to verify if the order is bundle and validate the bundle price
+    /// @param rightMakeAsset The make asset from buyer.
+    /// @param priceDistribution The price distribution details.
+    function verifyPriceDistribution(
+        Asset memory rightMakeAsset,
+        PriceDistribution memory priceDistribution
+    ) internal pure {
+        if (rightMakeAsset.assetType.assetClass == AssetClass.BUNDLE) {
+            uint256 bundlePrice = rightMakeAsset.value; // bundle price provided by buyer
+            Bundle memory bundle = LibAsset.decodeBundle(rightMakeAsset.assetType);
+            uint256 collectiveBundlePrice = 0;
 
-        // total price of all bundled ERC20 assets
-        for (uint256 i = 0; i < bundlePriceDistribution.erc20Prices.length; i++) {
-            totalPrice += bundlePriceDistribution.erc20Prices[i];
-        }
-
-        // calculate the total price of all bundled ERC721 assets
-        for (uint256 i = 0; i < bundlePriceDistribution.erc721Prices.length; i++) {
-            for (uint256 j = 0; j < bundlePriceDistribution.erc721Prices[i].length; j++)
-                totalPrice += bundlePriceDistribution.erc721Prices[i][j];
-        }
-
-        // calculate the total price of all bundled ERC1155 assets
-        for (uint256 i = 0; i < bundlePriceDistribution.erc1155Prices.length; i++) {
-            for (uint256 j = 0; j < bundlePriceDistribution.erc1155Prices[i].length; j++) {
-                totalPrice += bundle.bundledERC1155[i].supplies[j] * bundlePriceDistribution.erc1155Prices[i][j];
+            // total price of all bundled ERC20 assets
+            for (uint256 i = 0; i < priceDistribution.erc20Prices.length; i++) {
+                collectiveBundlePrice += priceDistribution.erc20Prices[i];
             }
+
+            // calculate the total price of all bundled ERC721 assets
+            for (uint256 i = 0; i < priceDistribution.erc721Prices.length; i++) {
+                for (uint256 j = 0; j < priceDistribution.erc721Prices[i].length; j++)
+                    collectiveBundlePrice += priceDistribution.erc721Prices[i][j];
+            }
+
+            // calculate the total price of all bundled ERC1155 assets
+            for (uint256 i = 0; i < priceDistribution.erc1155Prices.length; i++) {
+                for (uint256 j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
+                    collectiveBundlePrice +=
+                        bundle.bundledERC1155[i].supplies[j] *
+                        priceDistribution.erc1155Prices[i][j];
+                }
+            }
+
+            collectiveBundlePrice += priceDistribution.quadPrice;
+
+            require(bundlePrice == collectiveBundlePrice, "Bundle price mismatch");
         }
-
-        totalPrice += bundlePriceDistribution.quadPrice;
-
-        return totalPrice;
     }
 
     /// @notice Decode the recipient address from an AssetType.
