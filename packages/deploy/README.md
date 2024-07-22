@@ -44,6 +44,15 @@ where:
   executed ( see:[hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
   configuration)
 
+- There is a specific set of tags related to network on which each script was
+  meant to run.
+  - L1 = 'L1', // Layer one networks like Ethereum mainnet, sepolia
+  - L1_PROD = 'L1-prod', // Layer one production networks like Ethereum mainnet
+  - L1_TEST = 'L1-test', // Layer one test networks like Goerli
+  - L2 = 'L2', // Layer two networks like Polygon, mumbai
+  - L2_PROD = 'L2-prod', // Layer two production networks like Polygon
+  - L2_TEST = 'L2-test', // Layer two test networks like Mumbai
+
 ## Upgrades
 
 1. Modify smart contracts, add tests, and update documentation in the respective

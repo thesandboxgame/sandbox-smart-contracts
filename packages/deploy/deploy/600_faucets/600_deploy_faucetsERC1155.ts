@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -15,6 +16,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 
-func.tags = ['FaucetsERC1155', 'FaucetsERC1155_deploy'];
+func.tags = [
+  'FaucetsERC1155',
+  'FaucetsERC1155_deploy',
+  DEPLOY_TAGS.L1,
+  DEPLOY_TAGS.L1_TEST,
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_TEST,
+];
 
 export default func;

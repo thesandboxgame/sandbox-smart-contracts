@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../../hardhat.config';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -27,6 +28,8 @@ func.tags = [
   'LandV4_setup',
   'LandMetadataRegistry',
   'LandMetadataRegistry_setup',
-  'L1',
+  DEPLOY_TAGS.L1,
+  DEPLOY_TAGS.L1_PROD,
+  DEPLOY_TAGS.L1_TEST,
 ];
 func.dependencies = ['LandMetadataRegistry_deploy', 'LandV4_deploy'];
