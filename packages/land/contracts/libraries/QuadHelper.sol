@@ -14,14 +14,14 @@ library QuadHelper {
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
     /* solhint-enable const-name-snakecase */
-    
+
     /// @notice get the quad id given the layer and coordinates.
     /// @param layer the layer of the quad see: _getQuadLayer
     /// @param x The bottom left x coordinate of the quad
     /// @param y The bottom left y coordinate of the quad
     /// @return the tokenId of the quad
     /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
-    function getQuadId(uint256 layer, uint256 x, uint256 y) external pure returns (uint256) {
+    function getQuadId(uint256 layer, uint256 x, uint256 y) internal pure returns (uint256) {
         unchecked {
             return layer + x + y * GRID_SIZE;
         }
@@ -31,7 +31,7 @@ library QuadHelper {
     /// @return layer the layers that corresponds to the size
     /// @return parentSize the size of the parent (bigger quad that contains the current one)
     /// @return childLayer the layer of the child (smaller quad contained by this one)
-    function getQuadLayer(uint256 size) external pure returns (uint256 layer, uint256 parentSize, uint256 childLayer) {
+    function getQuadLayer(uint256 size) internal pure returns (uint256 layer, uint256 parentSize, uint256 childLayer) {
         if (size == 1) {
             layer = LAYER_1x1;
             parentSize = 3;

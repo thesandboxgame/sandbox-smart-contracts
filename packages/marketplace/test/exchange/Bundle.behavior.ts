@@ -1,7 +1,12 @@
 import {expect} from 'chai';
 import {deployFixtures} from '../fixtures/index.ts';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, Asset, AssetBundle} from '../utils/assets.ts';
+import {
+  AssetERC20,
+  Asset,
+  AssetBundle,
+  PriceDistribution,
+} from '../utils/assets.ts';
 
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
@@ -26,6 +31,8 @@ export function shouldMatchOrdersForBundle() {
       takerAsset: Asset,
       bundleWithoutERC721Left: Asset,
       bundleWithoutERC721Right: Asset,
+      emptyPriceDistribution: PriceDistribution,
+      priceDistribution: PriceDistribution,
       // TODO: types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bundledERC20: any,
@@ -58,6 +65,20 @@ export function shouldMatchOrdersForBundle() {
           user2: taker,
         } = await loadFixture(deployFixtures));
 
+        emptyPriceDistribution = {
+          erc20Prices: [],
+          erc721Prices: [],
+          erc1155Prices: [],
+          quadPrice: 0,
+        };
+
+        priceDistribution = {
+          erc20Prices: [2000000000],
+          erc721Prices: [[3000000000]],
+          erc1155Prices: [[500000000]],
+          quadPrice: 0,
+        };
+
         // Set up ERC20 for maker
         await ERC20Contract.mint(await maker.getAddress(), 30000000000);
         await ERC20Contract.connect(maker).approve(
@@ -66,7 +87,11 @@ export function shouldMatchOrdersForBundle() {
         );
 
         // Construct makerAsset
-        makerAsset = await AssetERC20(ERC20Contract, 10000000000);
+        makerAsset = await AssetERC20(
+          ERC20Contract,
+          10000000000,
+          emptyPriceDistribution
+        );
 
         // Set up ERC20 for taker
         await ERC20Contract2.mint(await taker.getAddress(), 40000000000);
@@ -95,12 +120,14 @@ export function shouldMatchOrdersForBundle() {
           {
             erc20Address: ERC20Contract2.target,
             value: 20000000000,
+            emptyPriceDistribution,
           },
         ];
         bundledERC721 = [
           {
             erc721Address: ERC721Contract.target,
             ids: [1],
+            emptyPriceDistribution,
           },
         ];
 
@@ -109,6 +136,7 @@ export function shouldMatchOrdersForBundle() {
             erc1155Address: ERC1155Contract.target,
             ids: [1],
             supplies: [10],
+            emptyPriceDistribution,
           },
         ];
 
@@ -127,7 +155,61 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        takerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721
+        takerAsset = await AssetBundle(bundleData, 1, priceDistribution); // there can only ever be 1 copy of a bundle that contains ERC72
+      });
+
+      it('should not execute match order between ERC20 tokens and Bundle if bundle price ia not equal to collective bundle price', async function () {
+        takerAsset = await AssetBundle(bundleData, 1, emptyPriceDistribution);
+
+        orderLeft = await OrderDefault(
+          maker, // ERC20
+          makerAsset,
+          ZeroAddress,
+          takerAsset, // Bundle
+          1,
+          0,
+          0
+        );
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset, // Bundle
+          ZeroAddress,
+          makerAsset, // ERC20
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const makerAddress = await maker.getAddress();
+        const takerAddress = await taker.getAddress();
+
+        expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
+          30000000000
+        );
+        expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(0);
+        expect(await ERC20Contract2.balanceOf(makerAddress)).to.be.equal(0);
+        expect(await ERC20Contract2.balanceOf(takerAddress)).to.be.equal(
+          40000000000
+        );
+        expect(await ERC721Contract.ownerOf(1)).to.be.equal(takerAddress);
+        expect(await ERC1155Contract.balanceOf(takerAddress, 1)).to.be.equal(
+          50
+        );
+        expect(await ERC1155Contract.balanceOf(makerAddress, 1)).to.be.equal(0);
+
+        await expect(
+          ExchangeContractAsUser.matchOrders([
+            {
+              orderLeft, // passing ERC20 as left order
+              signatureLeft: makerSig,
+              orderRight, // passing Bundle as right order
+              signatureRight: takerSig,
+            },
+          ])
+        ).to.be.revertedWith('Bundle price mismatch');
       });
 
       it('should execute a complete match order between ERC20 tokens and Bundle containing ERC20, ERC721 and ERC1155', async function () {
@@ -212,7 +294,7 @@ export function shouldMatchOrdersForBundle() {
       });
 
       it('should not allow asset bundle value > 1 if there are ERC721 contained in the bundle, since ERC721 are unique', async function () {
-        takerAsset = await AssetBundle(bundleData, 2);
+        takerAsset = await AssetBundle(bundleData, 2, priceDistribution);
 
         orderLeft = await OrderDefault(
           maker, // ERC20
@@ -269,13 +351,15 @@ export function shouldMatchOrdersForBundle() {
         // Seller (taker - left) has 5 copies of a Bundle type; buyer (maker - right) just wants to buy 1 of these
         const ERC20AssetForLeftOrder = await AssetERC20(
           ERC20Contract,
-          50000000000
+          50000000000,
+          emptyPriceDistribution
         );
 
         // ERC20Asset for partial fill
         const ERC20AssetForRightOrder = await AssetERC20(
           ERC20Contract,
-          10000000000
+          10000000000,
+          emptyPriceDistribution
         );
 
         bundledERC721 = [];
@@ -287,10 +371,25 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
+        priceDistribution = {
+          erc20Prices: [5000000000],
+          erc721Prices: [[]], // price distribution without ERC721
+          erc1155Prices: [[500000000]],
+          quadPrice: 0,
+        };
+
+        bundleWithoutERC721Left = await AssetBundle(
+          bundleAsset,
+          5,
+          emptyPriceDistribution
+        );
 
         // bundle for partial fill
-        bundleWithoutERC721Right = await AssetBundle(bundleAsset, 1);
+        bundleWithoutERC721Right = await AssetBundle(
+          bundleAsset,
+          1,
+          priceDistribution
+        );
 
         // left order for partial fill
         orderLeft = await OrderDefault(
@@ -383,13 +482,15 @@ export function shouldMatchOrdersForBundle() {
         // Seller (taker - left) has 5 copies of a Bundle type; buyer (maker - right) just wants to buy 1 of these
         const ERC20AssetForLeftOrder = await AssetERC20(
           ERC20Contract,
-          50000000000
+          50000000000,
+          emptyPriceDistribution
         );
 
         // ERC20Asset for partial fill
         const ERC20AssetForRightOrder = await AssetERC20(
           ERC20Contract,
-          10000000000
+          10000000000,
+          emptyPriceDistribution
         );
 
         bundledERC721 = [];
@@ -401,10 +502,25 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
+        priceDistribution = {
+          erc20Prices: [5000000000],
+          erc721Prices: [[]], // price distribution without ERC721
+          erc1155Prices: [[500000000]],
+          quadPrice: 0,
+        };
+
+        bundleWithoutERC721Left = await AssetBundle(
+          bundleAsset,
+          5,
+          priceDistribution
+        );
 
         // bundle for partial fill
-        bundleWithoutERC721Right = await AssetBundle(bundleAsset, 1);
+        bundleWithoutERC721Right = await AssetBundle(
+          bundleAsset,
+          1,
+          priceDistribution
+        );
 
         // left order for partial fill
         orderLeft = await OrderDefault(
@@ -455,13 +571,15 @@ export function shouldMatchOrdersForBundle() {
         // Seller (taker - left) has 5 copies of a Bundle type; buyer (maker - right) just wants to buy 1 of these
         const ERC20AssetForLeftOrder = await AssetERC20(
           ERC20Contract,
-          50000000000
+          50000000000,
+          emptyPriceDistribution
         );
 
         // ERC20Asset for partial fill
         const ERC20AssetForRightOrder = await AssetERC20(
           ERC20Contract,
-          20000000000
+          20000000000,
+          emptyPriceDistribution
         );
 
         bundledERC721 = [];
@@ -473,10 +591,25 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        // ERC1155Asset for partial fill
-        bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
+        priceDistribution = {
+          erc20Prices: [10000000000],
+          erc721Prices: [[]], // price distribution without ERC721
+          erc1155Prices: [[1000000000]],
+          quadPrice: 0,
+        };
 
-        bundleWithoutERC721Right = await AssetBundle(bundleAsset, 2);
+        // ERC1155Asset for partial fill
+        bundleWithoutERC721Left = await AssetBundle(
+          bundleAsset,
+          5,
+          priceDistribution
+        );
+
+        bundleWithoutERC721Right = await AssetBundle(
+          bundleAsset,
+          2,
+          priceDistribution
+        );
 
         // left order for partial fill
         orderLeft = await OrderDefault(
@@ -568,13 +701,15 @@ export function shouldMatchOrdersForBundle() {
         // Seller (taker - left) has 5 copies of a Bundle type; buyer (maker - right) wants to buy 1 of these, then another in a second tx
         const ERC20AssetForLeftOrder = await AssetERC20(
           ERC20Contract,
-          50000000000
+          50000000000,
+          emptyPriceDistribution
         );
 
         // ERC20Asset for partial fill
         const ERC20AssetForRightOrder = await AssetERC20(
           ERC20Contract,
-          10000000000
+          10000000000,
+          emptyPriceDistribution
         );
 
         bundledERC721 = [];
@@ -586,10 +721,25 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        // ERC1155Asset for partial fill
-        bundleWithoutERC721Left = await AssetBundle(bundleAsset, 5);
+        priceDistribution = {
+          erc20Prices: [5000000000],
+          erc721Prices: [[]], // price distribution without ERC721
+          erc1155Prices: [[500000000]],
+          quadPrice: 0,
+        };
 
-        bundleWithoutERC721Right = await AssetBundle(bundleAsset, 1);
+        // ERC1155Asset for partial fill
+        bundleWithoutERC721Left = await AssetBundle(
+          bundleAsset,
+          5,
+          priceDistribution
+        );
+
+        bundleWithoutERC721Right = await AssetBundle(
+          bundleAsset,
+          1,
+          priceDistribution
+        );
 
         // left order for partial fill
         orderLeft = await OrderDefault(
@@ -743,7 +893,11 @@ export function shouldMatchOrdersForBundle() {
         );
 
         // Construct takerAsset
-        takerAsset = await AssetERC20(ERC20Contract, 10000000000);
+        takerAsset = await AssetERC20(
+          ERC20Contract,
+          10000000000,
+          emptyPriceDistribution
+        );
 
         // Set up ERC20 for maker
         await ERC20Contract2.mint(await maker.getAddress(), 40000000000);
@@ -804,7 +958,7 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        makerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721
+        makerAsset = await AssetBundle(bundleData, 1, emptyPriceDistribution); // there can only ever be 1 copy of a bundle that contains ERC721
       });
 
       it('should execute a complete match order between ERC20 tokens and Bundle containing ERC20, ERC721 and ERC1155', async function () {
@@ -916,7 +1070,11 @@ export function shouldMatchOrdersForBundle() {
         );
 
         // Construct makerAsset
-        makerAsset = await AssetERC20(ERC20Contract, 10000000000);
+        makerAsset = await AssetERC20(
+          ERC20Contract,
+          10000000000,
+          emptyPriceDistribution
+        );
 
         // Set up ERC20 for taker
         await ERC20Contract2.mint(await taker.getAddress(), 40000000000);
@@ -1002,7 +1160,7 @@ export function shouldMatchOrdersForBundle() {
           quads,
         };
 
-        takerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721 / land
+        takerAsset = await AssetBundle(bundleData, 1, priceDistribution); // there can only ever be 1 copy of a bundle that contains ERC721 / land
       });
 
       it('should execute a complete match order between ERC20 tokens and Bundle containing ERC20, ERC721, ERC1155 and Quads', async function () {

@@ -43,9 +43,17 @@ export type AssetType = {
   data: BytesLike;
 };
 
+export type PriceDistribution = {
+  erc20Prices: Numeric[];
+  erc721Prices: Numeric[][];
+  erc1155Prices: Numeric[][];
+  quadPrice: Numeric;
+};
+
 export type Asset = {
   assetType: AssetType;
   value: Numeric;
+  priceDistribution: PriceDistribution;
 };
 
 export const FeeRecipientsData = async (
@@ -66,7 +74,8 @@ export const LibPartData = async (
 
 export const AssetERC20 = async (
   tokenContract: Contract,
-  value: Numeric
+  value: Numeric,
+  priceDistribution: PriceDistribution
 ): Promise<Asset> => ({
   assetType: {
     assetClass: AssetClassType.ERC20_ASSET_CLASS,
@@ -76,11 +85,13 @@ export const AssetERC20 = async (
     ),
   },
   value,
+  priceDistribution,
 });
 
 export const AssetERC721 = async (
   tokenContract: Contract,
-  tokenId: Numeric
+  tokenId: Numeric,
+  priceDistribution: PriceDistribution
 ): Promise<Asset> => ({
   assetType: {
     assetClass: AssetClassType.ERC721_ASSET_CLASS,
@@ -90,12 +101,14 @@ export const AssetERC721 = async (
     ),
   },
   value: 1,
+  priceDistribution,
 });
 
 export const AssetERC1155 = async (
   tokenContract: Contract,
   tokenId: Numeric,
-  value: Numeric
+  value: Numeric,
+  priceDistribution: PriceDistribution
 ): Promise<Asset> => ({
   assetType: {
     assetClass: AssetClassType.ERC1155_ASSET_CLASS,
@@ -105,6 +118,7 @@ export const AssetERC1155 = async (
     ),
   },
   value,
+  priceDistribution,
 });
 
 export function hashAssetType(a: AssetType) {
@@ -131,7 +145,8 @@ export function hashAsset(a: Asset) {
 export const AssetBundle = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bundleInformation: any, // TODO: type,
-  value: number
+  value: number,
+  priceDistribution: PriceDistribution
 ): Promise<Asset> => ({
   assetType: {
     assetClass: AssetClassType.BUNDLE_ASSET_CLASS,
@@ -143,4 +158,5 @@ export const AssetBundle = async (
     ),
   },
   value,
+  priceDistribution,
 });

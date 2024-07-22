@@ -173,7 +173,11 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             orderRight.makeAsset.assetType
         );
 
-        LibAsset.verifyPriceDistribution(orderRight.makeAsset, orderLeft.makeAsset.priceDistribution);
+        LibAsset.verifyPriceDistribution(
+            orderRight.makeAsset,
+            orderRight.takeAsset,
+            orderRight.makeAsset.priceDistribution
+        );
 
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 

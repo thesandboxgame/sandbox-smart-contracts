@@ -158,14 +158,16 @@ library LibAsset {
     }
 
     /// @dev function to verify if the order is bundle and validate the bundle price
-    /// @param rightMakeAsset The make asset from buyer.
+    /// @param rightMakeAsset The make asset from seller. // TODO if it is seller or buyer in code and configure with tests
+    /// @param leftMakeAsset The make asset from buyer. // TODO if it is seller or buyer in code and configure with tests
     /// @param priceDistribution The price distribution details.
     function verifyPriceDistribution(
         Asset memory rightMakeAsset,
+        Asset memory leftMakeAsset,
         PriceDistribution memory priceDistribution
     ) internal pure {
         if (rightMakeAsset.assetType.assetClass == AssetClass.BUNDLE) {
-            uint256 bundlePrice = rightMakeAsset.value; // bundle price provided by buyer
+            uint256 bundlePrice = leftMakeAsset.value; // bundle price provided by seller
             Bundle memory bundle = LibAsset.decodeBundle(rightMakeAsset.assetType);
             uint256 collectiveBundlePrice = 0;
 
