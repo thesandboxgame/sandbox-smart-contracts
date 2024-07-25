@@ -206,7 +206,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     ) internal returns (uint256) {
         // for bundle royalty is calc for loop // for a same creator club royalties
         // royalties are getting fetched
-        if (paymentSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
+        if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
             for (uint256 i; i < bundle.bundledERC721.length; i++) {
@@ -226,6 +226,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 for (uint256 j; j < idLength; j++) {
                     uint256 tokenId = bundle.bundledERC1155[i].ids[j];
                     IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
+                    if (royalties.length > 0) {
+                        royalties[0].basisPoints = royalties[0].basisPoints * bundle.bundledERC1155[i].supplies[j]; // cumulative basis point
+                    }
                     remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
                 }
             }
