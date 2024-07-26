@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 /*
 This script remains as an example as how to deploy a collection using hardhat. Since we implemented the back-office
@@ -170,7 +171,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['AvatarCollectionTest', 'AvatarCollectionTest_deploy'];
+func.tags = [
+  'AvatarCollectionTest',
+  'AvatarCollectionTest_deploy',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_TEST,
+];
 func.dependencies = [
   'PolygonSand_deploy',
   'CollectionFactory_deploy_beacon_main_avatar',
