@@ -26,7 +26,7 @@ const func: DeployFunction = async function (
   const deploymentsBase = hreBase.deployments;
   const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
 
-  const hreBsc = hre.companionNetworks.bsc;
+  const hreBsc = hre.companionNetworks.bscMainnet;
   const deploymentsBsc = hreBsc.deployments;
   const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 

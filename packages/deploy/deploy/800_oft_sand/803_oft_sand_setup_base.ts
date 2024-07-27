@@ -22,13 +22,13 @@ const func: DeployFunction = async function (
     eidBsc = 0;
   }
 
-  const hreEthereum = hre.companionNetworks.ethereum;
+  const hreEthereum = hre.companionNetworks.mainnet;
   const deploymentsEthereum = hreEthereum.deployments;
   const OFTAdapterForSand = await deploymentsEthereum.getOrNull(
     'OFTAdapterForSand'
   );
 
-  const hreBsc = hre.companionNetworks.bsc;
+  const hreBsc = hre.companionNetworks.bscMainnet;
   const deploymentsBsc = hreBsc.deployments;
   const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 
