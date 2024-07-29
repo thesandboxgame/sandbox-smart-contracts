@@ -1,3 +1,4 @@
+import {Deployment} from 'hardhat-deploy/dist/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {
@@ -7,7 +8,6 @@ import {
   setAsLandMinter,
   writeProofs,
 } from '../../data/landSales/getLandSales';
-import {Deployment} from 'hardhat-deploy/dist/types';
 import {skipUnlessTest} from '../../utils/network';
 
 type SaleDeployment = {
@@ -37,7 +37,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_31', skip: async () => true},
   {name: 'LandPreSale_32', skip: async () => true},
   {name: 'LandPreSale_33', skip: async () => true},
-  {name: 'LandPreSale_34', skip: async () => false},
+  {name: 'LandPreSale_34', skip: async () => true},
 ];
 
 const func: DeployFunction = async function (hre) {
