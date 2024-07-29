@@ -239,13 +239,15 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     uint256 size = bundle.quads.sizes[i];
                     uint256 x = bundle.quads.xs[i];
                     uint256 y = bundle.quads.ys[i];
-                    (uint256 layer, , ) = QuadHelper.getQuadLayer(size);
-                    uint256 quadId = QuadHelper.getQuadId(layer, x, y);
-                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
-                        address(landContract),
-                        quadId
-                    );
-                    remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+
+                    for (uint256 j = 0; j < size * size; j++) {
+                        uint256 tokenId = QuadHelper.idInPath(j, size, x, y);
+                        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
+                            address(landContract),
+                            tokenId
+                        );
+                        remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+                    }
                 }
             }
         } else {
