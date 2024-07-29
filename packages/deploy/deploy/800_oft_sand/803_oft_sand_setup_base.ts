@@ -1,6 +1,7 @@
+import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ethers} from 'ethers';
+import {DEPLOY_NETWORKS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -18,17 +19,16 @@ const func: DeployFunction = async function (
     eidEthereum = process.env[`EID_${'SEPOLIA'}`];
     eidBsc = process.env[`EID_${'BSCTESTNET'}`];
   } else {
-    eidEthereum = 0;
-    eidBsc = 0;
+    throw new Error('Cannot find EID for network');
   }
 
-  const hreEthereum = hre.companionNetworks.mainnet;
+  const hreEthereum = hre.companionNetworks[DEPLOY_NETWORKS.ETH_MAINNET];
   const deploymentsEthereum = hreEthereum.deployments;
   const OFTAdapterForSand = await deploymentsEthereum.getOrNull(
     'OFTAdapterForSand'
   );
 
-  const hreBsc = hre.companionNetworks.bscMainnet;
+  const hreBsc = hre.companionNetworks[DEPLOY_NETWORKS.BSC_MAINNET];
   const deploymentsBsc = hreBsc.deployments;
   const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 

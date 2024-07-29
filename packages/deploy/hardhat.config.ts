@@ -78,7 +78,7 @@ const importedPackages = {
 const namedAccounts = {
   deployer: {
     default: 1,
-    mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
+    mainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
@@ -86,6 +86,8 @@ const namedAccounts = {
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+    base: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
+    bscMainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -98,6 +100,8 @@ const namedAccounts = {
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    base: '0x18987794f808eE72Ae9127058F1C7d079736Ca45',
+    bscMainnet: '0x47032F58129341B90c83E312eE22d2e74D584B4A',
   }, // can add super operators and change admin
 
   operationsAdmin: {
