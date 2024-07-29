@@ -59,6 +59,7 @@ const importedPackages = {
     'src/solc_0.5/Land.sol',
     'src/solc_0.5/LandV2.sol',
     'src/solc_0.5/LandV3.sol',
+    'src/solc_0.5/Sand.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV1.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
   ],
@@ -66,6 +67,11 @@ const importedPackages = {
     'contracts/Land.sol',
     'contracts/PolygonLand.sol',
     'contracts/LandMetadataRegistry.sol',
+  ],
+  '@sandbox-smart-contracts/oft-sand': [
+    'contracts/OFTAdapterForSand.sol',
+    'contracts/OFTSand.sol',
+    'contracts/mock/EndpointMock.sol',
   ],
 };
 
@@ -76,8 +82,10 @@ const namedAccounts = {
     polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+    bscTestnet: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+    baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -86,8 +94,10 @@ const namedAccounts = {
     polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
   }, // can add super operators and change admin
 
   operationsAdmin: {
@@ -191,8 +201,10 @@ const namedAccounts = {
     polygon: 'sandAdmin',
     goerli: 'sandAdmin',
     sepolia: 'sandAdmin',
+    bscTestnet: 'sandAdmin',
     mumbai: 'sandAdmin',
     amoy: 'sandAdmin',
+    baseSepolia: 'sandAdmin',
   },
 
   landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -298,6 +310,11 @@ const namedAccounts = {
   lazyMintingTestAccount2: {
     default: 6,
   },
+  oftSender: {
+    sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06', // admin on Sand sepolia
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+  },
 };
 
 export enum DEPLOY_NETWORKS {
@@ -353,8 +370,8 @@ const networks = {
     tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
     companionNetworks: {
       [DEPLOY_NETWORKS.AMOY]: DEPLOY_NETWORKS.AMOY,
-      [DEPLOY_NETWORKS.BASE_SEPOLIA]: DEPLOY_NETWORKS.BASE_SEPOLIA,
-      [DEPLOY_NETWORKS.BSC_TESTNET]: DEPLOY_NETWORKS.BSC_TESTNET,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
     },
   },
   [DEPLOY_NETWORKS.ETH_MAINNET]: {
@@ -368,8 +385,8 @@ const networks = {
   [DEPLOY_NETWORKS.BSC_TESTNET]: {
     tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
     companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
-      [DEPLOY_NETWORKS.BASE_SEPOLIA]: DEPLOY_NETWORKS.BASE_SEPOLIA,
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
     },
   },
   [DEPLOY_NETWORKS.BSC_MAINNET]: {
@@ -400,8 +417,8 @@ const networks = {
   [DEPLOY_NETWORKS.BASE_SEPOLIA]: {
     tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
     companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
-      [DEPLOY_NETWORKS.BSC_TESTNET]: DEPLOY_NETWORKS.BSC_TESTNET,
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
     },
   },
   [DEPLOY_NETWORKS.BASE_MAINNET]: {
