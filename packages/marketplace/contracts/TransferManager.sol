@@ -110,7 +110,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         // Transfer NFT or left side if FeeSide.NONE
         _transfer(nftSide.asset, nftSide.account, paymentSide.recipient);
         // Transfer ERC20 or right side if FeeSide.NONE
-        if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
+        if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(nftSide.account)) {
             _transfer(paymentSide.asset, paymentSide.account, nftSide.recipient);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
@@ -166,7 +166,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
         uint256 fees;
         uint256 remainder = paymentSide.asset.value;
-        if (_isPrimaryMarket(nftSide)) {
+        if (_isTSBSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             // No royalties
         } else {
@@ -353,6 +353,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Function deciding if the fees are applied or not, to be override
     /// @param from Address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
+
+    /// @notice Function deciding if the seller is a TSB seller, to be override
+    /// @param from Address to check
+    function _isTSBSeller(address from) internal virtual returns (bool);
 
     // slither-disable-next-line unused-state
     uint256[49] private __gap;
