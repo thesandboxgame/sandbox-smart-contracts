@@ -47,7 +47,7 @@ export type PriceDistribution = {
   erc20Prices: Numeric[];
   erc721Prices: Numeric[][];
   erc1155Prices: Numeric[][];
-  quadPrice: Numeric;
+  quadPrices: Numeric[];
 };
 
 export type Asset = {

@@ -77,7 +77,7 @@ library LibAsset {
         uint256[] erc20Prices;
         uint256[][] erc721Prices;
         uint256[][] erc1155Prices;
-        uint256 quadPrice;
+        uint256[] quadPrices;
     }
 
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
@@ -191,7 +191,10 @@ library LibAsset {
                 }
             }
 
-            collectiveBundlePrice += priceDistribution.quadPrice;
+            // calculate the total price of all bundled Quad assets
+            for (uint256 i = 0; i < priceDistribution.quadPrices.length; i++) {
+                collectiveBundlePrice += priceDistribution.quadPrices[i];
+            }
 
             require(bundlePrice == collectiveBundlePrice, "Bundle price mismatch");
         }
