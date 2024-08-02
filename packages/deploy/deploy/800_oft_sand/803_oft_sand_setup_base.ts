@@ -34,13 +34,12 @@ const func: DeployFunction = async function (
 
   if (OFTAdapterForSand && OFTSandBsc) {
     const isPeerForEthereum = await read(
-      'OFTAdapterForSand',
+      'OFTSand',
       'isPeer',
       eidEthereum,
       ethers.zeroPadValue(OFTAdapterForSand.address, 32)
     );
     if (!isPeerForEthereum) {
-      // setting OFTAdapterForSand as peer to OFTSand(base) using eidEthereum
       await execute(
         'OFTSand',
         {from: deployer, log: true},
@@ -51,7 +50,7 @@ const func: DeployFunction = async function (
     }
 
     const isPeerForBsc = await read(
-      'OFTAdapterForSand',
+      'OFTSand',
       'isPeer',
       eidBsc,
       ethers.zeroPadValue(OFTSandBsc.address, 32)
