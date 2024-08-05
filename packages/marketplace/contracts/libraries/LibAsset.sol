@@ -34,7 +34,6 @@ library LibAsset {
     struct Asset {
         AssetType assetType; // The type of the asset.
         uint256 value; // The amount or value of the asset.
-        PriceDistribution priceDistribution; // The price distribution for individual assets in bundle.
     }
 
     /// @dev Represents a group (i.e. bundle) of ERC20 assets on the Ethereum blockchain.
@@ -70,6 +69,7 @@ library LibAsset {
         BundledERC721[] bundledERC721;
         BundledERC1155[] bundledERC1155;
         Quads quads;
+        PriceDistribution priceDistribution;
     }
 
     /// @dev Represents the price of each asset in a bundle.
@@ -77,7 +77,7 @@ library LibAsset {
         uint256[] erc20Prices;
         uint256[][] erc721Prices;
         uint256[][] erc1155Prices;
-        uint256 quadPrice;
+        uint256[] quadPrices;
     }
 
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
@@ -158,15 +158,13 @@ library LibAsset {
     }
 
     /// @dev function to verify if the order is bundle and validate the bundle price
-    /// @param rightMakeAsset The make asset from buyer.
-    /// @param priceDistribution The price distribution details.
-    function verifyPriceDistribution(
-        Asset memory rightMakeAsset,
-        PriceDistribution memory priceDistribution
-    ) internal pure {
-        if (rightMakeAsset.assetType.assetClass == AssetClass.BUNDLE) {
-            uint256 bundlePrice = rightMakeAsset.value; // bundle price provided by buyer
-            Bundle memory bundle = LibAsset.decodeBundle(rightMakeAsset.assetType);
+    /// @param leftAsset The left asset.
+    /// @param rightAsset The right asset.
+    function verifyPriceDistribution(Asset memory leftAsset, Asset memory rightAsset) internal pure {
+        if (leftAsset.assetType.assetClass == AssetClass.BUNDLE) {
+            uint256 bundlePrice = rightAsset.value; // bundle price provided by seller
+            Bundle memory bundle = LibAsset.decodeBundle(leftAsset.assetType);
+            PriceDistribution memory priceDistribution = bundle.priceDistribution;
             uint256 collectiveBundlePrice = 0;
 
             // total price of all bundled ERC20 assets
@@ -174,13 +172,13 @@ library LibAsset {
                 collectiveBundlePrice += priceDistribution.erc20Prices[i];
             }
 
-            // calculate the total price of all bundled ERC721 assets
+            // total price of all bundled ERC721 assets
             for (uint256 i = 0; i < priceDistribution.erc721Prices.length; i++) {
                 for (uint256 j = 0; j < priceDistribution.erc721Prices[i].length; j++)
                     collectiveBundlePrice += priceDistribution.erc721Prices[i][j];
             }
 
-            // calculate the total price of all bundled ERC1155 assets
+            // total price of all bundled ERC1155 assets
             for (uint256 i = 0; i < priceDistribution.erc1155Prices.length; i++) {
                 for (uint256 j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
                     collectiveBundlePrice +=
@@ -189,7 +187,10 @@ library LibAsset {
                 }
             }
 
-            collectiveBundlePrice += priceDistribution.quadPrice;
+            // total price of all bundled Quad assets
+            for (uint256 i = 0; i < priceDistribution.quadPrices.length; i++) {
+                collectiveBundlePrice += priceDistribution.quadPrices[i];
+            }
 
             require(bundlePrice == collectiveBundlePrice, "Bundle price mismatch");
         }
