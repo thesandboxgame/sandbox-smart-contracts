@@ -490,7 +490,8 @@ IERC4906
         waveTotalMinted += _amount;
 
         for (uint256 i; i < _amount;) {
-            _safeMint(_wallet, _getRandomToken(_wallet, totalSupply));
+            // @dev start with tokenId = 1
+            _safeMint(_wallet, totalSupply + i + 1);
 
         unchecked {++i;}
         }
@@ -961,35 +962,6 @@ IERC4906
 
         emit Personalized(_tokenId, _personalizationMask);
         emit MetadataUpdate(_tokenId);
-    }
-
-    /**
-     * @notice Pseudo-random number function. Good enough for our need, thx CyberKongs VX <3!
-     * @dev pseudo-random implementation using keccak256 over various parameters.
-     *      This function does not provide true randomness, it is pseudo-random. A determined attacker
-     *      can identify what token ID will be generated but this has no impact as we shuffle metadata
-     *      off-chain before any minting.
-     * @param _wallet the calling account address
-     * @param _totalSupply total amount of tokens stored by the contract up until this point.
-     * @return pseudo-random value
-     */
-    function _getRandomToken(address _wallet, uint256 _totalSupply) private returns (uint256) {
-        uint256 remaining = maxSupply - _totalSupply;
-        uint256 rand =
-        uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
-        uint256 value = rand;
-
-        if (_availableIds[rand] != 0) {
-            value = _availableIds[rand];
-        }
-
-        if (_availableIds[remaining - 1] == 0) {
-            _availableIds[rand] = remaining - 1;
-        } else {
-            _availableIds[rand] = _availableIds[remaining - 1];
-        }
-
-        return value;
     }
 
     /**
