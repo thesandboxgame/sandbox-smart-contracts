@@ -8,7 +8,6 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRoyaltyUGC} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IRoyaltyUGC.sol";
-import {QuadHelper} from "@sandbox-smart-contracts/land/contracts/libraries/QuadHelper.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
@@ -175,14 +174,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferRoyalties(remainder, paymentSide, nftSide);
         }
         if (fees > 0 && remainder > 0) {
-            remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
+            remainder = _transferPercentage(
+                remainder,
+                paymentSide,
+                paymentSide.asset.value,
+                defaultFeeReceiver,
+                fees,
+                PROTOCOL_FEE_MULTIPLIER
+            );
         }
         if (remainder > 0) {
-            _transfer(
-                LibAsset.Asset(paymentSide.asset.assetType, remainder, paymentSide.asset.priceDistribution),
-                paymentSide.account,
-                nftSide.recipient
-            );
+            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.recipient);
         }
     }
 
@@ -204,18 +206,25 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
-        // for bundle royalty is calc for loop // for a same creator club royalties
-        // royalties are getting fetched
-        if (paymentSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
+        if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
             for (uint256 i; i < bundle.bundledERC721.length; i++) {
                 address token = bundle.bundledERC721[i].erc721Address;
                 uint256 idLength = bundle.bundledERC721[i].ids.length;
                 for (uint256 j; j < idLength; j++) {
-                    uint256 tokenId = bundle.bundledERC721[i].ids[j];
-                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
-                    remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
+                        token,
+                        bundle.bundledERC721[i].ids[j]
+                    );
+
+                    remainder = _applyRoyalties(
+                        remainder,
+                        paymentSide,
+                        bundle.priceDistribution.erc721Prices[i][j],
+                        royalties,
+                        nftSide.recipient
+                    );
                 }
             }
 
@@ -224,9 +233,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 uint256 idLength = bundle.bundledERC1155[i].ids.length;
                 require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
                 for (uint256 j; j < idLength; j++) {
-                    uint256 tokenId = bundle.bundledERC1155[i].ids[j];
-                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
-                    remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+                    IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
+                        token,
+                        bundle.bundledERC1155[i].ids[j]
+                    );
+                    remainder = _applyRoyalties(
+                        remainder,
+                        paymentSide,
+                        bundle.priceDistribution.erc1155Prices[i][j],
+                        royalties,
+                        nftSide.recipient
+                    );
                 }
             }
 
@@ -236,19 +253,26 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     uint256 size = bundle.quads.sizes[i];
                     uint256 x = bundle.quads.xs[i];
                     uint256 y = bundle.quads.ys[i];
-                    (uint256 layer, , ) = QuadHelper.getQuadLayer(size);
-                    uint256 quadId = QuadHelper.getQuadId(layer, x, y);
+
+                    uint256 tokenId = idInPath(0, size, x, y);
                     IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(
                         address(landContract),
-                        quadId
+                        tokenId
                     );
-                    remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+
+                    remainder = _applyRoyalties(
+                        remainder,
+                        paymentSide,
+                        bundle.priceDistribution.quadPrices[i],
+                        royalties,
+                        nftSide.recipient
+                    );
                 }
             }
         } else {
             (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
             IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
-            remainder = _applyRoyalties(remainder, paymentSide, royalties, nftSide.recipient);
+            remainder = _applyRoyalties(remainder, paymentSide, remainder, royalties, nftSide.recipient);
         }
         return remainder;
     }
@@ -256,6 +280,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _applyRoyalties(
         uint256 remainder,
         DealSide memory paymentSide,
+        uint256 assetPrice,
         IRoyaltiesProvider.Part[] memory royalties,
         address recipient
     ) internal returns (uint256) {
@@ -268,7 +293,14 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }
-            remainder = _transferPercentage(remainder, paymentSide, r.account, r.basisPoints, TOTAL_BASIS_POINTS);
+            remainder = _transferPercentage(
+                remainder,
+                paymentSide,
+                assetPrice,
+                r.account,
+                r.basisPoints,
+                TOTAL_BASIS_POINTS
+            );
         }
         require(totalRoyalties <= ROYALTY_SHARE_LIMIT, "royalties are too high (>50%)");
         return remainder;
@@ -284,16 +316,13 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _transferPercentage(
         uint256 remainder,
         DealSide memory paymentSide,
+        uint256 assetPrice,
         address to,
         uint256 percentage,
         uint256 multiplier
     ) internal returns (uint256) {
-        LibAsset.Asset memory payment = LibAsset.Asset(
-            paymentSide.asset.assetType,
-            0,
-            paymentSide.asset.priceDistribution
-        );
-        uint256 fee = (paymentSide.asset.value * percentage) / multiplier;
+        LibAsset.Asset memory payment = LibAsset.Asset(paymentSide.asset.assetType, 0);
+        uint256 fee = (assetPrice * percentage) / multiplier;
         if (remainder > fee) {
             remainder = remainder - fee;
             payment.value = fee;
@@ -415,6 +444,19 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Function deciding if the fees are applied or not, to be override
     /// @param from Address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
+
+    /// @notice return the quadId given and index, size and coordinates
+    /// @param i the index to be added to x,y to get row and column
+    /// @param size The bottom left x coordinate of the quad
+    /// @param x The bottom left x coordinate of the quad
+    /// @param y The bottom left y coordinate of the quad
+    /// @return the tokenId of the quad
+    /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
+    function idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal view returns (uint256) {
+        unchecked {
+            return (x + (i % size)) + (y + (i / size)) * landContract.width();
+        }
+    }
 
     /// @notice Function deciding if the seller is a TSB seller, to be override
     /// @param from Address to check
