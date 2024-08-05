@@ -3,37 +3,22 @@
 pragma solidity 0.8.15;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
-import {
-    ReentrancyGuardUpgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
-import {
-    ERC721EnumerableUpgradeable,
-    ERC721Upgradeable,
-    IERC721Upgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
 import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
-
-import {
-    UpdatableOperatorFiltererUpgradeable
-} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
-
+import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {IERC4906} from "../common/IERC4906.sol";
-
 import {CollectionAccessControl} from "../avatar/CollectionAccessControl.sol";
-import {ERC721BurnMemoryEnumerableUpgradeable} from "../avatar/ERC721BurnMemoryEnumerableUpgradeable.sol";
+import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
 
 /**
- * @title nft-collection
+ * @title NFTCollection
  * @author qed.team x The Sandbox
  * @notice ERC721 contract for future Avatar collections.
  *         Is expected to be initialize via {CollectionFactory} or other similar factories
@@ -50,13 +35,13 @@ import {ERC721BurnMemoryEnumerableUpgradeable} from "../avatar/ERC721BurnMemoryE
  *   as mint price is in non-native tokens
  */
 contract NFTCollection is
-    ReentrancyGuardUpgradeable,
-    CollectionAccessControl,
-    ERC721BurnMemoryEnumerableUpgradeable,
-    ERC2771HandlerUpgradeable,
-    UpdatableOperatorFiltererUpgradeable,
-    PausableUpgradeable,
-    IERC4906
+ReentrancyGuardUpgradeable,
+CollectionAccessControl,
+ERC721BurnMemoryUpgradeable,
+ERC2771HandlerUpgradeable,
+UpdatableOperatorFiltererUpgradeable,
+PausableUpgradeable,
+IERC4906
 {
     /*//////////////////////////////////////////////////////////////
                            Type declarations
@@ -145,6 +130,9 @@ contract NFTCollection is
 
     /// @dev helper mapping used to determine which IDs are available for minting
     mapping(uint256 => uint256) private _availableIds;
+
+    /// @notice total amount of tokens minted till now
+    uint256 public totalSupply;
 
     /*//////////////////////////////////////////////////////////////
                                 Events
@@ -339,13 +327,14 @@ contract NFTCollection is
         require(_mintingDefaults.mintPrice > 0, "NFTCollection: public mint price cannot be 0");
         require(
             _mintingDefaults.maxPublicTokensPerWallet <= _maxSupply &&
-                _mintingDefaults.maxAllowlistTokensPerWallet <= _maxSupply,
+            _mintingDefaults.maxAllowlistTokensPerWallet <= _maxSupply,
             "NFTCollection: invalid tokens per wallet configuration"
         );
         require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "NFTCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
-        __InitializeAccessControl(_collectionOwner); // owner is also initialized here
+        __InitializeAccessControl(_collectionOwner);
+        // owner is also initialized here
         __ERC2771Handler_initialize(_initialTrustedForwarder);
         __Pausable_init();
         __ERC721_init(_name, _symbol);
@@ -440,7 +429,7 @@ contract NFTCollection is
      * @custom:event {WaveSetup}
      */
     function setAllowlistMint() external authorizedRole(CONFIGURATOR_ROLE) {
-        waveMaxTokensOverall = maxSupply - totalSupply();
+        waveMaxTokensOverall = maxSupply - totalSupply;
         waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
         waveTotalMinted = 0;
@@ -457,7 +446,7 @@ contract NFTCollection is
      * @custom:event {WaveSetup}
      */
     function setPublicMint() external authorizedRole(CONFIGURATOR_ROLE) {
-        waveMaxTokensOverall = maxSupply - totalSupply();
+        waveMaxTokensOverall = maxSupply - totalSupply;
         waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
         waveTotalMinted = 0;
@@ -486,7 +475,7 @@ contract NFTCollection is
         require(_wallet != address(0), "NFTCollection: wallet is zero address");
         require(_amount > 0, "NFTCollection: amount cannot be 0");
 
-        _checkAndSetSignature({_address: _wallet, _signatureId: _signatureId, _signature: _signature});
+        _checkAndSetSignature({_address : _wallet, _signatureId : _signatureId, _signature : _signature});
 
         require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
         require(_checkLimitNotReached(_wallet, _amount), "NFTCollection: max allowed");
@@ -500,11 +489,12 @@ contract NFTCollection is
 
         waveTotalMinted += _amount;
 
-        for (uint256 i; i < _amount; ) {
-            _safeMint(_wallet, _getRandomToken(_wallet, totalSupply()));
+        for (uint256 i; i < _amount;) {
+            _safeMint(_wallet, _getRandomToken(_wallet, totalSupply));
 
-            unchecked {++i;}
+        unchecked {++i;}
         }
+        totalSupply += _amount;
     }
 
     /**
@@ -525,7 +515,7 @@ contract NFTCollection is
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "NFTCollection: sender is not owner");
 
-        _checkAndSetSignature({_address: sender, _signatureId: _signatureId, _signature: _signature});
+        _checkAndSetSignature({_address : sender, _signatureId : _signatureId, _signature : _signature});
 
         emit MetadataUpdate(_tokenId);
     }
@@ -593,8 +583,8 @@ contract NFTCollection is
      * @param _personalizationMask a mask where each bit has a custom meaning in-game
      */
     function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask)
-        external
-        authorizedRole(TRANSFORMER_ROLE)
+    external
+    authorizedRole(TRANSFORMER_ROLE)
     {
         require(_exists(_tokenId), "NFTCollection: invalid token ID");
 
@@ -666,7 +656,7 @@ contract NFTCollection is
     function setAllowedExecuteMint(address _minterToken) external onlyOwner {
         require(_isContract(_minterToken), "NFTCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
-        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10**IERC20Metadata(_minterToken).decimals();
+        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
         emit DefaultMintingValuesSet(
             mintingDefaults.mintPrice,
@@ -736,11 +726,11 @@ contract NFTCollection is
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
-        returns (bool)
+    public
+    view
+    virtual
+    override(ERC721Upgradeable, AccessControlUpgradeable)
+    returns (bool)
     {
         return interfaceId == type(AccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
@@ -758,9 +748,9 @@ contract NFTCollection is
      * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
     function setApprovalForAll(address operator, bool approved)
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperatorApproval(operator)
+    public
+    override
+    onlyAllowedOperatorApproval(operator)
     {
         super.setApprovalForAll(operator, approved);
     }
@@ -769,9 +759,9 @@ contract NFTCollection is
      * @dev See OpenZeppelin {IERC721-approve}
      */
     function approve(address operator, uint256 tokenId)
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperatorApproval(operator)
+    public
+    override
+    onlyAllowedOperatorApproval(operator)
     {
         super.approve(operator, tokenId);
     }
@@ -783,7 +773,7 @@ contract NFTCollection is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+    ) public override onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -794,7 +784,7 @@ contract NFTCollection is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+    ) public override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -806,7 +796,7 @@ contract NFTCollection is
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
+    ) public override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
@@ -838,10 +828,10 @@ contract NFTCollection is
      * @return sender msg.sender
      */
     function _msgSender()
-        internal
-        view
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (address sender)
+    internal
+    view
+    override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+    returns (address sender)
     {
         sender = ERC2771HandlerUpgradeable._msgSender();
     }
@@ -884,15 +874,15 @@ contract NFTCollection is
         bytes memory _signature
     ) internal pure returns (address) {
         return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
-                    )
-                ),
-                _signature
-            );
+        ECDSA.recover(
+            keccak256(
+                abi.encodePacked(
+                    "\x19Ethereum Signed Message:\n32",
+                    keccak256(abi.encode(_wallet, _signatureId, _contractAddress, _chainId))
+                )
+            ),
+            _signature
+        );
     }
 
     /**
@@ -917,24 +907,24 @@ contract NFTCollection is
         bytes memory _signature
     ) internal pure returns (address) {
         return
-            ECDSA.recover(
-                keccak256(
-                    abi.encodePacked(
-                        "\x19Ethereum Signed Message:\n32",
-                        keccak256(
-                            abi.encode(
-                                _wallet,
-                                _signatureId,
-                                _contractAddress,
-                                _chainId,
-                                _tokenId,
-                                _personalizationMask
-                            )
+        ECDSA.recover(
+            keccak256(
+                abi.encodePacked(
+                    "\x19Ethereum Signed Message:\n32",
+                    keccak256(
+                        abi.encode(
+                            _wallet,
+                            _signatureId,
+                            _contractAddress,
+                            _chainId,
+                            _tokenId,
+                            _personalizationMask
                         )
                     )
-                ),
-                _signature
-            );
+                )
+            ),
+            _signature
+        );
     }
 
     /**
@@ -954,8 +944,8 @@ contract NFTCollection is
      */
     function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
         return
-            waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
-            totalSupply() + _amount <= maxSupply;
+        waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
+        totalSupply + _amount <= maxSupply;
     }
 
     /**
@@ -986,7 +976,7 @@ contract NFTCollection is
     function _getRandomToken(address _wallet, uint256 _totalSupply) private returns (uint256) {
         uint256 remaining = maxSupply - _totalSupply;
         uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
         uint256 value = rand;
 
         if (_availableIds[rand] != 0) {
