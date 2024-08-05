@@ -652,7 +652,7 @@ IERC4906
      * @custom:event {DefaultMintingValuesSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
-    function setAllowedExecuteMint(address _minterToken) external onlyOwner {
+    function setAllowedExecuteMint(address _minterToken) external onlyOwner nonReentrant {
         require(_isContract(_minterToken), "NFTCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
         mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
