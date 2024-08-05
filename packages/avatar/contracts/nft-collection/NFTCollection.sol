@@ -4,9 +4,9 @@ pragma solidity 0.8.15;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
-import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/Ownable2StepUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
 import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
@@ -14,7 +14,6 @@ import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeER
 import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {IERC4906} from "../common/IERC4906.sol";
-import {CollectionAccessControl} from "../avatar/CollectionAccessControl.sol";
 import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
 
 /**
@@ -36,7 +35,7 @@ import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
  */
 contract NFTCollection is
 ReentrancyGuardUpgradeable,
-CollectionAccessControl,
+Ownable2StepUpgradeable,
 ERC721BurnMemoryUpgradeable,
 ERC2771HandlerUpgradeable,
 UpdatableOperatorFiltererUpgradeable,
@@ -333,7 +332,8 @@ IERC4906
         require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "NFTCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
-        __InitializeAccessControl(_collectionOwner);
+        // @dev we don't need to set the owner to _msgSender, so, we don't call __Ownable_init
+        _transferOwnership(_collectionOwner);
         // owner is also initialized here
         __ERC2771Handler_initialize(_initialTrustedForwarder);
         __Pausable_init();
@@ -389,7 +389,7 @@ IERC4906
         uint256 _waveMaxTokensOverall,
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
-    ) external authorizedRole(CONFIGURATOR_ROLE) {
+    ) external onlyOwner {
         require(_waveMaxTokensOverall <= maxSupply, "NFTCollection: _waveMaxTokens exceeds maxSupply");
         require(_waveMaxTokensOverall > 0, "NFTCollection: max tokens to mint is 0");
         require(_waveMaxTokensPerWallet > 0, "NFTCollection: max tokens to mint per wallet is 0");
@@ -411,7 +411,7 @@ IERC4906
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setMarketingMint() external authorizedRole(CONFIGURATOR_ROLE) {
+    function setMarketingMint() external onlyOwner {
         waveMaxTokensOverall = mintingDefaults.maxMarketingTokens;
         waveMaxTokensPerWallet = mintingDefaults.maxMarketingTokens;
         waveSingleTokenPrice = 0;
@@ -428,7 +428,7 @@ IERC4906
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setAllowlistMint() external authorizedRole(CONFIGURATOR_ROLE) {
+    function setAllowlistMint() external onlyOwner {
         waveMaxTokensOverall = maxSupply - totalSupply;
         waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -445,7 +445,7 @@ IERC4906
      * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setPublicMint() external authorizedRole(CONFIGURATOR_ROLE) {
+    function setPublicMint() external onlyOwner {
         waveMaxTokensOverall = maxSupply - totalSupply;
         waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
         waveSingleTokenPrice = mintingDefaults.mintPrice;
@@ -583,9 +583,7 @@ IERC4906
      * @param _tokenId what token to personalize
      * @param _personalizationMask a mask where each bit has a custom meaning in-game
      */
-    function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask)
-    external
-    authorizedRole(TRANSFORMER_ROLE)
+    function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask) external onlyOwner
     {
         require(_exists(_tokenId), "NFTCollection: invalid token ID");
 
@@ -674,7 +672,7 @@ IERC4906
      * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
-    function setBaseURI(string memory baseURI) external authorizedRole(CONFIGURATOR_ROLE) {
+    function setBaseURI(string memory baseURI) external onlyOwner {
         require(bytes(baseURI).length != 0, "NFTCollection: baseURI is not set");
         baseTokenURI = baseURI;
         emit BaseURISet(baseURI);
@@ -730,10 +728,10 @@ IERC4906
     public
     view
     virtual
-    override(ERC721Upgradeable, AccessControlUpgradeable)
+    override
     returns (bool)
     {
-        return interfaceId == type(AccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);
+        return super.supportsInterface(interfaceId);
     }
 
     /**
