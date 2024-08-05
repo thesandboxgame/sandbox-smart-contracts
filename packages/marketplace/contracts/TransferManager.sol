@@ -471,7 +471,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
     /// @notice return the quadId given and index, size and coordinates
     /// @param i the index to be added to x,y to get row and column
-    /// @param size The bottom left x coordinate of the quad
+    /// @param size The size of the quad
     /// @param x The bottom left x coordinate of the quad
     /// @param y The bottom left y coordinate of the quad
     /// @return the tokenId of the quad
