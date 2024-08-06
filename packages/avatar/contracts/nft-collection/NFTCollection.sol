@@ -708,7 +708,7 @@ IERC4906
         emit BaseURISet(baseURI);
 
         // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
-        emit MetadataUpdate(type(uint256).max);
+        emit BatchMetadataUpdate(0, type(uint256).max);
     }
 
     /// @notice Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
