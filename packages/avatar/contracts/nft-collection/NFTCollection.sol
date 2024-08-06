@@ -601,8 +601,8 @@ IERC4906
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
-    function burn(uint256 tokenId) public override whenNotPaused {
-        super.burn(tokenId);
+    function burn(uint256 tokenId) external whenNotPaused {
+        _burn(tokenId);
     }
 
     /**
@@ -611,8 +611,8 @@ IERC4906
      *      Inherited in order to add the onlyOwner modifier
      * @custom:event TokenBurningEnabled
      */
-    function enableBurning() public override onlyOwner {
-        super.enableBurning();
+    function enableBurning() external onlyOwner {
+        _enableBurning();
     }
 
     /**
@@ -621,8 +621,8 @@ IERC4906
      *      Inherited in order to add the onlyOwner modifier
      * @custom:event TokenBurningDisabled
      */
-    function disableBurning() public override onlyOwner {
-        super.disableBurning();
+    function disableBurning() external onlyOwner {
+        _disableBurning();
     }
 
     /**
