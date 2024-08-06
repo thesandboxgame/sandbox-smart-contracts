@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.15;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/Ownable2StepUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
@@ -13,9 +12,9 @@ import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensi
 import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/common/ERC2981Upgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
-import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
-import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {IERC4906} from "../common/IERC4906.sol";
+import {UpdatableOperatorFiltererUpgradeable} from "./UpdatableOperatorFiltererUpgradeable.sol";
+import {ERC2771HandlerUpgradeable} from "./ERC2771HandlerUpgradeable.sol";
 import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
 
 /**
@@ -113,7 +112,7 @@ IERC4906
 
     /// @notice default are used when calling predefined wave setup functions:
     ///         setMarketingMint, setAllowlistMint and setPublicMint
-    ///         see struct MintingDefaults for more details
+    ///         see struct MintingDefaults for moreUpdatableOperatorFiltererUpgradeable details
     MintingDefaults public mintingDefaults;
 
     /// @notice ERC20 contract through which the minting will be done
@@ -352,12 +351,9 @@ IERC4906
         __Pausable_init();
         __ERC2981_init();
         __ERC721_init(_name, _symbol);
-        __UpdatableOperatorFiltererUpgradeable_init(
-            _filterParams.registry,
-            _filterParams.operatorFiltererSubscription,
-            _filterParams.operatorFiltererSubscriptionSubscribe
-        );
-
+        _setOperatorRegistry(_filterParams.registry);
+        _register(_filterParams.operatorFiltererSubscription,
+            _filterParams.operatorFiltererSubscriptionSubscribe);
         baseTokenURI = _initialBaseURI;
         mintTreasury = _mintTreasury;
         signAddress = _signAddress;
@@ -851,15 +847,6 @@ IERC4906
     {
         return ERC2981Upgradeable.supportsInterface(interfaceId)
         || ERC721Upgradeable.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @notice returns the owner of the contract
-     * @dev returns OwnableUpgradeable.owner()
-     * @return owner of current contract
-     */
-    function owner() public view override(OwnableUpgradeable, UpdatableOperatorFiltererUpgradeable) returns (address) {
-        return OwnableUpgradeable.owner();
     }
 
     /**
