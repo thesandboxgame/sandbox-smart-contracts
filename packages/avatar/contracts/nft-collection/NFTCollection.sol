@@ -100,7 +100,7 @@ IERC4906
     uint256 public waveMaxTokensPerWallet;
 
     /// @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
-    uint256 public waveSingleTokenPrice;
+    uint256 internal waveSingleTokenPrice;
 
     /// @notice number of total minted tokens in the current running wave
     uint256 public waveTotalMinted;
@@ -123,7 +123,7 @@ IERC4906
     address public signAddress;
 
     /// @notice stores the personalization for a tokenId
-    mapping(uint256 => uint256) public personalizationTraits;
+    mapping(uint256 => uint256) internal personalizationTraits;
 
     /// @dev map used to mark if a specific signatureId was used
     ///      values are 0 (default, unused) and 1 (used)

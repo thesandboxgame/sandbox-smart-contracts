@@ -199,7 +199,7 @@ async function createSetupWave(contract: NFTCollection) {
       waveMaxTokensToBuy.toString()
     );
     assert.equal(
-      (await contract.waveSingleTokenPrice()).toString(),
+      (await contract.price(1)).toString(),
       waveSingleTokenPrice.toString()
     );
   };
