@@ -11,7 +11,7 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/toke
  * - provides the "burn memory" functionality:
  *     - keeping track of who burned what token for faster in-game gating checks
  */
-contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
+abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
     /*//////////////////////////////////////////////////////////////
                            Global state variables
     //////////////////////////////////////////////////////////////*/
@@ -56,7 +56,7 @@ contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      *      reverts if burning already enabled
      * @custom:event TokenBurningEnabled
      */
-    function enableBurning() public virtual {
+    function _enableBurning() internal {
         require(!isBurnEnabled, "Burning already enabled");
         isBurnEnabled = true;
 
@@ -69,7 +69,7 @@ contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      *      reverts if burning already disabled
      * @custom:event TokenBurningDisabled
      */
-    function disableBurning() public virtual {
+    function _disableBurning() internal {
         require(isBurnEnabled, "Burning already disabled");
         isBurnEnabled = false;
 
@@ -83,7 +83,7 @@ contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
-    function burn(uint256 tokenId) public virtual {
+    function _burn(uint256 tokenId) internal override virtual {
         require(isBurnEnabled, "Burning is not enabled");
         address sender = _msgSender();
         require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
