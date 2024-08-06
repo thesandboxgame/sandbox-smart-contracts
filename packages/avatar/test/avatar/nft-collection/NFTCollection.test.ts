@@ -37,7 +37,7 @@ describe('NFTCollection', function () {
     const expectedWaveSingleTokenPrice = 0;
 
     assert.equal(
-      (await collectionContractAsOwner.waveSingleTokenPrice()).toString(),
+      (await collectionContractAsOwner.price(1)).toString(),
       expectedWaveSingleTokenPrice.toString(),
       'waveSingleTokenPrice is not set correctly'
     );
@@ -64,7 +64,7 @@ describe('NFTCollection', function () {
 
     const expectedWaveSingleTokenPrice = parseUnits('100', 'ether');
     assert.equal(
-      (await collectionContractAsOwner.waveSingleTokenPrice()).toString(),
+      (await collectionContractAsOwner.price(1)).toString(),
       expectedWaveSingleTokenPrice.toString(),
       'waveSingleTokenPrice is not set correctly'
     );
@@ -90,7 +90,7 @@ describe('NFTCollection', function () {
 
     const expectedWaveSingleTokenPrice = parseUnits('100', 'ether');
     assert.equal(
-      (await collectionContractAsOwner.waveSingleTokenPrice()).toString(),
+      (await collectionContractAsOwner.price(1)).toString(),
       expectedWaveSingleTokenPrice.toString(),
       'waveSingleTokenPrice is not set correctly'
     );
