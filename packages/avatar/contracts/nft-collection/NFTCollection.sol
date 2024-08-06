@@ -685,6 +685,46 @@ IERC4906
         emit MetadataUpdate(type(uint256).max);
     }
 
+    /// @notice Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
+    /// @dev this method can be gas optimized if necessary
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external virtual onlyAllowedOperator(from) {
+        address msgSender = _msgSender();
+        uint256 numTokens = ids.length;
+        for (uint256 i = 0; i < numTokens; i++) {
+            uint256 tokenId = ids[i];
+            require(_isApprovedOrOwner(msgSender, tokenId), "ERC721: caller is not token owner or approved");
+            _safeTransfer(from, to, tokenId, data);
+        }
+    }
+
+    /// @notice Transfer many tokens between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @dev this method can be gas optimized if necessary
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids
+    ) external virtual onlyAllowedOperator(from) {
+        address msgSender = _msgSender();
+        uint256 numTokens = ids.length;
+        for (uint256 i = 0; i < numTokens; i++) {
+            uint256 tokenId = ids[i];
+            require(_isApprovedOrOwner(msgSender, tokenId), "ERC721: caller is not token owner or approved");
+            _transfer(from, to, tokenId);
+        }
+    }
+
     /**
      * @notice Sets the royalty information that all ids in this contract will default to.
      * @param receiver the receiver of the royalties
