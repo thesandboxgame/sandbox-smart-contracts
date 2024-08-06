@@ -31,20 +31,23 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
 
     /**
      * @notice event emitted when a token was burned
+     * @param operator the sender of the transaction
      * @param tokenId the id of the token that was burned
      * @param burner the owner that burned the token
      */
-    event TokenBurned(uint256 indexed tokenId, address indexed burner);
+    event TokenBurned(address indexed operator, uint256 indexed tokenId, address indexed burner);
 
     /**
      * @notice event emitted when token burning was enabled
+     * @param operator the sender of the transaction
      */
-    event TokenBurningEnabled();
+    event TokenBurningEnabled(address indexed operator);
 
     /**
      * @notice event emitted when token burning was disabled
+     * @param operator the sender of the transaction
      */
-    event TokenBurningDisabled();
+    event TokenBurningDisabled(address indexed operator);
 
     /*//////////////////////////////////////////////////////////////
                     External and public functions
@@ -60,7 +63,7 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
         require(!isBurnEnabled, "Burning already enabled");
         isBurnEnabled = true;
 
-        emit TokenBurningEnabled();
+        emit TokenBurningEnabled(_msgSender());
     }
 
     /**
@@ -73,7 +76,7 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
         require(isBurnEnabled, "Burning already disabled");
         isBurnEnabled = false;
 
-        emit TokenBurningDisabled();
+        emit TokenBurningDisabled(_msgSender());
     }
 
     /**
@@ -86,11 +89,13 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
     function _burn(uint256 tokenId) internal override virtual {
         require(isBurnEnabled, "Burning is not enabled");
         address sender = _msgSender();
+        address owner = ERC721Upgradeable.ownerOf(tokenId);
         require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
         super._burn(tokenId);
         burner[tokenId] = sender;
+        // @dev TODO: if we don't remove this code, check if we want sender or owner.
         burnedTokens[sender].push(tokenId);
-        emit TokenBurned(tokenId, sender);
+        emit TokenBurned(_msgSender(), tokenId, owner);
     }
 
     /**
