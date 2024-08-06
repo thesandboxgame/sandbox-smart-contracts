@@ -1,7 +1,7 @@
 import {assert} from 'chai';
 import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import {ethers, network} from 'hardhat';
+import {ethers, network, upgrades} from 'hardhat';
 import {parseUnits, Wallet} from 'ethers';
 import {
   FakePolygonSand,
@@ -13,7 +13,6 @@ import {
   getTestingAccounts,
   topUpAddressWithETH,
 } from '../fixtures';
-import {setupCollectionFactory} from '../factory';
 
 export const COLLECTION_MAX_SUPPLY = 500;
 
@@ -26,17 +25,8 @@ export async function setupNFTCollectionContract() {
     nftCollectionAdmin,
     sandAdmin,
     trustedForwarder,
-  } = await getTestingAccounts();
-
-  // TODO: Test without factory, factory must be tested elsewhere!!!
-  const beaconAlias = 'main-avatar';
-  const {
-    collectionFactoryContract,
-    collectionFactoryAsOwner,
-    factoryOwner,
-    avatarCollectionContract: NFTCollectionContract,
     randomWallet,
-  } = await setupCollectionFactory();
+  } = await getTestingAccounts();
 
   const mintToDeployerAmount = parseUnits('100000000', 'ether');
   // setup arguments
@@ -57,53 +47,38 @@ export async function setupNFTCollectionContract() {
   const maxPublicTokensPerWallet = 4;
   const maxAllowlistTokensPerWallet = 2;
 
-  // references to implementation
-  const implementationAlias = ethers.encodeBytes32String(beaconAlias);
-
-  // encode arguments to be used as initialize data for the collection
-  const encodedInitializationArgs =
-    NFTCollectionContract.interface.encodeFunctionData('initialize', [
-      nftCollectionAdmin.address,
-      metadataUrl,
-      collectionName,
-      collectionSymbol,
-      treasury.address,
-      raffleSignWallet.address,
-      trustedForwarder.address,
-      await polygonSandContract.getAddress(),
-      MAX_SUPPLY,
-      [
-        defaultOperatorFiltererRegistry.address,
-        defaultOperatorFiltererSubscription.address,
-        operatorFiltererSubscriptionSubscribe,
-      ],
-      [
-        mintPrice,
-        maxPublicTokensPerWallet,
-        maxAllowlistTokensPerWallet,
-        maxMarketingTokens,
-      ],
-    ]);
-  // console.log(`encodedInitializationArgs:`, encodedInitializationArgs);
-  // console.log(`deploying "${collectionName}" ...`);
-  const deployTx = await collectionFactoryAsOwner.deployCollection(
-    implementationAlias,
-    encodedInitializationArgs
+  const NFTCollectionContract = await ethers.getContractFactory(
+    'NFTCollection'
   );
-  await deployTx.wait(); // a must
-
-  // for now, the last CollectionAdded is taken. If this is not ok, will use a TX parser
-  const collectionAddedEvents = await collectionFactoryAsOwner.queryFilter(
-    collectionFactoryAsOwner.filters.CollectionAdded()
-  );
-  const collectionAddress = collectionAddedEvents.slice(-1)[0].args?.[1];
-  // console.log(`deployed at ${collectionAddress} (tx: ${deployTx.hash})`);
-
-  const collectionContract = (await ethers.getContractAt(
-    'NFTCollection',
-    collectionAddress
+  const args = [
+    nftCollectionAdmin.address,
+    metadataUrl,
+    collectionName,
+    collectionSymbol,
+    treasury.address,
+    raffleSignWallet.address,
+    trustedForwarder.address,
+    await polygonSandContract.getAddress(),
+    MAX_SUPPLY,
+    [
+      defaultOperatorFiltererRegistry.address,
+      defaultOperatorFiltererSubscription.address,
+      operatorFiltererSubscriptionSubscribe,
+    ],
+    [
+      mintPrice,
+      maxPublicTokensPerWallet,
+      maxAllowlistTokensPerWallet,
+      maxMarketingTokens,
+    ],
+  ];
+  const collectionContract = (await upgrades.deployProxy(
+    NFTCollectionContract,
+    args,
+    {
+      initializer: 'initialize',
+    }
   )) as NFTCollection;
-
   // NFTCollectionAsRandomWallet
   const owner = await collectionContract.owner();
   const collectionContractAsOwner = collectionContract.connect(
@@ -117,9 +92,6 @@ export async function setupNFTCollectionContract() {
   return {
     polygonSandContract,
     sandContractAsOwner,
-    collectionFactoryContract,
-    collectionFactoryAsOwner,
-    factoryOwner,
     collectionContract,
     collectionOwner: owner,
     collectionContractAsOwner,
@@ -132,9 +104,9 @@ export const setupAvatar = async () => {
   const {
     polygonSandContract,
     sandContractAsOwner,
-    collectionFactoryContract,
-    collectionFactoryAsOwner,
-    factoryOwner,
+    // collectionFactoryContract,
+    // collectionFactoryAsOwner,
+    // factoryOwner,
     collectionContract,
     collectionOwner,
     collectionContractAsOwner,
@@ -146,9 +118,6 @@ export const setupAvatar = async () => {
 
   return {
     network,
-    collectionFactoryContract,
-    collectionFactoryAsOwner,
-    factoryOwner,
     collectionContract,
     collectionOwner,
     collectionContractAsOwner,

@@ -1,17 +1,17 @@
-import {expect, assert} from 'chai';
+import {assert, expect} from 'chai';
 import {ethers} from 'hardhat';
 import {parseUnits} from 'ethers';
 
 import {
+  COLLECTION_MAX_SUPPLY,
   setupAvatar,
   setupAvatarAndMint,
-  COLLECTION_MAX_SUPPLY,
   setupNFTCollectionContract,
 } from './NFTCollection.fixtures';
 import {
   getTestingAccounts,
-  topUpAddressWithETH,
   setupMockERC20,
+  topUpAddressWithETH,
 } from '../fixtures';
 
 const BATCH_SIZE = 50;
@@ -279,9 +279,7 @@ describe('NFTCollection', function () {
 
     await expect(
       collectionContract.setAllowedExecuteMint(randomAddress)
-    ).to.be.revertedWith(
-      'AvatarCollection: executor address is not a contract'
-    );
+    ).to.be.revertedWith('NFTCollection: executor address is not a contract');
   });
 
   it('setTreasury works (plus invalidations)', async function () {
@@ -307,7 +305,7 @@ describe('NFTCollection', function () {
     ).to.be.revertedWith('Ownable: caller is not the owner');
 
     await expect(contract.setTreasury(ethers.ZeroAddress)).to.be.revertedWith(
-      'AvatarCollection: owner is zero address'
+      'NFTCollection: owner is zero address'
     );
   });
 
@@ -335,7 +333,7 @@ describe('NFTCollection', function () {
 
     await expect(
       contract.setSignAddress(ethers.ZeroAddress)
-    ).to.be.revertedWith('AvatarCollection: sign address is zero address');
+    ).to.be.revertedWith('NFTCollection: sign address is zero address');
   });
 
   it('setBaseURI works (plus invalidations)', async function () {
@@ -359,10 +357,10 @@ describe('NFTCollection', function () {
 
     await expect(
       collectionContractAsRandomWallet.setBaseURI(randomAddress)
-    ).to.be.revertedWith('CollectionAccessControl: sender not authorized');
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
     await expect(contract.setBaseURI('')).to.be.revertedWith(
-      'AvatarCollection: baseURI is not set'
+      'NFTCollection: baseURI is not set'
     );
   });
 
@@ -578,7 +576,7 @@ describe('NFTCollection', function () {
     assert.equal(personalizeEvents.length, 1);
     assert.exists(personalizeEvents[0].args);
     assert.equal(
-      personalizeEvents[0]?.args?._personalizationMask,
+      personalizeEvents[0]?.args?.personalizationMask,
       personalizationMask
     );
 
@@ -632,7 +630,7 @@ describe('NFTCollection', function () {
         tokenId,
         personalizationMask
       )
-    ).to.be.revertedWith('AvatarCollection: signature check failed');
+    ).to.be.revertedWith('NFTCollection: signature check failed');
   });
 
   it('should be able to differentiate a personalized asset', async function () {
@@ -707,7 +705,7 @@ describe('NFTCollection', function () {
     assert.equal(allPersonalizeEvents.length, 1);
     assert.equal(personalizeEvents2.length, 1);
     assert.equal(
-      personalizeEvents2[0]?.args?._personalizationMask,
+      personalizeEvents2[0]?.args?.personalizationMask,
       personalizationMask
     );
   });
@@ -770,7 +768,7 @@ describe('NFTCollection', function () {
 
     await expect(
       contractAsDeployer.personalize(1, signature, tokenId, personalizationMask)
-    ).to.be.revertedWith('AvatarCollection: signatureId already used');
+    ).to.be.revertedWith('NFTCollection: signatureId already used');
   });
 
   /*////////////////////////////////////////////////////////
