@@ -141,96 +141,105 @@ IERC4906
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Event emitted when a token personalization was made.
-     * @dev emitted when personalize is called
-     * @param _tokenId id of the token which had the personalization done
-     * @param _personalizationMask the exact personalization that was done, as a custom meaning bit-mask
-     */
-    event Personalized(uint256 indexed _tokenId, uint256 indexed _personalizationMask);
-
-    /**
      * @notice Event emitted when the contract was initialized.
      * @dev emitted at proxy startup, once only
      * @param baseURI an URI that will be used as the base for token URI
-     * @param _name name of the ERC721 token
-     * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address
-     * @param _signAddress signer address that is allowed to create mint signatures
-     * @param _allowedToExecuteMint token address that is allowed to execute the mint function
-     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _registry filter registry to which to register with. For blocking operators that do not respect royalties
-     * @param _operatorFiltererSubscription subscription address to use as a template for
-     * @param _operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
+     * @param name name of the ERC721 token
+     * @param symbol token symbol of the ERC721 token
+     * @param mintTreasury collection treasury address
+     * @param signAddress signer address that is allowed to create mint signatures
+     * @param allowedToExecuteMint token address that is allowed to execute the mint function
+     * @param maxSupply max supply of tokens to be allowed to be minted per contract
+     * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
+     * @param operatorFiltererSubscription subscription address to use as a template for
+     * @param operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
      *                                               just copy entries from it
      */
     event ContractInitialized(
         string indexed baseURI,
-        string indexed _name,
-        string indexed _symbol,
-        address _mintTreasury,
-        address _signAddress,
-        address _allowedToExecuteMint,
-        uint256 _maxSupply,
-        address _registry,
-        address _operatorFiltererSubscription,
-        bool _operatorFiltererSubscriptionSubscribe
+        string indexed name,
+        string indexed symbol,
+        address mintTreasury,
+        address signAddress,
+        address allowedToExecuteMint,
+        uint256 maxSupply,
+        address registry,
+        address operatorFiltererSubscription,
+        bool operatorFiltererSubscriptionSubscribe
     );
 
     /**
      * @notice Event emitted when a wave was set up
      * @dev emitted when setupWave is called
-     * @param _waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
-     * @param _waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
-     * @param _waveSingleTokenPrice the price to mint a token in a given wave, in wei
+     * @param operator the sender of the transaction
+     * @param waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
+     * @param waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
+     * @param waveSingleTokenPrice the price to mint a token in a given wave, in wei
      */
     event WaveSetup(
-        uint256 indexed _waveMaxTokens,
-        uint256 indexed _waveMaxTokensToBuy,
-        uint256 indexed _waveSingleTokenPrice
+        address indexed operator,
+        uint256 waveMaxTokens,
+        uint256 waveMaxTokensToBuy,
+        uint256 waveSingleTokenPrice
     );
 
     /**
      * @notice Event emitted when an address was set as allowed to mint
      * @dev emitted when setAllowedExecuteMint is called
-     * @param _address the address that will be allowed to set execute the mint function
+     * @param operator the sender of the transaction
+     * @param addr the address that will be allowed to set execute the mint function
      */
-    event AllowedExecuteMintSet(address indexed _address);
+    event AllowedExecuteMintSet(address indexed operator, address indexed addr);
 
     /**
      * @notice Event emitted when the treasury address was saved
      * @dev emitted when setTreasury is called
-     * @param _owner new owner address to be saved
+     * @param operator the sender of the transaction
+     * @param owner new owner address to be saved
      */
-    event TreasurySet(address indexed _owner);
+    event TreasurySet(address indexed operator, address indexed owner);
 
     /**
      * @notice Event emitted when the base token URI for the contract was set or changed
      * @dev emitted when setBaseURI is called
+     * @param operator the sender of the transaction
      * @param baseURI an URI that will be used as the base for token URI
      */
-    event BaseURISet(string indexed baseURI);
+    event BaseURISet(address indexed operator, string baseURI);
 
     /**
      * @notice Event emitted when the signer address was set or changed
      * @dev emitted when setSignAddress is called
-     * @param _signAddress new signer address to be set
+     * @param operator the sender of the transaction
+     * @param signAddress new signer address to be set
      */
-    event SignAddressSet(address indexed _signAddress);
+    event SignAddressSet(address indexed operator, address indexed signAddress);
 
     /**
      * @notice Event emitted when the default values used by wave manipulation functions were changed
      * @dev emitted when initialize or setWaveDefaults is called
+     * @param operator the sender of the transaction
      * @param mintPrice default mint price for both allowlist and public minting
      * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
      * @param maxAllowlistTokensPerWallet maximum tokens mint per wallet in the allowlist minting
      * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
      */
     event DefaultMintingValuesSet(
-        uint256 indexed mintPrice,
-        uint256 indexed maxPublicTokensPerWallet,
-        uint256 indexed maxAllowlistTokensPerWallet,
+        address indexed operator,
+        uint256 mintPrice,
+        uint256 maxPublicTokensPerWallet,
+        uint256 maxAllowlistTokensPerWallet,
         uint256 maxMarketingTokens
     );
+
+    /**
+     * @notice Event emitted when a token personalization was made.
+     * @dev emitted when personalize is called
+     * @param operator the sender of the transaction
+     * @param tokenId id of the token which had the personalization done
+     * @param personalizationMask the exact personalization that was done, as a custom meaning bit-mask
+     */
+    event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask);
 
     /*//////////////////////////////////////////////////////////////
                             Initializers
@@ -240,6 +249,7 @@ IERC4906
      * @notice mitigate a possible Implementation contract takeover, as indicate by
      *         https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializing_the_implementation_contract
      */
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -356,6 +366,7 @@ IERC4906
         mintingDefaults = _mintingDefaults;
 
         emit DefaultMintingValuesSet(
+            _msgSender(),
             _mintingDefaults.mintPrice,
             _mintingDefaults.maxPublicTokensPerWallet,
             _mintingDefaults.maxAllowlistTokensPerWallet,
@@ -405,7 +416,7 @@ IERC4906
         waveTotalMinted = 0;
         indexWave++;
 
-        emit WaveSetup(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
+        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
     }
 
     /**
@@ -422,7 +433,7 @@ IERC4906
         waveTotalMinted = 0;
         indexWave++;
 
-        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
+        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
     }
 
     /**
@@ -439,7 +450,7 @@ IERC4906
         waveTotalMinted = 0;
         indexWave++;
 
-        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
+        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
     }
 
     /**
@@ -456,7 +467,7 @@ IERC4906
         waveTotalMinted = 0;
         indexWave++;
 
-        emit WaveSetup(waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
+        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
     }
 
     /**
@@ -660,7 +671,7 @@ IERC4906
     function setTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "NFTCollection: owner is zero address");
         mintTreasury = _treasury;
-        emit TreasurySet(_treasury);
+        emit TreasurySet(_msgSender(), _treasury);
     }
 
     /**
@@ -672,7 +683,7 @@ IERC4906
     function setSignAddress(address _signAddress) external onlyOwner {
         require(_signAddress != address(0), "NFTCollection: sign address is zero address");
         signAddress = _signAddress;
-        emit SignAddressSet(_signAddress);
+        emit SignAddressSet(_msgSender(), _signAddress);
     }
 
     /**
@@ -688,12 +699,13 @@ IERC4906
         mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
         emit DefaultMintingValuesSet(
+            _msgSender(),
             mintingDefaults.mintPrice,
             mintingDefaults.maxPublicTokensPerWallet,
             mintingDefaults.maxAllowlistTokensPerWallet,
             mintingDefaults.maxMarketingTokens
         );
-        emit AllowedExecuteMintSet(_minterToken);
+        emit AllowedExecuteMintSet(_msgSender(), _minterToken);
     }
 
     /**
@@ -705,7 +717,7 @@ IERC4906
     function setBaseURI(string memory baseURI) external onlyOwner {
         require(bytes(baseURI).length != 0, "NFTCollection: baseURI is not set");
         baseTokenURI = baseURI;
-        emit BaseURISet(baseURI);
+        emit BaseURISet(_msgSender(), baseURI);
 
         // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
         emit BatchMetadataUpdate(0, type(uint256).max);
@@ -1065,7 +1077,7 @@ IERC4906
     function _updateTokenTraits(uint256 _tokenId, uint256 _personalizationMask) internal {
         personalizationTraits[_tokenId] = _personalizationMask;
 
-        emit Personalized(_tokenId, _personalizationMask);
+        emit Personalized(_msgSender(), _tokenId, _personalizationMask);
         emit MetadataUpdate(_tokenId);
     }
 
