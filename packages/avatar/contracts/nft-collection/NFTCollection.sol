@@ -489,16 +489,42 @@ IERC4906
             SafeERC20.safeTransferFrom(IERC20(_msgSender()), _wallet, mintTreasury, _price);
         }
 
-        waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
-
-        waveTotalMinted += _amount;
-
         for (uint256 i; i < _amount;) {
             // @dev start with tokenId = 1
             _safeMint(_wallet, totalSupply + i + 1);
 
         unchecked {++i;}
         }
+        waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
+        waveTotalMinted += _amount;
+        totalSupply += _amount;
+    }
+
+    /**
+     * @notice token minting function. Price is set by wave and is paid in tokens denoted
+     *         by the allowedToExecuteMint contract
+     * @dev this methods takes a list of destination wallets and can only be used by the owner
+     * @custom:event {Transfer}
+     * @param _wallets minting wallets
+     */
+    function batchMint(address[] calldata _wallets) external whenNotPaused nonReentrant onlyOwner {
+        require(indexWave > 0, "NFTCollection: contract is not configured");
+        uint256 _amount = _wallets.length;
+        require(_amount > 0, "NFTCollection: wallets length cannot be 0");
+
+        require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
+
+        for (uint256 i; i < _amount;) {
+            address _wallet = _wallets[i];
+            require(_checkLimitNotReached(_wallet, 1), "NFTCollection: max allowed");
+            // @dev safeMint already checks the destination address
+            // @dev start with tokenId = 1
+            _safeMint(_wallet, totalSupply + i + 1);
+            waveOwnerToClaimedCounts[_wallet][indexWave - 1] += 1;
+
+        unchecked {++i;}
+        }
+        waveTotalMinted += _amount;
         totalSupply += _amount;
     }
 
