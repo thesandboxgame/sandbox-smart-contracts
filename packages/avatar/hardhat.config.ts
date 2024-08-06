@@ -1,6 +1,7 @@
 import '@nomicfoundation/hardhat-toolbox';
 import {HardhatUserConfig} from 'hardhat/config';
 import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-contract-sizer';
 
 const config: HardhatUserConfig = {
   mocha: {
