@@ -483,7 +483,7 @@ IERC4906
         address _wallet,
         uint256 _amount,
         uint256 _signatureId,
-        bytes memory _signature
+        bytes calldata _signature
     ) external whenNotPaused nonReentrant {
         require(indexWave > 0, "NFTCollection: contract is not configured");
         require(_msgSender() == allowedToExecuteMint, "NFTCollection: caller is not allowed");
@@ -552,7 +552,7 @@ IERC4906
     function reveal(
         uint256 _tokenId,
         uint256 _signatureId,
-        bytes memory _signature
+        bytes calldata _signature
     ) external whenNotPaused {
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "NFTCollection: sender is not owner");
@@ -590,7 +590,7 @@ IERC4906
      */
     function personalize(
         uint256 _signatureId,
-        bytes memory _signature,
+        bytes calldata _signature,
         uint256 _tokenId,
         uint256 _personalizationMask
     ) external whenNotPaused {
@@ -714,7 +714,7 @@ IERC4906
      * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
-    function setBaseURI(string memory baseURI) external onlyOwner {
+    function setBaseURI(string calldata baseURI) external onlyOwner {
         require(bytes(baseURI).length != 0, "NFTCollection: baseURI is not set");
         baseTokenURI = baseURI;
         emit BaseURISet(_msgSender(), baseURI);
@@ -964,7 +964,7 @@ IERC4906
     function _checkAndSetSignature(
         address _address,
         uint256 _signatureId,
-        bytes memory _signature
+        bytes calldata _signature
     ) internal {
         require(_signatureIds[_signatureId] == 0, "NFTCollection: signatureId already used");
         require(
@@ -989,7 +989,7 @@ IERC4906
         uint256 _signatureId,
         address _contractAddress,
         uint256 _chainId,
-        bytes memory _signature
+        bytes calldata _signature
     ) internal pure returns (address) {
         return
         ECDSA.recover(
@@ -1022,7 +1022,7 @@ IERC4906
         uint256 _chainId,
         uint256 _tokenId,
         uint256 _personalizationMask,
-        bytes memory _signature
+        bytes calldata _signature
     ) internal pure returns (address) {
         return
         ECDSA.recover(
