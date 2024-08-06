@@ -129,9 +129,6 @@ IERC4906
     ///      Used to mitigate a possible signature reuse attack
     mapping(uint256 => uint256) private _signatureIds;
 
-    /// @dev helper mapping used to determine which IDs are available for minting
-    mapping(uint256 => uint256) private _availableIds;
-
     /// @notice total amount of tokens minted till now
     uint256 public totalSupply;
 
