@@ -11,6 +11,8 @@ import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol
 import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
+import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/common/ERC2981Upgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
 import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {IERC4906} from "../common/IERC4906.sol";
@@ -37,6 +39,7 @@ contract NFTCollection is
 ReentrancyGuardUpgradeable,
 Ownable2StepUpgradeable,
 ERC721BurnMemoryUpgradeable,
+ERC2981Upgradeable,
 ERC2771HandlerUpgradeable,
 UpdatableOperatorFiltererUpgradeable,
 PausableUpgradeable,
@@ -337,6 +340,7 @@ IERC4906
         // owner is also initialized here
         __ERC2771Handler_initialize(_initialTrustedForwarder);
         __Pausable_init();
+        __ERC2981_init();
         __ERC721_init(_name, _symbol);
         __UpdatableOperatorFiltererUpgradeable_init(
             _filterParams.registry,
@@ -682,6 +686,42 @@ IERC4906
     }
 
     /**
+     * @notice Sets the royalty information that all ids in this contract will default to.
+     * @param receiver the receiver of the royalties
+     * @param feeNumerator percentage of the royalties in feeDenominator units
+     */
+    function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyOwner {
+        _setDefaultRoyalty(receiver, feeNumerator);
+    }
+
+    /**
+     * @notice Removes default royalty information.
+     */
+    function deleteDefaultRoyalty() external onlyOwner {
+        _deleteDefaultRoyalty();
+    }
+
+    /**
+     * @notice Sets the royalty information for a specific token id, overriding the global default.
+     * @param receiver the receiver of the royalties
+     * @param feeNumerator percentage of the royalties in feeDenominator units
+     */
+    function setTokenRoyalty(
+        uint256 tokenId,
+        address receiver,
+        uint96 feeNumerator
+    ) external onlyOwner {
+        _setTokenRoyalty(tokenId, receiver, feeNumerator);
+    }
+
+    /**
+     * @notice Resets royalty information for the token id back to the global default.
+     */
+    function resetTokenRoyalty(uint256 tokenId) external onlyOwner {
+        _resetTokenRoyalty(tokenId);
+    }
+
+    /**
      * @notice get the personalization of the indicated tokenID
      * @dev returns personalizationTraits[_tokenId]
      * @param _tokenId the token ID to check
@@ -728,10 +768,11 @@ IERC4906
     public
     view
     virtual
-    override
+    override(ERC2981Upgradeable, ERC721Upgradeable)
     returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return ERC2981Upgradeable.supportsInterface(interfaceId)
+        || ERC721Upgradeable.supportsInterface(interfaceId);
     }
 
     /**
