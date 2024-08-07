@@ -19,20 +19,22 @@ import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
 
 /**
  * @title NFTCollection
- * @author qed.team x The Sandbox
- * @notice ERC721 contract for future Avatar collections.
- *         Is expected to be initialize via {CollectionFactory} or other similar factories
- *
- * Some features:
+ * @author The Sandbox
+ * @custom:security-contact contact-blockchain@sandbox.game
+ * @notice ERC721 contract for Avatar collections.
+ *         May be initialized via {CollectionFactory} or other similar factories
+ * @dev Some features:
  * - upgradable
- * - ownable (2 step transfer) and multi-role support for simplifying logistics
+ * - ownable (2 step transfer)
  * - OpenSea royalty compliant
+ * - ERC2981 compliant
  * - ERC4906 compliant
  * - ERC165 compliant
  * - supports ERC2771 for services like Biconomy
  * - supports "burn memory" - keeping track of who burned what token for faster in-game gating checks
- * - minting is only supported via an ERC20 token contract that supports approveAndCall
+ * - minting is supported via an ERC20 token contract that supports approveAndCall
  *   as mint price is in non-native tokens
+ * - custom batch operations for minting and transfer
  */
 contract NFTCollection is
 ReentrancyGuardUpgradeable,
@@ -44,21 +46,17 @@ UpdatableOperatorFiltererUpgradeable,
 PausableUpgradeable,
 IERC4906
 {
-    /*//////////////////////////////////////////////////////////////
-                           Type declarations
-    //////////////////////////////////////////////////////////////*/
-
     /**
      * @notice Structure used to group default minting parameters in order to avoid stack too deep error
      * @param mintPrice default mint price for both allowlist and public minting
      * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
-     * @param maxAllowlistTokensPerWallet maximum tokens mint per wallet in the allowlist minting
+     * @param maxAllowListTokensPerWallet maximum tokens mint per wallet in the allowlist minting
      * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
      */
     struct MintingDefaults {
         uint256 mintPrice;
         uint256 maxPublicTokensPerWallet;
-        uint256 maxAllowlistTokensPerWallet;
+        uint256 maxAllowListTokensPerWallet;
         uint256 maxMarketingTokens;
     }
 
@@ -75,76 +73,101 @@ IERC4906
         bool operatorFiltererSubscriptionSubscribe;
     }
 
-    /*//////////////////////////////////////////////////////////////
-                           Global state variables
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice default minting price in full tokens (not WEI) when used, this must be
-    ///         multiplied by the token "allowedToExecuteMint" token decimals
+    /**
+     * @notice default minting price in full tokens (not WEI) when used, this must be
+     *         multiplied by the token "allowedToExecuteMint" token decimals
+     */
     uint256 public constant DEFAULT_MINT_PRICE_FULL = 100;
 
-    /// @notice max token supply
+    /**
+     * @notice maximum amount of tokens that can be minted
+     */
     uint256 public maxSupply;
 
-    /// @notice treasury address where mint tokens are sent
+    /**
+     * @notice treasury address where the payment for minting are sent
+     */
     address public mintTreasury;
 
-    /// @notice standard base token URL for ERC721 metadata
+    /**
+     * @notice standard base token URL for ERC721 metadata
+     */
     string public baseTokenURI;
 
-    /// @notice max tokens to buy per wave, cumulating all addresses
+    /**
+     * @notice max tokens to buy per wave, cumulating all addresses
+     */
     uint256 public waveMaxTokensOverall;
 
-    /// @notice max tokens to buy, per wallet in a given wave
+    /**
+     * @notice max tokens to buy, per wallet in a given wave
+     */
     uint256 public waveMaxTokensPerWallet;
 
-    /// @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+    /**
+     * @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     */
     uint256 internal waveSingleTokenPrice;
 
-    /// @notice number of total minted tokens in the current running wave
+    /**
+     * @notice number of total minted tokens in the current running wave
+     */
     uint256 public waveTotalMinted;
 
-    /// @notice mapping of [owner -> wave index -> minted count]
+    /**
+      * @notice mapping of [owner -> wave index -> minted count]
+      */
     mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
 
-    /// @notice each wave has an index to help track minting/tokens per wallet
+    /**
+     * @notice each wave has an index to help track minting/tokens per wallet
+     */
     uint256 public indexWave;
 
-    /// @notice default are used when calling predefined wave setup functions:
-    ///         setMarketingMint, setAllowlistMint and setPublicMint
-    ///         see struct MintingDefaults for moreUpdatableOperatorFiltererUpgradeable details
+    /**
+     * @notice default are used when calling predefined wave setup functions:
+     *         setMarketingMint, setAllowlistMint and setPublicMint
+     *         see struct MintingDefaults for more details
+     */
     MintingDefaults public mintingDefaults;
 
-    /// @notice ERC20 contract through which the minting will be done
-    address public allowedToExecuteMint;
+    /**
+     * @notice ERC20 contract through which the minting will be done (approveAndCall)
+     *         When there is a price for the minting, the payment will be done using this token
+     */
+    IERC20 public allowedToExecuteMint;
 
-    /// @notice all signatures must come from this specific address, otherwise are invalid
+    /**
+      * @notice all signatures must come from this specific address, otherwise they are invalid
+      */
     address public signAddress;
 
-    /// @notice stores the personalization for a tokenId
+    /**
+     * @notice stores the personalization mask for a tokenId
+     */
     mapping(uint256 => uint256) internal personalizationTraits;
 
-    /// @dev map used to mark if a specific signatureId was used
-    ///      values are 0 (default, unused) and 1 (used)
-    ///      Used to mitigate a possible signature reuse attack
+    /**
+     * @dev map used to mark if a specific signatureId was used
+     *      values are 0 (default, unused) and 1 (used)
+     *      Used to avoid a signature reuse
+     */
     mapping(uint256 => uint256) private _signatureIds;
 
-    /// @notice total amount of tokens minted till now
+    /**
+     * @notice total amount of tokens minted till now
+     */
     uint256 public totalSupply;
-
-    /*//////////////////////////////////////////////////////////////
-                                Events
-    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Event emitted when the contract was initialized.
-     * @dev emitted at proxy startup, once only
+     * @dev emitted at proxy startup, only once
      * @param baseURI an URI that will be used as the base for token URI
      * @param name name of the ERC721 token
      * @param symbol token symbol of the ERC721 token
-     * @param mintTreasury collection treasury address
+     * @param mintTreasury collection treasury address (where the payments are sent)
      * @param signAddress signer address that is allowed to create mint signatures
-     * @param allowedToExecuteMint token address that is allowed to execute the mint function
+     * @param allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param maxSupply max supply of tokens to be allowed to be minted per contract
      * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
      * @param operatorFiltererSubscription subscription address to use as a template for
@@ -183,23 +206,23 @@ IERC4906
      * @notice Event emitted when an address was set as allowed to mint
      * @dev emitted when setAllowedExecuteMint is called
      * @param operator the sender of the transaction
-     * @param addr the address that will be allowed to set execute the mint function
+     * @param token address that is used for payments and that is allowed to execute mint
      */
-    event AllowedExecuteMintSet(address indexed operator, address indexed addr);
+    event AllowedExecuteMintSet(address indexed operator, IERC20 indexed token);
 
     /**
      * @notice Event emitted when the treasury address was saved
      * @dev emitted when setTreasury is called
      * @param operator the sender of the transaction
-     * @param owner new owner address to be saved
+     * @param treasury collection treasury address (where the payments are sent)
      */
-    event TreasurySet(address indexed operator, address indexed owner);
+    event TreasurySet(address indexed operator, address indexed treasury);
 
     /**
      * @notice Event emitted when the base token URI for the contract was set or changed
      * @dev emitted when setBaseURI is called
      * @param operator the sender of the transaction
-     * @param baseURI an URI that will be used as the base for token URI
+     * @param baseURI an URI that will be used as the base for token metadata URI
      */
     event BaseURISet(address indexed operator, string baseURI);
 
@@ -207,7 +230,7 @@ IERC4906
      * @notice Event emitted when the signer address was set or changed
      * @dev emitted when setSignAddress is called
      * @param operator the sender of the transaction
-     * @param signAddress new signer address to be set
+     * @param signAddress signer address that is allowed to create mint signatures
      */
     event SignAddressSet(address indexed operator, address indexed signAddress);
 
@@ -215,16 +238,16 @@ IERC4906
      * @notice Event emitted when the default values used by wave manipulation functions were changed
      * @dev emitted when initialize or setWaveDefaults is called
      * @param operator the sender of the transaction
-     * @param mintPrice default mint price for both allowlist and public minting
+     * @param mintPrice default mint price for both allow list and public minting
      * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
-     * @param maxAllowlistTokensPerWallet maximum tokens mint per wallet in the allowlist minting
+     * @param maxAllowListTokensPerWallet maximum tokens mint per wallet in the allow list minting
      * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
      */
     event DefaultMintingValuesSet(
         address indexed operator,
         uint256 mintPrice,
         uint256 maxPublicTokensPerWallet,
-        uint256 maxAllowlistTokensPerWallet,
+        uint256 maxAllowListTokensPerWallet,
         uint256 maxMarketingTokens
     );
 
@@ -236,10 +259,6 @@ IERC4906
      * @param personalizationMask the exact personalization that was done, as a custom meaning bit-mask
      */
     event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask);
-
-    /*//////////////////////////////////////////////////////////////
-                            Initializers
-    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice mitigate a possible Implementation contract takeover, as indicate by
@@ -257,11 +276,10 @@ IERC4906
      * @param _initialBaseURI an URI that will be used as the base for token URI
      * @param _name name of the ERC721 token
      * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address
+     * @param _mintTreasury collection treasury address (where the payments are sent)
      * @param _signAddress signer address that is allowed to create mint signatures
      * @param _initialTrustedForwarder trusted forwarder address
-     * @param _allowedToExecuteMint ERC20 token contract through which mint will be done
-     *                              It is the only one allowed to call mint
+     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _filterParams Opensea registry filter initialization parameters
      * @param _mintingDefaults default minting values for predefined wave helpers
@@ -301,11 +319,10 @@ IERC4906
      * @param _initialBaseURI an URI that will be used as the base for token URI
      * @param _name name of the ERC721 token
      * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address
+     * @param _mintTreasury collection treasury address (where the payments are sent)
      * @param _signAddress signer address that is allowed to create mint signatures
      * @param _initialTrustedForwarder trusted forwarder address
-     * @param _allowedToExecuteMint ERC20 token contract through which mint will be done
-     *                              It is the only one allowed to call mint
+     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      * @param _filterParams Opensea registry filter initialization parameters
      * @param _mintingDefaults default minting values for predefined wave helpers
@@ -335,7 +352,7 @@ IERC4906
         require(_mintingDefaults.mintPrice > 0, "NFTCollection: public mint price cannot be 0");
         require(
             _mintingDefaults.maxPublicTokensPerWallet <= _maxSupply &&
-            _mintingDefaults.maxAllowlistTokensPerWallet <= _maxSupply,
+            _mintingDefaults.maxAllowListTokensPerWallet <= _maxSupply,
             "NFTCollection: invalid tokens per wallet configuration"
         );
         require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "NFTCollection: invalid marketing share");
@@ -354,7 +371,7 @@ IERC4906
         baseTokenURI = _initialBaseURI;
         mintTreasury = _mintTreasury;
         signAddress = _signAddress;
-        allowedToExecuteMint = _allowedToExecuteMint;
+        allowedToExecuteMint = IERC20(_allowedToExecuteMint);
         maxSupply = _maxSupply;
         mintingDefaults = _mintingDefaults;
 
@@ -362,7 +379,7 @@ IERC4906
             _msgSender(),
             _mintingDefaults.mintPrice,
             _mintingDefaults.maxPublicTokensPerWallet,
-            _mintingDefaults.maxAllowlistTokensPerWallet,
+            _mintingDefaults.maxAllowListTokensPerWallet,
             _mintingDefaults.maxMarketingTokens
         );
 
@@ -379,10 +396,6 @@ IERC4906
             _filterParams.operatorFiltererSubscriptionSubscribe
         );
     }
-
-    /*//////////////////////////////////////////////////////////////
-                    External and public functions
-    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
@@ -402,65 +415,34 @@ IERC4906
         require(_waveMaxTokensOverall > 0, "NFTCollection: max tokens to mint is 0");
         require(_waveMaxTokensPerWallet > 0, "NFTCollection: max tokens to mint per wallet is 0");
         require(_waveMaxTokensPerWallet <= _waveMaxTokensOverall, "NFTCollection: invalid supply configuration");
-
-        waveMaxTokensOverall = _waveMaxTokensOverall;
-        waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
-        waveSingleTokenPrice = _waveSingleTokenPrice;
-        waveTotalMinted = 0;
-        indexWave++;
-
-        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
+        _setupWave(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
     }
 
     /**
      * @notice helper function to set all token configs to that of the marketing minting phase.
-     *         Can be called by owner or specially designated role, CONFIGURATOR.
      *         Uses default values set on contract initialization
-     * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
     function setMarketingMint() external onlyOwner {
-        waveMaxTokensOverall = mintingDefaults.maxMarketingTokens;
-        waveMaxTokensPerWallet = mintingDefaults.maxMarketingTokens;
-        waveSingleTokenPrice = 0;
-        waveTotalMinted = 0;
-        indexWave++;
-
-        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
+        _setupWave(mintingDefaults.maxMarketingTokens, mintingDefaults.maxMarketingTokens, 0);
     }
 
     /**
-     * @notice helper function to set all token configs to that of the allowlist minting phase.
-     *         Can be called by owner or specially designated role, CONFIGURATOR.
+     * @notice helper function to set all token configs to that of the allow list minting phase.
      *         Uses default values set on contract initialization
-     * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
-    function setAllowlistMint() external onlyOwner {
-        waveMaxTokensOverall = maxSupply - totalSupply;
-        waveMaxTokensPerWallet = mintingDefaults.maxAllowlistTokensPerWallet;
-        waveSingleTokenPrice = mintingDefaults.mintPrice;
-        waveTotalMinted = 0;
-        indexWave++;
-
-        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
+    function setAllowListMint() external onlyOwner {
+        _setupWave(maxSupply - totalSupply, mintingDefaults.maxAllowListTokensPerWallet, mintingDefaults.mintPrice);
     }
 
     /**
      * @notice helper function to set all token configs to that of the public minting phase.
-     *         Can be called by owner or specially designated role, CONFIGURATOR.
      *         Uses default values set on contract initialization
-     * @dev reverts if not authorized
      * @custom:event {WaveSetup}
      */
     function setPublicMint() external onlyOwner {
-        waveMaxTokensOverall = maxSupply - totalSupply;
-        waveMaxTokensPerWallet = mintingDefaults.maxPublicTokensPerWallet;
-        waveSingleTokenPrice = mintingDefaults.mintPrice;
-        waveTotalMinted = 0;
-        indexWave++;
-
-        emit WaveSetup(_msgSender(), waveMaxTokensOverall, waveMaxTokensPerWallet, waveSingleTokenPrice);
+        _setupWave(maxSupply - totalSupply, mintingDefaults.maxPublicTokensPerWallet, mintingDefaults.mintPrice);
     }
 
     /**
@@ -479,7 +461,7 @@ IERC4906
         bytes calldata _signature
     ) external whenNotPaused nonReentrant {
         require(indexWave > 0, "NFTCollection: contract is not configured");
-        require(_msgSender() == allowedToExecuteMint, "NFTCollection: caller is not allowed");
+        require(_msgSender() == address(allowedToExecuteMint), "NFTCollection: caller is not allowed");
         require(_wallet != address(0), "NFTCollection: wallet is zero address");
         require(_amount > 0, "NFTCollection: amount cannot be 0");
 
@@ -490,7 +472,7 @@ IERC4906
 
         uint256 _price = price(_amount);
         if (_price > 0) {
-            SafeERC20.safeTransferFrom(IERC20(_msgSender()), _wallet, mintTreasury, _price);
+            SafeERC20.safeTransferFrom(allowedToExecuteMint, _wallet, mintTreasury, _price);
         }
 
         for (uint256 i; i < _amount; i++) {
@@ -503,11 +485,10 @@ IERC4906
     }
 
     /**
-     * @notice token minting function. Price is set by wave and is paid in tokens denoted
-     *         by the allowedToExecuteMint contract
-     * @dev this methods takes a list of destination wallets and can only be used by the owner
+     * @notice batch minting function, used by owner to airdrop directly to users.
+     * @dev this methods takes a list of destination wallets and can only be used by the owner of the contract
      * @custom:event {Transfer}
-     * @param _wallets minting wallets
+     * @param _wallets list of destination wallets
      */
     function batchMint(address[] calldata _wallets) external whenNotPaused nonReentrant onlyOwner {
         require(indexWave > 0, "NFTCollection: contract is not configured");
@@ -616,14 +597,12 @@ IERC4906
     function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask) external onlyOwner
     {
         require(_exists(_tokenId), "NFTCollection: invalid token ID");
-
         _updateTokenTraits(_tokenId, _personalizationMask);
     }
 
     /**
      * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
      * @dev See {ERC721BurnMemoryEnumerableUpgradeable.burn}.
-     *      Inherited in order to add the whenNotPaused modifier
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
@@ -634,7 +613,6 @@ IERC4906
     /**
      * @notice enables burning of tokens
      * @dev reverts if burning already enabled.
-     *      Inherited in order to add the onlyOwner modifier
      * @custom:event TokenBurningEnabled
      */
     function enableBurning() external onlyOwner {
@@ -644,7 +622,6 @@ IERC4906
     /**
      * @notice disables burning of tokens
      * @dev reverts if burning already disabled.
-     *      Inherited in order to add the onlyOwner modifier
      * @custom:event TokenBurningDisabled
      */
     function disableBurning() external onlyOwner {
@@ -652,8 +629,7 @@ IERC4906
     }
 
     /**
-     * @notice saving locally the treasury address
-     * @dev sets mintTreasury = _treasury
+     * @notice update the treasury address
      * @custom:event {TreasurySet}
      * @param _treasury new treasury address to be saved
      */
@@ -664,8 +640,7 @@ IERC4906
     }
 
     /**
-     * @notice sets the sign address. Emits {SignAddressSet} event
-     * @dev sets signAddress = _signAddress; address can't be 0
+     * @notice updates the sign address.
      * @custom:event {SignAddressSet}
      * @param _signAddress new signer address to be set
      */
@@ -676,14 +651,14 @@ IERC4906
     }
 
     /**
-     * @notice sets which address is allowed to execute the mint function. Also resets default mint price
-     * @dev sets allowedToExecuteMint = _address; address must belong to a contract or reverts
+     * @notice updates which address is allowed to execute the mint function.
+     * @dev also resets default mint price
      * @custom:event {AllowedExecuteMintSet}
      * @custom:event {DefaultMintingValuesSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
-    function setAllowedExecuteMint(address _minterToken) external onlyOwner nonReentrant {
-        require(_isContract(_minterToken), "NFTCollection: executor address is not a contract");
+    function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner nonReentrant {
+        require(_isContract(address(_minterToken)), "NFTCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
         mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
@@ -691,15 +666,14 @@ IERC4906
             _msgSender(),
             mintingDefaults.mintPrice,
             mintingDefaults.maxPublicTokensPerWallet,
-            mintingDefaults.maxAllowlistTokensPerWallet,
+            mintingDefaults.maxAllowListTokensPerWallet,
             mintingDefaults.maxMarketingTokens
         );
         emit AllowedExecuteMintSet(_msgSender(), _minterToken);
     }
 
     /**
-     * @notice sets the base token URI for the contract
-     * @dev sets baseTokenURI = baseURI
+     * @notice updates the base token URI for the contract
      * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
@@ -712,12 +686,13 @@ IERC4906
         emit BatchMetadataUpdate(0, type(uint256).max);
     }
 
-    /// @notice Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
-    /// @param from The sender of the token.
-    /// @param to The recipient of the token.
-    /// @param ids The ids of the tokens.
-    /// @param data Additional data.
-    /// @dev this method can be gas optimized if necessary
+    /***
+     * @notice Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
+     * @param from The sender of the token.
+     * @param to The recipient of the token.
+     * @param ids The ids of the tokens.
+     * @param data Additional data.
+     */
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -733,11 +708,11 @@ IERC4906
         }
     }
 
-    /// @notice Transfer many tokens between 2 addresses.
-    /// @param from The sender of the token.
-    /// @param to The recipient of the token.
-    /// @param ids The ids of the tokens.
-    /// @dev this method can be gas optimized if necessary
+    /** @notice Transfer many tokens between 2 addresses.
+     * @param from The sender of the token.
+     * @param to The recipient of the token.
+     * @param ids The ids of the tokens.
+     */
     function batchTransferFrom(
         address from,
         address to,
@@ -790,7 +765,6 @@ IERC4906
 
     /**
      * @notice get the personalization of the indicated tokenID
-     * @dev returns personalizationTraits[_tokenId]
      * @param _tokenId the token ID to check
      * @return the personalization data as uint256
      */
@@ -810,8 +784,6 @@ IERC4906
 
     /**
      * @notice get the price of minting the indicated number of tokens for the current wave
-     * @dev returns waveSingleTokenPrice * _count; Does not check if it is possible
-     *      to actually mint that much
      * @param _count the number of tokens to estimate mint price for
      * @return price of minting all the tokens
      */
@@ -821,7 +793,6 @@ IERC4906
 
     /**
      * @notice helper automation function
-     * @dev returns block.chainid
      * @return current chainID for the blockchain
      */
     function chain() external view returns (uint256) {
@@ -898,13 +869,30 @@ IERC4906
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
-    /*//////////////////////////////////////////////////////////////
-                    Internal and private functions
-    //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
+     *         minted in total, per wallet and minting price
+     * @custom:event {WaveSetup}
+     * @param _waveMaxTokensOverall the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
+     * @param _waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
+     * @param _waveSingleTokenPrice the price to mint a token in a given wave, in wei
+     *                              denoted by the allowedToExecuteMint contract
+     */
+    function _setupWave(
+        uint256 _waveMaxTokensOverall,
+        uint256 _waveMaxTokensPerWallet,
+        uint256 _waveSingleTokenPrice
+    ) internal {
+        waveMaxTokensOverall = _waveMaxTokensOverall;
+        waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
+        waveSingleTokenPrice = _waveSingleTokenPrice;
+        waveTotalMinted = 0;
+        indexWave++;
+        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
+    }
 
     /**
      * @notice get base TokenURI
-     * @dev returns baseTokenURI
      * @return baseTokenURI
      */
     function _baseURI() internal view virtual override returns (string memory) {
@@ -913,7 +901,6 @@ IERC4906
 
     /**
      * @notice ERC2771 compatible msg.data getter
-     * @dev returns ERC2771HandlerUpgradeable._msgData()
      * @return msg.data
      */
     function _msgData() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (bytes calldata) {
@@ -922,7 +909,6 @@ IERC4906
 
     /**
      * @notice ERC2771 compatible msg.sender getter
-     * @dev returns ERC2771HandlerUpgradeable._msgSender()
      * @return sender msg.sender
      */
     function _msgSender()
@@ -936,7 +922,7 @@ IERC4906
 
     /**
      * @notice checks that the provided signature is valid, while also taking into
-     *         consideration the provided address and signatureId
+     *         consideration the provided address and signatureId.
      * @param _address address to be used in validating the signature
      * @param _signatureId signing signature ID
      * @param _signature signing signature value
@@ -956,7 +942,6 @@ IERC4906
 
     /**
      * @notice validates signature
-     * @dev uses ECDSA.recover on the provided params
      * @param _wallet wallet that was used in signature generation
      * @param _signatureId id of signature
      * @param _contractAddress contract address that was used in signature generation
@@ -985,7 +970,6 @@ IERC4906
 
     /**
      * @notice validate personalization mask
-     * @dev uses ECDSA.recover on the provided params
      * @param _wallet wallet that was used in signature generation
      * @param _signatureId id of signature
      * @param _contractAddress contract address that was used in signature generation
@@ -1070,7 +1054,6 @@ IERC4906
         // This method relies on extcodesize/address.code.length, which returns 0
         // for contracts in construction, since the code is only stored at the end
         // of the constructor execution.
-
         return account.code.length > 0;
     }
 
