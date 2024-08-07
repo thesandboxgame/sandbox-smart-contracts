@@ -151,6 +151,19 @@ contract Exchange is
         _unpause();
     }
 
+    /// @notice Return all the information to calculate how much will be deduced from an exchange
+    /// @param token collection token address
+    /// @param tokenId tokenId for this collection
+    /// @return feePrimary fees for the primary market
+    /// @return feeSecondary fees for the secondary market
+    /// @return royalties royalties taken (receiver, valuePercent)
+    function getDeductibles(
+        address token,
+        uint256 tokenId
+    ) external view returns (uint256 feePrimary, uint256 feeSecondary, IRoyaltiesProvider.Part[] memory royalties) {
+        return (protocolFeePrimary, protocolFeeSecondary, royaltiesRegistry.getRoyalties(token, tokenId));
+    }
+
     /// @dev Check if fees & royalties should be skipped for users with the EXCHANGE_ADMIN_ROLE.
     /// @param from Address to check.
     /// @return True if fees should be skipped, false otherwise.
