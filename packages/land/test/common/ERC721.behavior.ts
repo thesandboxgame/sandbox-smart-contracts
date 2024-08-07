@@ -866,6 +866,7 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0x3b18763a')).to.be.true;
       });
+
       it('claim to IQuad interface', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0xd21ed03d')).to.be.true;
