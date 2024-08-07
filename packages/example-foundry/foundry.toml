@@ -1,0 +1,27 @@
+[profile.default]
+src = "src"
+out = "artifacts"
+libs = ["lib"]
+remappings = [
+    "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+    "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+    "ds-test/=lib/forge-std/lib/ds-test/src/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# OPTIMIZER SETTINGS
+optimizer = true
+optimizer_runs = 200
+
+# RPC SETTINGS
+
+[rpc_endpoints]
+default = "http://localhost:8545"
+mumbai = "${MUMBAI_RPC_URL}"
+
+# ETHERSCAN SETTINGS
+
+[etherscan]
+mumbai = { key = "${MUMBAI_POLYGONSCAN_API_KEY}" }
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
