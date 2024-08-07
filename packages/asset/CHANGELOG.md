@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- [AssetCreate] Add lazy minting feature
+- [AuthSuperValidator] Add signature expiration
+- [AssetCreate] Fix: Do not mark lazy minted assets as bridged
+- [AssetCreate] Fix: Improve gas inefficiencies
+- [AssetCreate, AuthSuperValidator] Add security contact
+- [AssetCreate] Improve readability of the contract by removing magic numbers
+- [AssetCreate] Improve code style
+- [AssetCreate] Improve documentation
+- [AssetCreate] Do not index creators array in one of the events
+
 ## [1.1.0] - 2024-01-12
 
 - Fix: Catalyst contract transfer method patch.

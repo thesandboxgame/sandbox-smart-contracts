@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 export const royaltyAmount = 500;
 
@@ -35,5 +36,11 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Catalyst', 'Catalyst_setup', 'L2'];
+func.tags = [
+  'Catalyst',
+  'Catalyst_setup',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_PROD,
+  DEPLOY_TAGS.L2_TEST,
+];
 func.dependencies = ['Catalyst_deploy', 'RoyaltyManager_deploy'];

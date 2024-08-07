@@ -12,7 +12,7 @@
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
-    "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
+    "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --noPrompt --fix \"contracts/**/*.sol\"",
     "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
     "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
     "test": "hardhat test",

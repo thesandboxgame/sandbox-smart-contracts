@@ -34,28 +34,28 @@ change the metadata for any token.
 
 # Implementation
 
-- Each land type (premiumness + neighborhood) takes 8 bits (1 byte)
-- We pack 32 land types in a 32 byte EVM word, so we use 5202 EVM words for the
+- Each land type (premiumness + neighborhood) takes 16 bits (2 byte)
+- We pack 16 land types in a 32 byte EVM word, so we use 10404 EVM words for the
   whole map.
 
 ## Land type
 
-- Key of the map: tokenId / 32
-- Value of the map: in each 256 bits we store 32 land types
-- Index inside each word: tokenId mod 32
+- Key of the map: tokenId / 16
+- Value of the map: in each 256 bits we store 16 land types
+- Index inside each word: tokenId mod 16
 
 ### Land Type
 
 Land Type is stored in a mapping: `mapping(uint256 key => uint256 value)`. Where
-key is tokenId / 32 and values is the land type.
+key is tokenId / 16 and values is the land type.
 
-| Land Type: 8 bits                              |
-| ---------------------------------------------- |
-| 1 bit Premiumness + 7 bits Neighborhood number |
+| Land Type: 16 bits                              |
+| ----------------------------------------------- |
+| 1 bit Premiumness + 15 bits Neighborhood number |
 
 ### EVM WORD
 
-| Land type 1 | Land type 2 | Land type 3 | Land type 4 | Land type 5 | …   | Land type 28 | Land type 29 | Land type 30 | Land type 31 | Land type 32 |
+| Land type 1 | Land type 2 | Land type 3 | Land type 4 | Land type 5 | …   | Land type 12 | Land type 13 | Land type 14 | Land type 15 | Land type 16 |
 | ----------- | ----------- | ----------- | ----------- | ----------- | --- | ------------ | ------------ | ------------ | ------------ | ------------ |
 
 ### Neighborhood Name
@@ -80,7 +80,7 @@ To update the metadata during an initial import or for a quad (see:
    metadata in EVM words ( see: [Implementation](#implementation) ).
 2. Calculate the new raw EVM words by changing only the right bytes of metadata
    that needs to be updated, taking into account that each EVM word contains
-   metadata for 32 tokens.
+   metadata for 16 tokens.
 3. Call `batchSetMetadata` to overwrite the metadata.
 
 The `updateMetadata` function in the following script is an example on how to do
@@ -155,7 +155,7 @@ export async function updateMetadata(
 function BITS_PER_LAND() external view returns (uint256)
 ```
 
-bits (8) of information stored for each land
+bits (16) of information stored for each land
 
 #### Returns
 
@@ -195,7 +195,7 @@ amount of land information that can be stored in one EVM word
 function LAND_MASK() external view returns (uint256)
 ```
 
-used to mask the 8 bits of information stored per land
+used to mask the 16 bits of information stored per land
 
 #### Returns
 
@@ -251,7 +251,7 @@ value returned when the neighborhood is not set yet.
 function batchGetMetadata(uint256[] tokenIds) external view returns (struct LandMetadataRegistry.BatchSetData[])
 ```
 
-return the metadata of 32 lands at once
+return the metadata of 16 lands at once
 
 _used to debug, extracting a lot of information that must be unpacked at once._
 

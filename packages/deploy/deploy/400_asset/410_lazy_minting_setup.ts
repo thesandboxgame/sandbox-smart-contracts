@@ -1,5 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -46,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const exchangeAddress = await read('AssetCreate', 'getExchangeContract');
+  const exchangeAddress = await read('AssetCreate', 'exchangeContract');
   if (exchangeAddress !== exchangeContract.address) {
     await catchUnknownSigner(
       execute(
@@ -61,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const authValidatorAddress = await read('AssetCreate', 'getAuthValidator');
+  const authValidatorAddress = await read('AssetCreate', 'authValidator');
   if (authValidatorAddress !== AuthSuperValidatorContract.address) {
     await catchUnknownSigner(
       execute(
@@ -141,5 +142,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 
-func.tags = ['AssetCreate_upgrade', 'AssetCreate_lazy_setup'];
+func.tags = [
+  'AssetCreate_upgrade',
+  'AssetCreate_lazy_setup',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_PROD,
+  DEPLOY_TAGS.L2_TEST,
+];
 func.dependencies = ['AuthSuperValidator_v2'];

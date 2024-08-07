@@ -44,6 +44,161 @@ where:
   executed ( see:[hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
   configuration)
 
+## Deployment Tags Documentation
+
+This sections aims to clarify the use of deployment tags within our deploy
+package. The configured enum `DEPLOY_TAGS` helps us manage deployment files
+effectively, allowing us to easier identify which scripts are meant to run on
+specific networks.
+
+### DEPLOY_TAGS Enum
+
+```typescript
+export enum DEPLOY_TAGS {
+  L1 = 'L1', // Layer one networks like Ethereum mainnet, Sepolia
+  L1_PROD = 'L1-prod', // Layer one production networks like Ethereum mainnet
+  L1_TEST = 'L1-test', // Layer one test networks like Goerli
+  L2 = 'L2', // Layer two networks like Polygon, Mumbai
+  L2_PROD = 'L2-prod', // Layer two production networks like Polygon
+  L2_TEST = 'L2-test', // Layer two test networks like Mumbai
+}
+```
+
+These tags help distinguish which scripts are written for L1 or L2 networks and
+which should only run on test networks because they are mocks or supplementary
+scripts.
+
+### Networks Configuration
+
+Here is an example configuration of networks within our Hardhat project that
+uses these tags:
+
+```typescript
+const networks = {
+  [DEPLOY_NETWORKS.ETH_GOERLI]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.MUMBAI]: DEPLOY_NETWORKS.MUMBAI,
+    },
+  },
+  [DEPLOY_NETWORKS.ETH_SEPOLIA]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.AMOY]: DEPLOY_NETWORKS.AMOY,
+      [DEPLOY_NETWORKS.BASE_SEPOLIA]: DEPLOY_NETWORKS.BASE_SEPOLIA,
+      [DEPLOY_NETWORKS.BSC_TESTNET]: DEPLOY_NETWORKS.BSC_TESTNET,
+    },
+  },
+  // other network configurations...
+};
+```
+
+## Usage Guidelines
+
+### When to Add Tags
+
+1. **L1 Networks (Layer 1)**
+
+   - **L1**: General tag for scripts intended to run on any Layer 1 network.
+   - **L1_PROD**: Use for scripts meant only for Layer 1 production networks
+     (e.g., Ethereum mainnet).
+   - **L1_TEST**: Tag scripts intended for Layer 1 test networks (e.g., Goerli,
+     Sepolia).
+
+2. **L2 Networks (Layer 2)**
+
+   - **L2**: General tag for scripts intended to run on any Layer 2 network.
+   - **L2_PROD**: Use for scripts meant only for Layer 2 production networks
+     (e.g., Polygon).
+   - **L2_TEST**: Tag scripts intended for Layer 2 test networks (e.g., Mumbai).
+
+### Example Scenarios
+
+1. **Deploying a Mock Contract on Amoy**
+
+   - If you have a mock contract that should only be deployed on test networks
+     for testing purposes, tag the script with `L2` and `L2_TEST`.
+   - Use the `DEPLOY_NETWORKS` enum to specify to which network the script was
+     ran on.
+   - Example:
+
+     ```typescript
+     // deploy_mocks/deployMockContract.ts
+     const func: DeployFunction = async function (
+       hre: HardhatRuntimeEnvironment
+     ) {
+       const {deployments, getNamedAccounts} = hre;
+       const {deploy} = deployments;
+
+       await deploy('MockContract', {
+         from: deployer,
+         log: true,
+       });
+     };
+
+     func.tags = [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST];
+     ```
+
+2. **Deploying a Mainnet-Only Script**
+
+   - If you have a script that should only run on the Ethereum mainnet, tag it
+     with `L1` and `L1_PROD` along with the `ETH_MAINNET` network tag.
+   - Example:
+
+     ```typescript
+     // deploy/deployMainnetOnlyContract.ts
+     const func: DeployFunction = async function (
+       hre: HardhatRuntimeEnvironment
+     ) {
+       const {deployments, getNamedAccounts} = hre;
+       const {deploy} = deployments;
+
+       await deploy('MainnetOnlyContract', {
+         from: deployer,
+         log: true,
+       });
+     };
+
+     func.tags = [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD];
+     ```
+
+3. **Deploying to Both L1 and L2 Networks**
+
+   - If you have a script that should deploy to both Layer 1 and Layer 2
+     networks, use the general tags `L1` and `L2`.
+   - Example:
+
+     ```typescript
+     // deploy/deployUniversalContract.ts
+     const func: DeployFunction = async function (
+       hre: HardhatRuntimeEnvironment
+     ) {
+       const {deployments, getNamedAccounts} = hre;
+       const {deploy} = deployments;
+
+       await deploy('UniversalContract', {
+         from: deployer,
+         log: true,
+       });
+     };
+
+     func.tags = [
+       DEPLOY_TAGS.L1,
+       DEPLOY_TAGS.L2,
+       DEPLOY_TAGS.L1_PROD,
+       DEPLOY_TAGS.L2_PROD,
+       DEPLOY_TAGS.L1_TEST,
+       DEPLOY_TAGS.L2_TEST,
+     ];
+     ```
+
+## Conclusion
+
+By following these guidelines and using the appropriate tags, you can ensure
+that our deployment scripts are managed correctly and deployed in the intended
+environments. This not only helps maintain the clarity of deployment processes
+but also prevents accidental deployments to unintended networks.
+
 ## Upgrades
 
 1. Modify smart contracts, add tests, and update documentation in the respective
