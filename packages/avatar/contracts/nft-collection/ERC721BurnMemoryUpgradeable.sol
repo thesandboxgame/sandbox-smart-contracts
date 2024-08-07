@@ -6,28 +6,26 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/toke
 
 /**
  * @title ERC721BurnMemoryUpgradeable
- * @author qed.team x The Sandbox
- * @notice Baseline ERC721 contract to be used by the AvatarCollection contract
- * - provides the "burn memory" functionality:
- *     - keeping track of who burned what token for faster in-game gating checks
+ * @author The Sandbox
+ * @custom:security-contact contact-blockchain@sandbox.game
+ * @notice Baseline ERC721 contract to be used by the NFTCollection contract
+ * @dev provides the "burn memory" functionality: keeping track of who burned what token
  */
 abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
-    /*//////////////////////////////////////////////////////////////
-                           Global state variables
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice tokenId to burner mapping; saves who burned a specific token
+    /**
+     * @notice tokenId to burner mapping; saves who burned a specific token
+     */
     mapping(uint256 => address) public burner;
 
-    /// @notice burner to list of burned tokens mapping; to see what tokens who burned
+    /**
+     * @notice burner to list of burned tokens mapping; to see what tokens who burned
+     */
     mapping(address => uint256[]) public burnedTokens;
 
-    /// @notice flag that gates burning
+    /**
+      * @notice flag that gates burning (enabling/disabling burning)
+      */
     bool public isBurnEnabled;
-
-    /*//////////////////////////////////////////////////////////////
-                                Events
-    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice event emitted when a token was burned
@@ -49,40 +47,28 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      */
     event TokenBurningDisabled(address indexed operator);
 
-    /*//////////////////////////////////////////////////////////////
-                    External and public functions
-    //////////////////////////////////////////////////////////////*/
-
     /**
      * @notice enables burning of tokens
-     * @dev must be inherited if access control is to be added
-     *      reverts if burning already enabled
      * @custom:event TokenBurningEnabled
      */
     function _enableBurning() internal {
         require(!isBurnEnabled, "Burning already enabled");
         isBurnEnabled = true;
-
         emit TokenBurningEnabled(_msgSender());
     }
 
     /**
      * @notice disables burning of tokens
-     * @dev must be inherited if access control is to be added
-     *      reverts if burning already disabled
      * @custom:event TokenBurningDisabled
      */
     function _disableBurning() internal {
         require(isBurnEnabled, "Burning already disabled");
         isBurnEnabled = false;
-
         emit TokenBurningDisabled(_msgSender());
     }
 
     /**
      * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
-     * @dev See {ERC721EnumerableUpgradeable-_burn}.
-     *      Reverts if burning is not enabled
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
@@ -100,9 +86,8 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
 
     /**
      * @notice Returns the burner of the `tokenId`
-     * @dev Does NOT revert if token was not burned/doesn't exist
      * @param tokenId the tokenId to be checked who burned it
-     * @return the address of who burned the indicated token ID
+     * @return the address of who burned the indicated token ID or zero if the token wasn't minted or burned yet.
      */
     function burnerOf(uint256 tokenId) external view returns (address) {
         return burner[tokenId];
@@ -111,7 +96,7 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
     /**
      * @notice Checks if the indicated owner had burned tokens
      * @param previousOwner the owner to check for burned tokens
-     * @return if the address burned any tokens
+     * @return true if the address burned any tokens
      */
     function didBurnTokens(address previousOwner) external view returns (bool) {
         return burnedTokens[previousOwner].length != 0;
