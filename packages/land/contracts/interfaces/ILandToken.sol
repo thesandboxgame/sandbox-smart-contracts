@@ -46,4 +46,8 @@ interface ILandToken {
     /// @param y y coordinate
     /// @return does the LAND exist
     function exists(uint256 size, uint256 x, uint256 y) external view returns (bool);
+
+    /// @notice total width of the map
+    /// @return width
+    function width() external pure returns (uint256);
 }
