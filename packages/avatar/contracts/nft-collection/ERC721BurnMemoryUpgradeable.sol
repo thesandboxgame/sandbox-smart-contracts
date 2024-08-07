@@ -81,7 +81,7 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
         burner[tokenId] = sender;
         // @dev TODO: if we don't remove this code, check if we want sender or owner.
         burnedTokens[sender].push(tokenId);
-        emit TokenBurned(_msgSender(), tokenId, owner);
+        emit TokenBurned(sender, tokenId, owner);
     }
 
     /**
