@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.26;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
 

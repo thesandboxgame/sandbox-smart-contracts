@@ -443,6 +443,7 @@ const networks = {
 };
 
 const compilers = [
+  '0.8.26',
   '0.8.23',
   '0.8.21',
   '0.8.19',
