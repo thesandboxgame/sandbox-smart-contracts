@@ -87,7 +87,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
         }
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer.
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param tokenId The id of the token.
@@ -324,8 +324,8 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
 
     /// @notice Add tokens to the owner balance
     /// @param who the owner of the token
-    /// @param val how must to add to the owner balance
-    /// @dev we can use unchecked becase there is a limited number of lands 408x408
+    /// @param val how much to add to the owner's balance
+    /// @dev we can use unchecked because there is a limited number of lands 408x408
     function _addNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
             _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) + val);
@@ -334,15 +334,15 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
 
     /// @notice Subtract tokens to the owner balance
     /// @param who the owner of the token
-    /// @param val how must to subtract to the owner balance
-    /// @dev we can use unchecked becase there is a limited number of lands 408x408
+    /// @param val how much to subtract from the owner's balance
+    /// @dev we can use unchecked because there is a limited number of lands 408x408
     function _subNumNFTPerAddress(address who, uint256 val) internal {
         unchecked {
             _writeNumNFTPerAddress(who, _readNumNFTPerAddress(who) - val);
         }
     }
 
-    /// @notice Move balance between to users
+    /// @notice Move balance between two users
     /// @param from address to subtract from
     /// @param to address to add from
     /// @param quantity how many tokens to move
@@ -388,7 +388,7 @@ abstract contract ERC721BaseToken is IERC721, IERC721BatchOps, IERC721Errors, IE
     /// @return true if the operator has access
     function _isOperatorForAll(address owner, address operator) internal view virtual returns (bool);
 
-    /// @notice Let an operator to access to all the tokens of a owner
+    /// @notice Provides an operator access to all the tokens of an owner
     /// @param owner that enabled the operator
     /// @param operator address to check if it was enabled
     /// @param enabled if true give access to the operator, else disable it

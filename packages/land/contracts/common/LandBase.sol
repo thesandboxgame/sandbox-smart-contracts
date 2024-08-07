@@ -8,6 +8,9 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
+import {ILandToken} from "../interfaces/ILandToken.sol";
+import {IQuad} from "../interfaces/IQuad.sol";
+import {ILandMetadataRegistry} from "../interfaces/ILandMetadataRegistry.sol";
 import {IERC721BatchOps} from "../interfaces/IERC721BatchOps.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 import {OperatorFiltererUpgradeable} from "../common/OperatorFiltererUpgradeable.sol";
@@ -20,7 +23,9 @@ import {LandBaseToken} from "./LandBaseToken.sol";
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice LAND contract
-/// @dev LAND contract implements ERC721, quad and marketplace filtering functionalities
+/// @dev LAND contract implements ERC721, quads, metadata, royalties and marketplace filtering functionalities.
+/// @dev The contract also implements EIP173 because it is needed by some marketplaces. The owner() doesn't have
+/// @dev any privileged roles within the contract. It can be set by the admin to any value.
 abstract contract LandBase is
     LandBaseToken,
     Initializable,
@@ -36,7 +41,7 @@ abstract contract LandBase is
         _disableInitializers();
     }
 
-    /// @notice Initializes the contract with the meta-transaction contract, admin & royalty-manager
+    /// @notice Initializes the contract admin
     /// @param admin Admin of the contract
     function initialize(address admin) external initializer {
         // We must be able to initialize the admin if this is a fresh deploy, but we want to
@@ -98,6 +103,9 @@ abstract contract LandBase is
 
     /// @notice Set the address of the new owner of the contract
     /// @param newOwner address of new owner
+    /// @dev This owner doesn't have any privileged role within this contract
+    /// @dev It is set by the admin to comply with EIP173 which is needed by some marketplaces
+    /// @dev Even when set to address(0) ownership is never permanently renounced the admin can always set any value
     function transferOwnership(address newOwner) external onlyAdmin {
         _transferOwnership(newOwner);
     }
@@ -114,7 +122,7 @@ abstract contract LandBase is
         _approveFor(sender, operator, tokenId);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
+    /// @notice Set the approval for an operator to manage all the tokens of the msgSender
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
     function setApprovalForAll(
@@ -124,7 +132,7 @@ abstract contract LandBase is
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Set the approval for an operator to manage all the tokens of the sender
+    /// @notice Set the approval for an operator to manage all the tokens of the sender (may differ from msgSender)
     /// @param sender The address giving the approval
     /// @param operator The address receiving the approval
     /// @param approved The determination of the approval
@@ -165,7 +173,7 @@ abstract contract LandBase is
         _batchTransferFrom(from, to, ids, data, false);
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer
     /// @param from The sender of the token
     /// @param to The recipient of the token
     /// @param tokenId The id of the token
@@ -173,7 +181,7 @@ abstract contract LandBase is
         _safeTransferFrom(from, to, tokenId, "");
     }
 
-    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer
     /// @param from The sender of the token
     /// @param to The recipient of the token
     /// @param tokenId The id of the token
@@ -212,6 +220,10 @@ abstract contract LandBase is
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId ||
             interfaceId == type(IERC173).interfaceId ||
-            interfaceId == type(IERC2981).interfaceId;
+            interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == type(ILandToken).interfaceId ||
+            interfaceId == type(ILandToken).interfaceId ^ type(IQuad).interfaceId ||
+            interfaceId == type(IQuad).interfaceId ||
+            interfaceId == type(ILandMetadataRegistry).interfaceId;
     }
 }

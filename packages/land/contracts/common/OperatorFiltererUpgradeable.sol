@@ -5,11 +5,11 @@ pragma solidity 0.8.23;
 import {IOperatorFilterRegistry} from "../interfaces/IOperatorFilterRegistry.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
-///@title OperatorFiltererUpgradeable
+/// @title OperatorFiltererUpgradeable
 /// @author The Sandbox
 /// @custom:security-contact contact-blockchain@sandbox.game
-///@notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
-///@dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
+/// @notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
+/// @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
 abstract contract OperatorFiltererUpgradeable is Context {
     /// @notice emitted when a registry is set
     /// @param registry address of the registry to set
@@ -23,15 +23,17 @@ abstract contract OperatorFiltererUpgradeable is Context {
     /// @notice the caller is not the operator
     error OperatorNotAllowed();
 
+    /// @notice Used in approval operations to check if the operator is allowed to call this contract
+    /// @param operator The address receiving the approval
     modifier onlyAllowedOperatorApproval(address operator) virtual {
         _checkIsOperatorAllowed(address(this), operator);
         _;
     }
 
+    /// @notice Used in transfer from operations to check if the sender of the token is allowed to call this contract
+    /// @param from the sender of the token
     modifier onlyAllowedOperator(address from) virtual {
-        IOperatorFilterRegistry registry = _readOperatorFilterRegistry();
-        // Check registry code length to facilitate testing in environments without a deployed registry.
-        // Allow spending tokens from addresses with balance
+        // Allow spending tokens from addresses with balance (from == _msgSender())
         // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
         // from an EOA.
         if (from != _msgSender()) {

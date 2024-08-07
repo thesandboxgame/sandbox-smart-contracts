@@ -110,8 +110,8 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
     it('should revert when token does not exist', async function () {
       const {LandAsAdmin, deployer, landAdmin} = await loadFixture(setupLand);
       await expect(LandAsAdmin.transferQuad(landAdmin, deployer, 1, 0, 0, '0x'))
-        .to.be.revertedWithCustomError(LandAsAdmin, 'InvalidCoordinates')
-        .withArgs(1, 0, 0);
+        .to.be.revertedWithCustomError(LandAsAdmin, 'NotOwner')
+        .withArgs(0, 0);
     });
 
     it('should revert for transfer Quad of zero size', async function () {
@@ -344,8 +344,8 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           await expect(
             LandContract.transferQuad(other, deployer, 1, 0, 0, bytes),
           )
-            .to.be.revertedWithCustomError(LandAsOther, 'InvalidCoordinates')
-            .withArgs(1, 0, 0);
+            .to.be.revertedWithCustomError(LandAsOther, 'NotOwner')
+            .withArgs(0, 0);
         });
 
         it('should not transfer burned quads', async function () {
@@ -396,8 +396,8 @@ export function shouldCheckTransferQuad(setupLand, Contract: string) {
           await expect(
             LandContract.transferQuad(deployer, other, 1, 0, 0, bytes),
           )
-            .to.be.revertedWithCustomError(LandContract, 'InvalidCoordinates')
-            .withArgs(1, 0, 0);
+            .to.be.revertedWithCustomError(LandContract, 'NotOwner')
+            .withArgs(0, 0);
         });
 
         it('should not transfer burned quads', async function () {
