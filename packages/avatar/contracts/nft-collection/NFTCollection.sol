@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.26;
 
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/Ownable2StepUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
-import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
-import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
-import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/common/ERC2981Upgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts-0.8.13/utils/cryptography/ECDSA.sol";
+import {IERC20} from "@openzeppelin/contracts-0.8.13/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts-0.8.13/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts-0.8.13/token/ERC20/utils/SafeERC20.sol";
 import {IERC4906} from "../common/IERC4906.sol";
 import {UpdatableOperatorFiltererUpgradeable} from "./UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "./ERC2771HandlerUpgradeable.sol";
@@ -493,11 +493,9 @@ IERC4906
             SafeERC20.safeTransferFrom(IERC20(_msgSender()), _wallet, mintTreasury, _price);
         }
 
-        for (uint256 i; i < _amount;) {
+        for (uint256 i; i < _amount; i++) {
             // @dev start with tokenId = 1
             _safeMint(_wallet, totalSupply + i + 1);
-
-        unchecked {++i;}
         }
         waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
         waveTotalMinted += _amount;
@@ -518,15 +516,13 @@ IERC4906
 
         require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
 
-        for (uint256 i; i < _amount;) {
+        for (uint256 i; i < _amount; i++) {
             address _wallet = _wallets[i];
             require(_checkLimitNotReached(_wallet, 1), "NFTCollection: max allowed");
             // @dev safeMint already checks the destination address
             // @dev start with tokenId = 1
             _safeMint(_wallet, totalSupply + i + 1);
             waveOwnerToClaimedCounts[_wallet][indexWave - 1] += 1;
-
-        unchecked {++i;}
         }
         waveTotalMinted += _amount;
         totalSupply += _amount;
