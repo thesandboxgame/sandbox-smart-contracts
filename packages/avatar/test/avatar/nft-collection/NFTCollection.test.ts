@@ -43,10 +43,10 @@ describe('NFTCollection', function () {
     );
   });
 
-  it('setAllowlistMint sets appropriate data', async function () {
+  it('setAllowListMint sets appropriate data', async function () {
     const {collectionContractAsOwner} = await setupNFTCollectionContract();
 
-    await collectionContractAsOwner.setAllowlistMint();
+    await collectionContractAsOwner.setAllowListMint();
 
     const expectedWaveMaxTokens = await collectionContractAsOwner.maxSupply();
     assert.equal(
