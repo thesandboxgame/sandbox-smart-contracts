@@ -5,13 +5,13 @@ pragma solidity 0.8.26;
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
 
 /**
-* @dev see: https://github.com/ProjectOpenSea/operator-filter-registry/tree/main
-*/
+ * @dev see: https://github.com/ProjectOpenSea/operator-filter-registry/tree/main
+ */
 interface IOperatorFilterRegistry {
     /**
-    * @notice Returns true if an address has registered
-    * @param addr the address to check if it is registered
-    */
+     * @notice Returns true if an address has registered
+     * @param addr the address to check if it is registered
+     */
     function isRegistered(address addr) external returns (bool);
 
     /**
@@ -46,53 +46,53 @@ interface IOperatorFilterRegistry {
 }
 
 /**
-* @title OperatorFiltererUpgradeable
-* @author The Sandbox
-* @custom:security-contact contact-blockchain@sandbox.game
-* @notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
-* @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
-*/
+ * @title UpdatableOperatorFiltererUpgradeable
+ * @author The Sandbox
+ * @custom:security-contact contact-blockchain@sandbox.game
+ * @notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
+ * @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
+ */
 abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
 
     /**
-    * @notice the registry filter
-    */
+     * @notice the registry filter
+     */
     IOperatorFilterRegistry public operatorFilterRegistry;
 
     /**
-    * @notice emitted when a registry is set
-    * @param operator the sender of the transaction
-    * @param registry address of the registry to set
-    */
+     * @notice emitted when a registry is set
+     * @param operator the sender of the transaction
+     * @param registry address of the registry to set
+     */
     event OperatorRegistrySet(address indexed operator, address indexed registry);
 
     /**
-    * @notice emitted when the contract is registered into the registry
-    * @param operator the sender of the transaction
-    * @param subscriptionOrRegistrant address to subscribe or copy entries from
-    * @param subscribe should it subscribe
-    */
+     * @notice emitted when the contract is registered into the registry
+     * @param operator the sender of the transaction
+     * @param subscriptionOrRegistrant address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
     event ContractRegistered(address indexed operator, address indexed subscriptionOrRegistrant, bool subscribe);
 
     /**
-    * @notice the caller is not the operator
-    * @param operator that does the call
-    */
+     * @notice the caller is not the operator
+     * @param operator that does the call
+     */
     error OperatorNotAllowed(address operator);
 
     /**
-    * @notice Used in approval operations to check if the operator is allowed to call this contract
-    * @param operator The address receiving the approval
-    */
+     * @notice Used in approval operations to check if the operator is allowed to call this contract
+     * @param operator The address receiving the approval
+     */
     modifier onlyAllowedOperatorApproval(address operator) virtual {
         _checkIsOperatorAllowed(address(this), operator);
         _;
     }
 
     /**
-    * @notice Used in transfer from operations to check if the sender of the token is allowed to call this contract
-    * @param from the sender of the token
-    */
+     * @notice Used in transfer from operations to check if the sender of the token is allowed to call this contract
+     * @param from the sender of the token
+     */
     modifier onlyAllowedOperator(address from) virtual {
         // Allow spending tokens from addresses with balance (from == _msgSender())
         // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred
@@ -105,10 +105,10 @@ abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
 
 
     /**
-    * @notice Register this contract into the registry
-    * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
-    * @param subscribe should it subscribe
-    */
+     * @notice Register this contract into the registry
+     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         IOperatorFilterRegistry registry = operatorFilterRegistry;
         if (address(registry).code.length > 0) {
@@ -128,19 +128,19 @@ abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
     }
 
     /**
-    * @notice sets filter registry address deployed in test
-    * @param registry the address of the registry
-    */
+     * @notice sets filter registry address deployed in test
+     * @param registry the address of the registry
+     */
     function _setOperatorRegistry(address registry) internal {
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
         emit OperatorRegistrySet(_msgSender(), registry);
     }
 
     /**
-    * @notice Check if the operator is allowed for the given registrant
-    * @param registrant address of the registrant
-    * @param operator operator address to check
-    */
+     * @notice Check if the operator is allowed for the given registrant
+     * @param registrant address of the registrant
+     * @param operator operator address to check
+     */
     function _checkIsOperatorAllowed(address registrant, address operator) internal view {
         // Check registry code length to facilitate testing in environments without a deployed registry.
         IOperatorFilterRegistry registry = operatorFilterRegistry;
@@ -155,4 +155,6 @@ abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
             revert OperatorNotAllowed(operator);
         }
     }
+
+    uint256[50] private __gap;
 }
