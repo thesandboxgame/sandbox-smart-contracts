@@ -629,6 +629,24 @@ IERC4906
     }
 
     /**
+     * @notice sets filter registry address deployed in test
+     * @param registry the address of the registry
+     */
+    function setOperatorRegistry(address registry) external virtual onlyOwner {
+        _setOperatorRegistry(registry);
+    }
+
+    /**
+     * @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
+     * @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+     * @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+     */
+    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyOwner {
+        require(subscriptionOrRegistrantToCopy != address(0), "invalid address");
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+    
+    /**
      * @notice update the treasury address
      * @custom:event {TreasurySet}
      * @param _treasury new treasury address to be saved
