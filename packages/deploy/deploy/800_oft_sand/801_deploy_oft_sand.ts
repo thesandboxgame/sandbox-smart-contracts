@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, sandAdmin, sandExecutionAdmin} = await getNamedAccounts();
 
   const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
-  const EndpointV2 = await deployments.get('EndPointV2');
+  const EndpointV2 = await deployments.get('EndpointV2');
 
   await deploy('OFTSand', {
     from: deployer,
