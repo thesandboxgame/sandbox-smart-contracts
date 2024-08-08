@@ -18,6 +18,9 @@ const func: DeployFunction = async function (
   } else if (hre.network.name == 'bscTestnet') {
     eidEthereum = process.env[`EID_${'SEPOLIA'}`];
     eidBase = process.env[`EID_${'BASESEPOLIA'}`];
+  } else if (hre.network.name == 'hardhat') {
+    eidEthereum = 0;
+    eidBase = 0;
   } else {
     throw new Error('Cannot find EID for network');
   }
