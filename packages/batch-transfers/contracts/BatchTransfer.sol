@@ -4,16 +4,24 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "hardhat/console.sol";
 
 /// @custom:security-contact contact-blockchain@sandbox.game
 contract BatchTransfer is AccessControl {
+    /// @notice The role that allows an address to use the contract
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
-    constructor(address defaultAdmin) {
-        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+    /// Grant the contract deployer the default admin role
+    constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    /// @notice Batch transfer ERC721 and ERC1155 tokens
+    /// @param contracts The addresses of the contracts
+    /// @param recipients The addresses of the recipients
+    /// @param tokenIds The token IDs
+    /// @param amounts The amounts of tokens
+    /// @param isERC1155 Whether the token is ERC1155 or not
+    /// @dev The arrays must have the same length
     function batchTransfer(
         address[] calldata contracts,
         address[][] calldata recipients,
