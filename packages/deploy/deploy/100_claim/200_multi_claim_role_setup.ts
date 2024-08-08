@@ -1,5 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -29,5 +30,11 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['SignedMultiGiveaway', 'SignedMultiGiveaway_role_setup', 'L2'];
+func.tags = [
+  'SignedMultiGiveaway',
+  'SignedMultiGiveaway_role_setup',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_PROD,
+  DEPLOY_TAGS.L2_TEST,
+];
 func.dependencies = ['SignedMultiGiveaway_deploy'];

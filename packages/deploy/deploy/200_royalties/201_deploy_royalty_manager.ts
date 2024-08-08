@@ -1,6 +1,7 @@
+import {ZeroAddress} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ZeroAddress} from 'ethers';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 export const ROYALTY_SPLIT = 5000;
 
@@ -45,5 +46,11 @@ const func: DeployFunction = async function (
   });
 };
 export default func;
-func.tags = ['RoyaltyManager', 'RoyaltyManager_deploy', 'L2'];
+func.tags = [
+  'RoyaltyManager',
+  'RoyaltyManager_deploy',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_PROD,
+  DEPLOY_TAGS.L2_TEST,
+];
 func.dependencies = ['RoyaltySplitter_deploy'];

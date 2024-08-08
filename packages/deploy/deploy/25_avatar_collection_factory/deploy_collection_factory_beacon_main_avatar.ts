@@ -1,6 +1,7 @@
 import {EventLog} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const implementationContractName = 'AvatarCollection';
 const beaconAlias = 'main-avatar';
@@ -106,6 +107,9 @@ export default func;
 func.tags = [
   'CollectionFactory',
   'CollectionFactory_deploy_beacon_main_avatar',
+  DEPLOY_TAGS.L2,
+  DEPLOY_TAGS.L2_PROD,
+  DEPLOY_TAGS.L2_TEST,
 ];
 func.dependencies = [
   'CollectionFactory_deploy',

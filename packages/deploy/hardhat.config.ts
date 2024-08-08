@@ -59,6 +59,7 @@ const importedPackages = {
     'src/solc_0.5/Land.sol',
     'src/solc_0.5/LandV2.sol',
     'src/solc_0.5/LandV3.sol',
+    'src/solc_0.5/Sand.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV1.sol',
     '/src/solc_0.8/polygon/child/land/PolygonLandV2.sol',
   ],
@@ -68,6 +69,11 @@ const importedPackages = {
     'contracts/LandMetadataRegistry.sol',
   ],
   '@sandbox-smart-contracts/batch-transfers': ['contracts/BatchTransfer.sol'],
+  '@sandbox-smart-contracts/oft-sand': [
+    'contracts/OFTAdapterForSand.sol',
+    'contracts/OFTSand.sol',
+    'contracts/mock/EndpointMock.sol',
+  ],
 };
 
 const namedAccounts = {
@@ -77,8 +83,10 @@ const namedAccounts = {
     polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+    bscTestnet: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+    baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -87,8 +95,10 @@ const namedAccounts = {
     polygon: '0xfD30a48Bc6c56E24B0ebF1B0117d750e2CFf7531',
     goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     amoy: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
   }, // can add super operators and change admin
 
   operationsAdmin: {
@@ -192,8 +202,10 @@ const namedAccounts = {
     polygon: 'sandAdmin',
     goerli: 'sandAdmin',
     sepolia: 'sandAdmin',
+    bscTestnet: 'sandAdmin',
     mumbai: 'sandAdmin',
     amoy: 'sandAdmin',
+    baseSepolia: 'sandAdmin',
   },
 
   landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -299,60 +311,122 @@ const namedAccounts = {
   lazyMintingTestAccount2: {
     default: 6,
   },
+  oftSender: {
+    sepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06', // admin on Sand sepolia
+    baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+    bscTestnet: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+  },
 };
 
-/**
- * TAGS:
- *  - mainnet -> production networks (you must pay for gas!!!)
- *  - L1      -> Layer 1 networks
- *  - L2      -> Layer 2 networks
- */
+export enum DEPLOY_NETWORKS {
+  HARDHAT = 'hardhat',
+  ETH_SEPOLIA = 'sepolia',
+  ETH_GOERLI = 'goerli',
+  ETH_MAINNET = 'mainnet',
+  BSC_TESTNET = 'bscTestnet',
+  BSC_MAINNET = 'bscMainnet',
+  AMOY = 'amoy',
+  POLYGON = 'polygon',
+  MUMBAI = 'mumbai',
+  BASE_SEPOLIA = 'baseSepolia',
+  BASE_MAINNET = 'base',
+}
+
+export enum DEPLOY_TAGS {
+  L1 = 'L1', // Layer one networks like Ethereum mainnet, sepolia
+  L1_PROD = 'L1-prod', // Layer one production networks like Ethereum mainnet
+  L1_TEST = 'L1-test', // Layer one test networks like Goerli
+  L2 = 'L2', // Layer two networks like Polygon, mumbai
+  L2_PROD = 'L2-prod', // Layer two production networks like Polygon
+  L2_TEST = 'L2-test', // Layer two test networks like Mumbai
+}
+
 const networks = {
-  hardhat: {
-    tags: ['L1', 'L2'],
+  [DEPLOY_NETWORKS.HARDHAT]: {
+    tags: [
+      DEPLOY_TAGS.L1,
+      DEPLOY_TAGS.L1_PROD,
+      DEPLOY_TAGS.L1_TEST,
+      DEPLOY_TAGS.L2,
+      DEPLOY_TAGS.L2_PROD,
+      DEPLOY_TAGS.L2_TEST,
+    ],
     deploy: ['deploy_mocks/', 'deploy/'],
     companionNetworks: {
-      l1: 'hardhat',
-      l2: 'hardhat',
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
     },
     blockGasLimit:
       parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
   },
-  goerli: {
-    tags: ['L1'],
+  [DEPLOY_NETWORKS.ETH_GOERLI]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
     // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
     companionNetworks: {
-      l2: 'mumbai',
+      [DEPLOY_NETWORKS.MUMBAI]: DEPLOY_NETWORKS.MUMBAI,
     },
   },
-  sepolia: {
-    tags: ['L1'],
+  [DEPLOY_NETWORKS.ETH_SEPOLIA]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
     companionNetworks: {
-      l2: 'amoy',
+      [DEPLOY_NETWORKS.AMOY]: DEPLOY_NETWORKS.AMOY,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
     },
   },
-  mainnet: {
-    tags: ['mainnet', 'L1'],
+  [DEPLOY_NETWORKS.ETH_MAINNET]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
     companionNetworks: {
-      l2: 'polygon',
+      [DEPLOY_NETWORKS.POLYGON]: DEPLOY_NETWORKS.POLYGON,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_MAINNET,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
     },
   },
-  mumbai: {
-    tags: ['L2'],
+  [DEPLOY_NETWORKS.BSC_TESTNET]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
     companionNetworks: {
-      l1: 'goerli',
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
     },
   },
-  amoy: {
-    tags: ['L2'],
+  [DEPLOY_NETWORKS.BSC_MAINNET]: {
+    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
     companionNetworks: {
-      l1: 'sepolia',
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
+      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_MAINNET,
     },
   },
-  polygon: {
-    tags: ['mainnet', 'L2'],
+  [DEPLOY_NETWORKS.MUMBAI]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
     companionNetworks: {
-      l1: 'mainnet',
+      [DEPLOY_NETWORKS.ETH_GOERLI]: DEPLOY_NETWORKS.ETH_GOERLI,
+    },
+  },
+  [DEPLOY_NETWORKS.AMOY]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
+    },
+  },
+  [DEPLOY_NETWORKS.POLYGON]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_PROD],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
+    },
+  },
+  [DEPLOY_NETWORKS.BASE_SEPOLIA]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
+    },
+  },
+  [DEPLOY_NETWORKS.BASE_MAINNET]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_PROD],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
+      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
     },
   },
 };

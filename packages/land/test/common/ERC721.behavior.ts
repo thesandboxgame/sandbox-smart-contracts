@@ -857,6 +857,26 @@ export function shouldCheckForERC721(setupLand, Contract: string) {
         expect(await LandAsOwner.supportsInterface('0x2a55205a')).to.be.true;
       });
 
+      it('claim to ILandToken interface combined with IQuad interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0xe906a607')).to.be.true;
+      });
+
+      it('claim to ILandToken interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0x3b18763a')).to.be.true;
+      });
+
+      it('claim to IQuad interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0xd21ed03d')).to.be.true;
+      });
+
+      it('claim to ILandMetadataRegistry interface', async function () {
+        const {LandAsOwner} = await loadFixture(setupLand);
+        expect(await LandAsOwner.supportsInterface('0x519cd8d9')).to.be.true;
+      });
+
       it('does not claim to support random interface', async function () {
         const {LandAsOwner} = await loadFixture(setupLand);
         expect(await LandAsOwner.supportsInterface('0x88888888')).to.be.false;
