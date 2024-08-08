@@ -3,10 +3,10 @@ import {ethers} from 'hardhat';
 import {MockERC721} from '../typechain-types/contracts/mocks/MockERC721';
 
 const runSetup = async () => {
-  const [deployer, operator] = await ethers.getSigners();
+  const [_, operator] = await ethers.getSigners();
 
   const BatchTransfer = await ethers.getContractFactory('BatchTransfer');
-  const batchTransferContract = await BatchTransfer.deploy(deployer.address);
+  const batchTransferContract = await BatchTransfer.deploy();
   const batchTransferContractAddress = await batchTransferContract.getAddress();
 
   // grant operator permission to transfer tokens
