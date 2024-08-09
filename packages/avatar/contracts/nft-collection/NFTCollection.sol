@@ -358,23 +358,23 @@ IERC4906
         require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "NFTCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
-        // @dev we don't need to set the owner to _msgSender, so, we don't call __Ownable_init
+        // @dev we don't want to set the owner to _msgSender, so, we don't call __Ownable_init
         _transferOwnership(_collectionOwner);
-        // owner is also initialized here
-        __ERC2771Handler_initialize(_initialTrustedForwarder);
-        __Pausable_init();
         __ERC2981_init();
+        __ERC2771Handler_initialize(_initialTrustedForwarder);
         __ERC721_init(_name, _symbol);
-        _setOperatorRegistry(_filterParams.registry);
-        _register(_filterParams.operatorFiltererSubscription,
+        __UpdatableOperatorFiltererUpgradeable_init(
+            _filterParams.registry,
+            _filterParams.operatorFiltererSubscription,
             _filterParams.operatorFiltererSubscriptionSubscribe);
+        __Pausable_init();
         baseTokenURI = _initialBaseURI;
         mintTreasury = _mintTreasury;
         signAddress = _signAddress;
         allowedToExecuteMint = IERC20(_allowedToExecuteMint);
         maxSupply = _maxSupply;
-        mintingDefaults = _mintingDefaults;
 
+        mintingDefaults = _mintingDefaults;
         emit DefaultMintingValuesSet(
             _msgSender(),
             _mintingDefaults.mintPrice,
@@ -645,7 +645,7 @@ IERC4906
         require(subscriptionOrRegistrantToCopy != address(0), "invalid address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
-    
+
     /**
      * @notice update the treasury address
      * @custom:event {TreasurySet}
