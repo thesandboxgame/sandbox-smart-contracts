@@ -55,7 +55,7 @@
         }
     },
     "dependencies": {
-        "@openzeppelin/contracts-upgradeable": "4.9.3"
+        "@openzeppelin/contracts-upgradeable": "4.9.6"
     },
     "devDependencies": {
         "@dlsl/hardhat-markup": "^1.0.0-rc.14",
