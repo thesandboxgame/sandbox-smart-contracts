@@ -2,6 +2,7 @@
 // solhint-disable one-contract-per-file
 pragma solidity 0.8.26;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable-0.8.13/proxy/utils/Initializable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
 
 /**
@@ -52,7 +53,7 @@ interface IOperatorFilterRegistry {
  * @notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
  * @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
  */
-abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
+abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
 
     /**
      * @notice the registry filter
@@ -101,6 +102,21 @@ abstract contract UpdatableOperatorFiltererUpgradeable is ContextUpgradeable {
             _checkIsOperatorAllowed(address(this), _msgSender());
         }
         _;
+    }
+
+    /**
+     * @notice initialization function in accordance with the upgradable pattern
+     * @param registry the address of the registry
+     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
+     * @param subscribe should it subscribe
+     */
+    function __UpdatableOperatorFiltererUpgradeable_init(
+        address registry,
+        address subscriptionOrRegistrantToCopy,
+        bool subscribe
+    ) internal onlyInitializing {
+        _setOperatorRegistry(registry);
+        _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
 
