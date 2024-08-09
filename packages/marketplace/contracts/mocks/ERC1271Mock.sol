@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
-import {IERC1271Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 /// @title ERC1271Mock Contract
 /// @dev implements the ERC1271 standard for signature validation
-contract ERC1271Mock is IERC1271Upgradeable {
+contract ERC1271Mock is IERC1271 {
     bool private returnSuccessfulValidSignature;
 
     /// @notice valid id signature

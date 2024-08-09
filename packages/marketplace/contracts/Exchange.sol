@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
-import {TransferManager, IRoyaltiesProvider} from "./TransferManager.sol";
+import {TransferManager, IRoyaltiesProvider, ILandToken} from "./TransferManager.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
 import {ExchangeCore} from "./ExchangeCore.sol";
 
@@ -36,6 +36,14 @@ contract Exchange is
     /// @notice Role for business addresses that can react to emergencies and pause.
     /// @return Hash for PAUSER_ROLE.
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+    /// @notice Role for TSB owned addresses that list TSB owned assets for sale, forces primary sales conditions.
+    /// @return Hash for TSB_SELLER_ROLE.
+    bytes32 public constant TSB_SELLER_ROLE = keccak256("TSB_SELLER_ROLE");
+
+    /// @notice Role for addresses that should be whitelisted from any marketplace fees including royalties.
+    /// @return Hash for FEE_WHITELIST_ROLE.
+    bytes32 public constant FEE_WHITELIST_ROLE = keccak256("FEE_WHITELIST_ROLE");
 
     /// @dev This protects the implementation contract from being initialized.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -112,6 +120,12 @@ contract Exchange is
         _setOrderValidatorContract(contractAddress);
     }
 
+    /// @notice Set the LAND contract address.
+    /// @param contractAddress New LAND contract address.
+    function setLandContract(ILandToken contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setLandContract(contractAddress);
+    }
+
     /// @notice Set the limit for matching orders.
     /// @param newMatchOrdersLimit New value for max orders that can be matched.
     function setMatchOrdersLimit(uint256 newMatchOrdersLimit) external onlyRole(EXCHANGE_ADMIN_ROLE) {
@@ -150,11 +164,18 @@ contract Exchange is
         _unpause();
     }
 
-    /// @dev Check if fees & royalties should be skipped for users with the EXCHANGE_ADMIN_ROLE.
+    /// @dev Check if fees & royalties should be skipped for users with the FEE_WHITELIST_ROLE.
     /// @param from Address to check.
     /// @return True if fees should be skipped, false otherwise.
     function _mustSkipFees(address from) internal view override returns (bool) {
-        return hasRole(EXCHANGE_ADMIN_ROLE, from);
+        return hasRole(FEE_WHITELIST_ROLE, from);
+    }
+
+    /// @dev Check if the address is a TSB seller, which forces primary sales conditions regardless if the seller is the creator of the token.
+    /// @param from Address to check.
+    /// @return True if the address is a TSB seller, false otherwise.
+    function _isTSBSeller(address from) internal view override returns (bool) {
+        return hasRole(TSB_SELLER_ROLE, from);
     }
 
     function _msgSender()

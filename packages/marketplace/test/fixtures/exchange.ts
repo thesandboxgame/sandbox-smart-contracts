@@ -50,6 +50,9 @@ export async function exchangeSetup() {
   const AssetMatcherAsDeployer = await LibAssetFactory.deploy();
   const AssetMatcherAsUser = AssetMatcherAsDeployer.connect(user);
 
+  const QuadHelperFactory = await ethers.getContractFactory('QuadHelper');
+  const QuadHelper = await QuadHelperFactory.deploy();
+
   return {
     ...royaltiesRegistry,
     ...orderValidator,
@@ -61,6 +64,7 @@ export async function exchangeSetup() {
     ExchangeContractAsDeployer,
     AssetMatcherAsDeployer,
     AssetMatcherAsUser,
+    QuadHelper,
     TrustedForwarder,
   };
 }
