@@ -53,7 +53,7 @@
     "@manifoldxyz/libraries-solidity": "^1.0.4",
     "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
     "@openzeppelin/contracts": "4.9.3",
-    "@openzeppelin/contracts-upgradeable": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.6",
     "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
     "@sandbox-smart-contracts/dependency-operator-filter": "1.0.1",
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
