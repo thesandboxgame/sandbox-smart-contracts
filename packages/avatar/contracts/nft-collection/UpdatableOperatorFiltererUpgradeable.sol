@@ -70,10 +70,18 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     /**
      * @notice emitted when the contract is registered into the registry
      * @param operator the sender of the transaction
+     * @param registry address of the registry to set
      * @param subscriptionOrRegistrant address to subscribe or copy entries from
      * @param subscribe should it subscribe
+     * @param isContract true if the current value of the registry is a contract
      */
-    event ContractRegistered(address indexed operator, address indexed subscriptionOrRegistrant, bool subscribe);
+    event ContractRegistered(
+        address indexed operator,
+        IOperatorFilterRegistry indexed registry,
+        address indexed subscriptionOrRegistrant,
+        bool subscribe,
+        bool isContract
+    );
 
     /**
      * @notice the caller is not the operator
@@ -127,7 +135,8 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
      */
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         IOperatorFilterRegistry registry = operatorFilterRegistry;
-        if (address(registry).code.length > 0) {
+        bool isContract = address(registry).code.length > 0;
+        if (isContract) {
             if (!registry.isRegistered(address(this))) {
                 if (subscribe) {
                     registry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
@@ -140,7 +149,7 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
                 }
             }
         }
-        emit ContractRegistered(_msgSender(), subscriptionOrRegistrantToCopy, subscribe);
+        emit ContractRegistered(_msgSender(), registry, subscriptionOrRegistrantToCopy, subscribe, isContract);
     }
 
     /**

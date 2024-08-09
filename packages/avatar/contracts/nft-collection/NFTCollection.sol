@@ -344,7 +344,6 @@ IERC4906
         require(bytes(_name).length != 0, "NFTCollection: name is empty");
         require(bytes(_symbol).length != 0, "NFTCollection: symbol is empty");
         require(_signAddress != address(0), "NFTCollection: sign address is zero address");
-        require(_initialTrustedForwarder != address(0), "NFTCollection: trusted forwarder is zero address");
         require(_mintTreasury != address(0), "NFTCollection: treasury is zero address");
         require(_isContract(_allowedToExecuteMint), "NFTCollection: executor address is not a contract");
         require(_maxSupply > 0, "NFTCollection: max supply should be more than 0");
@@ -361,7 +360,7 @@ IERC4906
         // @dev we don't want to set the owner to _msgSender, so, we don't call __Ownable_init
         _transferOwnership(_collectionOwner);
         __ERC2981_init();
-        __ERC2771Handler_initialize(_initialTrustedForwarder);
+        _setTrustedForwarder(_initialTrustedForwarder);
         __ERC721_init(_name, _symbol);
         __UpdatableOperatorFiltererUpgradeable_init(
             _filterParams.registry,
@@ -692,6 +691,15 @@ IERC4906
      */
     function setOperatorRegistry(address registry) external virtual onlyOwner {
         _setOperatorRegistry(registry);
+    }
+
+    /**
+     * @notice set the trusted forwarder
+     * @param forwarder the new trusted forwarder address
+     * @dev address(0) disables the forwarder
+     */
+    function setTrustedForwarder(address forwarder) external virtual onlyOwner {
+        _setTrustedForwarder(forwarder);
     }
 
     /**
