@@ -400,6 +400,7 @@ IERC4906
      * @custom:event {WaveSetup}
      */
     function setAllowListMint() external onlyOwner {
+        // @dev maxSupply <= totalSupply, see: _checkTotalNotReached
         _setupWave(maxSupply - totalSupply, mintingDefaults.maxAllowListTokensPerWallet, mintingDefaults.mintPrice);
     }
 
@@ -409,6 +410,7 @@ IERC4906
      * @custom:event {WaveSetup}
      */
     function setPublicMint() external onlyOwner {
+        // @dev maxSupply <= totalSupply, see: _checkTotalNotReached
         _setupWave(maxSupply - totalSupply, mintingDefaults.maxPublicTokensPerWallet, mintingDefaults.mintPrice);
     }
 
@@ -435,7 +437,8 @@ IERC4906
         _checkAndSetSignature({_address : _wallet, _signatureId : _signatureId, _signature : _signature});
 
         require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
-        require(_checkLimitNotReached(_wallet, _amount), "NFTCollection: max allowed");
+        require(_checkLimitPerWalletNotReached(_wallet, _amount), "NFTCollection: max allowed");
+        require(_checkTotalNotReached(_amount), "NFTCollection: max reached");
 
         uint256 _price = price(_amount);
         if (_price > 0) {
@@ -463,10 +466,11 @@ IERC4906
         require(_amount > 0, "NFTCollection: wallets length cannot be 0");
 
         require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
+        require(_checkTotalNotReached(_amount), "NFTCollection: max reached");
 
         for (uint256 i; i < _amount; i++) {
             address _wallet = _wallets[i];
-            require(_checkLimitNotReached(_wallet, 1), "NFTCollection: max allowed");
+            require(_checkLimitPerWalletNotReached(_wallet, 1), "NFTCollection: max allowed");
             // @dev safeMint already checks the destination address
             // @dev start with tokenId = 1
             _safeMint(_wallet, totalSupply + i + 1);
@@ -830,7 +834,11 @@ IERC4906
      * @return if can mint or not
      */
     function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
-        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
+        return _amount > 0
+        && _checkWaveNotComplete(_amount)
+        && _checkLimitPerWalletNotReached(_wallet, _amount)
+        && _checkTotalNotReached(_amount);
+
     }
 
     /**
@@ -1010,7 +1018,7 @@ IERC4906
      * @return if wave can mint the indicated amount
      */
     function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
-        return _amount > 0 && waveTotalMinted + _amount <= waveMaxTokensOverall;
+        return waveTotalMinted + _amount <= waveMaxTokensOverall;
     }
 
     /**
@@ -1019,12 +1027,18 @@ IERC4906
      * @param _amount number of tokens to mint
      * @return if amount can be safely minted
      */
-    function _checkLimitNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
-        return
-        waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet &&
-        totalSupply + _amount <= maxSupply;
+    function _checkLimitPerWalletNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
+        return waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet;
     }
 
+    /**
+     * @notice checks if the total supply was not reached
+     * @param _amount number of tokens to mint
+     * @return if amount can be safely minted
+     */
+    function _checkTotalNotReached(uint256 _amount) internal view returns (bool) {
+        return totalSupply + _amount <= maxSupply;
+    }
     /**
      * @notice actually updates the variables that store the personalization traits per token.
      * @dev no checks are done on input validations. Calling functions are expected to do them
