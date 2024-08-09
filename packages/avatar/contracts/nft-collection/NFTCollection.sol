@@ -533,22 +533,6 @@ IERC4906
     }
 
     /**
-     * @notice pauses the contract
-     * @dev reverts if not owner of the collection or if not un-paused
-     */
-    function pause() external onlyOwner {
-        super._pause();
-    }
-
-    /**
-     * @notice unpauses the contract
-     * @dev reverts if not owner of the collection or if not paused
-     */
-    function unpause() external onlyOwner {
-        super._unpause();
-    }
-
-    /**
      * @notice personalize token traits according to the provided personalization bit-mask
      * @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
      * @custom:event {Personalized}
@@ -629,21 +613,19 @@ IERC4906
     }
 
     /**
-     * @notice sets filter registry address deployed in test
-     * @param registry the address of the registry
+     * @notice pauses the contract
+     * @dev reverts if not owner of the collection or if not un-paused
      */
-    function setOperatorRegistry(address registry) external virtual onlyOwner {
-        _setOperatorRegistry(registry);
+    function pause() external onlyOwner {
+        super._pause();
     }
 
     /**
-     * @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
-     * @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
-     * @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+     * @notice unpauses the contract
+     * @dev reverts if not owner of the collection or if not paused
      */
-    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyOwner {
-        require(subscriptionOrRegistrantToCopy != address(0), "invalid address");
-        _register(subscriptionOrRegistrantToCopy, subscribe);
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 
     /**
@@ -704,7 +686,25 @@ IERC4906
         emit BatchMetadataUpdate(0, type(uint256).max);
     }
 
-    /***
+    /**
+     * @notice sets filter registry address deployed in test
+     * @param registry the address of the registry
+     */
+    function setOperatorRegistry(address registry) external virtual onlyOwner {
+        _setOperatorRegistry(registry);
+    }
+
+    /**
+     * @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
+     * @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
+     * @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+     */
+    function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyOwner {
+        require(subscriptionOrRegistrantToCopy != address(0), "invalid address");
+        _register(subscriptionOrRegistrantToCopy, subscribe);
+    }
+
+    /**
      * @notice Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
      * @param from The sender of the token.
      * @param to The recipient of the token.
@@ -726,7 +726,8 @@ IERC4906
         }
     }
 
-    /** @notice Transfer many tokens between 2 addresses.
+    /**
+     * @notice Transfer many tokens between 2 addresses.
      * @param from The sender of the token.
      * @param to The recipient of the token.
      * @param ids The ids of the tokens.
@@ -779,56 +780,6 @@ IERC4906
      */
     function resetTokenRoyalty(uint256 tokenId) external onlyOwner {
         _resetTokenRoyalty(tokenId);
-    }
-
-    /**
-     * @notice get the personalization of the indicated tokenID
-     * @param _tokenId the token ID to check
-     * @return the personalization data as uint256
-     */
-    function personalizationOf(uint256 _tokenId) external view returns (uint256) {
-        return personalizationTraits[_tokenId];
-    }
-
-    /**
-     * @notice check if the indicated wallet can mint the indicated amount
-     * @param _wallet wallet to be checked if it can mint
-     * @param _amount amount to be checked if can be minted
-     * @return if can mint or not
-     */
-    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
-        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
-    }
-
-    /**
-     * @notice get the price of minting the indicated number of tokens for the current wave
-     * @param _count the number of tokens to estimate mint price for
-     * @return price of minting all the tokens
-     */
-    function price(uint256 _count) public view virtual returns (uint256) {
-        return waveSingleTokenPrice * _count;
-    }
-
-    /**
-     * @notice helper automation function
-     * @return current chainID for the blockchain
-     */
-    function chain() external view returns (uint256) {
-        return block.chainid;
-    }
-
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override(ERC2981Upgradeable, ERC721Upgradeable)
-    returns (bool)
-    {
-        return ERC2981Upgradeable.supportsInterface(interfaceId)
-        || ERC721Upgradeable.supportsInterface(interfaceId);
     }
 
     /**
@@ -885,6 +836,56 @@ IERC4906
         bytes memory data
     ) public override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /**
+     * @notice get the personalization of the indicated tokenID
+     * @param _tokenId the token ID to check
+     * @return the personalization data as uint256
+     */
+    function personalizationOf(uint256 _tokenId) external view returns (uint256) {
+        return personalizationTraits[_tokenId];
+    }
+
+    /**
+     * @notice check if the indicated wallet can mint the indicated amount
+     * @param _wallet wallet to be checked if it can mint
+     * @param _amount amount to be checked if can be minted
+     * @return if can mint or not
+     */
+    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
+        return _checkWaveNotComplete(_amount) && _checkLimitNotReached(_wallet, _amount);
+    }
+
+    /**
+     * @notice get the price of minting the indicated number of tokens for the current wave
+     * @param _count the number of tokens to estimate mint price for
+     * @return price of minting all the tokens
+     */
+    function price(uint256 _count) public view virtual returns (uint256) {
+        return waveSingleTokenPrice * _count;
+    }
+
+    /**
+     * @notice helper automation function
+     * @return current chainID for the blockchain
+     */
+    function chain() external view returns (uint256) {
+        return block.chainid;
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC2981Upgradeable, ERC721Upgradeable)
+    returns (bool)
+    {
+        return ERC2981Upgradeable.supportsInterface(interfaceId)
+        || ERC721Upgradeable.supportsInterface(interfaceId);
     }
 
     /**
