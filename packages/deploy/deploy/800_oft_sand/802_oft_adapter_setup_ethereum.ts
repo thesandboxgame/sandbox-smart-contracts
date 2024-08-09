@@ -1,6 +1,7 @@
+import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ethers} from 'ethers';
+import {DEPLOY_NETWORKS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -11,22 +12,24 @@ const func: DeployFunction = async function (
 
   let eidBase, eidBsc;
 
-  if (hre.network.name == 'mainnnet') {
+  if (hre.network.name == 'mainnet') {
     eidBase = process.env[`EID_${'BASE'}`];
     eidBsc = process.env[`EID_${'BSCMAINNET'}`];
   } else if (hre.network.name == 'sepolia') {
     eidBase = process.env[`EID_${'BASESEPOLIA'}`];
     eidBsc = process.env[`EID_${'BSCTESTNET'}`];
-  } else {
+  } else if (hre.network.name == 'hardhat') {
     eidBsc = 0;
     eidBase = 0;
+  } else {
+    throw new Error('Cannot find EID for network');
   }
 
-  const hreBase = hre.companionNetworks.base;
+  const hreBase = hre.companionNetworks[DEPLOY_NETWORKS.BASE_MAINNET];
   const deploymentsBase = hreBase.deployments;
   const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
 
-  const hreBsc = hre.companionNetworks.bscMainnet;
+  const hreBsc = hre.companionNetworks[DEPLOY_NETWORKS.BSC_MAINNET];
   const deploymentsBsc = hreBsc.deployments;
   const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 

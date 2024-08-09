@@ -1,6 +1,7 @@
+import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ethers} from 'ethers';
+import {DEPLOY_NETWORKS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -17,30 +18,31 @@ const func: DeployFunction = async function (
   } else if (hre.network.name == 'baseSepolia') {
     eidEthereum = process.env[`EID_${'SEPOLIA'}`];
     eidBsc = process.env[`EID_${'BSCTESTNET'}`];
-  } else {
+  } else if (hre.network.name == 'hardhat') {
     eidEthereum = 0;
     eidBsc = 0;
+  } else {
+    throw new Error('Cannot find EID for network');
   }
 
-  const hreEthereum = hre.companionNetworks.mainnet;
+  const hreEthereum = hre.companionNetworks[DEPLOY_NETWORKS.ETH_MAINNET];
   const deploymentsEthereum = hreEthereum.deployments;
   const OFTAdapterForSand = await deploymentsEthereum.getOrNull(
     'OFTAdapterForSand'
   );
 
-  const hreBsc = hre.companionNetworks.bscMainnet;
+  const hreBsc = hre.companionNetworks[DEPLOY_NETWORKS.BSC_MAINNET];
   const deploymentsBsc = hreBsc.deployments;
   const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
 
   if (OFTAdapterForSand && OFTSandBsc) {
     const isPeerForEthereum = await read(
-      'OFTAdapterForSand',
+      'OFTSand',
       'isPeer',
       eidEthereum,
       ethers.zeroPadValue(OFTAdapterForSand.address, 32)
     );
     if (!isPeerForEthereum) {
-      // setting OFTAdapterForSand as peer to OFTSand(base) using eidEthereum
       await execute(
         'OFTSand',
         {from: deployer, log: true},
@@ -51,7 +53,7 @@ const func: DeployFunction = async function (
     }
 
     const isPeerForBsc = await read(
-      'OFTAdapterForSand',
+      'OFTSand',
       'isPeer',
       eidBsc,
       ethers.zeroPadValue(OFTSandBsc.address, 32)
