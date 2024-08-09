@@ -63,9 +63,10 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     /**
      * @notice emitted when a registry is set
      * @param operator the sender of the transaction
-     * @param registry address of the registry to set
+     * @param oldRegistry address of the old registry
+     * @param newRegistry address of the new registry to set
      */
-    event OperatorRegistrySet(address indexed operator, address indexed registry);
+    event OperatorRegistrySet(address indexed operator, IOperatorFilterRegistry indexed oldRegistry, address indexed newRegistry);
 
     /**
      * @notice emitted when the contract is registered into the registry
@@ -155,10 +156,11 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     /**
      * @notice sets filter registry address deployed in test
      * @param registry the address of the registry
+     * @dev address(0) disables the registry
      */
     function _setOperatorRegistry(address registry) internal {
+        emit OperatorRegistrySet(_msgSender(), operatorFilterRegistry, registry);
         operatorFilterRegistry = IOperatorFilterRegistry(registry);
-        emit OperatorRegistrySet(_msgSender(), registry);
     }
 
     /**

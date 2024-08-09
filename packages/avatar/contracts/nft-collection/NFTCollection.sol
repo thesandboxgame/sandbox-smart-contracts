@@ -61,19 +61,6 @@ IERC4906
     }
 
     /**
-     * @notice Structure used to group registry filter parameters in order to avoid stack too deep error
-     * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
-     * @param operatorFiltererSubscription subscription address to use as a template for
-     * @param operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
-     *                                              just copy entries from it
-     */
-    struct OpenseaRegistryFilterParameters {
-        address registry;
-        address operatorFiltererSubscription;
-        bool operatorFiltererSubscriptionSubscribe;
-    }
-
-    /**
      * @notice default minting price in full tokens (not WEI) when used, this must be
      *         multiplied by the token "allowedToExecuteMint" token decimals
      */
@@ -169,10 +156,6 @@ IERC4906
      * @param signAddress signer address that is allowed to create mint signatures
      * @param allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param registry filter registry to which to register with. For blocking operators that do not respect royalties
-     * @param operatorFiltererSubscription subscription address to use as a template for
-     * @param operatorFiltererSubscriptionSubscribe if to subscribe to the operatorFiltererSubscription address or
-     *                                               just copy entries from it
      */
     event ContractInitialized(
         string indexed baseURI,
@@ -181,10 +164,7 @@ IERC4906
         address mintTreasury,
         address signAddress,
         address allowedToExecuteMint,
-        uint256 maxSupply,
-        address registry,
-        address operatorFiltererSubscription,
-        bool operatorFiltererSubscriptionSubscribe
+        uint256 maxSupply
     );
 
     /**
@@ -281,7 +261,6 @@ IERC4906
      * @param _initialTrustedForwarder trusted forwarder address
      * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _filterParams Opensea registry filter initialization parameters
      * @param _mintingDefaults default minting values for predefined wave helpers
      */
     function initialize(
@@ -294,7 +273,6 @@ IERC4906
         address _initialTrustedForwarder,
         address _allowedToExecuteMint,
         uint256 _maxSupply,
-        OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
     ) external virtual initializer {
         __NFTCollection_init(
@@ -307,7 +285,6 @@ IERC4906
             _initialTrustedForwarder,
             _allowedToExecuteMint,
             _maxSupply,
-            _filterParams,
             _mintingDefaults
         );
     }
@@ -324,7 +301,6 @@ IERC4906
      * @param _initialTrustedForwarder trusted forwarder address
      * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _filterParams Opensea registry filter initialization parameters
      * @param _mintingDefaults default minting values for predefined wave helpers
      */
     function __NFTCollection_init(
@@ -337,14 +313,13 @@ IERC4906
         address _initialTrustedForwarder,
         address _allowedToExecuteMint,
         uint256 _maxSupply,
-        OpenseaRegistryFilterParameters memory _filterParams,
         MintingDefaults memory _mintingDefaults
     ) internal onlyInitializing {
         require(bytes(_initialBaseURI).length != 0, "NFTCollection: baseURI is not set");
         require(bytes(_name).length != 0, "NFTCollection: name is empty");
         require(bytes(_symbol).length != 0, "NFTCollection: symbol is empty");
-        require(_signAddress != address(0), "NFTCollection: sign address is zero address");
         require(_mintTreasury != address(0), "NFTCollection: treasury is zero address");
+        require(_signAddress != address(0), "NFTCollection: sign address is zero address");
         require(_isContract(_allowedToExecuteMint), "NFTCollection: executor address is not a contract");
         require(_maxSupply > 0, "NFTCollection: max supply should be more than 0");
 
@@ -362,10 +337,6 @@ IERC4906
         __ERC2981_init();
         _setTrustedForwarder(_initialTrustedForwarder);
         __ERC721_init(_name, _symbol);
-        __UpdatableOperatorFiltererUpgradeable_init(
-            _filterParams.registry,
-            _filterParams.operatorFiltererSubscription,
-            _filterParams.operatorFiltererSubscriptionSubscribe);
         __Pausable_init();
         baseTokenURI = _initialBaseURI;
         mintTreasury = _mintTreasury;
@@ -389,10 +360,7 @@ IERC4906
             _mintTreasury,
             _signAddress,
             _allowedToExecuteMint,
-            _maxSupply,
-            _filterParams.registry,
-            _filterParams.operatorFiltererSubscription,
-            _filterParams.operatorFiltererSubscriptionSubscribe
+            _maxSupply
         );
     }
 
