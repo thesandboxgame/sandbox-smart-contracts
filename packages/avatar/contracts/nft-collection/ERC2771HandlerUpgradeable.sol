@@ -11,9 +11,23 @@ pragma solidity 0.8.26;
  *      with an initializer for proxies and a mutable forwarder
  */
 contract ERC2771HandlerUpgradeable {
+    /**
+     * @notice emitted when the trusted forwarder is set
+     * @param operator the sender of the transaction
+     * @param oldForwarder the old trusted forwarder address
+     * @param newForwarder the new trusted forwarder address
+     */
+    event TrustedForwarderSet(address indexed operator, address indexed oldForwarder, address indexed newForwarder);
+
     address internal _trustedForwarder;
 
-    function __ERC2771Handler_initialize(address forwarder) internal {
+    /**
+     * @notice set the trusted forwarder
+     * @param forwarder the new trusted forwarder address
+     * @dev address(0) disables the forwarder
+     */
+    function _setTrustedForwarder(address forwarder) internal {
+        emit TrustedForwarderSet(_msgSender(), _trustedForwarder, forwarder);
         _trustedForwarder = forwarder;
     }
 
