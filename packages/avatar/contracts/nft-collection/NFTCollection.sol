@@ -47,6 +47,16 @@ PausableUpgradeable,
 IERC4906
 {
     /**
+     * @notice Structure used to mint in batch
+     * @param wallet destination address that will receive the tokens
+     * @param amount of tokens to mint
+     */
+    struct BatchMintingData {
+        address wallet;
+        uint256 amount;
+    }
+
+    /**
      * @notice Structure used to group default minting parameters in order to avoid stack too deep error
      * @param mintPrice default mint price for both allowlist and public minting
      * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
@@ -462,26 +472,30 @@ IERC4906
      * @notice batch minting function, used by owner to airdrop directly to users.
      * @dev this methods takes a list of destination wallets and can only be used by the owner of the contract
      * @custom:event {Transfer}
-     * @param _wallets list of destination wallets
+     * @param wallets list of destination wallets and amounts
      */
-    function batchMint(address[] calldata _wallets) external whenNotPaused nonReentrant onlyOwner {
+    function batchMint(BatchMintingData[] calldata wallets) external whenNotPaused nonReentrant onlyOwner {
         require(indexWave > 0, "NFTCollection: contract is not configured");
-        uint256 _amount = _wallets.length;
-        require(_amount > 0, "NFTCollection: wallets length cannot be 0");
+        uint256 len = wallets.length;
+        require(len > 0, "NFTCollection: wallets length cannot be 0");
 
-        require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
-        require(_checkTotalNotReached(_amount), "NFTCollection: max reached");
+        for (uint256 i; i < len; i++) {
+            address wallet = wallets[i].wallet;
+            uint256 amount = wallets[i].amount;
+            require(amount > 0, "NFTCollection: amount cannot be 0");
+            require(_checkWaveNotComplete(amount), "NFTCollection: wave completed");
+            require(_checkTotalNotReached(amount), "NFTCollection: max reached");
+            require(_checkLimitPerWalletNotReached(wallet, amount), "NFTCollection: max allowed");
 
-        for (uint256 i; i < _amount; i++) {
-            address _wallet = _wallets[i];
-            require(_checkLimitPerWalletNotReached(_wallet, 1), "NFTCollection: max allowed");
-            // @dev safeMint already checks the destination address
-            // @dev start with tokenId = 1
-            _safeMint(_wallet, totalSupply + i + 1);
-            waveOwnerToClaimedCounts[_wallet][indexWave - 1] += 1;
+            for (uint256 j; j < amount; j++) {
+                // @dev _mint already checks the destination address
+                // @dev start with tokenId = 1
+                _mint(wallet, totalSupply + j + 1);
+            }
+            waveOwnerToClaimedCounts[wallet][indexWave - 1] += amount;
+            waveTotalMinted += amount;
+            totalSupply += amount;
         }
-        waveTotalMinted += _amount;
-        totalSupply += _amount;
     }
 
     /**
