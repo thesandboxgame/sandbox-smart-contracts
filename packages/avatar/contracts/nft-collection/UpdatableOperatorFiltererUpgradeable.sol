@@ -6,52 +6,15 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable-0.8.13/proxy/ut
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
 
 /**
- * @dev see: https://github.com/ProjectOpenSea/operator-filter-registry/tree/main
- */
-interface IOperatorFilterRegistry {
-    /**
-     * @notice Returns true if an address has registered
-     * @param addr the address to check if it is registered
-     */
-    function isRegistered(address addr) external returns (bool);
-
-    /**
-     * @notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns
-     *         true if supplied registrant address is not registered.
-     * @param registrant the address of the contract to check for (usually address(this))
-     * @param operator the operator to check if it is registered for this registrant
-     */
-    function isOperatorAllowed(address registrant, address operator) external view returns (bool);
-
-
-    /**
-     * @notice Registers an address with the registry and "subscribes" to another address's filtered operators and codeHashes.
-     * @param registrant the address of the contract to check for (usually address(this))
-     * @param subscription address to subscribe to
-     */
-    function registerAndSubscribe(address registrant, address subscription) external;
-
-    /**
-     * @notice Registers an address with the registry and copies the filtered operators and codeHashes from another
-     *         address without subscribing.
-     * @param registrant the address of the contract to check for (usually address(this))
-     * @param registrantToCopy address to copy entries from
-     */
-    function registerAndCopyEntries(address registrant, address registrantToCopy) external;
-
-    /**
-     * @notice Registers an address with the registry. May be called by address itself or by EIP-173 owner.
-     * @param registrant the address of the contract to check for (usually address(this))
-     */
-    function register(address registrant) external;
-}
-
-/**
  * @title UpdatableOperatorFiltererUpgradeable
  * @author The Sandbox
  * @custom:security-contact contact-blockchain@sandbox.game
- * @notice This contract would subscribe or copy or just to the subscription provided or just register to default subscription list
- * @dev This contract is the upgradeable version of the OpenSea implementation https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol and adapted to the 0.5.9 solidity version
+ * @notice This contract would subscribe or copy or just to the subscription provided or just register to
+ *          default subscription list
+ * @dev This contract is the upgradeable version of the OpenSea implementation
+ *      https://github.com/ProjectOpenSea/operator-filter-registry/blob/main/src/OperatorFilterer.sol
+ *      and adapted to the 0.5.9 solidity version
+ *      To avoid an extra IOperatorFilterRegistry file for a code that is deprecated the interface is added below
  */
 abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
 
@@ -185,3 +148,50 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
 
     uint256[50] private __gap;
 }
+
+/**
+ * @title IOperatorFilterRegistry
+ * @author Opensea
+ * @custom:security-contact contact-blockchain@sandbox.game
+ * @notice Based on the opensea registry implementation, added here to be used specifically and
+ * @notice just once in UpdatableOperatorFiltererUpgradeable
+ * @dev see: https://github.com/ProjectOpenSea/operator-filter-registry/tree/main
+ */
+interface IOperatorFilterRegistry {
+    /**
+     * @notice Returns true if an address has registered
+     * @param addr the address to check if it is registered
+     */
+    function isRegistered(address addr) external returns (bool);
+
+    /**
+     * @notice Returns true if operator is not filtered for a given token, either by address or codeHash. Also returns
+     *         true if supplied registrant address is not registered.
+     * @param registrant the address of the contract to check for (usually address(this))
+     * @param operator the operator to check if it is registered for this registrant
+     */
+    function isOperatorAllowed(address registrant, address operator) external view returns (bool);
+
+
+    /**
+     * @notice Registers an address with the registry and "subscribes" to another address's filtered operators and codeHashes.
+     * @param registrant the address of the contract to check for (usually address(this))
+     * @param subscription address to subscribe to
+     */
+    function registerAndSubscribe(address registrant, address subscription) external;
+
+    /**
+     * @notice Registers an address with the registry and copies the filtered operators and codeHashes from another
+     *         address without subscribing.
+     * @param registrant the address of the contract to check for (usually address(this))
+     * @param registrantToCopy address to copy entries from
+     */
+    function registerAndCopyEntries(address registrant, address registrantToCopy) external;
+
+    /**
+     * @notice Registers an address with the registry. May be called by address itself or by EIP-173 owner.
+     * @param registrant the address of the contract to check for (usually address(this))
+     */
+    function register(address registrant) external;
+}
+
