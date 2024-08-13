@@ -200,46 +200,52 @@ IERC4906
      * @notice Event emitted when an address was set as allowed to mint
      * @dev emitted when setAllowedExecuteMint is called
      * @param operator the sender of the transaction
-     * @param token address that is used for payments and that is allowed to execute mint
+     * @param oldToken old address that is used for payments and that is allowed to execute mint
+     * @param newToken new address that is used for payments and that is allowed to execute mint
      */
-    event AllowedExecuteMintSet(address indexed operator, IERC20 indexed token);
+    event AllowedExecuteMintSet(address indexed operator, IERC20 indexed oldToken, IERC20 indexed newToken);
 
     /**
      * @notice Event emitted when the treasury address was saved
      * @dev emitted when setTreasury is called
      * @param operator the sender of the transaction
-     * @param treasury collection treasury address (where the payments are sent)
+     * @param oldTreasury old collection treasury address (where the payments are sent)
+     * @param newTreasury new collection treasury address (where the payments are sent)
      */
-    event TreasurySet(address indexed operator, address indexed treasury);
+    event TreasurySet(address indexed operator, address indexed oldTreasury, address indexed newTreasury);
 
     /**
      * @notice Event emitted when the base token URI for the contract was set or changed
      * @dev emitted when setBaseURI is called
      * @param operator the sender of the transaction
-     * @param baseURI an URI that will be used as the base for token metadata URI
+     * @param oldBaseURI old URI that will be used as the base for token metadata URI
+     * @param newBaseURI new URI that will be used as the base for token metadata URI
      */
-    event BaseURISet(address indexed operator, string baseURI);
+    event BaseURISet(address indexed operator, string oldBaseURI, string newBaseURI);
 
     /**
      * @notice Event emitted when the signer address was set or changed
      * @dev emitted when setSignAddress is called
      * @param operator the sender of the transaction
-     * @param signAddress signer address that is allowed to create mint signatures
+     * @param oldSignAddress old signer address that is allowed to create mint signatures
+     * @param newSignAddress new signer address that is allowed to create mint signatures
      */
-    event SignAddressSet(address indexed operator, address indexed signAddress);
+    event SignAddressSet(address indexed operator, address indexed oldSignAddress, address indexed newSignAddress);
 
     /**
      * @notice Event emitted when the default values used by wave manipulation functions were changed
      * @dev emitted when initialize or setWaveDefaults is called
      * @param operator the sender of the transaction
-     * @param mintPrice default mint price for both allow list and public minting
+     * @param oldMintPrice old default mint price for both allow list and public minting
+     * @param newMintPrice new default mint price for both allow list and public minting
      * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
      * @param maxAllowListTokensPerWallet maximum tokens mint per wallet in the allow list minting
      * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
      */
     event DefaultMintingValuesSet(
         address indexed operator,
-        uint256 mintPrice,
+        uint256 oldMintPrice,
+        uint256 newMintPrice,
         uint256 maxPublicTokensPerWallet,
         uint256 maxAllowListTokensPerWallet,
         uint256 maxMarketingTokens
@@ -253,6 +259,39 @@ IERC4906
      * @param personalizationMask the exact personalization that was done, as a custom meaning bit-mask
      */
     event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask);
+
+
+    /**
+     * @notice Event emitted when a token personalization was made.
+     * @param operator the sender of the transaction
+     * @param receiver the receiver of the royalties
+     * @param feeNumerator percentage of the royalties in feeDenominator units
+     */
+    event DefaultRoyaltySet(address indexed operator, address indexed receiver, uint96 feeNumerator);
+
+
+    /**
+     * @notice Event emitted when default royalties are reset
+     * @param operator the sender of the transaction
+     */
+    event DefaultRoyaltyReset(address indexed operator);
+
+    /**
+     * @notice Event emitted when a token personalization was made.
+     * @param operator the sender of the transaction
+     * @param tokenId the token id
+     * @param receiver the receiver of the royalties
+     * @param feeNumerator percentage of the royalties in feeDenominator units
+     */
+    event TokenRoyaltySet(address indexed operator, uint256 indexed tokenId, address indexed receiver, uint96 feeNumerator);
+
+
+    /**
+     * @notice Event emitted when default royalties are reset
+     * @param operator the sender of the transaction
+     */
+    event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId);
+
 
     /**
      * @notice mitigate a possible Implementation contract takeover, as indicate by
@@ -358,14 +397,15 @@ IERC4906
         allowedToExecuteMint = IERC20(_allowedToExecuteMint);
         maxSupply = _maxSupply;
 
-        mintingDefaults = _mintingDefaults;
         emit DefaultMintingValuesSet(
             _msgSender(),
+            0,
             _mintingDefaults.mintPrice,
             _mintingDefaults.maxPublicTokensPerWallet,
             _mintingDefaults.maxAllowListTokensPerWallet,
             _mintingDefaults.maxMarketingTokens
         );
+        mintingDefaults = _mintingDefaults;
 
         emit ContractInitialized(
             _initialBaseURI,
@@ -606,7 +646,8 @@ IERC4906
      * @dev reverts if not owner of the collection or if not un-paused
      */
     function pause() external onlyOwner {
-        super._pause();
+        _requireNotPaused();
+        _pause();
     }
 
     /**
@@ -614,7 +655,8 @@ IERC4906
      * @dev reverts if not owner of the collection or if not paused
      */
     function unpause() external onlyOwner {
-        super._unpause();
+        _requirePaused();
+        _unpause();
     }
 
     /**
@@ -624,8 +666,8 @@ IERC4906
      */
     function setTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "NFTCollection: owner is zero address");
+        emit TreasurySet(_msgSender(), mintTreasury, _treasury);
         mintTreasury = _treasury;
-        emit TreasurySet(_msgSender(), _treasury);
     }
 
     /**
@@ -635,8 +677,8 @@ IERC4906
      */
     function setSignAddress(address _signAddress) external onlyOwner {
         require(_signAddress != address(0), "NFTCollection: sign address is zero address");
+        emit SignAddressSet(_msgSender(), signAddress, _signAddress);
         signAddress = _signAddress;
-        emit SignAddressSet(_msgSender(), _signAddress);
     }
 
     /**
@@ -648,17 +690,19 @@ IERC4906
      */
     function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner nonReentrant {
         require(_isContract(address(_minterToken)), "NFTCollection: executor address is not a contract");
-        allowedToExecuteMint = _minterToken;
-        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
+        uint256 newPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
+        emit AllowedExecuteMintSet(_msgSender(), allowedToExecuteMint, _minterToken);
         emit DefaultMintingValuesSet(
             _msgSender(),
             mintingDefaults.mintPrice,
+            newPrice,
             mintingDefaults.maxPublicTokensPerWallet,
             mintingDefaults.maxAllowListTokensPerWallet,
             mintingDefaults.maxMarketingTokens
         );
-        emit AllowedExecuteMintSet(_msgSender(), _minterToken);
+        allowedToExecuteMint = _minterToken;
+        mintingDefaults.mintPrice = newPrice;
     }
 
     /**
@@ -668,8 +712,8 @@ IERC4906
      */
     function setBaseURI(string calldata baseURI) external onlyOwner {
         require(bytes(baseURI).length != 0, "NFTCollection: baseURI is not set");
+        emit BaseURISet(_msgSender(), baseTokenURI, baseURI);
         baseTokenURI = baseURI;
-        emit BaseURISet(_msgSender(), baseURI);
 
         // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
         emit BatchMetadataUpdate(0, type(uint256).max);
@@ -750,18 +794,23 @@ IERC4906
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyOwner {
+        /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
+        emit DefaultRoyaltySet(_msgSender(), receiver, feeNumerator);
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
     /**
      * @notice Removes default royalty information.
      */
-    function deleteDefaultRoyalty() external onlyOwner {
+    function resetDefaultRoyalty() external onlyOwner {
+        /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
+        emit DefaultRoyaltyReset(_msgSender());
         _deleteDefaultRoyalty();
     }
 
     /**
      * @notice Sets the royalty information for a specific token id, overriding the global default.
+     * @param tokenId the tokenId for
      * @param receiver the receiver of the royalties
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
@@ -770,6 +819,8 @@ IERC4906
         address receiver,
         uint96 feeNumerator
     ) external onlyOwner {
+        /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
+        emit TokenRoyaltySet(_msgSender(), tokenId, receiver, feeNumerator);
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
@@ -777,6 +828,8 @@ IERC4906
      * @notice Resets royalty information for the token id back to the global default.
      */
     function resetTokenRoyalty(uint256 tokenId) external onlyOwner {
+        /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
+        emit TokenRoyaltyReset(_msgSender(), tokenId);
         _resetTokenRoyalty(tokenId);
     }
 
@@ -866,6 +919,15 @@ IERC4906
      */
     function price(uint256 _count) public view virtual returns (uint256) {
         return waveSingleTokenPrice * _count;
+    }
+
+    /**
+     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
+     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
+     * override.
+     */
+    function feeDenominator() external pure virtual returns (uint96) {
+        return _feeDenominator();
     }
 
     /**
