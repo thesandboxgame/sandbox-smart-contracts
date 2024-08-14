@@ -158,6 +158,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
         return new Part[](0);
     }
 
+    /// @notice Check if the contract supports an interface
+    /// @param interfaceId The id of the interface
+    /// @return true if the interface is supported
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC165Upgradeable, IRoyaltiesProvider) returns (bool) {
