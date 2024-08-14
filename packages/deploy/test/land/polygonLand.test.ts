@@ -17,10 +17,10 @@ const setupTest = deployments.createFixture(
     const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
 
     const PolygonOperatorFilterSubscription = await getEthersContract(
-      'OperatorFilterLandSubscription'
+      'PolygonOperatorFilterSubscription'
     );
     const PolygonOperatorFilterRegistry = await getEthersContract(
-      'OperatorFilterRegistry'
+      'PolygonOperatorFilterRegistry'
     );
 
     return {
