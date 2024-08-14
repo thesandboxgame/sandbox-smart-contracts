@@ -144,8 +144,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Sets the LAND contract address.
     /// @param newLandContractAddress Address of new LAND contract
     function _setLandContract(ILandToken newLandContractAddress) internal {
-        // TODO: uncomment when ILandToken is supported by LandBase
-        // require(ERC165Checker.supportsInterface(address(newLandContractAddress, type(ILandToken).interfaceId), "invalid LAND address");
+        require(
+            ERC165Checker.supportsInterface(address(newLandContractAddress), type(ILandToken).interfaceId),
+            "Invalid LAND address"
+        );
         landContract = newLandContractAddress;
 
         emit LandContractSet(newLandContractAddress);
@@ -277,6 +279,13 @@ abstract contract TransferManager is Initializable, ITransferManager {
         return remainder;
     }
 
+    /// @notice Apply and transfer royalties based on the asset price and royalties information.
+    /// @param remainder How much of the amount left after previous transfers
+    /// @param paymentSide DealSide of the fee-side order
+    /// @param assetPrice The price of the asset for which royalties are being calculated.
+    /// @param royalties The array of royalty recipients and their respective basis points.
+    /// @param recipient The recipient who will receive the remainder after royalties are deducted.
+    /// @return How much left after paying royalties
     function _applyRoyalties(
         uint256 remainder,
         DealSide memory paymentSide,
@@ -309,6 +318,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice Do a transfer based on a percentage (in basis points)
     /// @param remainder How much of the amount left after previous transfers
     /// @param paymentSide DealSide of the fee-side order
+    /// @param assetPrice The price of the asset for which royalties are being calculated.
     /// @param to Account that will receive the asset
     /// @param percentage Percentage to be transferred multiplied by the multiplier
     /// @param multiplier Percentage is multiplied by this number to avoid rounding (2.5% == 0.025) * multiplier
@@ -441,7 +451,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         IERC1155(token).safeTransferFrom(from, to, id, supply, "");
     }
 
-    /// @notice Function deciding if the fees are applied or not, to be override
+    /// @notice Function deciding if the fees are applied or not, to be overridden
     /// @param from Address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
 
@@ -458,7 +468,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         }
     }
 
-    /// @notice Function deciding if the seller is a TSB seller, to be override
+    /// @notice Function deciding if the seller is a TSB seller, to be overridden
     /// @param from Address to check
     function _isTSBSeller(address from) internal virtual returns (bool);
 

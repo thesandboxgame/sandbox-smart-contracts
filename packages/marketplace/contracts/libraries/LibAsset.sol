@@ -36,19 +36,19 @@ library LibAsset {
         uint256 value; // The amount or value of the asset.
     }
 
-    /// @dev Represents a group (i.e. bundle) of ERC20 assets on the Ethereum blockchain.
+    /// @dev Represents a group (i.e. bundle) of ERC20 asset.
     struct BundledERC20 {
         address erc20Address;
         uint256 value;
     }
 
-    /// @dev Represents a group (i.e. bundle) of ERC721 assets on the Ethereum blockchain.
+    /// @dev Represents a group (i.e. bundle) of ERC721 assets.
     struct BundledERC721 {
         address erc721Address;
         uint256[] ids;
     }
 
-    /// @dev Represents a group (i.e. bundle) of ERC1155 assets on the Ethereum blockchain.
+    /// @dev Represents a group (i.e. bundle) of ERC1155 assets.
     struct BundledERC1155 {
         address erc1155Address;
         uint256[] ids;
@@ -63,7 +63,7 @@ library LibAsset {
         bytes data;
     }
 
-    /// @dev Represents a group (i.e. bundle) of assets on the Ethereum blockchain with its types and values.
+    /// @dev Represents a group (i.e. bundle) of assets with its types and values.
     struct Bundle {
         BundledERC20[] bundledERC20;
         BundledERC721[] bundledERC721;
@@ -157,7 +157,7 @@ library LibAsset {
         return abi.decode(assetType.data, (Bundle));
     }
 
-    /// @dev function to verify if the order is bundle and validate the bundle price
+    /// @dev function to verify if the order is a bundle and validate the bundle price
     /// @param leftAsset The left asset.
     /// @param rightAsset The right asset.
     function verifyPriceDistribution(Asset memory leftAsset, Asset memory rightAsset) internal pure {

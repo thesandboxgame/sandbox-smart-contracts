@@ -21,5 +21,8 @@ interface IRoyaltiesProvider {
     /// @return A part with all royalties for token
     function getRoyalties(address token, uint256 tokenId) external returns (Part[] memory);
 
+    /// @notice Check if the contract supports an interface
+    /// @param interfaceId The id of the interface
+    /// @return true if the interface is supported
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }

@@ -14,6 +14,7 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @author The Sandbox
 /// @title Exchange contract with meta transactions
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers

@@ -18,6 +18,7 @@ import {WithMetadataRegistry} from "../common/WithMetadataRegistry.sol";
 import {WithRoyalties} from "../common/WithRoyalties.sol";
 import {WithOwner} from "../common/WithOwner.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
+import {ILandToken} from "../interfaces/ILandToken.sol";
 
 /// @title Land Contract
 /// @author The Sandbox
@@ -215,6 +216,7 @@ abstract contract LandBase is
     /// @return True if the interface is supported
     function supportsInterface(bytes4 interfaceId) public pure override returns (bool) {
         return
+            interfaceId == type(ILandToken).interfaceId ||
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721BatchOps).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||

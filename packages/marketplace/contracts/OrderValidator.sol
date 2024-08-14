@@ -64,6 +64,9 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ER
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
     }
 
+    /// @notice Check if the contract supports an interface
+    /// @param interfaceId The id of the interface
+    /// @return true if the interface is supported
     function supportsInterface(
         bytes4 interfaceId
     )
