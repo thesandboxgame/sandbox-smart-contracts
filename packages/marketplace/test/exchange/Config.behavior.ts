@@ -32,30 +32,15 @@ export function exchangeConfig() {
       describe('default admin', function () {
         checkAccessControl(
           [
-            // TODO: new tests for setRoyaltiesRegistry and setOrderValidatorContract with correct contracts supporting interfaces
-            // 'setRoyaltiesRegistry',
-            // 'setOrderValidatorContract',
+            'setRoyaltiesRegistry',
+            'setOrderValidatorContract',
             'setTrustedForwarder',
           ],
+          ['RoyaltiesRegistrySet', 'OrderValidatorSet', 'TrustedForwarderSet'],
           [
-            // 'RoyaltiesRegistrySet',
-            // 'OrderValidatorSet',
-            'TrustedForwarderSet',
-          ],
-          [
-            // 'ExchangeContractAsUser',
-            // 'ExchangeContractAsUser',
-            'ExchangeContractAsUser',
-          ],
-          [
-            // 'ExchangeContractAsAdmin',
-            // 'ExchangeContractAsAdmin',
-            'ExchangeContractAsAdmin',
-          ],
-          [
-            // '0x00',
-            // '0x00',
-            '0x00',
+            'RoyaltiesRegistryAsUser',
+            'OrderValidatorAsUser',
+            'TrustedForwarderAsUser',
           ]
         );
 

@@ -8,7 +8,7 @@ import {TrustedForwarderSetup} from './TrustedForwarderMock';
 export async function exchangeSetup() {
   const {admin, user, defaultFeeReceiver} = await signerSetup();
 
-  const {TrustedForwarder} = await TrustedForwarderSetup();
+  const {TrustedForwarder, TrustedForwarder2} = await TrustedForwarderSetup();
 
   const royaltiesRegistry = await royaltiesRegistrySetup();
   const {RoyaltiesRegistryAsDeployer} = royaltiesRegistry;
@@ -66,5 +66,6 @@ export async function exchangeSetup() {
     AssetMatcherAsUser,
     QuadHelper,
     TrustedForwarder,
+    TrustedForwarder2,
   };
 }
