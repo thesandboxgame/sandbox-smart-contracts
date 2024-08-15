@@ -18,7 +18,6 @@ import {WithMetadataRegistry} from "../common/WithMetadataRegistry.sol";
 import {WithRoyalties} from "../common/WithRoyalties.sol";
 import {WithOwner} from "../common/WithOwner.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
-import {ILandToken} from "../interfaces/ILandToken.sol";
 
 /// @title Land Contract
 /// @author The Sandbox
