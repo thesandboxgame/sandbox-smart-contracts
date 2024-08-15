@@ -8,10 +8,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {sandAdmin} = await getNamedAccounts();
 
   const operatorFilterRegistry = await deployments.get(
-    'OperatorFilterRegistry'
+    'PolygonOperatorFilterRegistry'
   );
   const operatorFilterSubscription = await deployments.get(
-    'OperatorFilterLandSubscription'
+    'PolygonOperatorFilterSubscription'
   );
   const current = await read('PolygonLand', 'operatorFilterRegistry');
   if (current != operatorFilterRegistry.address) {

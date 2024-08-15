@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'OperatorFilterRegistry'
   );
   const operatorFilterSubscription = await deployments.get(
-    'OperatorFilterLandSubscription'
+    'OperatorFilterSubscription'
   );
   const current = await read('Land', 'operatorFilterRegistry');
   if (current != operatorFilterRegistry.address) {

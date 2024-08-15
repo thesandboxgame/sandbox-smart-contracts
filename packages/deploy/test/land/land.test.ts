@@ -15,7 +15,7 @@ const setupTest = deployments.createFixture(
     const RoyaltyManagerContract = await getEthersContract('RoyaltyManager');
 
     const OperatorFilterLandSubscription = await getEthersContract(
-      'OperatorFilterLandSubscription'
+      'OperatorFilterSubscription'
     );
     const OperatorFilterRegistry = await getEthersContract(
       'OperatorFilterRegistry'

@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
   const OperatorFilterSubscription = await deploy(
-    'OperatorFilterSubscription',
+    'PolygonOperatorFilterSubscription',
     {
       from: deployer,
       contract:
@@ -28,11 +28,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const defaultSubscription = await deployments.read(
-    'OperatorFilterSubscription',
+    'PolygonOperatorFilterSubscription',
     'DEFAULT_SUBSCRIPTION'
   );
   await deployments.execute(
-    'OperatorFilterRegistry',
+    'PolygonOperatorFilterRegistry',
     {from: deployer},
     'registerAndCopyEntries',
     OperatorFilterSubscription.address,
@@ -44,4 +44,4 @@ func.tags = [
   'OperatorFilterLandSubscription',
   'OperatorFilterLandSubscription_deploy',
 ];
-func.dependencies = ['OperatorFilterRegistry'];
+func.dependencies = ['PolygonOperatorFilterRegistry'];
