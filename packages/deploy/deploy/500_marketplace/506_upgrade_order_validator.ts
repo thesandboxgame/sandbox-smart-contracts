@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deploy('OrderValidator', {
       from: deployer,
       contract:
-      '@sandbox-smart-contracts/marketplace/contracts/OrderValidator.sol:OrderValidator',
+        '@sandbox-smart-contracts/marketplace/contracts/OrderValidator.sol:OrderValidator',
       proxy: {
         owner: upgradeAdmin,
         proxyContract: 'OpenZeppelinTransparentProxy',

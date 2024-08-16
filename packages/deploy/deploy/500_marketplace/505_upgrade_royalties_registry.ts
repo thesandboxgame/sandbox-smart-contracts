@@ -9,7 +9,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await catchUnknownSigner(
     deploy('RoyaltiesRegistry', {
       from: deployer,
-      contract: '@sandbox-smart-contracts/marketplace/contracts/RoyaltiesRegistry.sol:RoyaltiesRegistry',
+      contract:
+        '@sandbox-smart-contracts/marketplace/contracts/RoyaltiesRegistry.sol:RoyaltiesRegistry',
       proxy: {
         owner: upgradeAdmin,
         proxyContract: 'OpenZeppelinTransparentProxy',
