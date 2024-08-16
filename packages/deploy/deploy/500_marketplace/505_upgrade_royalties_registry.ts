@@ -25,7 +25,7 @@ export default func;
 func.tags = [
   'RoyaltiesRegistry',
   'RoyaltiesRegistry',
-  'RoyaltiesRegistry_deploy',
+  'RoyaltiesRegistryV2_deploy',
   DEPLOY_TAGS.L1,
   DEPLOY_TAGS.L1_PROD,
   DEPLOY_TAGS.L1_TEST,
