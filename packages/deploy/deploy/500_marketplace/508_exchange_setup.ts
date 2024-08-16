@@ -82,4 +82,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['Exchange_deploy', 'PolygonSand_deploy'];
+func.dependencies = ['Exchange_deploy', 'PolygonSand_deploy', 'PolygonLand_deploy'];

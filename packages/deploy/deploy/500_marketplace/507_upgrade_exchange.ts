@@ -24,7 +24,7 @@ export default func;
 func.tags = [
   'Exchange',
   'Exchange',
-  'Exchange_deploy',
+  'ExchangeV2_deploy',
   DEPLOY_TAGS.L1,
   DEPLOY_TAGS.L1_PROD,
   DEPLOY_TAGS.L1_TEST,
