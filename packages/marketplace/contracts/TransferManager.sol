@@ -33,6 +33,9 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @notice cannot exceed 50% == 0.5 * BASE_POINTS == 5000
     uint256 internal constant ROYALTY_SHARE_LIMIT = 5000;
 
+    /// @dev grid size of the land used to calculate ids
+    uint256 internal constant GRID_SIZE = 408;
+
     /// @notice Fee applied to primary sales.
     /// @return uint256 of primary sale fee in PROTOCOL_FEE_MULTIPLIER units
     uint256 public protocolFeePrimary;
@@ -464,7 +467,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
     function idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal view returns (uint256) {
         unchecked {
-            return (x + (i % size)) + (y + (i / size)) * landContract.width();
+            return (x + (i % size)) + (y + (i / size)) * GRID_SIZE;
         }
     }
 
