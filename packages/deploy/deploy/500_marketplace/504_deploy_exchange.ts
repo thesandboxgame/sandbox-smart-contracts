@@ -4,7 +4,7 @@ import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, read} = deployments;
+  const {deploy} = deployments;
   const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
@@ -15,8 +15,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const newProtocolFeePrimary = 0;
   const newProtocolFeeSecondary = 0;
   const newMatchOrdersLimit = 50;
-
-  console.log('Sand admin original', sandAdmin);
 
   await deploy('Exchange', {
     from: deployer,
@@ -42,10 +40,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-
-  console.log(`_______ Exchange deployed _______`);
-  const DEFAULT_ADMIN_ROLE = await read('Exchange', 'DEFAULT_ADMIN_ROLE');
-  console.log(await read('Exchange', 'hasRole', DEFAULT_ADMIN_ROLE, sandAdmin));
 };
 export default func;
 func.tags = [
