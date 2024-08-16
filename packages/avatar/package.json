@@ -67,7 +67,6 @@
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
     "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0",
     "@release-it/keep-a-changelog": "^5.0.0",
-    "@sandbox-smart-contracts/core": "0.0.1",
     "@typechain/ethers-v6": "^0.4.0",
     "@typechain/hardhat": "^8.0.0",
     "@types/chai": "^4.3.5",
