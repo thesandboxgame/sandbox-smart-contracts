@@ -88,5 +88,7 @@ func.dependencies = [
   'Land_deploy',
   'PolygonSand_deploy',
   'PolygonLand_deploy',
+  'PolygonLandV2_deploy',
+  'LandV4_deploy',
   'ExchangeV2_deploy',
 ];
