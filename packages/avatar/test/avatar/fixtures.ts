@@ -7,7 +7,7 @@ export async function deployFakeSandContract(
   sandAdminWallet: Wallet | HardhatEthersSigner,
   mintToDeployerAmount: bigint
 ) {
-  const PolygonSand = await ethers.getContractFactory('FakePolygonSand');
+  const PolygonSand = await ethers.getContractFactory('MockERC20');
   const polygonSandContract = await PolygonSand.connect(sandAdminWallet).deploy(
     mintToDeployerAmount
   );
@@ -21,12 +21,8 @@ export async function deployFakeSandContract(
 
 export const setupMockERC20 = async () => {
   const {deployer} = await getTestingAccounts();
-  const ERC20PresetMinterPauser = await ethers.getContractFactory('MockERC20');
-  return await ERC20PresetMinterPauser.connect(deployer).deploy(
-    'RToken',
-    'RAND',
-    100_000_000n
-  );
+  const MockERC20 = await ethers.getContractFactory('MockERC20');
+  return await MockERC20.connect(deployer).deploy(100_000_000n);
 };
 
 export async function topUpAddressWithETH(
@@ -41,6 +37,7 @@ export async function getTestingAccounts() {
   const [
     deployer,
     randomWallet,
+    randomWallet2,
     treasury,
     raffleSignWallet,
     nftCollectionAdmin,
@@ -53,6 +50,7 @@ export async function getTestingAccounts() {
   return {
     deployer,
     randomWallet,
+    randomWallet2,
     treasury,
     raffleSignWallet,
     nftCollectionAdmin,

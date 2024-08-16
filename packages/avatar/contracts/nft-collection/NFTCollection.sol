@@ -488,7 +488,7 @@ IERC4906
         require(_wallet != address(0), "NFTCollection: wallet is zero address");
         require(_amount > 0, "NFTCollection: amount cannot be 0");
 
-        _checkAndSetSignature({_address : _wallet, _signatureId : _signatureId, _signature : _signature});
+        _checkAndSetSignature({_wallet : _wallet, _signatureId : _signatureId, _signature : _signature});
 
         require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
         require(_checkLimitPerWalletNotReached(_wallet, _amount), "NFTCollection: max allowed");
@@ -524,8 +524,8 @@ IERC4906
             uint256 amount = wallets[i].amount;
             require(amount > 0, "NFTCollection: amount cannot be 0");
             require(_checkWaveNotComplete(amount), "NFTCollection: wave completed");
-            require(_checkTotalNotReached(amount), "NFTCollection: max reached");
             require(_checkLimitPerWalletNotReached(wallet, amount), "NFTCollection: max allowed");
+            require(_checkTotalNotReached(amount), "NFTCollection: max reached");
 
             for (uint256 j; j < amount; j++) {
                 // @dev _mint already checks the destination address
@@ -556,7 +556,7 @@ IERC4906
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "NFTCollection: sender is not owner");
 
-        _checkAndSetSignature({_address : sender, _signatureId : _signatureId, _signature : _signature});
+        _checkAndSetSignature({_wallet : sender, _signatureId : _signatureId, _signature : _signature});
 
         emit MetadataUpdate(_tokenId);
     }
@@ -740,9 +740,9 @@ IERC4906
      * @notice This function is used to register Land contract on the Operator Filterer Registry of Opensea.
      * @param subscriptionOrRegistrantToCopy registration address of the list to subscribe.
      * @param subscribe bool to signify subscription 'true' or to copy the list 'false'.
+     * @dev subscriptionOrRegistrantToCopy == address(0), just register
      */
     function register(address subscriptionOrRegistrantToCopy, bool subscribe) external onlyOwner {
-        require(subscriptionOrRegistrantToCopy != address(0), "invalid address");
         _register(subscriptionOrRegistrantToCopy, subscribe);
     }
 
@@ -1006,18 +1006,18 @@ IERC4906
     /**
      * @notice checks that the provided signature is valid, while also taking into
      *         consideration the provided address and signatureId.
-     * @param _address address to be used in validating the signature
+     * @param _wallet address to be used in validating the signature
      * @param _signatureId signing signature ID
      * @param _signature signing signature value
      */
     function _checkAndSetSignature(
-        address _address,
+        address _wallet,
         uint256 _signatureId,
         bytes calldata _signature
     ) internal {
         require(_signatureIds[_signatureId] == 0, "NFTCollection: signatureId already used");
         require(
-            _checkSignature(_address, _signatureId, address(this), block.chainid, _signature) == signAddress,
+            _checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
             "NFTCollection: signature failed"
         );
         _signatureIds[_signatureId] = 1;
