@@ -63,7 +63,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
 
     /// @notice Royalties registry initializer
     function initialize() external initializer {
-        __Ownable_init(_msgSender());
+        __Ownable_init();
     }
 
     /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (2).
