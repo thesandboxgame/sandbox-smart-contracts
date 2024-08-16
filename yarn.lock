@@ -2888,7 +2888,8 @@ __metadata:
     "@sandbox-smart-contracts/faucets": 0.0.1
     "@sandbox-smart-contracts/giveaway": 0.0.3
     "@sandbox-smart-contracts/land": 1.0.0-rc.1
-    "@sandbox-smart-contracts/marketplace": 1.0.1
+    "@sandbox-smart-contracts/marketplace": 1.0.2
+    "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1"
     "@sandbox-smart-contracts/oft-sand": 0.0.1
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
@@ -3099,7 +3100,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/marketplace@npm:1.0.1":
+"@sandbox-smart-contracts/marketplace@1.0.1@npm:@sandbox-smart-contracts/marketplace@1.0.1":
   version: 1.0.1
   resolution: "@sandbox-smart-contracts/marketplace@npm:1.0.1"
   dependencies:
@@ -3112,7 +3113,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
+"@sandbox-smart-contracts/marketplace@1.0.2, @sandbox-smart-contracts/marketplace@workspace:packages/marketplace":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/marketplace@workspace:packages/marketplace"
   dependencies:
@@ -3123,8 +3124,8 @@ __metadata:
     "@nomicfoundation/hardhat-toolbox": ^3.0.0
     "@nomicfoundation/hardhat-verify": ^1.0.0
     "@nomiclabs/hardhat-etherscan": ^3.1.7
-    "@openzeppelin/contracts": 5.0.2
-    "@openzeppelin/contracts-upgradeable": 5.0.2
+    "@openzeppelin/contracts": ^4.9.2
+    "@openzeppelin/contracts-upgradeable": ^4.9.2
     "@openzeppelin/hardhat-upgrades": ^2.2.1
     "@release-it/keep-a-changelog": ^4.0.0
     "@sandbox-smart-contracts/dependency-metatx": 1.0.1

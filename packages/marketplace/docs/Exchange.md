@@ -4,7 +4,9 @@
 
 The [Exchange contract](../contracts/Exchange.sol) is the entrypoint and main
 contract to the marketplace protocol. It safely offers a decentralized way to
-exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.
+exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.It
+also supports exchanging bundles of assets, which can include multiple ERC20,
+ERC1155, ERC721, and Quads.
 
 ## Concepts
 
@@ -23,6 +25,29 @@ Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 SA
 The order represents this intent and includes the address of the seller, the
 address of the NFT, the token id, the address of the ERC20 and the amount the
 seller is asking for (and more).
+
+### Bundle Order
+
+In addition to single-asset orders, the protocol supports bundle orders, where
+multiple assets are grouped together as a single entity for exchange. Let's
+consider this use case:
+
+Order B
+
+```
+Alice wants to sell a bundle of assets:
+ 1 LAND (ERC721) with token id 1000
+  - Price: 1200 MATIC
+ 10 ASSET (ERC1155) with token id 2000
+  - Price: 500 MATIC
+ 50 SAND (ERC20)
+  - Price: 300 MATIC (6 MATIC per SAND)
+against 2000 MATIC (ERC20).
+```
+
+The order represents this intent and includes the address of the seller, the
+address for the tokens(ERC721 and ERC1155), the token ids, the individual prices
+of the assets, the address of the ERC20 and the amount the seller is asking for.
 
 ### Maker & Taker
 
@@ -266,6 +291,21 @@ The royalties are the share returning to the creator (or owner) of the
 collection or token after a sale. The protocol handles multiple types of
 royalties (ERC2981, royalties registry, external provider). See the
 [RoyaltiesRegistry](RoyaltiesRegistry.md) contract for more information.
+
+### Royalties for Bundles
+
+For bundle orders, royalties are calculated individually for each asset type
+within the bundle. Here's how it works:
+
+- ERC721: The royalty is calculated on the price of each individual ERC721 asset
+  within the bundle. The royalty fee is then deducted from the price of that
+  specific ERC721 asset.
+- ERC1155: The royalty is calculated based on the asset price for each ERC1155
+  token within the bundle. The royalty fee is then deducted from this asset
+  price.
+- Quads: The price of Quad within the bundle is determined by the combined price
+  of all land in the Quad. The royalty is then calculated using the royalty
+  fetched for the land token associated with the leftmost land in the Quad.
 
 ### Payouts
 

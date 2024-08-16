@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.23;
 
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
@@ -14,6 +14,7 @@ import {ExchangeCore} from "./ExchangeCore.sol";
 
 /// @author The Sandbox
 /// @title Exchange contract with meta transactions
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Used to exchange assets, that is, tokens.
 /// @dev Main functions are in ExchangeCore
 /// @dev TransferManager is used to execute token transfers

@@ -63,7 +63,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
 
     /// @notice Royalties registry initializer
     function initialize() external initializer {
-        __Ownable_init(_msgSender());
+        __Ownable_init();
     }
 
     /// @notice Assigns an external provider for a token's royalties and sets the royalty type as 'EXTERNAL_PROVIDER' (2).
@@ -158,6 +158,9 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
         return new Part[](0);
     }
 
+    /// @notice Check if the contract supports an interface
+    /// @param interfaceId The id of the interface
+    /// @return true if the interface is supported
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC165Upgradeable, IRoyaltiesProvider) returns (bool) {
