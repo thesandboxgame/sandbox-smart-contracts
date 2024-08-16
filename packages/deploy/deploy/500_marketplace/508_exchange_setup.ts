@@ -13,7 +13,7 @@ const func: DeployFunction = async function (
   const EXCHANGE_ADMIN_ROLE = await read('Exchange', 'EXCHANGE_ADMIN_ROLE');
 
   let sandContract;
-  let landContract
+  let landContract;
   if (hre.network.name === 'polygon') {
     sandContract = await deployments.get('PolygonSand');
     landContract = await deployments.get('PolygonLand');
@@ -58,10 +58,7 @@ const func: DeployFunction = async function (
     );
   }
 
-  const currentLand = await read(
-    'Exchange',
-    'landContract'
-  );
+  const currentLand = await read('Exchange', 'landContract');
   if (currentLand != landContract.address) {
     await catchUnknownSigner(
       execute(
