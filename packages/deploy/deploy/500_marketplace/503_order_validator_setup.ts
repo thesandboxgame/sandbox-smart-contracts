@@ -115,5 +115,6 @@ func.tags = [
 func.dependencies = [
   'OrderValidator_deploy',
   'PolygonSand_deploy',
+  'Sand_deploy',
   'Asset_deploy',
 ];
