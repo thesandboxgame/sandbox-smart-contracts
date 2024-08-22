@@ -142,4 +142,29 @@ describe('NFTCollection burn', function () {
       }
     }
   });
+
+  it('other should fail to burn a token', async function () {
+    const {
+      collectionContractAsOwner,
+      randomWallet,
+      collectionContractAsRandomWallet2,
+    } = await loadFixture(setupNFTCollectionContract);
+    await collectionContractAsOwner.setupWave(100, 10, 20);
+
+    await collectionContractAsOwner.enableBurning();
+
+    // mint 5
+    await collectionContractAsOwner.batchMint([[randomWallet, 5]]);
+
+    const transferEvents = await collectionContractAsOwner.queryFilter(
+      'Transfer'
+    );
+    for (let i = 0; i < transferEvents.length; i++) {
+      const tokenId = transferEvents[i].args.tokenId;
+      // burn
+      await expect(
+        collectionContractAsRandomWallet2.burn(tokenId)
+      ).to.revertedWith('ERC721: caller is not token owner or approved');
+    }
+  });
 });

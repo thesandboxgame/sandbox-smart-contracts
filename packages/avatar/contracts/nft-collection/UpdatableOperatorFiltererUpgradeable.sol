@@ -37,14 +37,12 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
      * @param registry address of the registry to set
      * @param subscriptionOrRegistrant address to subscribe or copy entries from
      * @param subscribe should it subscribe
-     * @param isContract true if the current value of the registry is a contract
      */
     event ContractRegistered(
         address indexed operator,
         IOperatorFilterRegistry indexed registry,
         address indexed subscriptionOrRegistrant,
-        bool subscribe,
-        bool isContract
+        bool subscribe
     );
 
     /**
@@ -52,6 +50,18 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
      * @param operator that does the call
      */
     error OperatorNotAllowed(address operator);
+
+    /**
+     * @notice the registry is not configured
+     * @param operator that does the call
+     */
+    error RegistryNotSet(address operator);
+
+    /**
+     * @notice this contract is already registered
+     * @param operator that does the call
+     */
+    error AlreadyRegistered(address operator);
 
     /**
      * @notice Used in approval operations to check if the operator is allowed to call this contract
@@ -77,22 +87,6 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     }
 
     /**
-     * @notice initialization function in accordance with the upgradable pattern
-     * @param registry the address of the registry
-     * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
-     * @param subscribe should it subscribe
-     */
-    function __UpdatableOperatorFiltererUpgradeable_init(
-        address registry,
-        address subscriptionOrRegistrantToCopy,
-        bool subscribe
-    ) internal onlyInitializing {
-        _setOperatorRegistry(registry);
-        _register(subscriptionOrRegistrantToCopy, subscribe);
-    }
-
-
-    /**
      * @notice Register this contract into the registry
      * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
      * @param subscribe should it subscribe
@@ -100,20 +94,21 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
         IOperatorFilterRegistry registry = operatorFilterRegistry;
         bool isContract = address(registry).code.length > 0;
-        if (isContract) {
-            if (!registry.isRegistered(address(this))) {
-                if (subscribe) {
-                    registry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
-                } else {
-                    if (subscriptionOrRegistrantToCopy != address(0)) {
-                        registry.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);
-                    } else {
-                        registry.register(address(this));
-                    }
-                }
-            }
+        if (!isContract) {
+            revert RegistryNotSet(_msgSender());
         }
-        emit ContractRegistered(_msgSender(), registry, subscriptionOrRegistrantToCopy, subscribe, isContract);
+        if (registry.isRegistered(address(this))) {
+            revert AlreadyRegistered(_msgSender());
+        }
+
+        if (subscribe) {
+            registry.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);
+        } else if (subscriptionOrRegistrantToCopy != address(0)) {
+            registry.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);
+        } else {
+            registry.register(address(this));
+        }
+        emit ContractRegistered(_msgSender(), registry, subscriptionOrRegistrantToCopy, subscribe);
     }
 
     /**

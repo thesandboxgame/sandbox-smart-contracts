@@ -56,6 +56,16 @@ export async function setupNFTCollectionContract() {
     collectionContract,
     accounts.raffleSignWallet
   );
+
+  const NFTCollectionMock = await ethers.getContractFactory(
+    'NFTCollectionMock'
+  );
+  const nftCollectionMock = await NFTCollectionMock.connect(
+    accounts.deployer
+  ).deploy(collectionOwner.address, accounts.trustedForwarder.address);
+  const ReenterMock = await ethers.getContractFactory('ReenterMock');
+  const reenterMock = await ReenterMock.connect(accounts.deployer).deploy();
+
   return {
     ...accounts,
     metadataUrl,
@@ -76,6 +86,17 @@ export async function setupNFTCollectionContract() {
     collectionContractAsRandomWallet2: collectionContract.connect(
       accounts.randomWallet2
     ),
+    collectionContractAsTrustedForwarder: collectionContract.connect(
+      accounts.trustedForwarder
+    ),
+    nftCollectionMock,
+    nftCollectionMockAsRandomWallet: nftCollectionMock.connect(
+      accounts.randomWallet
+    ),
+    nftCollectionMockAsTrustedForwarder: nftCollectionMock.connect(
+      accounts.trustedForwarder
+    ),
+    reenterMock,
     mockERC20: await setupMockERC20(),
     mockOperatorFilterRegistry,
     mint: async (amount, wallet = collectionOwner) => {
@@ -91,6 +112,7 @@ export async function setupNFTCollectionContract() {
       collectionContract,
       accounts.raffleSignWallet
     ),
+    initializeArgs,
     deployWithCustomArg: async (idx: number, val) => {
       const args = [...initializeArgs];
       args[idx] = val;

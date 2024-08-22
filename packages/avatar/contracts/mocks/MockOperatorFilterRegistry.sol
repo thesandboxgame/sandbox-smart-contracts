@@ -23,6 +23,8 @@ contract MockOperatorFilterRegistry {
     bool public revertWithAddressFiltered;
 
     bool public revertWithCodeHashFiltered;
+
+    bool public returnFalse;
     /**
      * @notice Restricts method caller to the address or EIP-173 "owner()"
      */
@@ -51,15 +53,37 @@ contract MockOperatorFilterRegistry {
         revertWithCodeHashFiltered = _revertWithCodeHashFiltered;
     }
 
+    function doFalse(bool _returnFalse) external {
+        returnFalse = _returnFalse;
+    }
+
+
     /**
      * @notice Registers an address with the registry. May be called by address itself or by EIP-173 owner.
      */
     function register(address registrant) external onlyAddressOrOwner(registrant) {
-        if (_registrations[registrant] != address(0)) {
-            revert AlreadyRegistered();
-        }
-        _registrations[registrant] = registrant;
-        emit RegistrationUpdated(registrant, true);
+        _register(registrant);
+    }
+
+    /**
+     * @notice Registers an address with the registry and "subscribes" to another address's filtered operators and codeHashes.
+     * @param registrant the address of the contract to check for (usually address(this))
+     * @param subscription address to subscribe to
+     */
+    function registerAndSubscribe(address registrant, address subscription) external onlyAddressOrOwner(registrant) {
+        require(subscription!=address(0), "invalid address");
+        _register(registrant);
+    }
+
+    /**
+     * @notice Registers an address with the registry and copies the filtered operators and codeHashes from another
+     *         address without subscribing.
+     * @param registrant the address of the contract to check for (usually address(this))
+     * @param registrantToCopy address to copy entries from
+     */
+    function registerAndCopyEntries(address registrant, address registrantToCopy) external onlyAddressOrOwner(registrant) {
+        require(registrantToCopy!=address(0), "invalid address");
+        _register(registrant);
     }
 
     /**
@@ -85,6 +109,8 @@ contract MockOperatorFilterRegistry {
             } else if (revertWithCodeHashFiltered) {
                 bytes32 codeHash = operator.codehash;
                 revert CodeHashFiltered(operator, codeHash);
+            } else if (returnFalse) {
+                return false;
             }
         }
         return true;
@@ -96,4 +122,16 @@ contract MockOperatorFilterRegistry {
     function codeHashOf(address a) external view returns (bytes32) {
         return a.codehash;
     }
+
+    /**
+     * @notice Registers an address with the registry. May be called by address itself or by EIP-173 owner.
+     */
+    function _register(address registrant) internal {
+        if (_registrations[registrant] != address(0)) {
+            revert AlreadyRegistered();
+        }
+        _registrations[registrant] = registrant;
+        emit RegistrationUpdated(registrant, true);
+    }
+
 }
