@@ -248,12 +248,73 @@ describe('NFTCollection', function () {
     });
   });
 
+  describe('trusted forwarder', function () {
+    it('should return msgData without sender when called from the trusted forwarder', async function () {
+      const {
+        nftCollectionMockAsTrustedForwarder,
+        trustedForwarder,
+        randomWallet2,
+      } = await loadFixture(setupNFTCollectionContract);
+      expect(
+        await nftCollectionMockAsTrustedForwarder.isTrustedForwarder(
+          trustedForwarder
+        )
+      ).to.be.true;
+      // 4 (func signature) + 32 (address padded) - 20 bytes
+      expect(
+        await nftCollectionMockAsTrustedForwarder.msgData(randomWallet2)
+      ).to.be.eq('0x3185cfaa000000000000000000000000');
+    });
+
+    it('should return msgData with sender when called form any account', async function () {
+      const {nftCollectionMockAsRandomWallet, randomWallet2} =
+        await loadFixture(setupNFTCollectionContract);
+      expect(
+        await nftCollectionMockAsRandomWallet.msgData(randomWallet2)
+      ).to.be.eq(
+        '0x3185cfaa0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc'
+      );
+    });
+
+    it('should return msgSender without sender when called from the trusted forwarder', async function () {
+      const {
+        nftCollectionMockAsTrustedForwarder,
+        trustedForwarder,
+        randomWallet2,
+      } = await loadFixture(setupNFTCollectionContract);
+      expect(
+        await nftCollectionMockAsTrustedForwarder.isTrustedForwarder(
+          trustedForwarder
+        )
+      ).to.be.true;
+      // 4 (func signature) + 32 (address padded)
+      expect(
+        await nftCollectionMockAsTrustedForwarder.msgSender(randomWallet2)
+      ).to.be.eq(randomWallet2);
+    });
+
+    it('should return msgSender with sender when called form any account', async function () {
+      const {nftCollectionMockAsRandomWallet, randomWallet, randomWallet2} =
+        await loadFixture(setupNFTCollectionContract);
+      expect(
+        await nftCollectionMockAsRandomWallet.msgSender(randomWallet2)
+      ).to.be.eq(randomWallet);
+    });
+  });
+
   describe('coverage', function () {
     it('chain id', async function () {
       const {collectionContract} = await loadFixture(
         setupNFTCollectionContract
       );
       expect(await collectionContract.chain()).to.be.eq(31337);
+    });
+
+    it('feeDenominator', async function () {
+      const {collectionContract} = await loadFixture(
+        setupNFTCollectionContract
+      );
+      expect(await collectionContract.feeDenominator()).to.be.eq(10000);
     });
 
     it('supportsInterface', async function () {
@@ -272,6 +333,50 @@ describe('NFTCollection', function () {
       }
       expect(await collectionContract.supportsInterface('0x11111111')).to.be
         .false;
+    });
+
+    it('should not be able to reenter mint', async function () {
+      const {
+        reenterMock,
+        collectionOwner,
+        maxSupply,
+        authSign,
+        randomWallet,
+        raffleSignWallet,
+        deployWithCustomArg,
+      } = await setupNFTCollectionContract();
+      const contract = await deployWithCustomArg(
+        7,
+        await reenterMock.getAddress()
+      );
+      const contractAsOwner = contract.connect(collectionOwner);
+      await contractAsOwner.setupWave(maxSupply, maxSupply, 1);
+      await expect(
+        reenterMock.mintReenter(
+          contract,
+          await randomWallet.getAddress(),
+          12,
+          222,
+          await authSign(
+            randomWallet,
+            222,
+            raffleSignWallet,
+            await contract.getAddress()
+          )
+        )
+      ).to.be.revertedWith('ReentrancyGuard: reentrant call');
+    });
+
+    it('should not be able to reenter setAllowedExecuteMint', async function () {
+      const {reenterMock, deployWithCustomArg} =
+        await setupNFTCollectionContract();
+      const contract = await deployWithCustomArg(
+        0,
+        await reenterMock.getAddress()
+      );
+      await expect(
+        reenterMock.setAllowedExecuteMintReenter(contract, reenterMock)
+      ).to.be.revertedWith('ReentrancyGuard: reentrant call');
     });
   });
 

@@ -53,9 +53,9 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
         ...[randomWallet, randomWallet2, tokenIds, ...data]
       );
       const receipt = await tx.wait();
-      const gasPerToken = receipt.cumulativeGasUsed / BigInt(tokenIds.length);
+      const gasPerToken = receipt.gasUsed / BigInt(tokenIds.length);
       console.log(
-        `Gas usage of ${method} ${receipt.cumulativeGasUsed} after minting ${
+        `Gas usage of ${method} ${receipt.gasUsed} after minting ${
           tokenIds.length
         } tokens ${gasPerToken} per token, raw estimate of tokens ${
           BigInt(30 * 10 ** 6) / gasPerToken
@@ -78,10 +78,10 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
       [randomWallet, amount],
     ]);
     const receipt = await tx.wait();
-    const gasPerToken = receipt.cumulativeGasUsed / amount;
+    const gasPerToken = receipt.gasUsed / amount;
     console.log(
       `Gas usage of batchMint ${
-        receipt.cumulativeGasUsed
+        receipt.gasUsed
       } after minting ${amount} in one batch tokens ${gasPerToken} per token, raw estimate of tokens ${
         BigInt(30 * 10 ** 6) / gasPerToken
       }`
@@ -97,10 +97,10 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
     }
     const tx = await collectionContractAsOwner.batchMint(batches);
     const receipt = await tx.wait();
-    const gasPerToken = receipt.cumulativeGasUsed / amount;
+    const gasPerToken = receipt.gasUsed / amount;
     console.log(
       `Gas usage of batchMint ${
-        receipt.cumulativeGasUsed
+        receipt.gasUsed
       } after minting ${amount} in multiple batches, ${gasPerToken} per token, raw estimate of tokens ${
         BigInt(30 * 10 ** 6) / gasPerToken
       }`
@@ -131,10 +131,10 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
       .connect(randomWallet)
       .approveAndCall(contract, 0, encodedData);
     const receipt = await tx.wait();
-    const gasPerToken = receipt.cumulativeGasUsed / amount;
+    const gasPerToken = receipt.gasUsed / amount;
     console.log(
       `Gas usage of mint ${
-        receipt.cumulativeGasUsed
+        receipt.gasUsed
       } after minting ${amount} in multiple batches, ${gasPerToken} per token, raw estimate of tokens ${
         BigInt(30 * 10 ** 6) / gasPerToken
       }`
