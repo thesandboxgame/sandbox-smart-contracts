@@ -57,11 +57,10 @@ export function exchangeConfig() {
 
       describe('pauser role', function () {
         it('should not pause if caller is not in the role', async function () {
-          await expect(
-            ExchangeContractAsUser.pause()
-          ).to.be.revertedWithCustomError(
-            ExchangeContractAsUser,
-            'AccessControlUnauthorizedAccount'
+          await expect(ExchangeContractAsUser.pause()).to.be.revertedWith(
+            `AccessControl: account ${(
+              await user.getAddress()
+            ).toLowerCase()} is missing role ${PAUSER_ROLE}`
           );
         });
 
@@ -82,9 +81,10 @@ export function exchangeConfig() {
               newProtocolFeePrimary,
               newProtocolFeeSecondary
             )
-          ).to.be.revertedWithCustomError(
-            ExchangeContractAsUser,
-            'AccessControlUnauthorizedAccount'
+          ).to.be.revertedWith(
+            `AccessControl: account ${(
+              await user.getAddress()
+            ).toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
           );
         });
 
@@ -106,11 +106,10 @@ export function exchangeConfig() {
           const {ExchangeContractAsUser} = await loadFixture(
             deployFixturesWithoutWhitelist
           );
-          await expect(
-            ExchangeContractAsUser.unpause()
-          ).to.be.revertedWithCustomError(
-            ExchangeContractAsUser,
-            'AccessControlUnauthorizedAccount'
+          await expect(ExchangeContractAsUser.unpause()).to.be.revertedWith(
+            `AccessControl: account ${(
+              await user.getAddress()
+            ).toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
           );
         });
 
@@ -128,9 +127,10 @@ export function exchangeConfig() {
       it('should not set setDefaultFeeReceiver if caller is not in the role', async function () {
         await expect(
           ExchangeContractAsUser.setDefaultFeeReceiver(user.getAddress())
-        ).to.be.revertedWithCustomError(
-          ExchangeContractAsUser,
-          'AccessControlUnauthorizedAccount'
+        ).to.be.revertedWith(
+          `AccessControl: account ${(
+            await user.getAddress()
+          ).toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
         );
       });
 
@@ -155,9 +155,10 @@ export function exchangeConfig() {
         const newMatchOrdersLimit = 200;
         await expect(
           ExchangeContractAsUser.setMatchOrdersLimit(newMatchOrdersLimit)
-        ).to.be.revertedWithCustomError(
-          ExchangeContractAsUser,
-          'AccessControlUnauthorizedAccount'
+        ).to.be.revertedWith(
+          `AccessControl: account ${(
+            await user.getAddress()
+          ).toLowerCase()} is missing role ${EXCHANGE_ADMIN_ROLE}`
         );
       });
 
