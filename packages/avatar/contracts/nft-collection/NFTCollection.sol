@@ -514,7 +514,7 @@ IERC4906
      * @custom:event {Transfer}
      * @param wallets list of destination wallets and amounts
      */
-    function batchMint(BatchMintingData[] calldata wallets) external whenNotPaused nonReentrant onlyOwner {
+    function batchMint(BatchMintingData[] calldata wallets) external whenNotPaused onlyOwner {
         require(indexWave > 0, "NFTCollection: contract is not configured");
         uint256 len = wallets.length;
         require(len > 0, "NFTCollection: wallets length cannot be 0");
@@ -948,8 +948,7 @@ IERC4906
     override(ERC2981Upgradeable, ERC721Upgradeable)
     returns (bool)
     {
-        return ERC2981Upgradeable.supportsInterface(interfaceId)
-        || ERC721Upgradeable.supportsInterface(interfaceId);
+        return super.supportsInterface(interfaceId);
     }
 
     /**

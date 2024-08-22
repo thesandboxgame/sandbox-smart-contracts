@@ -5,7 +5,13 @@ import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
 
-function checkAddress(method, getter, eventName, varName) {
+function checkAddress(
+  method,
+  getter,
+  eventName,
+  varName,
+  zeroAddressErr = undefined
+) {
   describe(method, function () {
     it(`owner should be able to ${method}`, async function () {
       const fixtures = await loadFixture(setupNFTCollectionContract);
@@ -25,9 +31,19 @@ function checkAddress(method, getter, eventName, varName) {
       const {collectionContractAsRandomWallet, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
       await expect(
-        collectionContractAsRandomWallet.setTrustedForwarder(randomWallet)
+        collectionContractAsRandomWallet[method](randomWallet)
       ).to.revertedWith('Ownable: caller is not the owner');
     });
+    if (zeroAddressErr) {
+      it(`other should fail to call ${method} with zero address`, async function () {
+        const {collectionContractAsOwner} = await loadFixture(
+          setupNFTCollectionContract
+        );
+        await expect(
+          collectionContractAsOwner[method](ZeroAddress)
+        ).to.revertedWith(zeroAddressErr);
+      });
+    }
   });
 }
 
@@ -38,12 +54,19 @@ describe('NFTCollection config', function () {
     'TrustedForwarderSet',
     'trustedForwarder'
   );
-  checkAddress('setTreasury', 'mintTreasury', 'TreasurySet', 'treasury');
+  checkAddress(
+    'setTreasury',
+    'mintTreasury',
+    'TreasurySet',
+    'treasury',
+    'NFTCollection: owner is zero address'
+  );
   checkAddress(
     'setSignAddress',
     'signAddress',
     'SignAddressSet',
-    'raffleSignWallet'
+    'raffleSignWallet',
+    'NFTCollection: sign address is zero address'
   );
 
   describe('base URI', function () {
