@@ -22,6 +22,7 @@ describe('NFTCollection initialization', function () {
       maxPublicTokensPerWallet,
       maxAllowListTokensPerWallet,
       maxMarketingTokens,
+      mint,
     } = await loadFixture(setupNFTCollectionContract);
     const allowedToExecuteMint = await sandContract.getAddress();
     expect(await collectionContract.owner()).to.be.eq(nftCollectionAdmin);
@@ -80,6 +81,10 @@ describe('NFTCollection initialization', function () {
         allowedToExecuteMint,
         maxSupply
       );
+    expect(await collectionContract.totalSupply()).to.be.eq(0);
+    await mint(1);
+    expect(await collectionContract.totalSupply()).to.be.eq(1);
+    expect(await collectionContract.tokenURI(1)).to.be.eq(metadataUrl + '1');
   });
 
   it('should fail to initialize when called with wrong args', async function () {
@@ -144,5 +149,23 @@ describe('NFTCollection initialization', function () {
         maxSupply + 1, // maxMarketingTokens,
       ])
     ).to.revertedWith('NFTCollection: invalid marketing share');
+  });
+
+  it('should fail to initialize twice', async function () {
+    const {collectionContractAsOwner, initializeArgs} = await loadFixture(
+      setupNFTCollectionContract
+    );
+    await expect(
+      collectionContractAsOwner.initialize(...initializeArgs)
+    ).to.revertedWith('Initializable: contract is already initialized');
+  });
+
+  it('should fail to call __NFTCollection_init when contract is not initializing', async function () {
+    const {nftCollectionMock, initializeArgs} = await loadFixture(
+      setupNFTCollectionContract
+    );
+    await expect(
+      nftCollectionMock.NFTCollection_init(...initializeArgs)
+    ).to.revertedWith('Initializable: contract is not initializing');
   });
 });
