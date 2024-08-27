@@ -116,30 +116,12 @@ describe('NFTCollection config', function () {
         nftCollectionAdmin,
         sandContract,
         mockERC20,
-        mintPrice,
-        maxPublicTokensPerWallet,
-        maxAllowListTokensPerWallet,
-        maxMarketingTokens,
       } = await loadFixture(setupNFTCollectionContract);
       expect(await contract.allowedToExecuteMint()).to.be.eq(sandContract);
-      const DEFAULT_MINT_PRICE_FULL = 100;
-      expect(await contract.DEFAULT_MINT_PRICE_FULL()).to.be.eq(
-        DEFAULT_MINT_PRICE_FULL
-      );
       const tx = contract.setAllowedExecuteMint(mockERC20);
       await expect(tx)
         .to.emit(contract, 'AllowedExecuteMintSet')
         .withArgs(nftCollectionAdmin, sandContract, mockERC20);
-      await expect(tx)
-        .to.emit(contract, 'DefaultMintingValuesSet')
-        .withArgs(
-          nftCollectionAdmin,
-          mintPrice,
-          BigInt(DEFAULT_MINT_PRICE_FULL) * 10n ** 18n,
-          maxPublicTokensPerWallet,
-          maxAllowListTokensPerWallet,
-          maxMarketingTokens
-        );
       expect(await contract.allowedToExecuteMint()).to.be.eq(mockERC20);
     });
 
@@ -337,6 +319,42 @@ describe('NFTCollection config', function () {
           contract.setTokenRoyalty(tokenId, ZeroAddress, 123)
         ).to.revertedWith('ERC2981: Invalid parameters');
       });
+    });
+  });
+
+  describe('setMaxSupply', function () {
+    it('owner should be able to setMaxSupply', async function () {
+      const {collectionContractAsOwner, nftCollectionAdmin, maxSupply} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(collectionContractAsOwner.setMaxSupply(1))
+        .to.emit(collectionContractAsOwner, 'MaxSupplySet')
+        .withArgs(nftCollectionAdmin, maxSupply, 1);
+      expect(await collectionContractAsOwner.maxSupply()).to.be.eq(1);
+    });
+
+    it('owner should fail to setMaxSupply bellow totalSupply', async function () {
+      const {collectionContractAsOwner, nftCollectionAdmin, maxSupply, mint} =
+        await loadFixture(setupNFTCollectionContract);
+      await mint(10);
+      const totalSupply = await collectionContractAsOwner.totalSupply();
+      await expect(collectionContractAsOwner.setMaxSupply(totalSupply))
+        .to.emit(collectionContractAsOwner, 'MaxSupplySet')
+        .withArgs(nftCollectionAdmin, maxSupply, totalSupply);
+      await expect(mint(1)).to.revertedWith(
+        'NFTCollection: _waveMaxTokens exceeds maxSupply'
+      );
+      await expect(
+        collectionContractAsOwner.setMaxSupply(totalSupply - 1n)
+      ).to.revertedWith('NFTCollection: maxSupply must be gte totalSupply');
+    });
+
+    it('other should fail to setMaxSupply', async function () {
+      const {collectionContractAsRandomWallet} = await loadFixture(
+        setupNFTCollectionContract
+      );
+      await expect(
+        collectionContractAsRandomWallet.setMaxSupply(1)
+      ).to.revertedWith('Ownable: caller is not the owner');
     });
   });
 });

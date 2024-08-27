@@ -21,8 +21,7 @@ contract NFTCollectionMock is NFTCollection {
         address _signAddress,
         address _initialTrustedForwarder,
         address _allowedToExecuteMint,
-        uint256 _maxSupply,
-        MintingDefaults memory _mintingDefaults
+        uint256 _maxSupply
     ) external {
         __NFTCollection_init(
             _collectionOwner,
@@ -33,8 +32,7 @@ contract NFTCollectionMock is NFTCollection {
             _signAddress,
             _initialTrustedForwarder,
             _allowedToExecuteMint,
-            _maxSupply,
-            _mintingDefaults
+            _maxSupply
         );
     }
 

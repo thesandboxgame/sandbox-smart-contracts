@@ -57,26 +57,6 @@ IERC4906
     }
 
     /**
-     * @notice Structure used to group default minting parameters in order to avoid stack too deep error
-     * @param mintPrice default mint price for both allowlist and public minting
-     * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
-     * @param maxAllowListTokensPerWallet maximum tokens mint per wallet in the allowlist minting
-     * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
-     */
-    struct MintingDefaults {
-        uint256 mintPrice;
-        uint256 maxPublicTokensPerWallet;
-        uint256 maxAllowListTokensPerWallet;
-        uint256 maxMarketingTokens;
-    }
-
-    /**
-     * @notice default minting price in full tokens (not WEI) when used, this must be
-     *         multiplied by the token "allowedToExecuteMint" token decimals
-     */
-    uint256 public constant DEFAULT_MINT_PRICE_FULL = 100;
-
-    /**
      * @notice maximum amount of tokens that can be minted
      */
     uint256 public maxSupply;
@@ -120,13 +100,6 @@ IERC4906
      * @notice each wave has an index to help track minting/tokens per wallet
      */
     uint256 public indexWave;
-
-    /**
-     * @notice default are used when calling predefined wave setup functions:
-     *         setMarketingMint, setAllowlistMint and setPublicMint
-     *         see struct MintingDefaults for more details
-     */
-    MintingDefaults public mintingDefaults;
 
     /**
      * @notice ERC20 contract through which the minting will be done (approveAndCall)
@@ -233,23 +206,13 @@ IERC4906
     event SignAddressSet(address indexed operator, address indexed oldSignAddress, address indexed newSignAddress);
 
     /**
-     * @notice Event emitted when the default values used by wave manipulation functions were changed
-     * @dev emitted when initialize or setWaveDefaults is called
+     * @notice Event emitted when the max supply is set or changed
+     * @dev emitted when setSignAddress is called
      * @param operator the sender of the transaction
-     * @param oldMintPrice old default mint price for both allow list and public minting
-     * @param newMintPrice new default mint price for both allow list and public minting
-     * @param maxPublicTokensPerWallet maximum tokens mint per wallet in the public minting
-     * @param maxAllowListTokensPerWallet maximum tokens mint per wallet in the allow list minting
-     * @param maxMarketingTokens maximum allowed tokens to be minted in the marketing phase
+     * @param oldMaxSupply old maximum amount of tokens that can be minted
+     * @param newMaxSupply new maximum amount of tokens that can be minted
      */
-    event DefaultMintingValuesSet(
-        address indexed operator,
-        uint256 oldMintPrice,
-        uint256 newMintPrice,
-        uint256 maxPublicTokensPerWallet,
-        uint256 maxAllowListTokensPerWallet,
-        uint256 maxMarketingTokens
-    );
+    event MaxSupplySet(address indexed operator, uint256 oldMaxSupply, uint256 newMaxSupply);
 
     /**
      * @notice Event emitted when a token personalization was made.
@@ -314,7 +277,6 @@ IERC4906
      * @param _initialTrustedForwarder trusted forwarder address
      * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _mintingDefaults default minting values for predefined wave helpers
      */
     function initialize(
         address _collectionOwner,
@@ -325,8 +287,7 @@ IERC4906
         address _signAddress,
         address _initialTrustedForwarder,
         address _allowedToExecuteMint,
-        uint256 _maxSupply,
-        MintingDefaults memory _mintingDefaults
+        uint256 _maxSupply
     ) external virtual initializer {
         __NFTCollection_init(
             _collectionOwner,
@@ -337,8 +298,7 @@ IERC4906
             _signAddress,
             _initialTrustedForwarder,
             _allowedToExecuteMint,
-            _maxSupply,
-            _mintingDefaults
+            _maxSupply
         );
     }
 
@@ -354,7 +314,6 @@ IERC4906
      * @param _initialTrustedForwarder trusted forwarder address
      * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _mintingDefaults default minting values for predefined wave helpers
      */
     function __NFTCollection_init(
         address _collectionOwner,
@@ -365,8 +324,7 @@ IERC4906
         address _signAddress,
         address _initialTrustedForwarder,
         address _allowedToExecuteMint,
-        uint256 _maxSupply,
-        MintingDefaults memory _mintingDefaults
+        uint256 _maxSupply
     ) internal onlyInitializing {
         require(bytes(_initialBaseURI).length != 0, "NFTCollection: baseURI is not set");
         require(bytes(_name).length != 0, "NFTCollection: name is empty");
@@ -375,14 +333,6 @@ IERC4906
         require(_signAddress != address(0), "NFTCollection: sign address is zero address");
         require(_isContract(_allowedToExecuteMint), "NFTCollection: executor address is not a contract");
         require(_maxSupply > 0, "NFTCollection: max supply should be more than 0");
-
-        require(_mintingDefaults.mintPrice > 0, "NFTCollection: public mint price cannot be 0");
-        require(
-            _mintingDefaults.maxPublicTokensPerWallet <= _maxSupply &&
-            _mintingDefaults.maxAllowListTokensPerWallet <= _maxSupply,
-            "NFTCollection: invalid tokens per wallet configuration"
-        );
-        require(_mintingDefaults.maxMarketingTokens <= _maxSupply, "NFTCollection: invalid marketing share");
 
         __ReentrancyGuard_init();
         // @dev we don't want to set the owner to _msgSender, so, we don't call __Ownable_init
@@ -396,16 +346,6 @@ IERC4906
         signAddress = _signAddress;
         allowedToExecuteMint = IERC20(_allowedToExecuteMint);
         maxSupply = _maxSupply;
-
-        emit DefaultMintingValuesSet(
-            _msgSender(),
-            0,
-            _mintingDefaults.mintPrice,
-            _mintingDefaults.maxPublicTokensPerWallet,
-            _mintingDefaults.maxAllowListTokensPerWallet,
-            _mintingDefaults.maxMarketingTokens
-        );
-        mintingDefaults = _mintingDefaults;
 
         emit ContractInitialized(
             _initialBaseURI,
@@ -437,35 +377,6 @@ IERC4906
         require(_waveMaxTokensPerWallet > 0, "NFTCollection: max tokens to mint per wallet is 0");
         require(_waveMaxTokensPerWallet <= _waveMaxTokensOverall, "NFTCollection: invalid supply configuration");
         _setupWave(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
-    }
-
-    /**
-     * @notice helper function to set all token configs to that of the marketing minting phase.
-     *         Uses default values set on contract initialization
-     * @custom:event {WaveSetup}
-     */
-    function setMarketingMint() external onlyOwner {
-        _setupWave(mintingDefaults.maxMarketingTokens, mintingDefaults.maxMarketingTokens, 0);
-    }
-
-    /**
-     * @notice helper function to set all token configs to that of the allow list minting phase.
-     *         Uses default values set on contract initialization
-     * @custom:event {WaveSetup}
-     */
-    function setAllowListMint() external onlyOwner {
-        // @dev maxSupply <= totalSupply, see: _checkTotalNotReached
-        _setupWave(maxSupply - totalSupply, mintingDefaults.maxAllowListTokensPerWallet, mintingDefaults.mintPrice);
-    }
-
-    /**
-     * @notice helper function to set all token configs to that of the public minting phase.
-     *         Uses default values set on contract initialization
-     * @custom:event {WaveSetup}
-     */
-    function setPublicMint() external onlyOwner {
-        // @dev maxSupply <= totalSupply, see: _checkTotalNotReached
-        _setupWave(maxSupply - totalSupply, mintingDefaults.maxPublicTokensPerWallet, mintingDefaults.mintPrice);
     }
 
     /**
@@ -682,27 +593,27 @@ IERC4906
     }
 
     /**
+     * @notice updates the sign address.
+     * @custom:event {MaxSupplySet}
+     * @param _maxSupply maximum amount of tokens that can be minted
+     */
+    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
+        require(_maxSupply >= totalSupply, "NFTCollection: maxSupply must be gte totalSupply");
+        emit MaxSupplySet(_msgSender(), maxSupply, _maxSupply);
+        maxSupply = _maxSupply;
+    }
+
+    /**
      * @notice updates which address is allowed to execute the mint function.
      * @dev also resets default mint price
      * @custom:event {AllowedExecuteMintSet}
      * @custom:event {DefaultMintingValuesSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
-    function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner nonReentrant {
+    function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner {
         require(_isContract(address(_minterToken)), "NFTCollection: executor address is not a contract");
-        uint256 newPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
-
         emit AllowedExecuteMintSet(_msgSender(), allowedToExecuteMint, _minterToken);
-        emit DefaultMintingValuesSet(
-            _msgSender(),
-            mintingDefaults.mintPrice,
-            newPrice,
-            mintingDefaults.maxPublicTokensPerWallet,
-            mintingDefaults.maxAllowListTokensPerWallet,
-            mintingDefaults.maxMarketingTokens
-        );
         allowedToExecuteMint = _minterToken;
-        mintingDefaults.mintPrice = newPrice;
     }
 
     /**
