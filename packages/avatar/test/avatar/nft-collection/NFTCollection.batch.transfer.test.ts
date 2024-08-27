@@ -12,9 +12,10 @@ describe('NFTCollection batch transfer', function () {
           collectionContractAsRandomWallet: contract,
           randomWallet,
           randomWallet2,
+          setupDefaultWave,
           mint,
         } = await loadFixture(setupNFTCollectionContract);
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(20);
         const tokenIds = await mint(5, randomWallet);
         await contract[method](
           ...[randomWallet, randomWallet2, tokenIds, ...data]
@@ -33,9 +34,10 @@ describe('NFTCollection batch transfer', function () {
           collectionContractAsRandomWallet2,
           randomWallet,
           randomWallet2,
+          setupDefaultWave,
           mint,
         } = await loadFixture(setupNFTCollectionContract);
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(20);
         const tokenIds = await mint(5, randomWallet);
         for (const t of tokenIds) {
           await contract.approve(randomWallet2, t);
@@ -52,13 +54,13 @@ describe('NFTCollection batch transfer', function () {
 
       it(`should fail to ${method} if not owner`, async function () {
         const {
-          collectionContractAsOwner,
           collectionContractAsRandomWallet2,
           randomWallet,
           randomWallet2,
+          setupDefaultWave,
           mint,
         } = await loadFixture(setupNFTCollectionContract);
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(20);
         const tokenIds = await mint(5, randomWallet);
         await expect(
           collectionContractAsRandomWallet2[method](

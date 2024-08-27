@@ -46,8 +46,9 @@ describe('NFTCollection burn', function () {
       collectionContractAsOwner,
       randomWallet,
       collectionContractAsRandomWallet,
+      setupDefaultWave,
     } = await loadFixture(setupNFTCollectionContract);
-    await collectionContractAsOwner.setupWave(100, 10, 20);
+    await setupDefaultWave(20);
 
     // skip 5 ids
     await collectionContractAsOwner.batchMint([[randomWallet, 5]]);
@@ -96,8 +97,9 @@ describe('NFTCollection burn', function () {
       randomWallet2,
       collectionContractAsRandomWallet,
       collectionContractAsRandomWallet2,
+      setupDefaultWave,
     } = await loadFixture(setupNFTCollectionContract);
-    await collectionContractAsOwner.setupWave(100, 10, 20);
+    await setupDefaultWave(20);
 
     // enable burning
     await expect(collectionContractAsOwner.burn(1)).to.revertedWith(
@@ -148,9 +150,9 @@ describe('NFTCollection burn', function () {
       collectionContractAsOwner,
       randomWallet,
       collectionContractAsRandomWallet2,
+      setupDefaultWave,
     } = await loadFixture(setupNFTCollectionContract);
-    await collectionContractAsOwner.setupWave(100, 10, 20);
-
+    await setupDefaultWave(20);
     await collectionContractAsOwner.enableBurning();
 
     // mint 5

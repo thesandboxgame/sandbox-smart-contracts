@@ -8,13 +8,11 @@ export async function setupNFTCollectionContract() {
   const collectionName = 'MockNFTTesting';
   const collectionSymbol = 'MAT';
   const maxSupply = 500;
-  const maxMarketingTokens = 50;
+  const waveMaxTokensOverall = 100;
+  const waveMaxTokensPerWallet = 13;
+  const mintPrice = parseUnits('100', 'ether');
   const metadataUrl =
     'https://contracts-demo.sandbox.game/NFTCollection-unrevealed/';
-
-  const mintPrice = parseUnits('100', 'ether');
-  const maxPublicTokensPerWallet = 4;
-  const maxAllowListTokensPerWallet = 2;
 
   const collectionOwner = accounts.nftCollectionAdmin;
   const sandContract = await setupMockERC20();
@@ -28,12 +26,6 @@ export async function setupNFTCollectionContract() {
     accounts.trustedForwarder.address,
     await sandContract.getAddress(),
     maxSupply,
-    [
-      mintPrice,
-      maxPublicTokensPerWallet,
-      maxAllowListTokensPerWallet,
-      maxMarketingTokens,
-    ],
   ];
   const NFTCollectionFactory = await ethers.getContractFactory('NFTCollection');
   const collectionContract = (await upgrades.deployProxy(
@@ -63,8 +55,14 @@ export async function setupNFTCollectionContract() {
   const nftCollectionMock = await NFTCollectionMock.connect(
     accounts.deployer
   ).deploy(collectionOwner.address, accounts.trustedForwarder.address);
-  const ReenterMock = await ethers.getContractFactory('ReenterMock');
-  const reenterMock = await ReenterMock.connect(accounts.deployer).deploy();
+
+  async function setupDefaultWave(price: BigNumberish) {
+    await collectionContractAsOwner.setupWave(
+      waveMaxTokensOverall,
+      waveMaxTokensPerWallet,
+      price
+    );
+  }
 
   return {
     ...accounts,
@@ -72,10 +70,9 @@ export async function setupNFTCollectionContract() {
     collectionName,
     collectionSymbol,
     maxSupply,
+    waveMaxTokensOverall,
+    waveMaxTokensPerWallet,
     mintPrice,
-    maxPublicTokensPerWallet,
-    maxAllowListTokensPerWallet,
-    maxMarketingTokens,
     sandContract,
     collectionOwner,
     collectionContract,
@@ -96,11 +93,11 @@ export async function setupNFTCollectionContract() {
     nftCollectionMockAsTrustedForwarder: nftCollectionMock.connect(
       accounts.trustedForwarder
     ),
-    reenterMock,
     mockERC20: await setupMockERC20(),
     mockOperatorFilterRegistry,
+    setupDefaultWave,
     mint: async (amount, wallet = collectionOwner) => {
-      await collectionContractAsOwner.setMarketingMint();
+      await setupDefaultWave(0);
       await collectionContractAsOwner.batchMint([[wallet, amount]]);
       const transferEvents = await collectionContractAsOwner.queryFilter(
         'Transfer'

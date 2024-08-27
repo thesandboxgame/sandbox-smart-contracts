@@ -18,10 +18,6 @@ describe('NFTCollection initialization', function () {
       trustedForwarder,
       sandContract,
       maxSupply,
-      mintPrice,
-      maxPublicTokensPerWallet,
-      maxAllowListTokensPerWallet,
-      maxMarketingTokens,
       mint,
     } = await loadFixture(setupNFTCollectionContract);
     const allowedToExecuteMint = await sandContract.getAddress();
@@ -43,15 +39,6 @@ describe('NFTCollection initialization', function () {
     expect(await collectionContract.operatorFilterRegistry()).to.be.eq(
       ZeroAddress
     );
-    const mintingDefaults = await collectionContract.mintingDefaults();
-    expect(mintingDefaults.mintPrice).to.be.eq(mintPrice);
-    expect(mintingDefaults.maxPublicTokensPerWallet).to.be.eq(
-      maxPublicTokensPerWallet
-    );
-    expect(mintingDefaults.maxAllowListTokensPerWallet).to.be.eq(
-      maxAllowListTokensPerWallet
-    );
-    expect(mintingDefaults.maxMarketingTokens).to.be.eq(maxMarketingTokens);
 
     const tx = collectionContract.deploymentTransaction();
     await expect(tx)
@@ -60,16 +47,6 @@ describe('NFTCollection initialization', function () {
     await expect(tx)
       .to.emit(collectionContract, 'TrustedForwarderSet')
       .withArgs(deployer, ZeroAddress, trustedForwarder);
-    await expect(tx)
-      .to.emit(collectionContract, 'DefaultMintingValuesSet')
-      .withArgs(
-        deployer,
-        0,
-        mintPrice,
-        maxPublicTokensPerWallet,
-        maxAllowListTokensPerWallet,
-        maxMarketingTokens
-      );
     await expect(tx)
       .to.emit(collectionContract, 'ContractInitialized')
       .withArgs(
@@ -88,14 +65,7 @@ describe('NFTCollection initialization', function () {
   });
 
   it('should fail to initialize when called with wrong args', async function () {
-    const {
-      deployWithCustomArg,
-      mintPrice,
-      maxPublicTokensPerWallet,
-      maxAllowListTokensPerWallet,
-      maxMarketingTokens,
-      maxSupply,
-    } = await loadFixture(setupNFTCollectionContract);
+    const {deployWithCustomArg} = await loadFixture(setupNFTCollectionContract);
     await expect(deployWithCustomArg(1, '')).to.revertedWith(
       'NFTCollection: baseURI is not set'
     );
@@ -117,38 +87,6 @@ describe('NFTCollection initialization', function () {
     await expect(deployWithCustomArg(8, 0)).to.revertedWith(
       'NFTCollection: max supply should be more than 0'
     );
-    await expect(
-      deployWithCustomArg(9, [
-        0, // mintPrice
-        maxPublicTokensPerWallet,
-        maxAllowListTokensPerWallet,
-        maxMarketingTokens,
-      ])
-    ).to.revertedWith('NFTCollection: public mint price cannot be 0');
-    await expect(
-      deployWithCustomArg(9, [
-        mintPrice,
-        maxSupply + 1, // maxPublicTokensPerWallet,
-        maxAllowListTokensPerWallet,
-        maxMarketingTokens,
-      ])
-    ).to.revertedWith('NFTCollection: invalid tokens per wallet configuration');
-    await expect(
-      deployWithCustomArg(9, [
-        mintPrice,
-        maxPublicTokensPerWallet,
-        maxSupply + 1, // maxAllowListTokensPerWallet
-        maxMarketingTokens,
-      ])
-    ).to.revertedWith('NFTCollection: invalid tokens per wallet configuration');
-    await expect(
-      deployWithCustomArg(9, [
-        mintPrice,
-        maxPublicTokensPerWallet,
-        maxAllowListTokensPerWallet,
-        maxSupply + 1, // maxMarketingTokens,
-      ])
-    ).to.revertedWith('NFTCollection: invalid marketing share');
   });
 
   it('should fail to initialize twice', async function () {
