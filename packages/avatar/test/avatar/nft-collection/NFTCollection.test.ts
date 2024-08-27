@@ -6,13 +6,13 @@ describe('NFTCollection', function () {
   describe('reveal', function () {
     it('token owner should be able to be call reveal with a valid signature', async function () {
       const {
-        collectionContractAsOwner,
         collectionContractAsRandomWallet,
         randomWallet,
         authSign,
+        setupDefaultWave,
         mint,
       } = await loadFixture(setupNFTCollectionContract);
-      await collectionContractAsOwner.setMarketingMint();
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
         collectionContractAsRandomWallet.reveal(
@@ -26,10 +26,9 @@ describe('NFTCollection', function () {
     });
 
     it('other owner should fail to call reveal', async function () {
-      const {collectionContractAsOwner, randomWallet, mint} = await loadFixture(
-        setupNFTCollectionContract
-      );
-      await collectionContractAsOwner.setMarketingMint();
+      const {collectionContractAsOwner, randomWallet, setupDefaultWave, mint} =
+        await loadFixture(setupNFTCollectionContract);
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
         collectionContractAsOwner.reveal(tokenIds[0], 222, '0x')
@@ -38,9 +37,9 @@ describe('NFTCollection', function () {
 
     describe('signature issues', function () {
       it('should not be able to reveal when with an invalid signature', async function () {
-        const {collectionContractAsOwner, mint} =
+        const {collectionContractAsOwner, setupDefaultWave, mint} =
           await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
           collectionContractAsOwner.reveal(tokenIds[0], 222, '0x')
@@ -48,9 +47,14 @@ describe('NFTCollection', function () {
       });
 
       it('should not be able to reveal when with a wrong signature (signed by wrong address)', async function () {
-        const {collectionContractAsOwner, randomWallet, authSign, mint} =
-          await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        const {
+          collectionContractAsOwner,
+          randomWallet,
+          authSign,
+          setupDefaultWave,
+          mint,
+        } = await setupNFTCollectionContract();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
           collectionContractAsOwner.reveal(
@@ -62,9 +66,14 @@ describe('NFTCollection', function () {
       });
 
       it('should not be able to reveal when the signature is used twice', async function () {
-        const {collectionContractAsOwner, collectionOwner, authSign, mint} =
-          await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        const {
+          collectionContractAsOwner,
+          collectionOwner,
+          authSign,
+          setupDefaultWave,
+          mint,
+        } = await setupNFTCollectionContract();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         const signature = await authSign(collectionOwner, 222);
         await collectionContractAsOwner.reveal(tokenIds[0], 222, signature);
@@ -82,9 +91,10 @@ describe('NFTCollection', function () {
         collectionContractAsRandomWallet,
         randomWallet,
         personalizeSignature,
+        setupDefaultWave,
         mint,
       } = await loadFixture(setupNFTCollectionContract);
-      await collectionContractAsOwner.setMarketingMint();
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       const personalizationMask = '0x123456789abcdef0';
       const tx = collectionContractAsRandomWallet.personalize(
@@ -110,10 +120,9 @@ describe('NFTCollection', function () {
     });
 
     it('other owner should fail to call personalize', async function () {
-      const {collectionContractAsOwner, randomWallet, mint} = await loadFixture(
-        setupNFTCollectionContract
-      );
-      await collectionContractAsOwner.setMarketingMint();
+      const {collectionContractAsOwner, randomWallet, setupDefaultWave, mint} =
+        await loadFixture(setupNFTCollectionContract);
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
         collectionContractAsOwner.personalize(
@@ -127,9 +136,9 @@ describe('NFTCollection', function () {
 
     describe('signature issues', function () {
       it('should not be able to personalize when with an invalid signature', async function () {
-        const {collectionContractAsOwner, mint} =
+        const {collectionContractAsOwner, setupDefaultWave, mint} =
           await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
           collectionContractAsOwner.personalize(
@@ -146,9 +155,10 @@ describe('NFTCollection', function () {
           collectionContractAsOwner,
           randomWallet,
           personalizeSignature,
+          setupDefaultWave,
           mint,
         } = await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
           collectionContractAsOwner.personalize(
@@ -171,9 +181,10 @@ describe('NFTCollection', function () {
           collectionContractAsOwner,
           collectionOwner,
           personalizeSignature,
+          setupDefaultWave,
           mint,
         } = await setupNFTCollectionContract();
-        await collectionContractAsOwner.setMarketingMint();
+        await setupDefaultWave(0);
         const tokenIds = await mint(1);
         const signature = await personalizeSignature(
           collectionOwner,
@@ -201,9 +212,14 @@ describe('NFTCollection', function () {
 
   describe('operatorPersonalize', function () {
     it('owner should be able to be call operatorPersonalize', async function () {
-      const {collectionContractAsOwner, collectionOwner, mint, randomWallet} =
-        await loadFixture(setupNFTCollectionContract);
-      await collectionContractAsOwner.setMarketingMint();
+      const {
+        collectionContractAsOwner,
+        collectionOwner,
+        setupDefaultWave,
+        mint,
+        randomWallet,
+      } = await loadFixture(setupNFTCollectionContract);
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       const personalizationMask = '0x123456789abcdef0';
       const tx = collectionContractAsOwner.operatorPersonalize(
@@ -223,12 +239,12 @@ describe('NFTCollection', function () {
 
     it('other owner should fail to call operatorPersonalize', async function () {
       const {
-        collectionContractAsOwner,
         collectionContractAsRandomWallet,
         randomWallet,
+        setupDefaultWave,
         mint,
       } = await loadFixture(setupNFTCollectionContract);
-      await collectionContractAsOwner.setMarketingMint();
+      await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
         collectionContractAsRandomWallet.operatorPersonalize(
@@ -337,7 +353,7 @@ describe('NFTCollection', function () {
 
     it('should not be able to reenter mint', async function () {
       const {
-        reenterMock,
+        mockERC20,
         collectionOwner,
         maxSupply,
         authSign,
@@ -347,12 +363,12 @@ describe('NFTCollection', function () {
       } = await setupNFTCollectionContract();
       const contract = await deployWithCustomArg(
         7,
-        await reenterMock.getAddress()
+        await mockERC20.getAddress()
       );
       const contractAsOwner = contract.connect(collectionOwner);
       await contractAsOwner.setupWave(maxSupply, maxSupply, 1);
       await expect(
-        reenterMock.mintReenter(
+        mockERC20.mintReenter(
           contract,
           await randomWallet.getAddress(),
           12,
@@ -364,18 +380,6 @@ describe('NFTCollection', function () {
             await contract.getAddress()
           )
         )
-      ).to.be.revertedWith('ReentrancyGuard: reentrant call');
-    });
-
-    it('should not be able to reenter setAllowedExecuteMint', async function () {
-      const {reenterMock, deployWithCustomArg} =
-        await setupNFTCollectionContract();
-      const contract = await deployWithCustomArg(
-        0,
-        await reenterMock.getAddress()
-      );
-      await expect(
-        reenterMock.setAllowedExecuteMintReenter(contract, reenterMock)
       ).to.be.revertedWith('ReentrancyGuard: reentrant call');
     });
   });
