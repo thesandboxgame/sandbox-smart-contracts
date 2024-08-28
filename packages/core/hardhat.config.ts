@@ -239,12 +239,13 @@ const config: HardhatUserConfig = {
       polygon: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
-      default: 4,
+      default: null,
       mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
-      goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      sepolia: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      goerli_test: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      sepolia: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      amoy: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
     },
     sandboxFoundation: {
       default: 'sandAdmin',
@@ -254,9 +255,10 @@ const config: HardhatUserConfig = {
     extraCatalystAndGemMinter: {
       default: null,
       mainnet: null,
-      goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      goerli_test: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
-      sepolia: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
+      goerli: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      goerli_test: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      sepolia: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
+      amoy: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
     },
     defaultOperatorFiltererRegistry:
       '0x000000000000AAeB6D7670E522A718067333cd4E',
