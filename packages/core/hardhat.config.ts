@@ -239,7 +239,7 @@ const config: HardhatUserConfig = {
       polygon: '0x4e2422AC29B72290Be28C6a7c3Fad7A7fDA69e7a',
     },
     sandboxAccount: {
-      default: null,
+      default: 4,
       mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       goerli: '0xC9bAbb4B452Dd9f74476cE49ee197a1Af6E803ea',
