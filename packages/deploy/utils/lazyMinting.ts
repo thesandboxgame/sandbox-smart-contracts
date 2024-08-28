@@ -38,6 +38,7 @@ export type Order = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
+  makeRecipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -115,6 +116,7 @@ export async function signOrder(
         {name: 'makeAsset', type: 'Asset'},
         {name: 'taker', type: 'address'},
         {name: 'takeAsset', type: 'Asset'},
+        {name: 'makeRecipient', type: 'address'},
         {name: 'salt', type: 'uint256'},
         {name: 'start', type: 'uint256'},
         {name: 'end', type: 'uint256'},
@@ -131,13 +133,15 @@ export const OrderDefault = async (
   takeAsset: Asset,
   salt: Numeric,
   start: Numeric,
-  end: Numeric
+  end: Numeric,
+  makeRecipient?: Address
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
   taker:
     taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
+  makeRecipient: makeRecipient || (await maker.getAddress()), // Use makerAddress if makeRecipient is not provided
   salt,
   start,
   end,
