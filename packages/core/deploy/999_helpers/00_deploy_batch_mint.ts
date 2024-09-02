@@ -1,6 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import { skipUnlessL2 } from '../../utils/network';
+import { skipUnlessL1 } from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -13,11 +13,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  const isMinter = await read('PolygonLand', 'isMinter', batch.address);
+  const isMinter = await read('Land', 'isMinter', batch.address);
   if (!isMinter) {
-    const admin = await read('PolygonLand', 'getAdmin');
+    const admin = await read('Land', 'getAdmin');
     await execute(
-      'PolygonLand',
+      'Land',
       {from: admin, log: true},
       'setMinter',
       batch.address,
@@ -26,5 +26,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.skip = skipUnlessL2;
-func.tags = ['DeployerBatchMintPolygon', 'DeployerBatchMintPolygon_deploy'];
+func.skip = skipUnlessL1;
+func.tags = ['DeployerBatchMint', 'DeployerBatchMint_deploy'];
