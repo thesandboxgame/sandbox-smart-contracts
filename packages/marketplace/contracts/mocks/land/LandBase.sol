@@ -6,17 +6,17 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
-import {IERC173} from "./IERC173.sol";
-import {ILandToken} from "./ILandToken.sol";
-import {IQuad} from "./IQuad.sol";
-import {ILandMetadataRegistry} from "./ILandMetadataRegistry.sol";
-import {IERC721BatchOps} from "./IERC721BatchOps.sol";
+import {IOperatorFilterRegistry} from "@sandbox-smart-contracts/land/contracts/interfaces/IOperatorFilterRegistry.sol";
+import {IERC173} from "@sandbox-smart-contracts/land/contracts/interfaces/IERC173.sol";
+import {ILandToken} from "@sandbox-smart-contracts/land/contracts/interfaces/ILandToken.sol";
+import {IQuad} from "@sandbox-smart-contracts/land/contracts/interfaces/IQuad.sol";
+import {ILandMetadataRegistry} from "@sandbox-smart-contracts/land/contracts/interfaces/ILandMetadataRegistry.sol";
+import {IERC721BatchOps} from "@sandbox-smart-contracts/land/contracts/interfaces/IERC721BatchOps.sol";
 import {WithAdmin} from "./WithAdmin.sol";
-import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "@sandbox-smart-contracts/land/contracts/common/OperatorFiltererUpgradeable.sol";
 import {WithMetadataRegistry} from "./WithMetadataRegistry.sol";
-import {WithRoyalties} from "./WithRoyalties.sol";
-import {WithOwner} from "./WithOwner.sol";
+import {WithRoyalties} from "@sandbox-smart-contracts/land/contracts/common/WithRoyalties.sol";
+import {WithOwner} from "@sandbox-smart-contracts/land/contracts/common/WithOwner.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 
 /// @title Land Contract

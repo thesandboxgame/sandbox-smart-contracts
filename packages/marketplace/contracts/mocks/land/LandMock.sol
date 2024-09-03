@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import {IOperatorFilterRegistry} from "./IOperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "@sandbox-smart-contracts/land/contracts/interfaces/IOperatorFilterRegistry.sol";
 import {WithAdmin} from "./WithAdmin.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
-import {OperatorFiltererUpgradeable} from "./OperatorFiltererUpgradeable.sol";
+import {OperatorFiltererUpgradeable} from "@sandbox-smart-contracts/land/contracts/common/OperatorFiltererUpgradeable.sol";
 import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 import {LandBaseToken} from "./LandBaseToken.sol";
 import {LandBase} from "./LandBase.sol";
-import {LandStorageMixin} from "./LandStorageMixin.sol";
+import {LandStorageMixin} from "@sandbox-smart-contracts/land/contracts/mainnet/LandStorageMixin.sol";
 
 /// @title Land Mock Contrac
 contract LandMock is LandStorageMixin, LandBase {

@@ -6,10 +6,9 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-// import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {IERC721MandatoryTokenReceiver} from "./IERC721MandatoryTokenReceiver.sol";
+import {IERC721MandatoryTokenReceiver} from "@sandbox-smart-contracts/land/contracts/interfaces/IERC721MandatoryTokenReceiver.sol";
 import {IErrors} from "./IErrors.sol";
-import {IERC721BatchOps} from "./IERC721BatchOps.sol";
+import {IERC721BatchOps} from "@sandbox-smart-contracts/land/contracts/interfaces/IERC721BatchOps.sol";
 import {WithSuperOperators} from "./WithSuperOperators.sol";
 
 /// @title ERC721BaseTokenCommon

@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IErrors} from "./IErrors.sol";
-import {ILandToken} from "./ILandToken.sol";
+import {ILandToken} from "@sandbox-smart-contracts/land/contracts/interfaces/ILandToken.sol";
 import {ERC721BaseToken} from "./ERC721BaseToken.sol";
 
 /// @title LandBaseToken

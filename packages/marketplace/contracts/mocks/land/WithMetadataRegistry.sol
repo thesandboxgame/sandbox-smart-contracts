@@ -3,7 +3,7 @@
 pragma solidity 0.8.23;
 
 import {IErrors} from "./IErrors.sol";
-import {ILandMetadataRegistry} from "./ILandMetadataRegistry.sol";
+import {ILandMetadataRegistry} from "@sandbox-smart-contracts/land/contracts/interfaces/ILandMetadataRegistry.sol";
 
 /// @title WithMetadataRegistry
 /// @author The Sandbox
