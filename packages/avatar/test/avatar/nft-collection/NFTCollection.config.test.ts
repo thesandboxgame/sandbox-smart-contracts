@@ -28,20 +28,20 @@ function checkAddress(
     });
 
     it(`other should fail to ${method}`, async function () {
-      const {collectionContractAsRandomWallet, randomWallet} =
+      const {collectionContractAsRandomWallet: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
-      await expect(
-        collectionContractAsRandomWallet[method](randomWallet)
-      ).to.revertedWith('Ownable: caller is not the owner');
+      await expect(contract[method](randomWallet))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
     });
     if (zeroAddressErr) {
       it(`other should fail to call ${method} with zero address`, async function () {
-        const {collectionContractAsOwner} = await loadFixture(
+        const {collectionContractAsOwner: contract} = await loadFixture(
           setupNFTCollectionContract
         );
-        await expect(
-          collectionContractAsOwner[method](ZeroAddress)
-        ).to.revertedWith(zeroAddressErr);
+        await expect(contract[method](ZeroAddress))
+          .to.revertedWithCustomError(contract, zeroAddressErr)
+          .withArgs(ZeroAddress);
       });
     }
   });
@@ -59,14 +59,14 @@ describe('NFTCollection config', function () {
     'mintTreasury',
     'TreasurySet',
     'treasury',
-    'NFTCollection: owner is zero address'
+    'InvalidTreasury'
   );
   checkAddress(
     'setSignAddress',
     'signAddress',
     'SignAddressSet',
     'raffleSignWallet',
-    'NFTCollection: sign address is zero address'
+    'InvalidSignAddress'
   );
 
   describe('base URI', function () {
@@ -89,22 +89,27 @@ describe('NFTCollection config', function () {
     });
 
     it('other should fail to setAllowedExecuteMint', async function () {
-      const {collectionContractAsRandomWallet} = await loadFixture(
-        setupNFTCollectionContract
-      );
+      const {collectionContractAsRandomWallet, randomWallet} =
+        await loadFixture(setupNFTCollectionContract);
       await expect(
         collectionContractAsRandomWallet.setBaseURI(
           'http://something.something'
         )
-      ).to.revertedWith('Ownable: caller is not the owner');
+      )
+        .to.revertedWithCustomError(
+          collectionContractAsRandomWallet,
+          'OwnableUnauthorizedAccount'
+        )
+        .withArgs(randomWallet);
     });
 
     it('owner should fail to setAllowedExecuteMint for non contract address', async function () {
       const {collectionContractAsOwner: contract} = await loadFixture(
         setupNFTCollectionContract
       );
-      await expect(contract.setBaseURI('')).to.revertedWith(
-        'NFTCollection: baseURI is not set'
+      await expect(contract.setBaseURI('')).to.revertedWithCustomError(
+        contract,
+        'InvalidBaseTokenURI'
       );
     });
   });
@@ -126,19 +131,19 @@ describe('NFTCollection config', function () {
     });
 
     it('other should fail to setAllowedExecuteMint', async function () {
-      const {collectionContractAsRandomWallet, randomWallet} =
+      const {collectionContractAsRandomWallet: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
-      await expect(
-        collectionContractAsRandomWallet.setAllowedExecuteMint(randomWallet)
-      ).to.revertedWith('Ownable: caller is not the owner');
+      await expect(contract.setAllowedExecuteMint(randomWallet))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
     });
 
     it('owner should fail to setAllowedExecuteMint for non contract address', async function () {
       const {collectionContractAsOwner: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
-      await expect(
-        contract.setAllowedExecuteMint(randomWallet)
-      ).to.revertedWith('NFTCollection: executor address is not a contract');
+      await expect(contract.setAllowedExecuteMint(randomWallet))
+        .to.revertedWithCustomError(contract, 'InvalidAllowedToExecuteMint')
+        .withArgs(randomWallet);
     });
   });
 
@@ -149,7 +154,10 @@ describe('NFTCollection config', function () {
 
       expect(await contract.paused()).to.be.false;
 
-      await expect(contract.unpause()).to.revertedWith('Pausable: not paused');
+      await expect(contract.unpause()).to.revertedWithCustomError(
+        contract,
+        'ExpectedPause'
+      );
 
       await expect(contract.pause())
         .to.emit(contract, 'Paused')
@@ -157,7 +165,10 @@ describe('NFTCollection config', function () {
 
       expect(await contract.paused()).to.be.true;
 
-      await expect(contract.pause()).to.revertedWith('Pausable: paused');
+      await expect(contract.pause()).to.revertedWithCustomError(
+        contract,
+        'EnforcedPause'
+      );
 
       await expect(contract.unpause())
         .to.emit(contract, 'Unpaused')
@@ -167,31 +178,39 @@ describe('NFTCollection config', function () {
     it('other should fail to pause / unpause the contract', async function () {
       const {collectionContractAsRandomWallet: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
-      await expect(contract.pause(randomWallet)).to.revertedWith(
-        'Ownable: caller is not the owner'
-      );
-      await expect(contract.unpause(randomWallet)).to.revertedWith(
-        'Ownable: caller is not the owner'
-      );
+      await expect(contract.pause(randomWallet))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
+      await expect(contract.unpause(randomWallet))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
     });
 
     it('owner should fail to call restricted methods when paused', async function () {
       const {collectionContractAsOwner: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
       await contract.pause();
-      await expect(contract.mint(randomWallet, 10, 1, '0x')).to.revertedWith(
-        'Pausable: paused'
+      await expect(
+        contract.mint(randomWallet, 10, 1, '0x')
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.batchMint([[randomWallet, 1]])
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(contract.reveal(1, 1, '0x')).to.revertedWithCustomError(
+        contract,
+        'EnforcedPause'
       );
-      await expect(contract.batchMint([[randomWallet, 1]])).to.revertedWith(
-        'Pausable: paused'
+
+      await expect(
+        contract.personalize(1, '0x', 1, 1)
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(contract.burn(1)).to.revertedWithCustomError(
+        contract,
+        'EnforcedPause'
       );
-      await expect(contract.reveal(1, 1, '0x')).to.revertedWith(
-        'Pausable: paused'
-      );
-      await expect(contract.personalize(1, '0x', 1, 1)).to.revertedWith(
-        'Pausable: paused'
-      );
-      await expect(contract.burn(1)).to.revertedWith('Pausable: paused');
     });
   });
 
@@ -230,23 +249,26 @@ describe('NFTCollection config', function () {
       it('other should fail to setDefaultRoyalty and resetDefaultRoyalty', async function () {
         const {collectionContractAsRandomWallet: contract, randomWallet} =
           await loadFixture(setupNFTCollectionContract);
-        await expect(
-          contract.setDefaultRoyalty(randomWallet, 123)
-        ).to.revertedWith('Ownable: caller is not the owner');
-        await expect(contract.resetDefaultRoyalty()).to.revertedWith(
-          'Ownable: caller is not the owner'
-        );
+        await expect(contract.setDefaultRoyalty(randomWallet, 123))
+          .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+          .withArgs(randomWallet);
+        await expect(contract.resetDefaultRoyalty())
+          .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+          .withArgs(randomWallet);
       });
 
       it('owner should fail to call setDefaultRoyalty with wrong values', async function () {
         const {collectionContractAsOwner: contract, randomWallet} =
           await loadFixture(setupNFTCollectionContract);
-        await expect(
-          contract.setDefaultRoyalty(randomWallet, 20000)
-        ).to.revertedWith('ERC2981: royalty fee will exceed salePrice');
-        await expect(
-          contract.setDefaultRoyalty(ZeroAddress, 123)
-        ).to.revertedWith('ERC2981: invalid receiver');
+        await expect(contract.setDefaultRoyalty(randomWallet, 20000))
+          .to.revertedWithCustomError(contract, 'ERC2981InvalidDefaultRoyalty')
+          .withArgs(20000, 10000);
+        await expect(contract.setDefaultRoyalty(ZeroAddress, 123))
+          .to.revertedWithCustomError(
+            contract,
+            'ERC2981InvalidDefaultRoyaltyReceiver'
+          )
+          .withArgs(ZeroAddress);
       });
     });
 
@@ -300,61 +322,71 @@ describe('NFTCollection config', function () {
         const {collectionContractAsRandomWallet: contract, randomWallet} =
           await loadFixture(setupNFTCollectionContract);
         const tokenId = 34;
-        await expect(
-          contract.setTokenRoyalty(tokenId, randomWallet, 123)
-        ).to.revertedWith('Ownable: caller is not the owner');
-        await expect(contract.resetTokenRoyalty(tokenId)).to.revertedWith(
-          'Ownable: caller is not the owner'
-        );
+        await expect(contract.setTokenRoyalty(tokenId, randomWallet, 123))
+          .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+          .withArgs(randomWallet);
+        await expect(contract.resetTokenRoyalty(tokenId))
+          .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+          .withArgs(randomWallet);
       });
 
       it('owner should fail to call setTokenRoyalty with wrong values', async function () {
         const {collectionContractAsOwner: contract, randomWallet} =
           await loadFixture(setupNFTCollectionContract);
         const tokenId = 34;
-        await expect(
-          contract.setTokenRoyalty(tokenId, randomWallet, 20000)
-        ).to.revertedWith('ERC2981: royalty fee will exceed salePrice');
-        await expect(
-          contract.setTokenRoyalty(tokenId, ZeroAddress, 123)
-        ).to.revertedWith('ERC2981: Invalid parameters');
+        await expect(contract.setTokenRoyalty(tokenId, randomWallet, 20000))
+          .to.revertedWithCustomError(contract, 'ERC2981InvalidTokenRoyalty')
+          .withArgs(tokenId, 20000, 10000);
+        await expect(contract.setTokenRoyalty(tokenId, ZeroAddress, 123))
+          .to.revertedWithCustomError(
+            contract,
+            'ERC2981InvalidTokenRoyaltyReceiver'
+          )
+          .withArgs(tokenId, ZeroAddress);
       });
     });
   });
 
   describe('setMaxSupply', function () {
     it('owner should be able to setMaxSupply', async function () {
-      const {collectionContractAsOwner, nftCollectionAdmin, maxSupply} =
-        await loadFixture(setupNFTCollectionContract);
-      await expect(collectionContractAsOwner.setMaxSupply(1))
-        .to.emit(collectionContractAsOwner, 'MaxSupplySet')
+      const {
+        collectionContractAsOwner: contract,
+        nftCollectionAdmin,
+        maxSupply,
+      } = await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxSupply(1))
+        .to.emit(contract, 'MaxSupplySet')
         .withArgs(nftCollectionAdmin, maxSupply, 1);
-      expect(await collectionContractAsOwner.maxSupply()).to.be.eq(1);
+      expect(await contract.maxSupply()).to.be.eq(1);
     });
 
     it('owner should fail to setMaxSupply bellow totalSupply', async function () {
-      const {collectionContractAsOwner, nftCollectionAdmin, maxSupply, mint} =
-        await loadFixture(setupNFTCollectionContract);
+      const {
+        collectionContractAsOwner: contract,
+        collectionOwner,
+        nftCollectionAdmin,
+        maxSupply,
+        mint,
+      } = await loadFixture(setupNFTCollectionContract);
       await mint(10);
-      const totalSupply = await collectionContractAsOwner.totalSupply();
-      await expect(collectionContractAsOwner.setMaxSupply(totalSupply))
-        .to.emit(collectionContractAsOwner, 'MaxSupplySet')
+      const totalSupply = await contract.totalSupply();
+      await expect(contract.setMaxSupply(totalSupply))
+        .to.emit(contract, 'MaxSupplySet')
         .withArgs(nftCollectionAdmin, maxSupply, totalSupply);
-      await expect(mint(1)).to.revertedWith(
-        'NFTCollection: _waveMaxTokens exceeds maxSupply'
-      );
-      await expect(
-        collectionContractAsOwner.setMaxSupply(totalSupply - 1n)
-      ).to.revertedWith('NFTCollection: maxSupply must be gte totalSupply');
+      await expect(contract.batchMint([[collectionOwner, 1]]))
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(collectionOwner, 1);
+      await expect(contract.setMaxSupply(totalSupply - 1n))
+        .to.revertedWithCustomError(contract, 'LowMaxSupply')
+        .withArgs(totalSupply - 1n, totalSupply);
     });
 
     it('other should fail to setMaxSupply', async function () {
-      const {collectionContractAsRandomWallet} = await loadFixture(
-        setupNFTCollectionContract
-      );
-      await expect(
-        collectionContractAsRandomWallet.setMaxSupply(1)
-      ).to.revertedWith('Ownable: caller is not the owner');
+      const {collectionContractAsRandomWallet: contract, randomWallet} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxSupply(1))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
     });
   });
 });

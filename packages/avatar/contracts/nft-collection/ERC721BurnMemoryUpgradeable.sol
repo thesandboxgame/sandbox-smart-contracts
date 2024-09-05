@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.26;
 
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/token/ERC721/ERC721Upgradeable.sol";
 
 /**
  * @title ERC721BurnMemoryUpgradeable
@@ -12,20 +12,33 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/toke
  * @dev provides the "burn memory" functionality: keeping track of who burned what token
  */
 abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
-    /**
-     * @notice tokenId to burner mapping; saves who burned a specific token
-     */
-    mapping(uint256 => address) public burner;
+    struct ERC721BurnMemoryUpgradeableStorage {
+        /**
+         * @notice tokenId to burner mapping; saves who burned a specific token
+         */
+        mapping(uint256 => address) burner;
 
-    /**
-     * @notice burner to list of burned tokens mapping; to see what tokens who burned
-     */
-    mapping(address => uint256[]) public burnedTokens;
+        /**
+         * @notice burner to list of burned tokens mapping; to see what tokens who burned
+         */
+        mapping(address => uint256[]) burnedTokens;
 
-    /**
-      * @notice flag that gates burning (enabling/disabling burning)
-      */
-    bool public isBurnEnabled;
+        /**
+         * @notice flag that gates burning (enabling/disabling burning)
+         */
+        bool isBurnEnabled;
+    }
+
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.ERC721BurnMemoryUpgradeable
+    bytes32 internal constant ERC721_BURN_MEMORY_UPGRADABLE_STORAGE_LOCATION =
+    0x6936713dbc593f49219a6774bfcd8c37b5bc8ca843481c9ed2d56b3c48c59400;
+
+    function _getERC721BurnMemoryUpgradableStorage() private pure returns (ERC721BurnMemoryUpgradeableStorage storage $) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := ERC721_BURN_MEMORY_UPGRADABLE_STORAGE_LOCATION
+        }
+    }
 
     /**
      * @notice event emitted when a token was burned
@@ -48,12 +61,25 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
     event TokenBurningDisabled(address indexed operator);
 
     /**
+     * @dev The operation failed because burning is enabled.
+     */
+    error EnforcedBurn();
+
+    /**
+     * @dev The operation failed because burning is disabled.
+     */
+    error ExpectedBurn();
+
+    /**
      * @notice enables burning of tokens
      * @custom:event TokenBurningEnabled
      */
     function _enableBurning() internal {
-        require(!isBurnEnabled, "Burning already enabled");
-        isBurnEnabled = true;
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        if ($.isBurnEnabled) {
+            revert EnforcedBurn();
+        }
+        $.isBurnEnabled = true;
         emit TokenBurningEnabled(_msgSender());
     }
 
@@ -62,8 +88,11 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @custom:event TokenBurningDisabled
      */
     function _disableBurning() internal {
-        require(isBurnEnabled, "Burning already disabled");
-        isBurnEnabled = false;
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        if (!$.isBurnEnabled) {
+            revert ExpectedBurn();
+        }
+        $.isBurnEnabled = false;
         emit TokenBurningDisabled(_msgSender());
     }
 
@@ -72,16 +101,19 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
-    function _burn(uint256 tokenId) internal override virtual {
-        require(isBurnEnabled, "Burning is not enabled");
+    function _burnWithCheck(uint256 tokenId) internal virtual {
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        if (!$.isBurnEnabled) {
+            revert ExpectedBurn();
+        }
         address sender = _msgSender();
-        address owner = ERC721Upgradeable.ownerOf(tokenId);
-        require(_isApprovedOrOwner(sender, tokenId), "ERC721: caller is not token owner or approved");
-        super._burn(tokenId);
-        burner[tokenId] = sender;
+        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+        // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+        address previousOwner = _update(address(0), tokenId, sender);
+        $.burner[tokenId] = sender;
         // @dev TODO: if we don't remove this code, check if we want sender or owner.
-        burnedTokens[sender].push(tokenId);
-        emit TokenBurned(sender, tokenId, owner);
+        $.burnedTokens[sender].push(tokenId);
+        emit TokenBurned(sender, tokenId, previousOwner);
     }
 
     /**
@@ -90,7 +122,19 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @return the address of who burned the indicated token ID or zero if the token wasn't minted or burned yet.
      */
     function burnerOf(uint256 tokenId) external view returns (address) {
-        return burner[tokenId];
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.burner[tokenId];
+    }
+
+    /**
+     * @notice Returns the burner of the `tokenId`
+     * @param tokenId the tokenId to be checked who burned it
+     * @return the address of who burned the indicated token ID or zero if the token wasn't minted or burned yet.
+     * @dev same as burnerOf, kept here to be backward compatible
+     */
+    function burner(uint256 tokenId) external view returns (address) {
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.burner[tokenId];
     }
 
     /**
@@ -99,7 +143,8 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @return true if the address burned any tokens
      */
     function didBurnTokens(address previousOwner) external view returns (bool) {
-        return burnedTokens[previousOwner].length != 0;
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.burnedTokens[previousOwner].length != 0;
     }
 
     /**
@@ -108,12 +153,28 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
      * @return number of burned tokens by the indicated owner
      */
     function burnedTokensCount(address previousOwner) external view returns (uint256) {
-        return burnedTokens[previousOwner].length;
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.burnedTokens[previousOwner].length;
+    }
+
+
+    /**
+     * @notice Gets the list of burned tokens by the indicated owner
+     * @param previousOwner the owner to check for burned tokens
+     * @param index of the burnedTokens array
+     * @return the list of burned tokens by the indicated owner indexed by index
+     */
+    function burnedTokens(address previousOwner, uint256 index) external view returns (uint256) {
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.burnedTokens[previousOwner][index];
     }
 
     /**
-    Empty storage space in contracts for future enhancements
-    ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13
+     * @notice Return true if burning is enabled
      */
-    uint256[50] private __gap;
+    function isBurnEnabled() external view returns (bool) {
+        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
+        return $.isBurnEnabled;
+    }
+
 }

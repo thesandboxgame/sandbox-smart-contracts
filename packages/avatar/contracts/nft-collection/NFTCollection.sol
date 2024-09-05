@@ -2,20 +2,22 @@
 
 pragma solidity 0.8.26;
 
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
-import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/Ownable2StepUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
-import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/common/ERC2981Upgradeable.sol";
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/ERC721Upgradeable.sol";
-import {ECDSA} from "@openzeppelin/contracts-0.8.13/utils/cryptography/ECDSA.sol";
-import {IERC20} from "@openzeppelin/contracts-0.8.13/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@openzeppelin/contracts-0.8.13/token/ERC20/extensions/IERC20Metadata.sol";
-import {SafeERC20} from "@openzeppelin/contracts-0.8.13/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/ReentrancyGuardUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/access/Ownable2StepUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/ContextUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/PausableUpgradeable.sol";
+import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/token/common/ERC2981Upgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/token/ERC721/ERC721Upgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol";
+import {IERC20} from "@openzeppelin/contracts-5.0.2/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts-5.0.2/token/ERC20/utils/SafeERC20.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC4906} from "../common/IERC4906.sol";
 import {UpdatableOperatorFiltererUpgradeable} from "./UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "./ERC2771HandlerUpgradeable.sol";
 import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
+import {INFTCollection} from "./INFTCollection.sol";
 
 /**
  * @title NFTCollection
@@ -44,7 +46,8 @@ ERC2981Upgradeable,
 ERC2771HandlerUpgradeable,
 UpdatableOperatorFiltererUpgradeable,
 PausableUpgradeable,
-IERC4906
+IERC4906,
+INFTCollection
 {
     /**
      * @notice Structure used to mint in batch
@@ -56,206 +59,91 @@ IERC4906
         uint256 amount;
     }
 
-    /**
-     * @notice maximum amount of tokens that can be minted
-     */
-    uint256 public maxSupply;
+    struct NFTCollectionStorage {
+        /**
+         * @notice maximum amount of tokens that can be minted
+         */
+        uint256 maxSupply; // public
 
-    /**
-     * @notice treasury address where the payment for minting are sent
-     */
-    address public mintTreasury;
+        /**
+         * @notice treasury address where the payment for minting are sent
+         */
+        address mintTreasury; // public
 
-    /**
-     * @notice standard base token URL for ERC721 metadata
-     */
-    string public baseTokenURI;
+        /**
+         * @notice standard base token URL for ERC721 metadata
+         */
+        string baseTokenURI; // public
 
-    /**
-     * @notice max tokens to buy per wave, cumulating all addresses
-     */
-    uint256 public waveMaxTokensOverall;
+        /**
+         * @notice max tokens to buy per wave, cumulating all addresses
+         */
+        uint256 waveMaxTokensOverall; // public
 
-    /**
-     * @notice max tokens to buy, per wallet in a given wave
-     */
-    uint256 public waveMaxTokensPerWallet;
+        /**
+         * @notice max tokens to buy, per wallet in a given wave
+         */
+        uint256 waveMaxTokensPerWallet; // public
 
-    /**
-     * @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
-     */
-    uint256 internal waveSingleTokenPrice;
+        /**
+         * @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+         */
+        uint256 waveSingleTokenPrice;
 
-    /**
-     * @notice number of total minted tokens in the current running wave
-     */
-    uint256 public waveTotalMinted;
+        /**
+         * @notice number of total minted tokens in the current running wave
+         */
+        uint256 waveTotalMinted; // public
 
-    /**
-      * @notice mapping of [owner -> wave index -> minted count]
-      */
-    mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
+        /**
+          * @notice mapping of [owner -> wave index -> minted count]
+          */
+        mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts; // public
 
-    /**
-     * @notice each wave has an index to help track minting/tokens per wallet
-     */
-    uint256 public indexWave;
+        /**
+         * @notice each wave has an index to help track minting/tokens per wallet
+         */
+        uint256 indexWave; // public
 
-    /**
-     * @notice ERC20 contract through which the minting will be done (approveAndCall)
-     *         When there is a price for the minting, the payment will be done using this token
-     */
-    IERC20 public allowedToExecuteMint;
+        /**
+         * @notice ERC20 contract through which the minting will be done (approveAndCall)
+         *         When there is a price for the minting, the payment will be done using this token
+         */
+        IERC20 allowedToExecuteMint; // public
 
-    /**
-      * @notice all signatures must come from this specific address, otherwise they are invalid
-      */
-    address public signAddress;
+        /**
+          * @notice all signatures must come from this specific address, otherwise they are invalid
+          */
+        address signAddress; // public
 
-    /**
-     * @notice stores the personalization mask for a tokenId
-     */
-    mapping(uint256 => uint256) internal personalizationTraits;
+        /**
+         * @notice stores the personalization mask for a tokenId
+         */
+        mapping(uint256 => uint256) personalizationTraits;
 
-    /**
-     * @dev map used to mark if a specific signatureId was used
-     *      values are 0 (default, unused) and 1 (used)
-     *      Used to avoid a signature reuse
-     */
-    mapping(uint256 => uint256) private _signatureIds;
+        /**
+         * @dev map used to mark if a specific signatureId was used
+         *      values are 0 (default, unused) and 1 (used)
+         *      Used to avoid a signature reuse
+         */
+        mapping(uint256 => uint256) signatureIds;
 
-    /**
-     * @notice total amount of tokens minted till now
-     */
-    uint256 public totalSupply;
+        /**
+         * @notice total amount of tokens minted till now
+         */
+        uint256 totalSupply; // public
+    }
 
-    /**
-     * @notice Event emitted when the contract was initialized.
-     * @dev emitted at proxy startup, only once
-     * @param baseURI an URI that will be used as the base for token URI
-     * @param name name of the ERC721 token
-     * @param symbol token symbol of the ERC721 token
-     * @param mintTreasury collection treasury address (where the payments are sent)
-     * @param signAddress signer address that is allowed to create mint signatures
-     * @param allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
-     * @param maxSupply max supply of tokens to be allowed to be minted per contract
-     */
-    event ContractInitialized(
-        string indexed baseURI,
-        string indexed name,
-        string indexed symbol,
-        address mintTreasury,
-        address signAddress,
-        address allowedToExecuteMint,
-        uint256 maxSupply
-    );
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
+    bytes32 internal constant NFT_COLLECTION_STORAGE_LOCATION =
+    0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
 
-    /**
-     * @notice Event emitted when a wave was set up
-     * @dev emitted when setupWave is called
-     * @param operator the sender of the transaction
-     * @param waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
-     * @param waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
-     * @param waveSingleTokenPrice the price to mint a token in a given wave, in wei
-     * @param prevMinted the amount of tokens minted in previous wave
-     * @param waveIndex the current wave index
-     */
-    event WaveSetup(
-        address indexed operator,
-        uint256 waveMaxTokens,
-        uint256 waveMaxTokensToBuy,
-        uint256 waveSingleTokenPrice,
-        uint256 prevMinted,
-        uint256 waveIndex
-    );
-
-    /**
-     * @notice Event emitted when an address was set as allowed to mint
-     * @dev emitted when setAllowedExecuteMint is called
-     * @param operator the sender of the transaction
-     * @param oldToken old address that is used for payments and that is allowed to execute mint
-     * @param newToken new address that is used for payments and that is allowed to execute mint
-     */
-    event AllowedExecuteMintSet(address indexed operator, IERC20 indexed oldToken, IERC20 indexed newToken);
-
-    /**
-     * @notice Event emitted when the treasury address was saved
-     * @dev emitted when setTreasury is called
-     * @param operator the sender of the transaction
-     * @param oldTreasury old collection treasury address (where the payments are sent)
-     * @param newTreasury new collection treasury address (where the payments are sent)
-     */
-    event TreasurySet(address indexed operator, address indexed oldTreasury, address indexed newTreasury);
-
-    /**
-     * @notice Event emitted when the base token URI for the contract was set or changed
-     * @dev emitted when setBaseURI is called
-     * @param operator the sender of the transaction
-     * @param oldBaseURI old URI that will be used as the base for token metadata URI
-     * @param newBaseURI new URI that will be used as the base for token metadata URI
-     */
-    event BaseURISet(address indexed operator, string oldBaseURI, string newBaseURI);
-
-    /**
-     * @notice Event emitted when the signer address was set or changed
-     * @dev emitted when setSignAddress is called
-     * @param operator the sender of the transaction
-     * @param oldSignAddress old signer address that is allowed to create mint signatures
-     * @param newSignAddress new signer address that is allowed to create mint signatures
-     */
-    event SignAddressSet(address indexed operator, address indexed oldSignAddress, address indexed newSignAddress);
-
-    /**
-     * @notice Event emitted when the max supply is set or changed
-     * @dev emitted when setSignAddress is called
-     * @param operator the sender of the transaction
-     * @param oldMaxSupply old maximum amount of tokens that can be minted
-     * @param newMaxSupply new maximum amount of tokens that can be minted
-     */
-    event MaxSupplySet(address indexed operator, uint256 oldMaxSupply, uint256 newMaxSupply);
-
-    /**
-     * @notice Event emitted when a token personalization was made.
-     * @dev emitted when personalize is called
-     * @param operator the sender of the transaction
-     * @param tokenId id of the token which had the personalization done
-     * @param personalizationMask the exact personalization that was done, as a custom meaning bit-mask
-     */
-    event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask);
-
-
-    /**
-     * @notice Event emitted when a token personalization was made.
-     * @param operator the sender of the transaction
-     * @param receiver the receiver of the royalties
-     * @param feeNumerator percentage of the royalties in feeDenominator units
-     */
-    event DefaultRoyaltySet(address indexed operator, address indexed receiver, uint96 feeNumerator);
-
-
-    /**
-     * @notice Event emitted when default royalties are reset
-     * @param operator the sender of the transaction
-     */
-    event DefaultRoyaltyReset(address indexed operator);
-
-    /**
-     * @notice Event emitted when a token personalization was made.
-     * @param operator the sender of the transaction
-     * @param tokenId the token id
-     * @param receiver the receiver of the royalties
-     * @param feeNumerator percentage of the royalties in feeDenominator units
-     */
-    event TokenRoyaltySet(address indexed operator, uint256 indexed tokenId, address indexed receiver, uint96 feeNumerator);
-
-
-    /**
-     * @notice Event emitted when default royalties are reset
-     * @param operator the sender of the transaction
-     */
-    event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId);
-
-
+    function _getNFTCollectionStorage() private pure returns (NFTCollectionStorage storage $) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := NFT_COLLECTION_STORAGE_LOCATION
+        }
+    }
     /**
      * @notice mitigate a possible Implementation contract takeover, as indicate by
      *         https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializing_the_implementation_contract
@@ -280,13 +168,13 @@ IERC4906
      */
     function initialize(
         address _collectionOwner,
-        string memory _initialBaseURI,
+        string calldata _initialBaseURI,
         string memory _name,
         string memory _symbol,
         address payable _mintTreasury,
         address _signAddress,
         address _initialTrustedForwarder,
-        address _allowedToExecuteMint,
+        IERC20Metadata _allowedToExecuteMint,
         uint256 _maxSupply
     ) external virtual initializer {
         __NFTCollection_init(
@@ -317,23 +205,21 @@ IERC4906
      */
     function __NFTCollection_init(
         address _collectionOwner,
-        string memory _initialBaseURI,
+        string calldata _initialBaseURI,
         string memory _name,
         string memory _symbol,
         address payable _mintTreasury,
         address _signAddress,
         address _initialTrustedForwarder,
-        address _allowedToExecuteMint,
+        IERC20Metadata _allowedToExecuteMint,
         uint256 _maxSupply
     ) internal onlyInitializing {
-        require(bytes(_initialBaseURI).length != 0, "NFTCollection: baseURI is not set");
-        require(bytes(_name).length != 0, "NFTCollection: name is empty");
-        require(bytes(_symbol).length != 0, "NFTCollection: symbol is empty");
-        require(_mintTreasury != address(0), "NFTCollection: treasury is zero address");
-        require(_signAddress != address(0), "NFTCollection: sign address is zero address");
-        require(_isContract(_allowedToExecuteMint), "NFTCollection: executor address is not a contract");
-        require(_maxSupply > 0, "NFTCollection: max supply should be more than 0");
-
+        if (bytes(_name).length == 0) {
+            revert InvalidName(_name);
+        }
+        if (bytes(_symbol).length == 0) {
+            revert InvalidSymbol(_symbol);
+        }
         __ReentrancyGuard_init();
         // @dev we don't want to set the owner to _msgSender, so, we don't call __Ownable_init
         _transferOwnership(_collectionOwner);
@@ -341,11 +227,11 @@ IERC4906
         _setTrustedForwarder(_initialTrustedForwarder);
         __ERC721_init(_name, _symbol);
         __Pausable_init();
-        baseTokenURI = _initialBaseURI;
-        mintTreasury = _mintTreasury;
-        signAddress = _signAddress;
-        allowedToExecuteMint = IERC20(_allowedToExecuteMint);
-        maxSupply = _maxSupply;
+        _setBaseURI(_initialBaseURI);
+        _setTreasury(_mintTreasury);
+        _setSignAddress(_signAddress);
+        _setAllowedExecuteMint(_allowedToExecuteMint);
+        _setMaxSupply(_maxSupply);
 
         emit ContractInitialized(
             _initialBaseURI,
@@ -372,10 +258,6 @@ IERC4906
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
     ) external onlyOwner {
-        require(_waveMaxTokensOverall <= maxSupply, "NFTCollection: _waveMaxTokens exceeds maxSupply");
-        require(_waveMaxTokensOverall > 0, "NFTCollection: max tokens to mint is 0");
-        require(_waveMaxTokensPerWallet > 0, "NFTCollection: max tokens to mint per wallet is 0");
-        require(_waveMaxTokensPerWallet <= _waveMaxTokensOverall, "NFTCollection: invalid supply configuration");
         _setupWave(_waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice);
     }
 
@@ -383,40 +265,40 @@ IERC4906
      * @notice token minting function. Price is set by wave and is paid in tokens denoted
      *         by the allowedToExecuteMint contract
      * @custom:event {Transfer}
-     * @param _wallet minting wallet
-     * @param _amount number of token to mint
-     * @param _signatureId signing signature ID
-     * @param _signature signing signature value
+     * @param wallet minting wallet
+     * @param amount number of token to mint
+     * @param signatureId signing signature ID
+     * @param signature signing signature value
      */
     function mint(
-        address _wallet,
-        uint256 _amount,
-        uint256 _signatureId,
-        bytes calldata _signature
+        address wallet,
+        uint256 amount,
+        uint256 signatureId,
+        bytes calldata signature
     ) external whenNotPaused nonReentrant {
-        require(indexWave > 0, "NFTCollection: contract is not configured");
-        require(_msgSender() == address(allowedToExecuteMint), "NFTCollection: caller is not allowed");
-        require(_wallet != address(0), "NFTCollection: wallet is zero address");
-        require(_amount > 0, "NFTCollection: amount cannot be 0");
-
-        _checkAndSetSignature({_wallet : _wallet, _signatureId : _signatureId, _signature : _signature});
-
-        require(_checkWaveNotComplete(_amount), "NFTCollection: wave completed");
-        require(_checkLimitPerWalletNotReached(_wallet, _amount), "NFTCollection: max allowed");
-        require(_checkTotalNotReached(_amount), "NFTCollection: max reached");
-
-        uint256 _price = price(_amount);
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        uint256 _indexWave = $.indexWave;
+        if (_indexWave == 0) {
+            revert ContractNotConfigured();
+        }
+        if (_msgSender() != address($.allowedToExecuteMint)) {
+            revert ERC721InvalidSender(_msgSender());
+        }
+        _checkAndSetSignature(wallet, signatureId, signature);
+        _checkMintAllowed(wallet, amount);
+        uint256 _price = price(amount);
         if (_price > 0) {
-            SafeERC20.safeTransferFrom(allowedToExecuteMint, _wallet, mintTreasury, _price);
+            SafeERC20.safeTransferFrom($.allowedToExecuteMint, wallet, $.mintTreasury, _price);
         }
-
-        for (uint256 i; i < _amount; i++) {
+        uint256 _totalSupply = $.totalSupply;
+        for (uint256 i; i < amount; i++) {
+            // @dev _safeMint already checks the destination _wallet
             // @dev start with tokenId = 1
-            _safeMint(_wallet, totalSupply + i + 1);
+            _safeMint(wallet, _totalSupply + i + 1);
         }
-        waveOwnerToClaimedCounts[_wallet][indexWave - 1] += _amount;
-        waveTotalMinted += _amount;
-        totalSupply += _amount;
+        $.waveOwnerToClaimedCounts[wallet][_indexWave - 1] += amount;
+        $.waveTotalMinted += amount;
+        $.totalSupply += amount;
     }
 
     /**
@@ -426,26 +308,29 @@ IERC4906
      * @param wallets list of destination wallets and amounts
      */
     function batchMint(BatchMintingData[] calldata wallets) external whenNotPaused onlyOwner {
-        require(indexWave > 0, "NFTCollection: contract is not configured");
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        uint256 _indexWave = $.indexWave;
+        if (_indexWave == 0) {
+            revert ContractNotConfigured();
+        }
         uint256 len = wallets.length;
-        require(len > 0, "NFTCollection: wallets length cannot be 0");
+        if (len == 0) {
+            revert InvalidBatchData();
+        }
 
         for (uint256 i; i < len; i++) {
+            uint256 _totalSupply = $.totalSupply;
             address wallet = wallets[i].wallet;
             uint256 amount = wallets[i].amount;
-            require(amount > 0, "NFTCollection: amount cannot be 0");
-            require(_checkWaveNotComplete(amount), "NFTCollection: wave completed");
-            require(_checkLimitPerWalletNotReached(wallet, amount), "NFTCollection: max allowed");
-            require(_checkTotalNotReached(amount), "NFTCollection: max reached");
-
+            _checkMintAllowed(wallet, amount);
             for (uint256 j; j < amount; j++) {
-                // @dev _mint already checks the destination address
+                // @dev _mint already checks the destination wallet
                 // @dev start with tokenId = 1
-                _mint(wallet, totalSupply + j + 1);
+                _mint(wallet, _totalSupply + j + 1);
             }
-            waveOwnerToClaimedCounts[wallet][indexWave - 1] += amount;
-            waveTotalMinted += amount;
-            totalSupply += amount;
+            $.waveOwnerToClaimedCounts[wallet][_indexWave - 1] += amount;
+            $.waveTotalMinted += amount;
+            $.totalSupply += amount;
         }
     }
 
@@ -455,21 +340,24 @@ IERC4906
      *         function is ultimately called to signal the end of a reveal.
      * @dev will revert if owner of token is not caller or if signature is not valid
      * @custom:event {MetadataUpdate}
-     * @param _tokenId the ID belonging to the NFT token for which to emit the event
-     * @param _signatureId validation signature ID
-     * @param _signature validation signature
+     * @param tokenId the ID belonging to the NFT token for which to emit the event
+     * @param signatureId validation signature ID
+     * @param signature validation signature
      */
     function reveal(
-        uint256 _tokenId,
-        uint256 _signatureId,
-        bytes calldata _signature
+        uint256 tokenId,
+        uint256 signatureId,
+        bytes calldata signature
     ) external whenNotPaused {
         address sender = _msgSender();
-        require(ownerOf(_tokenId) == sender, "NFTCollection: sender is not owner");
+        address owner = ownerOf(tokenId);
+        if (owner != sender) {
+            revert ERC721IncorrectOwner(sender, tokenId, owner);
+        }
 
-        _checkAndSetSignature({_wallet : sender, _signatureId : _signatureId, _signature : _signature});
+        _checkAndSetSignature(sender, signatureId, signature);
 
-        emit MetadataUpdate(_tokenId);
+        emit MetadataUpdate(tokenId);
     }
 
     /**
@@ -477,36 +365,40 @@ IERC4906
      * @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
      * @custom:event {Personalized}
      * @custom:event {MetadataUpdate}
-     * @param _signatureId the ID of the provided signature
-     * @param _signature signing signature
-     * @param _tokenId what token to personalize
-     * @param _personalizationMask a mask where each bit has a custom meaning in-game
+     * @param signatureId the ID of the provided signature
+     * @param signature signing signature
+     * @param tokenId what token to personalize
+     * @param personalizationMask a mask where each bit has a custom meaning in-game
      */
     function personalize(
-        uint256 _signatureId,
-        bytes calldata _signature,
-        uint256 _tokenId,
-        uint256 _personalizationMask
+        uint256 signatureId,
+        bytes calldata signature,
+        uint256 tokenId,
+        uint256 personalizationMask
     ) external whenNotPaused {
-        require(ownerOf(_tokenId) == _msgSender(), "NFTCollection: sender is not owner");
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        address sender = _msgSender();
+        address owner = ownerOf(tokenId);
+        if (owner != sender) {
+            revert ERC721IncorrectOwner(sender, tokenId, owner);
+        }
 
-        require(_signatureIds[_signatureId] == 0, "NFTCollection: signatureId already used");
-        require(
-            _checkPersonalizationSignature(
-                _msgSender(),
-                _signatureId,
+        if ($.signatureIds[signatureId] > 0 ||
+            _getPersonalizationSignature(
+                sender,
+                signatureId,
                 address(this),
                 block.chainid,
-                _tokenId,
-                _personalizationMask,
-                _signature
-            ) == signAddress,
-            "NFTCollection: signature check failed"
-        );
+                tokenId,
+                personalizationMask,
+                signature
+            ) != $.signAddress) {
+            revert InvalidSignature(signatureId);
+        }
 
-        _signatureIds[_signatureId] = 1;
+        $.signatureIds[signatureId] = 1;
 
-        _updateTokenTraits(_tokenId, _personalizationMask);
+        _updateTokenTraits(tokenId, personalizationMask);
     }
 
     /**
@@ -515,13 +407,16 @@ IERC4906
      * @dev reverts if token does not exist or if not authorized
      * @custom:event {Personalized}
      * @custom:event {MetadataUpdate}
-     * @param _tokenId what token to personalize
-     * @param _personalizationMask a mask where each bit has a custom meaning in-game
+     * @param tokenId what token to personalize
+     * @param personalizationMask a mask where each bit has a custom meaning in-game
      */
-    function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask) external onlyOwner
+    function operatorPersonalize(uint256 tokenId, uint256 personalizationMask) external onlyOwner
     {
-        require(_exists(_tokenId), "NFTCollection: invalid token ID");
-        _updateTokenTraits(_tokenId, _personalizationMask);
+        address owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+        _updateTokenTraits(tokenId, personalizationMask);
     }
 
     /**
@@ -531,7 +426,7 @@ IERC4906
      * @param tokenId the token id to be burned
      */
     function burn(uint256 tokenId) external whenNotPaused {
-        _burn(tokenId);
+        _burnWithCheck(tokenId);
     }
 
     /**
@@ -573,12 +468,10 @@ IERC4906
     /**
      * @notice update the treasury address
      * @custom:event {TreasurySet}
-     * @param _treasury new treasury address to be saved
+     * @param treasury new treasury address to be saved
      */
-    function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "NFTCollection: owner is zero address");
-        emit TreasurySet(_msgSender(), mintTreasury, _treasury);
-        mintTreasury = _treasury;
+    function setTreasury(address treasury) external onlyOwner {
+        _setTreasury(treasury);
     }
 
     /**
@@ -587,9 +480,7 @@ IERC4906
      * @param _signAddress new signer address to be set
      */
     function setSignAddress(address _signAddress) external onlyOwner {
-        require(_signAddress != address(0), "NFTCollection: sign address is zero address");
-        emit SignAddressSet(_msgSender(), signAddress, _signAddress);
-        signAddress = _signAddress;
+        _setSignAddress(_signAddress);
     }
 
     /**
@@ -598,9 +489,7 @@ IERC4906
      * @param _maxSupply maximum amount of tokens that can be minted
      */
     function setMaxSupply(uint256 _maxSupply) external onlyOwner {
-        require(_maxSupply >= totalSupply, "NFTCollection: maxSupply must be gte totalSupply");
-        emit MaxSupplySet(_msgSender(), maxSupply, _maxSupply);
-        maxSupply = _maxSupply;
+        _setMaxSupply(_maxSupply);
     }
 
     /**
@@ -608,12 +497,10 @@ IERC4906
      * @dev also resets default mint price
      * @custom:event {AllowedExecuteMintSet}
      * @custom:event {DefaultMintingValuesSet}
-     * @param _minterToken the address that will be allowed to execute the mint function
+     * @param minterToken the address that will be allowed to execute the mint function
      */
-    function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner {
-        require(_isContract(address(_minterToken)), "NFTCollection: executor address is not a contract");
-        emit AllowedExecuteMintSet(_msgSender(), allowedToExecuteMint, _minterToken);
-        allowedToExecuteMint = _minterToken;
+    function setAllowedExecuteMint(IERC20Metadata minterToken) external onlyOwner {
+        _setAllowedExecuteMint(minterToken);
     }
 
     /**
@@ -622,10 +509,7 @@ IERC4906
      * @param baseURI an URI that will be used as the base for token URI
      */
     function setBaseURI(string calldata baseURI) external onlyOwner {
-        require(bytes(baseURI).length != 0, "NFTCollection: baseURI is not set");
-        emit BaseURISet(_msgSender(), baseTokenURI, baseURI);
-        baseTokenURI = baseURI;
-
+        _setBaseURI(baseURI);
         // Refreshes the whole collection (https://docs.opensea.io/docs/metadata-standards#metadata-updates)
         emit BatchMetadataUpdate(0, type(uint256).max);
     }
@@ -670,12 +554,20 @@ IERC4906
         uint256[] calldata ids,
         bytes calldata data
     ) external virtual onlyAllowedOperator(from) {
+        if (to == address(0)) {
+            revert ERC721InvalidReceiver(address(0));
+        }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 tokenId = ids[i];
-            require(_isApprovedOrOwner(msgSender, tokenId), "ERC721: caller is not token owner or approved");
-            _safeTransfer(from, to, tokenId, data);
+            // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+            // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+            address previousOwner = _update(to, tokenId, msgSender);
+            if (previousOwner != from) {
+                revert ERC721IncorrectOwner(from, tokenId, previousOwner);
+            }
+            _checkOnERC721ReceivedImpl(from, to, tokenId, data);
         }
     }
 
@@ -690,12 +582,19 @@ IERC4906
         address to,
         uint256[] calldata ids
     ) external virtual onlyAllowedOperator(from) {
+        if (to == address(0)) {
+            revert ERC721InvalidReceiver(address(0));
+        }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 tokenId = ids[i];
-            require(_isApprovedOrOwner(msgSender, tokenId), "ERC721: caller is not token owner or approved");
-            _transfer(from, to, tokenId);
+            // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+            // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+            address previousOwner = _update(to, tokenId, msgSender);
+            if (previousOwner != from) {
+                revert ERC721IncorrectOwner(from, tokenId, previousOwner);
+            }
         }
     }
 
@@ -783,17 +682,6 @@ IERC4906
     function safeTransferFrom(
         address from,
         address to,
-        uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, tokenId);
-    }
-
-    /**
-     * @dev See OpenZeppelin {IERC721-safeTransferFrom}
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
         uint256 tokenId,
         bytes memory data
     ) public override onlyAllowedOperator(from) {
@@ -802,34 +690,34 @@ IERC4906
 
     /**
      * @notice get the personalization of the indicated tokenID
-     * @param _tokenId the token ID to check
+     * @param tokenId the token ID to check
      * @return the personalization data as uint256
      */
-    function personalizationOf(uint256 _tokenId) external view returns (uint256) {
-        return personalizationTraits[_tokenId];
+    function personalizationOf(uint256 tokenId) external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.personalizationTraits[tokenId];
     }
 
     /**
      * @notice check if the indicated wallet can mint the indicated amount
-     * @param _wallet wallet to be checked if it can mint
-     * @param _amount amount to be checked if can be minted
+     * @param wallet wallet to be checked if it can mint
+     * @param amount amount to be checked if can be minted
      * @return if can mint or not
      */
-    function checkMintAllowed(address _wallet, uint256 _amount) external view returns (bool) {
-        return _amount > 0
-        && _checkWaveNotComplete(_amount)
-        && _checkLimitPerWalletNotReached(_wallet, _amount)
-        && _checkTotalNotReached(_amount);
-
+    function isMintAllowed(address wallet, uint256 amount) external view returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        uint256 waveClaimedCounts = $.waveOwnerToClaimedCounts[wallet][$.indexWave - 1];
+        return _isMintAllowed(waveClaimedCounts, amount);
     }
 
     /**
      * @notice get the price of minting the indicated number of tokens for the current wave
-     * @param _count the number of tokens to estimate mint price for
+     * @param count the number of tokens to estimate mint price for
      * @return price of minting all the tokens
      */
-    function price(uint256 _count) public view virtual returns (uint256) {
-        return waveSingleTokenPrice * _count;
+    function price(uint256 count) public view virtual returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveSingleTokenPrice * count;
     }
 
     /**
@@ -847,6 +735,123 @@ IERC4906
      */
     function chain() external view returns (uint256) {
         return block.chainid;
+    }
+
+    /**
+     * @notice return maximum amount of tokens that can be minted
+     */
+    function maxSupply() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.maxSupply;
+    }
+
+    /**
+     * @notice return treasury address where the payment for minting are sent
+     */
+    function mintTreasury() external view returns (address) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.mintTreasury;
+    }
+
+    /**
+     * @notice return standard base token URL for ERC721 metadata
+     */
+    function baseTokenURI() external view returns (string memory) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.baseTokenURI;
+    }
+
+    /**
+     * @notice return max tokens to buy per wave, cumulating all addresses
+     */
+    function waveMaxTokensOverall() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveMaxTokensOverall;
+    }
+
+    /**
+     * @notice return max tokens to buy, per wallet in a given wave
+     */
+    function waveMaxTokensPerWallet() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveMaxTokensPerWallet;
+    }
+
+    /**
+     * @notice return price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     */
+    function waveSingleTokenPrice() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveSingleTokenPrice;
+    }
+
+    /**
+     * @notice return number of total minted tokens in the current running wave
+     */
+    function waveTotalMinted() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveTotalMinted;
+    }
+
+    /**
+      * @notice return mapping of [owner -> wave index -> minted count]
+      * @param owner the owner for which the count is returned
+      * @param waveIndex the wave for which the count is returned
+      */
+    function waveOwnerToClaimedCounts(address owner, uint256 waveIndex) external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.waveOwnerToClaimedCounts[owner][waveIndex];
+    }
+
+    /**
+     * @notice return each wave has an index to help track minting/tokens per wallet
+     */
+    function indexWave() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.indexWave;
+    }
+
+    /**
+     * @notice return ERC20 contract through which the minting will be done (approveAndCall)
+     */
+    function allowedToExecuteMint() external view returns (IERC20) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.allowedToExecuteMint;
+    }
+
+    /**
+      * @notice return the address from which all signatures must come from this specific address, otherwise they are invalid
+      */
+    function signAddress() external view returns (address) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.signAddress;
+    }
+
+
+    /**
+     * @notice return the personalization mask for a tokenId
+     * @param tokenId the tokenId to check
+     */
+    function personalizationTraits(uint256 tokenId) external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.personalizationTraits[tokenId];
+    }
+
+    /**
+     * @notice return true if the signature id was used
+     * @param signatureId signing signature ID
+     */
+    function isSignatureUsed(uint256 signatureId) external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.signatureIds[signatureId];
+    }
+
+    /**
+     * @notice return the total amount of tokens minted till now
+         */
+    function totalSupply() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.totalSupply;
     }
 
     /**
@@ -876,12 +881,20 @@ IERC4906
         uint256 _waveMaxTokensPerWallet,
         uint256 _waveSingleTokenPrice
     ) internal {
-        waveMaxTokensOverall = _waveMaxTokensOverall;
-        waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
-        waveSingleTokenPrice = _waveSingleTokenPrice;
-        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, waveTotalMinted, indexWave);
-        waveTotalMinted = 0;
-        indexWave++;
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_waveMaxTokensOverall > $.maxSupply ||
+        _waveMaxTokensOverall == 0 ||
+        _waveMaxTokensPerWallet == 0 ||
+            _waveMaxTokensPerWallet > _waveMaxTokensOverall
+        ) {
+            revert InvalidWaveData(_waveMaxTokensOverall, _waveMaxTokensPerWallet);
+        }
+        $.waveMaxTokensOverall = _waveMaxTokensOverall;
+        $.waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
+        $.waveSingleTokenPrice = _waveSingleTokenPrice;
+        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, $.waveTotalMinted, $.indexWave);
+        $.waveTotalMinted = 0;
+        $.indexWave++;
     }
 
     /**
@@ -889,7 +902,8 @@ IERC4906
      * @return baseTokenURI
      */
     function _baseURI() internal view virtual override returns (string memory) {
-        return baseTokenURI;
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.baseTokenURI;
     }
 
     /**
@@ -914,23 +928,30 @@ IERC4906
     }
 
     /**
+     * @dev ERC-2771 specifies the context as being a single address (20 bytes).
+     */
+    function _contextSuffixLength() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (uint256) {
+        return ERC2771HandlerUpgradeable._contextSuffixLength();
+    }
+
+
+    /**
      * @notice checks that the provided signature is valid, while also taking into
      *         consideration the provided address and signatureId.
-     * @param _wallet address to be used in validating the signature
-     * @param _signatureId signing signature ID
-     * @param _signature signing signature value
+     * @param wallet address to be used in validating the signature
+     * @param signatureId signing signature ID
+     * @param signature signing signature value
      */
     function _checkAndSetSignature(
-        address _wallet,
-        uint256 _signatureId,
-        bytes calldata _signature
+        address wallet,
+        uint256 signatureId,
+        bytes calldata signature
     ) internal {
-        require(_signatureIds[_signatureId] == 0, "NFTCollection: signatureId already used");
-        require(
-            _checkSignature(_wallet, _signatureId, address(this), block.chainid, _signature) == signAddress,
-            "NFTCollection: signature failed"
-        );
-        _signatureIds[_signatureId] = 1;
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if ($.signatureIds[signatureId] > 0 || _getSignature(wallet, signatureId, address(this), block.chainid, signature) != $.signAddress) {
+            revert InvalidSignature(signatureId);
+        }
+        $.signatureIds[signatureId] = 1;
     }
 
     /**
@@ -942,7 +963,7 @@ IERC4906
      * @param _signature signature
      * @return address that validates the provided signature
      */
-    function _checkSignature(
+    function _getSignature(
         address _wallet,
         uint256 _signatureId,
         address _contractAddress,
@@ -972,7 +993,7 @@ IERC4906
      * @param _signature signature
      * @return address that validates the provided signature
      */
-    function _checkPersonalizationSignature(
+    function _getPersonalizationSignature(
         address _wallet,
         uint256 _signatureId,
         address _contractAddress,
@@ -1003,45 +1024,19 @@ IERC4906
     }
 
     /**
-     * @notice check if the current wave can still mint the indicated amount
-     * @param _amount number of tokens to check if can be minted
-     * @return if wave can mint the indicated amount
-     */
-    function _checkWaveNotComplete(uint256 _amount) internal view returns (bool) {
-        return waveTotalMinted + _amount <= waveMaxTokensOverall;
-    }
-
-    /**
-     * @notice checks if current contract limits are respected if minting the indicated amount
-     * @param _wallet minting wallet, whose restrictions will be considered
-     * @param _amount number of tokens to mint
-     * @return if amount can be safely minted
-     */
-    function _checkLimitPerWalletNotReached(address _wallet, uint256 _amount) internal view returns (bool) {
-        return waveOwnerToClaimedCounts[_wallet][indexWave - 1] + _amount <= waveMaxTokensPerWallet;
-    }
-
-    /**
-     * @notice checks if the total supply was not reached
-     * @param _amount number of tokens to mint
-     * @return if amount can be safely minted
-     */
-    function _checkTotalNotReached(uint256 _amount) internal view returns (bool) {
-        return totalSupply + _amount <= maxSupply;
-    }
-    /**
      * @notice actually updates the variables that store the personalization traits per token.
      * @dev no checks are done on input validations. Calling functions are expected to do them
      * @custom:event {Personalized}
      * @custom:event {MetadataUpdate}
-     * @param _tokenId the ID for the token to personalize
-     * @param _personalizationMask the personalization mask that will be applied
+     * @param tokenId the ID for the token to personalize
+     * @param personalizationMask the personalization mask that will be applied
      */
-    function _updateTokenTraits(uint256 _tokenId, uint256 _personalizationMask) internal {
-        personalizationTraits[_tokenId] = _personalizationMask;
+    function _updateTokenTraits(uint256 tokenId, uint256 personalizationMask) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        $.personalizationTraits[tokenId] = personalizationMask;
 
-        emit Personalized(_msgSender(), _tokenId, _personalizationMask);
-        emit MetadataUpdate(_tokenId);
+        emit Personalized(_msgSender(), tokenId, personalizationMask);
+        emit MetadataUpdate(tokenId);
     }
 
     /**
@@ -1057,8 +1052,134 @@ IERC4906
     }
 
     /**
-     * Empty storage space in contracts for future enhancements
-     * ref: https://github.com/OpenZeppelin/<at>openzeppelin/contracts-upgradeable/issues/13
+     * @notice updates the base token URI for the contract
+     * @custom:event {BaseURISet}
+     * @param baseURI an URI that will be used as the base for token URI
      */
-    uint256[50] private __gap;
+    function _setBaseURI(string calldata baseURI) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (bytes(baseURI).length == 0) {
+            revert InvalidBaseTokenURI(baseURI);
+        }
+        emit BaseURISet(_msgSender(), $.baseTokenURI, baseURI);
+        $.baseTokenURI = baseURI;
+    }
+
+    /**
+     * @notice update the treasury address
+     * @custom:event {TreasurySet}
+     * @param _treasury new treasury address to be saved
+     */
+    function _setTreasury(address _treasury) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_treasury == address(0)) {
+            revert InvalidTreasury(_treasury);
+        }
+        emit TreasurySet(_msgSender(), $.mintTreasury, _treasury);
+        $.mintTreasury = _treasury;
+    }
+
+    /**
+     * @notice updates the sign address.
+     * @custom:event {SignAddressSet}
+     * @param _signAddress new signer address to be set
+     */
+    function _setSignAddress(address _signAddress) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_signAddress == address(0)) {
+            revert InvalidSignAddress(_signAddress);
+        }
+        emit SignAddressSet(_msgSender(), $.signAddress, _signAddress);
+        $.signAddress = _signAddress;
+    }
+
+    /**
+     * @notice updates which address is allowed to execute the mint function.
+     * @dev also resets default mint price
+     * @custom:event {AllowedExecuteMintSet}
+     * @custom:event {DefaultMintingValuesSet}
+     * @param _minterToken the address that will be allowed to execute the mint function
+     */
+    function _setAllowedExecuteMint(IERC20Metadata _minterToken) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (!_isContract(address(_minterToken))) {
+            revert InvalidAllowedToExecuteMint(_minterToken);
+        }
+        emit AllowedExecuteMintSet(_msgSender(), $.allowedToExecuteMint, _minterToken);
+        $.allowedToExecuteMint = _minterToken;
+    }
+
+    /**
+     * @notice updates maximum supply
+     * @custom:event {MaxSupplySet}
+     * @param _maxSupply maximum amount of tokens that can be minted
+     */
+    function _setMaxSupply(uint256 _maxSupply) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_maxSupply == 0) {
+            revert LowMaxSupply(0, $.totalSupply);
+        }
+        if (_maxSupply < $.totalSupply) {
+            revert LowMaxSupply(_maxSupply, $.totalSupply);
+        }
+        emit MaxSupplySet(_msgSender(), $.maxSupply, _maxSupply);
+        $.maxSupply = _maxSupply;
+    }
+
+
+    /**
+     * @notice check if the indicated wallet can mint the indicated amount
+     * @param _wallet wallet to be checked if it can mint
+     * @param _amount amount to be checked if can be minted
+     */
+    function _checkMintAllowed(address _wallet, uint256 _amount) internal view {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        uint256 waveClaimedCounts = $.waveOwnerToClaimedCounts[_wallet][$.indexWave - 1];
+        if (!_isMintAllowed(waveClaimedCounts, _amount)) {
+            revert CannotMint(_wallet, _amount);
+        }
+    }
+
+    /**
+     * @notice check if the indicated wallet can mint the indicated amount
+     * @param _amount amount to be checked if can be minted
+     * @param _waveClaimedCounts amount of tokens already claimed by caller in the current running wave
+     * @return if can mint or not
+     */
+    function _isMintAllowed(uint256 _waveClaimedCounts, uint256 _amount) internal view returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return _amount > 0
+        && ($.waveTotalMinted + _amount <= $.waveMaxTokensOverall)
+        && (_waveClaimedCounts + _amount <= $.waveMaxTokensPerWallet)
+        && $.totalSupply + _amount <= $.maxSupply;
+    }
+
+    /**
+     * @notice taken from ERC721Upgradeable because it is declared private.
+     * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target address. This will revert if the
+     * recipient doesn't accept the token transfer. The call is not executed if the target address is not a contract.
+     *
+     * @param from address representing the previous owner of the given token ID
+     * @param to target address that will receive the tokens
+     * @param tokenId uint256 ID of the token to be transferred
+     * @param data bytes optional data to send along with the call
+     */
+    function _checkOnERC721ReceivedImpl(address from, address to, uint256 tokenId, bytes memory data) private {
+        if (to.code.length > 0) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+                if (retval != IERC721Receiver.onERC721Received.selector) {
+                    revert ERC721InvalidReceiver(to);
+                }
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert ERC721InvalidReceiver(to);
+                } else {
+                    /// @solidity memory-safe-assembly
+                    assembly {
+                        revert(add(32, reason), mload(reason))
+                    }
+                }
+            }
+        }
+    }
 }

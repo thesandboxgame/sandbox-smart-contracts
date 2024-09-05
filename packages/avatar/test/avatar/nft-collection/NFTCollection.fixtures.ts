@@ -64,7 +64,18 @@ export async function setupNFTCollectionContract() {
     );
   }
 
+  function getCustomArgs(idx: number, val) {
+    const args = [...initializeArgs];
+    args[idx] = val;
+    return args;
+  }
+
+  const MockERC721Holder = await ethers.getContractFactory('MockERC721Holder');
+  const mockERC721Holder = await MockERC721Holder.connect(
+    accounts.deployer
+  ).deploy();
   return {
+    NFTCollectionFactory,
     ...accounts,
     metadataUrl,
     collectionName,
@@ -95,6 +106,7 @@ export async function setupNFTCollectionContract() {
     ),
     mockERC20: await setupMockERC20(),
     mockOperatorFilterRegistry,
+    mockERC721Holder,
     setupDefaultWave,
     mint: async (amount, wallet = collectionOwner) => {
       await setupDefaultWave(0);
@@ -111,12 +123,12 @@ export async function setupNFTCollectionContract() {
     ),
     initializeArgs,
     deployWithCustomArg: async (idx: number, val) => {
-      const args = [...initializeArgs];
-      args[idx] = val;
+      const args = getCustomArgs(idx, val);
       return await upgrades.deployProxy(NFTCollectionFactory, args, {
         initializer: 'initialize',
       });
     },
+    getCustomArgs,
   };
 }
 
@@ -134,7 +146,10 @@ function setupSignAuthMessageAs(contract: Contract, raffleSignWallet: Signer) {
     if (destinationWallet instanceof Promise) {
       destinationWallet = await destinationWallet;
     }
-    if ('getAddress' in destinationWallet) {
+    if (
+      typeof destinationWallet != 'string' &&
+      'getAddress' in destinationWallet
+    ) {
       destinationWallet = await destinationWallet.getAddress();
     }
     const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(

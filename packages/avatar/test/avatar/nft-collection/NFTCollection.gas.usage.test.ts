@@ -4,7 +4,7 @@ import {Wallet} from 'ethers';
 
 async function customDeploy() {
   const maxSupply = 100000;
-  const ret = await setupNFTCollectionContract();
+  const ret = await loadFixture(setupNFTCollectionContract);
   const collectionContract = await ret.deployWithCustomArg(8, maxSupply);
   const collectionContractAsOwner = collectionContract.connect(
     ret.collectionOwner

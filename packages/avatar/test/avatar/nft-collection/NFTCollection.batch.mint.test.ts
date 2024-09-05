@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 
 describe('NFTCollection batch mint', function () {
   it('owner should be able batchMint without paying the price', async function () {
@@ -9,7 +10,7 @@ describe('NFTCollection batch mint', function () {
       collectionOwner,
       randomWallet,
       setupDefaultWave,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     await setupDefaultWave(20);
     await contract.batchMint([
       [randomWallet, 7],
@@ -38,27 +39,28 @@ describe('NFTCollection batch mint', function () {
 
   it('other should not be able batchMint', async function () {
     const {collectionContractAsRandomWallet: contract, randomWallet} =
-      await setupNFTCollectionContract();
-    await expect(contract.batchMint([[randomWallet, 1]])).to.revertedWith(
-      'Ownable: caller is not the owner'
-    );
+      await loadFixture(setupNFTCollectionContract);
+    await expect(contract.batchMint([[randomWallet, 1]]))
+      .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+      .withArgs(randomWallet);
   });
 
   it('should not be able to batchMint if no wave was initialized', async function () {
     const {collectionContractAsOwner: contract, randomWallet} =
-      await setupNFTCollectionContract();
-    await expect(contract.batchMint([[randomWallet, 1]])).to.revertedWith(
-      'NFTCollection: contract is not configured'
-    );
+      await loadFixture(setupNFTCollectionContract);
+    await expect(
+      contract.batchMint([[randomWallet, 1]])
+    ).to.revertedWithCustomError(contract, 'ContractNotConfigured');
   });
 
   describe('should not be able to batchMint with wrong args', function () {
     it('should not be able to batchMint when wallet length is zero', async function () {
       const {collectionContractAsOwner: contract, setupDefaultWave} =
-        await setupNFTCollectionContract();
+        await loadFixture(setupNFTCollectionContract);
       await setupDefaultWave(20);
-      await expect(contract.batchMint([])).to.revertedWith(
-        'NFTCollection: wallets length cannot be 0'
+      await expect(contract.batchMint([])).to.revertedWithCustomError(
+        contract,
+        'InvalidBatchData'
       );
     });
 
@@ -67,34 +69,40 @@ describe('NFTCollection batch mint', function () {
         collectionContractAsOwner: contract,
         randomWallet,
         setupDefaultWave,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       await setupDefaultWave(20);
       await expect(
         contract.batchMint([
           [randomWallet, 1],
           [randomWallet, 0],
         ])
-      ).to.revertedWith('NFTCollection: amount cannot be 0');
+      )
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(randomWallet, 0);
     });
 
     it('should not be able to batchMint over waveMaxTokensOverall', async function () {
       const {collectionContractAsOwner: contract, randomWallet} =
-        await setupNFTCollectionContract();
+        await loadFixture(setupNFTCollectionContract);
       const waveMaxTokensOverall = 100;
       await contract.setupWave(waveMaxTokensOverall, 10, 20);
       await expect(
         contract.batchMint([[randomWallet, waveMaxTokensOverall + 1]])
-      ).to.revertedWith('NFTCollection: wave completed');
+      )
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(randomWallet, waveMaxTokensOverall + 1);
     });
 
     it('should not be able to batchMint over waveMaxTokensPerWallet', async function () {
       const {collectionContractAsOwner: contract, randomWallet} =
-        await setupNFTCollectionContract();
+        await loadFixture(setupNFTCollectionContract);
       const waveMaxTokensPerWallet = 10;
       await contract.setupWave(100, waveMaxTokensPerWallet, 0);
       await expect(
         contract.batchMint([[randomWallet, waveMaxTokensPerWallet + 1]])
-      ).to.revertedWith('NFTCollection: max allowed');
+      )
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(randomWallet, waveMaxTokensPerWallet + 1);
     });
 
     it('should not be able to batchMint over maxSupply', async function () {
@@ -102,13 +110,13 @@ describe('NFTCollection batch mint', function () {
         collectionContractAsOwner: contract,
         randomWallet,
         maxSupply,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       await contract.setupWave(maxSupply, maxSupply, 0);
       await contract.batchMint([[randomWallet, maxSupply]]);
       await contract.setupWave(maxSupply, maxSupply, 0);
-      await expect(
-        contract.batchMint([[randomWallet, maxSupply]])
-      ).to.revertedWith('NFTCollection: max reached');
+      await expect(contract.batchMint([[randomWallet, maxSupply]]))
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(randomWallet, maxSupply);
     });
   });
 });

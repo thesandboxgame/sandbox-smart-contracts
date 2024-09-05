@@ -19,12 +19,11 @@ describe('NFTCollection operator registry', function () {
   });
 
   it('other should fail to setOperatorRegistry', async function () {
-    const {collectionContractAsRandomWallet, randomWallet} = await loadFixture(
-      setupNFTCollectionContract
-    );
-    await expect(
-      collectionContractAsRandomWallet.setOperatorRegistry(randomWallet)
-    ).to.revertedWith('Ownable: caller is not the owner');
+    const {collectionContractAsRandomWallet: contract, randomWallet} =
+      await loadFixture(setupNFTCollectionContract);
+    await expect(contract.setOperatorRegistry(randomWallet))
+      .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+      .withArgs(randomWallet);
   });
 
   it('owner should be able to register in the registry', async function () {
@@ -84,14 +83,15 @@ describe('NFTCollection operator registry', function () {
     const {
       collectionContractAsOwner,
       collectionContractAsRandomWallet: contract,
+      randomWallet,
       mockOperatorFilterRegistry,
     } = await loadFixture(setupNFTCollectionContract);
     await collectionContractAsOwner.setOperatorRegistry(
       mockOperatorFilterRegistry
     );
-    await expect(contract.register(ZeroAddress, false)).to.revertedWith(
-      'Ownable: caller is not the owner'
-    );
+    await expect(contract.register(ZeroAddress, false))
+      .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+      .withArgs(randomWallet);
   });
 
   it('should fail to call protected methods protected by onlyAllowedOperator when blacklisted in the registry', async function () {
