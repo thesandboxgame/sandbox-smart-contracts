@@ -5,45 +5,46 @@ import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 
 describe('NFTCollection burn', function () {
   it('owner should be able to enable/disable burning', async function () {
-    const {collectionContractAsOwner, nftCollectionAdmin} = await loadFixture(
-      setupNFTCollectionContract
+    const {collectionContractAsOwner: contract, nftCollectionAdmin} =
+      await loadFixture(setupNFTCollectionContract);
+
+    expect(await contract.isBurnEnabled()).to.be.false;
+    await expect(contract.disableBurning()).to.revertedWithCustomError(
+      contract,
+      'ExpectedBurn'
     );
 
-    expect(await collectionContractAsOwner.isBurnEnabled()).to.be.false;
-    await expect(collectionContractAsOwner.disableBurning()).to.revertedWith(
-      'Burning already disabled'
-    );
-
-    await expect(collectionContractAsOwner.enableBurning())
-      .to.emit(collectionContractAsOwner, 'TokenBurningEnabled')
+    await expect(contract.enableBurning())
+      .to.emit(contract, 'TokenBurningEnabled')
       .withArgs(nftCollectionAdmin);
-    expect(await collectionContractAsOwner.isBurnEnabled()).to.be.true;
+    expect(await contract.isBurnEnabled()).to.be.true;
 
-    await expect(collectionContractAsOwner.enableBurning()).to.revertedWith(
-      'Burning already enabled'
+    await expect(contract.enableBurning()).to.revertedWithCustomError(
+      contract,
+      'EnforcedBurn'
     );
 
-    await expect(collectionContractAsOwner.disableBurning())
-      .to.emit(collectionContractAsOwner, 'TokenBurningDisabled')
+    await expect(contract.disableBurning())
+      .to.emit(contract, 'TokenBurningDisabled')
       .withArgs(nftCollectionAdmin);
-    expect(await collectionContractAsOwner.isBurnEnabled()).to.be.false;
+    expect(await contract.isBurnEnabled()).to.be.false;
   });
 
   it('other should fail to enable/disable burning', async function () {
-    const {collectionContractAsRandomWallet} = await loadFixture(
-      setupNFTCollectionContract
+    const {collectionContractAsRandomWallet: contract, randomWallet} =
+      await loadFixture(setupNFTCollectionContract);
+    await expect(contract.enableBurning())
+      .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+      .withArgs(randomWallet);
+    await expect(contract.disableBurning()).to.revertedWithCustomError(
+      contract,
+      'OwnableUnauthorizedAccount'
     );
-    await expect(
-      collectionContractAsRandomWallet.enableBurning()
-    ).to.revertedWith('Ownable: caller is not the owner');
-    await expect(
-      collectionContractAsRandomWallet.disableBurning()
-    ).to.revertedWith('Ownable: caller is not the owner');
   });
 
   it('owner of the token should be able burn a token', async function () {
     const {
-      collectionContractAsOwner,
+      collectionContractAsOwner: contract,
       randomWallet,
       collectionContractAsRandomWallet,
       setupDefaultWave,
@@ -51,48 +52,38 @@ describe('NFTCollection burn', function () {
     await setupDefaultWave(20);
 
     // skip 5 ids
-    await collectionContractAsOwner.batchMint([[randomWallet, 5]]);
+    await contract.batchMint([[randomWallet, 5]]);
 
     // enable burning
-    await expect(collectionContractAsOwner.burn(1)).to.revertedWith(
-      'Burning is not enabled'
+    await expect(contract.burn(1)).to.revertedWithCustomError(
+      contract,
+      'ExpectedBurn'
     );
-    await collectionContractAsOwner.enableBurning();
+    await contract.enableBurning();
 
     // mint 5
-    await collectionContractAsOwner.batchMint([[randomWallet, 5]]);
-    const transferEvents = await collectionContractAsOwner.queryFilter(
-      'Transfer'
-    );
+    await contract.batchMint([[randomWallet, 5]]);
+    const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
       const tokenId = transferEvents[i].args.tokenId;
       // burn
       await expect(collectionContractAsRandomWallet.burn(tokenId))
-        .to.emit(collectionContractAsOwner, 'TokenBurned')
+        .to.emit(contract, 'TokenBurned')
         .withArgs(randomWallet, tokenId, randomWallet);
       // check
-      expect(await collectionContractAsOwner.burner(tokenId)).to.be.eq(
-        randomWallet
-      );
-      expect(await collectionContractAsOwner.burnerOf(tokenId)).to.be.eq(
-        randomWallet
-      );
-      expect(await collectionContractAsOwner.didBurnTokens(randomWallet)).to.be
-        .true;
-      expect(
-        await collectionContractAsOwner.burnedTokensCount(randomWallet)
-      ).to.be.eq(i + 1);
+      expect(await contract.burner(tokenId)).to.be.eq(randomWallet);
+      expect(await contract.burnerOf(tokenId)).to.be.eq(randomWallet);
+      expect(await contract.didBurnTokens(randomWallet)).to.be.true;
+      expect(await contract.burnedTokensCount(randomWallet)).to.be.eq(i + 1);
       for (let j = 0; j < i; j++) {
-        expect(
-          await collectionContractAsOwner.burnedTokens(randomWallet, j)
-        ).to.be.eq(j + 1);
+        expect(await contract.burnedTokens(randomWallet, j)).to.be.eq(j + 1);
       }
     }
   });
 
   it('approved of the token should be able burn a token', async function () {
     const {
-      collectionContractAsOwner,
+      collectionContractAsOwner: contract,
       randomWallet,
       randomWallet2,
       collectionContractAsRandomWallet,
@@ -102,71 +93,60 @@ describe('NFTCollection burn', function () {
     await setupDefaultWave(20);
 
     // enable burning
-    await expect(collectionContractAsOwner.burn(1)).to.revertedWith(
-      'Burning is not enabled'
+    await expect(contract.burn(1)).to.revertedWithCustomError(
+      contract,
+      'ExpectedBurn'
     );
-    await collectionContractAsOwner.enableBurning();
+    await contract.enableBurning();
 
     // mint 5
-    await collectionContractAsOwner.batchMint([[randomWallet2, 5]]);
+    await contract.batchMint([[randomWallet2, 5]]);
 
-    const transferEvents = await collectionContractAsOwner.queryFilter(
-      'Transfer'
-    );
+    const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
       const tokenId = transferEvents[i].args.tokenId;
       await collectionContractAsRandomWallet2.approve(randomWallet, tokenId);
       // burn
       await expect(collectionContractAsRandomWallet.burn(tokenId))
-        .to.emit(collectionContractAsOwner, 'TokenBurned')
+        .to.emit(contract, 'TokenBurned')
         .withArgs(randomWallet, tokenId, randomWallet2);
       // check
-      expect(await collectionContractAsOwner.burner(tokenId)).to.be.eq(
-        randomWallet
-      );
-      expect(await collectionContractAsOwner.burnerOf(tokenId)).to.be.eq(
-        randomWallet
-      );
-      expect(await collectionContractAsOwner.didBurnTokens(randomWallet2)).to.be
-        .false;
-      expect(
-        await collectionContractAsOwner.burnedTokensCount(randomWallet2)
-      ).to.be.eq(0);
-      expect(await collectionContractAsOwner.didBurnTokens(randomWallet)).to.be
-        .true;
-      expect(
-        await collectionContractAsOwner.burnedTokensCount(randomWallet)
-      ).to.be.eq(i + 1);
+      expect(await contract.burner(tokenId)).to.be.eq(randomWallet);
+      expect(await contract.burnerOf(tokenId)).to.be.eq(randomWallet);
+      expect(await contract.didBurnTokens(randomWallet2)).to.be.false;
+      expect(await contract.burnedTokensCount(randomWallet2)).to.be.eq(0);
+      expect(await contract.didBurnTokens(randomWallet)).to.be.true;
+      expect(await contract.burnedTokensCount(randomWallet)).to.be.eq(i + 1);
       for (let j = 0; j < i; j++) {
-        expect(
-          await collectionContractAsOwner.burnedTokens(randomWallet, j)
-        ).to.be.eq(j + 1);
+        expect(await contract.burnedTokens(randomWallet, j)).to.be.eq(j + 1);
       }
     }
   });
 
   it('other should fail to burn a token', async function () {
     const {
-      collectionContractAsOwner,
+      collectionContractAsOwner: contract,
       randomWallet,
+      randomWallet2,
       collectionContractAsRandomWallet2,
       setupDefaultWave,
     } = await loadFixture(setupNFTCollectionContract);
     await setupDefaultWave(20);
-    await collectionContractAsOwner.enableBurning();
+    await contract.enableBurning();
 
     // mint 5
-    await collectionContractAsOwner.batchMint([[randomWallet, 5]]);
+    await contract.batchMint([[randomWallet, 5]]);
 
-    const transferEvents = await collectionContractAsOwner.queryFilter(
-      'Transfer'
-    );
+    const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
       const tokenId = transferEvents[i].args.tokenId;
       // burn
-      await expect(
-        collectionContractAsRandomWallet2.burn(tokenId)
-      ).to.revertedWith('ERC721: caller is not token owner or approved');
+      await expect(collectionContractAsRandomWallet2.burn(tokenId))
+        .to.revertedWithCustomError(
+          collectionContractAsRandomWallet2,
+          'ERC721InsufficientApproval'
+        )
+        .withArgs(randomWallet2, tokenId);
     }
   });
 });

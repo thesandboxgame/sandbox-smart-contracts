@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {Wallet, parseUnits} from 'ethers';
+import {Wallet, parseUnits, keccak256, AbiCoder, toUtf8Bytes} from 'ethers';
 import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {setBalance} from '@nomicfoundation/hardhat-network-helpers';
 
@@ -60,4 +60,20 @@ export async function getTestingAccounts() {
     defaultOperatorFiltererSubscription,
     trustedForwarder,
   };
+}
+
+export function getStorageSlotJS(key: string): string {
+  return (
+    '0x' +
+    (
+      BigInt(
+        keccak256(
+          AbiCoder.defaultAbiCoder().encode(
+            ['uint256'],
+            [BigInt(keccak256(toUtf8Bytes(key))) - 1n]
+          )
+        )
+      ) & ~0xffn
+    ).toString(16)
+  );
 }

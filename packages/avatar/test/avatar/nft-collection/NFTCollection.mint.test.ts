@@ -2,6 +2,7 @@ import {expect} from 'chai';
 
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {ZeroAddress} from 'ethers';
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 
 describe('NFTCollection mint', function () {
   it('user should be able to mint with the right signature and payment', async function () {
@@ -12,7 +13,7 @@ describe('NFTCollection mint', function () {
       randomWallet,
       treasury,
       maxSupply,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     const amount = 2;
     const unitPrice = 10;
     const price = amount * unitPrice;
@@ -26,7 +27,7 @@ describe('NFTCollection mint', function () {
     ]);
     expect(await sandContract.balanceOf(treasury)).to.be.eq(0);
     expect(await sandContract.balanceOf(randomWallet)).to.be.eq(price);
-    expect(await contract.checkMintAllowed(randomWallet, amount)).to.be.true;
+    expect(await contract.isMintAllowed(randomWallet, amount)).to.be.true;
     await sandContract
       .connect(randomWallet)
       .approveAndCall(contract, price, encodedData);
@@ -53,7 +54,7 @@ describe('NFTCollection mint', function () {
       randomWallet,
       waveMaxTokensOverall,
       waveMaxTokensPerWallet,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     await contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
     await expect(
       sandContract.mint(
@@ -63,7 +64,9 @@ describe('NFTCollection mint', function () {
         222,
         await authSign(randomWallet, 222)
       )
-    ).to.revertedWith('NFTCollection: max allowed');
+    )
+      .to.revertedWithCustomError(contract, 'CannotMint')
+      .withArgs(randomWallet, waveMaxTokensPerWallet + 1);
   });
 
   it('should not be able to mint over waveMaxTokensOverall', async function () {
@@ -74,7 +77,7 @@ describe('NFTCollection mint', function () {
       randomWallet,
       randomWallet2,
       waveMaxTokensOverall,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     await contract.setupWave(waveMaxTokensOverall, waveMaxTokensOverall - 1, 0);
     await sandContract.mint(
       contract,
@@ -91,7 +94,9 @@ describe('NFTCollection mint', function () {
         223,
         await authSign(randomWallet2, 223)
       )
-    ).to.revertedWith('NFTCollection: wave completed');
+    )
+      .to.revertedWithCustomError(contract, 'CannotMint')
+      .withArgs(randomWallet2, waveMaxTokensOverall - 1);
   });
 
   it('should not be able to mint over maxSupply', async function () {
@@ -101,7 +106,7 @@ describe('NFTCollection mint', function () {
       sandContract,
       randomWallet,
       maxSupply,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     await contract.setupWave(maxSupply, maxSupply, 0);
     await sandContract.mint(
       contract,
@@ -119,7 +124,9 @@ describe('NFTCollection mint', function () {
         223,
         await authSign(randomWallet, 223)
       )
-    ).to.revertedWith('NFTCollection: max reached');
+    )
+      .to.revertedWithCustomError(contract, 'CannotMint')
+      .withArgs(randomWallet, maxSupply);
   });
 
   it('should not be able to mint without enough balance', async function () {
@@ -129,7 +136,7 @@ describe('NFTCollection mint', function () {
       sandContract,
       randomWallet,
       maxSupply,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     const price = 10;
     await contract.setupWave(maxSupply, maxSupply, price);
     await expect(
@@ -157,10 +164,10 @@ describe('NFTCollection mint', function () {
   describe('wrong args', function () {
     it('should not be able to mint if no wave was initialized', async function () {
       const {collectionContractAsRandomWallet: contract, randomWallet} =
-        await setupNFTCollectionContract();
-      await expect(contract.mint(randomWallet, 1, 1, '0x')).to.revertedWith(
-        'NFTCollection: contract is not configured'
-      );
+        await loadFixture(setupNFTCollectionContract);
+      await expect(
+        contract.mint(randomWallet, 1, 1, '0x')
+      ).to.revertedWithCustomError(contract, 'ContractNotConfigured');
     });
 
     it('should not be able to mint when the caller is not allowed to execute mint', async function () {
@@ -168,12 +175,12 @@ describe('NFTCollection mint', function () {
         collectionContractAsOwner,
         collectionContractAsRandomWallet: contract,
         randomWallet,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
 
       await collectionContractAsOwner.setupWave(10, 1, 2);
-      await expect(contract.mint(randomWallet, 1, 1, '0x')).to.revertedWith(
-        'NFTCollection: caller is not allowed'
-      );
+      await expect(contract.mint(randomWallet, 1, 1, '0x'))
+        .to.revertedWithCustomError(contract, 'ERC721InvalidSender')
+        .withArgs(randomWallet);
     });
 
     it('should not be able to mint when wallet address is zero', async function () {
@@ -181,11 +188,20 @@ describe('NFTCollection mint', function () {
         collectionContractAsOwner,
         collectionContractAsRandomWallet: contract,
         sandContract,
-      } = await setupNFTCollectionContract();
-      await collectionContractAsOwner.setupWave(10, 1, 2);
+        authSign,
+      } = await loadFixture(setupNFTCollectionContract);
+      await collectionContractAsOwner.setupWave(10, 1, 0);
       await expect(
-        sandContract.mint(contract, ZeroAddress, 1, 1, '0x')
-      ).to.revertedWith('NFTCollection: wallet is zero address');
+        sandContract.mint(
+          contract,
+          ZeroAddress,
+          1,
+          222,
+          await authSign(ZeroAddress, 222)
+        )
+      )
+        .to.revertedWithCustomError(contract, 'ERC721InvalidReceiver')
+        .withArgs(ZeroAddress);
     });
 
     it('should not be able to mint when amount is zero', async function () {
@@ -194,11 +210,20 @@ describe('NFTCollection mint', function () {
         collectionContractAsRandomWallet: contract,
         sandContract,
         randomWallet,
-      } = await setupNFTCollectionContract();
-      await collectionContractAsOwner.setupWave(10, 1, 2);
+        authSign,
+      } = await loadFixture(setupNFTCollectionContract);
+      await collectionContractAsOwner.setupWave(10, 1, 0);
       await expect(
-        sandContract.mint(contract, randomWallet, 0, 1, '0x')
-      ).to.revertedWith('NFTCollection: amount cannot be 0');
+        sandContract.mint(
+          contract,
+          randomWallet,
+          0,
+          222,
+          await authSign(randomWallet, 222)
+        )
+      )
+        .to.revertedWithCustomError(contract, 'CannotMint')
+        .withArgs(randomWallet, 0);
     });
   });
 
@@ -209,11 +234,11 @@ describe('NFTCollection mint', function () {
         collectionContractAsRandomWallet: contract,
         sandContract,
         randomWallet,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       await collectionContractAsOwner.setupWave(10, 1, 2);
-      await expect(
-        sandContract.mint(contract, randomWallet, 1, 1, '0x')
-      ).to.revertedWith('ECDSA: invalid signature length');
+      await expect(sandContract.mint(contract, randomWallet, 1, 1, '0x'))
+        .to.revertedWithCustomError(contract, 'ECDSAInvalidSignatureLength')
+        .withArgs(0);
     });
 
     it('should not be able to mint when with a wrong signature (signed by wrong address)', async function () {
@@ -223,7 +248,7 @@ describe('NFTCollection mint', function () {
         sandContract,
         randomWallet,
         authSign,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       await collectionContractAsOwner.setupWave(10, 1, 2);
       await expect(
         sandContract.mint(
@@ -233,7 +258,9 @@ describe('NFTCollection mint', function () {
           1,
           await authSign(randomWallet, 222, randomWallet)
         )
-      ).to.revertedWith('NFTCollection: signature failed');
+      )
+        .to.revertedWithCustomError(contract, 'InvalidSignature')
+        .withArgs(1);
     });
 
     it('should not be able to mint when the signature is used twice', async function () {
@@ -243,13 +270,13 @@ describe('NFTCollection mint', function () {
         sandContract,
         randomWallet,
         authSign,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       await collectionContractAsOwner.setupWave(10, 1, 0);
       const signature = await authSign(randomWallet, 222);
       await sandContract.mint(contract, randomWallet, 1, 222, signature);
-      await expect(
-        sandContract.mint(contract, randomWallet, 1, 222, signature)
-      ).to.revertedWith('NFTCollection: signatureId already used');
+      await expect(sandContract.mint(contract, randomWallet, 1, 222, signature))
+        .to.revertedWithCustomError(contract, 'InvalidSignature')
+        .withArgs(222);
     });
   });
 });
