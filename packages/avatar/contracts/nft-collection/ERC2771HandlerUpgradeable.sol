@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.26;
 
 /**
@@ -11,6 +10,21 @@ pragma solidity 0.8.26;
  *      with an initializer for proxies and a mutable forwarder
  */
 contract ERC2771HandlerUpgradeable {
+    struct ERC2771HandlerUpgradeableStorage {
+        address trustedForwarder;
+    }
+
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable
+    bytes32 internal constant ERC2771_HANDLER_UPGRADABLE_STORAGE_LOCATION =
+    0x269c7d123624135714769792dd28ef6db020f837bcb105cea22203ad17aa7000;
+
+    function _getERC2771HandlerUpgradableStorage() private pure returns (ERC2771HandlerUpgradeableStorage storage $) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := ERC2771_HANDLER_UPGRADABLE_STORAGE_LOCATION
+        }
+    }
+
     /**
      * @notice emitted when the trusted forwarder is set
      * @param operator the sender of the transaction
@@ -19,7 +33,6 @@ contract ERC2771HandlerUpgradeable {
      */
     event TrustedForwarderSet(address indexed operator, address indexed oldForwarder, address indexed newForwarder);
 
-    address internal _trustedForwarder;
 
     /**
      * @notice set the trusted forwarder
@@ -27,8 +40,9 @@ contract ERC2771HandlerUpgradeable {
      * @dev address(0) disables the forwarder
      */
     function _setTrustedForwarder(address forwarder) internal {
-        emit TrustedForwarderSet(_msgSender(), _trustedForwarder, forwarder);
-        _trustedForwarder = forwarder;
+        ERC2771HandlerUpgradeableStorage storage $ = _getERC2771HandlerUpgradableStorage();
+        emit TrustedForwarderSet(_msgSender(), $.trustedForwarder, forwarder);
+        $.trustedForwarder = forwarder;
     }
 
     /**
@@ -36,7 +50,8 @@ contract ERC2771HandlerUpgradeable {
      * @return the trusted forwarder address
      */
     function trustedForwarder() external view virtual returns (address) {
-        return _trustedForwarder;
+        ERC2771HandlerUpgradeableStorage storage $ = _getERC2771HandlerUpgradableStorage();
+        return $.trustedForwarder;
     }
 
     /**
@@ -86,7 +101,8 @@ contract ERC2771HandlerUpgradeable {
      * @return true if forwarder is the trusted forwarder address
      */
     function _isTrustedForwarder(address forwarder) internal view virtual returns (bool) {
-        return forwarder == _trustedForwarder;
+        ERC2771HandlerUpgradeableStorage storage $ = _getERC2771HandlerUpgradableStorage();
+        return forwarder == $.trustedForwarder;
     }
 
     /**
@@ -95,6 +111,4 @@ contract ERC2771HandlerUpgradeable {
     function _contextSuffixLength() internal view virtual returns (uint256) {
         return 20;
     }
-
-    uint256[50] private __gap;
 }

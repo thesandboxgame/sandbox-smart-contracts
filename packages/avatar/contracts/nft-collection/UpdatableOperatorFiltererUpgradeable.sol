@@ -2,8 +2,8 @@
 // solhint-disable one-contract-per-file
 pragma solidity 0.8.26;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable-0.8.13/proxy/utils/Initializable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable-5.0.2/proxy/utils/Initializable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/ContextUpgradeable.sol";
 
 /**
  * @title UpdatableOperatorFiltererUpgradeable
@@ -17,11 +17,23 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/uti
  *      To avoid an extra IOperatorFilterRegistry file for a code that is deprecated the interface is added below
  */
 abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
+    struct UpdatableOperatorFiltererUpgradeableStorage {
+        /**
+         * @notice the registry filter
+         */
+        IOperatorFilterRegistry operatorFilterRegistry;
+    }
 
-    /**
-     * @notice the registry filter
-     */
-    IOperatorFilterRegistry public operatorFilterRegistry;
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable
+    bytes32 internal constant UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION =
+    0x71a93d37b91262fe5ff5f64b534078b04fa3ca1f04b63abeac7b60ede712e800;
+
+    function _getUpdatableOperatorFiltererUpgradeableStorage() private pure returns (UpdatableOperatorFiltererUpgradeableStorage storage $) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION
+        }
+    }
 
     /**
      * @notice emitted when a registry is set
@@ -87,12 +99,21 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
     }
 
     /**
+     * @notice return the operatorFilterRegistry address
+     */
+    function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
+        UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
+        return $.operatorFilterRegistry;
+    }
+
+    /**
      * @notice Register this contract into the registry
      * @param subscriptionOrRegistrantToCopy address to subscribe or copy entries from
      * @param subscribe should it subscribe
      */
     function _register(address subscriptionOrRegistrantToCopy, bool subscribe) internal {
-        IOperatorFilterRegistry registry = operatorFilterRegistry;
+        UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
+        IOperatorFilterRegistry registry = $.operatorFilterRegistry;
         bool isContract = address(registry).code.length > 0;
         if (!isContract) {
             revert RegistryNotSet(_msgSender());
@@ -117,8 +138,9 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
      * @dev address(0) disables the registry
      */
     function _setOperatorRegistry(address registry) internal {
-        emit OperatorRegistrySet(_msgSender(), operatorFilterRegistry, registry);
-        operatorFilterRegistry = IOperatorFilterRegistry(registry);
+        UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
+        emit OperatorRegistrySet(_msgSender(), $.operatorFilterRegistry, registry);
+        $.operatorFilterRegistry = IOperatorFilterRegistry(registry);
     }
 
     /**
@@ -127,8 +149,9 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
      * @param operator operator address to check
      */
     function _checkIsOperatorAllowed(address registrant, address operator) internal view {
+        UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
         // Check registry code length to facilitate testing in environments without a deployed registry.
-        IOperatorFilterRegistry registry = operatorFilterRegistry;
+        IOperatorFilterRegistry registry = $.operatorFilterRegistry;
         if (address(registry).code.length > 0) {
             /* solhint-disable no-empty-blocks */
             try registry.isOperatorAllowed(registrant, operator) returns (bool retval) {
@@ -140,8 +163,6 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
             revert OperatorNotAllowed(operator);
         }
     }
-
-    uint256[50] private __gap;
 }
 
 /**

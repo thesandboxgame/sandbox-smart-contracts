@@ -1,12 +1,13 @@
 import {expect} from 'chai';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {getStorageSlotJS} from '../fixtures';
 
 describe('NFTCollection', function () {
   describe('reveal', function () {
     it('token owner should be able to be call reveal with a valid signature', async function () {
       const {
-        collectionContractAsRandomWallet,
+        collectionContractAsRandomWallet: contract,
         randomWallet,
         authSign,
         setupDefaultWave,
@@ -15,71 +16,77 @@ describe('NFTCollection', function () {
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
-        collectionContractAsRandomWallet.reveal(
-          tokenIds[0],
-          222,
-          await authSign(randomWallet, 222)
-        )
+        contract.reveal(tokenIds[0], 222, await authSign(randomWallet, 222))
       )
-        .to.emit(collectionContractAsRandomWallet, 'MetadataUpdate')
+        .to.emit(contract, 'MetadataUpdate')
         .withArgs(tokenIds[0]);
     });
 
     it('other owner should fail to call reveal', async function () {
-      const {collectionContractAsOwner, randomWallet, setupDefaultWave, mint} =
-        await loadFixture(setupNFTCollectionContract);
+      const {
+        collectionContractAsOwner: contract,
+        collectionOwner,
+        randomWallet,
+        setupDefaultWave,
+        mint,
+      } = await loadFixture(setupNFTCollectionContract);
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
-      await expect(
-        collectionContractAsOwner.reveal(tokenIds[0], 222, '0x')
-      ).to.revertedWith('NFTCollection: sender is not owner');
+      await expect(contract.reveal(tokenIds[0], 222, '0x'))
+        .to.revertedWithCustomError(contract, 'ERC721IncorrectOwner')
+        .withArgs(collectionOwner, tokenIds[0], randomWallet);
     });
 
     describe('signature issues', function () {
       it('should not be able to reveal when with an invalid signature', async function () {
-        const {collectionContractAsOwner, setupDefaultWave, mint} =
-          await setupNFTCollectionContract();
+        const {
+          collectionContractAsOwner: contract,
+          setupDefaultWave,
+          mint,
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
-        await expect(
-          collectionContractAsOwner.reveal(tokenIds[0], 222, '0x')
-        ).to.revertedWith('ECDSA: invalid signature length');
+        await expect(contract.reveal(tokenIds[0], 222, '0x'))
+          .to.revertedWithCustomError(contract, 'ECDSAInvalidSignatureLength')
+          .withArgs(0);
       });
 
       it('should not be able to reveal when with a wrong signature (signed by wrong address)', async function () {
         const {
-          collectionContractAsOwner,
+          collectionContractAsOwner: contract,
           randomWallet,
           authSign,
           setupDefaultWave,
           mint,
-        } = await setupNFTCollectionContract();
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
-          collectionContractAsOwner.reveal(
+          contract.reveal(
             tokenIds[0],
             222,
             await authSign(randomWallet, 222, randomWallet)
           )
-        ).to.revertedWith('NFTCollection: signature failed');
+        )
+          .to.revertedWithCustomError(contract, 'InvalidSignature')
+          .withArgs(222);
       });
 
       it('should not be able to reveal when the signature is used twice', async function () {
         const {
-          collectionContractAsOwner,
+          collectionContractAsOwner: contract,
           collectionOwner,
           authSign,
           setupDefaultWave,
           mint,
-        } = await setupNFTCollectionContract();
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         const signature = await authSign(collectionOwner, 222);
-        await collectionContractAsOwner.reveal(tokenIds[0], 222, signature);
-        await expect(
-          collectionContractAsOwner.reveal(tokenIds[0], 222, signature)
-        ).to.revertedWith('NFTCollection: signatureId already used');
+        await contract.reveal(tokenIds[0], 222, signature);
+        await expect(contract.reveal(tokenIds[0], 222, signature))
+          .to.revertedWithCustomError(contract, 'InvalidSignature')
+          .withArgs(222);
       });
     });
   });
@@ -88,7 +95,7 @@ describe('NFTCollection', function () {
     it('token owner should be able to be call personalize with a valid signature', async function () {
       const {
         collectionContractAsOwner,
-        collectionContractAsRandomWallet,
+        collectionContractAsRandomWallet: contract,
         randomWallet,
         personalizeSignature,
         setupDefaultWave,
@@ -97,7 +104,7 @@ describe('NFTCollection', function () {
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       const personalizationMask = '0x123456789abcdef0';
-      const tx = collectionContractAsRandomWallet.personalize(
+      const tx = contract.personalize(
         222,
         await personalizeSignature(
           randomWallet,
@@ -109,10 +116,10 @@ describe('NFTCollection', function () {
         personalizationMask
       );
       await expect(tx)
-        .to.emit(collectionContractAsRandomWallet, 'Personalized')
+        .to.emit(contract, 'Personalized')
         .withArgs(randomWallet, tokenIds[0], personalizationMask);
       await expect(tx)
-        .to.emit(collectionContractAsRandomWallet, 'MetadataUpdate')
+        .to.emit(contract, 'MetadataUpdate')
         .withArgs(tokenIds[0]);
       expect(
         await collectionContractAsOwner.personalizationOf(tokenIds[0])
@@ -120,48 +127,50 @@ describe('NFTCollection', function () {
     });
 
     it('other owner should fail to call personalize', async function () {
-      const {collectionContractAsOwner, randomWallet, setupDefaultWave, mint} =
-        await loadFixture(setupNFTCollectionContract);
+      const {
+        collectionContractAsOwner: contract,
+        collectionOwner,
+        randomWallet,
+        setupDefaultWave,
+        mint,
+      } = await loadFixture(setupNFTCollectionContract);
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
-        collectionContractAsOwner.personalize(
-          222,
-          '0x',
-          tokenIds[0],
-          '0x123456789abcdef0'
-        )
-      ).to.revertedWith('NFTCollection: sender is not owner');
+        contract.personalize(222, '0x', tokenIds[0], '0x123456789abcdef0')
+      )
+        .to.revertedWithCustomError(contract, 'ERC721IncorrectOwner')
+        .withArgs(collectionOwner, tokenIds[0], randomWallet);
     });
 
     describe('signature issues', function () {
       it('should not be able to personalize when with an invalid signature', async function () {
-        const {collectionContractAsOwner, setupDefaultWave, mint} =
-          await setupNFTCollectionContract();
+        const {
+          collectionContractAsOwner: contract,
+          setupDefaultWave,
+          mint,
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
-          collectionContractAsOwner.personalize(
-            222,
-            '0x',
-            tokenIds[0],
-            '0x123456789abcdef0'
-          )
-        ).to.revertedWith('ECDSA: invalid signature length');
+          contract.personalize(222, '0x', tokenIds[0], '0x123456789abcdef0')
+        )
+          .to.revertedWithCustomError(contract, 'ECDSAInvalidSignatureLength')
+          .withArgs(0);
       });
 
       it('should not be able to personalize when with a wrong signature (signed by wrong address)', async function () {
         const {
-          collectionContractAsOwner,
+          collectionContractAsOwner: contract,
           randomWallet,
           personalizeSignature,
           setupDefaultWave,
           mint,
-        } = await setupNFTCollectionContract();
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
-          collectionContractAsOwner.personalize(
+          contract.personalize(
             222,
             await personalizeSignature(
               randomWallet,
@@ -173,17 +182,19 @@ describe('NFTCollection', function () {
             tokenIds[0],
             '0x123456789abcdef0'
           )
-        ).to.revertedWith('NFTCollection: signature check failed');
+        )
+          .to.revertedWithCustomError(contract, 'InvalidSignature')
+          .withArgs(222);
       });
 
       it('should not be able to personalize when the signature is used twice', async function () {
         const {
-          collectionContractAsOwner,
+          collectionContractAsOwner: contract,
           collectionOwner,
           personalizeSignature,
           setupDefaultWave,
           mint,
-        } = await setupNFTCollectionContract();
+        } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         const signature = await personalizeSignature(
@@ -192,20 +203,22 @@ describe('NFTCollection', function () {
           '0x123456789abcdef0',
           222
         );
-        await collectionContractAsOwner.personalize(
+        await contract.personalize(
           222,
           signature,
           tokenIds[0],
           '0x123456789abcdef0'
         );
         await expect(
-          collectionContractAsOwner.personalize(
+          contract.personalize(
             222,
             signature,
             tokenIds[0],
             '0x123456789abcdef0'
           )
-        ).to.revertedWith('NFTCollection: signatureId already used');
+        )
+          .to.revertedWithCustomError(contract, 'InvalidSignature')
+          .withArgs(222);
       });
     });
   });
@@ -213,7 +226,7 @@ describe('NFTCollection', function () {
   describe('operatorPersonalize', function () {
     it('owner should be able to be call operatorPersonalize', async function () {
       const {
-        collectionContractAsOwner,
+        collectionContractAsOwner: contract,
         collectionOwner,
         setupDefaultWave,
         mint,
@@ -222,24 +235,21 @@ describe('NFTCollection', function () {
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       const personalizationMask = '0x123456789abcdef0';
-      const tx = collectionContractAsOwner.operatorPersonalize(
-        tokenIds[0],
-        personalizationMask
-      );
+      const tx = contract.operatorPersonalize(tokenIds[0], personalizationMask);
       await expect(tx)
-        .to.emit(collectionContractAsOwner, 'Personalized')
+        .to.emit(contract, 'Personalized')
         .withArgs(collectionOwner, tokenIds[0], personalizationMask);
       await expect(tx)
-        .to.emit(collectionContractAsOwner, 'MetadataUpdate')
+        .to.emit(contract, 'MetadataUpdate')
         .withArgs(tokenIds[0]);
-      expect(
-        await collectionContractAsOwner.personalizationOf(tokenIds[0])
-      ).to.be.eq(personalizationMask);
+      expect(await contract.personalizationOf(tokenIds[0])).to.be.eq(
+        personalizationMask
+      );
     });
 
     it('other owner should fail to call operatorPersonalize', async function () {
       const {
-        collectionContractAsRandomWallet,
+        collectionContractAsRandomWallet: contract,
         randomWallet,
         setupDefaultWave,
         mint,
@@ -247,94 +257,82 @@ describe('NFTCollection', function () {
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
-        collectionContractAsRandomWallet.operatorPersonalize(
-          tokenIds[0],
-          '0x123456789abcdef0'
-        )
-      ).to.revertedWith('Ownable: caller is not the owner');
+        contract.operatorPersonalize(tokenIds[0], '0x123456789abcdef0')
+      )
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
     });
 
     it('owner should fail to call operatorPersonalize with an invalid tokenId', async function () {
-      const {collectionContractAsOwner} = await loadFixture(
+      const {collectionContractAsOwner: contract} = await loadFixture(
         setupNFTCollectionContract
       );
-      await expect(
-        collectionContractAsOwner.operatorPersonalize(0, '0x123456789abcdef0')
-      ).to.revertedWith('NFTCollection: invalid token ID');
+      await expect(contract.operatorPersonalize(0, '0x123456789abcdef0'))
+        .to.revertedWithCustomError(contract, 'ERC721NonexistentToken')
+        .withArgs(0);
     });
   });
 
   describe('trusted forwarder', function () {
     it('should return msgData without sender when called from the trusted forwarder', async function () {
       const {
-        nftCollectionMockAsTrustedForwarder,
+        nftCollectionMockAsTrustedForwarder: contract,
         trustedForwarder,
         randomWallet2,
       } = await loadFixture(setupNFTCollectionContract);
-      expect(
-        await nftCollectionMockAsTrustedForwarder.isTrustedForwarder(
-          trustedForwarder
-        )
-      ).to.be.true;
+      expect(await contract.isTrustedForwarder(trustedForwarder)).to.be.true;
       // 4 (func signature) + 32 (address padded) - 20 bytes
-      expect(
-        await nftCollectionMockAsTrustedForwarder.msgData(randomWallet2)
-      ).to.be.eq('0x3185cfaa000000000000000000000000');
+      expect(await contract.msgData(randomWallet2)).to.be.eq(
+        '0x3185cfaa000000000000000000000000'
+      );
     });
 
     it('should return msgData with sender when called form any account', async function () {
-      const {nftCollectionMockAsRandomWallet, randomWallet2} =
+      const {nftCollectionMockAsRandomWallet: contract, randomWallet2} =
         await loadFixture(setupNFTCollectionContract);
-      expect(
-        await nftCollectionMockAsRandomWallet.msgData(randomWallet2)
-      ).to.be.eq(
+      expect(await contract.msgData(randomWallet2)).to.be.eq(
         '0x3185cfaa0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc'
       );
     });
 
     it('should return msgSender without sender when called from the trusted forwarder', async function () {
       const {
-        nftCollectionMockAsTrustedForwarder,
+        nftCollectionMockAsTrustedForwarder: contract,
         trustedForwarder,
         randomWallet2,
       } = await loadFixture(setupNFTCollectionContract);
-      expect(
-        await nftCollectionMockAsTrustedForwarder.isTrustedForwarder(
-          trustedForwarder
-        )
-      ).to.be.true;
+      expect(await contract.isTrustedForwarder(trustedForwarder)).to.be.true;
       // 4 (func signature) + 32 (address padded)
-      expect(
-        await nftCollectionMockAsTrustedForwarder.msgSender(randomWallet2)
-      ).to.be.eq(randomWallet2);
+      expect(await contract.msgSender(randomWallet2)).to.be.eq(randomWallet2);
     });
 
     it('should return msgSender with sender when called form any account', async function () {
-      const {nftCollectionMockAsRandomWallet, randomWallet, randomWallet2} =
-        await loadFixture(setupNFTCollectionContract);
-      expect(
-        await nftCollectionMockAsRandomWallet.msgSender(randomWallet2)
-      ).to.be.eq(randomWallet);
+      const {
+        nftCollectionMockAsRandomWallet: contract,
+        randomWallet,
+        randomWallet2,
+      } = await loadFixture(setupNFTCollectionContract);
+      expect(await contract.msgSender(randomWallet2)).to.be.eq(randomWallet);
     });
   });
 
   describe('coverage', function () {
     it('chain id', async function () {
-      const {collectionContract} = await loadFixture(
+      const {collectionContract: contract} = await loadFixture(
         setupNFTCollectionContract
       );
-      expect(await collectionContract.chain()).to.be.eq(31337);
+      expect(await contract.chain()).to.be.eq(31337);
     });
 
     it('feeDenominator', async function () {
-      const {collectionContract} = await loadFixture(
+      const {collectionContract: contract} = await loadFixture(
         setupNFTCollectionContract
       );
-      expect(await collectionContract.feeDenominator()).to.be.eq(10000);
+      expect(await contract.feeDenominator()).to.be.eq(10000);
     });
 
     it('supportsInterface', async function () {
-      const {collectionContract} = await loadFixture(
+      const {collectionContract: contract} = await loadFixture(
         setupNFTCollectionContract
       );
       const ifaces = {
@@ -344,11 +342,9 @@ describe('NFTCollection', function () {
         IERC721MetadataUpgradeable: '0x5b5e139f',
       };
       for (const i in ifaces) {
-        expect(await collectionContract.supportsInterface(ifaces[i])).to.be
-          .true;
+        expect(await contract.supportsInterface(ifaces[i])).to.be.true;
       }
-      expect(await collectionContract.supportsInterface('0x11111111')).to.be
-        .false;
+      expect(await contract.supportsInterface('0x11111111')).to.be.false;
     });
 
     it('should not be able to reenter mint', async function () {
@@ -360,7 +356,7 @@ describe('NFTCollection', function () {
         randomWallet,
         raffleSignWallet,
         deployWithCustomArg,
-      } = await setupNFTCollectionContract();
+      } = await loadFixture(setupNFTCollectionContract);
       const contract = await deployWithCustomArg(
         7,
         await mockERC20.getAddress()
@@ -380,7 +376,7 @@ describe('NFTCollection', function () {
             await contract.getAddress()
           )
         )
-      ).to.be.revertedWith('ReentrancyGuard: reentrant call');
+      ).to.be.revertedWithCustomError(contract, 'ReentrancyGuardReentrantCall');
     });
   });
 
@@ -391,7 +387,7 @@ describe('NFTCollection', function () {
       deployer,
       sandContract,
       authSign,
-    } = await setupNFTCollectionContract();
+    } = await loadFixture(setupNFTCollectionContract);
     const nftPriceInSand = 1;
     await sandContract.donateTo(deployer, maxSupply);
     const tokens = [];
@@ -450,5 +446,28 @@ describe('NFTCollection', function () {
       }
     }
     expect(tokens).to.have.lengthOf(maxSupply);
+  });
+
+  it('check V5 storage structure', async function () {
+    const {nftCollectionMock} = await loadFixture(setupNFTCollectionContract);
+    const slots = await nftCollectionMock.getV5VarsStorageStructure();
+    expect(slots.erc721BurnMemoryUpgradable).to.be.equal(
+      getStorageSlotJS(
+        'thesandbox.storage.avatar.nft-collection.ERC721BurnMemoryUpgradeable'
+      )
+    );
+    expect(slots.erc2771HandlerUpgradable).to.be.equal(
+      getStorageSlotJS(
+        'thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable'
+      )
+    );
+    expect(slots.updatableOperatorFiltererUpgradeable).to.be.equal(
+      getStorageSlotJS(
+        'thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable'
+      )
+    );
+    expect(slots.nftCollection).to.be.equal(
+      getStorageSlotJS('thesandbox.storage.avatar.nft-collection.NFTCollection')
+    );
   });
 });
