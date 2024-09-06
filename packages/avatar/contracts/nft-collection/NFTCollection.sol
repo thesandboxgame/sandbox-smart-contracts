@@ -122,7 +122,7 @@ INFTCollection
         mapping(uint256 => uint256) personalizationTraits;
 
         /**
-         * @dev map used to mark if a specific signatureId was used
+         * @notice map used to mark if a specific signatureId was used
          *      values are 0 (default, unused) and 1 (used)
          *      Used to avoid a signature reuse
          */
