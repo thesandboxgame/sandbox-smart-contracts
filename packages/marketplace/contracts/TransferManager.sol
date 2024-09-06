@@ -145,14 +145,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal pure returns (address paymentSideRecipient, address nftSideRecipient) {
-        if (LibAsset.decodeRecipient(paymentSide.asset.assetType) != address(0)) {
-            paymentSideRecipient = LibAsset.decodeRecipient(paymentSide.asset.assetType);
+        address decodedPaymentSideRecipient = LibAsset.decodeRecipient(paymentSide.asset.assetType);
+        address decodedNftSideRecipient = LibAsset.decodeRecipient(nftSide.asset.assetType);
+
+        if (decodedPaymentSideRecipient != address(0)) {
+            paymentSideRecipient = decodedPaymentSideRecipient;
         } else {
             paymentSideRecipient = paymentSide.account;
         }
 
-        if (LibAsset.decodeRecipient(nftSide.asset.assetType) != address(0)) {
-            nftSideRecipient = LibAsset.decodeRecipient(nftSide.asset.assetType);
+        if (decodedNftSideRecipient != address(0)) {
+            nftSideRecipient = decodedNftSideRecipient;
         } else {
             nftSideRecipient = nftSide.account;
         }
