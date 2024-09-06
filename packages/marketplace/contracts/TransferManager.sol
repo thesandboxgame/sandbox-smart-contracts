@@ -99,10 +99,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
             nftSide = left;
         }
         // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSide.makeRecipient);
+        _transfer(nftSide.asset, nftSide.account, paymentSide.recipient);
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
-            _transfer(paymentSide.asset, paymentSide.account, nftSide.makeRecipient);
+            _transfer(paymentSide.asset, paymentSide.account, nftSide.recipient);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
         }
@@ -155,11 +155,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(
-                LibAsset.Asset(paymentSide.asset.assetType, remainder),
-                paymentSide.account,
-                nftSide.makeRecipient
-            );
+            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.recipient);
         }
     }
 
@@ -188,7 +184,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         for (uint256 i; i < len; i++) {
             IRoyaltiesProvider.Part memory r = royalties[i];
             totalRoyalties = totalRoyalties + r.basisPoints;
-            if (r.account == nftSide.makeRecipient) {
+            if (r.account == nftSide.account) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }

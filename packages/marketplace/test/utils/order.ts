@@ -12,7 +12,7 @@ import {
 
 export const ORDER_TYPEHASH = keccak256(
   Buffer.from(
-    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
+    'Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address recipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)'
   )
 );
 
@@ -24,7 +24,7 @@ export type Order = {
   makeAsset: Asset;
   taker: string;
   takeAsset: Asset;
-  makeRecipient: string;
+  recipient: string;
   salt: Numeric;
   start: Numeric;
   end: Numeric;
@@ -37,15 +37,35 @@ export const OrderDefault = async (
   takeAsset: Asset,
   salt: Numeric,
   start: Numeric,
-  end: Numeric,
-  makeRecipient?: Address
+  end: Numeric
 ): Promise<Order> => ({
   maker: await maker.getAddress(),
   makeAsset,
   taker:
     taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
   takeAsset,
-  makeRecipient: makeRecipient || (await maker.getAddress()), // Use makerAddress if makeRecipient is not provided
+  recipient: await maker.getAddress(),
+  salt,
+  start,
+  end,
+});
+
+export const OrderDifferentRecipient = async (
+  maker: {getAddress: () => Promise<string>},
+  makeAsset: Asset,
+  taker: Signer | ZeroAddress,
+  takeAsset: Asset,
+  recipient: Address,
+  salt: Numeric,
+  start: Numeric,
+  end: Numeric
+): Promise<Order> => ({
+  maker: await maker.getAddress(),
+  makeAsset,
+  taker:
+    taker === ZeroAddress ? ZeroAddress : await (taker as Signer).getAddress(),
+  takeAsset,
+  recipient: recipient,
   salt,
   start,
   end,
@@ -78,7 +98,7 @@ export const getSymmetricOrder = async (
     return {
       ...ret,
       maker: await taker.getAddress(),
-      makeRecipient: await taker.getAddress(),
+      recipient: await taker.getAddress(),
     };
   }
   if (o.taker === ZeroAddress) {
@@ -108,7 +128,7 @@ export function hashOrder(order: Order): string {
       hashAsset(order.makeAsset),
       order.taker,
       hashAsset(order.takeAsset),
-      order.makeRecipient,
+      order.recipient, // it was .maker, I changed to recipient// recipient
       order.salt,
       order.start,
       order.end,
@@ -144,7 +164,7 @@ export async function signOrder(
         {name: 'makeAsset', type: 'Asset'},
         {name: 'taker', type: 'address'},
         {name: 'takeAsset', type: 'Asset'},
-        {name: 'makeRecipient', type: 'address'},
+        {name: 'recipient', type: 'address'},
         {name: 'salt', type: 'uint256'},
         {name: 'start', type: 'uint256'},
         {name: 'end', type: 'uint256'},

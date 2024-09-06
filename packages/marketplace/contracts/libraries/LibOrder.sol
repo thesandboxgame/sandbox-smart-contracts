@@ -11,7 +11,7 @@ import {LibMath} from "./LibMath.sol";
 library LibOrder {
     bytes32 internal constant ORDER_TYPEHASH =
         keccak256(
-            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address recipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
 
     /// @dev Represents the structure of an order.
@@ -20,7 +20,7 @@ library LibOrder {
         LibAsset.Asset makeAsset; // Asset the maker is providing.
         address taker; // Address of the taker.
         LibAsset.Asset takeAsset; // Asset the taker is providing.
-        address makeRecipient; // recipient address for maker.
+        address recipient; // recipient address.
         uint256 salt; // Random number to ensure unique order hash.
         uint256 start; // Timestamp when the order becomes valid.
         uint256 end; // Timestamp when the order expires.
@@ -60,7 +60,7 @@ library LibOrder {
                     LibAsset.hash(order.makeAsset),
                     order.taker,
                     LibAsset.hash(order.takeAsset),
-                    order.makeRecipient,
+                    order.recipient,
                     order.salt,
                     order.start,
                     order.end
