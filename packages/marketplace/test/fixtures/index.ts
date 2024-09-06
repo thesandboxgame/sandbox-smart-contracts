@@ -5,7 +5,7 @@ import {exchangeSetup} from './exchange';
 import {mockAssetsSetup} from './assets';
 
 export async function deployFixturesWithoutWhitelist() {
-  const [deployer, admin, user, defaultFeeReceiver, user1, user2, user3] =
+  const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
     await ethers.getSigners();
 
   const exchange = await exchangeSetup();
@@ -33,7 +33,6 @@ export async function deployFixturesWithoutWhitelist() {
     user,
     user1,
     user2,
-    user3,
     defaultFeeReceiver,
     ZERO_ADDRESS: ZeroAddress,
   };
