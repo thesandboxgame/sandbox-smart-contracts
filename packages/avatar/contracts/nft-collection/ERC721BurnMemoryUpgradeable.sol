@@ -61,12 +61,12 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
     event TokenBurningDisabled(address indexed operator);
 
     /**
-     * @dev The operation failed because burning is enabled.
+     * @notice The operation failed because burning is enabled.
      */
     error EnforcedBurn();
 
     /**
-     * @dev The operation failed because burning is disabled.
+     * @notice The operation failed because burning is disabled.
      */
     error ExpectedBurn();
 
