@@ -9,7 +9,7 @@ pragma solidity 0.8.26;
  * @dev based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol
  *      with an initializer for proxies and a mutable forwarder
  */
-contract ERC2771HandlerUpgradeable {
+abstract contract ERC2771HandlerUpgradeable {
     struct ERC2771HandlerUpgradeableStorage {
         address trustedForwarder;
     }
@@ -106,7 +106,7 @@ contract ERC2771HandlerUpgradeable {
     }
 
     /**
-     * @dev ERC-2771 specifies the context as being a single address (20 bytes).
+     * @notice ERC-2771 specifies the context as being a single address (20 bytes).
      */
     function _contextSuffixLength() internal view virtual returns (uint256) {
         return 20;
