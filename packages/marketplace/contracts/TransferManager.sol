@@ -98,11 +98,14 @@ abstract contract TransferManager is Initializable, ITransferManager {
             paymentSide = right;
             nftSide = left;
         }
+
+        (address paymentSideRecipient, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
+
         // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSide.account);
+        _transfer(nftSide.asset, nftSide.account, paymentSideRecipient);
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(paymentSide.account)) {
-            _transfer(paymentSide.asset, paymentSide.account, nftSide.account);
+            _transfer(paymentSide.asset, paymentSide.account, nftSideRecipient);
         } else {
             _doTransfersWithFeesAndRoyalties(paymentSide, nftSide);
         }
@@ -138,6 +141,23 @@ abstract contract TransferManager is Initializable, ITransferManager {
         emit DefaultFeeReceiverSet(newDefaultFeeReceiver);
     }
 
+    function _getRecipients(
+        DealSide memory paymentSide,
+        DealSide memory nftSide
+    ) internal pure returns (address paymentSideRecipient, address nftSideRecipient) {
+        if (LibAsset.decodeRecipient(paymentSide.asset.assetType) != address(0)) {
+            paymentSideRecipient = LibAsset.decodeRecipient(paymentSide.asset.assetType);
+        } else {
+            paymentSideRecipient = paymentSide.account;
+        }
+
+        if (LibAsset.decodeRecipient(nftSide.asset.assetType) != address(0)) {
+            nftSideRecipient = LibAsset.decodeRecipient(nftSide.asset.assetType);
+        } else {
+            nftSideRecipient = nftSide.account;
+        }
+    }
+
     /// @notice Transfer protocol fees and royalties.
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
@@ -155,7 +175,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
             remainder = _transferPercentage(remainder, paymentSide, defaultFeeReceiver, fees, PROTOCOL_FEE_MULTIPLIER);
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.account);
+            (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
+            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSideRecipient);
         }
     }
 
@@ -178,13 +199,14 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory nftSide
     ) internal returns (uint256) {
         (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
+        (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
         IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
         uint256 totalRoyalties;
         uint256 len = royalties.length;
         for (uint256 i; i < len; i++) {
             IRoyaltiesProvider.Part memory r = royalties[i];
             totalRoyalties = totalRoyalties + r.basisPoints;
-            if (r.account == nftSide.account) {
+            if (r.account == nftSideRecipient) {
                 // We just skip the transfer because the nftSide will get the full payment anyway.
                 continue;
             }

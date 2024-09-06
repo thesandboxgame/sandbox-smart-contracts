@@ -104,4 +104,18 @@ library LibAsset {
     function decodeAddress(AssetType memory assetType) internal pure returns (address) {
         return abi.decode(assetType.data, (address));
     }
+
+    /// @notice Decode the recipient address from an AssetType.
+    /// @param assetType The asset type to decode.
+    /// @return The address of the recipient, or zero address if not present.
+    function decodeRecipient(AssetType memory assetType) internal pure returns (address) {
+        bytes memory data = assetType.data;
+        if (data.length == 96) {
+            // 3 * 32 bytes (address, uint256, address)
+            (, , address recipient) = abi.decode(data, (address, uint256, address));
+            return recipient;
+        } else {
+            return address(0);
+        }
+    }
 }
