@@ -1,16 +1,20 @@
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {deployFixtures} from '../fixtures/index.ts';
-import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
+import {Asset, AssetERC1155, AssetERC20, AssetERC721} from '../utils/assets.ts';
 
+import {AbiCoder, Contract, Signer, ZeroAddress} from 'ethers';
 import {
   hashKey,
-  OrderDefault,
-  signOrder,
-  Order,
+  hashKeyV2,
   isOrderEqual,
+  Order,
+  OrderDefault,
+  OrderDefaultV2,
+  OrderV2,
+  signOrder,
+  signOrderV2,
 } from '../utils/order.ts';
-import {ZeroAddress, AbiCoder, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrders() {
@@ -34,9 +38,13 @@ export function shouldMatchOrders() {
       ERC721Asset: Asset,
       ERC1155Asset: Asset,
       orderLeft: Order,
+      orderLeftV2: OrderV2,
       orderRight: Order,
+      orderRightV2: OrderV2,
       makerSig: string,
+      makerSigV2: string,
       takerSig: string,
+      takerSigV2: string,
       PAUSER_ROLE: string,
       ERC1776_OPERATOR_ROLE: string;
 
@@ -651,6 +659,16 @@ export function shouldMatchOrders() {
           0,
           0
         );
+
+        orderLeftV2 = await OrderDefaultV2(
+          maker,
+          ERC20AssetForLeftOrder,
+          ZeroAddress,
+          ERC1155AssetForLeftOrder,
+          1,
+          0,
+          0
+        );
         // right order for partial fill
         orderRight = await OrderDefault(
           taker,
@@ -661,8 +679,29 @@ export function shouldMatchOrders() {
           0,
           0
         );
+
+        orderRightV2 = await OrderDefaultV2(
+          taker,
+          ERC1155AssetForRightOrder,
+          ZeroAddress,
+          ERC20AssetForRightOrder,
+          1,
+          0,
+          0
+        );
         makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
         takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        makerSigV2 = await signOrderV2(
+          orderLeftV2,
+          maker,
+          OrderValidatorAsAdmin
+        );
+        takerSigV2 = await signOrderV2(
+          orderRightV2,
+          taker,
+          OrderValidatorAsAdmin
+        );
         expect(
           await ExchangeContractAsUser.fills(hashKey(orderLeft))
         ).to.be.equal(0);
@@ -984,7 +1023,7 @@ export function shouldMatchOrders() {
         5000000000
       );
 
-      orderLeft = await OrderDefault(
+      orderLeftV2 = await OrderDefaultV2(
         maker,
         makerAssetForLeftOrder,
         ZeroAddress,
@@ -995,7 +1034,7 @@ export function shouldMatchOrders() {
         recipientAddress
       );
 
-      orderRight = await OrderDefault(
+      orderRightV2 = await OrderDefaultV2(
         taker,
         takerAssetForRightOrder,
         ZeroAddress,
@@ -1006,34 +1045,38 @@ export function shouldMatchOrders() {
         recipientAddress
       );
 
-      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
-      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+      makerSigV2 = await signOrderV2(orderLeftV2, maker, OrderValidatorAsAdmin);
+      takerSigV2 = await signOrderV2(
+        orderRightV2,
+        taker,
+        OrderValidatorAsAdmin
+      );
 
       expect(
-        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+        await ExchangeContractAsUser.fills(hashKeyV2(orderLeftV2))
       ).to.be.equal(0);
       expect(
-        await ExchangeContractAsUser.fills(hashKey(orderRight))
+        await ExchangeContractAsUser.fills(hashKeyV2(orderRightV2))
       ).to.be.equal(0);
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
       expect(await ERC20Contract.balanceOf(taker)).to.be.equal(0);
       expect(await ERC20Contract2.balanceOf(maker)).to.be.equal(0);
       expect(await ERC20Contract2.balanceOf(taker)).to.be.equal(20000000000);
 
-      await ExchangeContractAsUser.matchOrders([
+      await ExchangeContractAsUser.matchOrdersV2([
         {
-          orderLeft,
-          signatureLeft: makerSig,
-          orderRight,
-          signatureRight: takerSig,
+          orderLeft: orderLeftV2,
+          signatureLeft: makerSigV2,
+          orderRight: orderRightV2,
+          signatureRight: takerSigV2,
         },
       ]);
 
       expect(
-        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+        await ExchangeContractAsUser.fills(hashKeyV2(orderLeftV2))
       ).to.be.equal(10000000000);
       expect(
-        await ExchangeContractAsUser.fills(hashKey(orderRight))
+        await ExchangeContractAsUser.fills(hashKeyV2(orderRightV2))
       ).to.be.equal(5000000000);
       expect(await ERC20Contract.balanceOf(maker)).to.be.equal(5000000000);
       expect(await ERC20Contract.balanceOf(recipientAddress)).to.be.equal(

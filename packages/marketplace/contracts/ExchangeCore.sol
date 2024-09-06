@@ -24,6 +24,13 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         bytes signatureRight; // Signature of the right order
     }
 
+    struct ExchangeMatchV2 {
+        LibOrder.OrderV2 orderLeft; // Left order details
+        bytes signatureLeft; // Signature of the left order
+        LibOrder.OrderV2 orderRight; // Right order details
+        bytes signatureRight; // Signature of the right order
+    }
+
     /// @dev Address of the OrderValidator contract.
     IOrderValidator public orderValidator;
 
@@ -37,6 +44,11 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
     /// @param orderKeyHash The hash of the order being canceled.
     /// @param order The details of the order being canceled.
     event Cancel(bytes32 indexed orderKeyHash, LibOrder.Order order);
+
+    /// @notice Event emitted when an order is canceled.
+    /// @param orderKeyHash The hash of the order being canceled.
+    /// @param order The details of the order being canceled.
+    event CancelV2(bytes32 indexed orderKeyHash, LibOrder.OrderV2 order);
 
     /// @notice Event emitted when two orders are matched.
     /// @param from Address that initiated the match.
@@ -53,6 +65,26 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         bytes32 indexed orderKeyHashRight,
         LibOrder.Order orderLeft,
         LibOrder.Order orderRight,
+        LibOrder.FillResult newFill,
+        uint256 totalFillLeft,
+        uint256 totalFillRight
+    );
+
+    /// @notice Event emitted when two orders are matched.
+    /// @param from Address that initiated the match.
+    /// @param orderKeyHashLeft Hash of the left order.
+    /// @param orderKeyHashRight Hash of the right order.
+    /// @param orderLeft Details of the left order.
+    /// @param orderRight Details of the right order.
+    /// @param newFill Fill details resulting from the order match.
+    /// @param totalFillLeft Total fill amount for the left order.
+    /// @param totalFillRight Total fill amount for the right order.
+    event MatchV2(
+        address indexed from,
+        bytes32 indexed orderKeyHashLeft,
+        bytes32 indexed orderKeyHashRight,
+        LibOrder.OrderV2 orderLeft,
+        LibOrder.OrderV2 orderRight,
         LibOrder.FillResult newFill,
         uint256 totalFillLeft,
         uint256 totalFillRight
@@ -111,6 +143,17 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         emit Cancel(orderKeyHash, order);
     }
 
+    /// @notice Cancels a specified order.
+    /// @param order Details of the order to be canceled.
+    /// @param orderKeyHash The hash of the order, used for verification.
+    function _cancelV2(LibOrder.OrderV2 calldata order, bytes32 orderKeyHash) internal {
+        require(order.salt != 0, "0 salt can't be used");
+        bytes32 _orderKeyHash = LibOrder.hashKeyV2(order);
+        require(_orderKeyHash == orderKeyHash, "invalid orderHash");
+        fills[orderKeyHash] = type(uint256).max;
+        emit CancelV2(orderKeyHash, order);
+    }
+
     /// @notice Matches provided orders and performs the transaction.
     /// @param sender The original sender of the transaction.
     /// @param matchedOrders Array of orders that are matched with each other.
@@ -122,6 +165,20 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
             _matchAndTransfer(sender, m.orderLeft, m.orderRight);
+        }
+    }
+
+    /// @notice Matches provided orders and performs the transaction.
+    /// @param sender The original sender of the transaction.
+    /// @param matchedOrders Array of orders that are matched with each other.
+    function _matchOrdersV2(address sender, ExchangeMatchV2[] calldata matchedOrders) internal {
+        uint256 len = matchedOrders.length;
+        require(len > 0, "ExchangeMatch cannot be empty");
+        require(len <= matchOrdersLimit, "too many ExchangeMatch");
+        for (uint256 i; i < len; i++) {
+            ExchangeMatchV2 calldata m = matchedOrders[i];
+            _validateOrdersV2(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
+            _matchAndTransferV2(sender, m.orderLeft, m.orderRight);
         }
     }
 
@@ -149,6 +206,30 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         }
     }
 
+    /// @dev Validates the provided orders.
+    /// @param sender Address of the sender.
+    /// @param orderLeft Details of the left order.
+    /// @param signatureLeft Signature of the left order.
+    /// @param orderRight Details of the right order.
+    /// @param signatureRight Signature of the right order.
+    function _validateOrdersV2(
+        address sender,
+        LibOrder.OrderV2 memory orderLeft,
+        bytes memory signatureLeft,
+        LibOrder.OrderV2 memory orderRight,
+        bytes memory signatureRight
+    ) internal view {
+        // validate must force order.maker != address(0)
+        orderValidator.validateV2(orderLeft, signatureLeft, sender);
+        orderValidator.validateV2(orderRight, signatureRight, sender);
+        if (orderLeft.taker != address(0)) {
+            require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
+        }
+        if (orderRight.taker != address(0)) {
+            require(orderRight.taker == orderLeft.maker, "rightOrder.taker failed");
+        }
+    }
+
     /// @notice Matches valid orders and transfers the associated assets.
     /// @param sender Address initiating the match.
     /// @param orderLeft The left order.
@@ -168,6 +249,37 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         );
 
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
+
+        doTransfers(
+            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker, orderLeft.maker),
+            ITransferManager.DealSide(
+                LibAsset.Asset(takeMatch, newFill.rightValue),
+                orderRight.maker,
+                orderRight.maker
+            ),
+            LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
+        );
+    }
+
+    /// @notice Matches valid orders and transfers the associated assets.
+    /// @param sender Address initiating the match.
+    /// @param orderLeft The left order.
+    /// @param orderRight The right order.
+    function _matchAndTransferV2(
+        address sender,
+        LibOrder.OrderV2 calldata orderLeft,
+        LibOrder.OrderV2 calldata orderRight
+    ) internal {
+        LibAsset.AssetType memory makeMatch = LibAsset.matchAssets(
+            orderLeft.makeAsset.assetType,
+            orderRight.takeAsset.assetType
+        );
+        LibAsset.AssetType memory takeMatch = LibAsset.matchAssets(
+            orderLeft.takeAsset.assetType,
+            orderRight.makeAsset.assetType
+        );
+
+        LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatchV2(sender, orderLeft, orderRight);
 
         doTransfers(
             ITransferManager.DealSide(
@@ -212,6 +324,46 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         }
 
         emit Match({
+            from: sender,
+            orderKeyHashLeft: orderKeyHashLeft,
+            orderKeyHashRight: orderKeyHashRight,
+            orderLeft: orderLeft,
+            orderRight: orderRight,
+            newFill: newFill,
+            totalFillLeft: fills[orderKeyHashLeft],
+            totalFillRight: fills[orderKeyHashRight]
+        });
+        return newFill;
+    }
+
+    /// @notice Parse orders to get the order data, then create a new fill with setFillEmitMatch()
+    /// @param sender The message sender
+    /// @param orderLeft Left order
+    /// @param orderRight Right order
+    /// @return newFill Fill result
+    function _parseOrdersSetFillEmitMatchV2(
+        address sender,
+        LibOrder.OrderV2 calldata orderLeft,
+        LibOrder.OrderV2 calldata orderRight
+    ) internal returns (LibOrder.FillResult memory newFill) {
+        bytes32 orderKeyHashLeft = LibOrder.hashKeyV2(orderLeft);
+        bytes32 orderKeyHashRight = LibOrder.hashKeyV2(orderRight);
+
+        uint256 leftOrderFill = _getOrderFill(orderLeft.salt, orderKeyHashLeft);
+        uint256 rightOrderFill = _getOrderFill(orderRight.salt, orderKeyHashRight);
+        newFill = LibOrder.fillOrderV2(orderLeft, orderRight, leftOrderFill, rightOrderFill);
+
+        require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
+
+        if (orderLeft.salt != 0) {
+            fills[orderKeyHashLeft] = leftOrderFill + newFill.rightValue;
+        }
+
+        if (orderRight.salt != 0) {
+            fills[orderKeyHashRight] = rightOrderFill + newFill.leftValue;
+        }
+
+        emit MatchV2({
             from: sender,
             orderKeyHashLeft: orderKeyHashLeft,
             orderKeyHashRight: orderKeyHashRight,

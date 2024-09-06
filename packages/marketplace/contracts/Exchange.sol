@@ -81,6 +81,12 @@ contract Exchange is
     }
 
     /// @notice Match orders and transact.
+    /// @param matchedOrders A list of left/right orders that match each other.
+    function matchOrdersV2(ExchangeMatchV2[] calldata matchedOrders) external whenNotPaused {
+        _matchOrdersV2(_msgSender(), matchedOrders);
+    }
+
+    /// @notice Match orders and transact.
     /// @param sender The original sender of the transaction.
     /// @param matchedOrders A list of left/right orders that match each other.
     /// @dev This method supports ERC1776 native meta transactions.
@@ -92,12 +98,32 @@ contract Exchange is
         _matchOrders(sender, matchedOrders);
     }
 
+    /// @notice Match orders and transact.
+    /// @param sender The original sender of the transaction.
+    /// @param matchedOrders A list of left/right orders that match each other.
+    /// @dev This method supports ERC1776 native meta transactions.
+    function matchOrdersFromV2(
+        address sender,
+        ExchangeMatchV2[] calldata matchedOrders
+    ) external onlyRole(ERC1776_OPERATOR_ROLE) whenNotPaused {
+        require(sender != address(0), "invalid sender");
+        _matchOrdersV2(sender, matchedOrders);
+    }
+
     /// @notice Cancel an order.
     /// @param order The order to be canceled.
     /// @param orderKeyHash Used as a checksum to avoid mistakes in the order values.
     function cancel(LibOrder.Order calldata order, bytes32 orderKeyHash) external {
         require(_msgSender() == order.maker, "not maker");
         _cancel(order, orderKeyHash);
+    }
+
+    /// @notice Cancel an order.
+    /// @param order The order to be canceled.
+    /// @param orderKeyHash Used as a checksum to avoid mistakes in the order values.
+    function cancelV2(LibOrder.OrderV2 calldata order, bytes32 orderKeyHash) external {
+        require(_msgSender() == order.maker, "not maker");
+        _cancelV2(order, orderKeyHash);
     }
 
     /// @notice Set the royalty registry.

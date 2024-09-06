@@ -11,11 +11,27 @@ import {LibMath} from "./LibMath.sol";
 library LibOrder {
     bytes32 internal constant ORDER_TYPEHASH =
         keccak256(
-            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+            "Order(address maker,Asset makeAsset,address taker,Asset takeAsset,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
+        );
+
+    bytes32 internal constant ORDER_TYPEHASH_V2 =
+        keccak256(
+            "OrderV2(address maker,Asset makeAsset,address taker,Asset takeAsset,address makeRecipient,uint256 salt,uint256 start,uint256 end)Asset(AssetType assetType,uint256 value)AssetType(uint256 assetClass,bytes data)"
         );
 
     /// @dev Represents the structure of an order.
     struct Order {
+        address maker; // Address of the maker.
+        LibAsset.Asset makeAsset; // Asset the maker is providing.
+        address taker; // Address of the taker.
+        LibAsset.Asset takeAsset; // Asset the taker is providing.
+        uint256 salt; // Random number to ensure unique order hash.
+        uint256 start; // Timestamp when the order becomes valid.
+        uint256 end; // Timestamp when the order expires.
+    }
+
+    /// @dev Represents the structure of an order.
+    struct OrderV2 {
         address maker; // Address of the maker.
         LibAsset.Asset makeAsset; // Asset the maker is providing.
         address taker; // Address of the taker.
@@ -36,6 +52,21 @@ library LibOrder {
     /// @param order The order data.
     /// @return The unique hash of the order.
     function hashKey(Order calldata order) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    order.maker,
+                    LibAsset.hash(order.makeAsset.assetType),
+                    LibAsset.hash(order.takeAsset.assetType),
+                    order.salt
+                )
+            );
+    }
+
+    /// @notice Computes the unique hash of an order.
+    /// @param order The order data.
+    /// @return The unique hash of the order.
+    function hashKeyV2(OrderV2 calldata order) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -61,6 +92,26 @@ library LibOrder {
                     LibAsset.hash(order.makeAsset),
                     order.taker,
                     LibAsset.hash(order.takeAsset),
+                    order.salt,
+                    order.start,
+                    order.end
+                )
+            );
+    }
+
+    /// @notice Computes the complete hash of an order, including domain-specific data.
+    /// @param order The order data.
+    /// @return The complete hash of the order.
+    function hashV2(OrderV2 calldata order) internal pure returns (bytes32) {
+        return
+            keccak256(
+                // solhint-disable-next-line func-named-parameters
+                abi.encode(
+                    ORDER_TYPEHASH_V2,
+                    order.maker,
+                    LibAsset.hash(order.makeAsset),
+                    order.taker,
+                    LibAsset.hash(order.takeAsset),
                     order.makeRecipient,
                     order.salt,
                     order.start,
@@ -74,6 +125,15 @@ library LibOrder {
     // solhint-disable not-rely-on-time
     // slither-disable-start timestamp
     function validateOrderTime(Order memory order) internal view {
+        require(order.start == 0 || order.start < block.timestamp, "Order start validation failed");
+        require(order.end == 0 || order.end > block.timestamp, "Order end validation failed");
+    }
+
+    /// @notice Validates order time
+    /// @param order Whose time we want to validate
+    // solhint-disable not-rely-on-time
+    // slither-disable-start timestamp
+    function validateOrderTimeV2(OrderV2 memory order) internal view {
         require(order.start == 0 || order.start < block.timestamp, "Order start validation failed");
         require(order.end == 0 || order.end > block.timestamp, "Order end validation failed");
     }
@@ -104,6 +164,29 @@ library LibOrder {
         return _fillRight(leftOrder.makeAsset.value, leftOrder.takeAsset.value, rightMakeValue, rightTakeValue);
     }
 
+    /// @notice Should return filled values
+    /// @param leftOrder Left order
+    /// @param rightOrder Right order
+    /// @param leftOrderFill Current fill of the left order (0 if order is unfilled)
+    /// @param rightOrderFill Current fill of the right order (0 if order is unfilled)
+    /// @dev We have 3 cases, 1st: left order should be fully filled
+    /// @dev 2nd: right order should be fully filled or 3d: both should be fully filled if required values are the same
+    /// @return The fill result of both orders
+    function fillOrderV2(
+        LibOrder.OrderV2 calldata leftOrder,
+        LibOrder.OrderV2 calldata rightOrder,
+        uint256 leftOrderFill,
+        uint256 rightOrderFill
+    ) internal pure returns (FillResult memory) {
+        (uint256 leftMakeValue, uint256 leftTakeValue) = calculateRemainingV2(leftOrder, leftOrderFill);
+        (uint256 rightMakeValue, uint256 rightTakeValue) = calculateRemainingV2(rightOrder, rightOrderFill);
+
+        if (rightTakeValue > leftMakeValue) {
+            return _fillLeft(leftMakeValue, leftTakeValue, rightOrder.makeAsset.value, rightOrder.takeAsset.value);
+        }
+        return _fillRight(leftOrder.makeAsset.value, leftOrder.takeAsset.value, rightMakeValue, rightTakeValue);
+    }
+
     /// @notice Computes the remaining fillable amount of an order.
     /// @param order The order to compute from.
     /// @param fill The amount of the order already filled.
@@ -111,6 +194,20 @@ library LibOrder {
     /// @return takeValue The remaining fillable amount from the taker's side.
     function calculateRemaining(
         LibOrder.Order calldata order,
+        uint256 fill
+    ) internal pure returns (uint256 makeValue, uint256 takeValue) {
+        require(order.takeAsset.value >= fill, "filling more than order permits");
+        takeValue = order.takeAsset.value - fill;
+        makeValue = LibMath.safeGetPartialAmountFloor(order.makeAsset.value, order.takeAsset.value, takeValue);
+    }
+
+    /// @notice Computes the remaining fillable amount of an order.
+    /// @param order The order to compute from.
+    /// @param fill The amount of the order already filled.
+    /// @return makeValue The remaining fillable amount from the maker's side.
+    /// @return takeValue The remaining fillable amount from the taker's side.
+    function calculateRemainingV2(
+        LibOrder.OrderV2 calldata order,
         uint256 fill
     ) internal pure returns (uint256 makeValue, uint256 takeValue) {
         require(order.takeAsset.value >= fill, "filling more than order permits");

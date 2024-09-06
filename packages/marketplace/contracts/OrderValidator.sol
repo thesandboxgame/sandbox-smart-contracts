@@ -42,7 +42,6 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
     /// @param sender Address of the order sender.
     function validate(LibOrder.Order calldata order, bytes memory signature, address sender) external view {
         require(order.maker != address(0), "no maker");
-        require(order.makeRecipient != address(0), "no recipient");
 
         LibOrder.validateOrderTime(order);
         _verifyWhitelists(order.makeAsset);
@@ -60,6 +59,32 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, Wh
         bytes32 hash = LibOrder.hash(order);
 
         require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature verification error");
+    }
+
+    /// @notice Validates the given order.
+    /// @param order The order details to be validated.
+    /// @param signature The signature associated with the order.
+    /// @param sender Address of the order sender.
+    function validateV2(LibOrder.OrderV2 calldata order, bytes memory signature, address sender) external view {
+        require(order.maker != address(0), "no maker");
+        require(order.makeRecipient != address(0), "no recipient");
+
+        LibOrder.validateOrderTimeV2(order);
+        _verifyWhitelists(order.makeAsset);
+
+        if (order.salt == 0) {
+            require(sender == order.maker, "maker is not tx sender");
+            // No partial fill, the order is reusable forever
+            return;
+        }
+
+        if (sender == order.maker) {
+            return;
+        }
+
+        bytes32 hash = LibOrder.hashV2(order);
+
+        require(order.maker.isValidSignatureNow(_hashTypedDataV4(hash), signature), "signature v2 verification error");
     }
 
     /// @notice Verifies if the asset exchange is affected by the whitelist.
