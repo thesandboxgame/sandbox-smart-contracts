@@ -376,28 +376,12 @@ INFTCollection
         uint256 tokenId,
         uint256 personalizationMask
     ) external whenNotPaused {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         address sender = _msgSender();
         address owner = ownerOf(tokenId);
         if (owner != sender) {
             revert ERC721IncorrectOwner(sender, tokenId, owner);
         }
-
-        if ($.signatureIds[signatureId] > 0 ||
-            _getPersonalizationSignature(
-                sender,
-                signatureId,
-                address(this),
-                block.chainid,
-                tokenId,
-                personalizationMask,
-                signature
-            ) != $.signAddress) {
-            revert InvalidSignature(signatureId);
-        }
-
-        $.signatureIds[signatureId] = 1;
-
+        _checkAndSetPersonalizationSignature(sender, tokenId, personalizationMask, signatureId, signature);
         _updateTokenTraits(tokenId, personalizationMask);
     }
 
@@ -955,6 +939,38 @@ INFTCollection
     }
 
     /**
+     * @notice checks that the provided personalization signature is valid, while also taking into
+     *         consideration the provided address and signatureId.
+     * @param wallet address to be used in validating the signature
+     * @param signatureId signing signature ID
+     * @param signature signing signature value
+     * @param tokenId what token to personalize
+     * @param personalizationMask a mask where each bit has a custom meaning in-game
+     */
+    function _checkAndSetPersonalizationSignature(
+        address wallet,
+        uint256 tokenId,
+        uint256 personalizationMask,
+        uint256 signatureId,
+        bytes calldata signature
+    ) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if ($.signatureIds[signatureId] > 0 ||
+            _getPersonalizationSignature(
+                wallet,
+                signatureId,
+                address(this),
+                block.chainid,
+                tokenId,
+                personalizationMask,
+                signature
+            ) != $.signAddress) {
+            revert InvalidSignature(signatureId);
+        }
+        $.signatureIds[signatureId] = 1;
+    }
+
+    /**
      * @notice validates signature
      * @param _wallet wallet that was used in signature generation
      * @param _signatureId id of signature
@@ -1034,7 +1050,6 @@ INFTCollection
     function _updateTokenTraits(uint256 tokenId, uint256 personalizationMask) internal {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         $.personalizationTraits[tokenId] = personalizationMask;
-
         emit Personalized(_msgSender(), tokenId, personalizationMask);
         emit MetadataUpdate(tokenId);
     }
