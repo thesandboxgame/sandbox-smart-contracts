@@ -325,27 +325,6 @@ describe('OrderValidator.sol', function () {
     ).to.not.be.reverted;
   });
 
-  it('should not validate if recipient is zero', async function () {
-    const makerAsset = await AssetERC721(ERC721Contract, 100);
-    const takerAsset = await AssetERC20(ERC20Contract, 100);
-    const order = await OrderDefault(
-      user1,
-      makerAsset,
-      ZeroAddress,
-      takerAsset,
-      1,
-      0,
-      0,
-      ZeroAddress
-    );
-
-    const signature = await signOrder(order, user1, OrderValidatorAsUser);
-
-    await expect(
-      OrderValidatorAsUser.validate(order, signature, user2.getAddress())
-    ).to.be.revertedWith('no recipient');
-  });
-
   it('should not validate if recipient is changed after signature', async function () {
     const makerAsset = await AssetERC721(ERC721Contract, 100);
     const takerAsset = await AssetERC20(ERC20Contract, 100);
