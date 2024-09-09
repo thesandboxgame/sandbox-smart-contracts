@@ -96,6 +96,7 @@ export function shouldMatchOrders() {
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     });
+
     describe('Custom recipient', function () {
       it('allows seller to set custom recipient for sale proceeds', async function () {
         await ERC721Contract.mint(maker.getAddress(), 1);
@@ -174,6 +175,7 @@ export function shouldMatchOrders() {
           await ERC20Contract.balanceOf(await user.getAddress())
         ).to.be.equal(initialUserBalance + 1n);
       });
+
       it('allows buyer to set custom recipient for purchase', async function () {
         await ERC721Contract.mint(maker.getAddress(), 1);
         await ERC721Contract.connect(maker).approve(
@@ -240,6 +242,7 @@ export function shouldMatchOrders() {
           await user.getAddress()
         );
       });
+
       it('allows both buyer and seller to set custom recipients for the exchange', async function () {
         await ERC1155Contract.mint(maker.getAddress(), 1, 1);
         await ERC1155Contract.connect(maker).setApprovalForAll(
@@ -309,6 +312,7 @@ export function shouldMatchOrders() {
         ).to.be.equal(initialUserBalance + 1n);
       });
     });
+
     describe('ERC20 x ERC20 token', function () {
       it('should execute a complete match order between ERC20 tokens', async function () {
         expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);
