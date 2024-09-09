@@ -178,8 +178,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
         doTransfers(
-            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue, orderLeft.makeAsset.priceDistribution), orderLeft.maker),
-            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue, orderRight.makeAsset.priceDistribution), orderRight.maker),
+            ITransferManager.DealSide(LibAsset.Asset(makeMatch, newFill.leftValue), orderLeft.maker),
+            ITransferManager.DealSide(LibAsset.Asset(takeMatch, newFill.rightValue), orderRight.maker),
             LibAsset.getFeeSide(makeMatch.assetClass, takeMatch.assetClass)
         );
     }

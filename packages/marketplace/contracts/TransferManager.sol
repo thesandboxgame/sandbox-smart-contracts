@@ -212,7 +212,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
             );
         }
         if (remainder > 0) {
-            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSide.recipient);
+            (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
+            _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSideRecipient);
         }
     }
 
@@ -234,6 +235,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         DealSide memory paymentSide,
         DealSide memory nftSide
     ) internal returns (uint256) {
+        (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
         if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
@@ -251,7 +253,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                         paymentSide,
                         bundle.priceDistribution.erc721Prices[i][j],
                         royalties,
-                        nftSide.recipient
+                        nftSideRecipient
                     );
                 }
             }
@@ -270,7 +272,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                         paymentSide,
                         bundle.priceDistribution.erc1155Prices[i][j],
                         royalties,
-                        nftSide.recipient
+                        nftSideRecipient
                     );
                 }
             }
@@ -293,15 +295,14 @@ abstract contract TransferManager is Initializable, ITransferManager {
                         paymentSide,
                         bundle.priceDistribution.quadPrices[i],
                         royalties,
-                        nftSide.recipient
+                        nftSideRecipient
                     );
                 }
             }
         } else {
             (address token, uint256 tokenId) = LibAsset.decodeToken(nftSide.asset.assetType);
-            (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
-        IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
-            remainder = _applyRoyalties(remainder, paymentSide, remainder, royalties, nftSide.recipient);
+            IRoyaltiesProvider.Part[] memory royalties = royaltiesRegistry.getRoyalties(token, tokenId);
+            remainder = _applyRoyalties(remainder, paymentSide, remainder, royalties, nftSideRecipient);
         }
         return remainder;
     }

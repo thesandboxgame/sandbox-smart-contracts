@@ -86,8 +86,8 @@ export const AssetERC20 = async (
     baseValues.push(recipient);
   }
 
-  console.log(baseParams);
-  console.log(baseValues);
+  // console.log(baseParams);
+  // console.log(baseValues);
 
   return {
     assetType: {
