@@ -96,7 +96,7 @@ export function shouldMatchOrders() {
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     });
-    describe.only('Custom recipient', function () {
+    describe('Custom recipient', function () {
       it('allows seller to set custom recipient for sale proceeds', async function () {
         await ERC721Contract.mint(maker.getAddress(), 1);
         await ERC721Contract.connect(maker).approve(
