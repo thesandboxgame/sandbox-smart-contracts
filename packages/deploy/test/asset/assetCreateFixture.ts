@@ -78,6 +78,17 @@ const setupAssetCreateTests = deployments.createFixture(
     const createBatchLazyMintSignature = (data: LazyMintBatchData) =>
       createMultipleLazyMintSignature(data, AssetCreateContract, network);
 
+    const OrderValidatorAsAdmin = OrderValidatorContract.connect(
+      await ethers.provider.getSigner(assetAdmin)
+    );
+
+    const ERC20_ROLE = await OrderValidatorContract.ERC20_ROLE();
+    await OrderValidatorAsAdmin.grantRole(
+      ERC20_ROLE,
+      await SandContract.getAddress()
+    );
+    await OrderValidatorAsAdmin.disableWhitelists();
+
     return {
       AssetContract,
       AssetCreateContract,

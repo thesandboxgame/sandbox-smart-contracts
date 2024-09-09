@@ -16,6 +16,7 @@ export function checkAccessControl(
       OrderValidatorAsUser: Contract,
       TrustedForwarderAsUser: Contract,
       user: Signer,
+      DEFAULT_ADMIN_ROLE: string,
       contractMap: {[key: string]: Contract};
 
     beforeEach(async function () {
@@ -26,6 +27,7 @@ export function checkAccessControl(
         OrderValidatorAsUser,
         TrustedForwarder2: TrustedForwarderAsUser,
         user,
+        DEFAULT_ADMIN_ROLE,
       } = await loadFixture(deployFixturesWithoutWhitelist));
       contractMap = {
         ExchangeContractAsAdmin: ExchangeContractAsAdmin,
@@ -40,9 +42,10 @@ export function checkAccessControl(
       it(`should not set ${functionName[i]} if caller is not in the role`, async function () {
         await expect(
           ExchangeContractAsUser[functionName[i]](user.getAddress())
-        ).to.be.revertedWithCustomError(
-          ExchangeContractAsUser,
-          'AccessControlUnauthorizedAccount'
+        ).to.be.revertedWith(
+          `AccessControl: account ${(
+            await user.getAddress()
+          ).toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
         );
       });
 
