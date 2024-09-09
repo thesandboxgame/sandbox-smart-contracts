@@ -181,6 +181,22 @@ In the extreme cases:
   gets the benefit because she sells at 2000 MATIC each ASSET. Alice gets more
   MATIC than expected.
 
+### Custom recipients
+
+The protocol allows both buyer and seller to set custom recipients for the
+exchange.
+
+Inside the `LibAsset` library, the `Asset` struct contains a `data` field which
+is a `bytes` type. We encode the recipient address into that field.
+
+Look up `decodeRecipient` function in `LibAsset` to see how to decode the
+recipient address. Assets like ERC20 only have the token address in the data so
+we need to add a uint256 and a recipient address to make it 96 bytes.
+
+When transfers are happening, the recipient is decoded from the `Asset` struct,
+and if it's not the zero address, then the transfer will be done to the decoded
+recipient address otherwise it will be sent to the original deal side address.
+
 ### Order salt
 
 Orders contain a salt value that ensure each order is unique, even for the same

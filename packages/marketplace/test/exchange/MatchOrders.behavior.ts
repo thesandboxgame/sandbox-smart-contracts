@@ -1,16 +1,16 @@
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {deployFixtures} from '../fixtures/index.ts';
-import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {AssetERC20, AssetERC721, AssetERC1155, Asset} from '../utils/assets.ts';
+import {Asset, AssetERC1155, AssetERC20, AssetERC721} from '../utils/assets.ts';
 
+import {AbiCoder, Contract, Signer, ZeroAddress} from 'ethers';
 import {
   hashKey,
+  isOrderEqual,
+  Order,
   OrderDefault,
   signOrder,
-  Order,
-  isOrderEqual,
 } from '../utils/order.ts';
-import {ZeroAddress, AbiCoder, Contract, Signer} from 'ethers';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrders() {
@@ -96,7 +96,219 @@ export function shouldMatchOrders() {
       makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
       takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
     });
+    describe.only('Custom recipient', function () {
+      it('allows seller to set custom recipient for sale proceeds', async function () {
+        await ERC721Contract.mint(maker.getAddress(), 1);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
 
+        await ERC20Contract.mint(taker.getAddress(), 1);
+        await ERC20Contract.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        makerAsset = await AssetERC721(
+          ERC721Contract,
+          1,
+          await user.getAddress()
+        );
+
+        takerAsset = await AssetERC20(ERC20Contract, 1);
+
+        orderLeft = await OrderDefault(
+          maker,
+          makerAsset,
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset,
+          ZeroAddress,
+          makerAsset,
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const initialMakerBalance = await ERC20Contract.balanceOf(
+          await maker.getAddress()
+        );
+        const initialUserBalance = await ERC20Contract.balanceOf(
+          await user.getAddress()
+        );
+
+        await ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ]);
+
+        // The payment for the ERC721 token is sent to the custom recipient
+        // The owner of the ERC721 token is updated to the taker
+        // The protocol fee is transferred to the default fee receiver
+
+        expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+          await taker.getAddress()
+        );
+
+        expect(
+          await ERC20Contract.balanceOf(await maker.getAddress())
+        ).to.be.equal(initialMakerBalance);
+
+        // User should receive 1 token from the taker
+        expect(
+          await ERC20Contract.balanceOf(await user.getAddress())
+        ).to.be.equal(initialUserBalance + 1n);
+      });
+      it('allows buyer to set custom recipient for purchase', async function () {
+        await ERC721Contract.mint(maker.getAddress(), 1);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        await ERC20Contract.mint(taker.getAddress(), 1);
+        await ERC20Contract.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        makerAsset = await AssetERC721(ERC721Contract, 1);
+        // Taker specified a custom recipient for the ERC721 token
+        takerAsset = await AssetERC20(
+          ERC20Contract,
+          1,
+          await user.getAddress()
+        );
+
+        orderLeft = await OrderDefault(
+          maker,
+          makerAsset,
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset,
+          ZeroAddress,
+          makerAsset,
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const initialTakerBalance = await ERC20Contract.balanceOf(
+          await taker.getAddress()
+        );
+
+        await ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ]);
+
+        expect(
+          await ERC20Contract.balanceOf(await taker.getAddress())
+        ).to.be.equal(initialTakerBalance - 1n);
+
+        // user should own the ERC721 token
+        expect(await ERC721Contract.ownerOf(1)).to.be.equal(
+          await user.getAddress()
+        );
+      });
+      it('allows both buyer and seller to set custom recipients for the exchange', async function () {
+        await ERC1155Contract.mint(maker.getAddress(), 1, 1);
+        await ERC1155Contract.connect(maker).setApprovalForAll(
+          await ExchangeContractAsUser.getAddress(),
+          true
+        );
+        await ERC20Contract.mint(taker.getAddress(), 1);
+        await ERC20Contract.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        makerAsset = await AssetERC1155(
+          ERC1155Contract,
+          1,
+          1,
+          await user.getAddress()
+        );
+        takerAsset = await AssetERC20(
+          ERC20Contract,
+          1,
+          await user.getAddress()
+        );
+
+        orderLeft = await OrderDefault(
+          maker,
+          makerAsset,
+          ZeroAddress,
+          takerAsset,
+          1,
+          0,
+          0
+        );
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset,
+          ZeroAddress,
+          makerAsset,
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const initialUserBalance = await ERC20Contract.balanceOf(
+          await user.getAddress()
+        );
+
+        await ExchangeContractAsUser.matchOrders([
+          {
+            orderLeft,
+            signatureLeft: makerSig,
+            orderRight,
+            signatureRight: takerSig,
+          },
+        ]);
+
+        // user should own the ERC1155 token
+        expect(
+          await ERC1155Contract.balanceOf(await user.getAddress(), 1)
+        ).to.be.equal(1);
+        // user should receive 1 token from the taker
+        expect(
+          await ERC20Contract.balanceOf(await user.getAddress())
+        ).to.be.equal(initialUserBalance + 1n);
+      });
+    });
     describe('ERC20 x ERC20 token', function () {
       it('should execute a complete match order between ERC20 tokens', async function () {
         expect(await ERC20Contract.balanceOf(maker)).to.be.equal(10000000000);

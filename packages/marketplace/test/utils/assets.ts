@@ -65,46 +65,75 @@ export const LibPartData = async (
 
 export const AssetERC20 = async (
   tokenContract: Contract,
-  value: Numeric
-): Promise<Asset> => ({
-  assetType: {
-    assetClass: AssetClassType.ERC20_ASSET_CLASS,
-    data: AbiCoder.defaultAbiCoder().encode(
-      ['address'],
-      [await tokenContract.getAddress()]
-    ),
-  },
-  value,
-});
+  value: Numeric,
+  recipient?: string
+): Promise<Asset> => {
+  const baseParams: string[] = ['address'];
+  const baseValues: (string | number)[] = [await tokenContract.getAddress()];
+
+  if (recipient) {
+    baseParams.push('uint256');
+    baseValues.push(0);
+    baseParams.push('address');
+    baseValues.push(recipient);
+  }
+
+  console.log(baseParams);
+  console.log(baseValues);
+
+  return {
+    assetType: {
+      assetClass: AssetClassType.ERC20_ASSET_CLASS,
+      data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
+    },
+    value,
+  };
+};
 
 export const AssetERC721 = async (
   tokenContract: Contract,
-  tokenId: Numeric
-): Promise<Asset> => ({
-  assetType: {
-    assetClass: AssetClassType.ERC721_ASSET_CLASS,
-    data: AbiCoder.defaultAbiCoder().encode(
-      ['address', 'uint256'],
-      [await tokenContract.getAddress(), tokenId]
-    ),
-  },
-  value: 1,
-});
+  tokenId: Numeric,
+  recipient?: string
+): Promise<Asset> => {
+  const baseParams = ['address', 'uint256'];
+  const baseValues = [await tokenContract.getAddress(), tokenId];
+
+  if (recipient) {
+    baseParams.push('address');
+    baseValues.push(recipient);
+  }
+
+  return {
+    assetType: {
+      assetClass: AssetClassType.ERC721_ASSET_CLASS,
+      data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
+    },
+    value: 1,
+  };
+};
 
 export const AssetERC1155 = async (
   tokenContract: Contract,
   tokenId: Numeric,
-  value: Numeric
-): Promise<Asset> => ({
-  assetType: {
-    assetClass: AssetClassType.ERC1155_ASSET_CLASS,
-    data: AbiCoder.defaultAbiCoder().encode(
-      ['address', 'uint256'],
-      [await tokenContract.getAddress(), tokenId]
-    ),
-  },
-  value,
-});
+  value: Numeric,
+  recipient?: string
+): Promise<Asset> => {
+  const baseParams = ['address', 'uint256'];
+  const baseValues = [await tokenContract.getAddress(), tokenId];
+
+  if (recipient) {
+    baseParams.push('address');
+    baseValues.push(recipient);
+  }
+
+  return {
+    assetType: {
+      assetClass: AssetClassType.ERC1155_ASSET_CLASS,
+      data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
+    },
+    value,
+  };
+};
 
 export function hashAssetType(a: AssetType) {
   if (a.assetClass === AssetClassType.INVALID_ASSET_CLASS) {
