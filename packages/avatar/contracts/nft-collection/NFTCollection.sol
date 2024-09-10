@@ -63,27 +63,27 @@ INFTCollection
         /**
          * @notice maximum amount of tokens that can be minted
          */
-        uint256 maxSupply; // public
+        uint256 maxSupply;
 
         /**
          * @notice treasury address where the payment for minting are sent
          */
-        address mintTreasury; // public
+        address mintTreasury;
 
         /**
          * @notice standard base token URL for ERC721 metadata
          */
-        string baseTokenURI; // public
+        string baseTokenURI;
 
         /**
          * @notice max tokens to buy per wave, cumulating all addresses
          */
-        uint256 waveMaxTokensOverall; // public
+        uint256 waveMaxTokensOverall;
 
         /**
          * @notice max tokens to buy, per wallet in a given wave
          */
-        uint256 waveMaxTokensPerWallet; // public
+        uint256 waveMaxTokensPerWallet;
 
         /**
          * @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
@@ -93,28 +93,28 @@ INFTCollection
         /**
          * @notice number of total minted tokens in the current running wave
          */
-        uint256 waveTotalMinted; // public
+        uint256 waveTotalMinted;
 
         /**
           * @notice mapping of [owner -> wave index -> minted count]
           */
-        mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts; // public
+        mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts;
 
         /**
          * @notice each wave has an index to help track minting/tokens per wallet
          */
-        uint256 indexWave; // public
+        uint256 indexWave;
 
         /**
          * @notice ERC20 contract through which the minting will be done (approveAndCall)
          *         When there is a price for the minting, the payment will be done using this token
          */
-        IERC20 allowedToExecuteMint; // public
+        IERC20 allowedToExecuteMint;
 
         /**
           * @notice all signatures must come from this specific address, otherwise they are invalid
           */
-        address signAddress; // public
+        address signAddress;
 
         /**
          * @notice stores the personalization mask for a tokenId
@@ -131,7 +131,7 @@ INFTCollection
         /**
          * @notice total amount of tokens minted till now
          */
-        uint256 totalSupply; // public
+        uint256 totalSupply;
     }
 
     /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
@@ -873,10 +873,10 @@ INFTCollection
         ) {
             revert InvalidWaveData(_waveMaxTokensOverall, _waveMaxTokensPerWallet);
         }
+        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, $.waveTotalMinted, $.indexWave);
         $.waveMaxTokensOverall = _waveMaxTokensOverall;
         $.waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
         $.waveSingleTokenPrice = _waveSingleTokenPrice;
-        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, $.waveTotalMinted, $.indexWave);
         $.waveTotalMinted = 0;
         $.indexWave++;
     }
