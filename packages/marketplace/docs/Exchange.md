@@ -5,8 +5,8 @@
 The [Exchange contract](../contracts/Exchange.sol) is the entrypoint and main
 contract to the marketplace protocol. It safely offers a decentralized way to
 exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.It
-also supports exchanging bundles of assets, which can include multiple ERC20,
-ERC1155, ERC721, and Quads.
+also supports exchanging bundles of assets, which can include multiple ERC1155,
+ERC721, and Quads.
 
 ## Concepts
 
@@ -39,9 +39,7 @@ Alice wants to sell a bundle of assets:
  1 LAND (ERC721) with token id 1000
   - Price: 1200 MATIC
  10 ASSET (ERC1155) with token id 2000
-  - Price: 500 MATIC
- 50 SAND (ERC20)
-  - Price: 300 MATIC (6 MATIC per SAND)
+  - Price: 700 MATIC
 against 2000 MATIC (ERC20).
 ```
 
