@@ -111,10 +111,20 @@ abstract contract TransferManager is Initializable, ITransferManager {
             nftSide = left;
         }
 
+        LibAsset.verifyPriceDistribution(nftSide.asset, nftSide.asset.value, paymentSide.asset.value);
+
         (address paymentSideRecipient, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
 
         // Transfer NFT or left side if FeeSide.NONE
-        _transfer(nftSide.asset, nftSide.account, paymentSideRecipient);
+        // NFT transfer when exchanging more than one bundle of ERC1155s
+        if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE && nftSide.asset.value > 1) {
+            for (uint256 i = 0; i < nftSide.asset.value; i++) {
+                _transfer(nftSide.asset, nftSide.account, paymentSideRecipient);
+            }
+        } else {
+            _transfer(nftSide.asset, nftSide.account, paymentSideRecipient);
+        }
+
         // Transfer ERC20 or right side if FeeSide.NONE
         if (feeSide == LibAsset.FeeSide.NONE || _mustSkipFees(nftSide.account)) {
             _transfer(paymentSide.asset, paymentSide.account, nftSideRecipient);
@@ -267,13 +277,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
                         token,
                         bundle.bundledERC1155[i].ids[j]
                     );
-                    remainder = _applyRoyalties(
-                        remainder,
-                        paymentSide,
-                        bundle.priceDistribution.erc1155Prices[i][j],
-                        royalties,
-                        nftSideRecipient
-                    );
+
+                    // royalty transfer when exchanging one or more than one bundle of ERC1155s
+                    for (uint256 k; k < nftSide.asset.value; k++) {
+                        remainder = _applyRoyalties(
+                            remainder,
+                            paymentSide,
+                            bundle.priceDistribution.erc1155Prices[i][j],
+                            royalties,
+                            nftSideRecipient
+                        );
+                    }
                 }
             }
 
@@ -403,15 +417,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
             _transferERC1155(token, from, to, tokenId, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-            uint256 erc20Length = bundle.bundledERC20.length;
             uint256 erc721Length = bundle.bundledERC721.length;
             uint256 erc1155Length = bundle.bundledERC1155.length;
             uint256 quadsLength = bundle.quads.xs.length;
             if (erc721Length > 0 || quadsLength > 0) require(asset.value == 1, "bundle value error");
-            for (uint256 i; i < erc20Length; i++) {
-                address token = bundle.bundledERC20[i].erc20Address;
-                _transferERC20(token, from, to, bundle.bundledERC20[i].value);
-            }
             for (uint256 i; i < erc721Length; i++) {
                 address token = bundle.bundledERC721[i].erc721Address;
                 uint256 idLength = bundle.bundledERC721[i].ids.length;
@@ -490,7 +499,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param y The bottom left y coordinate of the quad
     /// @return the tokenId of the quad
     /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
-    function idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal view returns (uint256) {
+    function idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
         unchecked {
             return (x + (i % size)) + (y + (i / size)) * GRID_SIZE;
         }

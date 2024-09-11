@@ -36,12 +36,6 @@ library LibAsset {
         uint256 value; // The amount or value of the asset.
     }
 
-    /// @dev Represents a group (i.e. bundle) of ERC20 asset.
-    struct BundledERC20 {
-        address erc20Address;
-        uint256 value;
-    }
-
     /// @dev Represents a group (i.e. bundle) of ERC721 assets.
     struct BundledERC721 {
         address erc721Address;
@@ -65,7 +59,6 @@ library LibAsset {
 
     /// @dev Represents a group (i.e. bundle) of assets with its types and values.
     struct Bundle {
-        BundledERC20[] bundledERC20;
         BundledERC721[] bundledERC721;
         BundledERC1155[] bundledERC1155;
         Quads quads;
@@ -74,7 +67,6 @@ library LibAsset {
 
     /// @dev Represents the price of each asset in a bundle.
     struct PriceDistribution {
-        uint256[] erc20Prices;
         uint256[][] erc721Prices;
         uint256[][] erc1155Prices;
         uint256[] quadPrices;
@@ -159,18 +151,17 @@ library LibAsset {
 
     /// @dev function to verify if the order is a bundle and validate the bundle price
     /// @param leftAsset The left asset.
-    /// @param rightAsset The right asset.
-    function verifyPriceDistribution(Asset memory leftAsset, Asset memory rightAsset) internal pure {
+    /// @param nftSideValue The value on nft side order.
+    /// @param paymentSideValue The value on payment side order.
+    function verifyPriceDistribution(
+        Asset memory leftAsset,
+        uint256 nftSideValue,
+        uint256 paymentSideValue
+    ) internal pure {
         if (leftAsset.assetType.assetClass == AssetClass.BUNDLE) {
-            uint256 bundlePrice = rightAsset.value; // bundle price provided by seller
             Bundle memory bundle = LibAsset.decodeBundle(leftAsset.assetType);
             PriceDistribution memory priceDistribution = bundle.priceDistribution;
             uint256 collectiveBundlePrice = 0;
-
-            // total price of all bundled ERC20 assets
-            for (uint256 i = 0; i < priceDistribution.erc20Prices.length; i++) {
-                collectiveBundlePrice += priceDistribution.erc20Prices[i];
-            }
 
             // total price of all bundled ERC721 assets
             for (uint256 i = 0; i < priceDistribution.erc721Prices.length; i++) {
@@ -192,7 +183,7 @@ library LibAsset {
                 collectiveBundlePrice += priceDistribution.quadPrices[i];
             }
 
-            require(bundlePrice == collectiveBundlePrice, "Bundle price mismatch");
+            require(paymentSideValue == collectiveBundlePrice * nftSideValue, "Bundle price mismatch");
         }
     }
 

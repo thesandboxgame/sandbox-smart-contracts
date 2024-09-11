@@ -84,10 +84,6 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ER
         address makeToken;
         if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-            for (uint256 i; i < bundle.bundledERC20.length; i++) {
-                makeToken = bundle.bundledERC20[i].erc20Address;
-                _verifyWhitelistsRoles(makeToken);
-            }
         } else makeToken = LibAsset.decodeAddress(asset.assetType);
         if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
             _verifyWhitelistsRoles(makeToken);
