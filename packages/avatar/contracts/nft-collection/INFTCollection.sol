@@ -41,7 +41,6 @@ interface INFTCollection {
      * @param waveMaxTokens the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param waveMaxTokensToBuy max tokens to buy, per wallet in a given wave
      * @param waveSingleTokenPrice the price to mint a token in a given wave, in wei
-     * @param prevMinted the amount of tokens minted in previous wave
      * @param waveIndex the current wave index
      */
     event WaveSetup(
@@ -49,7 +48,6 @@ interface INFTCollection {
         uint256 waveMaxTokens,
         uint256 waveMaxTokensToBuy,
         uint256 waveSingleTokenPrice,
-        uint256 prevMinted,
         uint256 waveIndex
     );
 

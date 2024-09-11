@@ -10,10 +10,10 @@ describe('NFTCollection wave setup', function () {
         await loadFixture(setupNFTCollectionContract);
       await expect(contract.setupWave(10, 1, 2))
         .to.emit(contract, 'WaveSetup')
-        .withArgs(nftCollectionAdmin, 10, 1, 2, 0, 0);
-      expect(await contract.waveMaxTokensOverall()).to.be.eq(10);
-      expect(await contract.waveMaxTokensPerWallet()).to.be.eq(1);
-      expect(await contract.price(1)).to.be.eq(2);
+        .withArgs(nftCollectionAdmin, 10, 1, 2, 0);
+      expect(await contract.waveMaxTokensOverall(0)).to.be.eq(10);
+      expect(await contract.waveMaxTokensPerWallet(0)).to.be.eq(1);
+      expect(await contract.waveSingleTokenPrice(0)).to.be.eq(2);
     });
 
     it('other should fail to setupWave', async function () {
@@ -80,10 +80,9 @@ describe('NFTCollection wave setup', function () {
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
         0,
-        0,
         0
       );
-    expect(await contract.waveTotalMinted()).to.be.eq(0);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(0);
     expect(await contract.indexWave()).to.be.eq(1);
     await contract.batchMint([
       [randomWallet, 5],
@@ -96,12 +95,12 @@ describe('NFTCollection wave setup', function () {
       222,
       await authSign(randomWallet, 222)
     );
-    expect(await contract.waveTotalMinted()).to.be.eq(5 + 1 + 2);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(5 + 1 + 2);
     expect(await contract.indexWave()).to.be.eq(1);
     await expect(contract.setupWave(10, 1, 2))
       .to.emit(contract, 'WaveSetup')
-      .withArgs(nftCollectionAdmin, 10, 1, 2, 5 + 1 + 2, 1);
-    expect(await contract.waveTotalMinted()).to.be.eq(0);
+      .withArgs(nftCollectionAdmin, 10, 1, 2, 1);
+    expect(await contract.waveTotalMinted(1)).to.be.eq(0);
     expect(await contract.indexWave()).to.be.eq(2);
   });
 });
