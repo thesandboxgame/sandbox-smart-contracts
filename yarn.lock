@@ -2914,6 +2914,7 @@ __metadata:
     hardhat-contract-sizer: ^2.10.0
     hardhat-deploy: ^0.11.43
     hardhat-deploy-ethers: ^0.4.1
+    markdown-table-ts: ^1.0.3
     prettier: ^2.8.8
     prettier-plugin-solidity: ^1.1.3
     ts-node: ^10.9.2
@@ -11111,6 +11112,13 @@ __metadata:
     promise-retry: ^2.0.1
     ssri: ^10.0.0
   checksum: 5c9fad695579b79488fa100da05777213dd9365222f85e4757630f8dd2a21a79ddd3206c78cfd6f9b37346819681782b67900ac847a57cf04190f52dda5343fd
+  languageName: node
+  linkType: hard
+
+"markdown-table-ts@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "markdown-table-ts@npm:1.0.3"
+  checksum: af684c664f14d628cec0b554d3accc12309be02d25c7fc455bfd962e04484d2d2781c4d58dd1bfe07f5e895962b137ddbdae43e05f95ed3190f31f4035174840
   languageName: node
   linkType: hard
 
