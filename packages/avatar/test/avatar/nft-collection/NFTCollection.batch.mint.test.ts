@@ -18,12 +18,12 @@ describe('NFTCollection batch mint', function () {
     ]);
     const indexWave = await contract.indexWave();
     expect(
-      await contract.waveOwnerToClaimedCounts(randomWallet, indexWave - 1n)
+      await contract.waveOwnerToClaimedCounts(indexWave - 1n, randomWallet)
     ).to.be.eq(7);
     expect(
-      await contract.waveOwnerToClaimedCounts(collectionOwner, indexWave - 1n)
+      await contract.waveOwnerToClaimedCounts(indexWave - 1n, collectionOwner)
     ).to.be.eq(5);
-    expect(await contract.waveTotalMinted()).to.be.eq(12);
+    expect(await contract.waveTotalMinted(indexWave - 1n)).to.be.eq(12);
     expect(await contract.totalSupply()).to.be.eq(12);
     const transferEvents = await contract.queryFilter('Transfer');
     let i = 0;

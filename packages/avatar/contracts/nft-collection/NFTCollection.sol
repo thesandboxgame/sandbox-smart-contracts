@@ -59,16 +59,32 @@ INFTCollection
         uint256 amount;
     }
 
+    /**
+     * @notice Structure used save minting wave information
+     * @param waveMaxTokensOverall max tokens to buy per wave, cumulating all addresses
+     * @param waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
+     * @param waveSingleTokenPrice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     * @param waveTotalMinted number of total minted tokens in the current running wave
+     * @param waveOwnerToClaimedCounts mapping of [owner -> minted count]
+     */
+    struct WaveData {
+        uint256 waveMaxTokensOverall;
+        uint256 waveMaxTokensPerWallet;
+        uint256 waveSingleTokenPrice;
+        uint256 waveTotalMinted;
+        mapping(address => uint256) waveOwnerToClaimedCounts;
+    }
+
     struct NFTCollectionStorage {
         /**
          * @notice maximum amount of tokens that can be minted
          */
-        uint256 maxSupply;
+        uint256 maxSupply; // public
 
         /**
          * @notice treasury address where the payment for minting are sent
          */
-        address mintTreasury;
+        address mintTreasury; // public
 
         /**
          * @notice standard base token URL for ERC721 metadata
@@ -76,34 +92,9 @@ INFTCollection
         string baseTokenURI;
 
         /**
-         * @notice max tokens to buy per wave, cumulating all addresses
-         */
-        uint256 waveMaxTokensOverall;
-
-        /**
-         * @notice max tokens to buy, per wallet in a given wave
-         */
-        uint256 waveMaxTokensPerWallet;
-
-        /**
-         * @notice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
-         */
-        uint256 waveSingleTokenPrice;
-
-        /**
-         * @notice number of total minted tokens in the current running wave
-         */
-        uint256 waveTotalMinted;
-
-        /**
-          * @notice mapping of [owner -> wave index -> minted count]
+          * @notice saved information of minting waves
           */
-        mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts;
-
-        /**
-         * @notice each wave has an index to help track minting/tokens per wallet
-         */
-        uint256 indexWave;
+        WaveData[] waveData;
 
         /**
          * @notice ERC20 contract through which the minting will be done (approveAndCall)
@@ -277,16 +268,17 @@ INFTCollection
         bytes calldata signature
     ) external whenNotPaused nonReentrant {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 _indexWave = $.indexWave;
+        uint256 _indexWave = $.waveData.length;
         if (_indexWave == 0) {
             revert ContractNotConfigured();
         }
+        WaveData storage wd = $.waveData[_indexWave - 1];
         if (_msgSender() != address($.allowedToExecuteMint)) {
             revert ERC721InvalidSender(_msgSender());
         }
         _checkAndSetSignature(wallet, signatureId, signature);
         _checkMintAllowed(wallet, amount);
-        uint256 _price = price(amount);
+        uint256 _price = wd.waveSingleTokenPrice * amount;
         if (_price > 0) {
             SafeERC20.safeTransferFrom($.allowedToExecuteMint, wallet, $.mintTreasury, _price);
         }
@@ -296,8 +288,8 @@ INFTCollection
             // @dev start with tokenId = 1
             _safeMint(wallet, _totalSupply + i + 1);
         }
-        $.waveOwnerToClaimedCounts[wallet][_indexWave - 1] += amount;
-        $.waveTotalMinted += amount;
+        wd.waveOwnerToClaimedCounts[wallet] += amount;
+        wd.waveTotalMinted += amount;
         $.totalSupply += amount;
     }
 
@@ -309,7 +301,7 @@ INFTCollection
      */
     function batchMint(BatchMintingData[] calldata wallets) external whenNotPaused onlyOwner {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 _indexWave = $.indexWave;
+        uint256 _indexWave = $.waveData.length;
         if (_indexWave == 0) {
             revert ContractNotConfigured();
         }
@@ -318,6 +310,7 @@ INFTCollection
             revert InvalidBatchData();
         }
 
+        WaveData storage wd = $.waveData[_indexWave - 1];
         for (uint256 i; i < len; i++) {
             uint256 _totalSupply = $.totalSupply;
             address wallet = wallets[i].wallet;
@@ -328,8 +321,8 @@ INFTCollection
                 // @dev start with tokenId = 1
                 _mint(wallet, _totalSupply + j + 1);
             }
-            $.waveOwnerToClaimedCounts[wallet][_indexWave - 1] += amount;
-            $.waveTotalMinted += amount;
+            wd.waveOwnerToClaimedCounts[wallet] += amount;
+            wd.waveTotalMinted += amount;
             $.totalSupply += amount;
         }
     }
@@ -690,18 +683,8 @@ INFTCollection
      */
     function isMintAllowed(address wallet, uint256 amount) external view returns (bool) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 waveClaimedCounts = $.waveOwnerToClaimedCounts[wallet][$.indexWave - 1];
+        uint256 waveClaimedCounts = $.waveData[$.waveData.length - 1].waveOwnerToClaimedCounts[wallet];
         return _isMintAllowed(waveClaimedCounts, amount);
-    }
-
-    /**
-     * @notice get the price of minting the indicated number of tokens for the current wave
-     * @param count the number of tokens to estimate mint price for
-     * @return price of minting all the tokens
-     */
-    function price(uint256 count) public view virtual returns (uint256) {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveSingleTokenPrice * count;
     }
 
     /**
@@ -747,44 +730,48 @@ INFTCollection
 
     /**
      * @notice return max tokens to buy per wave, cumulating all addresses
+     * @param waveIndex the wave for which the count is returned
      */
-    function waveMaxTokensOverall() external view returns (uint256) {
+    function waveMaxTokensOverall(uint256 waveIndex) external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveMaxTokensOverall;
+        return $.waveData[waveIndex].waveMaxTokensOverall;
     }
 
     /**
      * @notice return max tokens to buy, per wallet in a given wave
+     * @param waveIndex the wave for which the count is returned
      */
-    function waveMaxTokensPerWallet() external view returns (uint256) {
+    function waveMaxTokensPerWallet(uint256 waveIndex) external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveMaxTokensPerWallet;
+        return $.waveData[waveIndex].waveMaxTokensPerWallet;
     }
 
     /**
      * @notice return price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     * @param waveIndex the wave for which the count is returned
      */
-    function waveSingleTokenPrice() external view returns (uint256) {
+    function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveSingleTokenPrice;
+        return $.waveData[waveIndex].waveSingleTokenPrice;
     }
 
     /**
      * @notice return number of total minted tokens in the current running wave
+     * @param waveIndex the wave for which the count is returned
      */
-    function waveTotalMinted() external view returns (uint256) {
+    function waveTotalMinted(uint256 waveIndex) external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveTotalMinted;
+        return $.waveData[waveIndex].waveTotalMinted;
     }
 
     /**
       * @notice return mapping of [owner -> wave index -> minted count]
-      * @param owner the owner for which the count is returned
       * @param waveIndex the wave for which the count is returned
+      * @param owner the owner for which the count is returned
       */
-    function waveOwnerToClaimedCounts(address owner, uint256 waveIndex) external view returns (uint256) {
+    function waveOwnerToClaimedCounts(uint256 waveIndex, address owner) external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.waveOwnerToClaimedCounts[owner][waveIndex];
+        return $.waveData[waveIndex].waveOwnerToClaimedCounts[owner];
     }
 
     /**
@@ -792,7 +779,7 @@ INFTCollection
      */
     function indexWave() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.indexWave;
+        return $.waveData.length;
     }
 
     /**
@@ -811,23 +798,13 @@ INFTCollection
         return $.signAddress;
     }
 
-
-    /**
-     * @notice return the personalization mask for a tokenId
-     * @param tokenId the tokenId to check
-     */
-    function personalizationTraits(uint256 tokenId) external view returns (uint256) {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.personalizationTraits[tokenId];
-    }
-
     /**
      * @notice return true if the signature id was used
      * @param signatureId signing signature ID
      */
-    function isSignatureUsed(uint256 signatureId) external view returns (uint256) {
+    function isSignatureUsed(uint256 signatureId) external view returns (bool) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.signatureIds[signatureId];
+        return $.signatureIds[signatureId] > 0;
     }
 
     /**
@@ -873,12 +850,12 @@ INFTCollection
         ) {
             revert InvalidWaveData(_waveMaxTokensOverall, _waveMaxTokensPerWallet);
         }
-        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, $.waveTotalMinted, $.indexWave);
-        $.waveMaxTokensOverall = _waveMaxTokensOverall;
-        $.waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
-        $.waveSingleTokenPrice = _waveSingleTokenPrice;
-        $.waveTotalMinted = 0;
-        $.indexWave++;
+        uint256 _indexWave = $.waveData.length;
+        emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, _indexWave);
+        $.waveData.push();
+        $.waveData[_indexWave].waveMaxTokensOverall = _waveMaxTokensOverall;
+        $.waveData[_indexWave].waveMaxTokensPerWallet = _waveMaxTokensPerWallet;
+        $.waveData[_indexWave].waveSingleTokenPrice = _waveSingleTokenPrice;
     }
 
     /**
@@ -1149,7 +1126,7 @@ INFTCollection
      */
     function _checkMintAllowed(address _wallet, uint256 _amount) internal view {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 waveClaimedCounts = $.waveOwnerToClaimedCounts[_wallet][$.indexWave - 1];
+        uint256 waveClaimedCounts = $.waveData[$.waveData.length - 1].waveOwnerToClaimedCounts[_wallet];
         if (!_isMintAllowed(waveClaimedCounts, _amount)) {
             revert CannotMint(_wallet, _amount);
         }
@@ -1163,9 +1140,10 @@ INFTCollection
      */
     function _isMintAllowed(uint256 _waveClaimedCounts, uint256 _amount) internal view returns (bool) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        uint256 _indexWave = $.waveData.length;
         return _amount > 0
-        && ($.waveTotalMinted + _amount <= $.waveMaxTokensOverall)
-        && (_waveClaimedCounts + _amount <= $.waveMaxTokensPerWallet)
+        && ($.waveData[_indexWave - 1].waveTotalMinted + _amount <= $.waveData[_indexWave - 1].waveMaxTokensOverall)
+        && (_waveClaimedCounts + _amount <= $.waveData[_indexWave - 1].waveMaxTokensPerWallet)
         && $.totalSupply + _amount <= $.maxSupply;
     }
 
