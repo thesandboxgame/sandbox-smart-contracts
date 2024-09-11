@@ -33,6 +33,7 @@ describe('NFTCollection mint', function () {
       .approveAndCall(contract, price, encodedData);
     expect(await sandContract.balanceOf(treasury)).to.be.eq(price);
     expect(await sandContract.balanceOf(randomWallet)).to.be.eq(0);
+    expect(await contract.isSignatureUsed(222)).to.be.true;
     const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
       const tokenId = transferEvents[i].args.tokenId;
@@ -40,9 +41,9 @@ describe('NFTCollection mint', function () {
     }
     const indexWave = await contract.indexWave();
     expect(
-      await contract.waveOwnerToClaimedCounts(randomWallet, indexWave - 1n)
+      await contract.waveOwnerToClaimedCounts(indexWave - 1n, randomWallet)
     ).to.be.eq(2);
-    expect(await contract.waveTotalMinted()).to.be.eq(2);
+    expect(await contract.waveTotalMinted(indexWave - 1n)).to.be.eq(2);
     expect(await contract.totalSupply()).to.be.eq(2);
   });
 
