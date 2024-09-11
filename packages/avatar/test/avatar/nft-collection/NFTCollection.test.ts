@@ -94,7 +94,6 @@ describe('NFTCollection', function () {
   describe('personalize', function () {
     it('token owner should be able to be call personalize with a valid signature', async function () {
       const {
-        collectionContractAsOwner,
         collectionContractAsRandomWallet: contract,
         randomWallet,
         personalizeSignature,
@@ -121,9 +120,9 @@ describe('NFTCollection', function () {
       await expect(tx)
         .to.emit(contract, 'MetadataUpdate')
         .withArgs(tokenIds[0]);
-      expect(
-        await collectionContractAsOwner.personalizationOf(tokenIds[0])
-      ).to.be.eq(personalizationMask);
+      expect(await contract.personalizationOf(tokenIds[0])).to.be.eq(
+        personalizationMask
+      );
     });
 
     it('other owner should fail to call personalize', async function () {
