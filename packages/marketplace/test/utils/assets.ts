@@ -43,6 +43,31 @@ export type AssetType = {
   data: BytesLike;
 };
 
+export type BundledERC721 = {
+  erc721Address: string;
+  ids: Numeric[];
+};
+
+export type BundledERC1155 = {
+  erc1155Address: string;
+  ids: Numeric[];
+  supplies: Numeric[];
+};
+
+export type Quads = {
+  sizes: Numeric[];
+  xs: Numeric[];
+  ys: Numeric[];
+  data: string;
+};
+
+export type BundleData = {
+  bundledERC721: BundledERC721[];
+  bundledERC1155: BundledERC1155[];
+  quads: Quads;
+  priceDistribution: PriceDistribution;
+};
+
 export type PriceDistribution = {
   erc721Prices: Numeric[][];
   erc1155Prices: Numeric[][];

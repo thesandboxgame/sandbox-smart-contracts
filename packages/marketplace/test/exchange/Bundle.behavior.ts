@@ -6,6 +6,10 @@ import {
   Asset,
   AssetBundle,
   LibPartData,
+  BundledERC721,
+  BundledERC1155,
+  Quads,
+  BundleData,
   PriceDistribution,
 } from '../utils/assets.ts';
 
@@ -38,15 +42,10 @@ export function shouldMatchOrdersForBundle() {
       bundleWithoutERC721Left: Asset,
       bundleWithoutERC721Right: Asset,
       priceDistribution: PriceDistribution,
-      // TODO: types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      bundledERC721: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      bundledERC1155: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      quads: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      bundleData: any,
+      bundledERC721: BundledERC721,
+      bundledERC1155: BundledERC1155,
+      quads: Quads,
+      bundleData: BundleData,
       orderLeft: Order,
       orderRight: Order,
       makerSig: string,
@@ -269,8 +268,6 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(
           (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
         );
-
-        // TODO: royalties checks for tokens
       });
 
       it('should not allow asset bundle value > 1 if there are ERC721 contained in the bundle, since ERC721 are unique', async function () {
@@ -450,7 +447,6 @@ export function shouldMatchOrdersForBundle() {
         expect(await ERC1155Contract.balanceOf(takerAddress, 1)).to.be.equal(
           10
         );
-        // TODO: royalties checks for tokens
       });
 
       it('should not allow signature reuse for partially filling orders using matchOrders between ERC20 and BUNDLE', async function () {
@@ -1813,7 +1809,6 @@ export function shouldMatchOrdersForBundle() {
         expect(await ERC1155Contract.balanceOf(takerAddress, 1)).to.be.equal(
           20
         );
-        // TODO: royalties checks for tokens
       });
 
       it('should execute complete match order for bundle with royalty on Quads', async function () {
