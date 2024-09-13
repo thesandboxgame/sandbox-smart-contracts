@@ -255,18 +255,22 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9750000000 // 10000000000 - protocolFee
+          9885000000 // 10000000000 - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
         );
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // TODO : check protocol fee
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0])) /
+            10000
         );
       });
 
@@ -428,7 +432,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9750000000
+          9975000000
         );
 
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(20000000000);
@@ -437,7 +441,7 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
           (Number(protocolFeeSecondary) *
-            Number(ERC20AssetForRightOrder.value)) /
+            Number(priceDistribution.erc1155Prices[0][0])) /
             10000
         );
 
@@ -622,13 +626,16 @@ export function shouldMatchOrdersForBundle() {
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           10000000000
         );
-        expect(await ERC20Contract.balanceOf(maker)).to.be.equal(19500000000);
+        expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
+          19950000000
+        );
 
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
-            Number(ERC20AssetForRightOrder.value)) /
+          (2 *
+            (Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]))) /
             10000
         );
 
@@ -723,7 +730,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9750000000
+          9975000000
         );
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(20000000000);
 
@@ -731,7 +738,7 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
           (Number(protocolFeeSecondary) *
-            Number(ERC20AssetForRightOrder.value)) /
+            Number(priceDistribution.erc1155Prices[0][0])) /
             10000
         ); // 1 * partial fills => 1 * fee taken
 
@@ -776,7 +783,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          19500000000
+          19950000000
         );
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
         0;
@@ -785,7 +792,7 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
           (Number(protocolFeeSecondary) *
-            Number(ERC20AssetForRightOrder.value) *
+            Number(priceDistribution.erc1155Prices[0][0]) *
             2) /
             10000
         ); // 2 * partial fills => 2 * fee taken
@@ -969,18 +976,26 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9750000000 // 10000000000 - protocolFee
+          9862500000 // 10000000000 - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
         );
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(await defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[1])) /
+            10000
         );
 
         // check maker received quads
@@ -1231,7 +1246,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          8950000000 // 10000000000 - royalty - protocolFee
+          9085000000 // 10000000000 - royalty - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -1243,11 +1258,15 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver.getAddress())
         ).to.be.equal(800000000); // 20% of asset price for ERC721 token
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0])) /
+            10000
         );
       });
 
@@ -1350,7 +1369,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          8950000000 // 10000000000 - royalty - protocolFee
+          9062500000 // 10000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -1364,11 +1383,17 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver2.getAddress())
         ).to.be.equal(600000000); // 20% of asset price for ERC721 token with id:2
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc721Prices[0][1]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0])) /
+            10000
         );
       });
 
@@ -1530,7 +1555,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9720000000 // 10000000000 - royalty - protocolFee
+          9855000000 // 10000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -1541,11 +1566,15 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver.getAddress())
         ).to.be.equal(30000000); // 5% of asset price for ERC1155 token with id:1
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0])) /
+            10000
         );
       });
 
@@ -1657,7 +1686,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9695000000 // 10000000000 - royalty - protocolFee
+          9802500000 // 10000000000 - royalty - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -1672,11 +1701,17 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver2.getAddress())
         ).to.be.equal(40000000); // 10% of asset price for ERC1155 token with id:2
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][1])) /
+            10000
         );
       });
 
@@ -1784,7 +1819,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(2);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          19300000000 // 10000000000 - royalty - protocolFee
+          19750000000 // 10000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           10000000000
@@ -1798,8 +1833,9 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
-            Number(ERC20AssetForRightOrder.value)) /
+          (2 *
+            (Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]))) /
             10000
         );
 
@@ -1902,7 +1938,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9650000000 // 10000000000 - protocolFee - royalty
+          9762500000 // 10000000000 - protocolFee - royalty
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -1914,11 +1950,19 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver.getAddress())
         ).to.be.equal(100000000); // 10% of asset price for quad (3,0) & (0,3)
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(await defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[1])) /
+            10000
         );
 
         // check maker received quads
@@ -2032,7 +2076,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9590000000 // 10000000000 - protocolFee - royalty
+          9702500000 // 10000000000 - protocolFee - royalty
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -2046,11 +2090,19 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver2.getAddress())
         ).to.be.equal(120000000); // 20% of asset price for quad(0,3)
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(await defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[1])) /
+            10000
         );
 
         // check maker received quads
@@ -2165,7 +2217,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9200000000 // 10000000000 - protocolFee - royalty
+          9312500000 // 10000000000 - protocolFee - royalty
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -2182,11 +2234,19 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(royaltyReceiver3.getAddress())
         ).to.be.equal(400000000); // 10% of asset price for quad (3,0) & (0,3)
 
-        // check protocol fee -> 250 * 10000000000 / 10000 = 250000000
+        // check protocol fee
         expect(
           await ERC20Contract.balanceOf(await defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) * Number(takerAsset.value)) / 10000
+          (Number(protocolFeeSecondary) *
+            Number(priceDistribution.erc721Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.erc1155Prices[0][0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[0]) +
+            Number(protocolFeeSecondary) *
+              Number(priceDistribution.quadPrices[1])) /
+            10000
         );
 
         // check maker received quads
