@@ -297,16 +297,17 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 feePrimary,
         uint256 feeSecondary,
         LibAsset.Bundle memory bundle
-    ) internal returns (uint256) {
+    ) internal returns (uint256 remainingValue) {
+        remainingValue = remainder;
         for (uint256 i; i < bundle.bundledERC721.length; i++) {
             address token = bundle.bundledERC721[i].erc721Address;
             uint256 idLength = bundle.bundledERC721[i].ids.length;
             for (uint256 j; j < idLength; j++) {
-                remainder = _processSingleAsset(
+                remainingValue = _processSingleAsset(
                     paymentSide,
                     nftSide,
                     nftSideRecipient,
-                    remainder,
+                    remainingValue,
                     feePrimary,
                     feeSecondary,
                     token,
@@ -315,7 +316,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 );
             }
         }
-        return remainder;
+        return remainingValue;
     }
 
     function _processERC1155Bundles(
@@ -326,7 +327,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 feePrimary,
         uint256 feeSecondary,
         LibAsset.Bundle memory bundle
-    ) internal returns (uint256) {
+    ) internal returns (uint256 remainingValue) {
+        remainingValue = remainder;
         for (uint256 i; i < bundle.bundledERC1155.length; i++) {
             address token = bundle.bundledERC1155[i].erc1155Address;
             uint256 idLength = bundle.bundledERC1155[i].ids.length;
@@ -334,11 +336,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
             for (uint256 j; j < idLength; j++) {
                 for (uint256 k = 0; k < nftSide.asset.value; k++) {
-                    remainder = _processSingleAsset(
+                    remainingValue = _processSingleAsset(
                         paymentSide,
                         nftSide,
                         nftSideRecipient,
-                        remainder,
+                        remainingValue,
                         feePrimary,
                         feeSecondary,
                         token,
@@ -348,7 +350,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 }
             }
         }
-        return remainder;
+        return remainingValue;
     }
 
     function _processQuadBundles(
