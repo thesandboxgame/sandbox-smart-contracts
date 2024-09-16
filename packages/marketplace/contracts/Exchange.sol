@@ -60,6 +60,7 @@ contract Exchange is
     /// @param newDefaultFeeReceiver Market fee receiver.
     /// @param newRoyaltiesProvider Registry for the different types of royalties.
     /// @param orderValidatorAddress New OrderValidator contract address.
+    /// @param newMatchOrdersLimit The limit for matching orders in one transaction.
     function initialize(
         address admin,
         address newTrustedForwarder,

@@ -27,10 +27,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     bool private _whitelistsEnabled;
 
     /// @notice Emitted when a specific role gets enabled.
-    /// @param role Roles whose permissions were enabled
+    /// @param role The role whose permissions were enabled.
     event RoleEnabled(bytes32 indexed role);
 
     /// @notice Emitted when a specific role gets disabled.
+    /// @param role The role whose permissions were disabled.
     event RoleDisabled(bytes32 indexed role);
 
     /// @notice Emitted when only non-ERC20 tokens that are whitelisted can be allowed.

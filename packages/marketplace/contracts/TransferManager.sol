@@ -449,9 +449,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
     }
 
     /// @notice Return if this tx is on primary market for bundled asset
-    /// @param token the
-    /// @param tokenId the
-    /// @return creator Address or zero if is not able to retrieve it
+    /// @param nftSideAccount The account associated with the NFT side of the deal.
+    /// @param token The address of the token contract.
+    /// @param tokenId The ID of the token being checked.
+    /// @return True if the transaction is on the primary market
     function _isPrimaryMarketForBundledAsset(
         address nftSideAccount,
         address token,
