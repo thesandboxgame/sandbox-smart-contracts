@@ -13,6 +13,7 @@ import {Whitelist} from "./Whitelist.sol";
 
 /// @author The Sandbox
 /// @title OrderValidator
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ERC165Upgradeable, Whitelist {
     using SignatureChecker for address;

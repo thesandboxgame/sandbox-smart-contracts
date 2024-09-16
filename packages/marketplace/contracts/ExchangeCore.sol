@@ -11,6 +11,7 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
 /// @author The Sandbox
 /// @title ExchangeCore Contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {

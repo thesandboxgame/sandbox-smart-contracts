@@ -12,6 +12,7 @@ import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesPro
 
 /// @author The Sandbox
 /// @title RoyaltiesRegistry
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @dev Contract managing the registry of royalties.
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgradeable {
     using ERC165Checker for address;
