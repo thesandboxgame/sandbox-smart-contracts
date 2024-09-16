@@ -658,8 +658,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param size The size of the quad
     /// @param x The bottom left x coordinate of the quad
     /// @param y The bottom left y coordinate of the quad
-    /// @return the tokenId of the quad
-    /// @dev this method is gas optimized, must be called with verified x,y and size, after a call to _isValidQuad
+    /// @return tokenId of the quad
     function idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
         unchecked {
             return (x + (i % size)) + (y + (i / size)) * GRID_SIZE;
