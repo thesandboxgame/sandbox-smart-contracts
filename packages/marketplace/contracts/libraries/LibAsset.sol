@@ -172,9 +172,7 @@ library LibAsset {
             // total price of all bundled ERC1155 assets
             for (uint256 i = 0; i < priceDistribution.erc1155Prices.length; i++) {
                 for (uint256 j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
-                    collectiveBundlePrice +=
-                        bundle.bundledERC1155[i].supplies[j] *
-                        priceDistribution.erc1155Prices[i][j];
+                    collectiveBundlePrice += priceDistribution.erc1155Prices[i][j];
                 }
             }
 
