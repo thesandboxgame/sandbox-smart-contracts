@@ -61,7 +61,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[4000000000]],
-          erc1155Prices: [[600000000]],
+          erc1155Prices: [[6000000000]],
           quadPrices: [],
         };
 
@@ -247,7 +247,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9885000000 // 10000000000 - protocolFee
+          9750000000 // 10000000000 - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -270,7 +270,7 @@ export function shouldMatchOrdersForBundle() {
         // to bypass price distribution check as fill.leftValue = 2
         priceDistribution = {
           erc721Prices: [[2000000000]],
-          erc1155Prices: [[300000000]],
+          erc1155Prices: [[3000000000]],
           quadPrices: [],
         };
 
@@ -347,7 +347,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[]], // price distribution without ERC721
-          erc1155Prices: [[1000000000]],
+          erc1155Prices: [[10000000000]],
           quadPrices: [],
         };
 
@@ -424,7 +424,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9975000000
+          9750000000
         );
 
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(20000000000);
@@ -462,7 +462,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[]], // price distribution without ERC721
-          erc1155Prices: [[1000000000]],
+          erc1155Prices: [[10000000000]],
           quadPrices: [],
         };
 
@@ -541,7 +541,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[]], // price distribution without ERC721
-          erc1155Prices: [[1000000000]],
+          erc1155Prices: [[10000000000]],
           quadPrices: [],
         };
 
@@ -619,7 +619,7 @@ export function shouldMatchOrdersForBundle() {
           10000000000
         );
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          19950000000
+          19500000000
         );
 
         expect(
@@ -656,7 +656,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[]], // price distribution without ERC721
-          erc1155Prices: [[1000000000]],
+          erc1155Prices: [[10000000000]],
           quadPrices: [],
         };
 
@@ -722,7 +722,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9975000000
+          9750000000
         );
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(20000000000);
 
@@ -775,7 +775,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          19950000000
+          19500000000
         );
         expect(await ERC20Contract.balanceOf(taker)).to.be.equal(10000000000);
         0;
@@ -818,7 +818,7 @@ export function shouldMatchOrdersForBundle() {
 
         priceDistribution = {
           erc721Prices: [[4000000000]], // price distribution without ERC721
-          erc1155Prices: [[500000000]],
+          erc1155Prices: [[5000000000]],
           quadPrices: [500000000, 500000000],
         };
 
@@ -967,7 +967,7 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9862500000 // 10000000000 - protocolFee
+          9750000000 // 10000000000 - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(

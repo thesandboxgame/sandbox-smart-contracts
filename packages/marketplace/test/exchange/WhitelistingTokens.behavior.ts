@@ -494,7 +494,7 @@ export function shouldCheckForWhitelisting() {
 
         priceDistribution = {
           erc721Prices: [[4000000000]],
-          erc1155Prices: [[600000000]],
+          erc1155Prices: [[6000000000]],
           quadPrices: [],
         };
 
