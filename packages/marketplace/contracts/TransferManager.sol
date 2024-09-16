@@ -202,50 +202,59 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param paymentSide DealSide of the fee-side order
     /// @param nftSide DealSide of the nft-side order
     function _doTransfersWithFeesAndRoyalties(DealSide memory paymentSide, DealSide memory nftSide) internal {
-        uint256 fees;
         uint256 remainder = paymentSide.asset.value;
         (, address nftSideRecipient) = _getRecipients(paymentSide, nftSide);
 
-        if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
-            if (_isTSBSeller(nftSide.account)) {
-                fees = protocolFeePrimary;
-                // No royalties
-                if (fees > 0 && remainder > 0) {
-                    remainder = _transferPercentage(
-                        remainder,
-                        paymentSide,
-                        paymentSide.asset.value,
-                        defaultFeeReceiver,
-                        fees,
-                        PROTOCOL_FEE_MULTIPLIER
-                    );
-                }
-            } else {
-                remainder = _doTransfersWithFeesAndRoyaltiesForBundle(paymentSide, nftSide, nftSideRecipient);
-            }
-        } else {
-            if (_isTSBSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
-                fees = protocolFeePrimary;
-                // No royalties
-            } else {
-                fees = protocolFeeSecondary;
-                remainder = _transferRoyalties(remainder, paymentSide, nftSide);
-            }
+        (uint256 fees, bool shouldTransferRoyalties) = _calculateFeesAndRoyalties(nftSide);
+        bool isBundle = nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE;
 
-            if (fees > 0 && remainder > 0) {
-                remainder = _transferPercentage(
-                    remainder,
-                    paymentSide,
-                    paymentSide.asset.value,
-                    defaultFeeReceiver,
-                    fees,
-                    PROTOCOL_FEE_MULTIPLIER
-                );
+        if (isBundle) {
+            if (!_isTSBSeller(nftSide.account)) {
+                remainder = _doTransfersWithFeesAndRoyaltiesForBundle(paymentSide, nftSide, nftSideRecipient);
+            } else {
+                // No royalties but primary fee should be paid on the total value of the bundle
+                remainder = _transferProtocolFees(remainder, paymentSide, fees);
             }
+        } else if (shouldTransferRoyalties) {
+            remainder = _transferRoyalties(remainder, paymentSide, nftSide);
         }
+        if (!isBundle) {
+            remainder = _transferProtocolFees(remainder, paymentSide, fees);
+        }
+
         if (remainder > 0) {
             _transfer(LibAsset.Asset(paymentSide.asset.assetType, remainder), paymentSide.account, nftSideRecipient);
         }
+    }
+
+    function _calculateFeesAndRoyalties(
+        DealSide memory nftSide
+    ) internal returns (uint256 fees, bool shouldTransferRoyalties) {
+        if (_isTSBSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
+            fees = protocolFeePrimary;
+            shouldTransferRoyalties = false;
+        } else {
+            fees = protocolFeeSecondary;
+            shouldTransferRoyalties = true;
+        }
+    }
+
+    function _transferProtocolFees(
+        uint256 remainder,
+        DealSide memory paymentSide,
+        uint256 fees
+    ) internal returns (uint256) {
+        if (fees > 0 && remainder > 0) {
+            remainder = _transferPercentage(
+                remainder,
+                paymentSide,
+                paymentSide.asset.value,
+                defaultFeeReceiver,
+                fees,
+                PROTOCOL_FEE_MULTIPLIER
+            );
+        }
+        return remainder;
     }
 
     function _doTransfersWithFeesAndRoyaltiesForBundle(
@@ -258,93 +267,150 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 feeSecondary = protocolFeeSecondary;
         LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
+        remainder = _processERC721Bundles(
+            paymentSide,
+            nftSide,
+            nftSideRecipient,
+            remainder,
+            feePrimary,
+            feeSecondary,
+            bundle
+        );
+        remainder = _processERC1155Bundles(
+            paymentSide,
+            nftSide,
+            nftSideRecipient,
+            remainder,
+            feePrimary,
+            feeSecondary,
+            bundle
+        );
+        remainder = _processQuadBundles(paymentSide, nftSideRecipient, remainder, feeSecondary, bundle);
+        return remainder;
+    }
+
+    function _processERC721Bundles(
+        DealSide memory paymentSide,
+        DealSide memory nftSide,
+        address nftSideRecipient,
+        uint256 remainder,
+        uint256 feePrimary,
+        uint256 feeSecondary,
+        LibAsset.Bundle memory bundle
+    ) internal returns (uint256) {
         for (uint256 i; i < bundle.bundledERC721.length; i++) {
             address token = bundle.bundledERC721[i].erc721Address;
             uint256 idLength = bundle.bundledERC721[i].ids.length;
             for (uint256 j; j < idLength; j++) {
-                if (_isPrimaryMarketForBundledAsset(nftSide.account, token, bundle.bundledERC721[i].ids[j])) {
-                    // No royalties
-
-                    if (feePrimary > 0 && remainder > 0) {
-                        remainder = _transferPercentage(
-                            remainder,
-                            paymentSide,
-                            bundle.priceDistribution.erc721Prices[i][j],
-                            defaultFeeReceiver,
-                            feePrimary,
-                            PROTOCOL_FEE_MULTIPLIER
-                        );
-                    }
-                } else {
-                    remainder = _transferFeesAndRoyaltiesForBundledAsset(
-                        paymentSide,
-                        token,
-                        nftSideRecipient,
-                        remainder,
-                        bundle.bundledERC721[i].ids[j],
-                        bundle.priceDistribution.erc721Prices[i][j],
-                        feeSecondary
-                    );
-                }
+                remainder = _processSingleAsset(
+                    paymentSide,
+                    nftSide,
+                    nftSideRecipient,
+                    remainder,
+                    feePrimary,
+                    feeSecondary,
+                    token,
+                    bundle.bundledERC721[i].ids[j],
+                    bundle.priceDistribution.erc721Prices[i][j]
+                );
             }
         }
+        return remainder;
+    }
 
+    function _processERC1155Bundles(
+        DealSide memory paymentSide,
+        DealSide memory nftSide,
+        address nftSideRecipient,
+        uint256 remainder,
+        uint256 feePrimary,
+        uint256 feeSecondary,
+        LibAsset.Bundle memory bundle
+    ) internal returns (uint256) {
         for (uint256 i; i < bundle.bundledERC1155.length; i++) {
             address token = bundle.bundledERC1155[i].erc1155Address;
             uint256 idLength = bundle.bundledERC1155[i].ids.length;
             require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
 
             for (uint256 j; j < idLength; j++) {
-                if (_isPrimaryMarketForBundledAsset(nftSide.account, token, bundle.bundledERC1155[i].ids[j])) {
-                    // No royalties
-
-                    if (feePrimary > 0 && remainder > 0) {
-                        remainder = _transferPercentage(
-                            remainder,
-                            paymentSide,
-                            bundle.priceDistribution.erc1155Prices[i][j],
-                            defaultFeeReceiver,
-                            feePrimary,
-                            PROTOCOL_FEE_MULTIPLIER
-                        );
-                    }
-                } else {
-                    // for exchanging one or more than one bundle of ERC1155s
-                    for (uint256 k = 0; k < nftSide.asset.value; k++) {
-                        remainder = _transferFeesAndRoyaltiesForBundledAsset(
-                            paymentSide,
-                            token,
-                            nftSideRecipient,
-                            remainder,
-                            bundle.bundledERC1155[i].ids[j],
-                            bundle.priceDistribution.erc1155Prices[i][j],
-                            feeSecondary
-                        );
-                    }
+                for (uint256 k = 0; k < nftSide.asset.value; k++) {
+                    remainder = _processSingleAsset(
+                        paymentSide,
+                        nftSide,
+                        nftSideRecipient,
+                        remainder,
+                        feePrimary,
+                        feeSecondary,
+                        token,
+                        bundle.bundledERC1155[i].ids[j],
+                        bundle.priceDistribution.erc1155Prices[i][j]
+                    );
                 }
             }
         }
+        return remainder;
+    }
 
+    function _processQuadBundles(
+        DealSide memory paymentSide,
+        address nftSideRecipient,
+        uint256 remainder,
+        uint256 feeSecondary,
+        LibAsset.Bundle memory bundle
+    ) internal returns (uint256) {
         uint256 quadSize = bundle.quads.xs.length;
-        if (quadSize > 0) {
-            for (uint256 i = 0; i < quadSize; i++) {
-                uint256 size = bundle.quads.sizes[i];
-                uint256 x = bundle.quads.xs[i];
-                uint256 y = bundle.quads.ys[i];
+        for (uint256 i = 0; i < quadSize; i++) {
+            uint256 size = bundle.quads.sizes[i];
+            uint256 x = bundle.quads.xs[i];
+            uint256 y = bundle.quads.ys[i];
 
-                uint256 tokenId = idInPath(0, size, x, y);
-                remainder = _transferFeesAndRoyaltiesForBundledAsset(
-                    paymentSide,
-                    address(landContract),
-                    nftSideRecipient,
+            uint256 tokenId = idInPath(0, size, x, y);
+            remainder = _transferFeesAndRoyaltiesForBundledAsset(
+                paymentSide,
+                address(landContract),
+                nftSideRecipient,
+                remainder,
+                tokenId,
+                bundle.priceDistribution.quadPrices[i],
+                feeSecondary
+            );
+        }
+        return remainder;
+    }
+
+    function _processSingleAsset(
+        DealSide memory paymentSide,
+        DealSide memory nftSide,
+        address nftSideRecipient,
+        uint256 remainder,
+        uint256 feePrimary,
+        uint256 feeSecondary,
+        address token,
+        uint256 tokenId,
+        uint256 assetPrice
+    ) internal returns (uint256) {
+        if (_isPrimaryMarketForBundledAsset(nftSide.account, token, tokenId)) {
+            if (feePrimary > 0 && remainder > 0) {
+                remainder = _transferPercentage(
                     remainder,
-                    tokenId,
-                    bundle.priceDistribution.quadPrices[i],
-                    feeSecondary
+                    paymentSide,
+                    assetPrice,
+                    defaultFeeReceiver,
+                    feePrimary,
+                    PROTOCOL_FEE_MULTIPLIER
                 );
             }
+        } else {
+            remainder = _transferFeesAndRoyaltiesForBundledAsset(
+                paymentSide,
+                token,
+                nftSideRecipient,
+                remainder,
+                tokenId,
+                assetPrice,
+                feeSecondary
+            );
         }
-
         return remainder;
     }
 
