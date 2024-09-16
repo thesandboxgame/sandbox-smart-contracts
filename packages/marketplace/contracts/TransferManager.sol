@@ -653,7 +653,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     /// @param from Address to check
     function _mustSkipFees(address from) internal virtual returns (bool);
 
-    /// @notice return the quadId given and index, size and coordinates
+    /// @notice return the quadId given an index, size and coordinates
     /// @param i the index to be added to x,y to get row and column
     /// @param size The size of the quad
     /// @param x The bottom left x coordinate of the quad
