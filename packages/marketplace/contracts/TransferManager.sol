@@ -606,8 +606,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 }
             }
             if (quadsLength > 0) {
-                require(quadsLength == bundle.quads.ys.length, "quad error");
-                require(quadsLength == bundle.quads.sizes.length, "quad size error");
                 landContract.batchTransferQuad(
                     from,
                     to,

@@ -3,7 +3,6 @@
 pragma solidity 0.8.23;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
@@ -15,9 +14,6 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
-    using Address for address;
-    using ERC165Checker for address;
-
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
