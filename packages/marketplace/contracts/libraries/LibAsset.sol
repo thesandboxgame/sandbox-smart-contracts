@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title LibAsset: A library for handling different types of Ethereum assets.
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This library contains structs, enums, and utility functions for managing and processing Ethereum assets.
 library LibAsset {
     /// @dev Represents different types of assets on the Ethereum network.

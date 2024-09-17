@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title Interface for the Whitelist contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the function signatures for the contract.
 interface IWhitelist {
     /// @notice Check if a specific role is enabled or disabled.

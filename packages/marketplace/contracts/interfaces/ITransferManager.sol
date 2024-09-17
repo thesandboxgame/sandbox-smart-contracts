@@ -6,6 +6,7 @@ import {LibAsset} from "../libraries/LibAsset.sol";
 
 /// @author The Sandbox
 /// @title ITransferManager Interface
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Provides an interface for managing transfers of assets between matched orders.
 abstract contract ITransferManager {
     /// @dev Represents a side (either maker or taker) of a deal.

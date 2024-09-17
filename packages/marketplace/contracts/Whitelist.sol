@@ -8,6 +8,7 @@ import {IWhitelist} from "./interfaces/IWhitelist.sol";
 
 /// @author The Sandbox
 /// @title Whitelist contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @dev A contract to control which tokens are accepted in the marketplace.
 contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradeable {
     /// @notice Role for The Sandbox tokens

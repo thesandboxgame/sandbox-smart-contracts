@@ -17,6 +17,7 @@ import {ILandToken} from "@sandbox-smart-contracts/land/contracts/interfaces/ILa
 
 /// @author The Sandbox
 /// @title TransferManager
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Manages the transfer of assets with support for different fee structures and beneficiaries.
 /// @dev This contract can handle various assets like ERC20, ERC721, and ERC1155 tokens.
 abstract contract TransferManager is Initializable, ITransferManager {

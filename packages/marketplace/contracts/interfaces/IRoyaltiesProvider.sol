@@ -8,6 +8,7 @@ uint256 constant TOTAL_BASIS_POINTS = 10000;
 
 /// @author The Sandbox
 /// @title RoyaltiesProvider contract interface
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the signature for the getRoyalties function
 interface IRoyaltiesProvider {
     struct Part {
