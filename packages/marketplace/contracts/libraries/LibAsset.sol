@@ -165,20 +165,25 @@ library LibAsset {
             uint256 collectiveBundlePrice = 0;
 
             // total price of all bundled ERC721 assets
-            for (uint256 i = 0; i < priceDistribution.erc721Prices.length; i++) {
-                for (uint256 j = 0; j < priceDistribution.erc721Prices[i].length; j++)
+            uint256 erc721PricesLength = priceDistribution.erc721Prices.length;
+            for (uint256 i = 0; i < erc721PricesLength; ++i) {
+                uint256 erc721PricesInnerLength = priceDistribution.erc721Prices[i].length;
+                for (uint256 j = 0; j < erc721PricesInnerLength; ++j)
                     collectiveBundlePrice += priceDistribution.erc721Prices[i][j];
             }
 
             // total price of all bundled ERC1155 assets
-            for (uint256 i = 0; i < priceDistribution.erc1155Prices.length; i++) {
-                for (uint256 j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
+            uint256 erc1155PricesLength = priceDistribution.erc1155Prices.length;
+            for (uint256 i = 0; i < erc1155PricesLength; ++i) {
+                uint256 erc1155PricesInnerLength = priceDistribution.erc1155Prices[i].length;
+                for (uint256 j = 0; j < erc1155PricesInnerLength; ++j) {
                     collectiveBundlePrice += priceDistribution.erc1155Prices[i][j];
                 }
             }
 
             // total price of all bundled Quad assets
-            for (uint256 i = 0; i < priceDistribution.quadPrices.length; i++) {
+            uint256 quadPricesLength = priceDistribution.quadPrices.length;
+            for (uint256 i = 0; i < quadPricesLength; ++i) {
                 collectiveBundlePrice += priceDistribution.quadPrices[i];
             }
 

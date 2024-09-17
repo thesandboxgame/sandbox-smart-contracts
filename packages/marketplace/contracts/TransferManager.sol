@@ -126,7 +126,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         // Transfer NFT or left side if FeeSide.NONE
         // NFT transfer when exchanging more than one bundle of ERC1155s
         if (nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE && nftSide.asset.value > 1) {
-            for (uint256 i = 0; i < nftSide.asset.value; i++) {
+            for (uint256 i = 0; i < nftSide.asset.value; ++i) {
                 _transfer(nftSide.asset, nftSide.account, paymentSideRecipient);
             }
         } else {
@@ -299,10 +299,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 feeSecondary,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
-        for (uint256 i; i < bundle.bundledERC721.length; i++) {
+        uint256 bundledERC721Length = bundle.bundledERC721.length;
+        for (uint256 i; i < bundledERC721Length; ++i) {
             address token = bundle.bundledERC721[i].erc721Address;
             uint256 idLength = bundle.bundledERC721[i].ids.length;
-            for (uint256 j; j < idLength; j++) {
+            for (uint256 j; j < idLength; ++j) {
                 remainder = _processSingleAsset(
                     paymentSide,
                     nftSide,
@@ -328,13 +329,13 @@ abstract contract TransferManager is Initializable, ITransferManager {
         uint256 feeSecondary,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
-        for (uint256 i; i < bundle.bundledERC1155.length; i++) {
+        for (uint256 i; i < bundle.bundledERC1155.length; ++i) {
             address token = bundle.bundledERC1155[i].erc1155Address;
             uint256 idLength = bundle.bundledERC1155[i].ids.length;
             require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
 
-            for (uint256 j; j < idLength; j++) {
-                for (uint256 k = 0; k < nftSide.asset.value; k++) {
+            for (uint256 j; j < idLength; ++j) {
+                for (uint256 k = 0; k < nftSide.asset.value; ++k) {
                     remainder = _processSingleAsset(
                         paymentSide,
                         nftSide,
@@ -360,7 +361,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
         uint256 quadSize = bundle.quads.xs.length;
-        for (uint256 i = 0; i < quadSize; i++) {
+        for (uint256 i = 0; i < quadSize; ++i) {
             uint256 size = bundle.quads.sizes[i];
             uint256 x = bundle.quads.xs[i];
             uint256 y = bundle.quads.ys[i];
@@ -500,8 +501,8 @@ abstract contract TransferManager is Initializable, ITransferManager {
         address recipient
     ) internal returns (uint256) {
         uint256 totalRoyalties;
-        uint256 len = royalties.length;
-        for (uint256 i; i < len; i++) {
+        uint256 royaltiesLength = royalties.length;
+        for (uint256 i; i < royaltiesLength; ++i) {
             IRoyaltiesProvider.Part memory r = royalties[i];
             totalRoyalties += r.basisPoints;
             if (r.account == recipient) {
@@ -581,22 +582,22 @@ abstract contract TransferManager is Initializable, ITransferManager {
             _transferERC1155(token, from, to, tokenId, asset.value);
         } else if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-            uint256 erc721Length = bundle.bundledERC721.length;
-            uint256 erc1155Length = bundle.bundledERC1155.length;
+            uint256 bundledERC721Length = bundle.bundledERC721.length;
+            uint256 bundledERC1155Length = bundle.bundledERC1155.length;
             uint256 quadsLength = bundle.quads.xs.length;
-            if (erc721Length > 0 || quadsLength > 0) require(asset.value == 1, "bundle value error");
-            for (uint256 i; i < erc721Length; i++) {
+            if (bundledERC721Length > 0 || quadsLength > 0) require(asset.value == 1, "bundle value error");
+            for (uint256 i; i < bundledERC721Length; ++i) {
                 address token = bundle.bundledERC721[i].erc721Address;
                 uint256 idLength = bundle.bundledERC721[i].ids.length;
-                for (uint256 j; j < idLength; j++) {
+                for (uint256 j; j < idLength; ++j) {
                     _transferERC721(token, from, to, bundle.bundledERC721[i].ids[j]);
                 }
             }
-            for (uint256 i; i < erc1155Length; i++) {
+            for (uint256 i; i < bundledERC1155Length; ++i) {
                 address token = bundle.bundledERC1155[i].erc1155Address;
                 uint256 idLength = bundle.bundledERC1155[i].ids.length;
                 require(idLength == bundle.bundledERC1155[i].supplies.length, "ERC1155 array error");
-                for (uint256 j; j < idLength; j++) {
+                for (uint256 j; j < idLength; ++j) {
                     _transferERC1155(
                         token,
                         from,
