@@ -521,7 +521,7 @@ export function shouldMatchOrdersForBundle() {
               signatureRight: takerSig,
             },
           ])
-        ).to.be.revertedWith('nothing to fill');
+        ).to.be.revertedWith('nothing to fill right');
       });
 
       it('should partially fill orders using matchOrders between ERC20 and BUNDLE - increase bundle right order value', async function () {
