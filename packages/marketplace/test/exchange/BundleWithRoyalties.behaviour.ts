@@ -17,6 +17,58 @@ import {
 import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
 import {ZeroAddress, Contract, Signer} from 'ethers';
 
+function calculateFinalPrice(
+  priceDistribution: PriceDistribution,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protocolFees: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  royaltyFees: any
+): number {
+  let finalPrice = 0;
+
+  // ERC721 assets
+  for (let i = 0; i < priceDistribution.erc721Prices.length; i++) {
+    for (let j = 0; j < priceDistribution.erc721Prices[i].length; j++) {
+      const assetPrice = priceDistribution.erc721Prices[i][j];
+      const protocolFee = protocolFees.erc721ProtocolFees[i][j];
+      const royaltyFee = royaltyFees.erc721RoyaltyFees[i][j];
+
+      const deductedProtocolFee = (assetPrice * protocolFee) / 10000;
+      const deductedRoyaltyFee = (assetPrice * royaltyFee) / 100;
+
+      finalPrice += assetPrice - deductedProtocolFee - deductedRoyaltyFee;
+    }
+  }
+
+  // ERC1155 assets
+  for (let i = 0; i < priceDistribution.erc1155Prices.length; i++) {
+    for (let j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
+      const assetPrice = priceDistribution.erc1155Prices[i][j];
+      const protocolFee = protocolFees.erc1155ProtocolFees[i][j];
+      const royaltyFee = royaltyFees.erc1155RoyaltyFees[i][j];
+
+      const deductedProtocolFee = (assetPrice * protocolFee) / 10000;
+      const deductedRoyaltyFee = (assetPrice * royaltyFee) / 100;
+
+      finalPrice += assetPrice - deductedProtocolFee - deductedRoyaltyFee;
+    }
+  }
+
+  // Quad assets
+  for (let i = 0; i < priceDistribution.quadPrices.length; i++) {
+    const assetPrice = priceDistribution.quadPrices[i];
+    const protocolFee = protocolFees.quadProtocolFees[i];
+    const royaltyFee = royaltyFees.quadRoyaltyFees[i];
+
+    const deductedProtocolFee = (assetPrice * protocolFee) / 10000;
+    const deductedRoyaltyFee = (assetPrice * royaltyFee) / 100;
+
+    finalPrice += assetPrice - deductedProtocolFee - deductedRoyaltyFee;
+  }
+
+  return finalPrice;
+}
+
 // eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrdersForBundleWithRoyalty() {
   describe('Exchange MatchOrders for Bundle with royalty', function () {
@@ -249,8 +301,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeePrimary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9877000000 // 10000000000 - protocolFee
+          expectedFinalReturn // 10000000000 - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -380,8 +450,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeePrimary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[10]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9200800000 // 10000000000 - protocolFee - royalty
+          expectedFinalReturn // 10000000000 - protocolFee - royalty
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -507,8 +595,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[10]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9426200000 // 10000000000 - protocolFee - royalty
+          expectedFinalReturn // 10000000000 - protocolFee - royalty
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -774,8 +880,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[20]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          8950000000 // 10000000000 - royalty - protocolFee
+          expectedFinalReturn // 10000000000 - royalty - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -897,8 +1021,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary, protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[10, 20]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          8950000000 // 10000000000 - royalty - protocolFee
+          expectedFinalReturn // 10000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -1083,8 +1225,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[5]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9450000000 // 10000000000 - royalty - protocolFee
+          expectedFinalReturn // 10000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -1214,8 +1374,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary, protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[5, 10]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9400000000 // 10000000000 - royalty - protocolFee
+          expectedFinalReturn // 10000000000 - royalty - protocolFee
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -1347,8 +1525,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight)) // newFill.leftValue
         ).to.be.equal(2);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[10]],
+          quadRoyaltyFees: [],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          17500000000 // 10000000000 - royalty - protocolFee
+          2 * expectedFinalReturn // 20000000000 - royalty - protocolFee
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           10000000000
@@ -1466,8 +1662,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [protocolFeeSecondary, protocolFeeSecondary],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [10, 10],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9650000000 // 10000000000 - protocolFee - royalty
+          expectedFinalReturn // 10000000000 - protocolFee - royalty
         );
 
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
@@ -1604,8 +1818,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [protocolFeeSecondary, protocolFeeSecondary],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[0]],
+          erc1155RoyaltyFees: [[0]],
+          quadRoyaltyFees: [10, 20],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          9590000000 // 10000000000 - protocolFee - royalty
+          expectedFinalReturn // 10000000000 - protocolFee - royalty
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
@@ -1745,8 +1977,26 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           await ExchangeContractAsUser.fills(hashKey(orderRight))
         ).to.be.equal(1);
 
+        const protocolFees = {
+          erc721ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          quadProtocolFees: [protocolFeeSecondary, protocolFeeSecondary],
+        };
+
+        const royaltyFees = {
+          erc721RoyaltyFees: [[10]],
+          erc1155RoyaltyFees: [[10]],
+          quadRoyaltyFees: [10, 10],
+        };
+
+        const expectedFinalReturn = calculateFinalPrice(
+          priceDistribution,
+          protocolFees,
+          royaltyFees
+        );
+
         expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(
-          8750000000 // 10000000000 - protocolFee - royalty
+          expectedFinalReturn // 10000000000 - protocolFee - royalty
         );
         expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
           20000000000
