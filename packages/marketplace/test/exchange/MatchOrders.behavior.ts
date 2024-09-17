@@ -1450,7 +1450,7 @@ export function shouldMatchOrders() {
             signatureRight: takerSig,
           },
         ])
-      ).to.be.revertedWith('nothing to fill');
+      ).to.be.revertedWith('nothing to fill right');
     });
   });
 }

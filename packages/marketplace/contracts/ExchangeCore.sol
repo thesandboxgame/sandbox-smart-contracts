@@ -195,7 +195,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 rightOrderFill = _getOrderFill(orderRight.salt, orderKeyHashRight);
         newFill = LibOrder.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
 
-        require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
+        require(newFill.rightValue > 0, "nothing to fill right");
+        require(newFill.leftValue > 0, "nothing to fill left");
 
         if (orderLeft.salt != 0) {
             fills[orderKeyHashLeft] = leftOrderFill + newFill.rightValue;
