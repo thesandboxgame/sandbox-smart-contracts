@@ -25,7 +25,7 @@ async function customDeploy() {
       const tokenIds = [];
       while (tokenIds.length < amount) {
         const batchSize = Math.min(500, amount - tokenIds.length);
-        const tx = await collectionContractAsOwner.batchMint([
+        const tx = await collectionContractAsOwner.batchMint(0, [
           [wallet, batchSize],
         ]);
         const transferEvents = await collectionContractAsOwner.queryFilter(
@@ -74,7 +74,7 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
       customDeploy
     );
     const amount = 1150n;
-    const tx = await collectionContractAsOwner.batchMint([
+    const tx = await collectionContractAsOwner.batchMint(0, [
       [randomWallet, amount],
     ]);
     const receipt = await tx.wait();
@@ -95,7 +95,7 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
     for (let i = 0; i < amount; i++) {
       batches.push([Wallet.createRandom(), 1]);
     }
-    const tx = await collectionContractAsOwner.batchMint(batches);
+    const tx = await collectionContractAsOwner.batchMint(0, batches);
     const receipt = await tx.wait();
     const gasPerToken = receipt.gasUsed / amount;
     console.log(
@@ -113,14 +113,14 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
       sandContract,
       randomWallet,
       raffleSignWallet,
-      authSign,
+      mintSign,
     } = await loadFixture(customDeploy);
     const amount = 1120n;
     const encodedData = contract.interface.encodeFunctionData('mint', [
       await randomWallet.getAddress(),
       amount,
       222,
-      await authSign(
+      await mintSign(
         randomWallet,
         222,
         raffleSignWallet,
