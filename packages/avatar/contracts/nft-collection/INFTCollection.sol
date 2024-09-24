@@ -79,15 +79,6 @@ interface INFTCollection {
     event BaseURISet(address indexed operator, string oldBaseURI, string newBaseURI);
 
     /**
-     * @notice Event emitted when the signer address was set or changed
-     * @dev emitted when setSignAddress is called
-     * @param operator the sender of the transaction
-     * @param oldSignAddress old signer address that is allowed to create mint signatures
-     * @param newSignAddress new signer address that is allowed to create mint signatures
-     */
-    event SignAddressSet(address indexed operator, address indexed oldSignAddress, address indexed newSignAddress);
-
-    /**
      * @notice Event emitted when the max supply is set or changed
      * @dev emitted when setSignAddress is called
      * @param operator the sender of the transaction
@@ -167,12 +158,6 @@ interface INFTCollection {
     error InvalidTreasury(address mintTreasury);
 
     /**
-     * @notice The operation failed because the signAddress is wrong
-     * @param signAddress signer address that is allowed to create mint signatures
-     */
-    error InvalidSignAddress(address signAddress);
-
-    /**
      * @notice The operation failed because the allowedToExecuteMint is not a contract or wrong
      * @param allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      */
@@ -189,12 +174,6 @@ interface INFTCollection {
      * @notice The operation failed because the batch data len is zero
      */
     error InvalidBatchData();
-
-    /**
-     * @notice The operation failed because signature is invalid or it was already used
-     * @param signatureId the ID of the provided signature
-     */
-    error InvalidSignature(uint256 signatureId);
 
     /**
      * @notice The operation failed because the wave arguments are wrong

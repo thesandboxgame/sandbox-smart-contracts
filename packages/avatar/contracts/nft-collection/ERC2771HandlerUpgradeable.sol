@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/ContextUpgradeable.sol";
+
 /**
  * @title ERC2771HandlerUpgradeable
  * @author The Sandbox
@@ -9,7 +11,7 @@ pragma solidity 0.8.26;
  * @dev based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.6.0/contracts/metatx/ERC2771Context.sol
  *      with an initializer for proxies and a mutable forwarder
  */
-abstract contract ERC2771HandlerUpgradeable {
+abstract contract ERC2771HandlerUpgradeable is ContextUpgradeable {
     struct ERC2771HandlerUpgradeableStorage {
         address trustedForwarder;
     }
@@ -69,7 +71,7 @@ abstract contract ERC2771HandlerUpgradeable {
      * @dev Defaults to the original `msg.sender` whenever a call is not performed by the trusted forwarder
      * or the calldata length is less than 20 bytes (an address length).
      */
-    function _msgSender() internal view virtual returns (address) {
+    function _msgSender() internal view override virtual returns (address) {
         uint256 calldataLength = msg.data.length;
         uint256 contextSuffixLength = _contextSuffixLength();
         if (_isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
@@ -85,7 +87,7 @@ abstract contract ERC2771HandlerUpgradeable {
      * @dev Defaults to the original `msg.data` whenever a call is not performed by the trusted forwarder
      * or the calldata length is less than 20 bytes (an address length).
      */
-    function _msgData() internal view virtual returns (bytes calldata) {
+    function _msgData() internal view override virtual returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         uint256 contextSuffixLength = _contextSuffixLength();
         if (_isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
@@ -108,7 +110,7 @@ abstract contract ERC2771HandlerUpgradeable {
     /**
      * @notice ERC-2771 specifies the context as being a single address (20 bytes).
      */
-    function _contextSuffixLength() internal view virtual returns (uint256) {
+    function _contextSuffixLength() internal view override virtual returns (uint256) {
         return 20;
     }
 }

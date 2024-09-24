@@ -10,6 +10,7 @@ contract MockERC20 is ERC20, Ownable {
         address target;
         address wallet;
         uint256 amount;
+        uint256 waveIndex;
         uint256 signatureId;
         bytes signature;
     }
@@ -42,8 +43,32 @@ contract MockERC20 is ERC20, Ownable {
         uint256 _signatureId,
         bytes calldata _signature
     ) external {
-        mintArgs = MintArgs({target : _target, wallet : _wallet, amount : _amount, signatureId : _signatureId, signature : _signature});
+        mintArgs = MintArgs({target : _target, wallet : _wallet, amount : _amount, waveIndex : 0, signatureId : _signatureId, signature : _signature});
         MintInterface(_target).mint(_wallet, _amount, _signatureId, _signature);
+    }
+
+    /// @dev instead of using approve and call we use this method directly for testing.
+    function waveMint(
+        MintInterface target,
+        address _wallet,
+        uint256 _amount,
+        uint256 _waveIndex,
+        uint256 _signatureId,
+        bytes calldata _signature
+    ) external {
+        target.waveMint(_wallet, _amount, _waveIndex, _signatureId, _signature);
+    }
+
+    function waveMintReenter(
+        address _target,
+        address _wallet,
+        uint256 _amount,
+        uint256 _waveIndex,
+        uint256 _signatureId,
+        bytes calldata _signature
+    ) external {
+        mintArgs = MintArgs({target : _target, wallet : _wallet, amount : _amount, waveIndex : _waveIndex, signatureId : _signatureId, signature : _signature});
+        MintInterface(_target).waveMint(_wallet, _amount, _waveIndex, _signatureId, _signature);
     }
 
     /// @notice Approve `target` to spend `amount` and call it with data.
@@ -114,5 +139,13 @@ interface MintInterface {
         uint256 _amount,
         uint256 _signatureId,
         bytes calldata _signature
+    ) external;
+
+    function waveMint(
+        address wallet,
+        uint256 amount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
     ) external;
 }

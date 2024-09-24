@@ -2,9 +2,6 @@
 // solhint-disable one-contract-per-file
 pragma solidity 0.8.26;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable-5.0.2/proxy/utils/Initializable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/utils/ContextUpgradeable.sol";
-
 /**
  * @title UpdatableOperatorFiltererUpgradeable
  * @author The Sandbox
@@ -16,7 +13,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/util
  *      and adapted to the 0.5.9 solidity version
  *      To avoid an extra IOperatorFilterRegistry file for a code that is deprecated the interface is added below
  */
-abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, ContextUpgradeable {
+abstract contract UpdatableOperatorFiltererUpgradeable {
     struct UpdatableOperatorFiltererUpgradeableStorage {
         /**
          * @notice the registry filter
@@ -163,6 +160,12 @@ abstract contract UpdatableOperatorFiltererUpgradeable is Initializable, Context
             revert OperatorNotAllowed(operator);
         }
     }
+
+    /**
+     * @notice ERC2771 compatible msg.sender getter
+     * @return sender msg.sender
+     */
+    function _msgSender() internal view virtual returns (address);
 }
 
 /**
