@@ -52,7 +52,7 @@ describe('NFTCollection burn', function () {
     await setupDefaultWave(20);
 
     // skip 5 ids
-    await contract.batchMint([[randomWallet, 5]]);
+    await contract.batchMint(0, [[randomWallet, 5]]);
 
     // enable burning
     await expect(contract.burn(1)).to.revertedWithCustomError(
@@ -62,7 +62,7 @@ describe('NFTCollection burn', function () {
     await contract.enableBurning();
 
     // mint 5
-    await contract.batchMint([[randomWallet, 5]]);
+    await contract.batchMint(0, [[randomWallet, 5]]);
     const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
       const tokenId = transferEvents[i].args.tokenId;
@@ -100,7 +100,7 @@ describe('NFTCollection burn', function () {
     await contract.enableBurning();
 
     // mint 5
-    await contract.batchMint([[randomWallet2, 5]]);
+    await contract.batchMint(0, [[randomWallet2, 5]]);
 
     const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {
@@ -135,7 +135,7 @@ describe('NFTCollection burn', function () {
     await contract.enableBurning();
 
     // mint 5
-    await contract.batchMint([[randomWallet, 5]]);
+    await contract.batchMint(0, [[randomWallet, 5]]);
 
     const transferEvents = await contract.queryFilter('Transfer');
     for (let i = 0; i < transferEvents.length; i++) {

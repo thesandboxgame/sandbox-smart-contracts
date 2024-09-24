@@ -9,14 +9,14 @@ describe('NFTCollection', function () {
       const {
         collectionContractAsRandomWallet: contract,
         randomWallet,
-        authSign,
+        revealSig,
         setupDefaultWave,
         mint,
       } = await loadFixture(setupNFTCollectionContract);
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
-        contract.reveal(tokenIds[0], 222, await authSign(randomWallet, 222))
+        contract.reveal(tokenIds[0], 222, await revealSig(randomWallet, 222))
       )
         .to.emit(contract, 'MetadataUpdate')
         .withArgs(tokenIds[0]);
@@ -55,7 +55,7 @@ describe('NFTCollection', function () {
         const {
           collectionContractAsOwner: contract,
           randomWallet,
-          authSign,
+          mintSign,
           setupDefaultWave,
           mint,
         } = await loadFixture(setupNFTCollectionContract);
@@ -65,7 +65,7 @@ describe('NFTCollection', function () {
           contract.reveal(
             tokenIds[0],
             222,
-            await authSign(randomWallet, 222, randomWallet)
+            await mintSign(randomWallet, 222, randomWallet)
           )
         )
           .to.revertedWithCustomError(contract, 'InvalidSignature')
@@ -76,13 +76,13 @@ describe('NFTCollection', function () {
         const {
           collectionContractAsOwner: contract,
           collectionOwner,
-          authSign,
+          revealSig,
           setupDefaultWave,
           mint,
         } = await loadFixture(setupNFTCollectionContract);
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
-        const signature = await authSign(collectionOwner, 222);
+        const signature = await revealSig(collectionOwner, 222);
         await contract.reveal(tokenIds[0], 222, signature);
         await expect(contract.reveal(tokenIds[0], 222, signature))
           .to.revertedWithCustomError(contract, 'InvalidSignature')
@@ -104,15 +104,15 @@ describe('NFTCollection', function () {
       const tokenIds = await mint(1, randomWallet);
       const personalizationMask = '0x123456789abcdef0';
       const tx = contract.personalize(
+        tokenIds[0],
+        personalizationMask,
         222,
         await personalizeSignature(
           randomWallet,
           tokenIds[0],
           personalizationMask,
           222
-        ),
-        tokenIds[0],
-        personalizationMask
+        )
       );
       await expect(tx)
         .to.emit(contract, 'Personalized')
@@ -136,7 +136,7 @@ describe('NFTCollection', function () {
       await setupDefaultWave(0);
       const tokenIds = await mint(1, randomWallet);
       await expect(
-        contract.personalize(222, '0x', tokenIds[0], '0x123456789abcdef0')
+        contract.personalize(tokenIds[0], '0x123456789abcdef0', 222, '0x')
       )
         .to.revertedWithCustomError(contract, 'ERC721IncorrectOwner')
         .withArgs(collectionOwner, tokenIds[0], randomWallet);
@@ -152,7 +152,7 @@ describe('NFTCollection', function () {
         await setupDefaultWave(0);
         const tokenIds = await mint(1);
         await expect(
-          contract.personalize(222, '0x', tokenIds[0], '0x123456789abcdef0')
+          contract.personalize(tokenIds[0], '0x123456789abcdef0', 222, '0x')
         )
           .to.revertedWithCustomError(contract, 'ECDSAInvalidSignatureLength')
           .withArgs(0);
@@ -170,6 +170,8 @@ describe('NFTCollection', function () {
         const tokenIds = await mint(1);
         await expect(
           contract.personalize(
+            tokenIds[0],
+            '0x123456789abcdef0',
             222,
             await personalizeSignature(
               randomWallet,
@@ -177,9 +179,7 @@ describe('NFTCollection', function () {
               '0x123456789abcdef0',
               222,
               randomWallet
-            ),
-            tokenIds[0],
-            '0x123456789abcdef0'
+            )
           )
         )
           .to.revertedWithCustomError(contract, 'InvalidSignature')
@@ -203,17 +203,17 @@ describe('NFTCollection', function () {
           222
         );
         await contract.personalize(
-          222,
-          signature,
           tokenIds[0],
-          '0x123456789abcdef0'
+          '0x123456789abcdef0',
+          222,
+          signature
         );
         await expect(
           contract.personalize(
-            222,
-            signature,
             tokenIds[0],
-            '0x123456789abcdef0'
+            '0x123456789abcdef0',
+            222,
+            signature
           )
         )
           .to.revertedWithCustomError(contract, 'InvalidSignature')
@@ -351,7 +351,7 @@ describe('NFTCollection', function () {
         mockERC20,
         collectionOwner,
         maxSupply,
-        authSign,
+        mintSign,
         randomWallet,
         raffleSignWallet,
         deployWithCustomArg,
@@ -368,8 +368,43 @@ describe('NFTCollection', function () {
           await randomWallet.getAddress(),
           12,
           222,
-          await authSign(
+          await mintSign(
             randomWallet,
+            222,
+            raffleSignWallet,
+            await contract.getAddress()
+          )
+        )
+      ).to.be.revertedWithCustomError(contract, 'ReentrancyGuardReentrantCall');
+    });
+
+    it('should not be able to reenter waveMint', async function () {
+      const {
+        mockERC20,
+        collectionOwner,
+        maxSupply,
+        waveMintSign,
+        randomWallet,
+        raffleSignWallet,
+        deployWithCustomArg,
+      } = await loadFixture(setupNFTCollectionContract);
+      const contract = await deployWithCustomArg(
+        7,
+        await mockERC20.getAddress()
+      );
+      const contractAsOwner = contract.connect(collectionOwner);
+      await contractAsOwner.setupWave(maxSupply, maxSupply, 1);
+      await expect(
+        mockERC20.waveMintReenter(
+          contract,
+          await randomWallet.getAddress(),
+          12,
+          0,
+          222,
+          await waveMintSign(
+            randomWallet,
+            12,
+            0,
             222,
             raffleSignWallet,
             await contract.getAddress()
@@ -385,7 +420,7 @@ describe('NFTCollection', function () {
       maxSupply,
       deployer,
       sandContract,
-      authSign,
+      mintSign,
     } = await loadFixture(setupNFTCollectionContract);
     const nftPriceInSand = 1;
     await sandContract.donateTo(deployer, maxSupply);
@@ -428,7 +463,7 @@ describe('NFTCollection', function () {
               await deployer.getAddress(),
               mintingBatch,
               signatureId,
-              await authSign(deployer, signatureId),
+              await mintSign(deployer, signatureId),
             ])
           );
         const transferEvents = await contract.queryFilter(
@@ -467,6 +502,11 @@ describe('NFTCollection', function () {
     );
     expect(slots.nftCollection).to.be.equal(
       getStorageSlotJS('thesandbox.storage.avatar.nft-collection.NFTCollection')
+    );
+    expect(slots.nftCollectionSignature).to.be.equal(
+      getStorageSlotJS(
+        'thesandbox.storage.avatar.nft-collection.NFTCollectionSignature'
+      )
     );
   });
 });

@@ -44,11 +44,7 @@ export async function setupNFTCollectionContract() {
   ).deploy();
 
   const collectionContractAsOwner = collectionContract.connect(collectionOwner);
-  const authSign = setupSignAuthMessageAs(
-    collectionContract,
-    accounts.raffleSignWallet
-  );
-
+  const mintSign = setupMintSign(collectionContract, accounts.raffleSignWallet);
   const NFTCollectionMock = await ethers.getContractFactory(
     'NFTCollectionMock'
   );
@@ -110,17 +106,19 @@ export async function setupNFTCollectionContract() {
     setupDefaultWave,
     mint: async (amount, wallet = collectionOwner) => {
       await setupDefaultWave(0);
-      await collectionContractAsOwner.batchMint([[wallet, amount]]);
+      await collectionContractAsOwner.batchMint(0, [[wallet, amount]]);
       const transferEvents = await collectionContractAsOwner.queryFilter(
         'Transfer'
       );
       return transferEvents.map((x) => x.args.tokenId);
     },
-    authSign,
+    mintSign,
+    waveMintSign: setupWaveSign(collectionContract, accounts.raffleSignWallet),
     personalizeSignature: setupPersonalizeSign(
       collectionContract,
       accounts.raffleSignWallet
     ),
+    revealSig: setupRevealSign(collectionContract, accounts.raffleSignWallet),
     initializeArgs,
     deployWithCustomArg: async (idx: number, val) => {
       const args = getCustomArgs(idx, val);
@@ -132,7 +130,7 @@ export async function setupNFTCollectionContract() {
   };
 }
 
-function setupSignAuthMessageAs(contract: Contract, raffleSignWallet: Signer) {
+function setupMintSign(contract: Contract, raffleSignWallet: Signer) {
   return async (
     destinationWallet: AddressLike,
     signatureId: BigNumberish,
@@ -155,6 +153,77 @@ function setupSignAuthMessageAs(contract: Contract, raffleSignWallet: Signer) {
     const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
       ['address', 'uint256', 'address', 'uint256'],
       [destinationWallet, signatureId, contractAddress, chainId]
+    );
+    // https://docs.ethers.org/v6/migrating/
+    return signerWallet.signMessage(
+      ethers.getBytes(ethers.keccak256(hashedData))
+    );
+  };
+}
+
+function setupWaveSign(contract: Contract, raffleSignWallet: Signer) {
+  return async (
+    destinationWallet: AddressLike,
+    amount: BigNumberish,
+    waveIndex: BigNumberish,
+    signatureId: BigNumberish,
+    signerWallet: Signer = raffleSignWallet,
+    contractAddress: string | undefined = undefined,
+    chainId: number = network.config.chainId
+  ) => {
+    if (!contractAddress) {
+      contractAddress = await contract.getAddress();
+    }
+    if (destinationWallet instanceof Promise) {
+      destinationWallet = await destinationWallet;
+    }
+    if (
+      typeof destinationWallet != 'string' &&
+      'getAddress' in destinationWallet
+    ) {
+      destinationWallet = await destinationWallet.getAddress();
+    }
+    const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
+      ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
+      [
+        destinationWallet,
+        amount,
+        waveIndex,
+        signatureId,
+        contractAddress,
+        chainId,
+      ]
+    );
+    // https://docs.ethers.org/v6/migrating/
+    return signerWallet.signMessage(
+      ethers.getBytes(ethers.keccak256(hashedData))
+    );
+  };
+}
+
+function setupRevealSign(contract: Contract, raffleSignWallet: Signer) {
+  return async (
+    destinationWallet: AddressLike,
+    signatureId: BigNumberish,
+    signerWallet: Signer = raffleSignWallet,
+    contractAddress: string | undefined = undefined,
+    chainId: number = network.config.chainId
+  ) => {
+    if (!contractAddress) {
+      contractAddress = await contract.getAddress();
+    }
+    if (destinationWallet instanceof Promise) {
+      destinationWallet = await destinationWallet;
+    }
+    if (
+      typeof destinationWallet != 'string' &&
+      'getAddress' in destinationWallet
+    ) {
+      destinationWallet = await destinationWallet.getAddress();
+    }
+    const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
+      ['address', 'uint256', 'address', 'uint256', 'string'],
+      [destinationWallet, signatureId, contractAddress, chainId, 'reveal']
     );
     // https://docs.ethers.org/v6/migrating/
     return signerWallet.signMessage(

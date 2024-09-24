@@ -195,7 +195,11 @@ describe('NFTCollection config', function () {
       ).to.revertedWithCustomError(contract, 'EnforcedPause');
 
       await expect(
-        contract.batchMint([[randomWallet, 1]])
+        contract.waveMint(randomWallet, 10, 0, 1, '0x')
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.batchMint(0, [[randomWallet, 1]])
       ).to.revertedWithCustomError(contract, 'EnforcedPause');
 
       await expect(contract.reveal(1, 1, '0x')).to.revertedWithCustomError(
@@ -204,7 +208,7 @@ describe('NFTCollection config', function () {
       );
 
       await expect(
-        contract.personalize(1, '0x', 1, 1)
+        contract.personalize(1, 1, 222, '0x')
       ).to.revertedWithCustomError(contract, 'EnforcedPause');
 
       await expect(contract.burn(1)).to.revertedWithCustomError(
@@ -373,7 +377,7 @@ describe('NFTCollection config', function () {
       await expect(contract.setMaxSupply(totalSupply))
         .to.emit(contract, 'MaxSupplySet')
         .withArgs(nftCollectionAdmin, maxSupply, totalSupply);
-      await expect(contract.batchMint([[collectionOwner, 1]]))
+      await expect(contract.batchMint(0, [[collectionOwner, 1]]))
         .to.revertedWithCustomError(contract, 'CannotMint')
         .withArgs(collectionOwner, 1);
       await expect(contract.setMaxSupply(totalSupply - 1n))

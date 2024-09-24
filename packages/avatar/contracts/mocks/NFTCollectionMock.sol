@@ -12,6 +12,7 @@ contract NFTCollectionMock is NFTCollection {
         bytes32 erc2771HandlerUpgradable;
         bytes32 updatableOperatorFiltererUpgradeable;
         bytes32 nftCollection;
+        bytes32 nftCollectionSignature;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -49,6 +50,7 @@ contract NFTCollectionMock is NFTCollection {
         ret.erc2771HandlerUpgradable = ERC2771_HANDLER_UPGRADABLE_STORAGE_LOCATION;
         ret.updatableOperatorFiltererUpgradeable = UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION;
         ret.nftCollection = NFT_COLLECTION_STORAGE_LOCATION;
+        ret.nftCollectionSignature = NFT_COLLECTION_SIGNATURE_STORAGE_LOCATION;
     }
 
     /**
