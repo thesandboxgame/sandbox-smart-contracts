@@ -60,17 +60,56 @@ describe('NFTCollection wave setup', function () {
     });
   });
 
+  describe('cancel', function () {
+    it('owner should be able to cancel a wave', async function () {
+      const {collectionContractAsOwner: contract, randomWallet} =
+        await loadFixture(setupNFTCollectionContract);
+      await contract.setupWave(10, 1, 0);
+      expect(await contract.isMintAllowed(0, randomWallet, 1)).to.be.true;
+      await contract.cancelWave(0);
+      expect(await contract.isMintAllowed(0, randomWallet, 1)).to.be.false;
+    });
+
+    it('should fail to cancel a wave that is not configured', async function () {
+      const {collectionContractAsOwner: contract} = await loadFixture(
+        setupNFTCollectionContract
+      );
+      await expect(contract.cancelWave(0)).to.revertedWithCustomError(
+        contract,
+        'ContractNotConfigured'
+      );
+      await expect(contract.cancelWave(10)).to.revertedWithCustomError(
+        contract,
+        'ContractNotConfigured'
+      );
+    });
+
+    it('other should fail to cancel a wave', async function () {
+      const {collectionContractAsRandomWallet: contract, randomWallet} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(contract.cancelWave(0))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
+    });
+  });
+
+  it('should not be able to mint on a wave that is not configured', async function () {
+    const {collectionContractAsOwner: contract, randomWallet} =
+      await loadFixture(setupNFTCollectionContract);
+    expect(await contract.isMintAllowed(0, randomWallet, 10)).to.be.false;
+  });
+
   it('index should be incremented, total minted should be set to zero on wave setup', async function () {
     const {
       collectionContractAsOwner: contract,
       nftCollectionAdmin,
       randomWallet,
-      authSign,
+      mintSign,
       sandContract,
       waveMaxTokensOverall,
       waveMaxTokensPerWallet,
     } = await loadFixture(setupNFTCollectionContract);
-    expect(await contract.indexWave()).to.be.eq(0);
+    expect(await contract.waveCount()).to.be.eq(0);
     await expect(
       contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0)
     )
@@ -83,8 +122,8 @@ describe('NFTCollection wave setup', function () {
         0
       );
     expect(await contract.waveTotalMinted(0)).to.be.eq(0);
-    expect(await contract.indexWave()).to.be.eq(1);
-    await contract.batchMint([
+    expect(await contract.waveCount()).to.be.eq(1);
+    await contract.batchMint(0, [
       [randomWallet, 5],
       [randomWallet, 1],
     ]);
@@ -93,14 +132,19 @@ describe('NFTCollection wave setup', function () {
       randomWallet,
       2,
       222,
-      await authSign(randomWallet, 222)
+      await mintSign(randomWallet, 222)
     );
     expect(await contract.waveTotalMinted(0)).to.be.eq(5 + 1 + 2);
-    expect(await contract.indexWave()).to.be.eq(1);
+    expect(await contract.waveTotalMinted(2n ** 256n - 1n)).to.be.eq(5 + 1 + 2);
+    expect(await contract.waveTotalMinted(1)).to.be.eq(5 + 1 + 2);
+    expect(await contract.waveCount()).to.be.eq(1);
     await expect(contract.setupWave(10, 1, 2))
       .to.emit(contract, 'WaveSetup')
       .withArgs(nftCollectionAdmin, 10, 1, 2, 1);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(5 + 1 + 2);
     expect(await contract.waveTotalMinted(1)).to.be.eq(0);
-    expect(await contract.indexWave()).to.be.eq(2);
+    expect(await contract.waveTotalMinted(2n ** 256n - 1n)).to.be.eq(0);
+    expect(await contract.waveTotalMinted(2)).to.be.eq(0);
+    expect(await contract.waveCount()).to.be.eq(2);
   });
 });
