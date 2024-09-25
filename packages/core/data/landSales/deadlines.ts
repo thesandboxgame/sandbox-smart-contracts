@@ -57,6 +57,6 @@ const deadlines: { [sector: number]: number } = {
   56: new Date("2024-04-19T12:00:00.000Z").valueOf() / 1000,
   57: new Date("2024-07-29T12:00:00.000Z").valueOf() / 1000,
   58: new Date("2024-09-20T12:00:00.000Z").valueOf() / 1000,
-  61: new Date("2024-10-04T12:00:00.000Z").valueOf() / 1000,
+  61: new Date("2024-10-14T12:00:00.000Z").valueOf() / 1000,
 };
 export default deadlines;
