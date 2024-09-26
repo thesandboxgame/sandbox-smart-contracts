@@ -1,0 +1,1144 @@
+{
+  "address": "0x88A0301C524BeE33D70E74412853dED750366583",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccessControlBadConfirmation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "neededRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AccessControlUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidArgument",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidBaseTokenId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInitialization",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidLength",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "neighborhoodId",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidNeighborhoodId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotInitializing",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyAdmin",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "baseTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "metadata",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct LandMetadataRegistry.BatchSetData[]",
+          "name": "data",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "BatchMetadataSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "version",
+          "type": "uint64"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldNeighborhoodId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "wasPremium",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newNeighborhoodId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "isPremium",
+          "type": "bool"
+        }
+      ],
+      "name": "MetadataSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "neighborhoodId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "name": "NeighborhoodNameSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BITS_PER_LAND",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LANDS_PER_WORD",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LAND_MASK",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NEIGHBORHOOD_MASK",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PREMIUM_MASK",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "UNKNOWN_NEIGHBORHOOD",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "batchGetMetadata",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "baseTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "metadata",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LandMetadataRegistry.BatchSetData[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "baseTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "metadata",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LandMetadataRegistry.BatchSetData[]",
+          "name": "data",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "batchSetMetadata",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "neighborhoodId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct LandMetadataRegistry.BatchSetNameData[]",
+          "name": "data",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "batchSetNeighborhoodName",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getMetadata",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "premium",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "neighborhoodId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "neighborhoodName",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getNeighborhoodId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getNeighborhoodName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "neighborhoodId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getNeighborhoodNameForId",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRoleMember",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleMemberCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "admin_",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isPremium",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "callerConfirmation",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "premium",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newNeighborhoodId",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMetadata",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newNeighborhoodId",
+          "type": "uint256"
+        }
+      ],
+      "name": "setNeighborhoodId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "neighborhoodId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "name": "setNeighborhoodName",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "premium",
+          "type": "bool"
+        }
+      ],
+      "name": "setPremium",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xead9ac52b0d919026de6a156d37e9747b2ca625835429574c063742921262faf",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x88A0301C524BeE33D70E74412853dED750366583",
+    "transactionIndex": 19,
+    "gasUsed": "1814881",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000800000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xceaa7e4fbdda21b6c103ff53d287046e3b083dce2551a63642a9d7d5701a0db1",
+    "transactionHash": "0xead9ac52b0d919026de6a156d37e9747b2ca625835429574c063742921262faf",
+    "logs": [
+      {
+        "transactionIndex": 19,
+        "blockNumber": 6710510,
+        "transactionHash": "0xead9ac52b0d919026de6a156d37e9747b2ca625835429574c063742921262faf",
+        "address": "0x88A0301C524BeE33D70E74412853dED750366583",
+        "topics": [
+          "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+        ],
+        "data": "0x000000000000000000000000000000000000000000000000ffffffffffffffff",
+        "logIndex": 27,
+        "blockHash": "0xceaa7e4fbdda21b6c103ff53d287046e3b083dce2551a63642a9d7d5701a0db1"
+      }
+    ],
+    "blockNumber": 6710510,
+    "cumulativeGasUsed": "3737167",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "f02626537b0dc847741d4d28935b6a2d",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.23+commit.f704f362\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidArgument\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"InvalidBaseTokenId\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"}],\"name\":\"InvalidNeighborhoodId\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyAdmin\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"baseTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"metadata\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"struct LandMetadataRegistry.BatchSetData[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"BatchMetadataSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"oldNeighborhoodId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"wasPremium\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newNeighborhoodId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isPremium\",\"type\":\"bool\"}],\"name\":\"MetadataSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"NeighborhoodNameSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BITS_PER_LAND\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"LANDS_PER_WORD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"LAND_MASK\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NEIGHBORHOOD_MASK\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PREMIUM_MASK\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UNKNOWN_NEIGHBORHOOD\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"batchGetMetadata\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"baseTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"metadata\",\"type\":\"uint256\"}],\"internalType\":\"struct LandMetadataRegistry.BatchSetData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"baseTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"metadata\",\"type\":\"uint256\"}],\"internalType\":\"struct LandMetadataRegistry.BatchSetData[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"batchSetMetadata\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"internalType\":\"struct LandMetadataRegistry.BatchSetNameData[]\",\"name\":\"data\",\"type\":\"tuple[]\"}],\"name\":\"batchSetNeighborhoodName\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getMetadata\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"premium\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"neighborhoodName\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getNeighborhoodId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getNeighborhoodName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"}],\"name\":\"getNeighborhoodNameForId\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"isPremium\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"premium\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"newNeighborhoodId\",\"type\":\"uint256\"}],\"name\":\"setMetadata\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"newNeighborhoodId\",\"type\":\"uint256\"}],\"name\":\"setNeighborhoodId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"neighborhoodId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"setNeighborhoodName\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"premium\",\"type\":\"bool\"}],\"name\":\"setPremium\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"The Sandbox\",\"custom:security-contact\":\"contact-blockchain@sandbox.game\",\"errors\":{\"AccessControlBadConfirmation()\":[{\"details\":\"The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\"}],\"AccessControlUnauthorizedAccount(address,bytes32)\":[{\"details\":\"The `account` is missing a role.\"}],\"InvalidBaseTokenId(uint256)\":[{\"params\":{\"tokenId\":\"the id of the token\"}}],\"InvalidInitialization()\":[{\"details\":\"The contract is already initialized.\"}],\"InvalidNeighborhoodId(uint256)\":[{\"params\":{\"neighborhoodId\":\"the invalid neighborhoodId\"}}],\"NotInitializing()\":[{\"details\":\"The contract is not initializing.\"}]},\"events\":{\"BatchMetadataSet(address,(uint256,uint256)[])\":{\"params\":{\"data\":\"token id and metadata\",\"operator\":\"the sender of the transaction\"}},\"Initialized(uint64)\":{\"details\":\"Triggered when the contract has been initialized or reinitialized.\"},\"MetadataSet(address,uint256,uint256,bool,uint256,bool)\":{\"params\":{\"isPremium\":\"true if land is premium\",\"newNeighborhoodId\":\"the number that identifies the neighborhood\",\"oldNeighborhoodId\":\"the number that identifies the neighborhood before changing it\",\"operator\":\"the sender of the transaction\",\"tokenId\":\"the token id\",\"wasPremium\":\"true if land was premium\"}},\"NeighborhoodNameSet(address,uint256,string)\":{\"params\":{\"name\":\"human readable name\",\"neighborhoodId\":\"the number that identifies the neighborhood\",\"operator\":\"the sender of the transaction\"}},\"RoleAdminChanged(bytes32,bytes32,bytes32)\":{\"details\":\"Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this.\"},\"RoleGranted(bytes32,address,address)\":{\"details\":\"Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {AccessControl-_setupRole}.\"},\"RoleRevoked(bytes32,address,address)\":{\"details\":\"Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)\"}},\"kind\":\"dev\",\"methods\":{\"batchGetMetadata(uint256[])\":{\"details\":\"used to debug, extracting a lot of information that must be unpacked at once.\",\"params\":{\"tokenIds\":\"the token ids\"},\"returns\":{\"_0\":\"the raw metadata for a series of tokenIds\"}},\"batchSetMetadata((uint256,uint256)[])\":{\"details\":\"use with care, we can set to the metadata for some lands to unknown (zero)\",\"params\":{\"data\":\"token id and metadata\"}},\"batchSetNeighborhoodName((uint256,string)[])\":{\"params\":{\"data\":\"array of neighborhood ids and names to set\"}},\"constructor\":{\"custom:oz-upgrades-unsafe-allow\":\"constructor\",\"details\":\"this protects the implementation contract from being initialized.\"},\"getMetadata(uint256)\":{\"params\":{\"tokenId\":\"the token id\"},\"returns\":{\"neighborhoodId\":\"the number that identifies the neighborhood\",\"neighborhoodName\":\"the neighborhood name\",\"premium\":\"true if the land is premium\"}},\"getNeighborhoodId(uint256)\":{\"params\":{\"tokenId\":\"the token id\"},\"returns\":{\"_0\":\"the neighborhoodId number\"}},\"getNeighborhoodName(uint256)\":{\"params\":{\"tokenId\":\"the token id\"},\"returns\":{\"_0\":\"the neighborhood name\"}},\"getNeighborhoodNameForId(uint256)\":{\"params\":{\"neighborhoodId\":\"the number that identifies the neighborhood\"},\"returns\":{\"_0\":\"the neighborhood name\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"getRoleMember(bytes32,uint256)\":{\"details\":\"Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.\"},\"getRoleMemberCount(bytes32)\":{\"details\":\"Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"initialize(address)\":{\"params\":{\"admin_\":\"address that have admin access and can assign roles.\"}},\"isPremium(uint256)\":{\"params\":{\"tokenId\":\"the token id\"},\"returns\":{\"_0\":\"true if the land is premium\"}},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event.\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.\"},\"setMetadata(uint256,bool,uint256)\":{\"params\":{\"newNeighborhoodId\":\"the number that identifies the neighborhood\",\"premium\":\"true if the land is premium\",\"tokenId\":\"the token id\"}},\"setNeighborhoodId(uint256,uint256)\":{\"params\":{\"newNeighborhoodId\":\"the number that identifies the neighborhood\",\"tokenId\":\"the token id\"}},\"setNeighborhoodName(uint256,string)\":{\"params\":{\"name\":\"human readable name\",\"neighborhoodId\":\"the number that identifies the neighborhood\"}},\"setPremium(uint256,bool)\":{\"params\":{\"premium\":\"true if the land is premium\",\"tokenId\":\"the token id\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"title\":\"LandMetadataRegistry\",\"version\":1},\"userdoc\":{\"errors\":{\"InvalidAddress()\":[{\"notice\":\"an address passed as argument is invalid\"}],\"InvalidArgument()\":[{\"notice\":\"an argument passed is invalid\"}],\"InvalidBaseTokenId(uint256)\":[{\"notice\":\"the base token id used for a batch operation is wrong\"}],\"InvalidLength()\":[{\"notice\":\"an array argument has an invalid length\"}],\"InvalidNeighborhoodId(uint256)\":[{\"notice\":\"the neighborhoodId is invalid\"}],\"OnlyAdmin()\":[{\"notice\":\"only admin can call this function\"}]},\"events\":{\"BatchMetadataSet(address,(uint256,uint256)[])\":{\"notice\":\"This event is emitted when the metadata is set in batch\"},\"MetadataSet(address,uint256,uint256,bool,uint256,bool)\":{\"notice\":\"This event is emitted when the metadata is set for a single land\"},\"NeighborhoodNameSet(address,uint256,string)\":{\"notice\":\"This event is emitted when the neighborhood name is set\"}},\"kind\":\"user\",\"methods\":{\"BITS_PER_LAND()\":{\"notice\":\"bits of information stored for each land: for example: 16\"},\"LANDS_PER_WORD()\":{\"notice\":\"amount of land information that can be stored in one EVM word\"},\"LAND_MASK()\":{\"notice\":\"used to mask the bits of information stored per land, for example: 0xFFFF\"},\"NEIGHBORHOOD_MASK()\":{\"notice\":\"mask used to extract the neighborhood number, for example: 0x7FFF\"},\"PREMIUM_MASK()\":{\"notice\":\"mask used to extract the premium bit, for example: 0x8000\"},\"UNKNOWN_NEIGHBORHOOD()\":{\"notice\":\"value returned when the neighborhood is not set yet.\"},\"batchGetMetadata(uint256[])\":{\"notice\":\"return the metadata of LANDS_PER_WORD lands at once\"},\"batchSetMetadata((uint256,uint256)[])\":{\"notice\":\"set the metadata for LANDS_PER_WORD lands at the same time in batch\"},\"batchSetNeighborhoodName((uint256,string)[])\":{\"notice\":\"set neighborhood name in batch\"},\"getMetadata(uint256)\":{\"notice\":\"return the metadata for one land\"},\"getNeighborhoodId(uint256)\":{\"notice\":\"return the id that identifies the neighborhood\"},\"getNeighborhoodName(uint256)\":{\"notice\":\"return the neighborhood name\"},\"getNeighborhoodNameForId(uint256)\":{\"notice\":\"return the neighborhood name using neighborhood id as the key\"},\"initialize(address)\":{\"notice\":\"initializer method, called during deployment\"},\"isPremium(uint256)\":{\"notice\":\"return true if a land is premium\"},\"setMetadata(uint256,bool,uint256)\":{\"notice\":\"set the premiumness for one land\"},\"setNeighborhoodId(uint256,uint256)\":{\"notice\":\"set the neighborhood for one land\"},\"setNeighborhoodName(uint256,string)\":{\"notice\":\"set neighborhood name\"},\"setPremium(uint256,bool)\":{\"notice\":\"set the premiumness for one land\"}},\"notice\":\"Store information about the lands (premiumness and neighborhood)\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"@sandbox-smart-contracts/land/contracts/LandMetadataRegistry.sol\":\"LandMetadataRegistry\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/AccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"@openzeppelin/contracts/access/IAccessControl.sol\\\";\\nimport {ContextUpgradeable} from \\\"../utils/ContextUpgradeable.sol\\\";\\nimport {ERC165Upgradeable} from \\\"../utils/introspection/ERC165Upgradeable.sol\\\";\\nimport {Initializable} from \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```solidity\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```solidity\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\\n * to enforce additional security measures for this role.\\n */\\nabstract contract AccessControlUpgradeable is Initializable, ContextUpgradeable, IAccessControl, ERC165Upgradeable {\\n    struct RoleData {\\n        mapping(address account => bool) hasRole;\\n        bytes32 adminRole;\\n    }\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n\\n    /// @custom:storage-location erc7201:openzeppelin.storage.AccessControl\\n    struct AccessControlStorage {\\n        mapping(bytes32 role => RoleData) _roles;\\n    }\\n\\n    // keccak256(abi.encode(uint256(keccak256(\\\"openzeppelin.storage.AccessControl\\\")) - 1)) & ~bytes32(uint256(0xff))\\n    bytes32 private constant AccessControlStorageLocation = 0x02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800;\\n\\n    function _getAccessControlStorage() private pure returns (AccessControlStorage storage $) {\\n        assembly {\\n            $.slot := AccessControlStorageLocation\\n        }\\n    }\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role);\\n        _;\\n    }\\n\\n    function __AccessControl_init() internal onlyInitializing {\\n    }\\n\\n    function __AccessControl_init_unchained() internal onlyInitializing {\\n    }\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\\n        AccessControlStorage storage $ = _getAccessControlStorage();\\n        return $._roles[role].hasRole[account];\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\\n     */\\n    function _checkRole(bytes32 role) internal view virtual {\\n        _checkRole(role, _msgSender());\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\\n     * is missing `role`.\\n     */\\n    function _checkRole(bytes32 role, address account) internal view virtual {\\n        if (!hasRole(role, account)) {\\n            revert AccessControlUnauthorizedAccount(account, role);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\\n        AccessControlStorage storage $ = _getAccessControlStorage();\\n        return $._roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\\n        if (callerConfirmation != _msgSender()) {\\n            revert AccessControlBadConfirmation();\\n        }\\n\\n        _revokeRole(role, callerConfirmation);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        AccessControlStorage storage $ = _getAccessControlStorage();\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        $._roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\\n        AccessControlStorage storage $ = _getAccessControlStorage();\\n        if (!hasRole(role, account)) {\\n            $._roles[role].hasRole[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Attempts to revoke `role` to `account` and returns a boolean indicating if `role` was revoked.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\\n        AccessControlStorage storage $ = _getAccessControlStorage();\\n        if (hasRole(role, account)) {\\n            $._roles[role].hasRole[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x6662ec4e5cefca03eeadd073e9469df8d2944bb2ee8ec8f7622c2c46aab5f225\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/extensions/AccessControlEnumerable.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControlEnumerable} from \\\"@openzeppelin/contracts/access/extensions/IAccessControlEnumerable.sol\\\";\\nimport {AccessControlUpgradeable} from \\\"../AccessControlUpgradeable.sol\\\";\\nimport {EnumerableSet} from \\\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\\\";\\nimport {Initializable} from \\\"../../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Extension of {AccessControl} that allows enumerating the members of each role.\\n */\\nabstract contract AccessControlEnumerableUpgradeable is Initializable, IAccessControlEnumerable, AccessControlUpgradeable {\\n    using EnumerableSet for EnumerableSet.AddressSet;\\n\\n    /// @custom:storage-location erc7201:openzeppelin.storage.AccessControlEnumerable\\n    struct AccessControlEnumerableStorage {\\n        mapping(bytes32 role => EnumerableSet.AddressSet) _roleMembers;\\n    }\\n\\n    // keccak256(abi.encode(uint256(keccak256(\\\"openzeppelin.storage.AccessControlEnumerable\\\")) - 1)) & ~bytes32(uint256(0xff))\\n    bytes32 private constant AccessControlEnumerableStorageLocation = 0xc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000;\\n\\n    function _getAccessControlEnumerableStorage() private pure returns (AccessControlEnumerableStorage storage $) {\\n        assembly {\\n            $.slot := AccessControlEnumerableStorageLocation\\n        }\\n    }\\n\\n    function __AccessControlEnumerable_init() internal onlyInitializing {\\n    }\\n\\n    function __AccessControlEnumerable_init_unchained() internal onlyInitializing {\\n    }\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControlEnumerable).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns one of the accounts that have `role`. `index` must be a\\n     * value between 0 and {getRoleMemberCount}, non-inclusive.\\n     *\\n     * Role bearers are not sorted in any particular way, and their ordering may\\n     * change at any point.\\n     *\\n     * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure\\n     * you perform all queries on the same block. See the following\\n     * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]\\n     * for more information.\\n     */\\n    function getRoleMember(bytes32 role, uint256 index) public view virtual returns (address) {\\n        AccessControlEnumerableStorage storage $ = _getAccessControlEnumerableStorage();\\n        return $._roleMembers[role].at(index);\\n    }\\n\\n    /**\\n     * @dev Returns the number of accounts that have `role`. Can be used\\n     * together with {getRoleMember} to enumerate all bearers of a role.\\n     */\\n    function getRoleMemberCount(bytes32 role) public view virtual returns (uint256) {\\n        AccessControlEnumerableStorage storage $ = _getAccessControlEnumerableStorage();\\n        return $._roleMembers[role].length();\\n    }\\n\\n    /**\\n     * @dev Overload {AccessControl-_grantRole} to track enumerable memberships\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual override returns (bool) {\\n        AccessControlEnumerableStorage storage $ = _getAccessControlEnumerableStorage();\\n        bool granted = super._grantRole(role, account);\\n        if (granted) {\\n            $._roleMembers[role].add(account);\\n        }\\n        return granted;\\n    }\\n\\n    /**\\n     * @dev Overload {AccessControl-_revokeRole} to track enumerable memberships\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual override returns (bool) {\\n        AccessControlEnumerableStorage storage $ = _getAccessControlEnumerableStorage();\\n        bool revoked = super._revokeRole(role, account);\\n        if (revoked) {\\n            $._roleMembers[role].remove(account);\\n        }\\n        return revoked;\\n    }\\n}\\n\",\"keccak256\":\"0xc603154d2a4d8f88d4d3c11090a8224f572c4b1f8baced3ea46cdec49f4674ee\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since proxied contracts do not make use of a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * The initialization functions use a version number. Once a version number is used, it is consumed and cannot be\\n * reused. This mechanism prevents re-execution of each \\\"step\\\" but allows the creation of new initialization steps in\\n * case an upgrade adds a module that needs to be initialized.\\n *\\n * For example:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```solidity\\n * contract MyToken is ERC20Upgradeable {\\n *     function initialize() initializer public {\\n *         __ERC20_init(\\\"MyToken\\\", \\\"MTK\\\");\\n *     }\\n * }\\n *\\n * contract MyTokenV2 is MyToken, ERC20PermitUpgradeable {\\n *     function initializeV2() reinitializer(2) public {\\n *         __ERC20Permit_init(\\\"MyToken\\\");\\n *     }\\n * }\\n * ```\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To prevent the implementation contract from being used, you should invoke\\n * the {_disableInitializers} function in the constructor to automatically lock it when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() {\\n *     _disableInitializers();\\n * }\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Storage of the initializable contract.\\n     *\\n     * It's implemented on a custom ERC-7201 namespace to reduce the risk of storage collisions\\n     * when using with upgradeable contracts.\\n     *\\n     * @custom:storage-location erc7201:openzeppelin.storage.Initializable\\n     */\\n    struct InitializableStorage {\\n        /**\\n         * @dev Indicates that the contract has been initialized.\\n         */\\n        uint64 _initialized;\\n        /**\\n         * @dev Indicates that the contract is in the process of being initialized.\\n         */\\n        bool _initializing;\\n    }\\n\\n    // keccak256(abi.encode(uint256(keccak256(\\\"openzeppelin.storage.Initializable\\\")) - 1)) & ~bytes32(uint256(0xff))\\n    bytes32 private constant INITIALIZABLE_STORAGE = 0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00;\\n\\n    /**\\n     * @dev The contract is already initialized.\\n     */\\n    error InvalidInitialization();\\n\\n    /**\\n     * @dev The contract is not initializing.\\n     */\\n    error NotInitializing();\\n\\n    /**\\n     * @dev Triggered when the contract has been initialized or reinitialized.\\n     */\\n    event Initialized(uint64 version);\\n\\n    /**\\n     * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,\\n     * `onlyInitializing` functions can be used to initialize parent contracts.\\n     *\\n     * Similar to `reinitializer(1)`, except that in the context of a constructor an `initializer` may be invoked any\\n     * number of times. This behavior in the constructor can be useful during testing and is not expected to be used in\\n     * production.\\n     *\\n     * Emits an {Initialized} event.\\n     */\\n    modifier initializer() {\\n        // solhint-disable-next-line var-name-mixedcase\\n        InitializableStorage storage $ = _getInitializableStorage();\\n\\n        // Cache values to avoid duplicated sloads\\n        bool isTopLevelCall = !$._initializing;\\n        uint64 initialized = $._initialized;\\n\\n        // Allowed calls:\\n        // - initialSetup: the contract is not in the initializing state and no previous version was\\n        //                 initialized\\n        // - construction: the contract is initialized at version 1 (no reininitialization) and the\\n        //                 current contract is just being deployed\\n        bool initialSetup = initialized == 0 && isTopLevelCall;\\n        bool construction = initialized == 1 && address(this).code.length == 0;\\n\\n        if (!initialSetup && !construction) {\\n            revert InvalidInitialization();\\n        }\\n        $._initialized = 1;\\n        if (isTopLevelCall) {\\n            $._initializing = true;\\n        }\\n        _;\\n        if (isTopLevelCall) {\\n            $._initializing = false;\\n            emit Initialized(1);\\n        }\\n    }\\n\\n    /**\\n     * @dev A modifier that defines a protected reinitializer function that can be invoked at most once, and only if the\\n     * contract hasn't been initialized to a greater version before. In its scope, `onlyInitializing` functions can be\\n     * used to initialize parent contracts.\\n     *\\n     * A reinitializer may be used after the original initialization step. This is essential to configure modules that\\n     * are added through upgrades and that require initialization.\\n     *\\n     * When `version` is 1, this modifier is similar to `initializer`, except that functions marked with `reinitializer`\\n     * cannot be nested. If one is invoked in the context of another, execution will revert.\\n     *\\n     * Note that versions can jump in increments greater than 1; this implies that if multiple reinitializers coexist in\\n     * a contract, executing them in the right order is up to the developer or operator.\\n     *\\n     * WARNING: Setting the version to 2**64 - 1 will prevent any future reinitialization.\\n     *\\n     * Emits an {Initialized} event.\\n     */\\n    modifier reinitializer(uint64 version) {\\n        // solhint-disable-next-line var-name-mixedcase\\n        InitializableStorage storage $ = _getInitializableStorage();\\n\\n        if ($._initializing || $._initialized >= version) {\\n            revert InvalidInitialization();\\n        }\\n        $._initialized = version;\\n        $._initializing = true;\\n        _;\\n        $._initializing = false;\\n        emit Initialized(version);\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} and {reinitializer} modifiers, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        _checkInitializing();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Reverts if the contract is not in an initializing state. See {onlyInitializing}.\\n     */\\n    function _checkInitializing() internal view virtual {\\n        if (!_isInitializing()) {\\n            revert NotInitializing();\\n        }\\n    }\\n\\n    /**\\n     * @dev Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.\\n     * Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized\\n     * to any version. It is recommended to use this to lock implementation contracts that are designed to be called\\n     * through proxies.\\n     *\\n     * Emits an {Initialized} event the first time it is successfully executed.\\n     */\\n    function _disableInitializers() internal virtual {\\n        // solhint-disable-next-line var-name-mixedcase\\n        InitializableStorage storage $ = _getInitializableStorage();\\n\\n        if ($._initializing) {\\n            revert InvalidInitialization();\\n        }\\n        if ($._initialized != type(uint64).max) {\\n            $._initialized = type(uint64).max;\\n            emit Initialized(type(uint64).max);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the highest version that has been initialized. See {reinitializer}.\\n     */\\n    function _getInitializedVersion() internal view returns (uint64) {\\n        return _getInitializableStorage()._initialized;\\n    }\\n\\n    /**\\n     * @dev Returns `true` if the contract is currently initializing. See {onlyInitializing}.\\n     */\\n    function _isInitializing() internal view returns (bool) {\\n        return _getInitializableStorage()._initializing;\\n    }\\n\\n    /**\\n     * @dev Returns a pointer to the storage namespace.\\n     */\\n    // solhint-disable-next-line var-name-mixedcase\\n    function _getInitializableStorage() private pure returns (InitializableStorage storage $) {\\n        assembly {\\n            $.slot := INITIALIZABLE_STORAGE\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x631188737069917d2f909d29ce62c4d48611d326686ba6683e26b72a23bfac0b\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\nimport {Initializable} from \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\nimport {Initializable} from \\\"../../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n */\\nabstract contract ERC165Upgradeable is Initializable, IERC165 {\\n    function __ERC165_init() internal onlyInitializing {\\n    }\\n\\n    function __ERC165_init_unchained() internal onlyInitializing {\\n    }\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0xdaba3f7c42c55b2896353f32bd27d4d5f8bae741b3b05d4c53f67abc4dc47ce8\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/IAccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControl {\\n    /**\\n     * @dev The `account` is missing a role.\\n     */\\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\\n\\n    /**\\n     * @dev The caller of a function is not the expected one.\\n     *\\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\\n     */\\n    error AccessControlBadConfirmation();\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {AccessControl-_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) external;\\n}\\n\",\"keccak256\":\"0xb6b36edd6a2999fd243ff226d6cbf84bd71af2432bbd0dfe19392996a1d9cb41\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/extensions/IAccessControlEnumerable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/extensions/IAccessControlEnumerable.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"../IAccessControl.sol\\\";\\n\\n/**\\n * @dev External interface of AccessControlEnumerable declared to support ERC165 detection.\\n */\\ninterface IAccessControlEnumerable is IAccessControl {\\n    /**\\n     * @dev Returns one of the accounts that have `role`. `index` must be a\\n     * value between 0 and {getRoleMemberCount}, non-inclusive.\\n     *\\n     * Role bearers are not sorted in any particular way, and their ordering may\\n     * change at any point.\\n     *\\n     * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure\\n     * you perform all queries on the same block. See the following\\n     * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]\\n     * for more information.\\n     */\\n    function getRoleMember(bytes32 role, uint256 index) external view returns (address);\\n\\n    /**\\n     * @dev Returns the number of accounts that have `role`. Can be used\\n     * together with {getRoleMember} to enumerate all bearers of a role.\\n     */\\n    function getRoleMemberCount(bytes32 role) external view returns (uint256);\\n}\\n\",\"keccak256\":\"0xc1435f102633849858e75d7bed14c636f25448ceb3406d82992b0f2df52f4306\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/structs/EnumerableSet.sol)\\n// This file was procedurally generated from scripts/generate/templates/EnumerableSet.js.\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Library for managing\\n * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive\\n * types.\\n *\\n * Sets have the following properties:\\n *\\n * - Elements are added, removed, and checked for existence in constant time\\n * (O(1)).\\n * - Elements are enumerated in O(n). No guarantees are made on the ordering.\\n *\\n * ```solidity\\n * contract Example {\\n *     // Add the library methods\\n *     using EnumerableSet for EnumerableSet.AddressSet;\\n *\\n *     // Declare a set state variable\\n *     EnumerableSet.AddressSet private mySet;\\n * }\\n * ```\\n *\\n * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)\\n * and `uint256` (`UintSet`) are supported.\\n *\\n * [WARNING]\\n * ====\\n * Trying to delete such a structure from storage will likely result in data corruption, rendering the structure\\n * unusable.\\n * See https://github.com/ethereum/solidity/pull/11843[ethereum/solidity#11843] for more info.\\n *\\n * In order to clean an EnumerableSet, you can either remove all elements one by one or create a fresh instance using an\\n * array of EnumerableSet.\\n * ====\\n */\\nlibrary EnumerableSet {\\n    // To implement this library for multiple types with as little code\\n    // repetition as possible, we write it in terms of a generic Set type with\\n    // bytes32 values.\\n    // The Set implementation uses private functions, and user-facing\\n    // implementations (such as AddressSet) are just wrappers around the\\n    // underlying Set.\\n    // This means that we can only create new EnumerableSets for types that fit\\n    // in bytes32.\\n\\n    struct Set {\\n        // Storage of set values\\n        bytes32[] _values;\\n        // Position is the index of the value in the `values` array plus 1.\\n        // Position 0 is used to mean a value is not in the set.\\n        mapping(bytes32 value => uint256) _positions;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function _add(Set storage set, bytes32 value) private returns (bool) {\\n        if (!_contains(set, value)) {\\n            set._values.push(value);\\n            // The value is stored at length-1, but we add 1 to all indexes\\n            // and use 0 as a sentinel value\\n            set._positions[value] = set._values.length;\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function _remove(Set storage set, bytes32 value) private returns (bool) {\\n        // We cache the value's position to prevent multiple reads from the same storage slot\\n        uint256 position = set._positions[value];\\n\\n        if (position != 0) {\\n            // Equivalent to contains(set, value)\\n            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in\\n            // the array, and then remove the last element (sometimes called as 'swap and pop').\\n            // This modifies the order of the array, as noted in {at}.\\n\\n            uint256 valueIndex = position - 1;\\n            uint256 lastIndex = set._values.length - 1;\\n\\n            if (valueIndex != lastIndex) {\\n                bytes32 lastValue = set._values[lastIndex];\\n\\n                // Move the lastValue to the index where the value to delete is\\n                set._values[valueIndex] = lastValue;\\n                // Update the tracked position of the lastValue (that was just moved)\\n                set._positions[lastValue] = position;\\n            }\\n\\n            // Delete the slot where the moved value was stored\\n            set._values.pop();\\n\\n            // Delete the tracked position for the deleted slot\\n            delete set._positions[value];\\n\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function _contains(Set storage set, bytes32 value) private view returns (bool) {\\n        return set._positions[value] != 0;\\n    }\\n\\n    /**\\n     * @dev Returns the number of values on the set. O(1).\\n     */\\n    function _length(Set storage set) private view returns (uint256) {\\n        return set._values.length;\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function _at(Set storage set, uint256 index) private view returns (bytes32) {\\n        return set._values[index];\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function _values(Set storage set) private view returns (bytes32[] memory) {\\n        return set._values;\\n    }\\n\\n    // Bytes32Set\\n\\n    struct Bytes32Set {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _add(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _remove(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {\\n        return _contains(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(Bytes32Set storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {\\n        return _at(set._inner, index);\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(Bytes32Set storage set) internal view returns (bytes32[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        bytes32[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // AddressSet\\n\\n    struct AddressSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(AddressSet storage set, address value) internal returns (bool) {\\n        return _add(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(AddressSet storage set, address value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(AddressSet storage set, address value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(AddressSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(AddressSet storage set, uint256 index) internal view returns (address) {\\n        return address(uint160(uint256(_at(set._inner, index))));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(AddressSet storage set) internal view returns (address[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        address[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // UintSet\\n\\n    struct UintSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _add(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(UintSet storage set, uint256 value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(UintSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(UintSet storage set, uint256 index) internal view returns (uint256) {\\n        return uint256(_at(set._inner, index));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(UintSet storage set) internal view returns (uint256[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        uint256[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n}\\n\",\"keccak256\":\"0x86c1470cbfd878491e5de030072b647352d36bd27122cffb928970b1945282aa\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/land/contracts/LandMetadataRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.23;\\n\\nimport {AccessControlEnumerableUpgradeable} from \\\"@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol\\\";\\nimport {IErrors} from \\\"./interfaces/IErrors.sol\\\";\\nimport {ILandMetadataRegistry} from \\\"./interfaces/ILandMetadataRegistry.sol\\\";\\nimport {LandMetadataBase} from \\\"./registry/LandMetadataBase.sol\\\";\\n\\n/// @title LandMetadataRegistry\\n/// @author The Sandbox\\n/// @custom:security-contact contact-blockchain@sandbox.game\\n/// @notice Store information about the lands (premiumness and neighborhood)\\ncontract LandMetadataRegistry is IErrors, ILandMetadataRegistry, AccessControlEnumerableUpgradeable, LandMetadataBase {\\n    struct BatchSetNameData {\\n        // the number that identifies the neighborhood\\n        uint256 neighborhoodId;\\n        // the name of the neighborhood\\n        string name;\\n    }\\n\\n    struct BatchSetData {\\n        // baseTokenId the token id floor LANDS_PER_WORD\\n        uint256 baseTokenId;\\n        // metadata: premiumness << (BITS_PER_LAND-1) | neighborhoodId\\n        uint256 metadata;\\n    }\\n\\n    /// @notice This event is emitted when the metadata is set for a single land\\n    /// @param operator the sender of the transaction\\n    /// @param tokenId the token id\\n    /// @param oldNeighborhoodId the number that identifies the neighborhood before changing it\\n    /// @param wasPremium true if land was premium\\n    /// @param newNeighborhoodId the number that identifies the neighborhood\\n    /// @param isPremium true if land is premium\\n    event MetadataSet(\\n        address indexed operator,\\n        uint256 indexed tokenId,\\n        uint256 oldNeighborhoodId,\\n        bool wasPremium,\\n        uint256 newNeighborhoodId,\\n        bool isPremium\\n    );\\n\\n    /// @notice This event is emitted when the neighborhood name is set\\n    /// @param operator the sender of the transaction\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @param name human readable name\\n    event NeighborhoodNameSet(address indexed operator, uint256 indexed neighborhoodId, string name);\\n\\n    /// @notice This event is emitted when the metadata is set in batch\\n    /// @param operator the sender of the transaction\\n    /// @param data token id and metadata\\n    event BatchMetadataSet(address indexed operator, BatchSetData[] data);\\n\\n    modifier onlyAdmin() {\\n        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {\\n            revert OnlyAdmin();\\n        }\\n        _;\\n    }\\n\\n    /// @dev this protects the implementation contract from being initialized.\\n    /// @custom:oz-upgrades-unsafe-allow constructor\\n    constructor() {\\n        _disableInitializers();\\n    }\\n\\n    /// @notice initializer method, called during deployment\\n    /// @param admin_ address that have admin access and can assign roles.\\n    function initialize(address admin_) external initializer {\\n        __Context_init_unchained();\\n        __ERC165_init_unchained();\\n        __AccessControl_init_unchained();\\n        __AccessControlEnumerable_init_unchained();\\n        _grantRole(DEFAULT_ADMIN_ROLE, admin_);\\n    }\\n\\n    /// @notice set the premiumness for one land\\n    /// @param tokenId the token id\\n    /// @param premium true if the land is premium\\n    function setPremium(uint256 tokenId, bool premium) external onlyAdmin {\\n        (uint256 neighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);\\n        _setMetadataForTokenId(tokenId, neighborhoodId, premium);\\n        emit MetadataSet(_msgSender(), tokenId, neighborhoodId, wasPremium, neighborhoodId, premium);\\n    }\\n\\n    /// @notice set the neighborhood for one land\\n    /// @param tokenId the token id\\n    /// @param newNeighborhoodId the number that identifies the neighborhood\\n    function setNeighborhoodId(uint256 tokenId, uint256 newNeighborhoodId) external onlyAdmin {\\n        _isValidNeighborhoodId(newNeighborhoodId);\\n        (uint256 oldNeighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);\\n        _setMetadataForTokenId(tokenId, newNeighborhoodId, wasPremium);\\n        emit MetadataSet(_msgSender(), tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, wasPremium);\\n    }\\n\\n    /// @notice set the premiumness for one land\\n    /// @param tokenId the token id\\n    /// @param premium true if the land is premium\\n    /// @param newNeighborhoodId the number that identifies the neighborhood\\n    function setMetadata(uint256 tokenId, bool premium, uint256 newNeighborhoodId) external onlyAdmin {\\n        _isValidNeighborhoodId(newNeighborhoodId);\\n        (uint256 oldNeighborhoodId, bool wasPremium) = _getMetadataForTokenId(tokenId);\\n        _setMetadataForTokenId(tokenId, newNeighborhoodId, premium);\\n        emit MetadataSet(_msgSender(), tokenId, oldNeighborhoodId, wasPremium, newNeighborhoodId, premium);\\n    }\\n\\n    /// @notice set neighborhood name\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @param name human readable name\\n    function setNeighborhoodName(uint256 neighborhoodId, string calldata name) external onlyAdmin {\\n        _isValidNeighborhoodId(neighborhoodId);\\n        _setNeighborhoodName(neighborhoodId, name);\\n        emit NeighborhoodNameSet(_msgSender(), neighborhoodId, name);\\n    }\\n\\n    /// @notice set neighborhood name in batch\\n    /// @param data array of neighborhood ids and names to set\\n    function batchSetNeighborhoodName(BatchSetNameData[] calldata data) external onlyAdmin {\\n        uint256 len = data.length;\\n        for (uint256 i; i < len; i++) {\\n            _isValidNeighborhoodId(data[i].neighborhoodId);\\n            _setNeighborhoodName(data[i].neighborhoodId, data[i].name);\\n            emit NeighborhoodNameSet(_msgSender(), data[i].neighborhoodId, data[i].name);\\n        }\\n    }\\n\\n    /// @notice set the metadata for LANDS_PER_WORD lands at the same time in batch\\n    /// @param data token id and metadata\\n    /// @dev use with care, we can set to the metadata for some lands to unknown (zero)\\n    function batchSetMetadata(BatchSetData[] calldata data) external onlyAdmin {\\n        uint256 len = data.length;\\n        for (uint256 i; i < len; i++) {\\n            BatchSetData calldata d = data[i];\\n            if (_getBits(d.baseTokenId) != 0) {\\n                revert InvalidBaseTokenId(d.baseTokenId);\\n            }\\n            _setMetadata(d.baseTokenId, d.metadata);\\n        }\\n        emit BatchMetadataSet(_msgSender(), data);\\n    }\\n\\n    /// @notice return the metadata for one land\\n    /// @param tokenId the token id\\n    /// @return premium true if the land is premium\\n    /// @return neighborhoodId the number that identifies the neighborhood\\n    /// @return neighborhoodName the neighborhood name\\n    function getMetadata(\\n        uint256 tokenId\\n    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName) {\\n        (neighborhoodId, premium) = _getMetadataForTokenId(tokenId);\\n        neighborhoodName = _getNeighborhoodName(neighborhoodId);\\n    }\\n\\n    /// @notice return true if a land is premium\\n    /// @param tokenId the token id\\n    /// @return true if the land is premium\\n    function isPremium(uint256 tokenId) external view returns (bool) {\\n        (, bool premium) = _getMetadataForTokenId(tokenId);\\n        return premium;\\n    }\\n\\n    /// @notice return the id that identifies the neighborhood\\n    /// @param tokenId the token id\\n    /// @return the neighborhoodId number\\n    function getNeighborhoodId(uint256 tokenId) external view returns (uint256) {\\n        (uint256 neighborhoodId, ) = _getMetadataForTokenId(tokenId);\\n        return neighborhoodId;\\n    }\\n\\n    /// @notice return the neighborhood name\\n    /// @param tokenId the token id\\n    /// @return the neighborhood name\\n    function getNeighborhoodName(uint256 tokenId) external view returns (string memory) {\\n        (uint256 neighborhoodId, ) = _getMetadataForTokenId(tokenId);\\n        return _getNeighborhoodName(neighborhoodId);\\n    }\\n\\n    /// @notice return the neighborhood name using neighborhood id as the key\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @return the neighborhood name\\n    function getNeighborhoodNameForId(uint256 neighborhoodId) external view returns (string memory) {\\n        return _getNeighborhoodName(neighborhoodId);\\n    }\\n\\n    /// @notice return the metadata of LANDS_PER_WORD lands at once\\n    /// @param tokenIds the token ids\\n    /// @return the raw metadata for a series of tokenIds\\n    /// @dev used to debug, extracting a lot of information that must be unpacked at once.\\n    function batchGetMetadata(uint256[] calldata tokenIds) external view returns (BatchSetData[] memory) {\\n        uint256 len = tokenIds.length;\\n        BatchSetData[] memory ret = new BatchSetData[](len);\\n        for (uint256 i; i < len; i++) {\\n            ret[i] = BatchSetData({baseTokenId: _getKey(tokenIds[i]), metadata: _getMetadata(tokenIds[i])});\\n        }\\n        return ret;\\n    }\\n}\\n\",\"keccak256\":\"0x6c86e09a48615645212f1f61f1a929eb674b55e99f3a1eed0008e80deb378aab\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/land/contracts/interfaces/IErrors.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.23;\\n\\n/// @title Errors\\n/// @author The Sandbox\\n/// @custom:security-contact contact-blockchain@sandbox.game\\n/// @notice Common errors\\ninterface IErrors {\\n    /// @notice an address passed as argument is invalid\\n    error InvalidAddress();\\n\\n    /// @notice an argument passed is invalid\\n    error InvalidArgument();\\n\\n    /// @notice an array argument has an invalid length\\n    error InvalidLength();\\n\\n    /// @notice only admin can call this function\\n    error OnlyAdmin();\\n}\\n\",\"keccak256\":\"0x303ca7609d4c5448ea00d7d1dda50d6638f251ae1f62c18215dcc139305e7cc4\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/land/contracts/interfaces/ILandMetadataRegistry.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/// @title ILandMetadataRegistry\\n/// @author The Sandbox\\n/// @custom:security-contact contact-blockchain@sandbox.game\\n/// @notice Interface implemented by the LandMetadataRegistry\\ninterface ILandMetadataRegistry {\\n    /// @notice return the metadata for one land\\n    /// @param tokenId the token id\\n    /// @return premium true if the land is premium\\n    /// @return neighborhoodId the number that identifies the neighborhood\\n    /// @return neighborhoodName the neighborhood name\\n    function getMetadata(\\n        uint256 tokenId\\n    ) external view returns (bool premium, uint256 neighborhoodId, string memory neighborhoodName);\\n\\n    /// @notice return true if a land is premium\\n    /// @param tokenId the token id\\n    /// @return true if the land is premium\\n    function isPremium(uint256 tokenId) external view returns (bool);\\n\\n    /// @notice return the id that identifies the neighborhood\\n    /// @param tokenId the token id\\n    /// @return the neighborhoodId number\\n    function getNeighborhoodId(uint256 tokenId) external view returns (uint256);\\n\\n    /// @notice return the neighborhood name\\n    /// @param tokenId the token id\\n    /// @return the neighborhood name\\n    function getNeighborhoodName(uint256 tokenId) external view returns (string memory);\\n\\n    /// @notice return the neighborhood name using neighborhood id as the key\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @return the neighborhood name\\n    function getNeighborhoodNameForId(uint256 neighborhoodId) external view returns (string memory);\\n}\\n\",\"keccak256\":\"0x693b08c212d0ab9d853f588c1c83cbe82bd662b5f0906e25cf3e2a039093b1fa\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/land/contracts/registry/LandMetadataBase.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.23;\\n\\n/// @title LandMetadataBase\\n/// @author The Sandbox\\n/// @custom:security-contact contact-blockchain@sandbox.game\\n/// @notice Store information about the lands (premiumness and neighborhood)\\nabstract contract LandMetadataBase {\\n    /// @notice the base token id used for a batch operation is wrong\\n    /// @param tokenId the id of the token\\n    error InvalidBaseTokenId(uint256 tokenId);\\n\\n    /// @notice the neighborhoodId is invalid\\n    /// @param neighborhoodId the invalid neighborhoodId\\n    error InvalidNeighborhoodId(uint256 neighborhoodId);\\n\\n    /// @notice value returned when the neighborhood is not set yet.\\n    string public constant UNKNOWN_NEIGHBORHOOD = \\\"unknown\\\";\\n    /// @notice amount of land information that can be stored in one EVM word\\n    uint256 public constant LANDS_PER_WORD = 16;\\n    /// @notice bits of information stored for each land: for example: 16\\n    uint256 public constant BITS_PER_LAND = 256 / LANDS_PER_WORD;\\n    /// @notice used to mask the bits of information stored per land, for example: 0xFFFF\\n    uint256 public constant LAND_MASK = (1 << BITS_PER_LAND) - 1;\\n    /// @notice mask used to extract the premium bit, for example: 0x8000\\n    uint256 public constant PREMIUM_MASK = 1 << (BITS_PER_LAND - 1);\\n    /// @notice mask used to extract the neighborhood number, for example: 0x7FFF\\n    uint256 public constant NEIGHBORHOOD_MASK = PREMIUM_MASK - 1;\\n\\n    struct LandMetadataStorage {\\n        /// @dev tokenId / LANDS_PER_WORD => premiumness + neighborhood metadata\\n        /// @dev zero means no metadata definition\\n        mapping(uint256 tokenId => uint256 metadataType) _metadata;\\n        /// @dev neighborhood number to string mapping\\n        mapping(uint256 neighborhoodNumber => string neighborhoodName) _neighborhoodName;\\n    }\\n\\n    /// @custom:storage-location erc7201:thesandbox.storage.land.registry.LandMetadataBase\\n    bytes32 internal constant METADATA_STORAGE_LOCATION =\\n        0x8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00;\\n\\n    function _getLandMetadataStorage() private pure returns (LandMetadataStorage storage $) {\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            $.slot := METADATA_STORAGE_LOCATION\\n        }\\n    }\\n\\n    /// @notice set the packed metadata (premiumness + neighborhood) for a land\\n    /// @param tokenId the token id\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @param premium true if is premium\\n    function _setMetadataForTokenId(uint256 tokenId, uint256 neighborhoodId, bool premium) internal {\\n        uint256 bits = _getBits(tokenId);\\n        uint256 mask = ~(LAND_MASK << bits);\\n        uint256 metadata = neighborhoodId;\\n        if (premium) metadata |= PREMIUM_MASK;\\n        _setMetadata(tokenId, (_getMetadata(tokenId) & mask) | (metadata << bits));\\n    }\\n\\n    /// @notice get the packed metadata for a single land\\n    /// @param tokenId the base token id floor LANDS_PER_WORD\\n    /// @return neighborhoodId the number that identifies the neighborhood\\n    /// @return premium true if is premium\\n    function _getMetadataForTokenId(uint256 tokenId) internal view returns (uint256 neighborhoodId, bool premium) {\\n        uint256 bits = _getBits(tokenId);\\n        uint256 metadata = _getMetadata(tokenId) >> bits;\\n        neighborhoodId = metadata & NEIGHBORHOOD_MASK;\\n        premium = (metadata & PREMIUM_MASK) != 0;\\n    }\\n\\n    /// @notice set the packed metadata for LANDS_PER_WORD lands at once\\n    /// @param tokenId the base token id floor LANDS_PER_WORD\\n    /// @param metadata the packed metadata for LANDS_PER_WORD lands\\n    function _setMetadata(uint256 tokenId, uint256 metadata) internal {\\n        LandMetadataStorage storage $ = _getLandMetadataStorage();\\n        $._metadata[_getKey(tokenId)] = metadata;\\n    }\\n\\n    /// @notice return the packed metadata for LANDS_PER_WORD lands at once\\n    /// @param tokenId the base token id floor LANDS_PER_WORD\\n    function _getMetadata(uint256 tokenId) internal view returns (uint256) {\\n        LandMetadataStorage storage $ = _getLandMetadataStorage();\\n        return $._metadata[_getKey(tokenId)];\\n    }\\n\\n    /// @notice set neighborhood name\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    /// @param name human readable name\\n    function _setNeighborhoodName(uint256 neighborhoodId, string memory name) internal {\\n        LandMetadataStorage storage $ = _getLandMetadataStorage();\\n        $._neighborhoodName[neighborhoodId] = name;\\n    }\\n\\n    /// @notice return the neighborhood name\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    function _getNeighborhoodName(uint256 neighborhoodId) internal view returns (string memory) {\\n        LandMetadataStorage storage $ = _getLandMetadataStorage();\\n        if (neighborhoodId == 0) {\\n            return UNKNOWN_NEIGHBORHOOD;\\n        }\\n        return $._neighborhoodName[neighborhoodId];\\n    }\\n\\n    /// @notice return the amount of bits must be shifted to access the packed metadata for a land\\n    /// @param tokenId the token id\\n    function _getBits(uint256 tokenId) internal pure returns (uint256) {\\n        return (tokenId % LANDS_PER_WORD) * BITS_PER_LAND;\\n    }\\n\\n    /// @notice return the tokenId floor LANDS_PER_WORD\\n    /// @param tokenId the token id\\n    function _getKey(uint256 tokenId) internal pure returns (uint256) {\\n        return LANDS_PER_WORD * (tokenId / LANDS_PER_WORD);\\n    }\\n\\n    /// @notice checks if a neighborhoodId is in range\\n    /// @param neighborhoodId the number that identifies the neighborhood\\n    function _isValidNeighborhoodId(uint256 neighborhoodId) internal pure {\\n        // Cannot set it to unknown (zero).\\n        if (neighborhoodId == 0) {\\n            revert InvalidNeighborhoodId(neighborhoodId);\\n        }\\n        // the last id: NEIGHBORHOOD_MASK is left out to use as escape char if needed in the future.\\n        if (neighborhoodId >= NEIGHBORHOOD_MASK) {\\n            revert InvalidNeighborhoodId(neighborhoodId);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x4a7d2d38f2f081f532937b207130abf279ac143512ecb8645e8c81daa60075ff\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061001961001e565b6100d0565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00805468010000000000000000900460ff161561006e5760405163f92ee8a960e01b815260040160405180910390fd5b80546001600160401b03908116146100cd5780546001600160401b0319166001600160401b0390811782556040519081527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a15b50565b611f7d806100df6000396000f3fe608060405234801561001057600080fd5b50600436106101c45760003560e01c80638d82249a116100f9578063aa52370e11610097578063ca15c87311610071578063ca15c8731461045d578063d547741f14610470578063dcc388e814610483578063ff2b646f1461049657600080fd5b8063aa52370e1461042f578063c4d66de814610442578063c786f68b1461045557600080fd5b80639ed57379116100d35780639ed57379146103df578063a217fddf146103f2578063a47c5253146103fa578063a574cea41461040d57600080fd5b80638d82249a146103495780639010d07c1461035c57806391d148541461038757600080fd5b80634802733f116101665780636e6cecae116101405780636e6cecae146103135780636eb9cb351461031b578063736e47e71461032e57806377074f0c1461033657600080fd5b80634802733f146102a257806350d5e9f7146102c2578063517065491461030b57600080fd5b806326ec0141116101a257806326ec0141146102545780632b26a407146102695780632f2ff15d1461027c57806336568abe1461028f57600080fd5b806301ffc9a7146101c9578063029bca78146101f1578063248a9ca314610204575b600080fd5b6101dc6101d7366004611893565b61049e565b60405190151581526020015b60405180910390f35b6101dc6101ff3660046118d5565b6104fa565b6102466102123660046118d5565b60009081527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602052604090206001015490565b6040519081526020016101e8565b610267610262366004611903565b61050e565b005b6102466102773660046118d5565b6105d5565b61026761028a36600461194f565b6105e9565b61026761029d36600461194f565b610633565b6102b56102b03660046119c7565b610684565b6040516101e89190611a09565b6102fe6040518060400160405280600781526020017f756e6b6e6f776e0000000000000000000000000000000000000000000000000081525081565b6040516101e89190611a9e565b610246610778565b610246610798565b610267610329366004611ab1565b6107a8565b610246601081565b6102fe6103443660046118d5565b6108cb565b6102676103573660046119c7565b6108d6565b61036f61036a366004611b26565b610a89565b6040516001600160a01b0390911681526020016101e8565b6101dc61039536600461194f565b60009182527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602090815260408084206001600160a01b0393909316845291905290205460ff1690565b6102676103ed366004611b48565b610ac2565b610246600081565b610267610408366004611bc4565b610ba3565b61042061041b3660046118d5565b610c62565b6040516101e893929190611be7565b6102fe61043d3660046118d5565b610c85565b610267610450366004611c11565b610ca5565b610246610e1c565b61024661046b3660046118d5565b610e44565b61026761047e36600461194f565b610e7c565b610267610491366004611b26565b610ec0565b610246610f80565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f5a05180f0000000000000000000000000000000000000000000000000000000014806104f457506104f482610f8f565b92915050565b60008061050683611026565b949350505050565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff1661055d57604051634755657960e01b815260040160405180910390fd5b6105668161109b565b60008061057285611026565b9150915061058185848661113e565b60408051838152821515602082015280820185905285151560608201529051869133917fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e5469181900360800190a35050505050565b6000806105e183611026565b509392505050565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b6268006020526040902060010154610623816111ae565b61062d83836111b8565b50505050565b6001600160a01b0381163314610675576040517f6697b23200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61067f8282611206565b505050565b60608160008167ffffffffffffffff8111156106a2576106a2611c2c565b6040519080825280602002602001820160405280156106e757816020015b60408051808201909152600080825260208201528152602001906001900390816106c05790505b50905060005b8281101561076f57604051806040016040528061072188888581811061071557610715611c42565b90506020020135611254565b815260200161074788888581811061073b5761073b611c42565b9050602002013561126c565b81525082828151811061075c5761075c611c42565b60209081029190910101526001016106ed565b50949350505050565b60016107876010610100611c84565b6107919190611c98565b6001901b81565b6107a56010610100611c84565b81565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff166107f757604051634755657960e01b815260040160405180910390fd5b8060005b81811015610882573684848381811061081657610816611c42565b905060400201905061082b81600001356112b1565b1561086a576040517f0551681d000000000000000000000000000000000000000000000000000000008152813560048201526024015b60405180910390fd5b610879813560208301356112d5565b506001016107fb565b50336001600160a01b03167f191ef6818772e8b66ac43cb3de34f7f1518c755e91c4ea4f46a37567af12011784846040516108be929190611cab565b60405180910390a2505050565b60606104f482611319565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff1661092557604051634755657960e01b815260040160405180910390fd5b8060005b8181101561062d5761095e84848381811061094657610946611c42565b90506020028101906109589190611cf2565b3561109b565b6109f284848381811061097357610973611c42565b90506020028101906109859190611cf2565b3585858481811061099857610998611c42565b90506020028101906109aa9190611cf2565b6109b8906020810190611d30565b8080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061142192505050565b838382818110610a0457610a04611c42565b9050602002810190610a169190611cf2565b35337fb88ad814671f7ca681c59ead0d6a0e55f2a771dfc8e164ea52afbd0fec42272b868685818110610a4b57610a4b611c42565b9050602002810190610a5d9190611cf2565b610a6b906020810190611d30565b604051610a79929190611d95565b60405180910390a3600101610929565b60008281527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000602081905260408220610506908461147a565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610b1157604051634755657960e01b815260040160405180910390fd5b610b1a8361109b565b610b5a8383838080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061142192505050565b82336001600160a01b03167fb88ad814671f7ca681c59ead0d6a0e55f2a771dfc8e164ea52afbd0fec42272b8484604051610b96929190611d95565b60405180910390a3505050565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610bf257604051634755657960e01b815260040160405180910390fd5b600080610bfe84611026565b91509150610c0d84838561113e565b6040805183815282151560208201529081018390528315156060820152849033907fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e546906080015b60405180910390a350505050565b6000806060610c7084611026565b93509150610c7d82611319565b929491935050565b60606000610c9283611026565b509050610c9e81611319565b9392505050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00805468010000000000000000810460ff16159067ffffffffffffffff16600081158015610cf05750825b905060008267ffffffffffffffff166001148015610d0d5750303b155b905081158015610d1b575080155b15610d52576040517ff92ee8a900000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b84547fffffffffffffffffffffffffffffffffffffffffffffffff00000000000000001660011785558315610d9d57845468ff00000000000000001916680100000000000000001785555b610da5611486565b610dad611486565b610db5611486565b610dbd611486565b610dc86000876111b8565b508315610e1457845468ff000000000000000019168555604051600181527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a15b505050505050565b600180610e2c6010610100611c84565b610e369190611c98565b6001901b6107a59190611c98565b60008181527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000602081905260408220610c9e90611490565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b6268006020526040902060010154610eb6816111ae565b61062d8383611206565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610f0f57604051634755657960e01b815260040160405180910390fd5b610f188161109b565b600080610f2484611026565b91509150610f3384848361113e565b60408051838152821515602082018190529181018590526060810191909152849033907fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e54690608001610c54565b6001610e366010610100611c84565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b0000000000000000000000000000000000000000000000000000000014806104f457507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316146104f4565b6000806000611034846112b1565b90506000816110428661126c565b901c90506001806110566010610100611c84565b6110609190611c98565b6001901b61106e9190611c98565b8116935060016110816010610100611c84565b61108b9190611c98565b9395600190941b16151593505050565b806000036110d8576040517fdc223cac00000000000000000000000000000000000000000000000000000000815260048101829052602401610861565b6001806110e86010610100611c84565b6110f29190611c98565b6001901b6111009190611c98565b811061113b576040517fdc223cac00000000000000000000000000000000000000000000000000000000815260048101829052602401610861565b50565b6000611149846112b1565b9050600081600161115d6010610100611c84565b6001901b61116b9190611c98565b901b1990508383156111965760016111866010610100611c84565b6111909190611c98565b6001901b175b610e148682851b846111a78361126c565b16176112d5565b61113b813361149a565b60007fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000816111e6858561152b565b9050801561050657600085815260208390526040902061076f90856115fa565b60007fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e8237170593200081611234858561160f565b9050801561050657600085815260208390526040902061076f90856116b5565b6000611261601083611c84565b6104f4906010611dc4565b60007f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00808261129a85611254565b815260200190815260200160002054915050919050565b60006112c06010610100611c84565b6112cb601084611ddb565b6104f49190611dc4565b7f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c008181600061130386611254565b8152602081019190915260400160002055505050565b60607f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00600083900361138057505060408051808201909152600781527f756e6b6e6f776e000000000000000000000000000000000000000000000000006020820152919050565b60008381526001820160205260409020805461139b90611def565b80601f01602080910402602001604051908101604052809291908181526020018280546113c790611def565b80156114145780601f106113e957610100808354040283529160200191611414565b820191906000526020600020905b8154815290600101906020018083116113f757829003601f168201915b5050505050915050919050565b60008281527f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c01602052604090207f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c009061062d8382611e71565b6000610c9e83836116ca565b61148e6116f4565b565b60006104f4825490565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602090815260408083206001600160a01b038516845290915290205460ff16611527576040517fe2517d3f0000000000000000000000000000000000000000000000000000000081526001600160a01b038216600482015260248101839052604401610861565b5050565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602081815260408084206001600160a01b038616855290915282205460ff166115f0576000848152602082815260408083206001600160a01b03871684529091529020805460ff191660011790556115a63390565b6001600160a01b0316836001600160a01b0316857f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a460019150506104f4565b60009150506104f4565b6000610c9e836001600160a01b03841661175b565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602081815260408084206001600160a01b038616855290915282205460ff16156115f0576000848152602082815260408083206001600160a01b0387168085529252808320805460ff1916905551339287917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a460019150506104f4565b6000610c9e836001600160a01b0384166117aa565b60008260000182815481106116e1576116e1611c42565b9060005260206000200154905092915050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a005468010000000000000000900460ff1661148e576040517fd7e6bcf800000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b60008181526001830160205260408120546117a2575081546001818101845560008481526020808220909301849055845484825282860190935260409020919091556104f4565b5060006104f4565b600081815260018301602052604081205480156115f05760006117ce600183611c98565b85549091506000906117e290600190611c98565b905080821461184757600086600001828154811061180257611802611c42565b906000526020600020015490508087600001848154811061182557611825611c42565b6000918252602080832090910192909255918252600188019052604090208390555b855486908061185857611858611f31565b6001900381819060005260206000200160009055905585600101600086815260200190815260200160002060009055600193505050506104f4565b6000602082840312156118a557600080fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610c9e57600080fd5b6000602082840312156118e757600080fd5b5035919050565b803580151581146118fe57600080fd5b919050565b60008060006060848603121561191857600080fd5b83359250611928602085016118ee565b9150604084013590509250925092565b80356001600160a01b03811681146118fe57600080fd5b6000806040838503121561196257600080fd5b8235915061197260208401611938565b90509250929050565b60008083601f84011261198d57600080fd5b50813567ffffffffffffffff8111156119a557600080fd5b6020830191508360208260051b85010111156119c057600080fd5b9250929050565b600080602083850312156119da57600080fd5b823567ffffffffffffffff8111156119f157600080fd5b6119fd8582860161197b565b90969095509350505050565b602080825282518282018190526000919060409081850190868401855b82811015611a4b57815180518552860151868501529284019290850190600101611a26565b5091979650505050505050565b6000815180845260005b81811015611a7e57602081850181015186830182015201611a62565b506000602082860101526020601f19601f83011685010191505092915050565b602081526000610c9e6020830184611a58565b60008060208385031215611ac457600080fd5b823567ffffffffffffffff80821115611adc57600080fd5b818501915085601f830112611af057600080fd5b813581811115611aff57600080fd5b8660208260061b8501011115611b1457600080fd5b60209290920196919550909350505050565b60008060408385031215611b3957600080fd5b50508035926020909101359150565b600080600060408486031215611b5d57600080fd5b83359250602084013567ffffffffffffffff80821115611b7c57600080fd5b818601915086601f830112611b9057600080fd5b813581811115611b9f57600080fd5b876020828501011115611bb157600080fd5b6020830194508093505050509250925092565b60008060408385031215611bd757600080fd5b82359150611972602084016118ee565b8315158152826020820152606060408201526000611c086060830184611a58565b95945050505050565b600060208284031215611c2357600080fd5b610c9e82611938565b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052601260045260246000fd5b634e487b7160e01b600052601160045260246000fd5b600082611c9357611c93611c58565b500490565b818103818111156104f4576104f4611c6e565b6020808252818101839052600090604080840186845b87811015611ce5578135835284820135858401529183019190830190600101611cc1565b5090979650505050505050565b600082357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc1833603018112611d2657600080fd5b9190910192915050565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1843603018112611d6557600080fd5b83018035915067ffffffffffffffff821115611d8057600080fd5b6020019150368190038213156119c057600080fd5b60208152816020820152818360408301376000818301604090810191909152601f909201601f19160101919050565b80820281158282048414176104f4576104f4611c6e565b600082611dea57611dea611c58565b500690565b600181811c90821680611e0357607f821691505b602082108103611e2357634e487b7160e01b600052602260045260246000fd5b50919050565b601f82111561067f576000816000526020600020601f850160051c81016020861015611e525750805b601f850160051c820191505b81811015610e1457828155600101611e5e565b815167ffffffffffffffff811115611e8b57611e8b611c2c565b611e9f81611e998454611def565b84611e29565b602080601f831160018114611ed45760008415611ebc5750858301515b600019600386901b1c1916600185901b178555610e14565b600085815260208120601f198616915b82811015611f0357888601518255948401946001909101908401611ee4565b5085821015611f215787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b634e487b7160e01b600052603160045260246000fdfea26469706673582212209fc3159dbe0d89e0d80ef602075117e8b87eb5c315f170b60098551cfcf4b9f364736f6c63430008170033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101c45760003560e01c80638d82249a116100f9578063aa52370e11610097578063ca15c87311610071578063ca15c8731461045d578063d547741f14610470578063dcc388e814610483578063ff2b646f1461049657600080fd5b8063aa52370e1461042f578063c4d66de814610442578063c786f68b1461045557600080fd5b80639ed57379116100d35780639ed57379146103df578063a217fddf146103f2578063a47c5253146103fa578063a574cea41461040d57600080fd5b80638d82249a146103495780639010d07c1461035c57806391d148541461038757600080fd5b80634802733f116101665780636e6cecae116101405780636e6cecae146103135780636eb9cb351461031b578063736e47e71461032e57806377074f0c1461033657600080fd5b80634802733f146102a257806350d5e9f7146102c2578063517065491461030b57600080fd5b806326ec0141116101a257806326ec0141146102545780632b26a407146102695780632f2ff15d1461027c57806336568abe1461028f57600080fd5b806301ffc9a7146101c9578063029bca78146101f1578063248a9ca314610204575b600080fd5b6101dc6101d7366004611893565b61049e565b60405190151581526020015b60405180910390f35b6101dc6101ff3660046118d5565b6104fa565b6102466102123660046118d5565b60009081527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602052604090206001015490565b6040519081526020016101e8565b610267610262366004611903565b61050e565b005b6102466102773660046118d5565b6105d5565b61026761028a36600461194f565b6105e9565b61026761029d36600461194f565b610633565b6102b56102b03660046119c7565b610684565b6040516101e89190611a09565b6102fe6040518060400160405280600781526020017f756e6b6e6f776e0000000000000000000000000000000000000000000000000081525081565b6040516101e89190611a9e565b610246610778565b610246610798565b610267610329366004611ab1565b6107a8565b610246601081565b6102fe6103443660046118d5565b6108cb565b6102676103573660046119c7565b6108d6565b61036f61036a366004611b26565b610a89565b6040516001600160a01b0390911681526020016101e8565b6101dc61039536600461194f565b60009182527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602090815260408084206001600160a01b0393909316845291905290205460ff1690565b6102676103ed366004611b48565b610ac2565b610246600081565b610267610408366004611bc4565b610ba3565b61042061041b3660046118d5565b610c62565b6040516101e893929190611be7565b6102fe61043d3660046118d5565b610c85565b610267610450366004611c11565b610ca5565b610246610e1c565b61024661046b3660046118d5565b610e44565b61026761047e36600461194f565b610e7c565b610267610491366004611b26565b610ec0565b610246610f80565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f5a05180f0000000000000000000000000000000000000000000000000000000014806104f457506104f482610f8f565b92915050565b60008061050683611026565b949350505050565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff1661055d57604051634755657960e01b815260040160405180910390fd5b6105668161109b565b60008061057285611026565b9150915061058185848661113e565b60408051838152821515602082015280820185905285151560608201529051869133917fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e5469181900360800190a35050505050565b6000806105e183611026565b509392505050565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b6268006020526040902060010154610623816111ae565b61062d83836111b8565b50505050565b6001600160a01b0381163314610675576040517f6697b23200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61067f8282611206565b505050565b60608160008167ffffffffffffffff8111156106a2576106a2611c2c565b6040519080825280602002602001820160405280156106e757816020015b60408051808201909152600080825260208201528152602001906001900390816106c05790505b50905060005b8281101561076f57604051806040016040528061072188888581811061071557610715611c42565b90506020020135611254565b815260200161074788888581811061073b5761073b611c42565b9050602002013561126c565b81525082828151811061075c5761075c611c42565b60209081029190910101526001016106ed565b50949350505050565b60016107876010610100611c84565b6107919190611c98565b6001901b81565b6107a56010610100611c84565b81565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff166107f757604051634755657960e01b815260040160405180910390fd5b8060005b81811015610882573684848381811061081657610816611c42565b905060400201905061082b81600001356112b1565b1561086a576040517f0551681d000000000000000000000000000000000000000000000000000000008152813560048201526024015b60405180910390fd5b610879813560208301356112d5565b506001016107fb565b50336001600160a01b03167f191ef6818772e8b66ac43cb3de34f7f1518c755e91c4ea4f46a37567af12011784846040516108be929190611cab565b60405180910390a2505050565b60606104f482611319565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff1661092557604051634755657960e01b815260040160405180910390fd5b8060005b8181101561062d5761095e84848381811061094657610946611c42565b90506020028101906109589190611cf2565b3561109b565b6109f284848381811061097357610973611c42565b90506020028101906109859190611cf2565b3585858481811061099857610998611c42565b90506020028101906109aa9190611cf2565b6109b8906020810190611d30565b8080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061142192505050565b838382818110610a0457610a04611c42565b9050602002810190610a169190611cf2565b35337fb88ad814671f7ca681c59ead0d6a0e55f2a771dfc8e164ea52afbd0fec42272b868685818110610a4b57610a4b611c42565b9050602002810190610a5d9190611cf2565b610a6b906020810190611d30565b604051610a79929190611d95565b60405180910390a3600101610929565b60008281527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000602081905260408220610506908461147a565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610b1157604051634755657960e01b815260040160405180910390fd5b610b1a8361109b565b610b5a8383838080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061142192505050565b82336001600160a01b03167fb88ad814671f7ca681c59ead0d6a0e55f2a771dfc8e164ea52afbd0fec42272b8484604051610b96929190611d95565b60405180910390a3505050565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610bf257604051634755657960e01b815260040160405180910390fd5b600080610bfe84611026565b91509150610c0d84838561113e565b6040805183815282151560208201529081018390528315156060820152849033907fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e546906080015b60405180910390a350505050565b6000806060610c7084611026565b93509150610c7d82611319565b929491935050565b60606000610c9283611026565b509050610c9e81611319565b9392505050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00805468010000000000000000810460ff16159067ffffffffffffffff16600081158015610cf05750825b905060008267ffffffffffffffff166001148015610d0d5750303b155b905081158015610d1b575080155b15610d52576040517ff92ee8a900000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b84547fffffffffffffffffffffffffffffffffffffffffffffffff00000000000000001660011785558315610d9d57845468ff00000000000000001916680100000000000000001785555b610da5611486565b610dad611486565b610db5611486565b610dbd611486565b610dc86000876111b8565b508315610e1457845468ff000000000000000019168555604051600181527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a15b505050505050565b600180610e2c6010610100611c84565b610e369190611c98565b6001901b6107a59190611c98565b60008181527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000602081905260408220610c9e90611490565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b6268006020526040902060010154610eb6816111ae565b61062d8383611206565b3360009081527fb7db2dd08fcb62d0c9e08c51941cae53c267786a0b75803fb7960902fc8ef97d602052604090205460ff16610f0f57604051634755657960e01b815260040160405180910390fd5b610f188161109b565b600080610f2484611026565b91509150610f3384848361113e565b60408051838152821515602082018190529181018590526060810191909152849033907fe38501760364f3724945b2d4e1e11cb741d06760567cfda59e07f8c72c98e54690608001610c54565b6001610e366010610100611c84565b60007fffffffff0000000000000000000000000000000000000000000000000000000082167f7965db0b0000000000000000000000000000000000000000000000000000000014806104f457507f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316146104f4565b6000806000611034846112b1565b90506000816110428661126c565b901c90506001806110566010610100611c84565b6110609190611c98565b6001901b61106e9190611c98565b8116935060016110816010610100611c84565b61108b9190611c98565b9395600190941b16151593505050565b806000036110d8576040517fdc223cac00000000000000000000000000000000000000000000000000000000815260048101829052602401610861565b6001806110e86010610100611c84565b6110f29190611c98565b6001901b6111009190611c98565b811061113b576040517fdc223cac00000000000000000000000000000000000000000000000000000000815260048101829052602401610861565b50565b6000611149846112b1565b9050600081600161115d6010610100611c84565b6001901b61116b9190611c98565b901b1990508383156111965760016111866010610100611c84565b6111909190611c98565b6001901b175b610e148682851b846111a78361126c565b16176112d5565b61113b813361149a565b60007fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000816111e6858561152b565b9050801561050657600085815260208390526040902061076f90856115fa565b60007fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e8237170593200081611234858561160f565b9050801561050657600085815260208390526040902061076f90856116b5565b6000611261601083611c84565b6104f4906010611dc4565b60007f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00808261129a85611254565b815260200190815260200160002054915050919050565b60006112c06010610100611c84565b6112cb601084611ddb565b6104f49190611dc4565b7f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c008181600061130386611254565b8152602081019190915260400160002055505050565b60607f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c00600083900361138057505060408051808201909152600781527f756e6b6e6f776e000000000000000000000000000000000000000000000000006020820152919050565b60008381526001820160205260409020805461139b90611def565b80601f01602080910402602001604051908101604052809291908181526020018280546113c790611def565b80156114145780601f106113e957610100808354040283529160200191611414565b820191906000526020600020905b8154815290600101906020018083116113f757829003601f168201915b5050505050915050919050565b60008281527f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c01602052604090207f8cfaa91df3342c358a2782e14267fc6692d3715672a46842d54671de765d4c009061062d8382611e71565b6000610c9e83836116ca565b61148e6116f4565b565b60006104f4825490565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602090815260408083206001600160a01b038516845290915290205460ff16611527576040517fe2517d3f0000000000000000000000000000000000000000000000000000000081526001600160a01b038216600482015260248101839052604401610861565b5050565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602081815260408084206001600160a01b038616855290915282205460ff166115f0576000848152602082815260408083206001600160a01b03871684529091529020805460ff191660011790556115a63390565b6001600160a01b0316836001600160a01b0316857f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a460019150506104f4565b60009150506104f4565b6000610c9e836001600160a01b03841661175b565b60008281527f02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800602081815260408084206001600160a01b038616855290915282205460ff16156115f0576000848152602082815260408083206001600160a01b0387168085529252808320805460ff1916905551339287917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a460019150506104f4565b6000610c9e836001600160a01b0384166117aa565b60008260000182815481106116e1576116e1611c42565b9060005260206000200154905092915050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a005468010000000000000000900460ff1661148e576040517fd7e6bcf800000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b60008181526001830160205260408120546117a2575081546001818101845560008481526020808220909301849055845484825282860190935260409020919091556104f4565b5060006104f4565b600081815260018301602052604081205480156115f05760006117ce600183611c98565b85549091506000906117e290600190611c98565b905080821461184757600086600001828154811061180257611802611c42565b906000526020600020015490508087600001848154811061182557611825611c42565b6000918252602080832090910192909255918252600188019052604090208390555b855486908061185857611858611f31565b6001900381819060005260206000200160009055905585600101600086815260200190815260200160002060009055600193505050506104f4565b6000602082840312156118a557600080fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610c9e57600080fd5b6000602082840312156118e757600080fd5b5035919050565b803580151581146118fe57600080fd5b919050565b60008060006060848603121561191857600080fd5b83359250611928602085016118ee565b9150604084013590509250925092565b80356001600160a01b03811681146118fe57600080fd5b6000806040838503121561196257600080fd5b8235915061197260208401611938565b90509250929050565b60008083601f84011261198d57600080fd5b50813567ffffffffffffffff8111156119a557600080fd5b6020830191508360208260051b85010111156119c057600080fd5b9250929050565b600080602083850312156119da57600080fd5b823567ffffffffffffffff8111156119f157600080fd5b6119fd8582860161197b565b90969095509350505050565b602080825282518282018190526000919060409081850190868401855b82811015611a4b57815180518552860151868501529284019290850190600101611a26565b5091979650505050505050565b6000815180845260005b81811015611a7e57602081850181015186830182015201611a62565b506000602082860101526020601f19601f83011685010191505092915050565b602081526000610c9e6020830184611a58565b60008060208385031215611ac457600080fd5b823567ffffffffffffffff80821115611adc57600080fd5b818501915085601f830112611af057600080fd5b813581811115611aff57600080fd5b8660208260061b8501011115611b1457600080fd5b60209290920196919550909350505050565b60008060408385031215611b3957600080fd5b50508035926020909101359150565b600080600060408486031215611b5d57600080fd5b83359250602084013567ffffffffffffffff80821115611b7c57600080fd5b818601915086601f830112611b9057600080fd5b813581811115611b9f57600080fd5b876020828501011115611bb157600080fd5b6020830194508093505050509250925092565b60008060408385031215611bd757600080fd5b82359150611972602084016118ee565b8315158152826020820152606060408201526000611c086060830184611a58565b95945050505050565b600060208284031215611c2357600080fd5b610c9e82611938565b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052601260045260246000fd5b634e487b7160e01b600052601160045260246000fd5b600082611c9357611c93611c58565b500490565b818103818111156104f4576104f4611c6e565b6020808252818101839052600090604080840186845b87811015611ce5578135835284820135858401529183019190830190600101611cc1565b5090979650505050505050565b600082357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc1833603018112611d2657600080fd5b9190910192915050565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1843603018112611d6557600080fd5b83018035915067ffffffffffffffff821115611d8057600080fd5b6020019150368190038213156119c057600080fd5b60208152816020820152818360408301376000818301604090810191909152601f909201601f19160101919050565b80820281158282048414176104f4576104f4611c6e565b600082611dea57611dea611c58565b500690565b600181811c90821680611e0357607f821691505b602082108103611e2357634e487b7160e01b600052602260045260246000fd5b50919050565b601f82111561067f576000816000526020600020601f850160051c81016020861015611e525750805b601f850160051c820191505b81811015610e1457828155600101611e5e565b815167ffffffffffffffff811115611e8b57611e8b611c2c565b611e9f81611e998454611def565b84611e29565b602080601f831160018114611ed45760008415611ebc5750858301515b600019600386901b1c1916600185901b178555610e14565b600085815260208120601f198616915b82811015611f0357888601518255948401946001909101908401611ee4565b5085821015611f215787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b634e487b7160e01b600052603160045260246000fdfea26469706673582212209fc3159dbe0d89e0d80ef602075117e8b87eb5c315f170b60098551cfcf4b9f364736f6c63430008170033",
+  "devdoc": {
+    "author": "The Sandbox",
+    "custom:security-contact": "contact-blockchain@sandbox.game",
+    "errors": {
+      "AccessControlBadConfirmation()": [
+        {
+          "details": "The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}."
+        }
+      ],
+      "AccessControlUnauthorizedAccount(address,bytes32)": [
+        {
+          "details": "The `account` is missing a role."
+        }
+      ],
+      "InvalidBaseTokenId(uint256)": [
+        {
+          "params": {
+            "tokenId": "the id of the token"
+          }
+        }
+      ],
+      "InvalidInitialization()": [
+        {
+          "details": "The contract is already initialized."
+        }
+      ],
+      "InvalidNeighborhoodId(uint256)": [
+        {
+          "params": {
+            "neighborhoodId": "the invalid neighborhoodId"
+          }
+        }
+      ],
+      "NotInitializing()": [
+        {
+          "details": "The contract is not initializing."
+        }
+      ]
+    },
+    "events": {
+      "BatchMetadataSet(address,(uint256,uint256)[])": {
+        "params": {
+          "data": "token id and metadata",
+          "operator": "the sender of the transaction"
+        }
+      },
+      "Initialized(uint64)": {
+        "details": "Triggered when the contract has been initialized or reinitialized."
+      },
+      "MetadataSet(address,uint256,uint256,bool,uint256,bool)": {
+        "params": {
+          "isPremium": "true if land is premium",
+          "newNeighborhoodId": "the number that identifies the neighborhood",
+          "oldNeighborhoodId": "the number that identifies the neighborhood before changing it",
+          "operator": "the sender of the transaction",
+          "tokenId": "the token id",
+          "wasPremium": "true if land was premium"
+        }
+      },
+      "NeighborhoodNameSet(address,uint256,string)": {
+        "params": {
+          "name": "human readable name",
+          "neighborhoodId": "the number that identifies the neighborhood",
+          "operator": "the sender of the transaction"
+        }
+      },
+      "RoleAdminChanged(bytes32,bytes32,bytes32)": {
+        "details": "Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this."
+      },
+      "RoleGranted(bytes32,address,address)": {
+        "details": "Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {AccessControl-_setupRole}."
+      },
+      "RoleRevoked(bytes32,address,address)": {
+        "details": "Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)"
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "batchGetMetadata(uint256[])": {
+        "details": "used to debug, extracting a lot of information that must be unpacked at once.",
+        "params": {
+          "tokenIds": "the token ids"
+        },
+        "returns": {
+          "_0": "the raw metadata for a series of tokenIds"
+        }
+      },
+      "batchSetMetadata((uint256,uint256)[])": {
+        "details": "use with care, we can set to the metadata for some lands to unknown (zero)",
+        "params": {
+          "data": "token id and metadata"
+        }
+      },
+      "batchSetNeighborhoodName((uint256,string)[])": {
+        "params": {
+          "data": "array of neighborhood ids and names to set"
+        }
+      },
+      "constructor": {
+        "custom:oz-upgrades-unsafe-allow": "constructor",
+        "details": "this protects the implementation contract from being initialized."
+      },
+      "getMetadata(uint256)": {
+        "params": {
+          "tokenId": "the token id"
+        },
+        "returns": {
+          "neighborhoodId": "the number that identifies the neighborhood",
+          "neighborhoodName": "the neighborhood name",
+          "premium": "true if the land is premium"
+        }
+      },
+      "getNeighborhoodId(uint256)": {
+        "params": {
+          "tokenId": "the token id"
+        },
+        "returns": {
+          "_0": "the neighborhoodId number"
+        }
+      },
+      "getNeighborhoodName(uint256)": {
+        "params": {
+          "tokenId": "the token id"
+        },
+        "returns": {
+          "_0": "the neighborhood name"
+        }
+      },
+      "getNeighborhoodNameForId(uint256)": {
+        "params": {
+          "neighborhoodId": "the number that identifies the neighborhood"
+        },
+        "returns": {
+          "_0": "the neighborhood name"
+        }
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "getRoleMember(bytes32,uint256)": {
+        "details": "Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information."
+      },
+      "getRoleMemberCount(bytes32)": {
+        "details": "Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "initialize(address)": {
+        "params": {
+          "admin_": "address that have admin access and can assign roles."
+        }
+      },
+      "isPremium(uint256)": {
+        "params": {
+          "tokenId": "the token id"
+        },
+        "returns": {
+          "_0": "true if the land is premium"
+        }
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event."
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event."
+      },
+      "setMetadata(uint256,bool,uint256)": {
+        "params": {
+          "newNeighborhoodId": "the number that identifies the neighborhood",
+          "premium": "true if the land is premium",
+          "tokenId": "the token id"
+        }
+      },
+      "setNeighborhoodId(uint256,uint256)": {
+        "params": {
+          "newNeighborhoodId": "the number that identifies the neighborhood",
+          "tokenId": "the token id"
+        }
+      },
+      "setNeighborhoodName(uint256,string)": {
+        "params": {
+          "name": "human readable name",
+          "neighborhoodId": "the number that identifies the neighborhood"
+        }
+      },
+      "setPremium(uint256,bool)": {
+        "params": {
+          "premium": "true if the land is premium",
+          "tokenId": "the token id"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "title": "LandMetadataRegistry",
+    "version": 1
+  },
+  "userdoc": {
+    "errors": {
+      "InvalidAddress()": [
+        {
+          "notice": "an address passed as argument is invalid"
+        }
+      ],
+      "InvalidArgument()": [
+        {
+          "notice": "an argument passed is invalid"
+        }
+      ],
+      "InvalidBaseTokenId(uint256)": [
+        {
+          "notice": "the base token id used for a batch operation is wrong"
+        }
+      ],
+      "InvalidLength()": [
+        {
+          "notice": "an array argument has an invalid length"
+        }
+      ],
+      "InvalidNeighborhoodId(uint256)": [
+        {
+          "notice": "the neighborhoodId is invalid"
+        }
+      ],
+      "OnlyAdmin()": [
+        {
+          "notice": "only admin can call this function"
+        }
+      ]
+    },
+    "events": {
+      "BatchMetadataSet(address,(uint256,uint256)[])": {
+        "notice": "This event is emitted when the metadata is set in batch"
+      },
+      "MetadataSet(address,uint256,uint256,bool,uint256,bool)": {
+        "notice": "This event is emitted when the metadata is set for a single land"
+      },
+      "NeighborhoodNameSet(address,uint256,string)": {
+        "notice": "This event is emitted when the neighborhood name is set"
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "BITS_PER_LAND()": {
+        "notice": "bits of information stored for each land: for example: 16"
+      },
+      "LANDS_PER_WORD()": {
+        "notice": "amount of land information that can be stored in one EVM word"
+      },
+      "LAND_MASK()": {
+        "notice": "used to mask the bits of information stored per land, for example: 0xFFFF"
+      },
+      "NEIGHBORHOOD_MASK()": {
+        "notice": "mask used to extract the neighborhood number, for example: 0x7FFF"
+      },
+      "PREMIUM_MASK()": {
+        "notice": "mask used to extract the premium bit, for example: 0x8000"
+      },
+      "UNKNOWN_NEIGHBORHOOD()": {
+        "notice": "value returned when the neighborhood is not set yet."
+      },
+      "batchGetMetadata(uint256[])": {
+        "notice": "return the metadata of LANDS_PER_WORD lands at once"
+      },
+      "batchSetMetadata((uint256,uint256)[])": {
+        "notice": "set the metadata for LANDS_PER_WORD lands at the same time in batch"
+      },
+      "batchSetNeighborhoodName((uint256,string)[])": {
+        "notice": "set neighborhood name in batch"
+      },
+      "getMetadata(uint256)": {
+        "notice": "return the metadata for one land"
+      },
+      "getNeighborhoodId(uint256)": {
+        "notice": "return the id that identifies the neighborhood"
+      },
+      "getNeighborhoodName(uint256)": {
+        "notice": "return the neighborhood name"
+      },
+      "getNeighborhoodNameForId(uint256)": {
+        "notice": "return the neighborhood name using neighborhood id as the key"
+      },
+      "initialize(address)": {
+        "notice": "initializer method, called during deployment"
+      },
+      "isPremium(uint256)": {
+        "notice": "return true if a land is premium"
+      },
+      "setMetadata(uint256,bool,uint256)": {
+        "notice": "set the premiumness for one land"
+      },
+      "setNeighborhoodId(uint256,uint256)": {
+        "notice": "set the neighborhood for one land"
+      },
+      "setNeighborhoodName(uint256,string)": {
+        "notice": "set neighborhood name"
+      },
+      "setPremium(uint256,bool)": {
+        "notice": "set the premiumness for one land"
+      }
+    },
+    "notice": "Store information about the lands (premiumness and neighborhood)",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
