@@ -66,7 +66,7 @@ export function shouldMatchOrdersForBundle() {
       ERC721Contract: Contract,
       ERC1155Contract: Contract,
       LandContract: Contract,
-      protocolFeeSecondary: number,
+      protocolFeePrimary: number,
       defaultFeeReceiver: Signer,
       maker: Signer,
       taker: Signer,
@@ -84,21 +84,30 @@ export function shouldMatchOrdersForBundle() {
       orderLeft: Order,
       orderRight: Order,
       makerSig: string,
-      takerSig: string;
+      takerSig: string,
+      TSB_SECONDARY_MARKET_SELLER_ROLE: string;
 
     describe('Bundle x ERC20', function () {
       beforeEach(async function () {
         ({
           ExchangeContractAsUser,
+          ExchangeContractAsAdmin,
           OrderValidatorAsAdmin,
           ERC20Contract,
           ERC721Contract,
           ERC1155Contract,
-          protocolFeeSecondary,
+          protocolFeePrimary,
           defaultFeeReceiver,
           user1: maker,
           user2: taker,
+          TSB_SECONDARY_MARKET_SELLER_ROLE,
         } = await loadFixture(deployFixtures));
+
+        // grant tsb bundle seller role to seller
+        await ExchangeContractAsAdmin.grantRole(
+          TSB_SECONDARY_MARKET_SELLER_ROLE,
+          await maker.getAddress()
+        );
 
         priceDistribution = {
           erc721Prices: [[4000000000]],
@@ -228,6 +237,107 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.revertedWith('Bundle price mismatch');
       });
 
+      it('should not execute match order between Bundle and Bundle', async function () {
+        // Set up ERC721 for maker
+        await ERC721Contract.mint(await maker.getAddress(), 10);
+        await ERC721Contract.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          1
+        );
+
+        // Set up ERC1155 for taker
+        await ERC1155Contract.mint(await taker.getAddress(), 10, 50);
+
+        await ERC1155Contract.connect(taker).setApprovalForAll(
+          await ExchangeContractAsUser.getAddress(),
+          true
+        );
+
+        // Construct makerAsset bundle
+        priceDistribution = {
+          erc721Prices: [[10000000000]],
+          erc1155Prices: [[]],
+          quadPrices: [],
+        };
+
+        bundledERC721 = [
+          {
+            erc721Address: ERC721Contract.target,
+            ids: [10],
+          },
+        ];
+
+        bundledERC1155 = [];
+
+        const bundleDataLeft: BundleData = {
+          bundledERC721,
+          bundledERC1155,
+          quads,
+          priceDistribution,
+        };
+
+        makerAsset = await AssetBundle(bundleDataLeft, 1);
+
+        // Construct takerAsset bundle
+        priceDistribution = {
+          erc721Prices: [[]],
+          erc1155Prices: [[10000000000]],
+          quadPrices: [],
+        };
+
+        bundledERC721 = [];
+
+        bundledERC1155 = [
+          {
+            erc1155Address: ERC1155Contract.target,
+            ids: [10],
+            supplies: [10],
+          },
+        ];
+
+        const bundleDataRight: BundleData = {
+          bundledERC721,
+          bundledERC1155,
+          quads,
+          priceDistribution,
+        };
+
+        takerAsset = await AssetBundle(bundleDataRight, 1);
+
+        orderLeft = await OrderDefault(
+          maker,
+          makerAsset, // Bundle
+          ZeroAddress,
+          takerAsset, // Bundle
+          1,
+          0,
+          0
+        );
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset, // Bundle
+          ZeroAddress,
+          makerAsset, // Bundle
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        await expect(
+          ExchangeContractAsUser.matchOrders([
+            {
+              orderLeft, // passing Bundle as left order
+              signatureLeft: makerSig,
+              orderRight, // passing Bundle as right order
+              signatureRight: takerSig,
+            },
+          ])
+        ).to.be.revertedWith('exchange not allowed');
+      });
+
       it('should execute a complete match order between ERC20 tokens and Bundle containing ERC20, ERC721 and ERC1155', async function () {
         orderLeft = await OrderDefault(
           maker, // ERC20
@@ -288,8 +398,8 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         const protocolFees = {
-          erc721ProtocolFees: [[protocolFeeSecondary]],
-          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          erc721ProtocolFees: [[protocolFeePrimary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
           quadProtocolFees: [],
         };
 
@@ -310,9 +420,9 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
+          (Number(protocolFeePrimary) *
             Number(priceDistribution.erc721Prices[0][0]) +
-            Number(protocolFeeSecondary) *
+            Number(protocolFeePrimary) *
               Number(priceDistribution.erc1155Prices[0][0])) /
             10000
         );
@@ -477,7 +587,7 @@ export function shouldMatchOrdersForBundle() {
 
         const protocolFees = {
           erc721ProtocolFees: [[]],
-          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
           quadProtocolFees: [],
         };
 
@@ -495,7 +605,7 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
+          (Number(protocolFeePrimary) *
             Number(priceDistribution.erc1155Prices[0][0])) /
             10000
         );
@@ -684,7 +794,7 @@ export function shouldMatchOrdersForBundle() {
 
         const protocolFees = {
           erc721ProtocolFees: [[]],
-          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
           quadProtocolFees: [],
         };
 
@@ -701,7 +811,7 @@ export function shouldMatchOrdersForBundle() {
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
           (2 *
-            (Number(protocolFeeSecondary) *
+            (Number(protocolFeePrimary) *
               Number(priceDistribution.erc1155Prices[0][0]))) /
             10000
         );
@@ -798,7 +908,7 @@ export function shouldMatchOrdersForBundle() {
 
         const protocolFees = {
           erc721ProtocolFees: [[]],
-          erc1155ProtocolFees: [[protocolFeeSecondary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
           quadProtocolFees: [],
         };
 
@@ -815,7 +925,7 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
+          (Number(protocolFeePrimary) *
             Number(priceDistribution.erc1155Prices[0][0])) /
             10000
         ); // 1 * partial fills => 1 * fee taken
@@ -869,7 +979,7 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
+          (Number(protocolFeePrimary) *
             Number(priceDistribution.erc1155Prices[0][0]) *
             2) /
             10000
@@ -893,14 +1003,21 @@ export function shouldMatchOrdersForBundle() {
           ERC20Contract,
           ERC721Contract,
           ERC1155Contract,
-          protocolFeeSecondary,
+          protocolFeePrimary,
           defaultFeeReceiver,
           user1: maker,
           user2: taker,
           LandContract,
           LandAsAdmin,
           landAdmin,
+          TSB_SECONDARY_MARKET_SELLER_ROLE,
         } = await loadFixture(deployFixtures));
+
+        // grant tsb bundle seller role to seller
+        await ExchangeContractAsAdmin.grantRole(
+          TSB_SECONDARY_MARKET_SELLER_ROLE,
+          await maker.getAddress()
+        );
 
         priceDistribution = {
           erc721Prices: [[4000000000]], // price distribution without ERC721
@@ -971,7 +1088,7 @@ export function shouldMatchOrdersForBundle() {
           data: '0x',
         };
 
-        // Create bundle for passing as right order
+        // Create bundle for passing as left order
         bundleData = {
           bundledERC721,
           bundledERC1155,
@@ -1053,9 +1170,9 @@ export function shouldMatchOrdersForBundle() {
         ).to.be.equal(1);
 
         const protocolFees = {
-          erc721ProtocolFees: [[protocolFeeSecondary]],
-          erc1155ProtocolFees: [[protocolFeeSecondary]],
-          quadProtocolFees: [protocolFeeSecondary, protocolFeeSecondary],
+          erc721ProtocolFees: [[protocolFeePrimary]],
+          erc1155ProtocolFees: [[protocolFeePrimary]],
+          quadProtocolFees: [protocolFeePrimary, protocolFeePrimary],
         };
 
         const expectedFinalReturn = calculateFinalPrice(
@@ -1075,13 +1192,13 @@ export function shouldMatchOrdersForBundle() {
         expect(
           await ERC20Contract.balanceOf(await defaultFeeReceiver.getAddress())
         ).to.be.equal(
-          (Number(protocolFeeSecondary) *
+          (Number(protocolFeePrimary) *
             Number(priceDistribution.erc721Prices[0][0]) +
-            Number(protocolFeeSecondary) *
+            Number(protocolFeePrimary) *
               Number(priceDistribution.erc1155Prices[0][0]) +
-            Number(protocolFeeSecondary) *
+            Number(protocolFeePrimary) *
               Number(priceDistribution.quadPrices[0]) +
-            Number(protocolFeeSecondary) *
+            Number(protocolFeePrimary) *
               Number(priceDistribution.quadPrices[1])) /
             10000
         );
