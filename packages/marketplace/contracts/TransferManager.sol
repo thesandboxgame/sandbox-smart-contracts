@@ -210,7 +210,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         bool isBundle = nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE;
 
         if (isBundle) {
-            if (!_isTSBPrimaryMarktSeller(nftSide.account)) {
+            if (!_isTSBPrimaryMarketSeller(nftSide.account)) {
                 remainder = _doTransfersWithFeesAndRoyaltiesForBundle(paymentSide, nftSide, nftSideRecipient);
             } else {
                 // No royalties but primary fee should be paid on the total value of the bundle
@@ -231,7 +231,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _calculateFeesAndRoyalties(
         DealSide memory nftSide
     ) internal returns (uint256 fees, bool shouldTransferRoyalties) {
-        if (_isTSBPrimaryMarktSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
+        if (_isTSBPrimaryMarketSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             shouldTransferRoyalties = false;
         } else {
@@ -650,7 +650,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
     /// @notice Function deciding if the seller is a TSB seller, to be overridden
     /// @param from Address to check
-    function _isTSBPrimaryMarktSeller(address from) internal virtual returns (bool);
+    function _isTSBPrimaryMarketSeller(address from) internal virtual returns (bool);
 
     /// @notice Function deciding if the seller is a TSB bundle seller, to be overridden
     /// @param from Address to check

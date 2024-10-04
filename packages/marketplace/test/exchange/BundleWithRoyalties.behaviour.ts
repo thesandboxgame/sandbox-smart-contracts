@@ -148,7 +148,7 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           1
         );
 
-        // Set up ERC721 for maker in primary markt
+        // Set up ERC721 for maker in primary market
         await ERC721WithRoyaltyV2981.mint(await maker.getAddress(), 1, [
           await FeeRecipientsData(maker.getAddress(), 10000),
         ]);
@@ -166,7 +166,7 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
           true
         );
 
-        // Set up ERC1155 for maker in primary markt
+        // Set up ERC1155 for maker in primary market
         await ERC1155WithRoyaltyV2981.mint(await maker.getAddress(), 1, 50, [
           await FeeRecipientsData(maker.getAddress(), 10000),
         ]);
@@ -491,6 +491,140 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
         ).to.be.revertedWith('not TSB secondary market seller');
       });
 
+      it('should not execute match order for bundle when the seller is not the creator of an asset with royalties', async function () {
+        const {user: maker} = await loadFixture(deployFixtures); // maker is not creator for ERC721WithRoyaltyV2981 & ERC1155WithRoyaltyV2981 assets
+
+        // Set up ERC721 for maker with royalty
+        await ERC721WithRoyaltyV2981.mint(await maker.getAddress(), 10, [
+          await FeeRecipientsData(maker.getAddress(), 10000),
+        ]);
+        await ERC721WithRoyaltyV2981.connect(maker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          10
+        );
+
+        // Set up ERC1155 for maker with royalty
+        await ERC1155WithRoyaltyV2981.mint(await maker.getAddress(), 10, 50, [
+          await FeeRecipientsData(maker.getAddress(), 10000),
+        ]);
+        await ERC1155WithRoyaltyV2981.connect(maker).setApprovalForAll(
+          await ExchangeContractAsUser.getAddress(),
+          true
+        );
+
+        // Construct makerAsset bundle
+        bundledERC721 = [
+          {
+            erc721Address: ERC721WithRoyaltyV2981.target,
+            ids: [10],
+          },
+        ];
+
+        bundledERC1155 = [
+          {
+            erc1155Address: ERC1155WithRoyaltyV2981.target,
+            ids: [10],
+            supplies: [10],
+          },
+        ];
+
+        quads = {
+          sizes: [],
+          xs: [],
+          ys: [],
+          data: '0x',
+        }; // non empty quads
+
+        // Create bundle for passing as left order
+        bundleData = {
+          bundledERC721,
+          bundledERC1155,
+          quads,
+          priceDistribution,
+        };
+
+        makerAsset = await AssetBundle(bundleData, 1); // there can only ever be 1 copy of a bundle that contains ERC721
+
+        // Set up ERC20 for taker
+        await ERC20Contract.mint(await taker.getAddress(), 30000000000);
+        await ERC20Contract.connect(taker).approve(
+          await ExchangeContractAsUser.getAddress(),
+          30000000000
+        );
+
+        // Construct takerAsset
+        takerAsset = await AssetERC20(ERC20Contract, 10000000000);
+
+        // set up royalties by token
+        await RoyaltiesRegistryAsDeployer.setRoyaltiesByToken(
+          await ERC721WithRoyaltyV2981.getAddress(),
+          [await LibPartData(royaltyReceiver, 1000)] // 10% royalty for ERC721 token
+        );
+
+        // configuring royalties
+        await RoyaltiesProvider.initializeProvider(
+          await ERC1155WithRoyaltyV2981.getAddress(),
+          10,
+          [await LibPartData(royaltyReceiver, 1000)] // 10% royalty for ERC1155 token with id:10
+        );
+
+        await RoyaltiesRegistryAsDeployer.setProviderByToken(
+          await ERC1155Contract.getAddress(),
+          RoyaltiesProvider.getAddress()
+        );
+
+        orderLeft = await OrderDefault(
+          maker,
+          makerAsset, // Bundle
+          ZeroAddress,
+          takerAsset, // ERC20
+          1,
+          0,
+          0
+        );
+        orderRight = await OrderDefault(
+          taker,
+          takerAsset, // ERC20
+          ZeroAddress,
+          makerAsset, // Bundle
+          1,
+          0,
+          0
+        );
+
+        makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+        takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+        const makerAddress = await maker.getAddress();
+        const takerAddress = await taker.getAddress();
+
+        expect(await ERC20Contract.balanceOf(makerAddress)).to.be.equal(0);
+        expect(await ERC20Contract.balanceOf(takerAddress)).to.be.equal(
+          30000000000
+        );
+
+        expect(await ERC721WithRoyaltyV2981.ownerOf(10)).to.be.equal(
+          makerAddress
+        );
+        expect(
+          await ERC1155WithRoyaltyV2981.balanceOf(makerAddress, 10)
+        ).to.be.equal(50);
+        expect(
+          await ERC1155WithRoyaltyV2981.balanceOf(takerAddress, 10)
+        ).to.be.equal(0);
+
+        await expect(
+          ExchangeContractAsUser.matchOrders([
+            {
+              orderLeft, // passing Bundle as left order
+              signatureLeft: makerSig,
+              orderRight, // passing ERC20 as right order
+              signatureRight: takerSig,
+            },
+          ])
+        ).to.be.revertedWith('not TSB secondary market seller');
+      });
+
       it('should not execute match order for bundle with quad for creator', async function () {
         // Construct makerAsset bundle
         bundledERC721 = [
@@ -545,7 +679,7 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
         );
 
         await RoyaltiesRegistryAsDeployer.setProviderByToken(
-          await ERC1155Contract.getAddress(),
+          await ERC1155WithRoyaltyV2981.getAddress(),
           RoyaltiesProvider.getAddress()
         );
 
@@ -649,7 +783,7 @@ export function shouldMatchOrdersForBundleWithRoyalty() {
         );
 
         await RoyaltiesRegistryAsDeployer.setProviderByToken(
-          await ERC1155Contract.getAddress(),
+          await ERC1155WithRoyaltyV2981.getAddress(),
           RoyaltiesProvider.getAddress()
         );
 

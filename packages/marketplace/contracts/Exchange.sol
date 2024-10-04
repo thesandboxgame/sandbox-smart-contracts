@@ -42,7 +42,7 @@ contract Exchange is
     /// @return Hash for TSB_PRIMARY_MARKET_SELLER_ROLE.
     bytes32 public constant TSB_PRIMARY_MARKET_SELLER_ROLE = keccak256("TSB_PRIMARY_MARKET_SELLER_ROLE");
 
-    /// @notice Role for TSB owned addresses that can sell bundled assets including quad in secondary market(pay royalties and primary protocol fees).
+    /// @notice Role for TSB owned addresses that can sell bundled assets including quad in secondary market(pays royalties and primary protocol fees).
     /// @return Hash for TSB_SECONDARY_MARKET_SELLER_ROLE.
     bytes32 public constant TSB_SECONDARY_MARKET_SELLER_ROLE = keccak256("TSB_SECONDARY_MARKET_SELLER_ROLE");
 
@@ -180,7 +180,7 @@ contract Exchange is
     /// @dev Check if the address is a TSB seller, which forces primary sales conditions regardless if the seller is the creator of the token.
     /// @param from Address to check.
     /// @return True if the address is a TSB seller, false otherwise.
-    function _isTSBPrimaryMarktSeller(address from) internal view override returns (bool) {
+    function _isTSBPrimaryMarketSeller(address from) internal view override returns (bool) {
         return hasRole(TSB_PRIMARY_MARKET_SELLER_ROLE, from);
     }
 
