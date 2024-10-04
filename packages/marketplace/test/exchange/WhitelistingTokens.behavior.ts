@@ -22,6 +22,7 @@ import {ZeroAddress, Contract, Signer} from 'ethers';
 export function shouldCheckForWhitelisting() {
   describe('Exchange MatchOrders for Whitelisting tokens', function () {
     let ExchangeContractAsUser: Contract,
+      ExchangeContractAsAdmin: Contract,
       OrderValidatorAsAdmin: Contract,
       ERC20Contract: Contract,
       ERC20Contract2: Contract,
@@ -40,11 +41,13 @@ export function shouldCheckForWhitelisting() {
       orderLeft: Order,
       orderRight: Order,
       makerSig: string,
-      takerSig: string;
+      takerSig: string,
+      TSB_SECONDARY_MARKET_SELLER_ROLE: string;
 
     beforeEach(async function () {
       ({
         ExchangeContractAsUser,
+        ExchangeContractAsAdmin,
         OrderValidatorAsAdmin,
         ERC20Contract,
         ERC20Contract2,
@@ -53,6 +56,7 @@ export function shouldCheckForWhitelisting() {
         ERC1155Contract,
         user1: maker,
         user2: taker,
+        TSB_SECONDARY_MARKET_SELLER_ROLE,
       } = await loadFixture(deployFixturesWithoutWhitelist));
     });
 
@@ -491,6 +495,12 @@ export function shouldCheckForWhitelisting() {
           deployer: maker, // making deployer the maker to sell in primary market
           user2: taker,
         } = await loadFixture(deployFixturesWithoutWhitelist));
+
+        // grant tsb bundle seller role to seller
+        await ExchangeContractAsAdmin.grantRole(
+          TSB_SECONDARY_MARKET_SELLER_ROLE,
+          await maker.getAddress()
+        );
 
         priceDistribution = {
           erc721Prices: [[4000000000]],

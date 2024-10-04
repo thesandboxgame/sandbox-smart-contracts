@@ -39,7 +39,7 @@ export function shouldMatchOrdersWithRoyalty() {
       orderRight: Order,
       makerSig: string,
       takerSig: string,
-      TSB_SELLER_ROLE: string,
+      TSB_PRIMARY_MARKET_SELLER_ROLE: string,
       FEE_WHITELIST_ROLE: string;
 
     beforeEach(async function () {
@@ -62,7 +62,7 @@ export function shouldMatchOrdersWithRoyalty() {
         admin: receiver1,
         user: receiver2,
         deployer: royaltyReceiver,
-        TSB_SELLER_ROLE,
+        TSB_PRIMARY_MARKET_SELLER_ROLE,
         FEE_WHITELIST_ROLE,
       } = await loadFixture(deployFixtures));
 
@@ -571,7 +571,7 @@ export function shouldMatchOrdersWithRoyalty() {
       );
     });
 
-    it('should execute a complete match order without royalties but with primary market fees for address with TSB_SELLER_ROLE', async function () {
+    it('should execute a complete match order without royalties but with primary market fees for address with TSB_PRIMARY_MARKET_SELLER_ROLE', async function () {
       await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
         await FeeRecipientsData(maker.getAddress(), 10000),
       ]);
@@ -589,7 +589,7 @@ export function shouldMatchOrdersWithRoyalty() {
 
       // grant exchange admin role to seller
       await ExchangeContractAsDeployer.connect(admin).grantRole(
-        TSB_SELLER_ROLE,
+        TSB_PRIMARY_MARKET_SELLER_ROLE,
         maker.getAddress()
       );
 

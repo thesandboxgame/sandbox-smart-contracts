@@ -38,9 +38,13 @@ contract Exchange is
     /// @return Hash for PAUSER_ROLE.
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    /// @notice Role for TSB owned addresses that list TSB owned assets for sale, forces primary sales conditions.
-    /// @return Hash for TSB_SELLER_ROLE.
-    bytes32 public constant TSB_SELLER_ROLE = keccak256("TSB_SELLER_ROLE");
+    /// @notice Role for TSB owned addresses that list TSB owned assets for sale, forces primary sales conditions(skips royalties, pays primary protocol fees).
+    /// @return Hash for TSB_PRIMARY_MARKET_SELLER_ROLE.
+    bytes32 public constant TSB_PRIMARY_MARKET_SELLER_ROLE = keccak256("TSB_PRIMARY_MARKET_SELLER_ROLE");
+
+    /// @notice Role for TSB owned addresses that can sell bundled assets including quad in secondary market(pays royalties and primary protocol fees).
+    /// @return Hash for TSB_SECONDARY_MARKET_SELLER_ROLE.
+    bytes32 public constant TSB_SECONDARY_MARKET_SELLER_ROLE = keccak256("TSB_SECONDARY_MARKET_SELLER_ROLE");
 
     /// @notice Role for addresses that should be whitelisted from any marketplace fees including royalties.
     /// @return Hash for FEE_WHITELIST_ROLE.
@@ -176,8 +180,15 @@ contract Exchange is
     /// @dev Check if the address is a TSB seller, which forces primary sales conditions regardless if the seller is the creator of the token.
     /// @param from Address to check.
     /// @return True if the address is a TSB seller, false otherwise.
-    function _isTSBSeller(address from) internal view override returns (bool) {
-        return hasRole(TSB_SELLER_ROLE, from);
+    function _isTSBPrimaryMarketSeller(address from) internal view override returns (bool) {
+        return hasRole(TSB_PRIMARY_MARKET_SELLER_ROLE, from);
+    }
+
+    /// @dev Check if the address is a TSB Bundle Seller, which can sell bundled assets including quad in secondary market.
+    /// @param from Address to check.
+    /// @return True if the address is a TSB bundle seller, false otherwise.
+    function _isTSBSecondaryMarketSeller(address from) internal view override returns (bool) {
+        return hasRole(TSB_SECONDARY_MARKET_SELLER_ROLE, from);
     }
 
     function _msgSender()
