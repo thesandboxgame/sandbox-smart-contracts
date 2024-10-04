@@ -83,6 +83,14 @@ library LibAsset {
     /// @param rightClass The asset class type of the right side of the trade.
     /// @return FeeSide representing which side should bear the fee, if any.
     function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
+        if (leftClass == AssetClass.BUNDLE || rightClass == AssetClass.BUNDLE) {
+            require(
+                ((leftClass == AssetClass.BUNDLE && rightClass == AssetClass.ERC20) ||
+                    (rightClass == AssetClass.BUNDLE && leftClass == AssetClass.ERC20)),
+                "exchange not allowed"
+            );
+        }
+
         if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
             return FeeSide.LEFT;
         }
