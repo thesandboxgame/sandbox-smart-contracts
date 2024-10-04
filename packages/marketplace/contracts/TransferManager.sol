@@ -210,7 +210,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
         bool isBundle = nftSide.asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE;
 
         if (isBundle) {
-            if (!_isTSBSeller(nftSide.account)) {
+            if (!_isTSBPrimaryMarketSeller(nftSide.account)) {
                 remainder = _doTransfersWithFeesAndRoyaltiesForBundle(paymentSide, nftSide, nftSideRecipient);
             } else {
                 // No royalties but primary fee should be paid on the total value of the bundle
@@ -231,7 +231,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
     function _calculateFeesAndRoyalties(
         DealSide memory nftSide
     ) internal returns (uint256 fees, bool shouldTransferRoyalties) {
-        if (_isTSBSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
+        if (_isTSBPrimaryMarketSeller(nftSide.account) || _isPrimaryMarket(nftSide)) {
             fees = protocolFeePrimary;
             shouldTransferRoyalties = false;
         } else {
@@ -265,28 +265,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
     ) internal returns (uint256 remainder) {
         remainder = paymentSide.asset.value;
         uint256 feePrimary = protocolFeePrimary;
-        uint256 feeSecondary = protocolFeeSecondary;
         LibAsset.Bundle memory bundle = LibAsset.decodeBundle(nftSide.asset.assetType);
 
-        remainder = _processERC721Bundles(
-            paymentSide,
-            nftSide,
-            nftSideRecipient,
-            remainder,
-            feePrimary,
-            feeSecondary,
-            bundle
-        );
-        remainder = _processERC1155Bundles(
-            paymentSide,
-            nftSide,
-            nftSideRecipient,
-            remainder,
-            feePrimary,
-            feeSecondary,
-            bundle
-        );
-        remainder = _processQuadBundles(paymentSide, nftSideRecipient, remainder, feeSecondary, bundle);
+        remainder = _processERC721Bundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
+        remainder = _processERC1155Bundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
+        remainder = _processQuadBundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
         return remainder;
     }
 
@@ -296,7 +279,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
         address nftSideRecipient,
         uint256 remainder,
         uint256 feePrimary,
-        uint256 feeSecondary,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
         uint256 bundledERC721Length = bundle.bundledERC721.length;
@@ -310,7 +292,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
                     nftSideRecipient,
                     remainder,
                     feePrimary,
-                    feeSecondary,
                     token,
                     bundle.bundledERC721[i].ids[j],
                     bundle.priceDistribution.erc721Prices[i][j]
@@ -326,7 +307,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
         address nftSideRecipient,
         uint256 remainder,
         uint256 feePrimary,
-        uint256 feeSecondary,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
         for (uint256 i; i < bundle.bundledERC1155.length; ++i) {
@@ -342,7 +322,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
                         nftSideRecipient,
                         remainder,
                         feePrimary,
-                        feeSecondary,
                         token,
                         bundle.bundledERC1155[i].ids[j],
                         bundle.priceDistribution.erc1155Prices[i][j]
@@ -355,9 +334,10 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
     function _processQuadBundles(
         DealSide memory paymentSide,
+        DealSide memory nftSide,
         address nftSideRecipient,
         uint256 remainder,
-        uint256 feeSecondary,
+        uint256 feePrimary,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
         uint256 quadSize = bundle.quads.xs.length;
@@ -367,14 +347,15 @@ abstract contract TransferManager is Initializable, ITransferManager {
             uint256 y = bundle.quads.ys[i];
 
             uint256 tokenId = idInPath(0, size, x, y);
-            remainder = _transferFeesAndRoyaltiesForBundledAsset(
+            remainder = _processSingleAsset(
                 paymentSide,
-                address(landContract),
+                nftSide,
                 nftSideRecipient,
                 remainder,
+                feePrimary,
+                address(landContract),
                 tokenId,
-                bundle.priceDistribution.quadPrices[i],
-                feeSecondary
+                bundle.priceDistribution.quadPrices[i]
             );
         }
         return remainder;
@@ -386,7 +367,6 @@ abstract contract TransferManager is Initializable, ITransferManager {
         address nftSideRecipient,
         uint256 remainder,
         uint256 feePrimary,
-        uint256 feeSecondary,
         address token,
         uint256 tokenId,
         uint256 assetPrice
@@ -403,6 +383,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 );
             }
         } else {
+            require(_isTSBSecondaryMarketSeller(nftSide.account), "not TSB secondary market seller");
             remainder = _transferFeesAndRoyaltiesForBundledAsset(
                 paymentSide,
                 token,
@@ -410,7 +391,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
                 remainder,
                 tokenId,
                 assetPrice,
-                feeSecondary
+                feePrimary
             );
         }
         return remainder;
@@ -669,7 +650,11 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
     /// @notice Function deciding if the seller is a TSB seller, to be overridden
     /// @param from Address to check
-    function _isTSBSeller(address from) internal virtual returns (bool);
+    function _isTSBPrimaryMarketSeller(address from) internal virtual returns (bool);
+
+    /// @notice Function deciding if the seller is a TSB bundle seller, to be overridden
+    /// @param from Address to check
+    function _isTSBSecondaryMarketSeller(address from) internal virtual returns (bool);
 
     // slither-disable-next-line unused-state
     uint256[49] private __gap;
