@@ -269,11 +269,7 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
         remainder = _processERC721Bundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
         remainder = _processERC1155Bundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
-        uint256 quadSize = bundle.quads.xs.length;
-        if (quadSize > 0) {
-            require(_isTSBSecondaryMarketSeller(nftSide.account), "not TSB secondary market seller");
-            remainder = _processQuadBundles(paymentSide, nftSideRecipient, remainder, feePrimary, quadSize, bundle);
-        }
+        remainder = _processQuadBundles(paymentSide, nftSide, nftSideRecipient, remainder, feePrimary, bundle);
         return remainder;
     }
 
@@ -338,26 +334,28 @@ abstract contract TransferManager is Initializable, ITransferManager {
 
     function _processQuadBundles(
         DealSide memory paymentSide,
+        DealSide memory nftSide,
         address nftSideRecipient,
         uint256 remainder,
         uint256 feePrimary,
-        uint256 quadSize,
         LibAsset.Bundle memory bundle
     ) internal returns (uint256) {
+        uint256 quadSize = bundle.quads.xs.length;
         for (uint256 i = 0; i < quadSize; ++i) {
             uint256 size = bundle.quads.sizes[i];
             uint256 x = bundle.quads.xs[i];
             uint256 y = bundle.quads.ys[i];
 
             uint256 tokenId = idInPath(0, size, x, y);
-            remainder = _transferFeesAndRoyaltiesForBundledAsset(
+            remainder = _processSingleAsset(
                 paymentSide,
-                address(landContract),
+                nftSide,
                 nftSideRecipient,
                 remainder,
+                feePrimary,
+                address(landContract),
                 tokenId,
-                bundle.priceDistribution.quadPrices[i],
-                feePrimary
+                bundle.priceDistribution.quadPrices[i]
             );
         }
         return remainder;
