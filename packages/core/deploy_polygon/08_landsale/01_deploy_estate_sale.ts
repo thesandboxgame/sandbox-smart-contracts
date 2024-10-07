@@ -39,7 +39,8 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_33', skip: async () => true},
   {name: 'LandPreSale_34', skip: async () => true},
   {name: 'LandPreSale_35', skip: async () => true},
-  {name: 'LandPreSale_36', skip: async () => false},
+  {name: 'LandPreSale_36', skip: async () => true},
+  {name: 'LandPreSale_37', skip: async () => false},
 ];
 
 const func: DeployFunction = async function (hre) {
