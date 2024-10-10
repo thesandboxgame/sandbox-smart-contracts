@@ -8,7 +8,7 @@ import {TrustedForwarderSetup} from './TrustedForwarderMock';
 export async function exchangeSetup() {
   const {admin, user, defaultFeeReceiver} = await signerSetup();
 
-  const {TrustedForwarder} = await TrustedForwarderSetup();
+  const {TrustedForwarder, TrustedForwarder2} = await TrustedForwarderSetup();
 
   const royaltiesRegistry = await royaltiesRegistrySetup();
   const {RoyaltiesRegistryAsDeployer} = royaltiesRegistry;
@@ -50,6 +50,9 @@ export async function exchangeSetup() {
   const AssetMatcherAsDeployer = await LibAssetFactory.deploy();
   const AssetMatcherAsUser = AssetMatcherAsDeployer.connect(user);
 
+  const QuadHelperFactory = await ethers.getContractFactory('QuadHelper');
+  const QuadHelper = await QuadHelperFactory.deploy();
+
   return {
     ...royaltiesRegistry,
     ...orderValidator,
@@ -61,6 +64,8 @@ export async function exchangeSetup() {
     ExchangeContractAsDeployer,
     AssetMatcherAsDeployer,
     AssetMatcherAsUser,
+    QuadHelper,
     TrustedForwarder,
+    TrustedForwarder2,
   };
 }

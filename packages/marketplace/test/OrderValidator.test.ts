@@ -49,7 +49,7 @@ describe('OrderValidator.sol', function () {
     } = await loadFixture(deployFixturesWithoutWhitelist));
   });
 
-  it('initialization should fail if roles and permissions lenghts are different', async function () {
+  it('initialization should fail if roles and permissions lengths are different', async function () {
     await expect(orderValidatorFailSetup()).to.be.revertedWith(
       'Mismatched input lengths'
     );

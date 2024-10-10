@@ -13,7 +13,12 @@ const func: DeployFunction = async function (
   const TSB_ROLE = await read('OrderValidator', 'TSB_ROLE');
   const PARTNER_ROLE = await read('OrderValidator', 'PARTNER_ROLE');
 
-  const SandContract = await deployments.get('PolygonSand');
+  let SandContract;
+  if (hre.network.name === 'polygon') {
+    SandContract = await deployments.get('PolygonSand');
+  } else {
+    SandContract = await deployments.get('Sand');
+  }
   const AssetContract = await deployments.get('Asset');
 
   const addressesToGrant = [];
@@ -110,5 +115,6 @@ func.tags = [
 func.dependencies = [
   'OrderValidator_deploy',
   'PolygonSand_deploy',
+  'Sand_deploy',
   'Asset_deploy',
 ];

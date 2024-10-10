@@ -32,10 +32,17 @@ const importedPackages = {
   ],
   '@sandbox-smart-contracts/giveaway': 'contracts/SignedMultiGiveaway.sol',
   '@sandbox-smart-contracts/faucets': 'contracts/FaucetsERC1155.sol',
+  '@sandbox-smart-contracts/marketplace@1.0.1': [
+    'contracts/RoyaltiesRegistry.sol',
+    'contracts/OrderValidator.sol',
+    'contracts/Exchange.sol',
+    'contracts/TransferManager.sol',
+  ],
   '@sandbox-smart-contracts/marketplace': [
     'contracts/RoyaltiesRegistry.sol',
     'contracts/OrderValidator.sol',
     'contracts/Exchange.sol',
+    'contracts/TransferManager.sol',
   ],
   '@sandbox-smart-contracts/dependency-operator-filter': [
     'contracts/OperatorFilterSubscription.sol',
