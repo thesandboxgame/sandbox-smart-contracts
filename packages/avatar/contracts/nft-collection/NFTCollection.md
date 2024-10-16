@@ -65,310 +65,43 @@ Parameters:
 | wallet | address | destination address that will receive the tokens  |
 | amount | uint256 | of tokens to mint                                 |
 
-## Events info
-
-### ContractInitialized
+### WaveData
 
 ```solidity
-event ContractInitialized(string indexed baseURI, string indexed name, string indexed symbol, address mintTreasury, address signAddress, address allowedToExecuteMint, uint256 maxSupply)
+struct WaveData {
+    uint256 waveMaxTokensOverall;
+    uint256 waveMaxTokensPerWallet;
+    uint256 waveSingleTokenPrice;
+    uint256 waveTotalMinted;
+    mapping(address => uint256) waveOwnerToClaimedCounts;
+}
 ```
 
-Event emitted when the contract was initialized.
-
-emitted at proxy startup, only once
+Structure used save minting wave information
 
 Parameters:
 
-| Name                 | Type    | Description                                                                  |
-| :------------------- | :------ | :--------------------------------------------------------------------------- |
-| baseURI              | string  | an URI that will be used as the base for token URI                           |
-| name                 | string  | name of the ERC721 token                                                     |
-| symbol               | string  | token symbol of the ERC721 token                                             |
-| mintTreasury         | address | collection treasury address (where the payments are sent)                    |
-| signAddress          | address | signer address that is allowed to create mint signatures                     |
-| allowedToExecuteMint | address | token address that is used for payments and that is allowed to execute mint  |
-| maxSupply            | uint256 | max supply of tokens to be allowed to be minted per contract                 |
+| Name                     | Type                        | Description                                                                          |
+| :----------------------- | :-------------------------- | :----------------------------------------------------------------------------------- |
+| waveMaxTokensOverall     | uint256                     | max tokens to buy per wave, cumulating all addresses                                 |
+| waveMaxTokensPerWallet   | uint256                     | max tokens to buy, per wallet in a given wave                                        |
+| waveSingleTokenPrice     | uint256                     | price of one token mint (in the token denoted by the allowedToExecuteMint contract)  |
+| waveTotalMinted          | uint256                     | number of total minted tokens in the current running wave                            |
+| waveOwnerToClaimedCounts | mapping(address => uint256) | mapping of [owner -> minted count]                                                   |
 
-### WaveSetup
+### NFTCollectionStorage
 
 ```solidity
-event WaveSetup(address indexed operator, uint256 waveMaxTokens, uint256 waveMaxTokensToBuy, uint256 waveSingleTokenPrice, uint256 prevMinted, uint256 waveIndex)
+struct NFTCollectionStorage {
+    uint256 maxSupply;
+    address mintTreasury;
+    string baseTokenURI;
+    NFTCollection.WaveData[] waveData;
+    IERC20 allowedToExecuteMint;
+    mapping(uint256 => uint256) personalizationTraits;
+    uint256 totalSupply;
+}
 ```
-
-Event emitted when a wave was set up
-
-emitted when setupWave is called
-
-Parameters:
-
-| Name                 | Type    | Description                                                                                 |
-| :------------------- | :------ | :------------------------------------------------------------------------------------------ |
-| operator             | address | the sender of the transaction                                                               |
-| waveMaxTokens        | uint256 | the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)  |
-| waveMaxTokensToBuy   | uint256 | max tokens to buy, per wallet in a given wave                                               |
-| waveSingleTokenPrice | uint256 | the price to mint a token in a given wave, in wei                                           |
-| prevMinted           | uint256 | the amount of tokens minted in previous wave                                                |
-| waveIndex            | uint256 | the current wave index                                                                      |
-
-### AllowedExecuteMintSet
-
-```solidity
-event AllowedExecuteMintSet(address indexed operator, IERC20 indexed oldToken, IERC20 indexed newToken)
-```
-
-Event emitted when an address was set as allowed to mint
-
-emitted when setAllowedExecuteMint is called
-
-Parameters:
-
-| Name     | Type            | Description                                                                |
-| :------- | :-------------- | :------------------------------------------------------------------------- |
-| operator | address         | the sender of the transaction                                              |
-| oldToken | contract IERC20 | old address that is used for payments and that is allowed to execute mint  |
-| newToken | contract IERC20 | new address that is used for payments and that is allowed to execute mint  |
-
-### TreasurySet
-
-```solidity
-event TreasurySet(address indexed operator, address indexed oldTreasury, address indexed newTreasury)
-```
-
-Event emitted when the treasury address was saved
-
-emitted when setTreasury is called
-
-Parameters:
-
-| Name        | Type    | Description                                                    |
-| :---------- | :------ | :------------------------------------------------------------- |
-| operator    | address | the sender of the transaction                                  |
-| oldTreasury | address | old collection treasury address (where the payments are sent)  |
-| newTreasury | address | new collection treasury address (where the payments are sent)  |
-
-### BaseURISet
-
-```solidity
-event BaseURISet(address indexed operator, string oldBaseURI, string newBaseURI)
-```
-
-Event emitted when the base token URI for the contract was set or changed
-
-emitted when setBaseURI is called
-
-Parameters:
-
-| Name       | Type    | Description                                                   |
-| :--------- | :------ | :------------------------------------------------------------ |
-| operator   | address | the sender of the transaction                                 |
-| oldBaseURI | string  | old URI that will be used as the base for token metadata URI  |
-| newBaseURI | string  | new URI that will be used as the base for token metadata URI  |
-
-### SignAddressSet
-
-```solidity
-event SignAddressSet(address indexed operator, address indexed oldSignAddress, address indexed newSignAddress)
-```
-
-Event emitted when the signer address was set or changed
-
-emitted when setSignAddress is called
-
-Parameters:
-
-| Name           | Type    | Description                                                   |
-| :------------- | :------ | :------------------------------------------------------------ |
-| operator       | address | the sender of the transaction                                 |
-| oldSignAddress | address | old signer address that is allowed to create mint signatures  |
-| newSignAddress | address | new signer address that is allowed to create mint signatures  |
-
-### MaxSupplySet
-
-```solidity
-event MaxSupplySet(address indexed operator, uint256 oldMaxSupply, uint256 newMaxSupply)
-```
-
-Event emitted when the max supply is set or changed
-
-emitted when setSignAddress is called
-
-Parameters:
-
-| Name         | Type    | Description                                      |
-| :----------- | :------ | :----------------------------------------------- |
-| operator     | address | the sender of the transaction                    |
-| oldMaxSupply | uint256 | old maximum amount of tokens that can be minted  |
-| newMaxSupply | uint256 | new maximum amount of tokens that can be minted  |
-
-### Personalized
-
-```solidity
-event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask)
-```
-
-Event emitted when a token personalization was made.
-
-emitted when personalize is called
-
-Parameters:
-
-| Name                | Type    | Description                                                           |
-| :------------------ | :------ | :-------------------------------------------------------------------- |
-| operator            | address | the sender of the transaction                                         |
-| tokenId             | uint256 | id of the token which had the personalization done                    |
-| personalizationMask | uint256 | the exact personalization that was done, as a custom meaning bit-mask |
-
-### DefaultRoyaltySet
-
-```solidity
-event DefaultRoyaltySet(address indexed operator, address indexed receiver, uint96 feeNumerator)
-```
-
-Event emitted when a token personalization was made.
-
-Parameters:
-
-| Name         | Type    | Description                                         |
-| :----------- | :------ | :-------------------------------------------------- |
-| operator     | address | the sender of the transaction                       |
-| receiver     | address | the receiver of the royalties                       |
-| feeNumerator | uint96  | percentage of the royalties in feeDenominator units |
-
-### DefaultRoyaltyReset
-
-```solidity
-event DefaultRoyaltyReset(address indexed operator)
-```
-
-Event emitted when default royalties are reset
-
-Parameters:
-
-| Name     | Type    | Description                   |
-| :------- | :------ | :---------------------------- |
-| operator | address | the sender of the transaction |
-
-### TokenRoyaltySet
-
-```solidity
-event TokenRoyaltySet(address indexed operator, uint256 indexed tokenId, address indexed receiver, uint96 feeNumerator)
-```
-
-Event emitted when a token personalization was made.
-
-Parameters:
-
-| Name         | Type    | Description                                         |
-| :----------- | :------ | :-------------------------------------------------- |
-| operator     | address | the sender of the transaction                       |
-| tokenId      | uint256 | the token id                                        |
-| receiver     | address | the receiver of the royalties                       |
-| feeNumerator | uint96  | percentage of the royalties in feeDenominator units |
-
-### TokenRoyaltyReset
-
-```solidity
-event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId)
-```
-
-Event emitted when default royalties are reset
-
-Parameters:
-
-| Name     | Type    | Description                   |
-| :------- | :------ | :---------------------------- |
-| operator | address | the sender of the transaction |
-
-## State variables info
-
-### maxSupply (0xd5abeb01)
-
-```solidity
-uint256 maxSupply
-```
-
-maximum amount of tokens that can be minted
-
-### mintTreasury (0xe3e35062)
-
-```solidity
-address mintTreasury
-```
-
-treasury address where the payment for minting are sent
-
-### baseTokenURI (0xd547cfb7)
-
-```solidity
-string baseTokenURI
-```
-
-standard base token URL for ERC721 metadata
-
-### waveMaxTokensOverall (0x9ea25d7a)
-
-```solidity
-uint256 waveMaxTokensOverall
-```
-
-max tokens to buy per wave, cumulating all addresses
-
-### waveMaxTokensPerWallet (0xbe4ca0cc)
-
-```solidity
-uint256 waveMaxTokensPerWallet
-```
-
-max tokens to buy, per wallet in a given wave
-
-### waveTotalMinted (0x3e84aa5e)
-
-```solidity
-uint256 waveTotalMinted
-```
-
-number of total minted tokens in the current running wave
-
-### waveOwnerToClaimedCounts (0x68d4a778)
-
-```solidity
-mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts
-```
-
-mapping of [owner -> wave index -> minted count]
-
-### indexWave (0x34b35ac0)
-
-```solidity
-uint256 indexWave
-```
-
-each wave has an index to help track minting/tokens per wallet
-
-### allowedToExecuteMint (0xac3149e3)
-
-```solidity
-contract IERC20 allowedToExecuteMint
-```
-
-ERC20 contract through which the minting will be done (approveAndCall)
-When there is a price for the minting, the payment will be done using this token
-
-### signAddress (0x0682bdbc)
-
-```solidity
-address signAddress
-```
-
-all signatures must come from this specific address, otherwise they are invalid
-
-### totalSupply (0x18160ddd)
-
-```solidity
-uint256 totalSupply
-```
-
-total amount of tokens minted till now
 
 ## Functions info
 
@@ -385,13 +118,13 @@ oz-upgrades-unsafe-allow: constructor
 ```solidity
 function initialize(
     address _collectionOwner,
-    string memory _initialBaseURI,
+    string calldata _initialBaseURI,
     string memory _name,
     string memory _symbol,
     address payable _mintTreasury,
     address _signAddress,
     address _initialTrustedForwarder,
-    address _allowedToExecuteMint,
+    IERC20Metadata _allowedToExecuteMint,
     uint256 _maxSupply
 ) external virtual initializer
 ```
@@ -402,17 +135,17 @@ calls all the init functions from the base classes. Emits {ContractInitialized} 
 
 Parameters:
 
-| Name                     | Type            | Description                                                                  |
-| :----------------------- | :-------------- | :--------------------------------------------------------------------------- |
-| _collectionOwner         | address         | the address that will be set as the owner of the collection                  |
-| _initialBaseURI          | string          | an URI that will be used as the base for token URI                           |
-| _name                    | string          | name of the ERC721 token                                                     |
-| _symbol                  | string          | token symbol of the ERC721 token                                             |
-| _mintTreasury            | address payable | collection treasury address (where the payments are sent)                    |
-| _signAddress             | address         | signer address that is allowed to create mint signatures                     |
-| _initialTrustedForwarder | address         | trusted forwarder address                                                    |
-| _allowedToExecuteMint    | address         | token address that is used for payments and that is allowed to execute mint  |
-| _maxSupply               | uint256         | max supply of tokens to be allowed to be minted per contract                 |
+| Name                     | Type                    | Description                                                                  |
+| :----------------------- | :---------------------- | :--------------------------------------------------------------------------- |
+| _collectionOwner         | address                 | the address that will be set as the owner of the collection                  |
+| _initialBaseURI          | string                  | an URI that will be used as the base for token URI                           |
+| _name                    | string                  | name of the ERC721 token                                                     |
+| _symbol                  | string                  | token symbol of the ERC721 token                                             |
+| _mintTreasury            | address payable         | collection treasury address (where the payments are sent)                    |
+| _signAddress             | address                 | signer address that is allowed to create mint signatures                     |
+| _initialTrustedForwarder | address                 | trusted forwarder address                                                    |
+| _allowedToExecuteMint    | contract IERC20Metadata | token address that is used for payments and that is allowed to execute mint  |
+| _maxSupply               | uint256                 | max supply of tokens to be allowed to be minted per contract                 |
 
 ### setupWave (0x1992c3f3)
 
@@ -424,8 +157,8 @@ function setupWave(
 ) external onlyOwner
 ```
 
-function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be minted in total,
-per wallet and minting price
+function to setup a new wave. A wave is defined as a combination of allowed number tokens to be minted in total, per
+wallet and minting price
 
 event: {WaveSetup}
 
@@ -441,30 +174,76 @@ Parameters:
 
 ```solidity
 function mint(
-    address _wallet,
-    uint256 _amount,
-    uint256 _signatureId,
-    bytes calldata _signature
+    address wallet,
+    uint256 amount,
+    uint256 signatureId,
+    bytes calldata signature
 ) external whenNotPaused nonReentrant
 ```
 
-token minting function. Price is set by wave and is paid in tokens denoted by the allowedToExecuteMint contract
+token minting function on the last wave. Price is set by wave and is paid in tokens denoted by the allowedToExecuteMint
+contract
+
+this method is backward compatible with the previous contract, so, it uses last configured wave event: {Transfer}
+
+Parameters:
+
+| Name        | Type    | Description              |
+| :---------- | :------ | :----------------------- |
+| wallet      | address | minting wallet           |
+| amount      | uint256 | number of token to mint  |
+| signatureId | uint256 | signing signature ID     |
+| signature   | bytes   | signing signature value  |
+
+### waveMint (0x26b3af64)
+
+```solidity
+function waveMint(
+    address wallet,
+    uint256 amount,
+    uint256 waveIndex,
+    uint256 signatureId,
+    bytes calldata signature
+) external whenNotPaused nonReentrant
+```
+
+token minting function on a certain wave. Price is set by wave and is paid in tokens denoted by the allowedToExecuteMint
+contract
 
 event: {Transfer}
 
 Parameters:
 
-| Name         | Type    | Description              |
-| :----------- | :------ | :----------------------- |
-| _wallet      | address | minting wallet           |
-| _amount      | uint256 | number of token to mint  |
-| _signatureId | uint256 | signing signature ID     |
-| _signature   | bytes   | signing signature value  |
+| Name        | Type    | Description                         |
+| :---------- | :------ | :---------------------------------- |
+| wallet      | address | minting wallet                      |
+| amount      | uint256 | number of token to mint             |
+| waveIndex   | uint256 | the index of the wave used to mint  |
+| signatureId | uint256 | signing signature ID                |
+| signature   | bytes   | signing signature value             |
 
-### batchMint (0x9386e197)
+### cancelWave (0x49c55c5e)
+
+```solidity
+function cancelWave(uint256 waveIndex) external onlyOwner
+```
+
+function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be minted in total,
+per wallet and minting price
+
+event: {WaveSetup}
+
+Parameters:
+
+| Name      | Type    | Description                          |
+| :-------- | :------ | :----------------------------------- |
+| waveIndex | uint256 | the index of the wave to be canceled |
+
+### batchMint (0x0f0a3e6d)
 
 ```solidity
 function batchMint(
+    uint256 waveIndex,
     NFTCollection.BatchMintingData[] calldata wallets
 ) external whenNotPaused onlyOwner
 ```
@@ -477,17 +256,18 @@ event: {Transfer}
 
 Parameters:
 
-| Name    | Type                                    | Description                             |
-| :------ | :-------------------------------------- | :-------------------------------------- |
-| wallets | struct NFTCollection.BatchMintingData[] | list of destination wallets and amounts |
+| Name      | Type                                    | Description                             |
+| :-------- | :-------------------------------------- | :-------------------------------------- |
+| waveIndex | uint256                                 | the index of the wave used to mint      |
+| wallets   | struct NFTCollection.BatchMintingData[] | list of destination wallets and amounts |
 
 ### reveal (0xa90fe861)
 
 ```solidity
 function reveal(
-    uint256 _tokenId,
-    uint256 _signatureId,
-    bytes calldata _signature
+    uint256 tokenId,
+    uint256 signatureId,
+    bytes calldata signature
 ) external whenNotPaused
 ```
 
@@ -501,20 +281,20 @@ event: {MetadataUpdate}
 
 Parameters:
 
-| Name         | Type    | Description                                                    |
-| :----------- | :------ | :------------------------------------------------------------- |
-| _tokenId     | uint256 | the ID belonging to the NFT token for which to emit the event  |
-| _signatureId | uint256 | validation signature ID                                        |
-| _signature   | bytes   | validation signature                                           |
+| Name        | Type    | Description                                                    |
+| :---------- | :------ | :------------------------------------------------------------- |
+| tokenId     | uint256 | the ID belonging to the NFT token for which to emit the event  |
+| signatureId | uint256 | validation signature ID                                        |
+| signature   | bytes   | validation signature                                           |
 
-### personalize (0x671b2a31)
+### personalize (0x1c00ff5b)
 
 ```solidity
 function personalize(
-    uint256 _signatureId,
-    bytes calldata _signature,
-    uint256 _tokenId,
-    uint256 _personalizationMask
+    uint256 tokenId,
+    uint256 personalizationMask,
+    uint256 signatureId,
+    bytes calldata signature
 ) external whenNotPaused
 ```
 
@@ -526,19 +306,19 @@ event: {MetadataUpdate}
 
 Parameters:
 
-| Name                 | Type    | Description                                        |
-| :------------------- | :------ | :------------------------------------------------- |
-| _signatureId         | uint256 | the ID of the provided signature                   |
-| _signature           | bytes   | signing signature                                  |
-| _tokenId             | uint256 | what token to personalize                          |
-| _personalizationMask | uint256 | a mask where each bit has a custom meaning in-game |
+| Name                | Type    | Description                                         |
+| :------------------ | :------ | :-------------------------------------------------- |
+| tokenId             | uint256 | what token to personalize                           |
+| personalizationMask | uint256 | a mask where each bit has a custom meaning in-game  |
+| signatureId         | uint256 | the ID of the provided signature                    |
+| signature           | bytes   | signing signature                                   |
 
 ### operatorPersonalize (0xa6e3ec26)
 
 ```solidity
 function operatorPersonalize(
-    uint256 _tokenId,
-    uint256 _personalizationMask
+    uint256 tokenId,
+    uint256 personalizationMask
 ) external onlyOwner
 ```
 
@@ -551,10 +331,10 @@ event: {MetadataUpdate}
 
 Parameters:
 
-| Name                 | Type    | Description                                        |
-| :------------------- | :------ | :------------------------------------------------- |
-| _tokenId             | uint256 | what token to personalize                          |
-| _personalizationMask | uint256 | a mask where each bit has a custom meaning in-game |
+| Name                | Type    | Description                                        |
+| :------------------ | :------ | :------------------------------------------------- |
+| tokenId             | uint256 | what token to personalize                          |
+| personalizationMask | uint256 | a mask where each bit has a custom meaning in-game |
 
 ### burn (0x42966c68)
 
@@ -621,7 +401,7 @@ reverts if not owner of the collection or if not paused
 ### setTreasury (0xf0f44260)
 
 ```solidity
-function setTreasury(address _treasury) external onlyOwner
+function setTreasury(address treasury) external onlyOwner
 ```
 
 update the treasury address
@@ -630,9 +410,9 @@ event: {TreasurySet}
 
 Parameters:
 
-| Name      | Type    | Description                      |
-| :-------- | :------ | :------------------------------- |
-| _treasury | address | new treasury address to be saved |
+| Name     | Type    | Description                      |
+| :------- | :------ | :------------------------------- |
+| treasury | address | new treasury address to be saved |
 
 ### setSignAddress (0x15137045)
 
@@ -669,7 +449,7 @@ Parameters:
 ### setAllowedExecuteMint (0x82bc7877)
 
 ```solidity
-function setAllowedExecuteMint(IERC20Metadata _minterToken) external onlyOwner
+function setAllowedExecuteMint(IERC20Metadata minterToken) external onlyOwner
 ```
 
 updates which address is allowed to execute the mint function.
@@ -680,9 +460,9 @@ event: {DefaultMintingValuesSet}
 
 Parameters:
 
-| Name         | Type                    | Description                                                   |
-| :----------- | :---------------------- | :------------------------------------------------------------ |
-| _minterToken | contract IERC20Metadata | the address that will be allowed to execute the mint function |
+| Name        | Type                    | Description                                                   |
+| :---------- | :---------------------- | :------------------------------------------------------------ |
+| minterToken | contract IERC20Metadata | the address that will be allowed to execute the mint function |
 
 ### setBaseURI (0x55f804b3)
 
@@ -880,18 +660,6 @@ function transferFrom(
 
 See OpenZeppelin {IERC721-transferFrom}
 
-### safeTransferFrom (0x42842e0e)
-
-```solidity
-function safeTransferFrom(
-    address from,
-    address to,
-    uint256 tokenId
-) public override onlyAllowedOperator(from)
-```
-
-See OpenZeppelin {IERC721-safeTransferFrom}
-
 ### safeTransferFrom (0xb88d4fde)
 
 ```solidity
@@ -908,16 +676,16 @@ See OpenZeppelin {IERC721-safeTransferFrom}
 ### personalizationOf (0x97944ba2)
 
 ```solidity
-function personalizationOf(uint256 _tokenId) external view returns (uint256)
+function personalizationOf(uint256 tokenId) external view returns (uint256)
 ```
 
 get the personalization of the indicated tokenID
 
 Parameters:
 
-| Name     | Type    | Description            |
-| :------- | :------ | :--------------------- |
-| _tokenId | uint256 | the token ID to check  |
+| Name    | Type    | Description            |
+| :------ | :------ | :--------------------- |
+| tokenId | uint256 | the token ID to check  |
 
 Return values:
 
@@ -925,12 +693,13 @@ Return values:
 | :--- | :------ | :---------------------------------- |
 | [0]  | uint256 | the personalization data as uint256 |
 
-### checkMintAllowed (0x283ca77c)
+### isMintAllowed (0x78b6811f)
 
 ```solidity
-function checkMintAllowed(
-    address _wallet,
-    uint256 _amount
+function isMintAllowed(
+    uint256 waveIndex,
+    address wallet,
+    uint256 amount
 ) external view returns (bool)
 ```
 
@@ -938,36 +707,17 @@ check if the indicated wallet can mint the indicated amount
 
 Parameters:
 
-| Name    | Type    | Description                            |
-| :------ | :------ | :------------------------------------- |
-| _wallet | address | wallet to be checked if it can mint    |
-| _amount | uint256 | amount to be checked if can be minted  |
+| Name      | Type    | Description                            |
+| :-------- | :------ | :------------------------------------- |
+| wallet    | address | wallet to be checked if it can mint    |
+| amount    | uint256 | amount to be checked if can be minted  |
+| waveIndex | uint256 | the index of the wave used to mint     |
 
 Return values:
 
 | Name | Type | Description        |
 | :--- | :--- | :----------------- |
 | [0]  | bool | if can mint or not |
-
-### price (0x26a49e37)
-
-```solidity
-function price(uint256 _count) public view virtual returns (uint256)
-```
-
-get the price of minting the indicated number of tokens for the current wave
-
-Parameters:
-
-| Name   | Type    | Description                                      |
-| :----- | :------ | :----------------------------------------------- |
-| _count | uint256 | the number of tokens to estimate mint price for  |
-
-Return values:
-
-| Name | Type    | Description                     |
-| :--- | :------ | :------------------------------ |
-| [0]  | uint256 | price of minting all the tokens |
 
 ### feeDenominator (0x180b0d7e)
 
@@ -991,6 +741,134 @@ Return values:
 | Name | Type    | Description                        |
 | :--- | :------ | :--------------------------------- |
 | [0]  | uint256 | current chainID for the blockchain |
+
+### maxSupply (0xd5abeb01)
+
+```solidity
+function maxSupply() external view returns (uint256)
+```
+
+return maximum amount of tokens that can be minted
+
+### mintTreasury (0xe3e35062)
+
+```solidity
+function mintTreasury() external view returns (address)
+```
+
+return treasury address where the payment for minting are sent
+
+### baseTokenURI (0xd547cfb7)
+
+```solidity
+function baseTokenURI() external view returns (string memory)
+```
+
+return standard base token URL for ERC721 metadata
+
+### waveMaxTokensOverall (0x5375e898)
+
+```solidity
+function waveMaxTokensOverall(
+    uint256 waveIndex
+) external view returns (uint256)
+```
+
+return max tokens to buy per wave, cumulating all addresses
+
+Parameters:
+
+| Name      | Type    | Description                        |
+| :-------- | :------ | :--------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint |
+
+### waveMaxTokensPerWallet (0x006cddce)
+
+```solidity
+function waveMaxTokensPerWallet(
+    uint256 waveIndex
+) external view returns (uint256)
+```
+
+return max tokens to buy, per wallet in a given wave
+
+Parameters:
+
+| Name      | Type    | Description                        |
+| :-------- | :------ | :--------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint |
+
+### waveSingleTokenPrice (0x179573d3)
+
+```solidity
+function waveSingleTokenPrice(
+    uint256 waveIndex
+) external view returns (uint256)
+```
+
+return price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+
+Parameters:
+
+| Name      | Type    | Description                        |
+| :-------- | :------ | :--------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint |
+
+### waveTotalMinted (0x3ee462c2)
+
+```solidity
+function waveTotalMinted(uint256 waveIndex) external view returns (uint256)
+```
+
+return number of total minted tokens in the current running wave
+
+Parameters:
+
+| Name      | Type    | Description                        |
+| :-------- | :------ | :--------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint |
+
+### waveOwnerToClaimedCounts (0x49c95a31)
+
+```solidity
+function waveOwnerToClaimedCounts(
+    uint256 waveIndex,
+    address owner
+) external view returns (uint256)
+```
+
+return mapping of [owner -> wave index -> minted count]
+
+Parameters:
+
+| Name      | Type    | Description                               |
+| :-------- | :------ | :---------------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint        |
+| owner     | address | the owner for which the count is returned |
+
+### waveCount (0xd2669199)
+
+```solidity
+function waveCount() external view returns (uint256)
+```
+
+the total amount of waves configured till now
+
+### allowedToExecuteMint (0xac3149e3)
+
+```solidity
+function allowedToExecuteMint() external view returns (IERC20)
+```
+
+return ERC20 contract through which the minting will be done (approveAndCall)
+
+### totalSupply (0x18160ddd)
+
+```solidity
+function totalSupply() external view returns (uint256)
+```
+
+return the total amount of tokens minted till now
 
 ### supportsInterface (0x01ffc9a7)
 
