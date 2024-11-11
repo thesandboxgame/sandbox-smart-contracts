@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-0.6/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.6/utils/Address.sol";
 import "@openzeppelin/contracts-0.6/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.6/token/ERC1155/IERC1155.sol";
-import "./ILandToken.sol";
+import "./common/Interfaces/ILandToken.sol";
 import "./common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "./ReferralValidator/ReferralValidator.sol";
 import "./AuthValidator.sol";
