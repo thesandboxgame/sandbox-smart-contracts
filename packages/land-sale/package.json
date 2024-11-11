@@ -1,10 +1,9 @@
 {
   "name": "@sandbox-smart-contracts/land-sale",
   "version": "1.0.0-rc.1",
-  "description": "Land-sale smart contract",
+  "description": "Land Sale smart contract",
   "files": [
-    "contracts",
-    "README.md"
+    "contracts"
   ],
   "publishConfig": {
     "access": "public"
@@ -29,33 +28,6 @@
       "test/**/*.ts"
     ]
   },
-  "release-it": {
-    "npm": {
-      "versionArgs": "--no-workspaces-update"
-    },
-    "git": {
-      "commitMessage": "chore: @sandbox-smart-contracts/land-sale release v${version}",
-      "tagAnnotation": "@sandbox-smart-contracts/land-sale release v${version}",
-      "tagName": "@sandbox-smart-contracts/land-sale@v${version}"
-    },
-    "plugins": {
-      "@release-it/keep-a-changelog": {}
-    },
-    "hooks": {
-      "before:init": [
-        "yarn lint",
-        "yarn test"
-      ]
-    }
-  },
-  "dependencies": {
-    "@manifoldxyz/royalty-registry-solidity": "^2.0.3",
-    "@openzeppelin/contracts": "5.0.2",
-    "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
-    "@openzeppelin/contracts-upgradeable": "5.0.2",
-    "@sandbox-smart-contracts/dependency-metatx": "1.0.1",
-    "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2"
-  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -65,11 +37,11 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/hardhat-upgrades": "^3.0.2",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.11",
+    "@types/fs-extra": "^11",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.10.4",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
@@ -93,5 +65,15 @@
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@3.2.0",
+    "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2",
+    "@openzeppelin/contracts-upgradeable": "^4.9.5",
+    "@sandbox-smart-contracts/core": "^0.0.1",
+    "@urql/core": "^4.2.3",
+    "fs-extra": "^11.2.0",
+    "hardhat-deploy": "^0.11.45",
+    "isomorphic-unfetch": "^4.0.2"
   }
 }
