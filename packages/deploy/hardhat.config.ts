@@ -78,8 +78,6 @@ const importedPackages = {
   '@sandbox-smart-contracts/land-sale': [
     'contracts/AuthValidator.sol',
     'contracts/EstateSaleWithAuth.sol',
-    'contracts/EstateSaleWithFee.sol',
-    'contracts/ILandToken.sol',
   ],
   '@sandbox-smart-contracts/batch-transfers': ['contracts/BatchTransfer.sol'],
   '@sandbox-smart-contracts/oft-sand': [
