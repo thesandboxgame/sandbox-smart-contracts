@@ -289,7 +289,7 @@ INFTCollection
      *         by the allowedToExecuteMint contract
      * @custom:event {Transfer}
      * @param wallet minting wallet
-     * @param amount number of token to mint
+     * @param amount number of token to mint (not included in the signature, the user can chose the amount)
      * @param waveIndex the index of the wave used to mint
      * @param signatureId signing signature ID
      * @param signature signing signature value
@@ -308,7 +308,7 @@ INFTCollection
         if (_msgSender() != address($.allowedToExecuteMint)) {
             revert ERC721InvalidSender(_msgSender());
         }
-        _checkAndSetWaveMintSignature(wallet, amount, waveIndex, signatureId, signature);
+        _checkAndSetWaveMintSignature(wallet, waveIndex, signatureId, signature);
         WaveData storage waveData = _getWaveData(waveIndex);
         _doMint(waveData, wallet, amount);
     }
