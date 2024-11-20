@@ -515,7 +515,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/networks@npm:5.7.1, @ethersproject/networks@npm:^5.7.0":
+"@ethersproject/networks@npm:5.7.1, @ethersproject/networks@npm:^5.7.0, @ethersproject/networks@npm:^5.7.1":
   version: 5.7.1
   resolution: "@ethersproject/networks@npm:5.7.1"
   dependencies:
@@ -2280,6 +2280,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/defender-sdk-base-client@npm:^1.15.2":
+  version: 1.15.2
+  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.15.2"
+  dependencies:
+    amazon-cognito-identity-js: ^6.3.6
+    async-retry: ^1.3.3
+  checksum: 033b5558eae7098e86b34edc605cef7333fb5e840c4e3a82b7e5329ed782d442190ca21c04f814f8eab930237ee71529e336428646a3ac1fca2675e116b455db
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/defender-sdk-deploy-client@npm:^1.10.0, @openzeppelin/defender-sdk-deploy-client@npm:^1.8.0":
   version: 1.13.4
   resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.13.4"
@@ -2299,6 +2309,30 @@ __metadata:
     axios: ^1.6.8
     lodash: ^4.17.21
   checksum: 1e00c1cb5be3130e043e83a946bdad0cb5490a63386785a0c459654337d3352f64670004c5102c43045ab29ae8da49c0c63f2f14480d0c4622dcdef3490a6526
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/defender-sdk-relay-signer-client@npm:^1.15.2":
+  version: 1.15.2
+  resolution: "@openzeppelin/defender-sdk-relay-signer-client@npm:1.15.2"
+  dependencies:
+    "@ethersproject/bignumber": ^5.7.0
+    "@ethersproject/bytes": ^5.7.0
+    "@ethersproject/logger": ^5.7.0
+    "@ethersproject/networks": ^5.7.1
+    "@ethersproject/properties": ^5.7.0
+    "@ethersproject/providers": ^5.7.2
+    "@ethersproject/strings": ^5.7.0
+    "@openzeppelin/defender-sdk-base-client": ^1.15.2
+    amazon-cognito-identity-js: ^6.3.6
+    axios: ^1.7.2
+    ethers: ^6.9.0
+    lodash: ^4.17.21
+  peerDependencies:
+    web3: ^4.14.0
+    web3-core: ^4.7.0
+    web3-utils: ^4.3.2
+  checksum: 35e9682c308238907d669ccbf18ee53836301b4a28fb87ca71bcd4dd1ee27ca4fda20b73d258f45dd7acbf592f6c9124ea6593be58e62930933e81e1146969cb
   languageName: node
   linkType: hard
 
@@ -2871,11 +2905,14 @@ __metadata:
   resolution: "@sandbox-smart-contracts/deploy@workspace:packages/deploy"
   dependencies:
     "@ethersproject/abi": ^5.7.0
+    "@ethersproject/abstract-signer": ^5.7.0
+    "@ethersproject/hash": ^5.7.0
     "@ethersproject/providers": ^5.7.2
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.3
     "@nomicfoundation/hardhat-ethers": ^3.0.5
     "@nomicfoundation/hardhat-network-helpers": ^1.0.8
     "@nomicfoundation/hardhat-verify": ^2.0.0
+    "@openzeppelin/defender-sdk-relay-signer-client": ^1.15.2
     "@openzeppelin/hardhat-upgrades": ^2.5.0
     "@openzeppelin/upgrades-core": ^1.32.3
     "@sandbox-smart-contracts/asset": 1.2.0
@@ -2902,6 +2939,7 @@ __metadata:
     chai: ^4.3.7
     child_process: ^1.0.2
     cross-env: ^7.0.3
+    csv-parser: ^3.0.0
     dotenv: ^16.1.4
     dotenv-cli: ^7.2.1
     eslint: ^8.43.0
@@ -4910,6 +4948,17 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: e457e2b0ab748504621f6fa6609074ac08c824bf0881592209dfa15098ece7e88495300e02cd22ba50b3468fd712fe687e629dcb03d6a3f6a51989727405aedf
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.7.2":
+  version: 1.7.7
+  resolution: "axios@npm:1.7.7"
+  dependencies:
+    follow-redirects: ^1.15.6
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 882d4fe0ec694a07c7f5c1f68205eb6dc5a62aecdb632cc7a4a3d0985188ce3030e0b277e1a8260ac3f194d314ae342117660a151fabffdc5081ca0b5a8b47fe
   languageName: node
   linkType: hard
 
