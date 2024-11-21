@@ -18,7 +18,8 @@ async function main(claimsFilename: string, eventsFilename: string) {
     fs.createReadStream(claimsFilename)
       .pipe(csv())
       .on("data", (data) => {
-        ret[BigInt(data.claim_id).toString(16)] = data;
+        const k = BigInt(data.claim_id).toString();
+        ret[k] = data;
       })
       .on("end", () => {
         resolve(ret);
@@ -40,10 +41,11 @@ async function main(claimsFilename: string, eventsFilename: string) {
   for (const d of eventData) {
     const result: Result = coder.decode(["uint256[]"], d);
     for (const r of result[0]) {
-      if (ids[r.toString(16)]) {
-        delete ids[r];
+      const k = r.toString();
+      if (ids[k]) {
+        delete ids[k];
       } else {
-        console.log(`this one was revoked somewhere else which is ok ${r}`);
+        // console.log(`this one was revoked somewhere else or duplicated which is ok ${k}`);
       }
     }
   }
