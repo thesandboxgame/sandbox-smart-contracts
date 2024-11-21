@@ -1,8 +1,7 @@
 import {ethers} from 'hardhat';
 
 const referralValiatorSetup = async () => {
-  const [_, initialSigningWallet] = await ethers.getSigners();
-
+  const [initialSigningWallet] = await ethers.getSigners();
   const ReferralValidatorFactory =
     await ethers.getContractFactory('ReferralValidator');
   const initialMaxCommissionRate = 1000;
