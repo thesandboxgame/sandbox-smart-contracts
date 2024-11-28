@@ -1,3 +1,6 @@
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-ethers';
+import '@nomicfoundation/hardhat-network-helpers';
 import 'dotenv/config';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
@@ -88,12 +91,12 @@ const namedAccounts = {
   deployer: {
     default: 1,
     mainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
-    polygon: '0xbB2C98E0fd4e0881745aeC8499dC17082a977448',
+    polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     bscTestnet: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
-    mumbai: '0xbB2C98E0fd4e0881745aeC8499dC17082a977448',
-    amoy: '0xbB2C98E0fd4e0881745aeC8499dC17082a977448',
+    mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
+    amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     base: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     bscMainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',

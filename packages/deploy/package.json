@@ -28,7 +28,9 @@
     "@sandbox-smart-contracts/land-sale": "1.0.0-rc.1",
     "@sandbox-smart-contracts/marketplace": "1.0.2",
     "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1",
-    "@sandbox-smart-contracts/oft-sand": "0.0.1"
+    "@sandbox-smart-contracts/oft-sand": "0.0.1",
+    "@urql/core": "^4.3.0",
+    "isomorphic-unfetch": "^4.0.2"
   },
   "files": [
     "deployments"
@@ -50,6 +52,7 @@
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.3",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
