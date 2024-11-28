@@ -8,7 +8,7 @@ import {
   setAsLandMinter,
   writeProofs,
 } from '../../land-sale-artifacts/getLandSales';
-import {skipUnlessTest} from '../../../core/utils/network';
+import {skipUnlessTest} from '../../land-sale-artifacts/network';
 
 type SaleDeployment = {
   name: string;
