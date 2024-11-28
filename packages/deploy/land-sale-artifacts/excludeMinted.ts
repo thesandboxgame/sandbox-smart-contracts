@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import hre from 'hardhat';
-import {TheGraph} from '../landSales/thegraph';
-import {SectorData, SectorLand} from '../landSales/getLandSales';
+import {TheGraph} from './graph';
+import {SectorData, SectorLand} from './getLandSales';
 
 let l1, l2;
 if (hre.network.tags.testnet && !process.env.HARDHAT_FORK) {
@@ -42,14 +42,13 @@ export async function excludeMinted({
   };
   lands.forEach((land) => checkCoords(land));
   estates.forEach((estate) =>
-    estate.lands.forEach((land) => checkCoords(land)),
+    estate.lands.forEach((land) => checkCoords(land))
   );
   const mintedLands = await getMintedLands({minX, minY, maxX, maxY});
   const isMinted = (land: SectorLand) =>
     mintedLands.find(
       (m) =>
-        m.coordinateX === land.coordinateX &&
-        m.coordinateY === land.coordinateY,
+        m.coordinateX === land.coordinateX && m.coordinateY === land.coordinateY
     );
   lands.forEach((land) => {
     if (isMinted(land)) {
@@ -91,7 +90,9 @@ async function getMintedLands({
 }): Promise<SectorLand[]> {
   console.log({minX, minY, maxX, maxY});
   const query = `{
-    landTokens(where: {x_gte: ${minX + 204} y_gte: ${minY + 204} x_lte:${maxX + 204} y_lte: ${maxY + 204}}) {
+    landTokens(where: {x_gte: ${minX + 204} y_gte: ${minY + 204} x_lte:${
+    maxX + 204
+  } y_lte: ${maxY + 204}}) {
       id
       x
       y
@@ -121,7 +122,7 @@ async function getMintedLands({
         coordinateY: land.y - 204,
         ownerAddress: land.owner.id,
       };
-    }),
+    })
   );
   return Object.values(landMap);
 }

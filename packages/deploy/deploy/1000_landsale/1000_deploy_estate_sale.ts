@@ -7,7 +7,7 @@ import {
   LandSale,
   setAsLandMinter,
   writeProofs,
-} from '../../../core/data/landSales/getLandSales';
+} from '../../land-sale-artifacts/getLandSales';
 import {skipUnlessTest} from '../../../core/utils/network';
 
 type SaleDeployment = {
@@ -40,7 +40,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_34', skip: async () => true},
   {name: 'LandPreSale_35', skip: async () => true},
   {name: 'LandPreSale_36', skip: async () => true},
-  {name: 'LandPreSale_37', skip: async () => false},
+  {name: 'LandPreSale_37', skip: async () => true},
 ];
 
 const func: DeployFunction = async function (hre) {

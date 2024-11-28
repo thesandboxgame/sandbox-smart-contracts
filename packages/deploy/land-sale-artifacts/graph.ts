@@ -14,7 +14,7 @@ export class TheGraph {
     queryString: string,
     field: string,
     variables: Record<string, unknown>,
-    getLastId?: (entries: T[]) => string,
+    getLastId?: (entries: T[]) => string
   ): Promise<T[]> {
     const fields = field.split('.');
     const first = 100;

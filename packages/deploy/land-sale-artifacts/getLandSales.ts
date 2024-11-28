@@ -1,17 +1,18 @@
 import fs from 'fs-extra';
-import hre, {ethers} from 'hardhat';
-import {HardhatRuntimeEnvironment} from 'hardhat/types/runtime';
-import MerkleTree from '../../lib/merkleTree';
 import helpers, {
   SaleLandInfo,
   SaltedProofSaleLandInfo,
   SaltedSaleLandInfo,
-} from '../../lib/merkleTreeHelper';
-import {isTestnet} from '../../../land-sale/data/landSales/network';
-import addresses from '../../../land-sale/data/addresses.json';
-import deadlines from '../../../land-sale/data/deadlines';
+} from './lib/merkleTreeHelper';
+import hre from 'hardhat';
+import MerkleTree from './lib/merkleTree';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import deadlines from './deadlines';
+import {isTestnet} from './network';
 import {excludeMinted} from './excludeMinted';
+import addresses from './addresses.json';
 import prices from './prices';
+import {ethers} from 'ethers';
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
@@ -85,7 +86,7 @@ async function generateLandsForMerkleTree(
   sectorData: SectorData,
   bundles: {[id: string]: string[]},
   prices: {[priceId: string]: string},
-  log?: boolean,
+  log?: boolean
 ): Promise<{lands: SaleLandInfo[]; partnersLands: PartnerLandInfo[]}> {
   const partnersLands: PartnerLandInfo[] = [];
   const lands: SaleLandInfo[] = [];
@@ -151,7 +152,7 @@ async function generateLandsForMerkleTree(
             y: landGroup.y,
             originalY: landGroup.originalY,
             size,
-          }),
+          })
       );
       return;
     }
@@ -250,11 +251,11 @@ async function generateLandsForMerkleTree(
 export async function getLandSales(
   presale: string,
   networkName: string,
-  expose?: boolean,
+  expose?: boolean
 ): Promise<LandSale[]> {
   const {secret, sectors, bundles, prices} = await getLandSaleFiles(
     presale,
-    networkName,
+    networkName
   );
 
   const landSales = [];
@@ -263,7 +264,7 @@ export async function getLandSales(
     const {lands} = await generateLandsForMerkleTree(
       fixedSectorData,
       bundles,
-      prices,
+      prices
     );
 
     const saltedLands = saltLands(lands, secret);
@@ -283,7 +284,7 @@ export async function getLandSales(
 
 export async function getLandSaleFiles(
   presale: string,
-  networkName: string,
+  networkName: string
 ): Promise<SectorFiles> {
   const networkNameMap: {[name: string]: string} = {
     mainnet: 'mainnet',
@@ -299,14 +300,14 @@ export async function getLandSaleFiles(
   const name = networkNameMap[networkName];
   if (!name) {
     throw new Error(
-      `missing network ${networkName}, please add it in getLandSale.ts`,
+      `missing network ${networkName}, please add it in getLandSale.ts`
     );
   }
-  const secretPath = `../../../land-sale/data/secret/estate-sale/.${presale}_${name}_secret`;
-  const sectorPath = `../../../land-sale/data/landSales/${presale}/sectors.${name}.json`;
+  const secretPath = `./secret/.${presale}_${name}_secret`;
+  const sectorPath = `./data/landSale/${presale}/sectors.${name}.json`;
   const bundlesPaths = [
-    `../../../land-sale/data/landSales/${presale}/bundles.${networkName}.json`,
-    `../../../land-sale/data/landSales/${presale}/bundles.${name}.json`,
+    `./data/landSale/${presale}/bundles.${networkName}.json`,
+    `./data/landSale/${presale}/bundles.${name}.json`,
   ];
   let secret;
   if (networkName === 'hardhat' || networkName === 'localhost') {
@@ -353,7 +354,7 @@ async function loadBundles(paths: string[]) {
 
 export function getDeadline(
   hre: HardhatRuntimeEnvironment,
-  sector: number,
+  sector: number
 ): number {
   let deadline = deadlines[sector];
   if (!deadline) {
@@ -363,13 +364,13 @@ export function getDeadline(
     hre.deployments.log('increasing deadline by 10 year');
     console.log(
       `Original Deadline sector ${sector}:`,
-      new Date(deadline * 1000).toISOString(),
+      new Date(deadline * 1000).toISOString()
     );
     deadline += 10 * 365 * 24 * 60 * 60; // add 10 year on testnets
   }
   console.log(
     `Deadline sector ${sector}:`,
-    new Date(deadline * 1000).toISOString(),
+    new Date(deadline * 1000).toISOString()
   );
   return deadline;
 }
@@ -377,7 +378,7 @@ export function getDeadline(
 export function writeProofs(
   hre: HardhatRuntimeEnvironment,
   landSaleName: string,
-  landSale: LandSale,
+  landSale: LandSale
 ): void {
   if (
     hre.network.name !== 'hardhat' ||
@@ -396,7 +397,7 @@ export function writeProofs(
 export async function setAsLandMinter(
   hre: HardhatRuntimeEnvironment,
   address: string,
-  contractName = 'Land',
+  contractName = 'Land'
 ): Promise<void> {
   const {read, execute, catchUnknownSigner} = hre.deployments;
   const isMinter = await read(contractName, 'isMinter', address);
@@ -408,8 +409,8 @@ export async function setAsLandMinter(
         {from: currentLandAdmin, log: true},
         'setMinter',
         address,
-        true,
-      ),
+        true
+      )
     );
   }
 }

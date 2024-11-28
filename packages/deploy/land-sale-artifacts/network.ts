@@ -20,7 +20,7 @@ export function node_url(networkName: string): string {
   }
   if (uri.indexOf('{{') >= 0) {
     throw new Error(
-      `invalid uri or network not supported by nod eprovider : ${uri}`,
+      `invalid uri or network not supported by nod eprovider : ${uri}`
     );
   }
   return uri;
@@ -46,31 +46,31 @@ export function accounts(networkName?: string): {mnemonic: string} {
 }
 
 export async function skipUnlessTest(
-  hre: HardhatRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
   return !isTest(hre);
 }
 
 export async function skipUnlessL1(
-  hre: HardhatRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
   return !isInTags(hre, 'L1');
 }
 
 export async function skipUnlessL2(
-  hre: HardhatRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
   return !isInTags(hre, 'L2');
 }
 
 export async function skipUnlessTestOrL2(
-  hre: HardhatRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
   return !isTest(hre) || !isInTags(hre, 'L2');
 }
 
 export async function skipUnlessTestnet(
-  hre: HardhatRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
   return !isTestnet(hre);
 }

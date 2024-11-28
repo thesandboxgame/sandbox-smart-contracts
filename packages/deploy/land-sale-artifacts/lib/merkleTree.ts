@@ -45,7 +45,7 @@ class MerkleTree {
   sort(arrayToSort: Node[]) {
     const sortedArray = [...arrayToSort];
     return sortedArray.sort((a, b) =>
-      BigInt(a.hash) > BigInt(b.hash) ? 1 : -1,
+      BigInt(a.hash) > BigInt(b.hash) ? 1 : -1
     );
   }
 
@@ -73,17 +73,17 @@ class MerkleTree {
     if (right && left === undefined) {
       hash = solidityPackedKeccak256(
         ['bytes32', 'bytes32'],
-        [right.hash, right.hash],
+        [right.hash, right.hash]
       );
     } else if (left && right === undefined) {
       hash = solidityPackedKeccak256(
         ['bytes32', 'bytes32'],
-        [left.hash, left.hash],
+        [left.hash, left.hash]
       );
     } else if (left && right) {
       hash = solidityPackedKeccak256(
         ['bytes32', 'bytes32'],
-        [left.hash, right.hash],
+        [left.hash, right.hash]
       );
     } else {
       throw new Error(`invalid node pair, both are undefined`);
@@ -168,12 +168,12 @@ class MerkleTree {
     while (leaf.parent) {
       if (leaf.parent.left === leaf) {
         path.push(
-          leaf.parent.right ? leaf.parent.right.hash : leaf.parent.left.hash,
+          leaf.parent.right ? leaf.parent.right.hash : leaf.parent.left.hash
         );
       } else {
         path.push(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          leaf.parent.left ? leaf.parent.left.hash : leaf.parent.right!.hash,
+          leaf.parent.left ? leaf.parent.left.hash : leaf.parent.right!.hash
         );
       }
       leaf = leaf.parent;
@@ -194,12 +194,12 @@ class MerkleTree {
       if (BigInt(potentialRoot) < BigInt(proof[i])) {
         potentialRoot = solidityPackedKeccak256(
           ['bytes32', 'bytes32'],
-          [potentialRoot, proof[i]],
+          [potentialRoot, proof[i]]
         );
       } else {
         potentialRoot = solidityPackedKeccak256(
           ['bytes32', 'bytes32'],
-          [proof[i], potentialRoot],
+          [proof[i], potentialRoot]
         );
       }
     }
