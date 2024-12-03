@@ -12,6 +12,7 @@ import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesPro
 
 /// @author The Sandbox
 /// @title RoyaltiesRegistry
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @dev Contract managing the registry of royalties.
 contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgradeable {
     using ERC165Checker for address;
@@ -109,7 +110,8 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
         _setRoyaltiesType(token, RoyaltiesType.BY_TOKEN, address(0));
         uint256 sumRoyalties = 0;
         delete royaltiesByToken[token];
-        for (uint256 i = 0; i < royalties.length; ++i) {
+        uint256 royaltiesLength = royalties.length;
+        for (uint256 i = 0; i < royaltiesLength; ++i) {
             require(royalties[i].account != address(0x0), "recipient should be present");
             require(royalties[i].basisPoints != 0, "basisPoints should be > 0");
             royaltiesByToken[token].royalties.push(royalties[i]);
@@ -252,7 +254,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgr
             uint256 multiRecipientsLength = multiRecipients.length;
             Part[] memory royalties = new Part[](multiRecipientsLength);
             uint256 sum = 0;
-            for (uint256 i; i < multiRecipientsLength; i++) {
+            for (uint256 i; i < multiRecipientsLength; ++i) {
                 Recipient memory splitRecipient = multiRecipients[i];
                 royalties[i].account = splitRecipient.recipient;
                 uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;
