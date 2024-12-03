@@ -11,6 +11,7 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
 /// @author The Sandbox
 /// @title ExchangeCore Contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
@@ -120,7 +121,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 len = matchedOrders.length;
         require(len > 0, "ExchangeMatch cannot be empty");
         require(len <= matchOrdersLimit, "too many ExchangeMatch");
-        for (uint256 i; i < len; i++) {
+        for (uint256 i; i < len; ++i) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
             _matchAndTransfer(sender, m.orderLeft, m.orderRight);
@@ -140,15 +141,15 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         LibOrder.Order memory orderRight,
         bytes memory signatureRight
     ) internal view {
-        // validate must force order.maker != address(0)
-        orderValidator.validate(orderLeft, signatureLeft, sender);
-        orderValidator.validate(orderRight, signatureRight, sender);
         if (orderLeft.taker != address(0)) {
             require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
         if (orderRight.taker != address(0)) {
             require(orderRight.taker == orderLeft.maker, "rightOrder.taker failed");
         }
+        // validate must force order.maker != address(0)
+        orderValidator.validate(orderLeft, signatureLeft, sender);
+        orderValidator.validate(orderRight, signatureRight, sender);
     }
 
     /// @notice Matches valid orders and transfers the associated assets.
