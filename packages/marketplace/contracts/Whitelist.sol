@@ -8,6 +8,7 @@ import {IWhitelist} from "./interfaces/IWhitelist.sol";
 
 /// @author The Sandbox
 /// @title Whitelist contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @dev A contract to control which tokens are accepted in the marketplace.
 contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradeable {
     /// @notice Role for The Sandbox tokens
@@ -27,10 +28,11 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     bool private _whitelistsEnabled;
 
     /// @notice Emitted when a specific role gets enabled.
-    /// @param role Roles whose permissions were enabled
+    /// @param role The role whose permissions were enabled.
     event RoleEnabled(bytes32 indexed role);
 
     /// @notice Emitted when a specific role gets disabled.
+    /// @param role The role whose permissions were disabled.
     event RoleDisabled(bytes32 indexed role);
 
     /// @notice Emitted when only non-ERC20 tokens that are whitelisted can be allowed.
@@ -116,8 +118,9 @@ contract Whitelist is IWhitelist, Initializable, AccessControlEnumerableUpgradea
     /// @param roles List of role identifiers.
     /// @param permissions List of desired status for each role.
     function _setRolesEnabled(bytes32[] memory roles, bool[] memory permissions) internal {
-        require(roles.length == permissions.length, "Mismatched input lengths");
-        for (uint256 i = 0; i < roles.length; ++i) {
+        uint256 rolesLength = roles.length;
+        require(rolesLength == permissions.length, "Mismatched input lengths");
+        for (uint256 i = 0; i < rolesLength; ++i) {
             if (isRoleEnabled(roles[i]) != permissions[i]) {
                 if (permissions[i]) {
                     _enableRole(roles[i]);
