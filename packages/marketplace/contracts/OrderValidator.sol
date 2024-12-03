@@ -13,6 +13,7 @@ import {Whitelist} from "./Whitelist.sol";
 
 /// @author The Sandbox
 /// @title OrderValidator
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contract for order validation. It validates orders and contains a whitelist of tokens.
 contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ERC165Upgradeable, Whitelist {
     using SignatureChecker for address;
@@ -84,31 +85,43 @@ contract OrderValidator is IOrderValidator, Initializable, EIP712Upgradeable, ER
         address makeToken;
         if (asset.assetType.assetClass == LibAsset.AssetClass.BUNDLE) {
             LibAsset.Bundle memory bundle = LibAsset.decodeBundle(asset.assetType);
-        } else makeToken = LibAsset.decodeAddress(asset.assetType);
-        if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
-            _verifyWhitelistsRoles(makeToken);
+            uint256 bundledERC721Length = bundle.bundledERC721.length;
+            for (uint256 i; i < bundledERC721Length; ++i) {
+                makeToken = bundle.bundledERC721[i].erc721Address;
+                _verifyWhitelistsRoles(makeToken);
+            }
+
+            uint256 bundledERC1155Length = bundle.bundledERC1155.length;
+            for (uint256 i; i < bundledERC1155Length; ++i) {
+                makeToken = bundle.bundledERC1155[i].erc1155Address;
+                _verifyWhitelistsRoles(makeToken);
+            }
+        } else {
+            makeToken = LibAsset.decodeAddress(asset.assetType);
+            if (asset.assetType.assetClass == LibAsset.AssetClass.ERC20) {
+                if (!hasRole(ERC20_ROLE, makeToken)) {
+                    revert("payment token not allowed");
+                }
+            } else {
+                _verifyWhitelistsRoles(makeToken);
+            }
         }
     }
 
-    /// @notice Verifies ERC20 whitelisted ROLEs.
-    /// @param makeToken The ERC20 token to check.
-    /// @dev As the asset type is ERC20, the ERC20_ROLE is checked.
-    /// @dev If ERC20_ROLE is enabled only tokens that have the role are accepted
-    /// @dev If whitelists are enabled, checks TSB_ROLE and PARTNER_ROLE.
+    /// @notice Verifies that the given token has the required roles
+    /// @param makeToken The token address to check.
+    /// @dev Check the status of the whitelists functionality.
+    /// @dev If whitelists functionality is activated only tokens(ERC721, ERC1155) that have TSB_ROLE or PARTNER_ROLE are accepted
     function _verifyWhitelistsRoles(address makeToken) private view {
-        if (!hasRole(ERC20_ROLE, makeToken)) {
-            revert("payment token not allowed");
+        if (!isWhitelistsEnabled()) {
+            return;
+        } else if (
+            (isRoleEnabled(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
+            (isRoleEnabled(PARTNER_ROLE) && hasRole(PARTNER_ROLE, makeToken))
+        ) {
+            return;
         } else {
-            if (!isWhitelistsEnabled()) {
-                return;
-            } else if (
-                (isRoleEnabled(TSB_ROLE) && hasRole(TSB_ROLE, makeToken)) ||
-                (isRoleEnabled(PARTNER_ROLE) && hasRole(PARTNER_ROLE, makeToken))
-            ) {
-                return;
-            } else {
-                revert("not allowed");
-            }
+            revert("not allowed");
         }
     }
 

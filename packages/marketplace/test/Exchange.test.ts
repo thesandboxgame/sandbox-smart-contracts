@@ -27,6 +27,7 @@ import {shouldSupportInterfaces} from './common/SupportsInterface.behavior.ts';
 import {shouldCheckForWhitelisting} from './exchange/WhitelistingTokens.behavior.ts';
 import {shouldMatchOrdersWithRoyalty} from './exchange/MatchOrdersWithRoyalties.behavior.ts';
 import {shouldMatchOrdersForBundle} from './exchange/Bundle.behavior.ts';
+import {shouldMatchOrdersForBundleWithRoyalty} from './exchange/BundleWithRoyalties.behaviour.ts';
 
 describe('Exchange.sol', function () {
   let AssetMatcherAsUser: Contract,
@@ -109,6 +110,9 @@ describe('Exchange.sol', function () {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   shouldMatchOrdersForBundle();
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  shouldMatchOrdersForBundleWithRoyalty();
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   exchangeConfig();
