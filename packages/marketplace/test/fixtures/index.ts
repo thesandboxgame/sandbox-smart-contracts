@@ -1,8 +1,8 @@
-import {ethers} from 'hardhat';
 import {ZeroAddress} from 'ethers';
+import {ethers} from 'hardhat';
 
-import {exchangeSetup} from './exchange';
 import {mockAssetsSetup} from './assets';
+import {exchangeSetup} from './exchange';
 
 export async function deployFixturesWithoutWhitelist() {
   const [deployer, admin, user, defaultFeeReceiver, user1, user2] =
@@ -14,6 +14,11 @@ export async function deployFixturesWithoutWhitelist() {
 
   const {ExchangeContractAsAdmin} = exchange;
 
+  const TSB_PRIMARY_MARKET_SELLER_ROLE =
+    await ExchangeContractAsAdmin.TSB_PRIMARY_MARKET_SELLER_ROLE();
+  const TSB_SECONDARY_MARKET_SELLER_ROLE =
+    await ExchangeContractAsAdmin.TSB_SECONDARY_MARKET_SELLER_ROLE();
+  const FEE_WHITELIST_ROLE = await ExchangeContractAsAdmin.FEE_WHITELIST_ROLE();
   const EXCHANGE_ADMIN_ROLE =
     await ExchangeContractAsAdmin.EXCHANGE_ADMIN_ROLE();
   const DEFAULT_ADMIN_ROLE = await ExchangeContractAsAdmin.DEFAULT_ADMIN_ROLE();
@@ -25,6 +30,9 @@ export async function deployFixturesWithoutWhitelist() {
     ...exchange,
     ...mockAssets,
     EXCHANGE_ADMIN_ROLE,
+    TSB_PRIMARY_MARKET_SELLER_ROLE,
+    TSB_SECONDARY_MARKET_SELLER_ROLE,
+    FEE_WHITELIST_ROLE,
     DEFAULT_ADMIN_ROLE,
     ERC1776_OPERATOR_ROLE,
     PAUSER_ROLE,

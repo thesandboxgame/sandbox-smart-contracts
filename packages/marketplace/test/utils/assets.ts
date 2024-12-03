@@ -16,6 +16,7 @@ export enum AssetClassType {
   ERC20_ASSET_CLASS = '0x1',
   ERC721_ASSET_CLASS = '0x2',
   ERC1155_ASSET_CLASS = '0x3',
+  BUNDLE_ASSET_CLASS = '0x4',
 }
 
 export const ASSET_TYPE_TYPEHASH = keccak256(
@@ -40,6 +41,37 @@ export type FeeRecipients = {
 export type AssetType = {
   assetClass: AssetClassType;
   data: BytesLike;
+};
+
+export type BundledERC721 = {
+  erc721Address: string;
+  ids: Numeric[];
+};
+
+export type BundledERC1155 = {
+  erc1155Address: string;
+  ids: Numeric[];
+  supplies: Numeric[];
+};
+
+export type Quads = {
+  sizes: Numeric[];
+  xs: Numeric[];
+  ys: Numeric[];
+  data: string;
+};
+
+export type BundleData = {
+  bundledERC721: BundledERC721[];
+  bundledERC1155: BundledERC1155[];
+  quads: Quads;
+  priceDistribution: PriceDistribution;
+};
+
+export type PriceDistribution = {
+  erc721Prices: Numeric[][];
+  erc1155Prices: Numeric[][];
+  quadPrices: Numeric[];
 };
 
 export type Asset = {
@@ -77,9 +109,6 @@ export const AssetERC20 = async (
     baseParams.push('address');
     baseValues.push(recipient);
   }
-
-  console.log(baseParams);
-  console.log(baseValues);
 
   return {
     assetType: {
@@ -155,3 +184,20 @@ export function hashAsset(a: Asset) {
     )
   );
 }
+
+export const AssetBundle = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bundleInformation: any, // TODO: type,
+  value: number
+): Promise<Asset> => ({
+  assetType: {
+    assetClass: AssetClassType.BUNDLE_ASSET_CLASS,
+    data: AbiCoder.defaultAbiCoder().encode(
+      [
+        'tuple(tuple(address erc721Address, uint256[] ids)[] bundledERC721, tuple(address erc1155Address, uint256[] ids, uint256[] supplies)[] bundledERC1155, tuple(uint256[] sizes, uint256[] xs, uint256[] ys, bytes data) quads, tuple(uint256[][] erc721Prices, uint256[][] erc1155Prices, uint256[] quadPrices) priceDistribution)',
+      ],
+      [bundleInformation]
+    ),
+  },
+  value,
+});

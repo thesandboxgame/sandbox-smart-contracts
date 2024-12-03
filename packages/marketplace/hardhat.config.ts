@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: '0.8.19',
+        version: '0.8.23',
         settings: {
           optimizer: {
             enabled: true,
@@ -30,6 +30,9 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
     excludeContracts: ['mocks', '@openzeppelin'],
+  },
+  mocha: {
+    ...(!process.env.CI ? {} : {invert: true, grep: '@skip-on-ci'}),
   },
 };
 export default config;

@@ -4,7 +4,9 @@
 
 The [Exchange contract](../contracts/Exchange.sol) is the entrypoint and main
 contract to the marketplace protocol. It safely offers a decentralized way to
-exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.
+exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.It
+also supports exchanging bundles of assets, which can include multiple ERC1155,
+ERC721, and Quads.
 
 ## Concepts
 
@@ -23,6 +25,27 @@ Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 SA
 The order represents this intent and includes the address of the seller, the
 address of the NFT, the token id, the address of the ERC20 and the amount the
 seller is asking for (and more).
+
+### Bundle Order
+
+In addition to single-asset orders, the protocol supports bundle orders, where
+multiple assets are grouped together as a single entity for exchange. Let's
+consider this use case:
+
+Order B
+
+```
+Alice wants to sell a bundle of assets:
+ 1 LAND (ERC721) with token id 1000
+  - Price: 1200 MATIC
+ 10 ASSET (ERC1155) with token id 2000
+  - Price: 700 MATIC
+against 2000 MATIC (ERC20).
+```
+
+The order represents this intent and includes the address of the seller, the
+address for the tokens(ERC721 and ERC1155), the token ids, the individual prices
+of the assets, the address of the ERC20 and the amount the seller is asking for.
 
 ### Maker & Taker
 
@@ -283,6 +306,21 @@ collection or token after a sale. The protocol handles multiple types of
 royalties (ERC2981, royalties registry, external provider). See the
 [RoyaltiesRegistry](RoyaltiesRegistry.md) contract for more information.
 
+### Royalties for Bundles
+
+For bundle orders, royalties are calculated individually for each asset type
+within the bundle. Here's how it works:
+
+- ERC721: The royalty is calculated on the price of each individual ERC721 asset
+  within the bundle. The royalty fee is then deducted from the price of that
+  specific ERC721 asset.
+- ERC1155: The royalty is calculated based on the asset price for each ERC1155
+  token within the bundle. The royalty fee is then deducted from this asset
+  price.
+- Quads: The price of Quad within the bundle is determined by the combined price
+  of all land in the Quad. The royalty is then calculated using the royalty
+  fetched for the land token associated with the leftmost land in the Quad.
+
 ### Payouts
 
 The payouts define what is due for each party of the exchange. For the buyer
@@ -344,7 +382,7 @@ The contract supports the ERC2771 standard to enable meta transactions.
 
 The protocol is secured with the Open Zeppelin access control component.
 
-4 roles are defined:
+6 roles are defined:
 
 - `DEFAULT_ADMIN_ROLE`: handle the roles & users and the technical settings
   (trusted forwarder, order validator contract addresses)
@@ -353,6 +391,10 @@ The protocol is secured with the Open Zeppelin access control component.
 - `ERC1776_OPERATOR_ROLE`: allow an operator to execute an exchange on behalf of
   a sender
 - `PAUSER_ROLE`: allow to control the pausing of the contract
+- `TSB_SELLER_ROLE` - allows bypassing primary market check for TSB owned seller
+  accounts
+- `FEE_WHITELIST_ROLE` - allows bypassing all fees for whitelisted accounts
+  (seller side only)
 
 ### ERC1776
 

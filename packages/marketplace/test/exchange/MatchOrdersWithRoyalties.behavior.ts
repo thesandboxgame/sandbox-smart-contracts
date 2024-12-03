@@ -1,16 +1,16 @@
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
 import {deployFixtures} from '../fixtures/index.ts';
-import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {
+  Asset,
   AssetERC20,
   AssetERC721,
   FeeRecipientsData,
   LibPartData,
-  Asset,
 } from '../utils/assets.ts';
 
-import {hashKey, OrderDefault, signOrder, Order} from '../utils/order.ts';
-import {ZeroAddress, Contract, Signer} from 'ethers';
+import {Contract, Signer, ZeroAddress} from 'ethers';
+import {Order, OrderDefault, hashKey, signOrder} from '../utils/order.ts';
 
 // eslint-disable-next-line mocha/no-exports
 export function shouldMatchOrdersWithRoyalty() {
@@ -39,7 +39,8 @@ export function shouldMatchOrdersWithRoyalty() {
       orderRight: Order,
       makerSig: string,
       takerSig: string,
-      EXCHANGE_ADMIN_ROLE: string;
+      TSB_PRIMARY_MARKET_SELLER_ROLE: string,
+      FEE_WHITELIST_ROLE: string;
 
     beforeEach(async function () {
       ({
@@ -61,7 +62,8 @@ export function shouldMatchOrdersWithRoyalty() {
         admin: receiver1,
         user: receiver2,
         deployer: royaltyReceiver,
-        EXCHANGE_ADMIN_ROLE,
+        TSB_PRIMARY_MARKET_SELLER_ROLE,
+        FEE_WHITELIST_ROLE,
       } = await loadFixture(deployFixtures));
 
       await ERC20Contract.mint(taker.getAddress(), 10000000000);
@@ -569,7 +571,7 @@ export function shouldMatchOrdersWithRoyalty() {
       );
     });
 
-    it('should execute a complete match order without fee and royalties for privileged seller', async function () {
+    it('should execute a complete match order without royalties but with primary market fees for address with TSB_PRIMARY_MARKET_SELLER_ROLE', async function () {
       await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
         await FeeRecipientsData(maker.getAddress(), 10000),
       ]);
@@ -587,8 +589,98 @@ export function shouldMatchOrdersWithRoyalty() {
 
       // grant exchange admin role to seller
       await ExchangeContractAsDeployer.connect(admin).grantRole(
-        EXCHANGE_ADMIN_ROLE,
-        taker.getAddress()
+        TSB_PRIMARY_MARKET_SELLER_ROLE,
+        maker.getAddress()
+      );
+
+      ERC721Asset = await AssetERC721(ERC721WithRoyaltyV2981, 1);
+      orderLeft = await OrderDefault(
+        maker,
+        ERC721Asset,
+        ZeroAddress,
+        ERC20Asset,
+        1,
+        0,
+        0
+      );
+      orderRight = await OrderDefault(
+        taker,
+        ERC20Asset,
+        ZeroAddress,
+        ERC721Asset,
+        1,
+        0,
+        0
+      );
+      makerSig = await signOrder(orderLeft, maker, OrderValidatorAsAdmin);
+      takerSig = await signOrder(orderRight, taker, OrderValidatorAsAdmin);
+
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(0);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(0);
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        await maker.getAddress()
+      );
+      expect(await ERC20Contract.balanceOf(taker.getAddress())).to.be.equal(
+        10000000000
+      );
+
+      await ExchangeContractAsUser.matchOrders([
+        {
+          orderLeft,
+          signatureLeft: makerSig,
+          orderRight,
+          signatureRight: takerSig,
+        },
+      ]);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderLeft))
+      ).to.be.equal(10000000000);
+      expect(
+        await ExchangeContractAsUser.fills(hashKey(orderRight))
+      ).to.be.equal(1);
+      expect(await ERC721WithRoyaltyV2981.ownerOf(1)).to.be.equal(
+        await taker.getAddress()
+      );
+
+      // PRIMARY protocol fee paid
+      expect(
+        await ERC20Contract.balanceOf(defaultFeeReceiver.getAddress())
+      ).to.be.equal(123000000);
+
+      // no royalties paid
+      expect(await ERC20Contract.balanceOf(deployer.getAddress())).to.be.equal(
+        0
+      );
+
+      expect(await ERC20Contract.balanceOf(maker.getAddress())).to.be.equal(
+        10000000000 - 123000000
+      );
+    });
+
+    it('should execute a complete match order without any fees for address with FEE_WHITELIST_ROLE', async function () {
+      await ERC721WithRoyaltyV2981.mint(maker.getAddress(), 1, [
+        await FeeRecipientsData(maker.getAddress(), 10000),
+      ]);
+
+      await ERC721WithRoyaltyV2981.connect(maker).approve(
+        await ExchangeContractAsUser.getAddress(),
+        1
+      );
+
+      // set up receiver
+      await ERC721WithRoyaltyV2981.setRoyaltiesReceiver(
+        1,
+        deployer.getAddress()
+      );
+
+      // grant exchange admin role to seller
+      await ExchangeContractAsDeployer.connect(admin).grantRole(
+        FEE_WHITELIST_ROLE,
+        maker.getAddress()
       );
 
       ERC721Asset = await AssetERC721(ERC721WithRoyaltyV2981, 1);

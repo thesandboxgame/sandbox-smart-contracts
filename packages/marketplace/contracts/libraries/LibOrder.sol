@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {LibAsset} from "./LibAsset.sol";
 import {LibMath} from "./LibMath.sol";
 
 /// @author The Sandbox
 /// @title Order Handling Library
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Provides tools for constructing, hashing, and validating orders.
 library LibOrder {
     bytes32 internal constant ORDER_TYPEHASH =

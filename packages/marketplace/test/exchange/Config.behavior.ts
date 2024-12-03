@@ -38,16 +38,10 @@ export function exchangeConfig() {
           ],
           ['RoyaltiesRegistrySet', 'OrderValidatorSet', 'TrustedForwarderSet'],
           [
-            'ExchangeContractAsUser',
-            'ExchangeContractAsUser',
-            'ExchangeContractAsUser',
-          ],
-          [
-            'ExchangeContractAsAdmin',
-            'ExchangeContractAsAdmin',
-            'ExchangeContractAsAdmin',
-          ],
-          ['0x00', '0x00', '0x00']
+            'RoyaltiesRegistryAsUser',
+            'OrderValidatorAsUser',
+            'TrustedForwarderAsUser',
+          ]
         );
 
         it('should be able to set trusted forwarder as zero address to disable it', async function () {
@@ -109,8 +103,9 @@ export function exchangeConfig() {
         });
 
         it('should not unpause if caller is not in the role', async function () {
-          const {ExchangeContractAsUser, EXCHANGE_ADMIN_ROLE, user} =
-            await loadFixture(deployFixturesWithoutWhitelist);
+          const {ExchangeContractAsUser} = await loadFixture(
+            deployFixturesWithoutWhitelist
+          );
           await expect(ExchangeContractAsUser.unpause()).to.be.revertedWith(
             `AccessControl: account ${(
               await user.getAddress()

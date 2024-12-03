@@ -1,19 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 import {IMultiRoyaltyRecipients} from "@sandbox-smart-contracts/dependency-royalty-management/contracts/interfaces/IMultiRoyaltyRecipients.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Recipient} from "@manifoldxyz/royalty-registry-solidity/contracts/overrides/IRoyaltySplitter.sol";
 import {IRoyaltiesProvider, TOTAL_BASIS_POINTS} from "./interfaces/IRoyaltiesProvider.sol";
 
 /// @author The Sandbox
 /// @title RoyaltiesRegistry
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @dev Contract managing the registry of royalties.
-contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
-    using ERC165CheckerUpgradeable for address;
+contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider, ERC165Upgradeable {
+    using ERC165Checker for address;
+
     /// @notice Emitted when royalties are set for a token.
     /// @param token The token address for which royalties are set.
     /// @param royalties An array of royalties set for the token.
@@ -107,7 +110,8 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
         _setRoyaltiesType(token, RoyaltiesType.BY_TOKEN, address(0));
         uint256 sumRoyalties = 0;
         delete royaltiesByToken[token];
-        for (uint256 i = 0; i < royalties.length; ++i) {
+        uint256 royaltiesLength = royalties.length;
+        for (uint256 i = 0; i < royaltiesLength; ++i) {
             require(royalties[i].account != address(0x0), "recipient should be present");
             require(royalties[i].basisPoints != 0, "basisPoints should be > 0");
             royaltiesByToken[token].royalties.push(royalties[i]);
@@ -154,6 +158,15 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
 
         // case royaltiesType = 4, unknown/empty royalties
         return new Part[](0);
+    }
+
+    /// @notice Check if the contract supports an interface
+    /// @param interfaceId The id of the interface
+    /// @return true if the interface is supported
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, IRoyaltiesProvider) returns (bool) {
+        return interfaceId == type(IRoyaltiesProvider).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @notice Returns provider address for token contract from royaltiesProviders mapping
@@ -241,7 +254,7 @@ contract RoyaltiesRegistry is OwnableUpgradeable, IRoyaltiesProvider {
             uint256 multiRecipientsLength = multiRecipients.length;
             Part[] memory royalties = new Part[](multiRecipientsLength);
             uint256 sum = 0;
-            for (uint256 i; i < multiRecipientsLength; i++) {
+            for (uint256 i; i < multiRecipientsLength; ++i) {
                 Recipient memory splitRecipient = multiRecipients[i];
                 royalties[i].account = splitRecipient.recipient;
                 uint256 splitAmount = (splitRecipient.bps * royaltyAmount) / WEIGHT_VALUE;

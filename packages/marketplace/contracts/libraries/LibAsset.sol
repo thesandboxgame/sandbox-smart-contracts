@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title LibAsset: A library for handling different types of Ethereum assets.
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This library contains structs, enums, and utility functions for managing and processing Ethereum assets.
 library LibAsset {
     /// @dev Represents different types of assets on the Ethereum network.
@@ -11,7 +12,8 @@ library LibAsset {
         INVALID, // Represents an invalid asset type.
         ERC20, // Represents an ERC20 token.
         ERC721, // Represents a single ERC721 token.
-        ERC1155 // Represents an ERC1155 token.
+        ERC1155, // Represents an ERC1155 token.
+        BUNDLE // Represents a group of tokens of various types.
     }
 
     /// @dev Represents the side of the trade from which a fee should be taken, if any.
@@ -35,6 +37,42 @@ library LibAsset {
         uint256 value; // The amount or value of the asset.
     }
 
+    /// @dev Represents a group (i.e. bundle) of ERC721 assets.
+    struct BundledERC721 {
+        address erc721Address;
+        uint256[] ids;
+    }
+
+    /// @dev Represents a group (i.e. bundle) of ERC1155 assets.
+    struct BundledERC1155 {
+        address erc1155Address;
+        uint256[] ids;
+        uint256[] supplies;
+    }
+
+    /// @dev Represents a group of LAND ERC721 token (enables LAND quad batch transfer functionality).
+    struct Quads {
+        uint256[] sizes;
+        uint256[] xs;
+        uint256[] ys;
+        bytes data;
+    }
+
+    /// @dev Represents a group (i.e. bundle) of assets with its types and values.
+    struct Bundle {
+        BundledERC721[] bundledERC721;
+        BundledERC1155[] bundledERC1155;
+        Quads quads;
+        PriceDistribution priceDistribution;
+    }
+
+    /// @dev Represents the price of each asset in a bundle.
+    struct PriceDistribution {
+        uint256[][] erc721Prices;
+        uint256[][] erc1155Prices;
+        uint256[] quadPrices;
+    }
+
     bytes32 internal constant ASSET_TYPE_TYPEHASH = keccak256("AssetType(uint256 assetClass,bytes data)");
 
     bytes32 internal constant ASSET_TYPEHASH =
@@ -45,6 +83,14 @@ library LibAsset {
     /// @param rightClass The asset class type of the right side of the trade.
     /// @return FeeSide representing which side should bear the fee, if any.
     function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
+        if (leftClass == AssetClass.BUNDLE || rightClass == AssetClass.BUNDLE) {
+            require(
+                ((leftClass == AssetClass.BUNDLE && rightClass == AssetClass.ERC20) ||
+                    (rightClass == AssetClass.BUNDLE && leftClass == AssetClass.ERC20)),
+                "exchange not allowed"
+            );
+        }
+
         if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
             return FeeSide.LEFT;
         }
@@ -103,6 +149,54 @@ library LibAsset {
     /// @return The address of the token.
     function decodeAddress(AssetType memory assetType) internal pure returns (address) {
         return abi.decode(assetType.data, (address));
+    }
+
+    /// @notice Decode the token details (address and tokenId) from a group of AssetTypes.
+    /// @param assetType The asset type to decode.
+    /// @return Bundle information.
+    function decodeBundle(AssetType memory assetType) internal pure returns (Bundle memory) {
+        return abi.decode(assetType.data, (Bundle));
+    }
+
+    /// @dev function to verify if the order is a bundle and validate the bundle price
+    /// @param leftAsset The left asset.
+    /// @param nftSideValue The value on nft side order.
+    /// @param paymentSideValue The value on payment side order.
+    function verifyPriceDistribution(
+        Asset memory leftAsset,
+        uint256 nftSideValue,
+        uint256 paymentSideValue
+    ) internal pure {
+        if (leftAsset.assetType.assetClass == AssetClass.BUNDLE) {
+            Bundle memory bundle = LibAsset.decodeBundle(leftAsset.assetType);
+            PriceDistribution memory priceDistribution = bundle.priceDistribution;
+            uint256 collectiveBundlePrice = 0;
+
+            // total price of all bundled ERC721 assets
+            uint256 erc721PricesLength = priceDistribution.erc721Prices.length;
+            for (uint256 i = 0; i < erc721PricesLength; ++i) {
+                uint256 erc721PricesInnerLength = priceDistribution.erc721Prices[i].length;
+                for (uint256 j = 0; j < erc721PricesInnerLength; ++j)
+                    collectiveBundlePrice += priceDistribution.erc721Prices[i][j];
+            }
+
+            // total price of all bundled ERC1155 assets
+            uint256 erc1155PricesLength = priceDistribution.erc1155Prices.length;
+            for (uint256 i = 0; i < erc1155PricesLength; ++i) {
+                uint256 erc1155PricesInnerLength = priceDistribution.erc1155Prices[i].length;
+                for (uint256 j = 0; j < erc1155PricesInnerLength; ++j) {
+                    collectiveBundlePrice += priceDistribution.erc1155Prices[i][j];
+                }
+            }
+
+            // total price of all bundled Quad assets
+            uint256 quadPricesLength = priceDistribution.quadPrices.length;
+            for (uint256 i = 0; i < quadPricesLength; ++i) {
+                collectiveBundlePrice += priceDistribution.quadPrices[i];
+            }
+
+            require(paymentSideValue == collectiveBundlePrice * nftSideValue, "Bundle price mismatch");
+        }
     }
 
     /// @notice Decode the recipient address from an AssetType.
