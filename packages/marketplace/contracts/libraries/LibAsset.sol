@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title LibAsset: A library for handling different types of Ethereum assets.
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice This library contains structs, enums, and utility functions for managing and processing Ethereum assets.
 library LibAsset {
     /// @dev Represents different types of assets on the Ethereum network.
@@ -36,12 +37,6 @@ library LibAsset {
         uint256 value; // The amount or value of the asset.
     }
 
-    /// @dev Represents a group (i.e. bundle) of ERC20 asset.
-    struct BundledERC20 {
-        address erc20Address;
-        uint256 value;
-    }
-
     /// @dev Represents a group (i.e. bundle) of ERC721 assets.
     struct BundledERC721 {
         address erc721Address;
@@ -65,7 +60,6 @@ library LibAsset {
 
     /// @dev Represents a group (i.e. bundle) of assets with its types and values.
     struct Bundle {
-        BundledERC20[] bundledERC20;
         BundledERC721[] bundledERC721;
         BundledERC1155[] bundledERC1155;
         Quads quads;
@@ -74,7 +68,6 @@ library LibAsset {
 
     /// @dev Represents the price of each asset in a bundle.
     struct PriceDistribution {
-        uint256[] erc20Prices;
         uint256[][] erc721Prices;
         uint256[][] erc1155Prices;
         uint256[] quadPrices;
@@ -90,6 +83,14 @@ library LibAsset {
     /// @param rightClass The asset class type of the right side of the trade.
     /// @return FeeSide representing which side should bear the fee, if any.
     function getFeeSide(AssetClass leftClass, AssetClass rightClass) internal pure returns (FeeSide) {
+        if (leftClass == AssetClass.BUNDLE || rightClass == AssetClass.BUNDLE) {
+            require(
+                ((leftClass == AssetClass.BUNDLE && rightClass == AssetClass.ERC20) ||
+                    (rightClass == AssetClass.BUNDLE && leftClass == AssetClass.ERC20)),
+                "exchange not allowed"
+            );
+        }
+
         if (leftClass == AssetClass.ERC20 && rightClass != AssetClass.ERC20) {
             return FeeSide.LEFT;
         }
@@ -159,40 +160,42 @@ library LibAsset {
 
     /// @dev function to verify if the order is a bundle and validate the bundle price
     /// @param leftAsset The left asset.
-    /// @param rightAsset The right asset.
-    function verifyPriceDistribution(Asset memory leftAsset, Asset memory rightAsset) internal pure {
+    /// @param nftSideValue The value on nft side order.
+    /// @param paymentSideValue The value on payment side order.
+    function verifyPriceDistribution(
+        Asset memory leftAsset,
+        uint256 nftSideValue,
+        uint256 paymentSideValue
+    ) internal pure {
         if (leftAsset.assetType.assetClass == AssetClass.BUNDLE) {
-            uint256 bundlePrice = rightAsset.value; // bundle price provided by seller
             Bundle memory bundle = LibAsset.decodeBundle(leftAsset.assetType);
             PriceDistribution memory priceDistribution = bundle.priceDistribution;
             uint256 collectiveBundlePrice = 0;
 
-            // total price of all bundled ERC20 assets
-            for (uint256 i = 0; i < priceDistribution.erc20Prices.length; i++) {
-                collectiveBundlePrice += priceDistribution.erc20Prices[i];
-            }
-
             // total price of all bundled ERC721 assets
-            for (uint256 i = 0; i < priceDistribution.erc721Prices.length; i++) {
-                for (uint256 j = 0; j < priceDistribution.erc721Prices[i].length; j++)
+            uint256 erc721PricesLength = priceDistribution.erc721Prices.length;
+            for (uint256 i = 0; i < erc721PricesLength; ++i) {
+                uint256 erc721PricesInnerLength = priceDistribution.erc721Prices[i].length;
+                for (uint256 j = 0; j < erc721PricesInnerLength; ++j)
                     collectiveBundlePrice += priceDistribution.erc721Prices[i][j];
             }
 
             // total price of all bundled ERC1155 assets
-            for (uint256 i = 0; i < priceDistribution.erc1155Prices.length; i++) {
-                for (uint256 j = 0; j < priceDistribution.erc1155Prices[i].length; j++) {
-                    collectiveBundlePrice +=
-                        bundle.bundledERC1155[i].supplies[j] *
-                        priceDistribution.erc1155Prices[i][j];
+            uint256 erc1155PricesLength = priceDistribution.erc1155Prices.length;
+            for (uint256 i = 0; i < erc1155PricesLength; ++i) {
+                uint256 erc1155PricesInnerLength = priceDistribution.erc1155Prices[i].length;
+                for (uint256 j = 0; j < erc1155PricesInnerLength; ++j) {
+                    collectiveBundlePrice += priceDistribution.erc1155Prices[i][j];
                 }
             }
 
             // total price of all bundled Quad assets
-            for (uint256 i = 0; i < priceDistribution.quadPrices.length; i++) {
+            uint256 quadPricesLength = priceDistribution.quadPrices.length;
+            for (uint256 i = 0; i < quadPricesLength; ++i) {
                 collectiveBundlePrice += priceDistribution.quadPrices[i];
             }
 
-            require(bundlePrice == collectiveBundlePrice, "Bundle price mismatch");
+            require(paymentSideValue == collectiveBundlePrice * nftSideValue, "Bundle price mismatch");
         }
     }
 

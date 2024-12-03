@@ -2,14 +2,7 @@
 // "20 eth" == AssetETH(20), "11 Sand" == AssetERC20(SandTokenAddress, 11)
 // some NFT" == AssetERC721(nftContractAddress, tokenId), etc
 // SEE: LibAsset.sol
-import {
-  AbiCoder,
-  AddressLike,
-  BytesLike,
-  Contract,
-  keccak256,
-  Numeric,
-} from 'ethers';
+import {AbiCoder, AddressLike, BytesLike, keccak256, Numeric} from 'ethers';
 
 export enum AssetClassType {
   INVALID_ASSET_CLASS = '0x0',
@@ -43,31 +36,6 @@ export type AssetType = {
   data: BytesLike;
 };
 
-export type BundledERC721 = {
-  erc721Address: string;
-  ids: Numeric[];
-};
-
-export type BundledERC1155 = {
-  erc1155Address: string;
-  ids: Numeric[];
-  supplies: Numeric[];
-};
-
-export type Quads = {
-  sizes: Numeric[];
-  xs: Numeric[];
-  ys: Numeric[];
-  data: string;
-};
-
-export type BundleData = {
-  bundledERC721: BundledERC721[];
-  bundledERC1155: BundledERC1155[];
-  quads: Quads;
-  priceDistribution: PriceDistribution;
-};
-
 export type PriceDistribution = {
   erc721Prices: Numeric[][];
   erc1155Prices: Numeric[][];
@@ -96,12 +64,12 @@ export const LibPartData = async (
 });
 
 export const AssetERC20 = async (
-  tokenContract: Contract,
+  tokenContractAddress: string,
   value: Numeric,
   recipient?: string
 ): Promise<Asset> => {
   const baseParams: string[] = ['address'];
-  const baseValues: (string | number)[] = [await tokenContract.getAddress()];
+  const baseValues: (string | number)[] = [tokenContractAddress];
 
   if (recipient) {
     baseParams.push('uint256');
@@ -113,51 +81,6 @@ export const AssetERC20 = async (
   return {
     assetType: {
       assetClass: AssetClassType.ERC20_ASSET_CLASS,
-      data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
-    },
-    value,
-  };
-};
-
-export const AssetERC721 = async (
-  tokenContract: Contract,
-  tokenId: Numeric,
-  recipient?: string
-): Promise<Asset> => {
-  const baseParams = ['address', 'uint256'];
-  const baseValues = [await tokenContract.getAddress(), tokenId];
-
-  if (recipient) {
-    baseParams.push('address');
-    baseValues.push(recipient);
-  }
-
-  return {
-    assetType: {
-      assetClass: AssetClassType.ERC721_ASSET_CLASS,
-      data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
-    },
-    value: 1,
-  };
-};
-
-export const AssetERC1155 = async (
-  tokenContract: Contract,
-  tokenId: Numeric,
-  value: Numeric,
-  recipient?: string
-): Promise<Asset> => {
-  const baseParams = ['address', 'uint256'];
-  const baseValues = [await tokenContract.getAddress(), tokenId];
-
-  if (recipient) {
-    baseParams.push('address');
-    baseValues.push(recipient);
-  }
-
-  return {
-    assetType: {
-      assetClass: AssetClassType.ERC1155_ASSET_CLASS,
       data: AbiCoder.defaultAbiCoder().encode(baseParams, baseValues),
     },
     value,

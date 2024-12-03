@@ -6,6 +6,7 @@ import {LibOrder} from "../libraries/LibOrder.sol";
 
 /// @author The Sandbox
 /// @title OrderValidator contract interface
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the signature for validate, isPurchaseValid and verifyERC20Whitelist functions
 interface IOrderValidator {
     /// @notice Verifies order

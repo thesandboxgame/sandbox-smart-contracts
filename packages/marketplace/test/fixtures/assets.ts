@@ -40,6 +40,18 @@ export async function mockAssetsSetup() {
   );
   await ERC1155WithRoyalty.waitForDeployment();
 
+  const ERC1155WithRoyaltyV2981Factory = await ethers.getContractFactory(
+    'ERC1155WithRoyaltyV2981MultiMock'
+  );
+  const ERC1155WithRoyaltyV2981 = await upgrades.deployProxy(
+    ERC1155WithRoyaltyV2981Factory,
+    [],
+    {
+      initializer: 'initialize',
+    }
+  );
+  await ERC1155WithRoyaltyV2981.waitForDeployment();
+
   const ERC721WithRoyaltyWithoutIROYALTYUGCFactory =
     await ethers.getContractFactory('ERC721WithRoyaltyWithoutIROYALTYUGCMock');
   const ERC721WithRoyaltyWithoutIROYALTYUGC = await upgrades.deployProxy(
@@ -136,6 +148,7 @@ export async function mockAssetsSetup() {
     ERC721WithRoyaltyV2981,
     ERC721WithRoyalty,
     ERC1155WithRoyalty,
+    ERC1155WithRoyaltyV2981,
     ERC721WithRoyaltyWithoutIROYALTYUGC,
     RoyaltyInfo,
     RoyaltiesProvider,

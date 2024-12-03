@@ -3,7 +3,6 @@
 pragma solidity 0.8.23;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {LibAsset} from "./libraries/LibAsset.sol";
 import {LibOrder} from "./libraries/LibOrder.sol";
@@ -12,12 +11,10 @@ import {IOrderValidator} from "./interfaces/IOrderValidator.sol";
 
 /// @author The Sandbox
 /// @title ExchangeCore Contract
+/// @custom:security-contact contact-blockchain@sandbox.game
 /// @notice Contains the main functions for the marketplace.
 /// @dev This is an abstract contract that requires implementation.
 abstract contract ExchangeCore is Initializable, ITransferManager {
-    using Address for address;
-    using ERC165Checker for address;
-
     /// @dev Stores left and right orders that match each other.
     /// Left and right are symmetrical except for fees that are taken from the left side first.
     struct ExchangeMatch {
@@ -124,7 +121,7 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 len = matchedOrders.length;
         require(len > 0, "ExchangeMatch cannot be empty");
         require(len <= matchOrdersLimit, "too many ExchangeMatch");
-        for (uint256 i; i < len; i++) {
+        for (uint256 i; i < len; ++i) {
             ExchangeMatch calldata m = matchedOrders[i];
             _validateOrders(sender, m.orderLeft, m.signatureLeft, m.orderRight, m.signatureRight);
             _matchAndTransfer(sender, m.orderLeft, m.orderRight);
@@ -144,15 +141,15 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         LibOrder.Order memory orderRight,
         bytes memory signatureRight
     ) internal view {
-        // validate must force order.maker != address(0)
-        orderValidator.validate(orderLeft, signatureLeft, sender);
-        orderValidator.validate(orderRight, signatureRight, sender);
         if (orderLeft.taker != address(0)) {
             require(orderRight.maker == orderLeft.taker, "leftOrder.taker failed");
         }
         if (orderRight.taker != address(0)) {
             require(orderRight.taker == orderLeft.maker, "rightOrder.taker failed");
         }
+        // validate must force order.maker != address(0)
+        orderValidator.validate(orderLeft, signatureLeft, sender);
+        orderValidator.validate(orderRight, signatureRight, sender);
     }
 
     /// @notice Matches valid orders and transfers the associated assets.
@@ -172,8 +169,6 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
             orderLeft.takeAsset.assetType,
             orderRight.makeAsset.assetType
         );
-
-        LibAsset.verifyPriceDistribution(orderLeft.takeAsset, orderRight.takeAsset);
 
         LibOrder.FillResult memory newFill = _parseOrdersSetFillEmitMatch(sender, orderLeft, orderRight);
 
@@ -201,7 +196,8 @@ abstract contract ExchangeCore is Initializable, ITransferManager {
         uint256 rightOrderFill = _getOrderFill(orderRight.salt, orderKeyHashRight);
         newFill = LibOrder.fillOrder(orderLeft, orderRight, leftOrderFill, rightOrderFill);
 
-        require(newFill.rightValue > 0 && newFill.leftValue > 0, "nothing to fill");
+        require(newFill.rightValue > 0, "nothing to fill right");
+        require(newFill.leftValue > 0, "nothing to fill left");
 
         if (orderLeft.salt != 0) {
             fills[orderKeyHashLeft] = leftOrderFill + newFill.rightValue;

@@ -4,6 +4,7 @@ pragma solidity 0.8.23;
 
 /// @author The Sandbox
 /// @title LibMath: A library for handling specific math operations.
+/// @custom:security-contact contact-blockchain@sandbox.game
 library LibMath {
     uint256 internal constant ACCEPTABLE_RELATIVE_ERROR = 1000;
 
