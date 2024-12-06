@@ -1,5 +1,4 @@
-import {Deployment} from 'hardhat-deploy/dist/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import {DeployFunction, Deployment} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {
   getDeadline,
