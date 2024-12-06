@@ -30,8 +30,8 @@ contracts:
 
 ### Step 1: Prepare for Deployment
 
-- **Receive JSON Files**: The Landsale team will provide `bundles.testnet.json`
-  and `sectors.testnet.json` files.
+- **Receive JSON Files**: The Landsale team will provide JSON files for bundles
+  and sectors. The filenames may vary depending on the network or environment.
 - **Organize the Files**: Place the JSON files in a new folder within
   `land-sale/data/landSales` named `LandPreSale_XX`.
 - **NOTE**: Here, `XX` is an incremented folder number that does not correspond
@@ -57,9 +57,9 @@ contracts:
 
 ```
 {
-  "bundleId":
+  [bundleId:
    [
-     bundle-Id
+     "assetId"
    ]
 }
 ```

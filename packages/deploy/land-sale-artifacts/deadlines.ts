@@ -34,7 +34,7 @@ const deadlines: {[sector: number]: number} = {
   32: new Date('2021-11-11T13:00:00.000Z').valueOf() / 1000,
   33: new Date('2021-12-09T13:00:00.000Z').valueOf() / 1000,
   34: new Date('2021-12-23T13:00:00.000Z').valueOf() / 1000,
-  35: new Date('2022-03-03T13:00:00.000Z').valueOf() / 1000, // TODO: to be determined
+  35: new Date('2022-03-03T13:00:00.000Z').valueOf() / 1000,
   36: new Date('2022-01-20T13:00:00.000Z').valueOf() / 1000,
   38: new Date('2022-02-17T13:00:00.000Z').valueOf() / 1000,
   39: new Date('2022-03-10T13:00:00.000Z').valueOf() / 1000,
