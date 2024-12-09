@@ -32,9 +32,10 @@ There are two ways of minting tokens:
 2. The backend gives a signed message to the user. Using this authorization a user can mint certain amount of tokens to
    his wallet paying a price in Sand or any other configured ERC20 token.
 
-Minting is done in waves set the price of the tokens and some limits on the amount of tokens that can be minted and are
-configured by the owner of the contract. After setting an initial wave the owner can set a new wave at any time, the
-previous wave is cancelled each time a new wave is set.
+Minting is done in waves, a wave set the price of the tokens and some limits on the amount of tokens that can be minted.
+Waves are configured by the owner of the contract. After setting an initial wave the owner can set a new wave at any
+time. Usually the previous wave is cancelled each time a new wave is set, but, the owner can choose to leave a wave open
+so two waves can run in parallel (to use this new functionality the user must claim using `waveMint` method).
 
 ### Minting Limits
 
@@ -160,8 +161,6 @@ function setupWave(
 function to setup a new wave. A wave is defined as a combination of allowed number tokens to be minted in total, per
 wallet and minting price
 
-event: {WaveSetup}
-
 Parameters:
 
 | Name                    | Type    | Description                                                                                    |
@@ -184,7 +183,7 @@ function mint(
 token minting function on the last wave. Price is set by wave and is paid in tokens denoted by the allowedToExecuteMint
 contract
 
-this method is backward compatible with the previous contract, so, it uses last configured wave event: {Transfer}
+this method is backward compatible with the previous contract, so, it uses last configured wave
 
 Parameters:
 
@@ -210,8 +209,6 @@ function waveMint(
 token minting function on a certain wave. Price is set by wave and is paid in tokens denoted by the allowedToExecuteMint
 contract
 
-event: {Transfer}
-
 Parameters:
 
 | Name        | Type    | Description                         |
@@ -231,8 +228,6 @@ function cancelWave(uint256 waveIndex) external onlyOwner
 function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be minted in total,
 per wallet and minting price
 
-event: {WaveSetup}
-
 Parameters:
 
 | Name      | Type    | Description                          |
@@ -251,8 +246,6 @@ function batchMint(
 batch minting function, used by owner to airdrop directly to users.
 
 this methods takes a list of destination wallets and can only be used by the owner of the contract
-
-event: {Transfer}
 
 Parameters:
 
@@ -277,8 +270,6 @@ reveal.
 
 will revert if owner of token is not caller or if signature is not valid
 
-event: {MetadataUpdate}
-
 Parameters:
 
 | Name        | Type    | Description                                                    |
@@ -301,8 +292,6 @@ function personalize(
 personalize token traits according to the provided personalization bit-mask
 
 after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
-
-event: {MetadataUpdate}
 
 Parameters:
 
@@ -327,8 +316,6 @@ on an in-game action
 
 reverts if token does not exist or if not authorized
 
-event: {MetadataUpdate}
-
 Parameters:
 
 | Name                | Type    | Description                                        |
@@ -346,8 +333,6 @@ Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
 
 See {ERC721BurnMemoryEnumerableUpgradeable.burn}.
 
-event: TokenBurned
-
 Parameters:
 
 | Name    | Type    | Description               |
@@ -364,8 +349,6 @@ enables burning of tokens
 
 reverts if burning already enabled.
 
-event: TokenBurningEnabled
-
 ### disableBurning (0x98603cca)
 
 ```solidity
@@ -375,8 +358,6 @@ function disableBurning() external onlyOwner
 disables burning of tokens
 
 reverts if burning already disabled.
-
-event: TokenBurningDisabled
 
 ### pause (0x8456cb59)
 
@@ -406,8 +387,6 @@ function setTreasury(address treasury) external onlyOwner
 
 update the treasury address
 
-event: {TreasurySet}
-
 Parameters:
 
 | Name     | Type    | Description                      |
@@ -422,8 +401,6 @@ function setSignAddress(address _signAddress) external onlyOwner
 
 updates the sign address.
 
-event: {SignAddressSet}
-
 Parameters:
 
 | Name         | Type    | Description                  |
@@ -437,8 +414,6 @@ function setMaxSupply(uint256 _maxSupply) external onlyOwner
 ```
 
 updates the sign address.
-
-event: {MaxSupplySet}
 
 Parameters:
 
@@ -456,8 +431,6 @@ updates which address is allowed to execute the mint function.
 
 also resets default mint price
 
-event: {DefaultMintingValuesSet}
-
 Parameters:
 
 | Name        | Type                    | Description                                                   |
@@ -471,8 +444,6 @@ function setBaseURI(string calldata baseURI) external onlyOwner
 ```
 
 updates the base token URI for the contract
-
-event: {BaseURISet}
 
 Parameters:
 

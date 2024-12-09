@@ -72,7 +72,6 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
 
     /**
      * @notice enables burning of tokens
-     * @custom:event TokenBurningEnabled
      */
     function _enableBurning() internal {
         ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
@@ -85,7 +84,6 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
 
     /**
      * @notice disables burning of tokens
-     * @custom:event TokenBurningDisabled
      */
     function _disableBurning() internal {
         ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
@@ -98,7 +96,6 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
 
     /**
      * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
-     * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
     function _burnWithCheck(uint256 tokenId) internal virtual {

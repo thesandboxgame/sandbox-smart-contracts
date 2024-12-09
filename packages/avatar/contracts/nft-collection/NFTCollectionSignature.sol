@@ -10,7 +10,8 @@ import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol"
  * @custom:security-contact contact-blockchain@sandbox.game
  * @notice Signatures accepted by the NFTCollection
  * @dev We have a set of different signatures to be backward compatible with previous collections
- * @dev We must be sure that all the signatures are different and cannot be reused so we added a string to reveal.
+ * @dev We must be sure that all the signatures are different and cannot be reused by different methods, so,
+ * @dev we added an extra constant string to reveal to distinguish it from the mint signature.
  * @dev mint:           ['address', 'uint256', 'address', 'uint256']
  * @dev reveal:         ['address', 'uint256', 'address', 'uint256', 'string']
  * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256']
@@ -91,7 +92,6 @@ abstract contract NFTCollectionSignature {
 
     /**
      * @notice updates the sign address.
-     * @custom:event {SignAddressSet}
      * @param _signAddress new signer address to be set
      */
     function _setSignAddress(address _signAddress) internal {
