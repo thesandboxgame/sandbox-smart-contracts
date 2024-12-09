@@ -202,7 +202,7 @@ INFTCollection
             revert InvalidSymbol(_symbol);
         }
         __ReentrancyGuard_init();
-        // @dev we don't want to set the owner to _msgSender, so, we don't call __Ownable_init
+        // We don't want to set the owner to _msgSender, so, we call _transferOwnership instead of __Ownable_init
         _transferOwnership(_collectionOwner);
         __ERC2981_init();
         _setTrustedForwarder(_initialTrustedForwarder);
@@ -228,7 +228,6 @@ INFTCollection
     /**
      * @notice function to setup a new wave. A wave is defined as a combination of allowed number tokens to be
      *         minted in total, per wallet and minting price
-     * @custom:event {WaveSetup}
      * @param _waveMaxTokensOverall the allowed number of tokens to be minted in this wave (cumulative by all minting wallets)
      * @param _waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
      * @param _waveSingleTokenPrice the price to mint a token in a given wave, in wei
@@ -258,7 +257,6 @@ INFTCollection
     /**
      * @notice token minting function on the last wave. Price is set by wave and is paid in tokens denoted
      *         by the allowedToExecuteMint contract
-     * @custom:event {Transfer}
      * @param wallet minting wallet
      * @param amount number of token to mint
      * @param signatureId signing signature ID
@@ -287,7 +285,6 @@ INFTCollection
     /**
      * @notice token minting function on a certain wave. Price is set by wave and is paid in tokens denoted
      *         by the allowedToExecuteMint contract
-     * @custom:event {Transfer}
      * @param wallet minting wallet
      * @param amount number of token to mint
      * @param waveIndex the index of the wave used to mint
@@ -316,7 +313,6 @@ INFTCollection
     /**
      * @notice function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be
      *         minted in total, per wallet and minting price
-     * @custom:event {WaveSetup}
      * @param waveIndex the index of the wave to be canceled
      */
     function cancelWave(uint256 waveIndex) external onlyOwner {
@@ -331,7 +327,6 @@ INFTCollection
     /**
      * @notice batch minting function, used by owner to airdrop directly to users.
      * @dev this methods takes a list of destination wallets and can only be used by the owner of the contract
-     * @custom:event {Transfer}
      * @param waveIndex the index of the wave used to mint
      * @param wallets list of destination wallets and amounts
      */
@@ -368,7 +363,6 @@ INFTCollection
      *         refresh metadata, for the provided token ID. Off-chain, gaming mechanics are done and this
      *         function is ultimately called to signal the end of a reveal.
      * @dev will revert if owner of token is not caller or if signature is not valid
-     * @custom:event {MetadataUpdate}
      * @param tokenId the ID belonging to the NFT token for which to emit the event
      * @param signatureId validation signature ID
      * @param signature validation signature
@@ -390,8 +384,6 @@ INFTCollection
     /**
      * @notice personalize token traits according to the provided personalization bit-mask
      * @dev after checks, it is reduced to personalizationTraits[_tokenId] = _personalizationMask
-     * @custom:event {Personalized}
-     * @custom:event {MetadataUpdate}
      * @param tokenId what token to personalize
      * @param personalizationMask a mask where each bit has a custom meaning in-game
      * @param signatureId the ID of the provided signature
@@ -416,8 +408,6 @@ INFTCollection
      * @notice personalize token traits but can be called by owner or special roles address
      *         Used to change the traits of a token based on an in-game action
      * @dev reverts if token does not exist or if not authorized
-     * @custom:event {Personalized}
-     * @custom:event {MetadataUpdate}
      * @param tokenId what token to personalize
      * @param personalizationMask a mask where each bit has a custom meaning in-game
      */
@@ -433,7 +423,6 @@ INFTCollection
     /**
      * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
      * @dev See {ERC721BurnMemoryEnumerableUpgradeable.burn}.
-     * @custom:event TokenBurned
      * @param tokenId the token id to be burned
      */
     function burn(uint256 tokenId) external whenNotPaused {
@@ -443,7 +432,6 @@ INFTCollection
     /**
      * @notice enables burning of tokens
      * @dev reverts if burning already enabled.
-     * @custom:event TokenBurningEnabled
      */
     function enableBurning() external onlyOwner {
         _enableBurning();
@@ -452,7 +440,6 @@ INFTCollection
     /**
      * @notice disables burning of tokens
      * @dev reverts if burning already disabled.
-     * @custom:event TokenBurningDisabled
      */
     function disableBurning() external onlyOwner {
         _disableBurning();
@@ -478,7 +465,6 @@ INFTCollection
 
     /**
      * @notice update the treasury address
-     * @custom:event {TreasurySet}
      * @param treasury new treasury address to be saved
      */
     function setTreasury(address treasury) external onlyOwner {
@@ -487,7 +473,6 @@ INFTCollection
 
     /**
      * @notice updates the sign address.
-     * @custom:event {SignAddressSet}
      * @param _signAddress new signer address to be set
      */
     function setSignAddress(address _signAddress) external onlyOwner {
@@ -496,7 +481,6 @@ INFTCollection
 
     /**
      * @notice updates the sign address.
-     * @custom:event {MaxSupplySet}
      * @param _maxSupply maximum amount of tokens that can be minted
      */
     function setMaxSupply(uint256 _maxSupply) external onlyOwner {
@@ -506,8 +490,6 @@ INFTCollection
     /**
      * @notice updates which address is allowed to execute the mint function.
      * @dev also resets default mint price
-     * @custom:event {AllowedExecuteMintSet}
-     * @custom:event {DefaultMintingValuesSet}
      * @param minterToken the address that will be allowed to execute the mint function
      */
     function setAllowedExecuteMint(IERC20Metadata minterToken) external onlyOwner {
@@ -516,7 +498,6 @@ INFTCollection
 
     /**
      * @notice updates the base token URI for the contract
-     * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
     function setBaseURI(string calldata baseURI) external onlyOwner {
@@ -851,7 +832,6 @@ INFTCollection
 
     /**
      * @notice complete the minting called from waveMint and mint
-     * @custom:event {Transfer}
      * @param waveData the data of the wave used to mint
      * @param wallet minting wallet
      * @param amount number of token to mint
@@ -945,8 +925,6 @@ INFTCollection
     /**
      * @notice actually updates the variables that store the personalization traits per token.
      * @dev no checks are done on input validations. Calling functions are expected to do them
-     * @custom:event {Personalized}
-     * @custom:event {MetadataUpdate}
      * @param tokenId the ID for the token to personalize
      * @param personalizationMask the personalization mask that will be applied
      */
@@ -971,7 +949,6 @@ INFTCollection
 
     /**
      * @notice updates the base token URI for the contract
-     * @custom:event {BaseURISet}
      * @param baseURI an URI that will be used as the base for token URI
      */
     function _setBaseURI(string calldata baseURI) internal {
@@ -985,7 +962,6 @@ INFTCollection
 
     /**
      * @notice update the treasury address
-     * @custom:event {TreasurySet}
      * @param _treasury new treasury address to be saved
      */
     function _setTreasury(address _treasury) internal {
@@ -1000,8 +976,6 @@ INFTCollection
     /**
      * @notice updates which address is allowed to execute the mint function.
      * @dev also resets default mint price
-     * @custom:event {AllowedExecuteMintSet}
-     * @custom:event {DefaultMintingValuesSet}
      * @param _minterToken the address that will be allowed to execute the mint function
      */
     function _setAllowedExecuteMint(IERC20Metadata _minterToken) internal {
@@ -1015,7 +989,6 @@ INFTCollection
 
     /**
      * @notice updates maximum supply
-     * @custom:event {MaxSupplySet}
      * @param _maxSupply maximum amount of tokens that can be minted
      */
     function _setMaxSupply(uint256 _maxSupply) internal {
