@@ -1,6 +1,7 @@
 import '@nomicfoundation/hardhat-toolbox';
 import {HardhatUserConfig} from 'hardhat/config';
 import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-contract-sizer';
 
 const config: HardhatUserConfig = {
   mocha: {
@@ -9,6 +10,15 @@ const config: HardhatUserConfig = {
   },
   solidity: {
     compilers: [
+      {
+        version: '0.8.26',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: '0.8.18',
         settings: {
