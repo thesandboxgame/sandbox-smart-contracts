@@ -1,16 +1,22 @@
 {
-    "tasksRunnerOptions": {
-        "default": {
-            "runner": "nx/tasks-runners/default",
-            "options": {
-                "cacheableOperations": [
-                    "test",
-                    "coverage",
-                    "lint",
-                    "deploy",
-                    "format"
-                ]
-            }
-        }
+  "targetDefaults": {
+    "test": {
+      "cache": true
+    },
+    "coverage": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "deploy": {
+      "cache": true
+    },
+    "format": {
+      "cache": true
+    },
+    "analyze": {
+      "cache": true
     }
+  }
 }

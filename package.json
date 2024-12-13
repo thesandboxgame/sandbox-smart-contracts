@@ -34,7 +34,7 @@
     "packageManager": "yarn@3.6.0",
     "devDependencies": {
         "istanbul-combine": "^0.3.0",
-        "nx": "15.8.6",
+        "nx": "^20.2.2",
         "rimraf": "^4.4.0"
     },
     "keywords": [
