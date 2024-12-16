@@ -6,9 +6,9 @@ import {
   saveDeployment,
 } from '../../utils/hardhatDeployUtils';
 
-// Collections are created via backoffice, this script creates a collection
-// for testing (TO BE USED ONLY ON TESTNETS)
-// hardhat-deploy don't support factory and beacons the way we use it
+// TO BE USED ONLY ON TESTNETS!!!
+// Collections are created via backoffice, this script creates a testing collection
+// hardhat-deploy don't support factory and beacons the way we use them
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
 

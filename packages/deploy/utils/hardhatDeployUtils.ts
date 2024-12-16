@@ -12,18 +12,28 @@ export async function saveDeployment(
   address: string,
   artifactName: string,
   contractName: string,
-  receipt: Receipt,
+  receipt?: Receipt,
   implementationAddress?: string
 ) {
   const extendedArtifact = await deployments.getExtendedArtifact(contractName);
-  console.log(
-    `saving "${artifactName}" (tx: ${receipt.transactionHash})...: deployed at ${address} with ${receipt.gasUsed} gas`
-  );
+  if (receipt) {
+    console.log(
+      `saving "${artifactName}" (tx: ${receipt.transactionHash})...: deployed at ${address} with ${receipt.gasUsed} gas`
+    );
+  } else {
+    console.log(
+      `saving "${artifactName}"...: deployed at ${address} without receipt`
+    );
+  }
   await deployments.save(artifactName, {
     address,
     ...extendedArtifact,
-    receipt,
-    transactionHash: receipt.transactionHash,
+    ...(receipt
+      ? {
+          receipt,
+          transactionHash: receipt.transactionHash,
+        }
+      : {}),
     ...(implementationAddress ? {implementation: implementationAddress} : {}),
   } as DeploymentSubmission);
 }

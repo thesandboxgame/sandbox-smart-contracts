@@ -8,9 +8,10 @@ import {
 } from '../../utils/hardhatDeployUtils';
 import {getNamedAccounts} from 'hardhat';
 
-// hardhat-deploy don't support factory and beacons the way we use it
+// hardhat-deploy don't support factory and beacons the way we use them
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
+  const {nftCollectionAdmin} = await getNamedAccounts();
   const beaconAlias = ethers.encodeBytes32String('nft-collection-v2');
   const implementation = await deployments.get('NFTCollection_Implementation');
   const beaconAddress = await deployments.read(
@@ -19,58 +20,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     beaconAlias
   );
   if (beaconAddress == ZeroAddress) {
-    await deployments.catchUnknownSigner(
-      deployBeacon(hre, beaconAlias, implementation)
-    );
-  } else {
-    await performSanityChecks(hre, beaconAddress, implementation);
+    await deployments.catchUnknownSigner(async () => {
+      const receipt = await deployments.execute(
+        'CollectionFactory',
+        {from: nftCollectionAdmin, log: true},
+        'deployBeacon',
+        implementation.address,
+        beaconAlias
+      );
+      const eventArgs: {beaconAlias: string; beaconAddress: string} =
+        getEventArgsFromReceipt(
+          await ethers.getContract('CollectionFactory'),
+          receipt,
+          'BeaconAdded'
+        );
+      await saveDeployment(
+        deployments,
+        eventArgs.beaconAddress,
+        'NFTCollection_Beacon',
+        'UpgradeableBeacon',
+        receipt
+      );
+    });
   }
 };
-
-async function deployBeacon(hre, beaconAlias, implementation) {
-  const {deployments, ethers} = hre;
-  const {nftCollectionAdmin} = await getNamedAccounts();
-  const receipt = await deployments.execute(
-    'CollectionFactory',
-    {from: nftCollectionAdmin, log: true},
-    'deployBeacon',
-    implementation.address,
-    beaconAlias
-  );
-  const eventArgs: {beaconAlias: string; beaconAddress: string} =
-    getEventArgsFromReceipt(
-      await ethers.getContract('CollectionFactory'),
-      receipt,
-      'BeaconAdded'
-    );
-  await saveDeployment(
-    deployments,
-    eventArgs.beaconAddress,
-    'NFTCollection_Beacon',
-    'UpgradeableBeacon',
-    receipt
-  );
-}
-
-async function performSanityChecks(hre, beaconAddress: string, implementation) {
-  const {deployments, ethers} = hre;
-  const beaconArtifact = await deployments.getArtifact('UpgradeableBeacon');
-  const beacon = await ethers.getContractAt(beaconArtifact.abi, beaconAddress);
-
-  const i = await beacon.implementation();
-  if (i != implementation.address) {
-    throw new Error(
-      'something went wrong: Beacon already deployed but has wrong implementation address, must call updateBeaconImplementation'
-    );
-  }
-  const factory = await deployments.get('CollectionFactory');
-  const o = await beacon.owner();
-  if (o != factory.address) {
-    throw new Error(
-      'something went wrong: Beacon already deployed but has wrong owner'
-    );
-  }
-}
 
 export default func;
 func.tags = [
