@@ -28,6 +28,25 @@ contracts:
 
 ## Getting Started
 
+### Overview
+
+- Deploy new land presale contracts on any supported network.
+- The process for initiating a new land sale requires deploying a separate smart
+  contract for each sector using the EstateSaleWithAuth template. Update the
+  existing script to deploy the contract.
+- Deploy script path:
+  `packages/deploy/deploy/1000_landsale/02_deploy_estate_sale.ts`
+- Land presale requests involve one or more sector numbers. Confirm details if
+  sector numbers don’t follow the usual increment by consulting the
+  landsale-raffle squad.
+- **NOTE**: Multiple sectors can be requested simultaneously.
+- Some lands may include additional assets as optional bundles.
+- Premium Lands will have additional steps documented once processed by the
+  Blockchain Team.
+- The landsale team typically requests an Amoy testnet deployment 1-2 weeks
+  before mainnet.
+- Relevant `.json` files will be provided by the landsale team.
+
 ### Step 1: Prepare for Deployment
 
 - **Receive JSON Files**: The Landsale team will provide JSON files for bundles
