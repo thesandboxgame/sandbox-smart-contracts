@@ -1,5 +1,6 @@
 package-lock.json 
 .env
+.nx
 yarn.error.log
 yarn-error.log
 .yalc
