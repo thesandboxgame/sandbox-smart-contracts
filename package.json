@@ -37,6 +37,9 @@
         "nx": "^20.2.2",
         "rimraf": "^4.4.0"
     },
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "keywords": [
         "ethereum",
         "polygon",
