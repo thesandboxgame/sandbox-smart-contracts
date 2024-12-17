@@ -6,7 +6,7 @@ import {
   saveDeployment,
 } from '../../utils/hardhatDeployUtils';
 
-// TO BE USED ONLY ON TESTNETS!!!
+// TO BE USED ONLY ON TEST NETS!!!
 // Collections are created via backoffice, this script creates a testing collection
 // hardhat-deploy don't support factory and beacons the way we use them
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -34,24 +34,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const implementation = await ethers.getContract(
     'NFTCollection_Implementation'
   );
-
+  const encodedConstructorArgs = implementation.interface.encodeFunctionData(
+    'initialize',
+    [
+      nftCollectionAdmin,
+      metadataUrl,
+      collectionName,
+      collectionSymbol,
+      treasury,
+      raffleSignWallet,
+      TRUSTED_FORWARDER.address,
+      sandContract.address,
+      MAX_SUPPLY,
+    ]
+  );
   await deployments.catchUnknownSigner(async () => {
     const receipt = await deployments.execute(
       'CollectionFactory',
       {from: nftCollectionAdmin, log: true},
       'deployCollection',
       ethers.encodeBytes32String('nft-collection-v2'),
-      implementation.interface.encodeFunctionData('initialize', [
-        nftCollectionAdmin,
-        metadataUrl,
-        collectionName,
-        collectionSymbol,
-        treasury,
-        raffleSignWallet,
-        TRUSTED_FORWARDER.address,
-        sandContract.address,
-        MAX_SUPPLY,
-      ])
+      encodedConstructorArgs
     );
     const eventArgs: {collectionProxy: string; beaconAddress: string} =
       getEventArgsFromReceipt(
@@ -63,9 +66,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployments,
       eventArgs.collectionProxy,
       'NFTCollectionMat_Proxy',
-      'CollectionProxy',
+      '@sandbox-smart-contracts/avatar/contracts/proxy/CollectionProxy.sol:CollectionProxy',
       receipt,
-      await implementation.getAddress()
+      await implementation.getAddress(),
+      [eventArgs.beaconAddress, encodedConstructorArgs]
     );
   });
 };

@@ -39,7 +39,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         eventArgs.beaconAddress,
         'NFTCollection_Beacon',
         'UpgradeableBeacon',
-        receipt
+        receipt,
+        undefined,
+        [implementation.address]
       );
     });
   }

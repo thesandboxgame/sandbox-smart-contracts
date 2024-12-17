@@ -8,7 +8,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deployments.deploy('NFTCollection_Implementation', {
     from: deployer,
-    contract: 'NFTCollection',
+    contract:
+      '@sandbox-smart-contracts/avatar/contracts/nft-collection/NFTCollection.sol:NFTCollection',
     log: true,
     skipIfAlreadyDeployed: true,
   });

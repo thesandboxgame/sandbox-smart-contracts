@@ -13,7 +13,8 @@ export async function saveDeployment(
   artifactName: string,
   contractName: string,
   receipt?: Receipt,
-  implementationAddress?: string
+  proxyImplAddress?: string,
+  args?: any[]
 ) {
   const extendedArtifact = await deployments.getExtendedArtifact(contractName);
   if (receipt) {
@@ -27,6 +28,7 @@ export async function saveDeployment(
   }
   await deployments.save(artifactName, {
     address,
+    args,
     ...extendedArtifact,
     ...(receipt
       ? {
@@ -34,7 +36,7 @@ export async function saveDeployment(
           transactionHash: receipt.transactionHash,
         }
       : {}),
-    ...(implementationAddress ? {implementation: implementationAddress} : {}),
+    ...(proxyImplAddress ? {implementation: proxyImplAddress} : {}),
   } as DeploymentSubmission);
 }
 

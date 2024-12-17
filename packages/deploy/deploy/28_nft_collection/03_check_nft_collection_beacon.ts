@@ -2,11 +2,7 @@ import {ZeroAddress} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DEPLOY_TAGS} from '../../hardhat.config';
-import {
-  getEventArgsFromReceipt,
-  saveDeployment,
-} from '../../utils/hardhatDeployUtils';
-import {getNamedAccounts} from 'hardhat';
+import {saveDeployment} from '../../utils/hardhatDeployUtils';
 
 // usually the deployments are done via defender proposals.
 // This step lets us continue the deployment after proposal execution
@@ -28,7 +24,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployments,
       beaconAddress,
       'NFTCollection_Beacon',
-      'UpgradeableBeacon'
+      '@openzeppelin/contracts-0.8.15/proxy/beacon/UpgradeableBeacon.sol:UpgradeableBeacon',
+      undefined,
+      undefined,
+      [implementation.address]
     );
   }
 
