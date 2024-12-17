@@ -14,7 +14,7 @@ export async function saveDeployment(
   contractName: string,
   receipt?: Receipt,
   proxyImplAddress?: string,
-  args?: any[]
+  args?
 ) {
   const extendedArtifact = await deployments.getExtendedArtifact(contractName);
   if (receipt) {
