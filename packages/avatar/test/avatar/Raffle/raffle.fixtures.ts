@@ -2,16 +2,12 @@ import {assert} from 'chai';
 import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, network} from 'hardhat';
-import {Wallet, parseUnits} from 'ethers';
+import {parseUnits, Wallet} from 'ethers';
+import {GenericRaffle, MockERC20, PolygonSand} from '../../../typechain-types';
 import {
-  FakePolygonSand,
-  GenericRaffle,
-  PolygonSand,
-} from '../../../typechain-types';
-import {
+  deployFakeSandContract,
   getTestingAccounts,
   topUpAddressWithETH,
-  deployFakeSandContract,
 } from '../fixtures';
 import {setupRaffleContract} from '../raffleSetup';
 
@@ -166,7 +162,7 @@ function signAuthMessageAs(
   return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
-async function setupTransferSand(sandContractAsOwner: FakePolygonSand) {
+async function setupTransferSand(sandContractAsOwner: MockERC20) {
   return async (address: string, amount: string) => {
     const amountToSend = parseUnits(amount.toString(), 'ether');
     await sandContractAsOwner.donateTo(address, amountToSend);
