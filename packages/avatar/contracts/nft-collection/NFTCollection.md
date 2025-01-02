@@ -15,7 +15,7 @@ Some features:
 - ERC2981 compliant
 - ERC4906 compliant
 - ERC165 compliant
-- supports ERC2771 for services like Biconomy
+- supports ERC2771 for meta transactions
 - supports keeping track of who burned what token for faster in-game gating checks
 - minting is supported via an ERC20 token contract that supports approveAndCall as mint price is in non-native tokens
 - custom batch operations for minting and transfer
