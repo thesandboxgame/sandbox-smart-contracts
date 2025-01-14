@@ -355,6 +355,7 @@ describe('NFTCollection mint', function () {
       expect(await contract.getSignatureType(222)).to.be.eq(4);
       expect(await contract.getSignatureType(223)).to.be.eq(4);
     });
+
     it('should emit WaveMint event when waveMint is called', async function () {
       const {
         collectionContractAsOwner: contract,
