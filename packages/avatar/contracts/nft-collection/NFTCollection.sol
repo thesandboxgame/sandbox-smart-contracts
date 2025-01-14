@@ -39,16 +39,16 @@ import {INFTCollection} from "./INFTCollection.sol";
  * - custom batch operations for minting and transfer
  */
 contract NFTCollection is
-ReentrancyGuardUpgradeable,
-Ownable2StepUpgradeable,
-ERC721BurnMemoryUpgradeable,
-ERC2981Upgradeable,
-ERC2771HandlerUpgradeable,
-UpdatableOperatorFiltererUpgradeable,
-PausableUpgradeable,
-NFTCollectionSignature,
-IERC4906,
-INFTCollection
+    ReentrancyGuardUpgradeable,
+    Ownable2StepUpgradeable,
+    ERC721BurnMemoryUpgradeable,
+    ERC2981Upgradeable,
+    ERC2771HandlerUpgradeable,
+    UpdatableOperatorFiltererUpgradeable,
+    PausableUpgradeable,
+    NFTCollectionSignature,
+    IERC4906,
+    INFTCollection
 {
     /**
      * @notice Structure used to mint in batch
@@ -81,33 +81,27 @@ INFTCollection
          * @notice maximum amount of tokens that can be minted
          */
         uint256 maxSupply; // public
-
         /**
          * @notice treasury address where the payment for minting are sent
          */
         address mintTreasury; // public
-
         /**
          * @notice standard base token URL for ERC721 metadata
          */
         string baseTokenURI;
-
         /**
-          * @notice saved information of minting waves
-          */
+         * @notice saved information of minting waves
+         */
         WaveData[] waveData;
-
         /**
          * @notice ERC20 contract through which the minting will be done (approveAndCall)
          *         When there is a price for the minting, the payment will be done using this token
          */
         IERC20 allowedToExecuteMint;
-
         /**
          * @notice stores the personalization mask for a tokenId
          */
         mapping(uint256 => uint256) personalizationTraits;
-
         /**
          * @notice total amount of tokens minted till now
          */
@@ -116,7 +110,7 @@ INFTCollection
 
     /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
     bytes32 internal constant NFT_COLLECTION_STORAGE_LOCATION =
-    0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
+        0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
 
     function _getNFTCollectionStorage() private pure returns (NFTCollectionStorage storage $) {
         // solhint-disable-next-line no-inline-assembly
@@ -239,9 +233,10 @@ INFTCollection
         uint256 _waveSingleTokenPrice
     ) external onlyOwner {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (_waveMaxTokensOverall > $.maxSupply ||
-        _waveMaxTokensOverall == 0 ||
-        _waveMaxTokensPerWallet == 0 ||
+        if (
+            _waveMaxTokensOverall > $.maxSupply ||
+            _waveMaxTokensOverall == 0 ||
+            _waveMaxTokensPerWallet == 0 ||
             _waveMaxTokensPerWallet > _waveMaxTokensOverall
         ) {
             revert InvalidWaveData(_waveMaxTokensOverall, _waveMaxTokensPerWallet);
@@ -270,16 +265,18 @@ INFTCollection
         bytes calldata signature
     ) external whenNotPaused nonReentrant {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 waveIndex = $.waveData.length;
-        if (waveIndex == 0) {
+        uint256 waveCount = $.waveData.length;
+        if (waveCount == 0) {
             revert ContractNotConfigured();
         }
         if (_msgSender() != address($.allowedToExecuteMint)) {
             revert ERC721InvalidSender(_msgSender());
         }
         _checkAndSetMintSignature(wallet, signatureId, signature);
-        WaveData storage waveData = $.waveData[waveIndex - 1];
-        _doMint(waveData, wallet, amount);
+        // pick the last wave
+        uint256 waveIndex = waveCount - 1;
+        WaveData storage waveData = $.waveData[waveIndex];
+        _doMint(waveData, wallet, amount, waveIndex);
     }
 
     /**
@@ -307,7 +304,7 @@ INFTCollection
         }
         _checkAndSetWaveMintSignature(wallet, amount, waveIndex, signatureId, signature);
         WaveData storage waveData = _getWaveData(waveIndex);
-        _doMint(waveData, wallet, amount);
+        _doMint(waveData, wallet, amount, waveIndex);
     }
 
     /**
@@ -351,6 +348,13 @@ INFTCollection
                 // @dev _mint already checks the destination wallet
                 // @dev start with tokenId = 1
                 _mint(wallet, _totalSupply + j + 1);
+                emit WaveMint(
+                    _totalSupply + j + 1,
+                    wallet,
+                    waveIndex,
+                    waveData.waveOwnerToClaimedCounts[wallet] + 1,
+                    waveData.waveTotalMinted + 1
+                );
             }
             waveData.waveOwnerToClaimedCounts[wallet] += amount;
             waveData.waveTotalMinted += amount;
@@ -367,11 +371,7 @@ INFTCollection
      * @param signatureId validation signature ID
      * @param signature validation signature
      */
-    function reveal(
-        uint256 tokenId,
-        uint256 signatureId,
-        bytes calldata signature
-    ) external whenNotPaused {
+    function reveal(uint256 tokenId, uint256 signatureId, bytes calldata signature) external whenNotPaused {
         address sender = _msgSender();
         address owner = ownerOf(tokenId);
         if (owner != sender) {
@@ -411,8 +411,7 @@ INFTCollection
      * @param tokenId what token to personalize
      * @param personalizationMask a mask where each bit has a custom meaning in-game
      */
-    function operatorPersonalize(uint256 tokenId, uint256 personalizationMask) external onlyOwner
-    {
+    function operatorPersonalize(uint256 tokenId, uint256 personalizationMask) external onlyOwner {
         address owner = _ownerOf(tokenId);
         if (owner == address(0)) {
             revert ERC721NonexistentToken(tokenId);
@@ -616,11 +615,7 @@ INFTCollection
      * @param receiver the receiver of the royalties
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
-    function setTokenRoyalty(
-        uint256 tokenId,
-        address receiver,
-        uint96 feeNumerator
-    ) external onlyOwner {
+    function setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator) external onlyOwner {
         /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
         emit TokenRoyaltySet(_msgSender(), tokenId, receiver, feeNumerator);
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
@@ -638,33 +633,21 @@ INFTCollection
     /**
      * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
-    function setApprovalForAll(address operator, bool approved)
-    public
-    override
-    onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
     /**
      * @dev See OpenZeppelin {IERC721-approve}
      */
-    function approve(address operator, uint256 tokenId)
-    public
-    override
-    onlyAllowedOperatorApproval(operator)
-    {
+    function approve(address operator, uint256 tokenId) public override onlyAllowedOperatorApproval(operator) {
         super.approve(operator, tokenId);
     }
 
     /**
      * @dev See OpenZeppelin {IERC721-transferFrom}
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
+    function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -784,10 +767,10 @@ INFTCollection
     }
 
     /**
-      * @notice return mapping of [owner -> wave index -> minted count]
-      * @param waveIndex the index of the wave used to mint
-      * @param owner the owner for which the count is returned
-      */
+     * @notice return mapping of [owner -> wave index -> minted count]
+     * @param waveIndex the index of the wave used to mint
+     * @param owner the owner for which the count is returned
+     */
     function waveOwnerToClaimedCounts(uint256 waveIndex, address owner) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
         return waveData.waveOwnerToClaimedCounts[owner];
@@ -811,7 +794,7 @@ INFTCollection
 
     /**
      * @notice return the total amount of tokens minted till now
-         */
+     */
     function totalSupply() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         return $.totalSupply;
@@ -820,13 +803,9 @@ INFTCollection
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override(ERC2981Upgradeable, ERC721Upgradeable)
-    returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC2981Upgradeable, ERC721Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -836,7 +815,7 @@ INFTCollection
      * @param wallet minting wallet
      * @param amount number of token to mint
      */
-    function _doMint(WaveData storage waveData, address wallet, uint256 amount) internal {
+    function _doMint(WaveData storage waveData, address wallet, uint256 amount, uint256 waveIndex) internal {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         if (!_isMintAllowed($, waveData, wallet, amount)) {
             revert CannotMint(wallet, amount);
@@ -850,6 +829,13 @@ INFTCollection
             // @dev _safeMint already checks the destination _wallet
             // @dev start with tokenId = 1
             _safeMint(wallet, _totalSupply + i + 1);
+            emit WaveMint(
+                _totalSupply + i + 1,
+                wallet,
+                waveIndex,
+                waveData.waveOwnerToClaimedCounts[wallet] + 1,
+                waveData.waveTotalMinted + 1
+            );
         }
         waveData.waveOwnerToClaimedCounts[wallet] += amount;
         waveData.waveTotalMinted += amount;
@@ -863,11 +849,17 @@ INFTCollection
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
      */
-    function _isMintAllowed(NFTCollectionStorage storage $, WaveData storage waveData, address wallet, uint256 amount) internal view returns (bool) {
-        return amount > 0
-        && (waveData.waveTotalMinted + amount <= waveData.waveMaxTokensOverall)
-        && (waveData.waveOwnerToClaimedCounts[wallet] + amount <= waveData.waveMaxTokensPerWallet)
-        && $.totalSupply + amount <= $.maxSupply;
+    function _isMintAllowed(
+        NFTCollectionStorage storage $,
+        WaveData storage waveData,
+        address wallet,
+        uint256 amount
+    ) internal view returns (bool) {
+        return
+            amount > 0 &&
+            (waveData.waveTotalMinted + amount <= waveData.waveMaxTokensOverall) &&
+            (waveData.waveOwnerToClaimedCounts[wallet] + amount <= waveData.waveMaxTokensPerWallet) &&
+            $.totalSupply + amount <= $.maxSupply;
     }
 
     /**
@@ -876,7 +868,7 @@ INFTCollection
      * @return waveData the wave data used
      * @dev we accept waveIndex gte to waveData.length so we can access the wave used by mint easily
      */
-    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage waveData){
+    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage waveData) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         uint256 waveDataLen = $.waveData.length;
         if (waveIndex >= waveDataLen) {
@@ -907,10 +899,15 @@ INFTCollection
      * @return sender msg.sender
      */
     function _msgSender()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771HandlerUpgradeable, UpdatableOperatorFiltererUpgradeable, NFTCollectionSignature)
-    returns (address sender)
+        internal
+        view
+        override(
+            ContextUpgradeable,
+            ERC2771HandlerUpgradeable,
+            UpdatableOperatorFiltererUpgradeable,
+            NFTCollectionSignature
+        )
+        returns (address sender)
     {
         sender = ERC2771HandlerUpgradeable._msgSender();
     }
@@ -918,7 +915,12 @@ INFTCollection
     /**
      * @dev ERC-2771 specifies the context as being a single address (20 bytes).
      */
-    function _contextSuffixLength() internal view override(ContextUpgradeable, ERC2771HandlerUpgradeable) returns (uint256) {
+    function _contextSuffixLength()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (uint256)
+    {
         return ERC2771HandlerUpgradeable._contextSuffixLength();
     }
 

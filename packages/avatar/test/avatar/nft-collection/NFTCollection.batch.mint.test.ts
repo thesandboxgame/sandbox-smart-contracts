@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 describe('NFTCollection batch mint', function () {
   it('owner should be able batchMint without paying the price', async function () {
@@ -33,6 +33,32 @@ describe('NFTCollection batch mint', function () {
     }
     for (; i < 5; i++) {
       const tokenId = transferEvents[i].args.tokenId;
+      expect(await contract.ownerOf(tokenId)).to.be.eq(collectionOwner);
+    }
+  });
+
+  it('should emit WaveMint event when batchMint is called', async function () {
+    const {
+      collectionContractAsOwner: contract,
+      collectionOwner,
+      randomWallet,
+      setupDefaultWave,
+    } = await loadFixture(setupNFTCollectionContract);
+    await setupDefaultWave(20);
+    await contract.batchMint(0, [
+      [randomWallet, 7],
+      [collectionOwner, 5],
+    ]);
+
+    const waveMintEvents = await contract.queryFilter('WaveMint');
+    expect(waveMintEvents).to.have.lengthOf(12);
+    let i = 0;
+    for (; i < 7; i++) {
+      const tokenId = waveMintEvents[i].args.tokenId;
+      expect(await contract.ownerOf(tokenId)).to.be.eq(randomWallet);
+    }
+    for (; i < 5; i++) {
+      const tokenId = waveMintEvents[i].args.tokenId;
       expect(await contract.ownerOf(tokenId)).to.be.eq(collectionOwner);
     }
   });
