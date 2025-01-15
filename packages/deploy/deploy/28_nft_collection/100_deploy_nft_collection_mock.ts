@@ -38,16 +38,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const encodedConstructorArgs = implementation.interface.encodeFunctionData(
     'initialize',
     [
-      nftCollectionAdmin,
-      metadataUrl,
-      collectionName,
-      collectionSymbol,
-      treasury,
-      raffleSignWallet,
-      TRUSTED_FORWARDER.address,
-      sandContract.address,
-      MAX_SUPPLY,
-      MAX_TOKENS_PER_WALLET,
+      [
+        nftCollectionAdmin,
+        metadataUrl,
+        collectionName,
+        collectionSymbol,
+        treasury,
+        raffleSignWallet,
+        TRUSTED_FORWARDER.address,
+        sandContract.address,
+        MAX_SUPPLY,
+        MAX_TOKENS_PER_WALLET,
+      ],
     ]
   );
   await deployments.catchUnknownSigner(async () => {

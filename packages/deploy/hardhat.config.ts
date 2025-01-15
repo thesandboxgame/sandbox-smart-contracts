@@ -479,14 +479,10 @@ const compilers = [
   })),
 
   // Special cases with lower optimization runs
-  ...[
-    {version: '0.8.26', comment: 'NFTCollection contract'},
-    {version: '0.8.15', comment: 'AvatarCollection contract'},
-  ].map(({version, comment}) => ({
+  ...[{version: '0.8.26'}, {version: '0.8.15'}].map(({version}) => ({
     version,
     settings: {
       optimizer: lowRunsOptimizer,
-      metadata: {comments: {optimizer: comment}},
     },
   })),
 ];
