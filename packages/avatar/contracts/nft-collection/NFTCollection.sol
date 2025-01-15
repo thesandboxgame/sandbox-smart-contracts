@@ -773,6 +773,22 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
+     * @param _maxTokensPerWallet new maximum tokens per wallet
+     */
+    function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner {
+        _setMaxTokensPerWallet(_maxTokensPerWallet);
+    }
+
+    /**
+     * @notice Get the maximum number of tokens that can be minted per wallet across all waves
+     */
+    function maxTokensPerWallet() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.maxTokensPerWallet;
+    }
+
+    /**
      * @notice return the total amount of tokens minted till now
      */
     function totalSupply() external view returns (uint256) {
@@ -1012,22 +1028,6 @@ contract NFTCollection is
                 }
             }
         }
-    }
-
-    /**
-     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
-     * @param _maxTokensPerWallet new maximum tokens per wallet
-     */
-    function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner {
-        _setMaxTokensPerWallet(_maxTokensPerWallet);
-    }
-
-    /**
-     * @notice Get the maximum number of tokens that can be minted per wallet across all waves
-     */
-    function maxTokensPerWallet() external view returns (uint256) {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        return $.maxTokensPerWallet;
     }
 
     /**
