@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const collectionName = 'NFTCollectionTest';
   const collectionSymbol = 'TEST';
   const MAX_SUPPLY = 500;
-
+  const MAX_TOKENS_PER_WALLET = 2;
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const sandContract = await deployments.get('PolygonSand');
   const implementation = await ethers.getContract(
@@ -47,6 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         TRUSTED_FORWARDER.address,
         sandContract.address,
         MAX_SUPPLY,
+        MAX_TOKENS_PER_WALLET,
       ]),
     ]
   );
