@@ -35,6 +35,7 @@ describe('NFTCollection batch mint', function () {
       expect(await contract.ownerOf(tokenId)).to.be.eq(collectionOwner);
     }
   });
+
   it('owner should be able to batchMint irrespective of the maxTokensPerWallet', async function () {
     const {
       collectionContractAsOwner: contract,

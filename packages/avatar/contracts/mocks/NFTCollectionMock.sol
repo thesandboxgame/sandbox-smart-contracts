@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.26;
 
-import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensions/IERC20Metadata.sol";
 import {NFTCollection} from "../nft-collection/NFTCollection.sol";
 
 contract NFTCollectionMock is NFTCollection {

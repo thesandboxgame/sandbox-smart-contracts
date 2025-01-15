@@ -147,7 +147,6 @@ describe('NFTCollection mint', function () {
         mintSign,
         sandContract,
         randomWallet,
-        maxSupply,
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
@@ -529,6 +528,7 @@ describe('NFTCollection mint', function () {
           )
           .withArgs(maxTokensPerWallet, maxTokensPerWallet, maxTokensPerWallet);
       });
+
       it('should not be able to waveMint when the caller is not allowed to execute mint', async function () {
         const {
           collectionContractAsOwner,
