@@ -5,7 +5,6 @@ pragma solidity 0.8.26;
 import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensions/IERC20Metadata.sol";
 import {NFTCollection} from "../nft-collection/NFTCollection.sol";
 
-
 contract NFTCollectionMock is NFTCollection {
     struct V5VarsStorage {
         bytes32 erc721BurnMemoryUpgradable;
@@ -16,33 +15,13 @@ contract NFTCollectionMock is NFTCollection {
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address _collectionOwner, address _initialTrustedForwarder)  {
+    constructor(address _collectionOwner, address _initialTrustedForwarder) {
         _transferOwnership(_collectionOwner);
         _setTrustedForwarder(_initialTrustedForwarder);
     }
 
-    function NFTCollection_init(
-        address _collectionOwner,
-        string calldata _initialBaseURI,
-        string memory _name,
-        string memory _symbol,
-        address payable _mintTreasury,
-        address _signAddress,
-        address _initialTrustedForwarder,
-        IERC20Metadata _allowedToExecuteMint,
-        uint256 _maxSupply
-    ) external {
-        __NFTCollection_init(
-            _collectionOwner,
-            _initialBaseURI,
-            _name,
-            _symbol,
-            _mintTreasury,
-            _signAddress,
-            _initialTrustedForwarder,
-            _allowedToExecuteMint,
-            _maxSupply
-        );
+    function NFTCollection_init(InitializationParams calldata params) external {
+        __NFTCollection_init(params);
     }
 
     function getV5VarsStorageStructure() external pure returns (V5VarsStorage memory ret) {

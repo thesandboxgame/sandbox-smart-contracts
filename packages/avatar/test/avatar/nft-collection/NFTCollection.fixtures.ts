@@ -1,5 +1,5 @@
-import {ethers, network, upgrades} from 'hardhat';
 import {AddressLike, BigNumberish, Contract, parseUnits, Signer} from 'ethers';
+import {ethers, network, upgrades} from 'hardhat';
 import {NFTCollection} from '../../../typechain-types';
 import {getTestingAccounts, setupMockERC20} from '../fixtures';
 
@@ -7,30 +7,47 @@ export async function setupNFTCollectionContract() {
   const accounts = await getTestingAccounts();
   const collectionName = 'MockNFTTesting';
   const collectionSymbol = 'MAT';
-  const maxSupply = 500;
-  const waveMaxTokensOverall = 100;
-  const waveMaxTokensPerWallet = 13;
+  const maxSupply = 100;
+  const waveMaxTokensOverall = 50;
+  const waveMaxTokensPerWallet = 10;
   const mintPrice = parseUnits('100', 'ether');
   const metadataUrl =
     'https://contracts-demo.sandbox.game/NFTCollection-unrevealed/';
+  const maxTokensPerWallet = 20;
 
   const collectionOwner = accounts.nftCollectionAdmin;
   const sandContract = await setupMockERC20();
-  const initializeArgs = [
-    collectionOwner.address,
-    metadataUrl,
-    collectionName,
-    collectionSymbol,
-    accounts.treasury.address,
-    accounts.raffleSignWallet.address,
-    accounts.trustedForwarder.address,
-    await sandContract.getAddress(),
-    maxSupply,
-  ];
+
+  interface InitializeArgs {
+    collectionOwner: string;
+    initialBaseURI: string;
+    name: string;
+    symbol: string;
+    mintTreasury: string;
+    signAddress: string;
+    initialTrustedForwarder: string;
+    allowedToExecuteMint: string;
+    maxSupply: number;
+    maxTokensPerWallet: number;
+  }
+
+  const initializeArgs: InitializeArgs = {
+    collectionOwner: collectionOwner.address,
+    initialBaseURI: metadataUrl,
+    name: collectionName,
+    symbol: collectionSymbol,
+    mintTreasury: accounts.treasury.address,
+    signAddress: accounts.raffleSignWallet.address,
+    initialTrustedForwarder: accounts.trustedForwarder.address,
+    allowedToExecuteMint: await sandContract.getAddress(),
+    maxSupply: maxSupply,
+    maxTokensPerWallet: maxTokensPerWallet,
+  };
+
   const NFTCollectionFactory = await ethers.getContractFactory('NFTCollection');
   const collectionContract = (await upgrades.deployProxy(
     NFTCollectionFactory,
-    initializeArgs,
+    [initializeArgs],
     {
       from: accounts.deployer,
       initializer: 'initialize',
@@ -61,9 +78,12 @@ export async function setupNFTCollectionContract() {
   }
 
   function getCustomArgs(idx: number, val) {
-    const args = [...initializeArgs];
-    args[idx] = val;
-    return args;
+    const args = {...initializeArgs};
+    const keys = Object.keys(initializeArgs);
+    if (idx >= 0 && idx < keys.length) {
+      args[keys[idx]] = val;
+    }
+    return [args];
   }
 
   const MockERC721Holder = await ethers.getContractFactory('MockERC721Holder');
@@ -79,6 +99,7 @@ export async function setupNFTCollectionContract() {
     maxSupply,
     waveMaxTokensOverall,
     waveMaxTokensPerWallet,
+    maxTokensPerWallet,
     mintPrice,
     sandContract,
     collectionOwner,
@@ -120,9 +141,9 @@ export async function setupNFTCollectionContract() {
     ),
     revealSig: setupRevealSign(collectionContract, accounts.raffleSignWallet),
     initializeArgs,
-    deployWithCustomArg: async (idx: number, val) => {
-      const args = getCustomArgs(idx, val);
-      return await upgrades.deployProxy(NFTCollectionFactory, args, {
+    deployWithCustomArg: async (partialArgs: Partial<InitializeArgs>) => {
+      const args = {...initializeArgs, ...partialArgs};
+      return await upgrades.deployProxy(NFTCollectionFactory, [args], {
         initializer: 'initialize',
       });
     },

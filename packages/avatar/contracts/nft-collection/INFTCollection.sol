@@ -30,7 +30,8 @@ interface INFTCollection {
         address mintTreasury,
         address signAddress,
         IERC20Metadata allowedToExecuteMint,
-        uint256 maxSupply
+        uint256 maxSupply,
+        uint256 maxTokensPerWallet
     );
 
     /**
@@ -55,16 +56,8 @@ interface INFTCollection {
      * @param tokenId the token id
      * @param wallet the wallet address of the receiver
      * @param waveIndex the wave index
-     * @param walletMintCount the amount of tokens minted by the wallet
-     * @param waveTotalMinted the total tokens count minted in the wave
      */
-    event WaveMint(
-        uint256 tokenId,
-        address indexed wallet,
-        uint256 waveIndex,
-        uint256 walletMintCount,
-        uint256 waveTotalMinted
-    );
+    event WaveMint(uint256 tokenId, address indexed wallet, uint256 waveIndex);
 
     /**
      * @notice Event emitted when an address was set as allowed to mint
@@ -146,6 +139,14 @@ interface INFTCollection {
     event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId);
 
     /**
+     * @notice Event emitted when the max tokens per wallet is set
+     * @param operator the sender of the transaction
+     * @param oldMaxTokensPerWallet old maximum tokens per wallet
+     * @param newMaxTokensPerWallet new maximum tokens per wallet
+     */
+    event MaxTokensPerWalletSet(address indexed operator, uint256 oldMaxTokensPerWallet, uint256 newMaxTokensPerWallet);
+
+    /**
      * @notice The operation failed because the base token uri is empty.
      * @param baseURI an URI that will be used as the base for token URI
      */
@@ -205,4 +206,25 @@ interface INFTCollection {
      * @param amount amount to be checked if can be minted
      */
     error CannotMint(address wallet, uint256 amount);
+
+    /**
+     * @notice The operation failed because the max tokens per wallet is invalid
+     * @param maxTokensPerWallet max tokens per wallet
+     */
+    error InvalidMaxTokensPerWallet(uint256 maxTokensPerWallet, uint256 maxSupply);
+
+    /**
+     * @notice The operation failed because the wave max tokens per wallet is higher than the global max tokens per wallet
+     * @param waveMaxTokensPerWallet wave max tokens per wallet
+     * @param maxTokensPerWallet global max tokens per wallet
+     */
+    error WaveMaxTokensHigherThanGlobalMax(uint256 waveMaxTokensPerWallet, uint256 maxTokensPerWallet);
+
+    /**
+     * @notice The operation failed because the global max tokens per wallet is exceeded
+     * @param amountToMint amount to mint
+     * @param mintedCount minted count
+     * @param maxTokensPerWallet global max tokens per wallet
+     */
+    error GlobalMaxTokensPerWalletExceeded(uint256 amountToMint, uint256 mintedCount, uint256 maxTokensPerWallet);
 }
