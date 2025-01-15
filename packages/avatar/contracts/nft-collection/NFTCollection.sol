@@ -50,58 +50,6 @@ contract NFTCollection is
     IERC4906,
     INFTCollection
 {
-    /**
-     * @notice Structure to hold initialization parameters
-     * @param _collectionOwner the address that will be set as the owner of the collection
-     * @param _initialBaseURI an URI that will be used as the base for token URI
-     * @param _name name of the ERC721 token
-     * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address (where the payments are sent)
-     * @param _signAddress signer address that is allowed to create mint signatures
-     * @param _initialTrustedForwarder trusted forwarder address
-     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
-     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
-     * @param _maxTokensPerWallet max tokens per wallet
-     */
-    struct InitializationParams {
-        address collectionOwner;
-        string initialBaseURI;
-        string name;
-        string symbol;
-        address payable mintTreasury;
-        address signAddress;
-        address initialTrustedForwarder;
-        IERC20Metadata allowedToExecuteMint;
-        uint256 maxSupply;
-        uint256 maxTokensPerWallet;
-    }
-
-    /**
-     * @notice Structure used to mint in batch
-     * @param wallet destination address that will receive the tokens
-     * @param amount of tokens to mint
-     */
-    struct BatchMintingData {
-        address wallet;
-        uint256 amount;
-    }
-
-    /**
-     * @notice Structure used save minting wave information
-     * @param waveMaxTokensOverall max tokens to buy per wave, cumulating all addresses
-     * @param waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
-     * @param waveSingleTokenPrice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
-     * @param waveTotalMinted number of total minted tokens in the current running wave
-     * @param waveOwnerToClaimedCounts mapping of [owner -> minted count]
-     */
-    struct WaveData {
-        uint256 waveMaxTokensOverall;
-        uint256 waveMaxTokensPerWallet;
-        uint256 waveSingleTokenPrice;
-        uint256 waveTotalMinted;
-        mapping(address => uint256) waveOwnerToClaimedCounts;
-    }
-
     struct NFTCollectionStorage {
         /**
          * @notice maximum amount of tokens that can be minted
