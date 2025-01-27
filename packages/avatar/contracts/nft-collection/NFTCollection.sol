@@ -132,8 +132,7 @@ INFTCollection
             revert InvalidSymbol(params.symbol);
         }
         __ReentrancyGuard_init();
-        // We don't want to set the owner to _msgSender, so, we call _transferOwnership instead of __Ownable_init
-        _transferOwnership(params.collectionOwner);
+        __Ownable_init(params.collectionOwner);
         __ERC2981_init();
         _setTrustedForwarder(params.initialTrustedForwarder);
         __ERC721_init(params.name, params.symbol);
