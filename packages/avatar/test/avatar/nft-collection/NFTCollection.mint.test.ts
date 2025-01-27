@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
-import {ZeroAddress} from 'ethers';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {ZeroAddress} from 'ethers';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 describe('NFTCollection mint', function () {
   describe('backward compatible mint', function () {
@@ -354,6 +354,87 @@ describe('NFTCollection mint', function () {
 
       expect(await contract.getSignatureType(222)).to.be.eq(4);
       expect(await contract.getSignatureType(223)).to.be.eq(4);
+    });
+
+    it('should emit WaveMint event when waveMint is called', async function () {
+      const {
+        collectionContractAsOwner: contract,
+        waveMintSign,
+        sandContract,
+        randomWallet,
+        maxSupply,
+      } = await loadFixture(setupNFTCollectionContract);
+      const unitPrice = 10;
+      await sandContract.donateTo(randomWallet, unitPrice * 5);
+      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+
+      expect(await sandContract.balanceOf(randomWallet)).to.be.eq(
+        unitPrice * 5
+      );
+      const encodedData = contract.interface.encodeFunctionData('waveMint', [
+        await randomWallet.getAddress(),
+        1,
+        0,
+        222,
+        await waveMintSign(randomWallet, 1, 0, 222),
+      ]);
+
+      await sandContract
+        .connect(randomWallet)
+        .approveAndCall(contract, unitPrice, encodedData);
+
+      const waveMintEvents = await contract.queryFilter(
+        contract.filters.WaveMint()
+      );
+
+      const walletTotalMinted = await contract.waveOwnerToClaimedCounts(
+        0,
+        randomWallet
+      );
+      const waveTotalMinted = await contract.waveTotalMinted(0);
+
+      expect(waveMintEvents).to.have.lengthOf(1);
+      expect(waveMintEvents[0].args.tokenId).to.be.eq(1);
+      expect(waveMintEvents[0].args.wallet).to.be.eq(randomWallet);
+      expect(waveMintEvents[0].args.waveIndex).to.be.eq(0);
+      expect(waveMintEvents[0].args.walletMintCount).to.be.eq(
+        walletTotalMinted
+      );
+      expect(waveMintEvents[0].args.waveTotalMinted).to.be.eq(waveTotalMinted);
+    });
+
+    it('should emit WaveMint event when mint is called', async function () {
+      const {
+        collectionContractAsOwner: contract,
+        mintSign,
+        sandContract,
+        randomWallet,
+        maxSupply,
+      } = await loadFixture(setupNFTCollectionContract);
+      const unitPrice = 10;
+      await sandContract.donateTo(randomWallet, unitPrice * 5);
+      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+
+      const encodedData = contract.interface.encodeFunctionData('mint', [
+        await randomWallet.getAddress(),
+        1,
+        222,
+        await mintSign(randomWallet, 222),
+      ]);
+      await sandContract
+        .connect(randomWallet)
+        .approveAndCall(contract, unitPrice, encodedData);
+
+      const mintEvents = await contract.queryFilter(
+        contract.filters.WaveMint()
+      );
+
+      expect(mintEvents).to.have.lengthOf(1);
+      expect(mintEvents[0].args.tokenId).to.be.eq(1);
+      expect(mintEvents[0].args.wallet).to.be.eq(randomWallet);
+      expect(mintEvents[0].args.waveIndex).to.be.eq(0);
+      expect(mintEvents[0].args.walletMintCount).to.be.eq(1);
+      expect(mintEvents[0].args.waveTotalMinted).to.be.eq(1);
     });
 
     describe('wrong args', function () {

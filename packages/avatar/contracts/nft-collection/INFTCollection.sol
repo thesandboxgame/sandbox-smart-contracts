@@ -5,7 +5,6 @@ pragma solidity 0.8.26;
 import {IERC20} from "@openzeppelin/contracts-5.0.2/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensions/IERC20Metadata.sol";
 
-
 /**
  * @title INFTCollection
  * @author The Sandbox
@@ -49,6 +48,22 @@ interface INFTCollection {
         uint256 waveMaxTokensToBuy,
         uint256 waveSingleTokenPrice,
         uint256 waveIndex
+    );
+
+    /**
+     * @notice Event emitted when a wave mint is completed
+     * @param tokenId the token id
+     * @param wallet the wallet address of the receiver
+     * @param waveIndex the wave index
+     * @param walletMintCount the amount of tokens minted by the wallet
+     * @param waveTotalMinted the total tokens count minted in the wave
+     */
+    event WaveMint(
+        uint256 tokenId,
+        address indexed wallet,
+        uint256 waveIndex,
+        uint256 walletMintCount,
+        uint256 waveTotalMinted
     );
 
     /**
@@ -96,7 +111,6 @@ interface INFTCollection {
      */
     event Personalized(address indexed operator, uint256 indexed tokenId, uint256 indexed personalizationMask);
 
-
     /**
      * @notice Event emitted when a token personalization was made.
      * @param operator the sender of the transaction
@@ -104,7 +118,6 @@ interface INFTCollection {
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
     event DefaultRoyaltySet(address indexed operator, address indexed receiver, uint96 feeNumerator);
-
 
     /**
      * @notice Event emitted when default royalties are reset
@@ -119,8 +132,12 @@ interface INFTCollection {
      * @param receiver the receiver of the royalties
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
-    event TokenRoyaltySet(address indexed operator, uint256 indexed tokenId, address indexed receiver, uint96 feeNumerator);
-
+    event TokenRoyaltySet(
+        address indexed operator,
+        uint256 indexed tokenId,
+        address indexed receiver,
+        uint96 feeNumerator
+    );
 
     /**
      * @notice Event emitted when default royalties are reset
@@ -188,5 +205,4 @@ interface INFTCollection {
      * @param amount amount to be checked if can be minted
      */
     error CannotMint(address wallet, uint256 amount);
-
 }
