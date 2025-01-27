@@ -168,7 +168,7 @@ INFTCollection
     ) external onlyOwner {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         if (
-            _waveMaxTokensOverall > $.maxSupply ||
+            $.totalSupply + _waveMaxTokensOverall > $.maxSupply ||
             _waveMaxTokensOverall == 0 ||
             _waveMaxTokensPerWallet == 0 ||
             _waveMaxTokensPerWallet > _waveMaxTokensOverall

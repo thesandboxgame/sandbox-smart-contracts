@@ -32,6 +32,19 @@ describe('NFTCollection wave setup', function () {
         .withArgs(maxSupply + 1, 1);
     });
 
+    it('should fail to setup a wave when waveMaxTokensOverall excess maxSupply-totalSupply', async function () {
+      const {
+        collectionContractAsOwner: contract,
+        randomWallet2,
+        maxSupply,
+      } = await loadFixture(setupNFTCollectionContract);
+      await contract.setupWave(1, 1, 2);
+      await contract.batchMint(0, [[randomWallet2, 1]]);
+      await expect(contract.setupWave(maxSupply, 1, 2))
+        .to.revertedWithCustomError(contract, 'InvalidWaveData')
+        .withArgs(maxSupply, 1);
+    });
+
     it('should fail to setup a wave when waveMaxTokensPerWallet excess maxTokensPerWallet', async function () {
       const {
         collectionContractAsOwner: contract,
