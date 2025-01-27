@@ -15,7 +15,13 @@ import {
 
 // Package name : solidity source code path
 const importedPackages = {
-  '@sandbox-smart-contracts/avatar': 'contracts/',
+  '@sandbox-smart-contracts/avatar': [
+    'contracts/nft-collection/NFTCollection.sol',
+    'contracts/avatar/AvatarCollection.sol',
+    'contracts/proxy',
+    'contracts/raffle',
+    'contracts/raffleold/contracts',
+  ],
   '@sandbox-smart-contracts/asset@1.1.0': [
     'contracts/Asset.sol',
     'contracts/AssetCreate.sol',
@@ -312,6 +318,7 @@ const namedAccounts = {
     default: 'sandAdmin',
     mainnet: null,
     polygon: '0xF06dD9b61d480704Cc7bEF717e5Ea6efB6Af75bE', // Final admin should be 0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e
+    amoy: '0x4BF86138e9DC66Fb65F8b9387C53aB4439FC41FF',
   },
   lazyMintingCatSeller: {
     default: 4,
@@ -442,35 +449,43 @@ const networks = {
   },
 };
 
-const compilers = [
-  '0.8.23',
-  '0.8.21',
-  '0.8.19',
-  '0.8.18',
-  '0.8.2',
-  '0.7.5',
-  '0.7.6',
-  '0.6.5',
-  '0.5.9',
-].map((version) => ({
-  version,
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 2000,
-    },
-  },
-}));
+const defaultOptimizer = {
+  enabled: true,
+  runs: 2000,
+};
 
-compilers.push({
-  version: '0.8.15',
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
+const lowRunsOptimizer = {
+  enabled: true,
+  runs: 200, // For large contracts that exceed size limits
+};
+
+const compilers = [
+  // Standard optimized compilers
+  ...[
+    '0.8.23',
+    '0.8.21',
+    '0.8.19',
+    '0.8.18',
+    '0.8.2',
+    '0.7.5',
+    '0.7.6',
+    '0.6.5',
+    '0.5.9',
+  ].map((version) => ({
+    version,
+    settings: {
+      optimizer: defaultOptimizer,
     },
-  },
-});
+  })),
+
+  // Special cases with lower optimization runs
+  ...[{version: '0.8.26'}, {version: '0.8.15'}].map(({version}) => ({
+    version,
+    settings: {
+      optimizer: lowRunsOptimizer,
+    },
+  })),
+];
 
 const config = skipDeploymentsOnLiveNetworks(
   addForkingSupport({

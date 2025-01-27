@@ -2200,10 +2200,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts-5.0.2@npm:@openzeppelin/contracts@5.0.2, @openzeppelin/contracts@npm:5.0.2, @openzeppelin/contracts@npm:@openzeppelin/contracts@5.0.2":
+  version: 5.0.2
+  resolution: "@openzeppelin/contracts@npm:5.0.2"
+  checksum: 0cce6fc284bd1d89e2a447027832a62f1356b44ee31088899453e10349a63a62df2f07da63d76e4c41aad9c86b96b650b2b6fc85439ef276850dda1170a047fd
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/contracts-upgradeable-0.8.13@npm:@openzeppelin/contracts-upgradeable@4.8.0":
   version: 4.8.0
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.8.0"
   checksum: c39f3a719830c068d0ae413a8beee4072fa19f777b55bf6155fe21023414eab0633a641318845ac50929837b71848de1efbd00d4c181ddd6d8b735ceb0a82070
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts-upgradeable-5.0.2@npm:@openzeppelin/contracts-upgradeable@5.0.2, @openzeppelin/contracts-upgradeable@npm:5.0.2":
+  version: 5.0.2
+  resolution: "@openzeppelin/contracts-upgradeable@npm:5.0.2"
+  peerDependencies:
+    "@openzeppelin/contracts": 5.0.2
+  checksum: 7d1dbd6bcb45fb6fccf2dc51253afd044b9f77b01d34e11f7cf4c3e17c860df31ddc2c831be7ac463e2955eaea9620cec1c38cdffed7fcf235eb1fdc7ceb3716
   languageName: node
   linkType: hard
 
@@ -2228,15 +2244,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:5.0.2":
-  version: 5.0.2
-  resolution: "@openzeppelin/contracts-upgradeable@npm:5.0.2"
-  peerDependencies:
-    "@openzeppelin/contracts": 5.0.2
-  checksum: 7d1dbd6bcb45fb6fccf2dc51253afd044b9f77b01d34e11f7cf4c3e17c860df31ddc2c831be7ac463e2955eaea9620cec1c38cdffed7fcf235eb1fdc7ceb3716
-  languageName: node
-  linkType: hard
-
 "@openzeppelin/contracts-upgradeable@npm:^4.8.0, @openzeppelin/contracts-upgradeable@npm:^4.8.2, @openzeppelin/contracts-upgradeable@npm:^4.9.0, @openzeppelin/contracts-upgradeable@npm:^4.9.2":
   version: 4.9.6
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.6"
@@ -2255,13 +2262,6 @@ __metadata:
   version: 4.9.3
   resolution: "@openzeppelin/contracts@npm:4.9.3"
   checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
-  languageName: node
-  linkType: hard
-
-"@openzeppelin/contracts@npm:5.0.2":
-  version: 5.0.2
-  resolution: "@openzeppelin/contracts@npm:5.0.2"
-  checksum: 0cce6fc284bd1d89e2a447027832a62f1356b44ee31088899453e10349a63a62df2f07da63d76e4c41aad9c86b96b650b2b6fc85439ef276850dda1170a047fd
   languageName: node
   linkType: hard
 
@@ -2598,14 +2598,16 @@ __metadata:
     "@nomicfoundation/hardhat-verify": ^1.0.0
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@0.3.0-beta.7"
     "@nomiclabs/hardhat-etherscan": ^3.1.7
+    "@openzeppelin/contracts": "npm:@openzeppelin/contracts@5.0.2"
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.4.2"
     "@openzeppelin/contracts-0.8.13": "npm:@openzeppelin/contracts@4.8.0"
     "@openzeppelin/contracts-0.8.15": "npm:@openzeppelin/contracts@4.8.3"
+    "@openzeppelin/contracts-5.0.2": "npm:@openzeppelin/contracts@5.0.2"
     "@openzeppelin/contracts-upgradeable": ^4.9.2
     "@openzeppelin/contracts-upgradeable-0.8.13": "npm:@openzeppelin/contracts-upgradeable@4.8.0"
+    "@openzeppelin/contracts-upgradeable-5.0.2": "npm:@openzeppelin/contracts-upgradeable@5.0.2"
     "@openzeppelin/hardhat-upgrades": ^2.3.1
     "@release-it/keep-a-changelog": ^5.0.0
-    "@sandbox-smart-contracts/core": 0.0.1
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
@@ -2620,6 +2622,7 @@ __metadata:
     eslint-plugin-prettier: ^4.2.1
     ethers: ^6.7.1
     hardhat: ^2.14.1
+    hardhat-contract-sizer: ^2.10.0
     hardhat-gas-reporter: ^1.0.9
     hardhat-upgrades: ^0.0.0
     prettier: ^2.8.8
@@ -2682,7 +2685,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/core@*, @sandbox-smart-contracts/core@0.0.1, @sandbox-smart-contracts/core@workspace:packages/core":
+"@sandbox-smart-contracts/core@*, @sandbox-smart-contracts/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/core@workspace:packages/core"
   dependencies:
