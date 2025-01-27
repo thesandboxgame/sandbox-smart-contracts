@@ -393,4 +393,42 @@ describe('NFTCollection config', function () {
         .withArgs(randomWallet);
     });
   });
+
+  describe('setMaxTokensPerWallet', function () {
+    it('owner should be able to setMaxTokensPerWallet', async function () {
+      const {
+        collectionContractAsOwner: contract,
+        nftCollectionAdmin,
+        maxTokensPerWallet,
+      } = await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxTokensPerWallet(1))
+        .to.emit(contract, 'MaxTokensPerWalletSet')
+        .withArgs(nftCollectionAdmin, maxTokensPerWallet, 1);
+      expect(await contract.maxTokensPerWallet()).to.be.eq(1);
+    });
+
+    it('owner should fail to setMaxTokensPerWallet above maxSupply', async function () {
+      const {collectionContractAsOwner: contract, maxSupply} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxTokensPerWallet(maxSupply + 1))
+        .to.revertedWithCustomError(contract, 'InvalidMaxTokensPerWallet')
+        .withArgs(maxSupply + 1, maxSupply);
+    });
+
+    it('owner should fail to setMaxTokensPerWallet to zero', async function () {
+      const {collectionContractAsOwner: contract, maxSupply} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxTokensPerWallet(0))
+        .to.revertedWithCustomError(contract, 'InvalidMaxTokensPerWallet')
+        .withArgs(0, maxSupply);
+    });
+
+    it('other should fail to setMaxTokensPerWallet', async function () {
+      const {collectionContractAsRandomWallet: contract, randomWallet} =
+        await loadFixture(setupNFTCollectionContract);
+      await expect(contract.setMaxTokensPerWallet(1))
+        .to.revertedWithCustomError(contract, 'OwnableUnauthorizedAccount')
+        .withArgs(randomWallet);
+    });
+  });
 });

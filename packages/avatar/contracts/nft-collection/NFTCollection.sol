@@ -39,16 +39,16 @@ import {INFTCollection} from "./INFTCollection.sol";
  * - custom batch operations for minting and transfer
  */
 contract NFTCollection is
-    ReentrancyGuardUpgradeable,
-    Ownable2StepUpgradeable,
-    ERC721BurnMemoryUpgradeable,
-    ERC2981Upgradeable,
-    ERC2771HandlerUpgradeable,
-    UpdatableOperatorFiltererUpgradeable,
-    PausableUpgradeable,
-    NFTCollectionSignature,
-    IERC4906,
-    INFTCollection
+ReentrancyGuardUpgradeable,
+Ownable2StepUpgradeable,
+ERC721BurnMemoryUpgradeable,
+ERC2981Upgradeable,
+ERC2771HandlerUpgradeable,
+UpdatableOperatorFiltererUpgradeable,
+PausableUpgradeable,
+NFTCollectionSignature,
+IERC4906,
+INFTCollection
 {
     struct NFTCollectionStorage {
         /**
@@ -58,7 +58,7 @@ contract NFTCollection is
         /**
          * @notice maximum amount of tokens that can be minted per wallet across all waves
          */
-        uint256 maxTokensPerWallet;
+        uint256 maxTokensPerWallet; // public
         /**
          * @notice treasury address where the payment for minting are sent
          */
@@ -92,7 +92,7 @@ contract NFTCollection is
 
     /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
     bytes32 internal constant NFT_COLLECTION_STORAGE_LOCATION =
-        0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
+    0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
 
     function _getNFTCollectionStorage() private pure returns (NFTCollectionStorage storage $) {
         // solhint-disable-next-line no-inline-assembly
@@ -415,6 +415,14 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
+     * @param _maxTokensPerWallet new maximum tokens per wallet
+     */
+    function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner {
+        _setMaxTokensPerWallet(_maxTokensPerWallet);
+    }
+
+    /**
      * @notice updates which address is allowed to execute the mint function.
      * @dev also resets default mint price
      * @param minterToken the address that will be allowed to execute the mint function
@@ -602,6 +610,16 @@ contract NFTCollection is
     }
 
     /**
+     * @notice get the number of tokens minted by an address
+     * @param wallet minting wallet
+     * @return the number of tokens minted by an address
+     */
+    function mintedCount(address wallet) external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.mintedCount[wallet];
+    }
+
+    /**
      * @notice check if the indicated wallet can mint the indicated amount
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
@@ -721,14 +739,6 @@ contract NFTCollection is
     }
 
     /**
-     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
-     * @param _maxTokensPerWallet new maximum tokens per wallet
-     */
-    function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner {
-        _setMaxTokensPerWallet(_maxTokensPerWallet);
-    }
-
-    /**
      * @notice Get the maximum number of tokens that can be minted per wallet across all waves
      */
     function maxTokensPerWallet() external view returns (uint256) {
@@ -800,10 +810,10 @@ contract NFTCollection is
         uint256 amount
     ) internal view returns (bool) {
         return
-            amount > 0 &&
-            (waveData.waveTotalMinted + amount <= waveData.waveMaxTokensOverall) &&
-            (waveData.waveOwnerToClaimedCounts[wallet] + amount <= waveData.waveMaxTokensPerWallet) &&
-            $.totalSupply + amount <= $.maxSupply;
+        amount > 0 &&
+        (waveData.waveTotalMinted + amount <= waveData.waveMaxTokensOverall) &&
+        (waveData.waveOwnerToClaimedCounts[wallet] + amount <= waveData.waveMaxTokensPerWallet) &&
+        $.totalSupply + amount <= $.maxSupply;
     }
 
     /**
@@ -843,15 +853,15 @@ contract NFTCollection is
      * @return sender msg.sender
      */
     function _msgSender()
-        internal
-        view
-        override(
-            ContextUpgradeable,
-            ERC2771HandlerUpgradeable,
-            UpdatableOperatorFiltererUpgradeable,
-            NFTCollectionSignature
-        )
-        returns (address sender)
+    internal
+    view
+    override(
+    ContextUpgradeable,
+    ERC2771HandlerUpgradeable,
+    UpdatableOperatorFiltererUpgradeable,
+    NFTCollectionSignature
+    )
+    returns (address sender)
     {
         sender = ERC2771HandlerUpgradeable._msgSender();
     }
@@ -860,10 +870,10 @@ contract NFTCollection is
      * @dev ERC-2771 specifies the context as being a single address (20 bytes).
      */
     function _contextSuffixLength()
-        internal
-        view
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (uint256)
+    internal
+    view
+    override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+    returns (uint256)
     {
         return ERC2771HandlerUpgradeable._contextSuffixLength();
     }
@@ -950,6 +960,19 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
+     * @param _maxTokensPerWallet new maximum tokens per wallet
+     */
+    function _setMaxTokensPerWallet(uint256 _maxTokensPerWallet) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_maxTokensPerWallet == 0 || _maxTokensPerWallet > $.maxSupply) {
+            revert InvalidMaxTokensPerWallet(_maxTokensPerWallet, $.maxSupply);
+        }
+        emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
+        $.maxTokensPerWallet = _maxTokensPerWallet;
+    }
+
+    /**
      * @notice taken from ERC721Upgradeable because it is declared private.
      * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target address. This will revert if the
      * recipient doesn't accept the token transfer. The call is not executed if the target address is not a contract.
@@ -976,18 +999,5 @@ contract NFTCollection is
                 }
             }
         }
-    }
-
-    /**
-     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
-     * @param _maxTokensPerWallet new maximum tokens per wallet
-     */
-    function _setMaxTokensPerWallet(uint256 _maxTokensPerWallet) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (_maxTokensPerWallet == 0 || _maxTokensPerWallet > $.maxSupply) {
-            revert InvalidMaxTokensPerWallet(_maxTokensPerWallet, $.maxSupply);
-        }
-        emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
-        $.maxTokensPerWallet = _maxTokensPerWallet;
     }
 }
