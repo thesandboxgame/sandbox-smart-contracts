@@ -15,7 +15,7 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {IERC4906} from "../common/IERC4906.sol";
 import {UpdatableOperatorFiltererUpgradeable} from "./UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "./ERC2771HandlerUpgradeable.sol";
-import {ERC721BurnMemoryUpgradeable} from "./ERC721BurnMemoryUpgradeable.sol";
+import {ERC721BurnUpgradeable} from "./ERC721BurnUpgradeable.sol";
 import {NFTCollectionSignature} from "./NFTCollectionSignature.sol";
 import {INFTCollection} from "./INFTCollection.sol";
 
@@ -41,7 +41,7 @@ import {INFTCollection} from "./INFTCollection.sol";
 contract NFTCollection is
 ReentrancyGuardUpgradeable,
 Ownable2StepUpgradeable,
-ERC721BurnMemoryUpgradeable,
+ERC721BurnUpgradeable,
 ERC2981Upgradeable,
 ERC2771HandlerUpgradeable,
 UpdatableOperatorFiltererUpgradeable,
