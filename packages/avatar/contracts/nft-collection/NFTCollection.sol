@@ -267,7 +267,7 @@ INFTCollection
      * @param waveIndex the index of the wave used to mint
      * @param wallets list of destination wallets and amounts
      */
-    function batchMint(uint256 waveIndex, BatchMintingData[] calldata wallets) external whenNotPaused onlyOwner {
+    function batchMint(uint256 waveIndex, BatchMintingData[] calldata wallets) external onlyOwner {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         uint256 len = wallets.length;
         if (len == 0) {
@@ -493,7 +493,7 @@ INFTCollection
         address to,
         uint256[] calldata ids,
         bytes calldata data
-    ) external virtual onlyAllowedOperator(from) {
+    ) external virtual whenNotPaused onlyAllowedOperator(from) {
         if (to == address(0)) {
             revert ERC721InvalidReceiver(address(0));
         }
@@ -521,7 +521,7 @@ INFTCollection
         address from,
         address to,
         uint256[] calldata ids
-    ) external virtual onlyAllowedOperator(from) {
+    ) external virtual whenNotPaused onlyAllowedOperator(from) {
         if (to == address(0)) {
             revert ERC721InvalidReceiver(address(0));
         }
@@ -582,21 +582,21 @@ INFTCollection
     /**
      * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
-    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
+    function setApprovalForAll(address operator, bool approved) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
     /**
      * @dev See OpenZeppelin {IERC721-approve}
      */
-    function approve(address operator, uint256 tokenId) public override onlyAllowedOperatorApproval(operator) {
+    function approve(address operator, uint256 tokenId) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
         super.approve(operator, tokenId);
     }
 
     /**
      * @dev See OpenZeppelin {IERC721-transferFrom}
      */
-    function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
+    function transferFrom(address from, address to, uint256 tokenId) public override whenNotPaused onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -608,7 +608,7 @@ INFTCollection
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override onlyAllowedOperator(from) {
+    ) public override whenNotPaused onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
