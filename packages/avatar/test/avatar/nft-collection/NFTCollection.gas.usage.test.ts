@@ -1,11 +1,14 @@
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {Wallet} from 'ethers';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 async function customDeploy() {
   const maxSupply = 100000;
   const ret = await loadFixture(setupNFTCollectionContract);
-  const collectionContract = await ret.deployWithCustomArg(8, maxSupply);
+  const collectionContract = await ret.deployWithCustomArg({
+    maxSupply,
+    maxTokensPerWallet: maxSupply,
+  });
   const collectionContractAsOwner = collectionContract.connect(
     ret.collectionOwner
   );
@@ -73,7 +76,7 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
     const {collectionContractAsOwner, randomWallet} = await loadFixture(
       customDeploy
     );
-    const amount = 1150n;
+    const amount = 10n;
     const tx = await collectionContractAsOwner.batchMint(0, [
       [randomWallet, amount],
     ]);
@@ -115,7 +118,7 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
       raffleSignWallet,
       mintSign,
     } = await loadFixture(customDeploy);
-    const amount = 1120n;
+    const amount = 1000n;
     const encodedData = contract.interface.encodeFunctionData('mint', [
       await randomWallet.getAddress(),
       amount,

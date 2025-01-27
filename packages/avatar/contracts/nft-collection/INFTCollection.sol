@@ -13,6 +13,58 @@ import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensio
  */
 interface INFTCollection {
     /**
+     * @notice Structure to hold initialization parameters
+     * @param _collectionOwner the address that will be set as the owner of the collection
+     * @param _initialBaseURI an URI that will be used as the base for token URI
+     * @param _name name of the ERC721 token
+     * @param _symbol token symbol of the ERC721 token
+     * @param _mintTreasury collection treasury address (where the payments are sent)
+     * @param _signAddress signer address that is allowed to create mint signatures
+     * @param _initialTrustedForwarder trusted forwarder address
+     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
+     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
+     * @param _maxTokensPerWallet max tokens per wallet
+     */
+    struct InitializationParams {
+        address collectionOwner;
+        string initialBaseURI;
+        string name;
+        string symbol;
+        address payable mintTreasury;
+        address signAddress;
+        address initialTrustedForwarder;
+        IERC20Metadata allowedToExecuteMint;
+        uint256 maxSupply;
+        uint256 maxTokensPerWallet;
+    }
+
+    /**
+     * @notice Structure used to mint in batch
+     * @param wallet destination address that will receive the tokens
+     * @param amount of tokens to mint
+     */
+    struct BatchMintingData {
+        address wallet;
+        uint256 amount;
+    }
+
+    /**
+     * @notice Structure used save minting wave information
+     * @param waveMaxTokensOverall max tokens to buy per wave, cumulating all addresses
+     * @param waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
+     * @param waveSingleTokenPrice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     * @param waveTotalMinted number of total minted tokens in the current running wave
+     * @param waveOwnerToClaimedCounts mapping of [owner -> minted count]
+     */
+    struct WaveData {
+        uint256 waveMaxTokensOverall;
+        uint256 waveMaxTokensPerWallet;
+        uint256 waveSingleTokenPrice;
+        uint256 waveTotalMinted;
+        mapping(address => uint256) waveOwnerToClaimedCounts;
+    }
+
+    /**
      * @notice Event emitted when the contract was initialized.
      * @dev emitted at proxy startup, only once
      * @param baseURI an URI that will be used as the base for token URI
@@ -30,7 +82,8 @@ interface INFTCollection {
         address mintTreasury,
         address signAddress,
         IERC20Metadata allowedToExecuteMint,
-        uint256 maxSupply
+        uint256 maxSupply,
+        uint256 maxTokensPerWallet
     );
 
     /**
@@ -55,16 +108,8 @@ interface INFTCollection {
      * @param tokenId the token id
      * @param wallet the wallet address of the receiver
      * @param waveIndex the wave index
-     * @param walletMintCount the amount of tokens minted by the wallet
-     * @param waveTotalMinted the total tokens count minted in the wave
      */
-    event WaveMint(
-        uint256 tokenId,
-        address indexed wallet,
-        uint256 waveIndex,
-        uint256 walletMintCount,
-        uint256 waveTotalMinted
-    );
+    event WaveMint(uint256 tokenId, address indexed wallet, uint256 waveIndex);
 
     /**
      * @notice Event emitted when an address was set as allowed to mint
@@ -146,6 +191,14 @@ interface INFTCollection {
     event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId);
 
     /**
+     * @notice Event emitted when the max tokens per wallet is set
+     * @param operator the sender of the transaction
+     * @param oldMaxTokensPerWallet old maximum tokens per wallet
+     * @param newMaxTokensPerWallet new maximum tokens per wallet
+     */
+    event MaxTokensPerWalletSet(address indexed operator, uint256 oldMaxTokensPerWallet, uint256 newMaxTokensPerWallet);
+
+    /**
      * @notice The operation failed because the base token uri is empty.
      * @param baseURI an URI that will be used as the base for token URI
      */
@@ -205,4 +258,25 @@ interface INFTCollection {
      * @param amount amount to be checked if can be minted
      */
     error CannotMint(address wallet, uint256 amount);
+
+    /**
+     * @notice The operation failed because the max tokens per wallet is invalid
+     * @param maxTokensPerWallet max tokens per wallet
+     */
+    error InvalidMaxTokensPerWallet(uint256 maxTokensPerWallet, uint256 maxSupply);
+
+    /**
+     * @notice The operation failed because the wave max tokens per wallet is higher than the global max tokens per wallet
+     * @param waveMaxTokensPerWallet wave max tokens per wallet
+     * @param maxTokensPerWallet global max tokens per wallet
+     */
+    error WaveMaxTokensHigherThanGlobalMax(uint256 waveMaxTokensPerWallet, uint256 maxTokensPerWallet);
+
+    /**
+     * @notice The operation failed because the global max tokens per wallet is exceeded
+     * @param amountToMint amount to mint
+     * @param mintedCount minted count
+     * @param maxTokensPerWallet global max tokens per wallet
+     */
+    error GlobalMaxTokensPerWalletExceeded(uint256 amountToMint, uint256 mintedCount, uint256 maxTokensPerWallet);
 }

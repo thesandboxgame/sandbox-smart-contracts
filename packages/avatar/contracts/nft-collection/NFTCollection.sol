@@ -50,37 +50,15 @@ contract NFTCollection is
     IERC4906,
     INFTCollection
 {
-    /**
-     * @notice Structure used to mint in batch
-     * @param wallet destination address that will receive the tokens
-     * @param amount of tokens to mint
-     */
-    struct BatchMintingData {
-        address wallet;
-        uint256 amount;
-    }
-
-    /**
-     * @notice Structure used save minting wave information
-     * @param waveMaxTokensOverall max tokens to buy per wave, cumulating all addresses
-     * @param waveMaxTokensPerWallet max tokens to buy, per wallet in a given wave
-     * @param waveSingleTokenPrice price of one token mint (in the token denoted by the allowedToExecuteMint contract)
-     * @param waveTotalMinted number of total minted tokens in the current running wave
-     * @param waveOwnerToClaimedCounts mapping of [owner -> minted count]
-     */
-    struct WaveData {
-        uint256 waveMaxTokensOverall;
-        uint256 waveMaxTokensPerWallet;
-        uint256 waveSingleTokenPrice;
-        uint256 waveTotalMinted;
-        mapping(address => uint256) waveOwnerToClaimedCounts;
-    }
-
     struct NFTCollectionStorage {
         /**
          * @notice maximum amount of tokens that can be minted
          */
         uint256 maxSupply; // public
+        /**
+         * @notice maximum amount of tokens that can be minted per wallet across all waves
+         */
+        uint256 maxTokensPerWallet;
         /**
          * @notice treasury address where the payment for minting are sent
          */
@@ -102,6 +80,10 @@ contract NFTCollection is
          * @notice stores the personalization mask for a tokenId
          */
         mapping(uint256 => uint256) personalizationTraits;
+        /**
+         * @notice stores the number of tokens minted by an address
+         */
+        mapping(address => uint256) mintedCount;
         /**
          * @notice total amount of tokens minted till now
          */
@@ -130,92 +112,44 @@ contract NFTCollection is
 
     /**
      * @notice external entry point initialization function in accordance with the upgradable pattern
-     * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
-     * @param _collectionOwner the address that will be set as the owner of the collection
-     * @param _initialBaseURI an URI that will be used as the base for token URI
-     * @param _name name of the ERC721 token
-     * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address (where the payments are sent)
-     * @param _signAddress signer address that is allowed to create mint signatures
-     * @param _initialTrustedForwarder trusted forwarder address
-     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
-     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      */
-    function initialize(
-        address _collectionOwner,
-        string calldata _initialBaseURI,
-        string memory _name,
-        string memory _symbol,
-        address payable _mintTreasury,
-        address _signAddress,
-        address _initialTrustedForwarder,
-        IERC20Metadata _allowedToExecuteMint,
-        uint256 _maxSupply
-    ) external virtual initializer {
-        __NFTCollection_init(
-            _collectionOwner,
-            _initialBaseURI,
-            _name,
-            _symbol,
-            _mintTreasury,
-            _signAddress,
-            _initialTrustedForwarder,
-            _allowedToExecuteMint,
-            _maxSupply
-        );
+    function initialize(InitializationParams calldata params) external virtual initializer {
+        __NFTCollection_init(params);
     }
 
     /**
      * @notice initialization function in accordance with the upgradable pattern
-     * @dev calls all the init functions from the base classes. Emits {ContractInitialized} event
-     * @param _collectionOwner the address that will be set as the owner of the collection
-     * @param _initialBaseURI an URI that will be used as the base for token URI
-     * @param _name name of the ERC721 token
-     * @param _symbol token symbol of the ERC721 token
-     * @param _mintTreasury collection treasury address (where the payments are sent)
-     * @param _signAddress signer address that is allowed to create mint signatures
-     * @param _initialTrustedForwarder trusted forwarder address
-     * @param _allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
-     * @param _maxSupply max supply of tokens to be allowed to be minted per contract
      */
-    function __NFTCollection_init(
-        address _collectionOwner,
-        string calldata _initialBaseURI,
-        string memory _name,
-        string memory _symbol,
-        address payable _mintTreasury,
-        address _signAddress,
-        address _initialTrustedForwarder,
-        IERC20Metadata _allowedToExecuteMint,
-        uint256 _maxSupply
-    ) internal onlyInitializing {
-        if (bytes(_name).length == 0) {
-            revert InvalidName(_name);
+    function __NFTCollection_init(InitializationParams calldata params) internal onlyInitializing {
+        if (bytes(params.name).length == 0) {
+            revert InvalidName(params.name);
         }
-        if (bytes(_symbol).length == 0) {
-            revert InvalidSymbol(_symbol);
+        if (bytes(params.symbol).length == 0) {
+            revert InvalidSymbol(params.symbol);
         }
         __ReentrancyGuard_init();
         // We don't want to set the owner to _msgSender, so, we call _transferOwnership instead of __Ownable_init
-        _transferOwnership(_collectionOwner);
+        _transferOwnership(params.collectionOwner);
         __ERC2981_init();
-        _setTrustedForwarder(_initialTrustedForwarder);
-        __ERC721_init(_name, _symbol);
+        _setTrustedForwarder(params.initialTrustedForwarder);
+        __ERC721_init(params.name, params.symbol);
         __Pausable_init();
-        _setBaseURI(_initialBaseURI);
-        _setTreasury(_mintTreasury);
-        _setSignAddress(_signAddress);
-        _setAllowedExecuteMint(_allowedToExecuteMint);
-        _setMaxSupply(_maxSupply);
+        _setBaseURI(params.initialBaseURI);
+        _setTreasury(params.mintTreasury);
+        _setSignAddress(params.signAddress);
+        _setAllowedExecuteMint(params.allowedToExecuteMint);
+        _setMaxSupply(params.maxSupply);
+        _setMaxTokensPerWallet(params.maxTokensPerWallet);
 
         emit ContractInitialized(
-            _initialBaseURI,
-            _name,
-            _symbol,
-            _mintTreasury,
-            _signAddress,
-            _allowedToExecuteMint,
-            _maxSupply
+            params.initialBaseURI,
+            params.name,
+            params.symbol,
+            params.mintTreasury,
+            params.signAddress,
+            params.allowedToExecuteMint,
+            params.maxSupply,
+            params.maxTokensPerWallet
         );
     }
 
@@ -241,6 +175,9 @@ contract NFTCollection is
         ) {
             revert InvalidWaveData(_waveMaxTokensOverall, _waveMaxTokensPerWallet);
         }
+        if (_waveMaxTokensPerWallet > $.maxTokensPerWallet) {
+            revert WaveMaxTokensHigherThanGlobalMax(_waveMaxTokensPerWallet, $.maxTokensPerWallet);
+        }
         uint256 waveIndex = $.waveData.length;
         emit WaveSetup(_msgSender(), _waveMaxTokensOverall, _waveMaxTokensPerWallet, _waveSingleTokenPrice, waveIndex);
         $.waveData.push();
@@ -265,8 +202,8 @@ contract NFTCollection is
         bytes calldata signature
     ) external whenNotPaused nonReentrant {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        uint256 waveCount = $.waveData.length;
-        if (waveCount == 0) {
+        uint256 wavesLength = $.waveData.length;
+        if (wavesLength == 0) {
             revert ContractNotConfigured();
         }
         if (_msgSender() != address($.allowedToExecuteMint)) {
@@ -274,7 +211,7 @@ contract NFTCollection is
         }
         _checkAndSetMintSignature(wallet, signatureId, signature);
         // pick the last wave
-        uint256 waveIndex = waveCount - 1;
+        uint256 waveIndex = wavesLength - 1;
         WaveData storage waveData = $.waveData[waveIndex];
         _doMint(waveData, wallet, amount, waveIndex);
     }
@@ -336,28 +273,19 @@ contract NFTCollection is
         if ($.waveData.length == 0) {
             revert ContractNotConfigured();
         }
-        WaveData storage waveData = _getWaveData(waveIndex);
         for (uint256 i; i < len; i++) {
             uint256 _totalSupply = $.totalSupply;
             address wallet = wallets[i].wallet;
             uint256 amount = wallets[i].amount;
-            if (!_isMintAllowed($, waveData, wallet, amount)) {
+            if (amount == 0 || $.totalSupply + amount > $.maxSupply) {
                 revert CannotMint(wallet, amount);
             }
             for (uint256 j; j < amount; j++) {
                 // @dev _mint already checks the destination wallet
                 // @dev start with tokenId = 1
                 _mint(wallet, _totalSupply + j + 1);
-                emit WaveMint(
-                    _totalSupply + j + 1,
-                    wallet,
-                    waveIndex,
-                    waveData.waveOwnerToClaimedCounts[wallet] + 1,
-                    waveData.waveTotalMinted + 1
-                );
+                emit WaveMint(_totalSupply + j + 1, wallet, waveIndex);
             }
-            waveData.waveOwnerToClaimedCounts[wallet] += amount;
-            waveData.waveTotalMinted += amount;
             $.totalSupply += amount;
         }
     }
@@ -793,6 +721,22 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
+     * @param _maxTokensPerWallet new maximum tokens per wallet
+     */
+    function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner {
+        _setMaxTokensPerWallet(_maxTokensPerWallet);
+    }
+
+    /**
+     * @notice Get the maximum number of tokens that can be minted per wallet across all waves
+     */
+    function maxTokensPerWallet() external view returns (uint256) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.maxTokensPerWallet;
+    }
+
+    /**
      * @notice return the total amount of tokens minted till now
      */
     function totalSupply() external view returns (uint256) {
@@ -817,6 +761,11 @@ contract NFTCollection is
      */
     function _doMint(WaveData storage waveData, address wallet, uint256 amount, uint256 waveIndex) internal {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+
+        if ($.mintedCount[wallet] + amount > $.maxTokensPerWallet) {
+            revert GlobalMaxTokensPerWalletExceeded(amount, $.mintedCount[wallet], $.maxTokensPerWallet);
+        }
+
         if (!_isMintAllowed($, waveData, wallet, amount)) {
             revert CannotMint(wallet, amount);
         }
@@ -829,17 +778,12 @@ contract NFTCollection is
             // @dev _safeMint already checks the destination _wallet
             // @dev start with tokenId = 1
             _safeMint(wallet, _totalSupply + i + 1);
-            emit WaveMint(
-                _totalSupply + i + 1,
-                wallet,
-                waveIndex,
-                waveData.waveOwnerToClaimedCounts[wallet] + 1,
-                waveData.waveTotalMinted + 1
-            );
+            emit WaveMint(_totalSupply + i + 1, wallet, waveIndex);
         }
         waveData.waveOwnerToClaimedCounts[wallet] += amount;
         waveData.waveTotalMinted += amount;
         $.totalSupply += amount;
+        $.mintedCount[wallet] += amount;
     }
 
     /**
@@ -1032,5 +976,18 @@ contract NFTCollection is
                 }
             }
         }
+    }
+
+    /**
+     * @notice Set the maximum number of tokens that can be minted per wallet across all waves
+     * @param _maxTokensPerWallet new maximum tokens per wallet
+     */
+    function _setMaxTokensPerWallet(uint256 _maxTokensPerWallet) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_maxTokensPerWallet == 0 || _maxTokensPerWallet > $.maxSupply) {
+            revert InvalidMaxTokensPerWallet(_maxTokensPerWallet, $.maxSupply);
+        }
+        emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
+        $.maxTokensPerWallet = _maxTokensPerWallet;
     }
 }

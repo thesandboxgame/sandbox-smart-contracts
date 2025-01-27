@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 describe('NFTCollection wave setup', function () {
   describe('setupWave', function () {
@@ -121,8 +121,11 @@ describe('NFTCollection wave setup', function () {
         0,
         0
       );
-    expect(await contract.waveTotalMinted(0)).to.be.eq(0);
-    expect(await contract.waveCount()).to.be.eq(1);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(
+      0,
+      'Wave total minted not 0'
+    );
+    expect(await contract.waveCount()).to.be.eq(1, 'Wave count not 1');
     await contract.batchMint(0, [
       [randomWallet, 5],
       [randomWallet, 1],
@@ -134,15 +137,19 @@ describe('NFTCollection wave setup', function () {
       222,
       await mintSign(randomWallet, 222)
     );
-    expect(await contract.waveTotalMinted(0)).to.be.eq(5 + 1 + 2);
-    expect(await contract.waveTotalMinted(2n ** 256n - 1n)).to.be.eq(5 + 1 + 2);
-    expect(await contract.waveTotalMinted(1)).to.be.eq(5 + 1 + 2);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(2);
+    expect(await contract.waveTotalMinted(2n ** 256n - 1n)).to.be.eq(2);
+    expect(await contract.waveTotalMinted(1)).to.be.eq(2);
+    expect(await contract.waveTotalMinted(5)).to.be.eq(2);
+
     expect(await contract.waveCount()).to.be.eq(1);
     await expect(contract.setupWave(10, 1, 2))
       .to.emit(contract, 'WaveSetup')
       .withArgs(nftCollectionAdmin, 10, 1, 2, 1);
-    expect(await contract.waveTotalMinted(0)).to.be.eq(5 + 1 + 2);
+    expect(await contract.waveTotalMinted(0)).to.be.eq(2);
+    expect(await contract.waveTotalMinted(5)).to.be.eq(0);
     expect(await contract.waveTotalMinted(1)).to.be.eq(0);
+
     expect(await contract.waveTotalMinted(2n ** 256n - 1n)).to.be.eq(0);
     expect(await contract.waveTotalMinted(2)).to.be.eq(0);
     expect(await contract.waveCount()).to.be.eq(2);

@@ -13,13 +13,14 @@ describe('NFTCollection mint', function () {
         sandContract,
         randomWallet,
         treasury,
+        waveMaxTokensPerWallet,
         maxSupply,
       } = await loadFixture(setupNFTCollectionContract);
       const amount = 2;
       const unitPrice = 10;
       const price = amount * unitPrice;
       await sandContract.donateTo(randomWallet, price);
-      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+      await contract.setupWave(maxSupply, waveMaxTokensPerWallet, unitPrice);
       const encodedData = contract.interface.encodeFunctionData('mint', [
         await randomWallet.getAddress(),
         amount,
@@ -78,31 +79,32 @@ describe('NFTCollection mint', function () {
         sandContract,
         randomWallet,
         randomWallet2,
-        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       await contract.setupWave(
-        waveMaxTokensOverall,
-        waveMaxTokensOverall - 1,
+        waveMaxTokensPerWallet,
+        waveMaxTokensPerWallet - 1,
         0
       );
       await sandContract.mint(
         contract,
         randomWallet,
-        waveMaxTokensOverall - 1,
+        waveMaxTokensPerWallet - 1,
         222,
         await mintSign(randomWallet, 222)
       );
+
       await expect(
         sandContract.mint(
           contract,
           randomWallet2,
-          waveMaxTokensOverall - 1,
+          waveMaxTokensPerWallet - 1,
           223,
           await mintSign(randomWallet2, 223)
         )
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet2, waveMaxTokensOverall - 1);
+        .withArgs(randomWallet2, waveMaxTokensPerWallet - 1);
     });
 
     it('should not be able to mint over maxSupply', async function () {
@@ -111,28 +113,32 @@ describe('NFTCollection mint', function () {
         mintSign,
         sandContract,
         randomWallet,
+        randomWallet2,
         maxSupply,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
-      await contract.setupWave(maxSupply, maxSupply, 0);
+      await contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
+      await contract.batchMint(0, [[randomWallet2, maxSupply - 1]]);
       await sandContract.mint(
         contract,
         randomWallet,
-        maxSupply,
+        1,
         222,
         await mintSign(randomWallet, 222)
       );
-      await contract.setupWave(maxSupply, maxSupply, 0);
+      await contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
       await expect(
         sandContract.mint(
           contract,
           randomWallet,
-          maxSupply,
+          1,
           223,
           await mintSign(randomWallet, 223)
         )
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet, maxSupply);
+        .withArgs(randomWallet, 1);
     });
 
     it('should not be able to mint without enough balance', async function () {
@@ -141,15 +147,20 @@ describe('NFTCollection mint', function () {
         mintSign,
         sandContract,
         randomWallet,
-        maxSupply,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       const price = 10;
-      await contract.setupWave(maxSupply, maxSupply, price);
+      await contract.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        price
+      );
       await expect(
         sandContract.mint(
           contract,
           randomWallet,
-          maxSupply,
+          waveMaxTokensPerWallet,
           222,
           await mintSign(randomWallet, 222)
         )
@@ -297,13 +308,22 @@ describe('NFTCollection mint', function () {
         sandContract,
         randomWallet,
         treasury,
-        maxSupply,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       const unitPrice = 10;
       await sandContract.donateTo(randomWallet, unitPrice * 5);
       // Setup two waves
-      await contract.setupWave(maxSupply, maxSupply, unitPrice);
-      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+      await contract.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        unitPrice
+      );
+      await contract.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        unitPrice
+      );
       expect(await sandContract.balanceOf(treasury)).to.be.eq(0);
       expect(await sandContract.balanceOf(randomWallet)).to.be.eq(
         unitPrice * 5
@@ -362,11 +382,16 @@ describe('NFTCollection mint', function () {
         waveMintSign,
         sandContract,
         randomWallet,
-        maxSupply,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       const unitPrice = 10;
       await sandContract.donateTo(randomWallet, unitPrice * 5);
-      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+      await contract.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        unitPrice
+      );
 
       expect(await sandContract.balanceOf(randomWallet)).to.be.eq(
         unitPrice * 5
@@ -387,20 +412,10 @@ describe('NFTCollection mint', function () {
         contract.filters.WaveMint()
       );
 
-      const walletTotalMinted = await contract.waveOwnerToClaimedCounts(
-        0,
-        randomWallet
-      );
-      const waveTotalMinted = await contract.waveTotalMinted(0);
-
       expect(waveMintEvents).to.have.lengthOf(1);
       expect(waveMintEvents[0].args.tokenId).to.be.eq(1);
       expect(waveMintEvents[0].args.wallet).to.be.eq(randomWallet);
       expect(waveMintEvents[0].args.waveIndex).to.be.eq(0);
-      expect(waveMintEvents[0].args.walletMintCount).to.be.eq(
-        walletTotalMinted
-      );
-      expect(waveMintEvents[0].args.waveTotalMinted).to.be.eq(waveTotalMinted);
     });
 
     it('should emit WaveMint event when mint is called', async function () {
@@ -409,11 +424,16 @@ describe('NFTCollection mint', function () {
         mintSign,
         sandContract,
         randomWallet,
-        maxSupply,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       const unitPrice = 10;
       await sandContract.donateTo(randomWallet, unitPrice * 5);
-      await contract.setupWave(maxSupply, maxSupply, unitPrice);
+      await contract.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        unitPrice
+      );
 
       const encodedData = contract.interface.encodeFunctionData('mint', [
         await randomWallet.getAddress(),
@@ -433,8 +453,6 @@ describe('NFTCollection mint', function () {
       expect(mintEvents[0].args.tokenId).to.be.eq(1);
       expect(mintEvents[0].args.wallet).to.be.eq(randomWallet);
       expect(mintEvents[0].args.waveIndex).to.be.eq(0);
-      expect(mintEvents[0].args.walletMintCount).to.be.eq(1);
-      expect(mintEvents[0].args.waveTotalMinted).to.be.eq(1);
     });
 
     describe('wrong args', function () {
@@ -444,6 +462,71 @@ describe('NFTCollection mint', function () {
         await expect(
           contract.waveMint(randomWallet, 1, 0, 1, '0x')
         ).to.revertedWithCustomError(contract, 'ContractNotConfigured');
+      });
+
+      it('should not allow minting more than maxTokensPerWallet', async function () {
+        const {
+          collectionContractAsOwner,
+          collectionContractAsRandomWallet: contract,
+          sandContract,
+          randomWallet,
+          waveMaxTokensOverall,
+          maxTokensPerWallet,
+          waveMintSign,
+        } = await loadFixture(setupNFTCollectionContract);
+
+        const unitPrice = 1;
+        await sandContract.donateTo(randomWallet, unitPrice * 40);
+
+        await collectionContractAsOwner.setupWave(
+          waveMaxTokensOverall,
+          maxTokensPerWallet,
+          unitPrice
+        );
+        await collectionContractAsOwner.setupWave(
+          waveMaxTokensOverall,
+          maxTokensPerWallet,
+          unitPrice
+        );
+
+        const encodedData = contract.interface.encodeFunctionData('waveMint', [
+          await randomWallet.getAddress(),
+          maxTokensPerWallet,
+          0,
+          222,
+          await waveMintSign(randomWallet, maxTokensPerWallet, 0, 222),
+        ]);
+
+        await sandContract
+          .connect(randomWallet)
+          .approveAndCall(
+            contract,
+            unitPrice * maxTokensPerWallet,
+            encodedData
+          );
+
+        const encodedData2 = contract.interface.encodeFunctionData('waveMint', [
+          await randomWallet.getAddress(),
+          maxTokensPerWallet,
+          1,
+          223,
+          await waveMintSign(randomWallet, maxTokensPerWallet, 1, 223),
+        ]);
+
+        await expect(
+          sandContract
+            .connect(randomWallet)
+            .approveAndCall(
+              contract,
+              unitPrice * maxTokensPerWallet,
+              encodedData2
+            )
+        )
+          .to.revertedWithCustomError(
+            contract,
+            'GlobalMaxTokensPerWalletExceeded'
+          )
+          .withArgs(maxTokensPerWallet, maxTokensPerWallet, maxTokensPerWallet);
       });
 
       it('should not be able to waveMint when the caller is not allowed to execute mint', async function () {

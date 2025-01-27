@@ -449,36 +449,43 @@ const networks = {
   },
 };
 
-const compilers = [
-  '0.8.26',
-  '0.8.23',
-  '0.8.21',
-  '0.8.19',
-  '0.8.18',
-  '0.8.2',
-  '0.7.5',
-  '0.7.6',
-  '0.6.5',
-  '0.5.9',
-].map((version) => ({
-  version,
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 2000,
-    },
-  },
-}));
+const defaultOptimizer = {
+  enabled: true,
+  runs: 2000,
+};
 
-compilers.push({
-  version: '0.8.15',
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
+const lowRunsOptimizer = {
+  enabled: true,
+  runs: 200, // For large contracts that exceed size limits
+};
+
+const compilers = [
+  // Standard optimized compilers
+  ...[
+    '0.8.23',
+    '0.8.21',
+    '0.8.19',
+    '0.8.18',
+    '0.8.2',
+    '0.7.5',
+    '0.7.6',
+    '0.6.5',
+    '0.5.9',
+  ].map((version) => ({
+    version,
+    settings: {
+      optimizer: defaultOptimizer,
     },
-  },
-});
+  })),
+
+  // Special cases with lower optimization runs
+  ...[{version: '0.8.26'}, {version: '0.8.15'}].map(({version}) => ({
+    version,
+    settings: {
+      optimizer: lowRunsOptimizer,
+    },
+  })),
+];
 
 const config = skipDeploymentsOnLiveNetworks(
   addForkingSupport({

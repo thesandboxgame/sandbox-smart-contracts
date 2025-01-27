@@ -12,6 +12,7 @@
     "format": "prettier --check \"**/*.{ts,js}\"",
     "format:fix": "prettier --write \"**/*.{ts,js}\"",
     "test": "hardhat test",
+    "test:nft-collection": "hardhat test test/avatar/nft-collection/*",
     "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "hardhat": "hardhat",
     "size": "yarn hardhat size-contracts",

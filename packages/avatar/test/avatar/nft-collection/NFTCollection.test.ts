@@ -1,7 +1,7 @@
-import {expect} from 'chai';
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
+import {expect} from 'chai';
 import {getStorageSlotJS} from '../fixtures';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 describe('NFTCollection', function () {
   describe('reveal', function () {
@@ -350,23 +350,27 @@ describe('NFTCollection', function () {
       const {
         mockERC20,
         collectionOwner,
-        maxSupply,
         mintSign,
         randomWallet,
         raffleSignWallet,
+        waveMaxTokensPerWallet,
+        waveMaxTokensOverall,
         deployWithCustomArg,
       } = await loadFixture(setupNFTCollectionContract);
-      const contract = await deployWithCustomArg(
-        7,
-        await mockERC20.getAddress()
-      );
+      const contract = await deployWithCustomArg({
+        allowedToExecuteMint: await mockERC20.getAddress(),
+      });
       const contractAsOwner = contract.connect(collectionOwner);
-      await contractAsOwner.setupWave(maxSupply, maxSupply, 1);
+      await contractAsOwner.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        1
+      );
       await expect(
         mockERC20.mintReenter(
           contract,
           await randomWallet.getAddress(),
-          12,
+          6,
           222,
           await mintSign(
             randomWallet,
@@ -382,28 +386,32 @@ describe('NFTCollection', function () {
       const {
         mockERC20,
         collectionOwner,
-        maxSupply,
         waveMintSign,
         randomWallet,
         raffleSignWallet,
+        waveMaxTokensPerWallet,
+        waveMaxTokensOverall,
         deployWithCustomArg,
       } = await loadFixture(setupNFTCollectionContract);
-      const contract = await deployWithCustomArg(
-        7,
-        await mockERC20.getAddress()
-      );
+      const contract = await deployWithCustomArg({
+        allowedToExecuteMint: await mockERC20.getAddress(),
+      });
       const contractAsOwner = contract.connect(collectionOwner);
-      await contractAsOwner.setupWave(maxSupply, maxSupply, 1);
+      await contractAsOwner.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        1
+      );
       await expect(
         mockERC20.waveMintReenter(
           contract,
           await randomWallet.getAddress(),
-          12,
+          6,
           0,
           222,
           await waveMintSign(
             randomWallet,
-            12,
+            6,
             0,
             222,
             raffleSignWallet,
@@ -419,67 +427,77 @@ describe('NFTCollection', function () {
       collectionContractAsOwner: contract,
       maxSupply,
       deployer,
+      randomWallet,
+      randomWallet2,
       sandContract,
       mintSign,
     } = await loadFixture(setupNFTCollectionContract);
+
     const nftPriceInSand = 1;
     await sandContract.donateTo(deployer, maxSupply);
     const tokens = [];
     let totalMinted = 0;
     let signatureId = 222;
-    const BATCH_SIZE = 50;
+    const WAVE_SIZE = 20;
+    const NUM_WAVES = 3;
 
-    const fistWave = Math.trunc(maxSupply / 6);
-    const secondWave = Math.trunc((maxSupply * 2) / 6);
-    const waves = [fistWave, secondWave, maxSupply - fistWave - secondWave];
-    for (const waveSize of waves) {
-      await contract.setupWave(waveSize, waveSize, nftPriceInSand);
-      const mintingQuantities = Array.from<number>({
-        length: Math.floor(waveSize / BATCH_SIZE),
-      }).fill(BATCH_SIZE);
-      if (waveSize % BATCH_SIZE) mintingQuantities.push(waveSize % BATCH_SIZE);
-      console.log(
-        `Minting with a wave size of ${waveSize} in ${mintingQuantities.length} batches with ${mintingQuantities[0]} tokens per mint TX`
-      );
-      for (const i in mintingQuantities) {
+    const wallets = [deployer, randomWallet, randomWallet2];
+
+    // Create 3 waves of 20 tokens each
+    for (let wave = 0; wave < NUM_WAVES; wave++) {
+      await sandContract.donateTo(wallets[wave], WAVE_SIZE);
+      await contract.setupWave(WAVE_SIZE, WAVE_SIZE, nftPriceInSand);
+      let waveMinted = 0;
+
+      // Keep minting until wave is fully used
+      while (waveMinted < WAVE_SIZE) {
         signatureId++;
-        const index = parseInt(i);
-        const mintingBatch = mintingQuantities[index];
+        // Random quantity between 1 and remaining tokens in wave
+        const remainingInWave = WAVE_SIZE - waveMinted;
+        const mintingBatch = Math.floor(Math.random() * remainingInWave) + 1;
 
         console.log(
-          `for batch ${
-            index + 1
-          } minting ${mintingBatch} tokens. With this will be minted: ${
-            totalMinted + mintingBatch
-          } NFTs`
+          `Wave ${
+            wave + 1
+          }: Minting batch of ${mintingBatch} tokens. Total minted in wave: ${
+            waveMinted + mintingBatch
+          }/${WAVE_SIZE}`
         );
 
         const receipt = await sandContract
-          .connect(deployer)
+          .connect(wallets[wave])
           .approveAndCall(
             contract,
             mintingBatch * nftPriceInSand,
             contract.interface.encodeFunctionData('mint', [
-              await deployer.getAddress(),
+              await wallets[wave].getAddress(),
               mintingBatch,
               signatureId,
-              await mintSign(deployer, signatureId),
+              await mintSign(wallets[wave], signatureId),
             ])
           );
+
         const transferEvents = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber || undefined
         );
         expect(transferEvents).to.have.lengthOf(mintingBatch);
+
+        waveMinted += mintingBatch;
         totalMinted += mintingBatch;
+
         for (const event of transferEvents) {
           const tokenId = event.args?.tokenId.toString();
           expect(tokens).not.to.include(tokenId);
           tokens.push(tokenId);
         }
       }
+
+      expect(waveMinted).to.equal(WAVE_SIZE);
     }
-    expect(tokens).to.have.lengthOf(maxSupply);
+
+    expect(totalMinted).to.equal(WAVE_SIZE * NUM_WAVES);
+    expect(tokens).to.have.lengthOf(WAVE_SIZE * NUM_WAVES);
   });
 
   it('check V5 storage structure', async function () {

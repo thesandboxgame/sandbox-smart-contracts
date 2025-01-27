@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import {ZeroAddress} from 'ethers';
 
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {upgrades} from 'hardhat';
+import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 describe('NFTCollection initialization', function () {
   it('should be able to initialize', async function () {
@@ -19,6 +19,7 @@ describe('NFTCollection initialization', function () {
       trustedForwarder,
       sandContract,
       maxSupply,
+      maxTokensPerWallet,
       mint,
     } = await loadFixture(setupNFTCollectionContract);
     const allowedToExecuteMint = await sandContract.getAddress();
@@ -40,6 +41,9 @@ describe('NFTCollection initialization', function () {
     expect(await collectionContract.operatorFilterRegistry()).to.be.eq(
       ZeroAddress
     );
+    expect(await collectionContract.maxTokensPerWallet()).to.be.eq(
+      maxTokensPerWallet
+    );
 
     const tx = collectionContract.deploymentTransaction();
     await expect(tx)
@@ -57,7 +61,8 @@ describe('NFTCollection initialization', function () {
         treasury,
         raffleSignWallet,
         allowedToExecuteMint,
-        maxSupply
+        maxSupply,
+        maxTokensPerWallet
       );
     expect(await collectionContract.totalSupply()).to.be.eq(0);
     await mint(1);
@@ -93,6 +98,9 @@ describe('NFTCollection initialization', function () {
     await expect(proxy.initialize(...getCustomArgs(8, 0)))
       .to.revertedWithCustomError(proxy, 'LowMaxSupply')
       .withArgs(0, 0);
+    await expect(proxy.initialize(...getCustomArgs(9, 0)))
+      .to.revertedWithCustomError(proxy, 'InvalidMaxTokensPerWallet')
+      .withArgs(0, 100);
   });
 
   it('should fail to initialize twice', async function () {
@@ -100,7 +108,7 @@ describe('NFTCollection initialization', function () {
       setupNFTCollectionContract
     );
     await expect(
-      collectionContractAsOwner.initialize(...initializeArgs)
+      collectionContractAsOwner.initialize(initializeArgs)
     ).to.revertedWithCustomError(
       collectionContractAsOwner,
       'InvalidInitialization'
@@ -112,7 +120,7 @@ describe('NFTCollection initialization', function () {
       setupNFTCollectionContract
     );
     await expect(
-      nftCollectionMock.NFTCollection_init(...initializeArgs)
+      nftCollectionMock.NFTCollection_init(initializeArgs)
     ).to.revertedWithCustomError(nftCollectionMock, 'NotInitializing');
   });
 });

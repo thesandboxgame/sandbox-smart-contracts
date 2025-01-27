@@ -28,6 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const collectionName = 'NFTCollectionTest';
   const collectionSymbol = 'TEST';
   const MAX_SUPPLY = 500;
+  const MAX_TOKENS_PER_WALLET = 2;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
   const sandContract = await deployments.get('PolygonSand');
@@ -37,15 +38,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const encodedConstructorArgs = implementation.interface.encodeFunctionData(
     'initialize',
     [
-      nftCollectionAdmin,
-      metadataUrl,
-      collectionName,
-      collectionSymbol,
-      treasury,
-      raffleSignWallet,
-      TRUSTED_FORWARDER.address,
-      sandContract.address,
-      MAX_SUPPLY,
+      [
+        nftCollectionAdmin,
+        metadataUrl,
+        collectionName,
+        collectionSymbol,
+        treasury,
+        raffleSignWallet,
+        TRUSTED_FORWARDER.address,
+        sandContract.address,
+        MAX_SUPPLY,
+        MAX_TOKENS_PER_WALLET,
+      ],
     ]
   );
   await deployments.catchUnknownSigner(async () => {
