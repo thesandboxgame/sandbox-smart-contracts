@@ -198,10 +198,6 @@ describe('NFTCollection config', function () {
         contract.waveMint(randomWallet, 10, 0, 1, '0x')
       ).to.revertedWithCustomError(contract, 'EnforcedPause');
 
-      await expect(
-        contract.batchMint(0, [[randomWallet, 1]])
-      ).to.revertedWithCustomError(contract, 'EnforcedPause');
-
       await expect(contract.reveal(1, 1, '0x')).to.revertedWithCustomError(
         contract,
         'EnforcedPause'
@@ -215,6 +211,43 @@ describe('NFTCollection config', function () {
         contract,
         'EnforcedPause'
       );
+
+      await expect(
+        contract.safeBatchTransferFrom(randomWallet, randomWallet, [1], '0x')
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.batchTransferFrom(randomWallet, randomWallet, [1])
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.setApprovalForAll(randomWallet, true)
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.approve(randomWallet, 1)
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract.transferFrom(randomWallet, randomWallet, 1)
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract['safeTransferFrom(address,address,uint256,bytes)'](
+          randomWallet,
+          randomWallet,
+          1,
+          '0x'
+        )
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
+      await expect(
+        contract['safeTransferFrom(address,address,uint256)'](
+          randomWallet,
+          randomWallet,
+          1
+        )
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
     });
   });
 
