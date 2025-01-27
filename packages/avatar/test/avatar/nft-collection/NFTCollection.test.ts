@@ -339,9 +339,10 @@ describe('NFTCollection', function () {
         IERC2981Upgradeable: '0x2a55205a',
         IERC721Upgradeable: '0x80ac58cd',
         IERC721MetadataUpgradeable: '0x5b5e139f',
+        IERC4906: '0x49064906',
       };
       for (const i in ifaces) {
-        expect(await contract.supportsInterface(ifaces[i])).to.be.true;
+        expect(await contract.supportsInterface(ifaces[i]), i).to.be.true;
       }
       expect(await contract.supportsInterface('0x11111111')).to.be.false;
     });
