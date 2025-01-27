@@ -119,7 +119,6 @@ describe('NFTCollection mint', function () {
         waveMaxTokensPerWallet,
       } = await loadFixture(setupNFTCollectionContract);
       await contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
-      await contract.batchMint(0, [[randomWallet2, maxSupply - 1]]);
       await sandContract.mint(
         contract,
         randomWallet,
@@ -128,6 +127,7 @@ describe('NFTCollection mint', function () {
         await mintSign(randomWallet, 222)
       );
       await contract.setupWave(waveMaxTokensOverall, waveMaxTokensPerWallet, 0);
+      await contract.batchMint(0, [[randomWallet2, maxSupply - 1]]);
       await expect(
         sandContract.mint(
           contract,
