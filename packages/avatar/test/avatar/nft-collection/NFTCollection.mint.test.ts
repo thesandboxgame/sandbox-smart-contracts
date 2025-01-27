@@ -496,7 +496,7 @@ describe('NFTCollection mint', function () {
           222,
           await waveMintSign(randomWallet, maxTokensPerWallet, 0, 222),
         ]);
-
+        expect(await contract.mintedCount(randomWallet)).to.be.equal(0);
         await sandContract
           .connect(randomWallet)
           .approveAndCall(
@@ -504,6 +504,9 @@ describe('NFTCollection mint', function () {
             unitPrice * maxTokensPerWallet,
             encodedData
           );
+        expect(await contract.mintedCount(randomWallet)).to.be.equal(
+          maxTokensPerWallet
+        );
 
         const encodedData2 = contract.interface.encodeFunctionData('waveMint', [
           await randomWallet.getAddress(),
@@ -512,7 +515,6 @@ describe('NFTCollection mint', function () {
           223,
           await waveMintSign(randomWallet, maxTokensPerWallet, 1, 223),
         ]);
-
         await expect(
           sandContract
             .connect(randomWallet)
