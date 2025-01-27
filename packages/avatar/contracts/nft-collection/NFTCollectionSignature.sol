@@ -15,7 +15,7 @@ import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol"
  * @dev mint:           ['address', 'uint256', 'address', 'uint256']
  * @dev reveal:         ['address', 'uint256', 'address', 'uint256', 'string']
  * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256']
- * @dev waveMint:       ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256']
+ * @dev waveMint:       ['address', 'uint256', 'uint256', 'address', 'uint256']
  */
 abstract contract NFTCollectionSignature {
     enum SignatureType {
@@ -127,21 +127,19 @@ abstract contract NFTCollectionSignature {
      * @notice checks that the provided signature is valid, while also taking into
      *         consideration the provided address and signatureId.
      * @param wallet address to be used in validating the signature
-     * @param amount number of token to mint
      * @param waveIndex the index of the wave that is used to mint
      * @param signatureId signing signature ID
      * @param signature signing signature value
      */
     function _checkAndSetWaveMintSignature(
         address wallet,
-        uint256 amount,
         uint256 waveIndex,
         uint256 signatureId,
         bytes calldata signature
     ) internal {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
         if ($.signatureIds[signatureId] != SignatureType.Unused
-            || _getWaveMintSignature(wallet, amount, waveIndex, signatureId, address(this), block.chainid, signature) != $.signAddress) {
+            || _getWaveMintSignature(wallet, waveIndex, signatureId, address(this), block.chainid, signature) != $.signAddress) {
             revert InvalidSignature(signatureId);
         }
         $.signatureIds[signatureId] = SignatureType.WaveMint;
@@ -302,7 +300,6 @@ abstract contract NFTCollectionSignature {
     /**
      * @notice validate a mint signature that includes a waveIndex
      * @param wallet wallet that was used in signature generation
-     * @param amount number of token to mint
      * @param waveIndex the index of the wave that is used to mint
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -312,7 +309,6 @@ abstract contract NFTCollectionSignature {
      */
     function _getWaveMintSignature(
         address wallet,
-        uint256 amount,
         uint256 waveIndex,
         uint256 signatureId,
         address contractAddress,
@@ -327,7 +323,6 @@ abstract contract NFTCollectionSignature {
                     keccak256(
                         abi.encode(
                             wallet,
-                            amount,
                             waveIndex,
                             signatureId,
                             contractAddress,

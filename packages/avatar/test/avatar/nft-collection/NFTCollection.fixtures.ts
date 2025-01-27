@@ -205,15 +205,8 @@ function setupWaveSign(contract: Contract, raffleSignWallet: Signer) {
       destinationWallet = await destinationWallet.getAddress();
     }
     const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
-      ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
-      [
-        destinationWallet,
-        amount,
-        waveIndex,
-        signatureId,
-        contractAddress,
-        chainId,
-      ]
+      ['address', 'uint256', 'uint256', 'address', 'uint256'],
+      [destinationWallet, waveIndex, signatureId, contractAddress, chainId]
     );
     // https://docs.ethers.org/v6/migrating/
     return signerWallet.signMessage(

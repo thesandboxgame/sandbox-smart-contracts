@@ -239,7 +239,7 @@ INFTCollection
         if (_msgSender() != address($.allowedToExecuteMint)) {
             revert ERC721InvalidSender(_msgSender());
         }
-        _checkAndSetWaveMintSignature(wallet, amount, waveIndex, signatureId, signature);
+        _checkAndSetWaveMintSignature(wallet, waveIndex, signatureId, signature);
         WaveData storage waveData = _getWaveData(waveIndex);
         _doMint(waveData, wallet, amount, waveIndex);
     }
