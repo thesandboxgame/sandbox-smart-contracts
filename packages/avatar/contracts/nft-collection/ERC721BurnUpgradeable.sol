@@ -11,18 +11,8 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/token
  * @notice Baseline ERC721 contract to be used by the NFTCollection contract
  * @dev provides the "burn memory" functionality: keeping track of who burned what token
  */
-abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
+abstract contract ERC721BurnUpgradeable is ERC721Upgradeable {
     struct ERC721BurnMemoryUpgradeableStorage {
-        /**
-         * @notice tokenId to burner mapping; saves who burned a specific token
-         */
-        mapping(uint256 => address) burner;
-
-        /**
-         * @notice burner to list of burned tokens mapping; to see what tokens who burned
-         */
-        mapping(address => uint256[]) burnedTokens;
-
         /**
          * @notice flag that gates burning (enabling/disabling burning)
          */
@@ -107,63 +97,7 @@ abstract contract ERC721BurnMemoryUpgradeable is ERC721Upgradeable {
         // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
         // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
         address previousOwner = _update(address(0), tokenId, sender);
-        $.burner[tokenId] = sender;
-        // @dev TODO: if we don't remove this code, check if we want sender or owner.
-        $.burnedTokens[sender].push(tokenId);
         emit TokenBurned(sender, tokenId, previousOwner);
-    }
-
-    /**
-     * @notice Returns the burner of the `tokenId`
-     * @param tokenId the tokenId to be checked who burned it
-     * @return the address of who burned the indicated token ID or zero if the token wasn't minted or burned yet.
-     */
-    function burnerOf(uint256 tokenId) external view returns (address) {
-        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
-        return $.burner[tokenId];
-    }
-
-    /**
-     * @notice Returns the burner of the `tokenId`
-     * @param tokenId the tokenId to be checked who burned it
-     * @return the address of who burned the indicated token ID or zero if the token wasn't minted or burned yet.
-     * @dev same as burnerOf, kept here to be backward compatible
-     */
-    function burner(uint256 tokenId) external view returns (address) {
-        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
-        return $.burner[tokenId];
-    }
-
-    /**
-     * @notice Checks if the indicated owner had burned tokens
-     * @param previousOwner the owner to check for burned tokens
-     * @return true if the address burned any tokens
-     */
-    function didBurnTokens(address previousOwner) external view returns (bool) {
-        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
-        return $.burnedTokens[previousOwner].length != 0;
-    }
-
-    /**
-     * @notice Gets the number of burned tokens by the indicated owner
-     * @param previousOwner the owner to check for burned tokens
-     * @return number of burned tokens by the indicated owner
-     */
-    function burnedTokensCount(address previousOwner) external view returns (uint256) {
-        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
-        return $.burnedTokens[previousOwner].length;
-    }
-
-
-    /**
-     * @notice Gets the list of burned tokens by the indicated owner
-     * @param previousOwner the owner to check for burned tokens
-     * @param index of the burnedTokens array
-     * @return the list of burned tokens by the indicated owner indexed by index
-     */
-    function burnedTokens(address previousOwner, uint256 index) external view returns (uint256) {
-        ERC721BurnMemoryUpgradeableStorage storage $ = _getERC721BurnMemoryUpgradableStorage();
-        return $.burnedTokens[previousOwner][index];
     }
 
     /**
