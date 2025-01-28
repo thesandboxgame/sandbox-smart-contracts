@@ -276,7 +276,15 @@ function setupPersonalizeSign(contract: Contract, raffleSignWallet: Signer) {
       destinationWallet = await destinationWallet.getAddress();
     }
     const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
-      ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
+      [
+        'address',
+        'uint256',
+        'address',
+        'uint256',
+        'uint256',
+        'uint256',
+        'string',
+      ],
       [
         destinationWallet,
         signatureId,
@@ -284,6 +292,7 @@ function setupPersonalizeSign(contract: Contract, raffleSignWallet: Signer) {
         chainId,
         tokenId,
         personalizationMask,
+        'personalization',
       ]
     );
     // https://docs.ethers.org/v6/migrating/
