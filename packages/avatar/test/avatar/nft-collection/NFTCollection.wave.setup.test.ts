@@ -1,7 +1,10 @@
 import {expect} from 'chai';
 
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
+import {
+  MintDenialReason,
+  setupNFTCollectionContract,
+} from './NFTCollection.fixtures';
 
 describe('NFTCollection wave setup', function () {
   describe('setupWave', function () {
@@ -92,9 +95,13 @@ describe('NFTCollection wave setup', function () {
       const {collectionContractAsOwner: contract, randomWallet} =
         await loadFixture(setupNFTCollectionContract);
       await contract.setupWave(10, 1, 0);
-      expect(await contract.isMintAllowed(0, randomWallet, 1)).to.be.true;
+      expect(await contract.isMintDenied(0, randomWallet, 1)).to.be.eq(
+        MintDenialReason.None
+      );
       await contract.cancelWave(0);
-      expect(await contract.isMintAllowed(0, randomWallet, 1)).to.be.false;
+      expect(await contract.isMintDenied(0, randomWallet, 1)).to.be.eq(
+        MintDenialReason.WaveMaxTokensOverallExceeded
+      );
     });
 
     it('should fail to cancel a wave that is not configured', async function () {
@@ -123,7 +130,9 @@ describe('NFTCollection wave setup', function () {
   it('should not be able to mint on a wave that is not configured', async function () {
     const {collectionContractAsOwner: contract, randomWallet} =
       await loadFixture(setupNFTCollectionContract);
-    expect(await contract.isMintAllowed(0, randomWallet, 10)).to.be.false;
+    expect(await contract.isMintDenied(0, randomWallet, 10)).to.be.eq(
+      MintDenialReason.NotConfigured
+    );
   });
 
   it('index should be incremented, total minted should be set to zero on wave setup', async function () {

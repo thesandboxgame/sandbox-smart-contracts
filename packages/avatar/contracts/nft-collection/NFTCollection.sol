@@ -281,7 +281,7 @@ INFTCollection
             address wallet = wallets[i].wallet;
             uint256 amount = wallets[i].amount;
             if (amount == 0 || $.totalSupply + amount > $.maxSupply) {
-                revert CannotMint(wallet, amount);
+                revert CannotMint(MintDenialReason.InvalidAmount, wallet, amount, waveIndex);
             }
             for (uint256 j; j < amount; j++) {
                 // @dev _mint already checks the destination wallet
@@ -637,15 +637,15 @@ INFTCollection
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
      * @param waveIndex the index of the wave used to mint
-     * @return if can mint or not
+     * @return zero if minting is allowed or a number that represents the reason for denial
      */
-    function isMintAllowed(uint256 waveIndex, address wallet, uint256 amount) external view returns (bool) {
+    function isMintDenied(uint256 waveIndex, address wallet, uint256 amount) external view returns (MintDenialReason) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         if (waveIndex >= $.waveData.length) {
-            return false;
+            return MintDenialReason.NotConfigured;
         }
         WaveData storage waveData = $.waveData[waveIndex];
-        return _isMintAllowed($, waveData, wallet, amount);
+        return _isMintDenied($, waveData, wallet, amount);
     }
 
     /**
@@ -792,13 +792,9 @@ INFTCollection
      */
     function _doMint(WaveData storage waveData, address wallet, uint256 amount, uint256 waveIndex) internal {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-
-        if ($.mintedCount[wallet] + amount > $.maxTokensPerWallet) {
-            revert GlobalMaxTokensPerWalletExceeded(amount, $.mintedCount[wallet], $.maxTokensPerWallet);
-        }
-
-        if (!_isMintAllowed($, waveData, wallet, amount)) {
-            revert CannotMint(wallet, amount);
+        MintDenialReason reason = _isMintDenied($, waveData, wallet, amount);
+        if (reason != MintDenialReason.None) {
+            revert CannotMint(reason, wallet, amount, waveIndex);
         }
         uint256 _price = waveData.waveSingleTokenPrice * amount;
         if (_price > 0) {
@@ -824,17 +820,29 @@ INFTCollection
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
      */
-    function _isMintAllowed(
+    function _isMintDenied(
         NFTCollectionStorage storage $,
         WaveData storage waveData,
         address wallet,
         uint256 amount
-    ) internal view returns (bool) {
-        return
-        amount > 0 &&
-        (waveData.waveTotalMinted + amount <= waveData.waveMaxTokensOverall) &&
-        (waveData.waveOwnerToClaimedCounts[wallet] + amount <= waveData.waveMaxTokensPerWallet) &&
-        $.totalSupply + amount <= $.maxSupply;
+    ) internal view returns (MintDenialReason) {
+
+        if ($.mintedCount[wallet] + amount > $.maxTokensPerWallet) {
+            return MintDenialReason.GlobalMaxTokensPerWalletExceeded;
+        }
+        if (amount == 0) {
+            return MintDenialReason.InvalidAmount;
+        }
+        if (waveData.waveTotalMinted + amount > waveData.waveMaxTokensOverall) {
+            return MintDenialReason.WaveMaxTokensOverallExceeded;
+        }
+        if (waveData.waveOwnerToClaimedCounts[wallet] + amount > waveData.waveMaxTokensPerWallet) {
+            return MintDenialReason.WaveMaxTokensPerWalletExceeded;
+        }
+        if ($.totalSupply + amount > $.maxSupply) {
+            return MintDenialReason.MaxSupplyExceeded;
+        }
+        return MintDenialReason.None;
     }
 
     /**
