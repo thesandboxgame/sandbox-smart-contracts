@@ -902,7 +902,7 @@ contract NFTCollection is
      * @return waveData Storage pointer to the wave configuration.
      * @dev Accepts indices >= waveData.length to access the latest wave.
      */
-    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage waveData) {
+    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         uint256 waveDataLen = $.waveData.length;
         if (waveIndex >= waveDataLen) {
