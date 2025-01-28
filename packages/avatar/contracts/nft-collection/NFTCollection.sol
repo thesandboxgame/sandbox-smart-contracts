@@ -46,6 +46,7 @@ contract NFTCollection is
     IERC4906,
     INFTCollection
 {
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
     struct NFTCollectionStorage {
         /**
          * @notice Maximum supply cap for the collection.
@@ -89,7 +90,7 @@ contract NFTCollection is
         bool isBurnEnabled;
     }
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant NFT_COLLECTION_STORAGE_LOCATION =
         0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
 

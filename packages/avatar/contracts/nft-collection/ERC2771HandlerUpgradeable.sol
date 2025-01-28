@@ -12,11 +12,12 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-5.0.2/util
  *      with an initializer for proxies and a mutable forwarder
  */
 abstract contract ERC2771HandlerUpgradeable is ContextUpgradeable {
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable
     struct ERC2771HandlerUpgradeableStorage {
         address trustedForwarder;
     }
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant ERC2771_HANDLER_UPGRADABLE_STORAGE_LOCATION =
     0x269c7d123624135714769792dd28ef6db020f837bcb105cea22203ad17aa7000;
 
