@@ -504,7 +504,7 @@ contract NFTCollection is
         }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
+        for (uint256 i; i < numTokens; i++) {
             uint256 tokenId = ids[i];
             // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
             // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
@@ -533,7 +533,7 @@ contract NFTCollection is
         }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
+        for (uint256 i; i < numTokens; i++) {
             uint256 tokenId = ids[i];
             // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
             // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
