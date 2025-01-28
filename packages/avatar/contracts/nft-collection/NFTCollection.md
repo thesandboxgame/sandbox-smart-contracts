@@ -16,7 +16,6 @@ Some features:
 - ERC4906 compliant
 - ERC165 compliant
 - supports ERC2771 for meta transactions
-- supports keeping track of who burned what token for faster in-game gating checks
 - minting is supported via an ERC20 token contract that supports approveAndCall as mint price is in non-native tokens
 - custom batch operations for minting and transfer
 
@@ -45,64 +44,27 @@ the following parameters:
 - waveMaxTokensOverall: The total amount of tokens that can be minted in the current wave.
 - waveMaxTokensPerWallet: The amount of tokens that each wallet can mint in the current wave.
 - waveSingleTokenPrice: The price in Sand (or another ERC20) that must be paid to mint a token.
+- maxTokensPerWallet: The maximum amount of tokens that can be minted per wallet across all waves.
 
 ## Structs info
-
-### BatchMintingData
-
-```solidity
-struct BatchMintingData {
-    address wallet;
-    uint256 amount;
-}
-```
-
-Structure used to mint in batch
-
-Parameters:
-
-| Name   | Type    | Description                                       |
-| :----- | :------ | :------------------------------------------------ |
-| wallet | address | destination address that will receive the tokens  |
-| amount | uint256 | of tokens to mint                                 |
-
-### WaveData
-
-```solidity
-struct WaveData {
-    uint256 waveMaxTokensOverall;
-    uint256 waveMaxTokensPerWallet;
-    uint256 waveSingleTokenPrice;
-    uint256 waveTotalMinted;
-    mapping(address => uint256) waveOwnerToClaimedCounts;
-}
-```
-
-Structure used save minting wave information
-
-Parameters:
-
-| Name                     | Type                        | Description                                                                          |
-| :----------------------- | :-------------------------- | :----------------------------------------------------------------------------------- |
-| waveMaxTokensOverall     | uint256                     | max tokens to buy per wave, cumulating all addresses                                 |
-| waveMaxTokensPerWallet   | uint256                     | max tokens to buy, per wallet in a given wave                                        |
-| waveSingleTokenPrice     | uint256                     | price of one token mint (in the token denoted by the allowedToExecuteMint contract)  |
-| waveTotalMinted          | uint256                     | number of total minted tokens in the current running wave                            |
-| waveOwnerToClaimedCounts | mapping(address => uint256) | mapping of [owner -> minted count]                                                   |
 
 ### NFTCollectionStorage
 
 ```solidity
 struct NFTCollectionStorage {
     uint256 maxSupply;
+    uint256 maxTokensPerWallet;
     address mintTreasury;
     string baseTokenURI;
-    NFTCollection.WaveData[] waveData;
+    INFTCollection.WaveData[] waveData;
     IERC20 allowedToExecuteMint;
     mapping(uint256 => uint256) personalizationTraits;
+    mapping(address => uint256) mintedCount;
     uint256 totalSupply;
 }
 ```
+
+storage-location: erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
 
 ## Functions info
 
@@ -114,39 +76,21 @@ constructor()
 
 oz-upgrades-unsafe-allow: constructor
 
-### initialize (0x15491c21)
+### initialize (0xc5a2824e)
 
 ```solidity
 function initialize(
-    address _collectionOwner,
-    string calldata _initialBaseURI,
-    string memory _name,
-    string memory _symbol,
-    address payable _mintTreasury,
-    address _signAddress,
-    address _initialTrustedForwarder,
-    IERC20Metadata _allowedToExecuteMint,
-    uint256 _maxSupply
+    INFTCollection.InitializationParams calldata params
 ) external virtual initializer
 ```
 
 external entry point initialization function in accordance with the upgradable pattern
 
-calls all the init functions from the base classes. Emits {ContractInitialized} event
-
 Parameters:
 
-| Name                     | Type                    | Description                                                                  |
-| :----------------------- | :---------------------- | :--------------------------------------------------------------------------- |
-| _collectionOwner         | address                 | the address that will be set as the owner of the collection                  |
-| _initialBaseURI          | string                  | an URI that will be used as the base for token URI                           |
-| _name                    | string                  | name of the ERC721 token                                                     |
-| _symbol                  | string                  | token symbol of the ERC721 token                                             |
-| _mintTreasury            | address payable         | collection treasury address (where the payments are sent)                    |
-| _signAddress             | address                 | signer address that is allowed to create mint signatures                     |
-| _initialTrustedForwarder | address                 | trusted forwarder address                                                    |
-| _allowedToExecuteMint    | contract IERC20Metadata | token address that is used for payments and that is allowed to execute mint  |
-| _maxSupply               | uint256                 | max supply of tokens to be allowed to be minted per contract                 |
+| Name   | Type                                       | Description                                                                         |
+| :----- | :----------------------------------------- | :---------------------------------------------------------------------------------- |
+| params | struct INFTCollection.InitializationParams | arguments taken during initialization, for details see: struct InitializationParams |
 
 ### setupWave (0x1992c3f3)
 
@@ -225,8 +169,7 @@ Parameters:
 function cancelWave(uint256 waveIndex) external onlyOwner
 ```
 
-function to setup wave parameters. A wave is defined as a combination of allowed number tokens to be minted in total,
-per wallet and minting price
+function used to cancel a wave
 
 Parameters:
 
@@ -239,7 +182,7 @@ Parameters:
 ```solidity
 function batchMint(
     uint256 waveIndex,
-    NFTCollection.BatchMintingData[] calldata wallets
+    INFTCollection.BatchMintingData[] calldata wallets
 ) external whenNotPaused onlyOwner
 ```
 
@@ -249,10 +192,10 @@ this methods takes a list of destination wallets and can only be used by the own
 
 Parameters:
 
-| Name      | Type                                    | Description                             |
-| :-------- | :-------------------------------------- | :-------------------------------------- |
-| waveIndex | uint256                                 | the index of the wave used to mint      |
-| wallets   | struct NFTCollection.BatchMintingData[] | list of destination wallets and amounts |
+| Name      | Type                                     | Description                             |
+| :-------- | :--------------------------------------- | :-------------------------------------- |
+| waveIndex | uint256                                  | the index of the wave used to mint      |
+| wallets   | struct INFTCollection.BatchMintingData[] | list of destination wallets and amounts |
 
 ### reveal (0xa90fe861)
 
@@ -421,6 +364,20 @@ Parameters:
 | :--------- | :------ | :------------------------------------------ |
 | _maxSupply | uint256 | maximum amount of tokens that can be minted |
 
+### setMaxTokensPerWallet (0xaac5d69f)
+
+```solidity
+function setMaxTokensPerWallet(uint256 _maxTokensPerWallet) external onlyOwner
+```
+
+Set the maximum number of tokens that can be minted per wallet across all waves
+
+Parameters:
+
+| Name                | Type    | Description                   |
+| :------------------ | :------ | :---------------------------- |
+| _maxTokensPerWallet | uint256 | new maximum tokens per wallet |
+
 ### setAllowedExecuteMint (0x82bc7877)
 
 ```solidity
@@ -509,7 +466,7 @@ function safeBatchTransferFrom(
     address to,
     uint256[] calldata ids,
     bytes calldata data
-) external virtual onlyAllowedOperator(from)
+) external virtual whenNotPaused onlyAllowedOperator(from)
 ```
 
 Transfer many tokens between 2 addresses, while ensuring the receiving contract has a receiver method.
@@ -530,7 +487,7 @@ function batchTransferFrom(
     address from,
     address to,
     uint256[] calldata ids
-) external virtual onlyAllowedOperator(from)
+) external virtual whenNotPaused onlyAllowedOperator(from)
 ```
 
 Transfer many tokens between 2 addresses.
@@ -585,7 +542,7 @@ Parameters:
 
 | Name         | Type    | Description                                         |
 | :----------- | :------ | :-------------------------------------------------- |
-| tokenId      | uint256 | the tokenId for                                     |
+| tokenId      | uint256 | the NFT tokenId that will has his royalties set     |
 | receiver     | address | the receiver of the royalties                       |
 | feeNumerator | uint96  | percentage of the royalties in feeDenominator units |
 
@@ -597,16 +554,31 @@ function resetTokenRoyalty(uint256 tokenId) external onlyOwner
 
 Resets royalty information for the token id back to the global default.
 
+Parameters:
+
+| Name    | Type    | Description                                       |
+| :------ | :------ | :------------------------------------------------ |
+| tokenId | uint256 | the NFT tokenId that will has his royalties reset |
+
 ### setApprovalForAll (0xa22cb465)
 
 ```solidity
 function setApprovalForAll(
     address operator,
     bool approved
-) public override onlyAllowedOperatorApproval(operator)
+) public override whenNotPaused onlyAllowedOperatorApproval(operator)
 ```
 
+Set the approval for an operator to manage all the tokens of the sender
+
 See OpenZeppelin {IERC721-setApprovalForAll}
+
+Parameters:
+
+| Name     | Type    | Description                         |
+| :------- | :------ | :---------------------------------- |
+| operator | address | The address receiving the approval  |
+| approved | bool    | The determination of the approval   |
 
 ### approve (0x095ea7b3)
 
@@ -614,10 +586,19 @@ See OpenZeppelin {IERC721-setApprovalForAll}
 function approve(
     address operator,
     uint256 tokenId
-) public override onlyAllowedOperatorApproval(operator)
+) public override whenNotPaused onlyAllowedOperatorApproval(operator)
 ```
 
+Approve an operator to spend tokens on the sender behalf
+
 See OpenZeppelin {IERC721-approve}
+
+Parameters:
+
+| Name     | Type    | Description                         |
+| :------- | :------ | :---------------------------------- |
+| operator | address | The address receiving the approval  |
+| tokenId  | uint256 | The id of the token                 |
 
 ### transferFrom (0x23b872dd)
 
@@ -626,10 +607,20 @@ function transferFrom(
     address from,
     address to,
     uint256 tokenId
-) public override onlyAllowedOperator(from)
+) public override whenNotPaused onlyAllowedOperator(from)
 ```
 
+Transfer a token between 2 addresses
+
 See OpenZeppelin {IERC721-transferFrom}
+
+Parameters:
+
+| Name    | Type    | Description                 |
+| :------ | :------ | :-------------------------- |
+| from    | address | The sender of the token     |
+| to      | address | The recipient of the token  |
+| tokenId | uint256 | The id of the token         |
 
 ### safeTransferFrom (0xb88d4fde)
 
@@ -639,10 +630,21 @@ function safeTransferFrom(
     address to,
     uint256 tokenId,
     bytes memory data
-) public override onlyAllowedOperator(from)
+) public override whenNotPaused onlyAllowedOperator(from)
 ```
 
+Transfer a token between 2 addresses letting the receiver knows of the transfer
+
 See OpenZeppelin {IERC721-safeTransferFrom}
+
+Parameters:
+
+| Name    | Type    | Description                 |
+| :------ | :------ | :-------------------------- |
+| from    | address | The sender of the token     |
+| to      | address | The recipient of the token  |
+| tokenId | uint256 | The id of the token         |
+| data    | bytes   | Additional data             |
 
 ### personalizationOf (0x97944ba2)
 
@@ -664,14 +666,34 @@ Return values:
 | :--- | :------ | :---------------------------------- |
 | [0]  | uint256 | the personalization data as uint256 |
 
-### isMintAllowed (0x78b6811f)
+### mintedCount (0xfddcb5ea)
 
 ```solidity
-function isMintAllowed(
+function mintedCount(address wallet) external view returns (uint256)
+```
+
+get the number of tokens minted by an address
+
+Parameters:
+
+| Name   | Type    | Description     |
+| :----- | :------ | :-------------- |
+| wallet | address | minting wallet  |
+
+Return values:
+
+| Name | Type    | Description                               |
+| :--- | :------ | :---------------------------------------- |
+| [0]  | uint256 | the number of tokens minted by an address |
+
+### isMintDenied (0xa0f9b839)
+
+```solidity
+function isMintDenied(
     uint256 waveIndex,
     address wallet,
     uint256 amount
-) external view returns (bool)
+) external view returns (INFTCollection.MintDenialReason)
 ```
 
 check if the indicated wallet can mint the indicated amount
@@ -686,9 +708,9 @@ Parameters:
 
 Return values:
 
-| Name | Type | Description        |
-| :--- | :--- | :----------------- |
-| [0]  | bool | if can mint or not |
+| Name | Type                                 | Description                                                                  |
+| :--- | :----------------------------------- | :--------------------------------------------------------------------------- |
+| [0]  | enum INFTCollection.MintDenialReason | zero if minting is allowed or a number that represents the reason for denial |
 
 ### feeDenominator (0x180b0d7e)
 
@@ -698,6 +720,12 @@ function feeDenominator() external pure virtual returns (uint96)
 
 The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a fraction of the
 sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an override.
+
+Return values:
+
+| Name | Type   | Description         |
+| :--- | :----- | :------------------ |
+| [0]  | uint96 | the fee denominator |
 
 ### chain (0xc763e5a1)
 
@@ -721,6 +749,12 @@ function maxSupply() external view returns (uint256)
 
 return maximum amount of tokens that can be minted
 
+Return values:
+
+| Name | Type    | Description    |
+| :--- | :------ | :------------- |
+| [0]  | uint256 | the max supply |
+
 ### mintTreasury (0xe3e35062)
 
 ```solidity
@@ -729,6 +763,12 @@ function mintTreasury() external view returns (address)
 
 return treasury address where the payment for minting are sent
 
+Return values:
+
+| Name | Type    | Description                     |
+| :--- | :------ | :------------------------------ |
+| [0]  | address | the address of the min treasury |
+
 ### baseTokenURI (0xd547cfb7)
 
 ```solidity
@@ -736,6 +776,12 @@ function baseTokenURI() external view returns (string memory)
 ```
 
 return standard base token URL for ERC721 metadata
+
+Return values:
+
+| Name | Type   | Description        |
+| :--- | :----- | :----------------- |
+| [0]  | string | the base token uri |
 
 ### waveMaxTokensOverall (0x5375e898)
 
@@ -749,9 +795,15 @@ return max tokens to buy per wave, cumulating all addresses
 
 Parameters:
 
-| Name      | Type    | Description                        |
-| :-------- | :------ | :--------------------------------- |
-| waveIndex | uint256 | the index of the wave used to mint |
+| Name      | Type    | Description                         |
+| :-------- | :------ | :---------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint  |
+
+Return values:
+
+| Name | Type    | Description                    |
+| :--- | :------ | :----------------------------- |
+| [0]  | uint256 | the max tokens to buy per wave |
 
 ### waveMaxTokensPerWallet (0x006cddce)
 
@@ -765,9 +817,15 @@ return max tokens to buy, per wallet in a given wave
 
 Parameters:
 
-| Name      | Type    | Description                        |
-| :-------- | :------ | :--------------------------------- |
-| waveIndex | uint256 | the index of the wave used to mint |
+| Name      | Type    | Description                         |
+| :-------- | :------ | :---------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint  |
+
+Return values:
+
+| Name | Type    | Description                      |
+| :--- | :------ | :------------------------------- |
+| [0]  | uint256 | the max tokens to buy per wallet |
 
 ### waveSingleTokenPrice (0x179573d3)
 
@@ -781,9 +839,15 @@ return price of one token mint (in the token denoted by the allowedToExecuteMint
 
 Parameters:
 
-| Name      | Type    | Description                        |
-| :-------- | :------ | :--------------------------------- |
-| waveIndex | uint256 | the index of the wave used to mint |
+| Name      | Type    | Description                         |
+| :-------- | :------ | :---------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint  |
+
+Return values:
+
+| Name | Type    | Description                 |
+| :--- | :------ | :-------------------------- |
+| [0]  | uint256 | the price of one token mint |
 
 ### waveTotalMinted (0x3ee462c2)
 
@@ -795,9 +859,15 @@ return number of total minted tokens in the current running wave
 
 Parameters:
 
-| Name      | Type    | Description                        |
-| :-------- | :------ | :--------------------------------- |
-| waveIndex | uint256 | the index of the wave used to mint |
+| Name      | Type    | Description                         |
+| :-------- | :------ | :---------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint  |
+
+Return values:
+
+| Name | Type    | Description                                         |
+| :--- | :------ | :-------------------------------------------------- |
+| [0]  | uint256 | the total minted tokens in the current running wave |
 
 ### waveOwnerToClaimedCounts (0x49c95a31)
 
@@ -812,10 +882,16 @@ return mapping of [owner -> wave index -> minted count]
 
 Parameters:
 
-| Name      | Type    | Description                               |
-| :-------- | :------ | :---------------------------------------- |
-| waveIndex | uint256 | the index of the wave used to mint        |
-| owner     | address | the owner for which the count is returned |
+| Name      | Type    | Description                                |
+| :-------- | :------ | :----------------------------------------- |
+| waveIndex | uint256 | the index of the wave used to mint         |
+| owner     | address | the owner for which the count is returned  |
+
+Return values:
+
+| Name | Type    | Description                                   |
+| :--- | :------ | :-------------------------------------------- |
+| [0]  | uint256 | the claimed counts for an waveIndex and owner |
 
 ### waveCount (0xd2669199)
 
@@ -825,6 +901,12 @@ function waveCount() external view returns (uint256)
 
 the total amount of waves configured till now
 
+Return values:
+
+| Name | Type    | Description    |
+| :--- | :------ | :------------- |
+| [0]  | uint256 | the wave count |
+
 ### allowedToExecuteMint (0xac3149e3)
 
 ```solidity
@@ -833,6 +915,26 @@ function allowedToExecuteMint() external view returns (IERC20)
 
 return ERC20 contract through which the minting will be done (approveAndCall)
 
+Return values:
+
+| Name | Type            | Description                                                   |
+| :--- | :-------------- | :------------------------------------------------------------ |
+| [0]  | contract IERC20 | the address of the token that is allowed to do a call to mint |
+
+### maxTokensPerWallet (0x469132ce)
+
+```solidity
+function maxTokensPerWallet() external view returns (uint256)
+```
+
+Get the maximum number of tokens that can be minted per wallet across all waves
+
+Return values:
+
+| Name | Type    | Description                                                                 |
+| :--- | :------ | :-------------------------------------------------------------------------- |
+| [0]  | uint256 | the maximum number of tokens that can be minted per wallet across all waves |
+
 ### totalSupply (0x18160ddd)
 
 ```solidity
@@ -840,6 +942,12 @@ function totalSupply() external view returns (uint256)
 ```
 
 return the total amount of tokens minted till now
+
+Return values:
+
+| Name | Type    | Description                                |
+| :--- | :------ | :----------------------------------------- |
+| [0]  | uint256 | the total amount of tokens minted till now |
 
 ### supportsInterface (0x01ffc9a7)
 
