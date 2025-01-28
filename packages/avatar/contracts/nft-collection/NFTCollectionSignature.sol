@@ -14,7 +14,7 @@ import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol"
  * @dev we added an extra constant string to reveal to distinguish it from the mint signature.
  * @dev mint:           ['address', 'uint256', 'address', 'uint256']
  * @dev reveal:         ['address', 'uint256', 'address', 'uint256', 'string']
- * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256']
+ * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256', 'string']
  * @dev waveMint:       ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256']
  */
 abstract contract NFTCollectionSignature {
@@ -291,7 +291,8 @@ abstract contract NFTCollectionSignature {
                             contractAddress,
                             chainId,
                             tokenId,
-                            personalizationMask
+                            personalizationMask,
+                            "personalization"
                         )
                     )
                 )
