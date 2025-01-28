@@ -116,6 +116,7 @@ INFTCollection
 
     /**
      * @notice external entry point initialization function in accordance with the upgradable pattern
+     * @param params arguments taken during initialization, for details see: struct InitializationParams
      */
     function initialize(InitializationParams calldata params) external virtual initializer {
         __NFTCollection_init(params);
@@ -123,6 +124,7 @@ INFTCollection
 
     /**
      * @notice initialization function in accordance with the upgradable pattern
+     * @param params arguments taken during initialization, for details see: struct InitializationParams
      */
     function __NFTCollection_init(InitializationParams calldata params) internal onlyInitializing {
         if (bytes(params.name).length == 0) {
@@ -560,7 +562,7 @@ INFTCollection
 
     /**
      * @notice Sets the royalty information for a specific token id, overriding the global default.
-     * @param tokenId the tokenId for
+     * @param tokenId the NFT tokenId that will has his royalties set
      * @param receiver the receiver of the royalties
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
@@ -572,6 +574,7 @@ INFTCollection
 
     /**
      * @notice Resets royalty information for the token id back to the global default.
+     * @param tokenId the NFT tokenId that will has his royalties reset
      */
     function resetTokenRoyalty(uint256 tokenId) external onlyOwner {
         /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
@@ -580,6 +583,9 @@ INFTCollection
     }
 
     /**
+     * @notice Set the approval for an operator to manage all the tokens of the sender
+     * @param operator The address receiving the approval
+     * @param approved The determination of the approval
      * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
     function setApprovalForAll(address operator, bool approved) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
@@ -587,6 +593,9 @@ INFTCollection
     }
 
     /**
+     * @notice Approve an operator to spend tokens on the sender behalf
+     * @param operator The address receiving the approval
+     * @param tokenId The id of the token
      * @dev See OpenZeppelin {IERC721-approve}
      */
     function approve(address operator, uint256 tokenId) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
@@ -594,6 +603,10 @@ INFTCollection
     }
 
     /**
+     * @notice Transfer a token between 2 addresses
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param tokenId The id of the token
      * @dev See OpenZeppelin {IERC721-transferFrom}
      */
     function transferFrom(address from, address to, uint256 tokenId) public override whenNotPaused onlyAllowedOperator(from) {
@@ -601,6 +614,11 @@ INFTCollection
     }
 
     /**
+     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param tokenId The id of the token
+     * @param data Additional data
      * @dev See OpenZeppelin {IERC721-safeTransferFrom}
      */
     function safeTransferFrom(
@@ -649,9 +667,10 @@ INFTCollection
     }
 
     /**
-     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
+     * @notice The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
      * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
      * override.
+     * @return the fee denominator
      */
     function feeDenominator() external pure virtual returns (uint96) {
         return _feeDenominator();
@@ -667,6 +686,7 @@ INFTCollection
 
     /**
      * @notice return maximum amount of tokens that can be minted
+     * @return the max supply
      */
     function maxSupply() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -675,6 +695,7 @@ INFTCollection
 
     /**
      * @notice return treasury address where the payment for minting are sent
+     * @return the address of the min treasury
      */
     function mintTreasury() external view returns (address) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -683,6 +704,7 @@ INFTCollection
 
     /**
      * @notice return standard base token URL for ERC721 metadata
+     * @return the base token uri
      */
     function baseTokenURI() external view returns (string memory) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -692,6 +714,7 @@ INFTCollection
     /**
      * @notice return max tokens to buy per wave, cumulating all addresses
      * @param waveIndex the index of the wave used to mint
+     * @return the max tokens to buy per wave
      */
     function waveMaxTokensOverall(uint256 waveIndex) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
@@ -701,6 +724,7 @@ INFTCollection
     /**
      * @notice return max tokens to buy, per wallet in a given wave
      * @param waveIndex the index of the wave used to mint
+     * @return the max tokens to buy per wallet
      */
     function waveMaxTokensPerWallet(uint256 waveIndex) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
@@ -710,6 +734,7 @@ INFTCollection
     /**
      * @notice return price of one token mint (in the token denoted by the allowedToExecuteMint contract)
      * @param waveIndex the index of the wave used to mint
+     * @return the price of one token mint
      */
     function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
@@ -719,6 +744,7 @@ INFTCollection
     /**
      * @notice return number of total minted tokens in the current running wave
      * @param waveIndex the index of the wave used to mint
+     * @return the total minted tokens in the current running wave
      */
     function waveTotalMinted(uint256 waveIndex) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
@@ -729,6 +755,7 @@ INFTCollection
      * @notice return mapping of [owner -> wave index -> minted count]
      * @param waveIndex the index of the wave used to mint
      * @param owner the owner for which the count is returned
+     * @return the claimed counts for an waveIndex and owner
      */
     function waveOwnerToClaimedCounts(uint256 waveIndex, address owner) external view returns (uint256) {
         WaveData storage waveData = _getWaveData(waveIndex);
@@ -737,6 +764,7 @@ INFTCollection
 
     /**
      * @notice the total amount of waves configured till now
+     * @return the wave count
      */
     function waveCount() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -745,6 +773,7 @@ INFTCollection
 
     /**
      * @notice return ERC20 contract through which the minting will be done (approveAndCall)
+     * @return the address of the token that is allowed to do a call to mint
      */
     function allowedToExecuteMint() external view returns (IERC20) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -753,6 +782,7 @@ INFTCollection
 
     /**
      * @notice Get the maximum number of tokens that can be minted per wallet across all waves
+     * @return the maximum number of tokens that can be minted per wallet across all waves
      */
     function maxTokensPerWallet() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -761,6 +791,7 @@ INFTCollection
 
     /**
      * @notice return the total amount of tokens minted till now
+     * @return the total amount of tokens minted till now
      */
     function totalSupply() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
