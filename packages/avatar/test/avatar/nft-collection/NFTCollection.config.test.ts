@@ -198,6 +198,10 @@ describe('NFTCollection config', function () {
         contract.waveMint(randomWallet, 10, 0, 1, '0x')
       ).to.revertedWithCustomError(contract, 'EnforcedPause');
 
+      await expect(
+        contract.batchMint(0, [[randomWallet, 1]])
+      ).to.revertedWithCustomError(contract, 'EnforcedPause');
+
       await expect(contract.reveal(1, 1, '0x')).to.revertedWithCustomError(
         contract,
         'EnforcedPause'
