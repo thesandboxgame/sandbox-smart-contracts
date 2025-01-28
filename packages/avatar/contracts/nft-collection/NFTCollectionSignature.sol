@@ -75,6 +75,7 @@ abstract contract NFTCollectionSignature {
 
     /**
       * @notice return the address from which all signatures must come from this specific address, otherwise they are invalid
+      * @return the address from which all signatures must come
       */
     function signAddress() external view returns (address) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
@@ -82,8 +83,9 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice return true if the signature id was used
+     * @notice return the type of signature used for a specific Id
      * @param signatureId signing signature ID
+     * @return the type of signature used
      */
     function getSignatureType(uint256 signatureId) external view returns (SignatureType) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
