@@ -267,7 +267,7 @@ INFTCollection
      * @param waveIndex the index of the wave used to mint
      * @param wallets list of destination wallets and amounts
      */
-    function batchMint(uint256 waveIndex, BatchMintingData[] calldata wallets) external onlyOwner {
+    function batchMint(uint256 waveIndex, BatchMintingData[] calldata wallets) external whenNotPaused onlyOwner {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         uint256 len = wallets.length;
         if (len == 0) {
