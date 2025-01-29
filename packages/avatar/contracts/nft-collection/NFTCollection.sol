@@ -811,8 +811,6 @@ INFTCollection
         $.mintedCount[wallet] += amount;
         for (uint256 i; i < amount; i++) {
             emit WaveMint(_totalSupply + i + 1, wallet, waveIndex);
-        }
-        for (uint256 i; i < amount; i++) {
             // @dev _safeMint already checks the destination _wallet
             // @dev start with tokenId = 1
             _safeMint(wallet, _totalSupply + i + 1);
