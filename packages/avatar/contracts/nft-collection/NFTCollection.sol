@@ -565,7 +565,7 @@ INFTCollection
 
     /**
      * @notice Sets the royalty information for a specific token id, overriding the global default.
-     * @param tokenId the NFT tokenId that will has his royalties set
+     * @param tokenId the token id for which the royalty is set
      * @param receiver the receiver of the royalties
      * @param feeNumerator percentage of the royalties in feeDenominator units
      */
@@ -577,7 +577,7 @@ INFTCollection
 
     /**
      * @notice Resets royalty information for the token id back to the global default.
-     * @param tokenId the NFT tokenId that will has his royalties reset
+     * @param tokenId the token id for which the royalty is reset
      */
     function resetTokenRoyalty(uint256 tokenId) external onlyOwner {
         /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
@@ -688,7 +688,7 @@ INFTCollection
     }
 
     /**
-     * @notice return maximum amount of tokens that can be minted
+     * @notice returns the maximum amount of tokens that can be minted
      * @return the max supply
      */
     function maxSupply() external view returns (uint256) {
@@ -697,8 +697,8 @@ INFTCollection
     }
 
     /**
-     * @notice return treasury address where the payment for minting are sent
-     * @return the address of the min treasury
+     * @notice returns the treasury address where the payment for minting are sent
+     * @return the address of the treasury
      */
     function mintTreasury() external view returns (address) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -706,7 +706,7 @@ INFTCollection
     }
 
     /**
-     * @notice return standard base token URL for ERC721 metadata
+     * @notice returns the standard base token URL for ERC721 metadata
      * @return the base token uri
      */
     function baseTokenURI() external view returns (string memory) {
@@ -735,7 +735,7 @@ INFTCollection
     }
 
     /**
-     * @notice return price of one token mint (in the token denoted by the allowedToExecuteMint contract)
+     * @notice returns the price of one token mint (in the token denoted by the allowedToExecuteMint contract)
      * @param waveIndex the index of the wave used to mint
      * @return the price of one token mint
      */
@@ -755,7 +755,7 @@ INFTCollection
     }
 
     /**
-     * @notice return mapping of [owner -> wave index -> minted count]
+     * @notice returns the mapping of [owner -> wave index -> minted count]
      * @param waveIndex the index of the wave used to mint
      * @param owner the owner for which the count is returned
      * @return the claimed counts for an waveIndex and owner
@@ -766,8 +766,8 @@ INFTCollection
     }
 
     /**
-     * @notice the total amount of waves configured till now
-     * @return the wave count
+     * @notice returns the total amount of waves configured till now
+     * @return the total amount of waves configured till now
      */
     function waveCount() external view returns (uint256) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -775,8 +775,8 @@ INFTCollection
     }
 
     /**
-     * @notice return ERC20 contract through which the minting will be done (approveAndCall)
-     * @return the address of the token that is allowed to do a call to mint
+     * @notice returns the ERC20 contract through which the minting will be done (approveAndCall)
+     * @return the address of the token that is allowed to execute mint function
      */
     function allowedToExecuteMint() external view returns (IERC20) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -793,7 +793,7 @@ INFTCollection
     }
 
     /**
-     * @notice return the total amount of tokens minted till now
+     * @notice returns the total amount of tokens minted till now
      * @return the total amount of tokens minted till now
      */
     function totalSupply() external view returns (uint256) {
@@ -802,7 +802,8 @@ INFTCollection
     }
 
     /**
-     * @notice Return true if burning is enabled
+     * @notice returns true if burning is enabled
+     * @return true if burning is enabled
      */
     function isBurnEnabled() external view returns (bool) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
@@ -848,11 +849,12 @@ INFTCollection
     }
 
     /**
-     * @notice return true if the indicated wallet can mint the indicated amount
+     * @notice returns zero if minting is allowed or a number that represents the reason for denial
      * @param $ storage access
      * @param waveData wave data used to check
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
+     * @return zero if minting is allowed or a number that represents the reason for denial
      */
     function _isMintDenied(
         NFTCollectionStorage storage $,
