@@ -15,7 +15,6 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {IERC4906} from "../common/IERC4906.sol";
 import {UpdatableOperatorFiltererUpgradeable} from "./UpdatableOperatorFiltererUpgradeable.sol";
 import {ERC2771HandlerUpgradeable} from "./ERC2771HandlerUpgradeable.sol";
-import {ERC721BurnUpgradeable} from "./ERC721BurnUpgradeable.sol";
 import {NFTCollectionSignature} from "./NFTCollectionSignature.sol";
 import {INFTCollection} from "./INFTCollection.sol";
 
@@ -41,7 +40,7 @@ import {INFTCollection} from "./INFTCollection.sol";
 contract NFTCollection is
 ReentrancyGuardUpgradeable,
 Ownable2StepUpgradeable,
-ERC721BurnUpgradeable,
+ERC721Upgradeable,
 ERC2981Upgradeable,
 ERC2771HandlerUpgradeable,
 UpdatableOperatorFiltererUpgradeable,
@@ -88,6 +87,11 @@ INFTCollection
          * @notice total amount of tokens minted till now
          */
         uint256 totalSupply;
+
+        /**
+         * @notice flag that gates burning (enabling/disabling burning)
+         */
+        bool isBurnEnabled;
     }
 
     /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
@@ -361,7 +365,12 @@ INFTCollection
      * @dev reverts if burning already enabled.
      */
     function enableBurning() external onlyOwner {
-        _enableBurning();
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if ($.isBurnEnabled) {
+            revert EnforcedBurn();
+        }
+        $.isBurnEnabled = true;
+        emit TokenBurningEnabled(_msgSender());
     }
 
     /**
@@ -369,7 +378,12 @@ INFTCollection
      * @dev reverts if burning already disabled.
      */
     function disableBurning() external onlyOwner {
-        _disableBurning();
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (!$.isBurnEnabled) {
+            revert ExpectedBurn();
+        }
+        $.isBurnEnabled = false;
+        emit TokenBurningDisabled(_msgSender());
     }
 
     /**
@@ -755,6 +769,14 @@ INFTCollection
     }
 
     /**
+     * @notice Return true if burning is enabled
+     */
+    function isBurnEnabled() external view returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.isBurnEnabled;
+    }
+
+    /**
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(
@@ -970,6 +992,22 @@ INFTCollection
         }
         emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
         $.maxTokensPerWallet = _maxTokensPerWallet;
+    }
+
+    /**
+     * @notice Burns `tokenId`. The caller must own `tokenId` or be an approved operator.
+     * @param tokenId the token id to be burned
+     */
+    function _burnWithCheck(uint256 tokenId) internal virtual {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (!$.isBurnEnabled) {
+            revert ExpectedBurn();
+        }
+        address sender = _msgSender();
+        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+        // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+        address previousOwner = _update(address(0), tokenId, sender);
+        emit TokenBurned(sender, tokenId, previousOwner);
     }
 
     /**

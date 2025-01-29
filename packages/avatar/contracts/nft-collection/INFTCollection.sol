@@ -199,6 +199,26 @@ interface INFTCollection {
     event MaxTokensPerWalletSet(address indexed operator, uint256 oldMaxTokensPerWallet, uint256 newMaxTokensPerWallet);
 
     /**
+      * @notice event emitted when a token was burned
+     * @param operator the sender of the transaction
+     * @param tokenId the id of the token that was burned
+     * @param burner the owner that burned the token
+     */
+    event TokenBurned(address indexed operator, uint256 indexed tokenId, address indexed burner);
+
+    /**
+     * @notice event emitted when token burning was enabled
+     * @param operator the sender of the transaction
+     */
+    event TokenBurningEnabled(address indexed operator);
+
+    /**
+     * @notice event emitted when token burning was disabled
+     * @param operator the sender of the transaction
+     */
+    event TokenBurningDisabled(address indexed operator);
+
+    /**
      * @notice The operation failed because the base token uri is empty.
      * @param baseURI an URI that will be used as the base for token URI
      */
@@ -279,4 +299,14 @@ interface INFTCollection {
      * @param maxTokensPerWallet global max tokens per wallet
      */
     error GlobalMaxTokensPerWalletExceeded(uint256 amountToMint, uint256 mintedCount, uint256 maxTokensPerWallet);
+
+    /**
+     * @notice The operation failed because burning is enabled.
+     */
+    error EnforcedBurn();
+
+    /**
+     * @notice The operation failed because burning is disabled.
+     */
+    error ExpectedBurn();
 }

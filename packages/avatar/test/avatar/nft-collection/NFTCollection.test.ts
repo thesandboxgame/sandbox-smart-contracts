@@ -503,11 +503,6 @@ describe('NFTCollection', function () {
   it('check V5 storage structure', async function () {
     const {nftCollectionMock} = await loadFixture(setupNFTCollectionContract);
     const slots = await nftCollectionMock.getV5VarsStorageStructure();
-    expect(slots.erc721BurnMemoryUpgradable).to.be.equal(
-      getStorageSlotJS(
-        'thesandbox.storage.avatar.nft-collection.ERC721BurnMemoryUpgradeable'
-      )
-    );
     expect(slots.erc2771HandlerUpgradable).to.be.equal(
       getStorageSlotJS(
         'thesandbox.storage.avatar.nft-collection.ERC2771HandlerUpgradeable'
