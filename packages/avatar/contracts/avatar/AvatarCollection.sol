@@ -810,6 +810,14 @@ contract AvatarCollection is
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
+    /// @notice Set a new trusted forwarder address, limited to ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(ADMIN_ROLE) {
+        require(_isContract(trustedForwarder), "AvatarCollection: Bad forwarder");
+        _trustedForwarder = trustedForwarder;
+    }
+
     /*//////////////////////////////////////////////////////////////
                     Internal and private functions
     //////////////////////////////////////////////////////////////*/

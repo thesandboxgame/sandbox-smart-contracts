@@ -311,7 +311,7 @@ const namedAccounts = {
   nftCollectionAdmin: {
     default: 'sandAdmin',
     mainnet: null,
-    polygon: '0xF06dD9b61d480704Cc7bEF717e5Ea6efB6Af75bE', // Final admin should be 0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e
+    polygon: '0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e', // Final admin should be 0xE79AF6BEb7D31c7faF7a1b891d9684960522D22e
   },
   lazyMintingCatSeller: {
     default: 4,
@@ -467,7 +467,7 @@ compilers.push({
   settings: {
     optimizer: {
       enabled: true,
-      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
+      runs: 100, // needed for AvatarCollection contract that exceeds maximum contract size
     },
   },
 });
