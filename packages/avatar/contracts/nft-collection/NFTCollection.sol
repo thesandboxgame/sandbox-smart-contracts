@@ -781,7 +781,7 @@ INFTCollection
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC2981Upgradeable, ERC721Upgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == bytes4(0x49064906) || super.supportsInterface(interfaceId);
     }
 
     /**
