@@ -6,7 +6,6 @@ import {NFTCollection} from "../nft-collection/NFTCollection.sol";
 
 contract NFTCollectionMock is NFTCollection {
     struct V5VarsStorage {
-        bytes32 erc721BurnMemoryUpgradable;
         bytes32 erc2771HandlerUpgradable;
         bytes32 updatableOperatorFiltererUpgradeable;
         bytes32 nftCollection;
@@ -24,7 +23,6 @@ contract NFTCollectionMock is NFTCollection {
     }
 
     function getV5VarsStorageStructure() external pure returns (V5VarsStorage memory ret) {
-        ret.erc721BurnMemoryUpgradable = ERC721_BURN_MEMORY_UPGRADABLE_STORAGE_LOCATION;
         ret.erc2771HandlerUpgradable = ERC2771_HANDLER_UPGRADABLE_STORAGE_LOCATION;
         ret.updatableOperatorFiltererUpgradeable = UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION;
         ret.nftCollection = NFT_COLLECTION_STORAGE_LOCATION;

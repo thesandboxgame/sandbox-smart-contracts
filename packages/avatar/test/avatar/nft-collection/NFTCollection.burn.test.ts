@@ -70,14 +70,6 @@ describe('NFTCollection burn', function () {
       await expect(collectionContractAsRandomWallet.burn(tokenId))
         .to.emit(contract, 'TokenBurned')
         .withArgs(randomWallet, tokenId, randomWallet);
-      // check
-      expect(await contract.burner(tokenId)).to.be.eq(randomWallet);
-      expect(await contract.burnerOf(tokenId)).to.be.eq(randomWallet);
-      expect(await contract.didBurnTokens(randomWallet)).to.be.true;
-      expect(await contract.burnedTokensCount(randomWallet)).to.be.eq(i + 1);
-      for (let j = 0; j < i; j++) {
-        expect(await contract.burnedTokens(randomWallet, j)).to.be.eq(j + 1);
-      }
     }
   });
 
@@ -110,16 +102,6 @@ describe('NFTCollection burn', function () {
       await expect(collectionContractAsRandomWallet.burn(tokenId))
         .to.emit(contract, 'TokenBurned')
         .withArgs(randomWallet, tokenId, randomWallet2);
-      // check
-      expect(await contract.burner(tokenId)).to.be.eq(randomWallet);
-      expect(await contract.burnerOf(tokenId)).to.be.eq(randomWallet);
-      expect(await contract.didBurnTokens(randomWallet2)).to.be.false;
-      expect(await contract.burnedTokensCount(randomWallet2)).to.be.eq(0);
-      expect(await contract.didBurnTokens(randomWallet)).to.be.true;
-      expect(await contract.burnedTokensCount(randomWallet)).to.be.eq(i + 1);
-      for (let j = 0; j < i; j++) {
-        expect(await contract.burnedTokens(randomWallet, j)).to.be.eq(j + 1);
-      }
     }
   });
 
