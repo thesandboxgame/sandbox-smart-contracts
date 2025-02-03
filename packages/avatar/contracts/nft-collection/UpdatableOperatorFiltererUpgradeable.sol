@@ -97,6 +97,7 @@ abstract contract UpdatableOperatorFiltererUpgradeable {
 
     /**
      * @notice return the operatorFilterRegistry address
+     * @return the operatorFilterRegistry address
      */
     function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
         UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
@@ -180,6 +181,7 @@ interface IOperatorFilterRegistry {
     /**
      * @notice Returns true if an address has registered
      * @param addr the address to check if it is registered
+     * @return true if an address has registered
      */
     function isRegistered(address addr) external returns (bool);
 
@@ -188,6 +190,7 @@ interface IOperatorFilterRegistry {
      *         true if supplied registrant address is not registered.
      * @param registrant the address of the contract to check for (usually address(this))
      * @param operator the operator to check if it is registered for this registrant
+     * @return true if operator is not filtered for a given token
      */
     function isOperatorAllowed(address registrant, address operator) external view returns (bool);
 

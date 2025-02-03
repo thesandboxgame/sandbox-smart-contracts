@@ -75,6 +75,7 @@ abstract contract NFTCollectionSignature {
 
     /**
       * @notice return the address from which all signatures must come from this specific address, otherwise they are invalid
+      * @return the signer address
       */
     function signAddress() external view returns (address) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
@@ -82,8 +83,9 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice return true if the signature id was used
+     * @notice returns the type of signature used for a specific Id
      * @param signatureId signing signature ID
+     * @return the type of signature used
      */
     function getSignatureType(uint256 signatureId) external view returns (SignatureType) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
@@ -200,7 +202,7 @@ abstract contract NFTCollectionSignature {
 
 
     /**
-     * @notice validates signature
+     * @notice get the address related to mint the signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -228,7 +230,7 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validates signature
+     * @notice get the address related to the reveal signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -257,7 +259,7 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validate personalization mask
+     * @notice get the address related to the personalization signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -298,7 +300,7 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validate a mint signature that includes a waveIndex
+     * @notice get the address related to the wave mint signature
      * @param wallet wallet that was used in signature generation
      * @param waveIndex the index of the wave that is used to mint
      * @param signatureId id of signature
