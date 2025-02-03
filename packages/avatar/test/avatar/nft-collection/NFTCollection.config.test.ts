@@ -419,7 +419,7 @@ describe('NFTCollection config', function () {
         .withArgs(nftCollectionAdmin, maxSupply, totalSupply);
       await expect(contract.batchMint(0, [[collectionOwner, 1]]))
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(MintDenialReason.InvalidAmount, collectionOwner, 1, 0);
+        .withArgs(MintDenialReason.MaxSupplyExceeded, collectionOwner, 1, 0);
       await expect(contract.setMaxSupply(totalSupply - 1n))
         .to.revertedWithCustomError(contract, 'LowMaxSupply')
         .withArgs(totalSupply - 1n, totalSupply);

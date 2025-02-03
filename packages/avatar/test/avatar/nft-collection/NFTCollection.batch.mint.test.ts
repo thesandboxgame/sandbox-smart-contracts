@@ -162,7 +162,7 @@ describe('NFTCollection batch mint', function () {
       await expect(contract.batchMint(0, [[randomWallet, maxSupply + 1]]))
         .to.revertedWithCustomError(contract, 'CannotMint')
         .withArgs(
-          MintDenialReason.InvalidAmount,
+          MintDenialReason.MaxSupplyExceeded,
           randomWallet,
           maxSupply + 1,
           0

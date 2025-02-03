@@ -280,8 +280,11 @@ INFTCollection
             uint256 _totalSupply = $.totalSupply;
             address wallet = wallets[i].wallet;
             uint256 amount = wallets[i].amount;
-            if (amount == 0 || $.totalSupply + amount > $.maxSupply) {
+            if (amount == 0) {
                 revert CannotMint(MintDenialReason.InvalidAmount, wallet, amount, waveIndex);
+            }
+            if ($.totalSupply + amount > $.maxSupply) {
+                revert CannotMint(MintDenialReason.MaxSupplyExceeded, wallet, amount, waveIndex);
             }
             for (uint256 j; j < amount; j++) {
                 // @dev _mint already checks the destination wallet
