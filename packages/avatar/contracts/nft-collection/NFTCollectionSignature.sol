@@ -10,12 +10,12 @@ import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol"
  * @custom:security-contact contact-blockchain@sandbox.game
  * @notice Signatures accepted by the NFTCollection
  * @dev We have a set of different signatures to be backward compatible with previous collections
- * @dev We must be sure that all the signatures are different and cannot be reused by different methods, so,
- * @dev we added an extra constant string to reveal to distinguish it from the mint signature.
+ * @dev To guarantee that signatures are unique and cannot be reused across different methods,
+ * @dev a constant string is appended to distinguish "reveal" and "personalize" signatures from "mint" signatures.
  * @dev mint:           ['address', 'uint256', 'address', 'uint256']
  * @dev reveal:         ['address', 'uint256', 'address', 'uint256', 'string']
  * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256', 'string']
- * @dev waveMint:       ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256']
+ * @dev waveMint:       ['address', 'uint256', 'uint256', 'address', 'uint256']
  */
 abstract contract NFTCollectionSignature {
     enum SignatureType {
@@ -168,7 +168,6 @@ abstract contract NFTCollectionSignature {
         $.signatureIds[signatureId] = SignatureType.Reveal;
     }
 
-
     /**
      * @notice checks that the provided personalization signature is valid, while also taking into
      *         consideration the provided address and signatureId.
@@ -201,7 +200,6 @@ abstract contract NFTCollectionSignature {
         $.signatureIds[signatureId] = SignatureType.Personalization;
     }
 
-
     /**
      * @notice get the address related to mint the signature
      * @param wallet wallet that was used in signature generation
@@ -219,7 +217,7 @@ abstract contract NFTCollectionSignature {
         bytes calldata signature
     ) internal pure returns (address) {
         return
-        ECDSA.recover(
+            ECDSA.recover(
             keccak256(
                 abi.encodePacked(
                     "\x19Ethereum Signed Message:\n32",
@@ -248,7 +246,7 @@ abstract contract NFTCollectionSignature {
     ) internal pure returns (address) {
         /// @dev the string "reveal" is to distinguish it from the minting signature.
         return
-        ECDSA.recover(
+            ECDSA.recover(
             keccak256(
                 abi.encodePacked(
                     "\x19Ethereum Signed Message:\n32",
@@ -280,7 +278,7 @@ abstract contract NFTCollectionSignature {
         bytes calldata signature
     ) internal pure returns (address) {
         return
-        ECDSA.recover(
+            ECDSA.recover(
             keccak256(
                 abi.encodePacked(
                     "\x19Ethereum Signed Message:\n32",
@@ -320,7 +318,7 @@ abstract contract NFTCollectionSignature {
         bytes calldata signature
     ) internal pure returns (address) {
         return
-        ECDSA.recover(
+            ECDSA.recover(
             keccak256(
                 abi.encodePacked(
                     "\x19Ethereum Signed Message:\n32",
