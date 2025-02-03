@@ -14,6 +14,7 @@ pragma solidity 0.8.26;
  *      To avoid an extra IOperatorFilterRegistry file for a code that is deprecated the interface is added below
  */
 abstract contract UpdatableOperatorFiltererUpgradeable {
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable
     struct UpdatableOperatorFiltererUpgradeableStorage {
         /**
          * @notice the registry filter
@@ -21,7 +22,7 @@ abstract contract UpdatableOperatorFiltererUpgradeable {
         IOperatorFilterRegistry operatorFilterRegistry;
     }
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION =
     0x71a93d37b91262fe5ff5f64b534078b04fa3ca1f04b63abeac7b60ede712e800;
 
