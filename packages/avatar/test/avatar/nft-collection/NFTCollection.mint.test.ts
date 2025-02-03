@@ -2,7 +2,10 @@ import {expect} from 'chai';
 
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
+import {
+  MintDenialReason,
+  setupNFTCollectionContract,
+} from './NFTCollection.fixtures';
 
 describe('NFTCollection mint', function () {
   describe('backward compatible mint', function () {
@@ -29,7 +32,9 @@ describe('NFTCollection mint', function () {
       ]);
       expect(await sandContract.balanceOf(treasury)).to.be.eq(0);
       expect(await sandContract.balanceOf(randomWallet)).to.be.eq(price);
-      expect(await contract.isMintAllowed(0, randomWallet, amount)).to.be.true;
+      expect(await contract.isMintDenied(0, randomWallet, amount)).to.be.eq(
+        MintDenialReason.None
+      );
       await sandContract
         .connect(randomWallet)
         .approveAndCall(contract, price, encodedData);
@@ -69,7 +74,12 @@ describe('NFTCollection mint', function () {
         )
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet, waveMaxTokensPerWallet + 1);
+        .withArgs(
+          MintDenialReason.WaveMaxTokensPerWalletExceeded,
+          randomWallet,
+          waveMaxTokensPerWallet + 1,
+          0
+        );
     });
 
     it('should not be able to mint over waveMaxTokensOverall', async function () {
@@ -104,7 +114,12 @@ describe('NFTCollection mint', function () {
         )
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet2, waveMaxTokensPerWallet - 1);
+        .withArgs(
+          MintDenialReason.WaveMaxTokensOverallExceeded,
+          randomWallet2,
+          waveMaxTokensPerWallet - 1,
+          0
+        );
     });
 
     it('should not be able to mint over maxSupply', async function () {
@@ -138,7 +153,7 @@ describe('NFTCollection mint', function () {
         )
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet, 1);
+        .withArgs(MintDenialReason.MaxSupplyExceeded, randomWallet, 1, 1);
     });
 
     it('should not be able to mint without enough balance', async function () {
@@ -240,7 +255,7 @@ describe('NFTCollection mint', function () {
           )
         )
           .to.revertedWithCustomError(contract, 'CannotMint')
-          .withArgs(randomWallet, 0);
+          .withArgs(MintDenialReason.InvalidAmount, randomWallet, 0, 0);
       });
     });
 
@@ -524,11 +539,13 @@ describe('NFTCollection mint', function () {
               encodedData2
             )
         )
-          .to.revertedWithCustomError(
-            contract,
-            'GlobalMaxTokensPerWalletExceeded'
-          )
-          .withArgs(maxTokensPerWallet, maxTokensPerWallet, maxTokensPerWallet);
+          .to.revertedWithCustomError(contract, 'CannotMint')
+          .withArgs(
+            MintDenialReason.GlobalMaxTokensPerWalletExceeded,
+            randomWallet,
+            20,
+            1
+          );
       });
 
       it('should not be able to waveMint when the caller is not allowed to execute mint', async function () {
@@ -586,7 +603,7 @@ describe('NFTCollection mint', function () {
           )
         )
           .to.revertedWithCustomError(contract, 'CannotMint')
-          .withArgs(randomWallet, 0);
+          .withArgs(MintDenialReason.InvalidAmount, randomWallet, 0, 0);
       });
     });
 

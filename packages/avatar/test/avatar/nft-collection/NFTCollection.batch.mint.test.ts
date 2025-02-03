@@ -1,6 +1,9 @@
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
+import {
+  MintDenialReason,
+  setupNFTCollectionContract,
+} from './NFTCollection.fixtures';
 
 describe('NFTCollection batch mint', function () {
   it('owner should be able batchMint without paying the price and without increasing the waveTotalMinted nor waveOwnerToClaimedCounts', async function () {
@@ -144,7 +147,7 @@ describe('NFTCollection batch mint', function () {
         ])
       )
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet, 0);
+        .withArgs(MintDenialReason.InvalidAmount, randomWallet, 0, 0);
     });
 
     it('should not be able to batchMint over maxSupply', async function () {
@@ -158,7 +161,12 @@ describe('NFTCollection batch mint', function () {
       await contract.setupWave(maxSupply, maxSupply, 0);
       await expect(contract.batchMint(0, [[randomWallet, maxSupply + 1]]))
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(randomWallet, maxSupply + 1);
+        .withArgs(
+          MintDenialReason.MaxSupplyExceeded,
+          randomWallet,
+          maxSupply + 1,
+          0
+        );
     });
   });
 });

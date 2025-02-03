@@ -12,6 +12,20 @@ import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensio
  * @notice Events emitted and Error raised by the NFTCollection
  */
 interface INFTCollection {
+
+    /**
+     * @notice minting can be denied because of the following reasons
+    **/
+    enum MintDenialReason {
+        None,
+        NotConfigured,
+        InvalidAmount,
+        GlobalMaxTokensPerWalletExceeded,
+        WaveMaxTokensOverallExceeded,
+        WaveMaxTokensPerWalletExceeded,
+        MaxSupplyExceeded
+    }
+
     /**
      * @notice Structure to hold initialization parameters
      * @param _collectionOwner the address that will be set as the owner of the collection
@@ -274,10 +288,12 @@ interface INFTCollection {
 
     /**
      * @notice The operation failed because the wave is completed
+     * @param reason the reason for the denial
      * @param wallet wallet to be checked if it can mint
      * @param amount amount to be checked if can be minted
+     * @param waveIndex the current wave index
      */
-    error CannotMint(address wallet, uint256 amount);
+    error CannotMint(MintDenialReason reason, address wallet, uint256 amount, uint256 waveIndex);
 
     /**
      * @notice The operation failed because the max tokens per wallet is invalid
@@ -291,14 +307,6 @@ interface INFTCollection {
      * @param maxTokensPerWallet global max tokens per wallet
      */
     error WaveMaxTokensHigherThanGlobalMax(uint256 waveMaxTokensPerWallet, uint256 maxTokensPerWallet);
-
-    /**
-     * @notice The operation failed because the global max tokens per wallet is exceeded
-     * @param amountToMint amount to mint
-     * @param mintedCount minted count
-     * @param maxTokensPerWallet global max tokens per wallet
-     */
-    error GlobalMaxTokensPerWalletExceeded(uint256 amountToMint, uint256 mintedCount, uint256 maxTokensPerWallet);
 
     /**
      * @notice The operation failed because burning is enabled.

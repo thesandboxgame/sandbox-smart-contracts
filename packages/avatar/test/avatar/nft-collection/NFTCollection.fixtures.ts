@@ -3,6 +3,16 @@ import {ethers, network, upgrades} from 'hardhat';
 import {NFTCollection} from '../../../typechain-types';
 import {getTestingAccounts, setupMockERC20} from '../fixtures';
 
+export enum MintDenialReason {
+  None,
+  NotConfigured,
+  InvalidAmount,
+  GlobalMaxTokensPerWalletExceeded,
+  WaveMaxTokensOverallExceeded,
+  WaveMaxTokensPerWalletExceeded,
+  MaxSupplyExceeded,
+}
+
 export async function setupNFTCollectionContract() {
   const accounts = await getTestingAccounts();
   const collectionName = 'MockNFTTesting';
