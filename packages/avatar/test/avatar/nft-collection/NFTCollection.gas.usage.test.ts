@@ -76,7 +76,7 @@ describe('NFTCollection gas usage @skip-on-ci @skip-on-coverage', function () {
     const {collectionContractAsOwner, randomWallet} = await loadFixture(
       customDeploy
     );
-    const amount = 10n;
+    const amount = 1000n;
     const tx = await collectionContractAsOwner.batchMint(0, [
       [randomWallet, amount],
     ]);
