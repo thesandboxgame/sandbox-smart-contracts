@@ -13,13 +13,18 @@ import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/comm
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract SandboxPasses1155Upgradeable is
     Initializable,
     ERC2771HandlerUpgradeable,
     AccessControlUpgradeable,
     ERC1155SupplyUpgradeable,
-    ERC2981Upgradeable
+    ERC2981Upgradeable,
+    PausableUpgradeable
 {
     using Strings for uint256;
 
@@ -48,6 +53,13 @@ contract SandboxPasses1155Upgradeable is
 
     /// @dev The role that is allowed to upgrade the contract and manage admin-level operations.
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    /// @dev The role that is allowed to sign minting operations
+    bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
+    /// @dev The role that is allowed to consume tokens
+    bytes32 public constant CONSUMER_ROLE = keccak256("CONSUMER_ROLE");
+
+    /// @dev Signature validity duration (5 minutes)
+    uint256 public constant SIGNATURE_VALIDITY = 5 minutes;
 
     // =============================================================
     //                           Events
@@ -64,10 +76,12 @@ contract SandboxPasses1155Upgradeable is
     struct TokenConfig {
         bool isConfigured;
         bool transferable;
-        uint256 maxSupply;
+        uint256 maxSupply; // 0 for open edition
         string metadata;
-        uint256 burnToMintId;
-        address premintWallet; // Add wallet for preminting
+        uint256 maxPerWallet; // max tokens that can be minted per wallet
+        address treasuryWallet; // specific treasury wallet for this token
+        mapping(address => uint256) mintedPerWallet; // track mints per wallet
+        mapping(address => bool) transferWhitelist; // whitelist for transfers
     }
 
     /// @dev Mapping of token configurations
@@ -86,6 +100,12 @@ contract SandboxPasses1155Upgradeable is
      */
     string public baseURI;
 
+    /// @dev Default treasury wallet
+    address public defaultTreasuryWallet;
+
+    /// @dev Mapping to track used signatures
+    mapping(bytes32 => bool) public usedSignatures;
+
     // =============================================================
     //                          Init
     // =============================================================
@@ -102,28 +122,29 @@ contract SandboxPasses1155Upgradeable is
      * @param _royaltyFeeNumerator Royalty fee in basis points (e.g. 500 => 5%).
      * @param _admin Address that will be granted the ADMIN_ROLE.
      * @param _trustedForwarder Address of the trusted meta-transaction forwarder.
+     * @param _defaultTreasury Address of the default treasury wallet.
      */
     function initialize(
         string memory _baseURI,
         address _royaltyReceiver,
         uint96 _royaltyFeeNumerator,
         address _admin,
-        address _trustedForwarder
+        address _trustedForwarder,
+        address _defaultTreasury
     ) public initializer {
         __ERC2771Handler_init(_trustedForwarder);
         __AccessControl_init();
         __ERC1155_init(_baseURI);
         __ERC1155Supply_init();
         __ERC2981_init();
+        __Pausable_init();
 
         // Set up AccessControl roles
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin); // Default admin
-        _grantRole(ADMIN_ROLE, _admin); // Custom admin role
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(ADMIN_ROLE, _admin);
 
-        // Set the base URI
         baseURI = _baseURI;
-
-        // Set default royalty info (applies to all token IDs unless otherwise specified)
+        defaultTreasuryWallet = _defaultTreasury;
         _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
     }
 
@@ -142,11 +163,6 @@ contract SandboxPasses1155Upgradeable is
         TokenConfig storage config = tokenConfigs[tokenId];
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
-        }
-
-        // Prevent minting of preminted tokens
-        if (config.premintWallet != address(0)) {
-            revert MintingNotAllowed(tokenId);
         }
 
         if (totalSupply(tokenId) + amount > config.maxSupply) {
@@ -170,11 +186,6 @@ contract SandboxPasses1155Upgradeable is
                 revert TokenNotConfigured(ids[i]);
             }
 
-            // Prevent minting of preminted tokens
-            if (config.premintWallet != address(0)) {
-                revert MintingNotAllowed(ids[i]);
-            }
-
             if (totalSupply(ids[i]) + amounts[i] > config.maxSupply) {
                 revert MaxSupplyExceeded(ids[i]);
             }
@@ -184,7 +195,7 @@ contract SandboxPasses1155Upgradeable is
 
     /**
      * @notice Forcibly burn tokens from a user's address.
-     * @dev    Useful to “shutdown” or punish cheaters.
+     * @dev    Useful to "shutdown" or punish cheaters.
      * @param account The address whose tokens are burned.
      * @param tokenId The token ID to burn.
      * @param amount The number of tokens to burn.
@@ -210,7 +221,7 @@ contract SandboxPasses1155Upgradeable is
 
     /**
      * @notice Burn `burnAmount` of tokenId `burnId` from `account`, then mint `mintAmount` of tokenId `mintId` to `account`.
-     * @dev    Can be used for an “upgrade” or “transform” mechanic.
+     * @dev    Can be used for an "upgrade" or "transform" mechanic.
      * @param account The user wallet to burn from and mint to.
      * @param burnId ID of the token to burn.
      * @param burnAmount Number of tokens to burn.
@@ -225,7 +236,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 mintAmount
     ) external {
         TokenConfig storage burnConfig = tokenConfigs[burnId];
-        if (!burnConfig.isConfigured || burnConfig.burnToMintId != mintId) {
+        if (!burnConfig.isConfigured) {
             revert BurnMintNotConfigured(burnId);
         }
 
@@ -247,13 +258,106 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Update transferability for a given token ID.
-     * @dev    If you want to “lock” a pass after it’s used, set `transferable` to false.
-     * @param tokenId The token ID to update.
-     * @param transferable New transferability status.
+     * @notice Configure a new token
+     * @param tokenId The token ID to configure
+     * @param transferable Whether the token can be transferred
+     * @param maxSupply Maximum supply (0 for open edition)
+     * @param maxPerWallet Maximum tokens that can be minted per wallet
+     * @param metadata Token metadata
+     * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
+     */
+    function configureToken(
+        uint256 tokenId,
+        bool transferable,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string memory metadata,
+        address treasuryWallet
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(!config.isConfigured, "Token already configured");
+
+        config.isConfigured = true;
+        config.transferable = transferable;
+        config.maxSupply = maxSupply;
+        config.maxPerWallet = maxPerWallet;
+        config.metadata = metadata;
+        config.treasuryWallet = treasuryWallet;
+
+        // Set initial transferability state
+        isTransferable[tokenId] = transferable;
+    }
+
+    /**
+     * @notice Update existing token configuration
+     * @param tokenId The token ID to update
+     * @param maxSupply New maximum supply (0 for open edition)
+     * @param maxPerWallet New maximum tokens per wallet
+     * @param metadata New metadata
+     * @param treasuryWallet New treasury wallet (or address(0) for default)
+     */
+    function updateTokenConfig(
+        uint256 tokenId,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string memory metadata,
+        address treasuryWallet
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.isConfigured, "Token not configured");
+
+        // Cannot decrease maxSupply below current supply
+        if (maxSupply > 0) {
+            uint256 currentSupply = totalSupply(tokenId);
+            require(maxSupply >= currentSupply, "Cannot decrease below current supply");
+        }
+
+        config.maxSupply = maxSupply;
+        config.maxPerWallet = maxPerWallet;
+        config.metadata = metadata;
+        config.treasuryWallet = treasuryWallet;
+    }
+
+    /**
+     * @notice Add or remove addresses from token transfer whitelist
+     * @param tokenId The token ID to update whitelist for
+     * @param accounts Array of addresses to update
+     * @param allowed Whether the addresses should be allowed to transfer
+     */
+    function updateTransferWhitelist(
+        uint256 tokenId,
+        address[] calldata accounts,
+        bool allowed
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.isConfigured, "Token not configured");
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            config.transferWhitelist[accounts[i]] = allowed;
+        }
+    }
+
+    /**
+     * @notice Update transferability for a given token ID
+     * @param tokenId The token ID to update
+     * @param transferable New transferability status
      */
     function setTransferable(uint256 tokenId, bool transferable) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.isConfigured, "Token not configured");
+
+        config.transferable = transferable;
         isTransferable[tokenId] = transferable;
+    }
+
+    /**
+     * @notice Check if an address is whitelisted for token transfers
+     * @param tokenId The token ID to check
+     * @param account The address to check
+     * @return bool Whether the address is whitelisted
+     */
+    function isTransferWhitelisted(uint256 tokenId, address account) public view returns (bool) {
+        return tokenConfigs[tokenId].transferWhitelist[account];
     }
 
     /**
@@ -264,79 +368,6 @@ contract SandboxPasses1155Upgradeable is
     function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
         emit BaseURISet(baseURI, newBaseURI);
         baseURI = newBaseURI;
-    }
-
-    /**
-     * @notice Update token configuration values
-     * @param tokenId The token ID to update
-     * @param maxSupply New maximum supply
-     * @param metadata New metadata
-     * @param burnToMintId Token ID that can be burned to mint this token
-     */
-    function updateTokenConfig(
-        uint256 tokenId,
-        uint256 maxSupply,
-        string memory metadata,
-        uint256 burnToMintId
-    ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-
-        // If token was preminted, cannot decrease max supply below current supply
-        if (config.premintWallet != address(0)) {
-            uint256 currentSupply = totalSupply(tokenId);
-            if (maxSupply < currentSupply) {
-                revert CannotDecreaseMaxSupply(tokenId, currentSupply, maxSupply);
-            }
-
-            // If increasing max supply, mint difference to premint wallet
-            if (maxSupply > config.maxSupply) {
-                uint256 additionalSupply = maxSupply - config.maxSupply;
-                _mint(config.premintWallet, tokenId, additionalSupply, "");
-            }
-        }
-
-        config.maxSupply = maxSupply;
-        config.metadata = metadata;
-        config.burnToMintId = burnToMintId;
-    }
-
-    /**
-     * @notice Configure a new token with optional preminting
-     * @param tokenId The token ID to configure
-     * @param transferable Whether the token can be transferred
-     * @param maxSupply Maximum supply of the token
-     * @param metadata Token metadata
-     * @param burnToMintId Token ID that can be burned to mint this token
-     * @param premintWallet Address to premint tokens to (address(0) for no preminting)
-     */
-    function configureToken(
-        uint256 tokenId,
-        bool transferable,
-        uint256 maxSupply,
-        string memory metadata,
-        uint256 burnToMintId,
-        address premintWallet
-    ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        if (config.isConfigured) {
-            revert TokenAlreadyConfigured(tokenId);
-        }
-
-        config.isConfigured = true;
-        config.transferable = transferable;
-        config.maxSupply = maxSupply;
-        config.metadata = metadata;
-        config.burnToMintId = burnToMintId;
-        config.premintWallet = premintWallet;
-        isTransferable[tokenId] = transferable;
-
-        // If premintWallet is specified, mint the full supply
-        if (premintWallet != address(0)) {
-            _mint(premintWallet, tokenId, maxSupply, "");
-        }
     }
 
     // =============================================================
@@ -392,10 +423,15 @@ contract SandboxPasses1155Upgradeable is
         if (from != address(0) && to != address(0)) {
             for (uint256 i = 0; i < ids.length; i++) {
                 uint256 tokenId = ids[i];
-                if (!isTransferable[tokenId]) {
-                    // If it's not transferable, revert
-                    revert NonTransferable(tokenId);
-                }
+                TokenConfig storage config = tokenConfigs[tokenId];
+
+                require(
+                    config.transferable ||
+                        config.transferWhitelist[from] ||
+                        config.transferWhitelist[to] ||
+                        hasRole(ADMIN_ROLE, _msgSender()),
+                    "Transfer not allowed"
+                );
             }
         }
 
@@ -440,5 +476,181 @@ contract SandboxPasses1155Upgradeable is
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    /**
+     * @notice Verify signature for minting operation
+     * @param signer The address that signed the message
+     * @param to Recipient of the tokens
+     * @param tokenId Token ID to mint
+     * @param amount Amount to mint
+     * @param price Price in wei
+     * @param deadline Signature expiration timestamp
+     * @param signature The signature to verify
+     */
+    function verifySignature(
+        address signer,
+        address to,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 price,
+        uint256 deadline,
+        bytes memory signature
+    ) public view returns (bool) {
+        require(hasRole(SIGNER_ROLE, signer), "Invalid signer");
+        require(block.timestamp <= deadline, "Signature expired");
+
+        bytes32 hash = keccak256(abi.encodePacked(to, tokenId, amount, price, deadline, address(this)));
+
+        bytes32 message = MessageHashUtils.toEthSignedMessageHash(hash);
+        return SignatureChecker.isValidSignatureNow(signer, message, signature);
+    }
+
+    /**
+     * @notice Mint tokens with a valid signature
+     * @param to Recipient of the tokens
+     * @param tokenId Token ID to mint
+     * @param amount Amount to mint
+     * @param price Price in wei
+     * @param deadline Signature expiration timestamp
+     * @param signature The signature to verify
+     */
+    function mintWithSignature(
+        address to,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 price,
+        uint256 deadline,
+        bytes memory signature
+    ) external payable whenNotPaused {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.isConfigured, "Token not configured");
+        require(msg.value >= price, "Insufficient payment");
+
+        // Verify signature hasn't been used
+        bytes32 sigHash = keccak256(abi.encodePacked(signature));
+        require(!usedSignatures[sigHash], "Signature already used");
+        usedSignatures[sigHash] = true;
+
+        // Check max per wallet
+        require(config.mintedPerWallet[to] + amount <= config.maxPerWallet, "Exceeds max per wallet");
+
+        // Check max supply
+        if (config.maxSupply > 0) {
+            require(totalSupply(tokenId) + amount <= config.maxSupply, "Exceeds max supply");
+        }
+
+        // Update minted amount for wallet
+        config.mintedPerWallet[to] += amount;
+
+        // Transfer payment to treasury
+        address treasury = config.treasuryWallet != address(0) ? config.treasuryWallet : defaultTreasuryWallet;
+        (bool success, ) = treasury.call{value: msg.value}("");
+        require(success, "Payment transfer failed");
+
+        _mint(to, tokenId, amount, "");
+    }
+
+    /**
+     * @notice Admin mint function - no price, no signature needed
+     * @param to Recipient of the tokens
+     * @param tokenId Token ID to mint
+     * @param amount Amount to mint
+     */
+    function adminMint(address to, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.isConfigured, "Token not configured");
+
+        if (config.maxSupply > 0) {
+            require(totalSupply(tokenId) + amount <= config.maxSupply, "Exceeds max supply");
+        }
+
+        _mint(to, tokenId, amount, "");
+    }
+
+    /**
+     * @notice Admin batch mint function
+     * @param to Recipient of the tokens
+     * @param ids Array of token IDs
+     * @param amounts Array of amounts
+     */
+    function adminBatchMint(address to, uint256[] memory ids, uint256[] memory amounts) external onlyRole(ADMIN_ROLE) {
+        require(ids.length == amounts.length, "Length mismatch");
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            TokenConfig storage config = tokenConfigs[ids[i]];
+            require(config.isConfigured, "Token not configured");
+
+            if (config.maxSupply > 0) {
+                require(totalSupply(ids[i]) + amounts[i] <= config.maxSupply, "Exceeds max supply");
+            }
+        }
+
+        _mintBatch(to, ids, amounts, "");
+    }
+
+    /**
+     * @notice Burn and mint with signature (token transformation)
+     * @param burnTokenId Token ID to burn
+     * @param burnAmount Amount to burn
+     * @param mintTokenId Token ID to mint
+     * @param mintAmount Amount to mint
+     * @param deadline Signature expiration timestamp
+     * @param signature The signature to verify
+     */
+    function burnAndMintWithSignature(
+        uint256 burnTokenId,
+        uint256 burnAmount,
+        uint256 mintTokenId,
+        uint256 mintAmount,
+        uint256 deadline,
+        bytes memory signature
+    ) external whenNotPaused {
+        TokenConfig storage mintConfig = tokenConfigs[mintTokenId];
+        require(mintConfig.isConfigured, "Mint token not configured");
+
+        // Verify signature hasn't been used
+        bytes32 sigHash = keccak256(abi.encodePacked(signature));
+        require(!usedSignatures[sigHash], "Signature already used");
+        usedSignatures[sigHash] = true;
+
+        // Check max supply for mint token
+        if (mintConfig.maxSupply > 0) {
+            require(totalSupply(mintTokenId) + mintAmount <= mintConfig.maxSupply, "Exceeds max supply");
+        }
+
+        // Burn first
+        _burn(_msgSender(), burnTokenId, burnAmount);
+
+        // Then mint
+        _mint(_msgSender(), mintTokenId, mintAmount, "");
+    }
+
+    /**
+     * @notice Consume tokens (admin burn)
+     * @param from Address to burn from
+     * @param tokenId Token ID to burn
+     * @param amount Amount to burn
+     */
+    function consumeTokens(address from, uint256 tokenId, uint256 amount) external onlyRole(CONSUMER_ROLE) {
+        _burn(from, tokenId, amount);
+    }
+
+    // =============================================================
+    //                   Pausable Functions
+    // =============================================================
+
+    /**
+     * @notice Pause the contract
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause the contract
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
     }
 }
