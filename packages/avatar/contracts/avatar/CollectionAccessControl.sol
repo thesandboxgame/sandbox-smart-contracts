@@ -143,7 +143,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
     }
 
     /**
-     * @notice helper functi    on to revert the TRANSFORMER role that was given to an address
+     * @notice helper function to revert the TRANSFORMER role that was given to an address
      * @dev reverts if account is zero address or not called by owner
      * @param account the account address for which the role to be revoked
      */
