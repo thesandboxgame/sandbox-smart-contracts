@@ -3,33 +3,22 @@
 pragma solidity 0.8.15;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/OwnableUpgradeable.sol";
-import {
-    ReentrancyGuardUpgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
-import {
-    AccessControlUpgradeable,
-    ContextUpgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/ReentrancyGuardUpgradeable.sol";
+import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/security/PausableUpgradeable.sol";
-import {
-    ERC721EnumerableUpgradeable,
-    ERC721Upgradeable,
-    IERC721Upgradeable
-} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721EnumerableUpgradeable, ERC721Upgradeable, IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 import {ECDSA} from "@openzeppelin/contracts-0.8.15/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts-0.8.15/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8.15/token/ERC20/utils/SafeERC20.sol";
 
-import {
-    UpdatableOperatorFiltererUpgradeable
-} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
+import {UpdatableOperatorFiltererUpgradeable} from "../common/OperatorFilterer/UpdatableOperatorFiltererUpgradeable.sol";
 
 import {ERC2771HandlerUpgradeable} from "../common/BaseWithStorage/ERC2771/ERC2771HandlerUpgradeable.sol";
 import {IERC4906} from "../common/IERC4906.sol";
 
-import {CollectionAccessControl} from "./CollectionAccessControl.sol";
+import {CollectionAccessControlV2} from "./CollectionAccessControlV2.sol";
 import {ERC721BurnMemoryEnumerableUpgradeable} from "./ERC721BurnMemoryEnumerableUpgradeable.sol";
 
 /**
@@ -49,9 +38,9 @@ import {ERC721BurnMemoryEnumerableUpgradeable} from "./ERC721BurnMemoryEnumerabl
  * - minting is only supported via an ERC20 token contract that supports approveAndCall
  *   as mint price is in non-native tokens
  */
-contract AvatarCollection is
+contract AvatarCollectionV2 is
     ReentrancyGuardUpgradeable,
-    CollectionAccessControl,
+    CollectionAccessControlV2,
     ERC721BurnMemoryEnumerableUpgradeable,
     ERC2771HandlerUpgradeable,
     UpdatableOperatorFiltererUpgradeable,
@@ -503,7 +492,9 @@ contract AvatarCollection is
         for (uint256 i; i < _amount; ) {
             _safeMint(_wallet, _getRandomToken(_wallet, totalSupply()));
 
-            unchecked {++i;}
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -517,11 +508,7 @@ contract AvatarCollection is
      * @param _signatureId validation signature ID
      * @param _signature validation signature
      */
-    function reveal(
-        uint256 _tokenId,
-        uint256 _signatureId,
-        bytes memory _signature
-    ) external whenNotPaused {
+    function reveal(uint256 _tokenId, uint256 _signatureId, bytes memory _signature) external whenNotPaused {
         address sender = _msgSender();
         require(ownerOf(_tokenId) == sender, "AvatarCollection: sender is not owner");
 
@@ -592,10 +579,10 @@ contract AvatarCollection is
      * @param _tokenId what token to personalize
      * @param _personalizationMask a mask where each bit has a custom meaning in-game
      */
-    function operatorPersonalize(uint256 _tokenId, uint256 _personalizationMask)
-        external
-        authorizedRole(TRANSFORMER_ROLE)
-    {
+    function operatorPersonalize(
+        uint256 _tokenId,
+        uint256 _personalizationMask
+    ) external authorizedRole(TRANSFORMER_ROLE) {
         require(_exists(_tokenId), "AvatarCollection: invalid token ID");
 
         _updateTokenTraits(_tokenId, _personalizationMask);
@@ -666,7 +653,7 @@ contract AvatarCollection is
     function setAllowedExecuteMint(address _minterToken) external onlyOwner {
         require(_isContract(_minterToken), "AvatarCollection: executor address is not a contract");
         allowedToExecuteMint = _minterToken;
-        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10**IERC20Metadata(_minterToken).decimals();
+        mintingDefaults.mintPrice = DEFAULT_MINT_PRICE_FULL * 10 ** IERC20Metadata(_minterToken).decimals();
 
         emit DefaultMintingValuesSet(
             mintingDefaults.mintPrice,
@@ -735,13 +722,9 @@ contract AvatarCollection is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
         return interfaceId == type(AccessControlUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 
@@ -757,22 +740,20 @@ contract AvatarCollection is
     /**
      * @dev See OpenZeppelin {IERC721-setApprovalForAll}
      */
-    function setApprovalForAll(address operator, bool approved)
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
     /**
      * @dev See OpenZeppelin {IERC721-approve}
      */
-    function approve(address operator, uint256 tokenId)
-        public
-        override(ERC721Upgradeable, IERC721Upgradeable)
-        onlyAllowedOperatorApproval(operator)
-    {
+    function approve(
+        address operator,
+        uint256 tokenId
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator) {
         super.approve(operator, tokenId);
     }
 
@@ -808,6 +789,14 @@ contract AvatarCollection is
         bytes memory data
     ) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /// @notice Set a new trusted forwarder address, limited to ADMIN_ROLE only
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(ADMIN_ROLE) {
+        require(_isContract(trustedForwarder), "AvatarCollection: Bad forwarder");
+        _trustedForwarder = trustedForwarder;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -853,11 +842,7 @@ contract AvatarCollection is
      * @param _signatureId signing signature ID
      * @param _signature signing signature value
      */
-    function _checkAndSetSignature(
-        address _address,
-        uint256 _signatureId,
-        bytes memory _signature
-    ) internal {
+    function _checkAndSetSignature(address _address, uint256 _signatureId, bytes memory _signature) internal {
         require(_signatureIds[_signatureId] == 0, "AvatarCollection: signatureId already used");
         require(
             _checkSignature(_address, _signatureId, address(this), block.chainid, _signature) == signAddress,
@@ -985,8 +970,8 @@ contract AvatarCollection is
      */
     function _getRandomToken(address _wallet, uint256 _totalSupply) private returns (uint256) {
         uint256 remaining = maxSupply - _totalSupply;
-        uint256 rand =
-            uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) % remaining;
+        uint256 rand = uint256(keccak256(abi.encodePacked(_wallet, block.difficulty, block.timestamp, remaining))) %
+            remaining;
         uint256 value = rand;
 
         if (_availableIds[rand] != 0) {

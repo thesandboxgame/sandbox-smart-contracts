@@ -2,7 +2,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DEPLOY_TAGS} from '../../hardhat.config';
 
-const implementationContractName = 'AvatarCollection';
+const implementationContractName = 'AvatarCollectionV2';
 
 const beaconAlias =
   '0x6d61696e2d617661746172000000000000000000000000000000000000000000';
@@ -10,7 +10,7 @@ const beaconAlias =
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {deployer, sandAdmin} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   // deploying the implementation
   const deployment = await deployments.deploy(implementationContractName, {
@@ -30,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await catchUnknownSigner(
     execute(
       'CollectionFactory',
-      {from: sandAdmin, log: true},
+      {from: deployer, log: true},
       'updateBeaconImplementation',
       beaconAlias,
       deployment.address
@@ -52,4 +52,7 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['CollectionFactory_deploy'];
+func.dependencies = [
+  'CollectionFactory_implementation_AvatarCollection_1_deploy',
+  'CollectionFactory_deploy',
+];

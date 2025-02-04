@@ -30,7 +30,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable-0.8.13/acc
  *   We could not inherit Ownable2StepUpgradeable directly because:
  *   - Ownable2StepUpgradeable.acceptOwnership() is not declared virtual
  */
-abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUpgradeable {
+abstract contract CollectionAccessControlV2 is AccessControlUpgradeable, OwnableUpgradeable {
     /*//////////////////////////////////////////////////////////////
                            Global state variables
     //////////////////////////////////////////////////////////////*/
@@ -119,7 +119,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function addConfigurator(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.grantRole(CONFIGURATOR_ROLE, account);
+        super._grantRole(CONFIGURATOR_ROLE, account);
     }
 
     /**
@@ -129,7 +129,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function revokeConfiguratorRole(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.revokeRole(CONFIGURATOR_ROLE, account);
+        super._revokeRole(CONFIGURATOR_ROLE, account);
     }
 
     /**
@@ -139,17 +139,17 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function addTransformer(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.grantRole(TRANSFORMER_ROLE, account);
+        super._grantRole(TRANSFORMER_ROLE, account);
     }
 
     /**
-     * @notice helper function to revert the TRANSFORMER role that was given to an address
+     * @notice helper functi    on to revert the TRANSFORMER role that was given to an address
      * @dev reverts if account is zero address or not called by owner
      * @param account the account address for which the role to be revoked
      */
     function revokeTransformerRole(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.revokeRole(TRANSFORMER_ROLE, account);
+        super._revokeRole(TRANSFORMER_ROLE, account);
     }
 
     /**
@@ -161,8 +161,8 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
         address sender = _msgSender();
         require(pendingOwner() == sender, "CollectionAccessControl: caller is not the new owner");
 
-        super.revokeRole(ADMIN_ROLE, owner());
-        super.grantRole(ADMIN_ROLE, sender);
+        super._revokeRole(ADMIN_ROLE, owner());
+        super._grantRole(ADMIN_ROLE, sender);
 
         _transferOwnership(sender);
     }
