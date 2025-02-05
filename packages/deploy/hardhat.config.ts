@@ -467,7 +467,7 @@ compilers.push({
   settings: {
     optimizer: {
       enabled: true,
-      runs: 200, // needed for AvatarCollection contract that exceeds maximum contract size
+      runs: 100, // needed for AvatarCollection contract that exceeds maximum contract size
     },
   },
 });
