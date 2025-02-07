@@ -75,7 +75,7 @@ interface INFTCollection {
         uint256 waveMaxTokensPerWallet;
         uint256 waveSingleTokenPrice;
         uint256 waveTotalMinted;
-        mapping(address => uint256) waveOwnerToClaimedCounts;
+        mapping(address owner => uint256 count) waveOwnerToClaimedCounts;
     }
 
     /**
