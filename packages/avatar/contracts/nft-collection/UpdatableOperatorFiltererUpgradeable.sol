@@ -14,6 +14,7 @@ pragma solidity 0.8.26;
  *      To avoid an extra IOperatorFilterRegistry file for a code that is deprecated the interface is added below
  */
 abstract contract UpdatableOperatorFiltererUpgradeable {
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable
     struct UpdatableOperatorFiltererUpgradeableStorage {
         /**
          * @notice the registry filter
@@ -21,7 +22,7 @@ abstract contract UpdatableOperatorFiltererUpgradeable {
         IOperatorFilterRegistry operatorFilterRegistry;
     }
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.UpdatableOperatorFiltererUpgradeable")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant UPDATABLE_OPERATOR_FILTERER_UPGRADABLE_STORAGE_LOCATION =
     0x71a93d37b91262fe5ff5f64b534078b04fa3ca1f04b63abeac7b60ede712e800;
 
@@ -97,6 +98,7 @@ abstract contract UpdatableOperatorFiltererUpgradeable {
 
     /**
      * @notice return the operatorFilterRegistry address
+     * @return the operatorFilterRegistry address
      */
     function operatorFilterRegistry() external view returns (IOperatorFilterRegistry) {
         UpdatableOperatorFiltererUpgradeableStorage storage $ = _getUpdatableOperatorFiltererUpgradeableStorage();
@@ -180,6 +182,7 @@ interface IOperatorFilterRegistry {
     /**
      * @notice Returns true if an address has registered
      * @param addr the address to check if it is registered
+     * @return true if an address has registered
      */
     function isRegistered(address addr) external returns (bool);
 
@@ -188,6 +191,7 @@ interface IOperatorFilterRegistry {
      *         true if supplied registrant address is not registered.
      * @param registrant the address of the contract to check for (usually address(this))
      * @param operator the operator to check if it is registered for this registrant
+     * @return true if operator is not filtered for a given token
      */
     function isOperatorAllowed(address registrant, address operator) external view returns (bool);
 
