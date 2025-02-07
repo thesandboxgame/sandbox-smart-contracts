@@ -15,7 +15,7 @@ import {ECDSA} from "@openzeppelin/contracts-5.0.2/utils/cryptography/ECDSA.sol"
  * @dev mint:           ['address', 'uint256', 'address', 'uint256']
  * @dev reveal:         ['address', 'uint256', 'address', 'uint256', 'string']
  * @dev personalize:    ['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256']
- * @dev waveMint:       ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256']
+ * @dev waveMint:       ['address', 'uint256', 'uint256', 'address', 'uint256']
  */
 abstract contract NFTCollectionSignature {
     enum SignatureType {
@@ -26,6 +26,7 @@ abstract contract NFTCollectionSignature {
         WaveMint
     }
 
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollectionSignature
     struct NFTCollectionSignatureStorage {
 
         /**
@@ -38,7 +39,7 @@ abstract contract NFTCollectionSignature {
          *      values are 0 (default, unused) and 1 (used)
          *      Used to avoid a signature reuse
          */
-        mapping(uint256 => SignatureType) signatureIds;
+        mapping(uint256 signatureId => SignatureType signatureType) signatureIds;
     }
 
     /**
@@ -62,7 +63,7 @@ abstract contract NFTCollectionSignature {
      */
     error InvalidSignAddress(address signAddress);
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollectionSignature
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollectionSignature")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant NFT_COLLECTION_SIGNATURE_STORAGE_LOCATION =
     0x40778db7ee4c29e622e04906f2c4ade86f805ca9734a7b64bb0f84f333357900;
 
@@ -75,6 +76,7 @@ abstract contract NFTCollectionSignature {
 
     /**
       * @notice return the address from which all signatures must come from this specific address, otherwise they are invalid
+      * @return the signer address
       */
     function signAddress() external view returns (address) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
@@ -82,8 +84,9 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice return true if the signature id was used
+     * @notice returns the type of signature used for a specific Id
      * @param signatureId signing signature ID
+     * @return the type of signature used
      */
     function getSignatureType(uint256 signatureId) external view returns (SignatureType) {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
@@ -127,21 +130,19 @@ abstract contract NFTCollectionSignature {
      * @notice checks that the provided signature is valid, while also taking into
      *         consideration the provided address and signatureId.
      * @param wallet address to be used in validating the signature
-     * @param amount number of token to mint
      * @param waveIndex the index of the wave that is used to mint
      * @param signatureId signing signature ID
      * @param signature signing signature value
      */
     function _checkAndSetWaveMintSignature(
         address wallet,
-        uint256 amount,
         uint256 waveIndex,
         uint256 signatureId,
         bytes calldata signature
     ) internal {
         NFTCollectionSignatureStorage storage $ = _getNFTCollectionSignatureStorage();
         if ($.signatureIds[signatureId] != SignatureType.Unused
-            || _getWaveMintSignature(wallet, amount, waveIndex, signatureId, address(this), block.chainid, signature) != $.signAddress) {
+            || _getWaveMintSignature(wallet, waveIndex, signatureId, address(this), block.chainid, signature) != $.signAddress) {
             revert InvalidSignature(signatureId);
         }
         $.signatureIds[signatureId] = SignatureType.WaveMint;
@@ -202,7 +203,7 @@ abstract contract NFTCollectionSignature {
 
 
     /**
-     * @notice validates signature
+     * @notice get the address related to mint the signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -230,7 +231,7 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validates signature
+     * @notice get the address related to the reveal signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -259,7 +260,7 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validate personalization mask
+     * @notice get the address related to the personalization signature
      * @param wallet wallet that was used in signature generation
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -300,9 +301,8 @@ abstract contract NFTCollectionSignature {
     }
 
     /**
-     * @notice validate a mint signature that includes a waveIndex
+     * @notice get the address related to the wave mint signature
      * @param wallet wallet that was used in signature generation
-     * @param amount number of token to mint
      * @param waveIndex the index of the wave that is used to mint
      * @param signatureId id of signature
      * @param contractAddress contract address that was used in signature generation
@@ -312,7 +312,6 @@ abstract contract NFTCollectionSignature {
      */
     function _getWaveMintSignature(
         address wallet,
-        uint256 amount,
         uint256 waveIndex,
         uint256 signatureId,
         address contractAddress,
@@ -327,7 +326,6 @@ abstract contract NFTCollectionSignature {
                     keccak256(
                         abi.encode(
                             wallet,
-                            amount,
                             waveIndex,
                             signatureId,
                             contractAddress,
