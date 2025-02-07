@@ -72,7 +72,7 @@ abstract contract ERC2771HandlerUpgradeable is ContextUpgradeable {
      * @dev Defaults to the original `msg.sender` whenever a call is not performed by the trusted forwarder
      * or the calldata length is less than 20 bytes (an address length).
      */
-    function _msgSender() internal view override virtual returns (address) {
+    function _msgSender() internal view virtual override returns (address) {
         uint256 calldataLength = msg.data.length;
         uint256 contextSuffixLength = _contextSuffixLength();
         if (_isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
@@ -88,7 +88,7 @@ abstract contract ERC2771HandlerUpgradeable is ContextUpgradeable {
      * @dev Defaults to the original `msg.data` whenever a call is not performed by the trusted forwarder
      * or the calldata length is less than 20 bytes (an address length).
      */
-    function _msgData() internal view override virtual returns (bytes calldata) {
+    function _msgData() internal view virtual override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         uint256 contextSuffixLength = _contextSuffixLength();
         if (_isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
@@ -111,7 +111,7 @@ abstract contract ERC2771HandlerUpgradeable is ContextUpgradeable {
     /**
      * @notice ERC-2771 specifies the context as being a single address (20 bytes).
      */
-    function _contextSuffixLength() internal view override virtual returns (uint256) {
+    function _contextSuffixLength() internal view virtual override returns (uint256) {
         return 20;
     }
 }
