@@ -75,7 +75,7 @@ interface INFTCollection {
         uint256 waveMaxTokensPerWallet;
         uint256 waveSingleTokenPrice;
         uint256 waveTotalMinted;
-        mapping(address => uint256) waveOwnerToClaimedCounts;
+        mapping(address owner => uint256 count) waveOwnerToClaimedCounts;
     }
 
     /**
@@ -88,6 +88,7 @@ interface INFTCollection {
      * @param signAddress signer address that is allowed to create mint signatures
      * @param allowedToExecuteMint token address that is used for payments and that is allowed to execute mint
      * @param maxSupply max supply of tokens to be allowed to be minted per contract
+     * @param maxTokensPerWallet maximum amount of tokens that can be minted per wallet across all waves
      */
     event ContractInitialized(
         string indexed baseURI,
@@ -201,6 +202,7 @@ interface INFTCollection {
     /**
      * @notice Event emitted when default royalties are reset
      * @param operator the sender of the transaction
+     * @param tokenId the token id
      */
     event TokenRoyaltyReset(address indexed operator, uint256 indexed tokenId);
 
