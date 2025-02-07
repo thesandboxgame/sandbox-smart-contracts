@@ -46,6 +46,7 @@ contract NFTCollection is
     IERC4906,
     INFTCollection
 {
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
     struct NFTCollectionStorage {
         /**
          * @notice Maximum supply cap for the collection.
@@ -74,11 +75,11 @@ contract NFTCollection is
         /**
          * @notice Mapping of token personalization traits.
          */
-        mapping(uint256 => uint256) personalizationTraits;
+        mapping(uint256 tokenId => uint256 mask) personalizationTraits;
         /**
          * @notice Mapping of tokens minted per address.
          */
-        mapping(address => uint256) mintedCount;
+        mapping(address wallet => uint256 count) mintedCount;
         /**
          * @notice Current total supply of minted tokens.
          */
@@ -89,7 +90,7 @@ contract NFTCollection is
         bool isBurnEnabled;
     }
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollection
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant NFT_COLLECTION_STORAGE_LOCATION =
         0x54137d560768c3c24834e09621a4fafd063f4a5812823197e84bcd3fbaff7d00;
 
@@ -503,7 +504,7 @@ contract NFTCollection is
         }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
+        for (uint256 i; i < numTokens; i++) {
             uint256 tokenId = ids[i];
             // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
             // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
@@ -532,7 +533,7 @@ contract NFTCollection is
         }
         address msgSender = _msgSender();
         uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
+        for (uint256 i; i < numTokens; i++) {
             uint256 tokenId = ids[i];
             // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
             // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
@@ -904,7 +905,7 @@ contract NFTCollection is
      * @return waveData Storage pointer to the wave configuration.
      * @dev Accepts indices >= waveData.length to access the latest wave.
      */
-    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage waveData) {
+    function _getWaveData(uint256 waveIndex) internal view returns (WaveData storage) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         uint256 waveDataLen = $.waveData.length;
         if (waveIndex >= waveDataLen) {

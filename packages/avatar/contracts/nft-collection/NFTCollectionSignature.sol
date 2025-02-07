@@ -26,6 +26,7 @@ abstract contract NFTCollectionSignature {
         WaveMint
     }
 
+    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollectionSignature
     struct NFTCollectionSignatureStorage {
 
         /**
@@ -38,7 +39,7 @@ abstract contract NFTCollectionSignature {
          *      values are 0 (default, unused) and 1 (used)
          *      Used to avoid a signature reuse
          */
-        mapping(uint256 => SignatureType) signatureIds;
+        mapping(uint256 signatureId => SignatureType signatureType) signatureIds;
     }
 
     /**
@@ -62,7 +63,7 @@ abstract contract NFTCollectionSignature {
      */
     error InvalidSignAddress(address signAddress);
 
-    /// @custom:storage-location erc7201:thesandbox.storage.avatar.nft-collection.NFTCollectionSignature
+    // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollectionSignature")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 internal constant NFT_COLLECTION_SIGNATURE_STORAGE_LOCATION =
     0x40778db7ee4c29e622e04906f2c4ade86f805ca9734a7b64bb0f84f333357900;
 
