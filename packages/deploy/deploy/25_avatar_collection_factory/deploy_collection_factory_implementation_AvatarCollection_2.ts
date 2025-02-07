@@ -18,14 +18,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     contract: implementationContractName,
     log: true,
   });
-  console.log('New Implementation', deployment.address);
+  console.info('New Implementation', deployment.address);
 
+  // Below may need to be done via multisig on production
   const oldImplementation = await read(
     'MainAvatarUpgradeableBeacon',
     'implementation'
   );
 
-  console.log('Old Implementation On Beacon', oldImplementation);
+  console.info('Old Implementation On Beacon', oldImplementation);
 
   await catchUnknownSigner(
     execute(
@@ -41,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'MainAvatarUpgradeableBeacon',
     'implementation'
   );
-  console.log('New Implementation On Beacon', implementation);
+  console.info('New Implementation On Beacon', implementation);
 };
 
 export default func;
