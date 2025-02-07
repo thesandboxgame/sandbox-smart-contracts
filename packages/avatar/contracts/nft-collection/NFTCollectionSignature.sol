@@ -39,7 +39,7 @@ abstract contract NFTCollectionSignature {
          *      values are 0 (default, unused) and 1 (used)
          *      Used to avoid a signature reuse
          */
-        mapping(uint256 => SignatureType) signatureIds;
+        mapping(uint256 signatureId => SignatureType signatureType) signatureIds;
     }
 
     /**

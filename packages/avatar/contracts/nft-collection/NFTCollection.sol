@@ -75,11 +75,11 @@ contract NFTCollection is
         /**
          * @notice Mapping of token personalization traits.
          */
-        mapping(uint256 => uint256) personalizationTraits;
+        mapping(uint256 tokenId => uint256 mask) personalizationTraits;
         /**
          * @notice Mapping of tokens minted per address.
          */
-        mapping(address => uint256) mintedCount;
+        mapping(address wallet => uint256 count) mintedCount;
         /**
          * @notice Current total supply of minted tokens.
          */
