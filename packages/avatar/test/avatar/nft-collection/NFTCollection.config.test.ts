@@ -1,7 +1,10 @@
 /* eslint-disable mocha/no-setup-in-describe */
 import {expect} from 'chai';
 
-import {setupNFTCollectionContract} from './NFTCollection.fixtures';
+import {
+  MintDenialReason,
+  setupNFTCollectionContract,
+} from './NFTCollection.fixtures';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {ZeroAddress} from 'ethers';
 
@@ -416,7 +419,7 @@ describe('NFTCollection config', function () {
         .withArgs(nftCollectionAdmin, maxSupply, totalSupply);
       await expect(contract.batchMint(0, [[collectionOwner, 1]]))
         .to.revertedWithCustomError(contract, 'CannotMint')
-        .withArgs(collectionOwner, 1);
+        .withArgs(MintDenialReason.MaxSupplyExceeded, collectionOwner, 1, 0);
       await expect(contract.setMaxSupply(totalSupply - 1n))
         .to.revertedWithCustomError(contract, 'LowMaxSupply')
         .withArgs(totalSupply - 1n, totalSupply);
