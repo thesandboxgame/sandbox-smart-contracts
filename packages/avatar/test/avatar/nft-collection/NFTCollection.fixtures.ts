@@ -3,6 +3,16 @@ import {ethers, network, upgrades} from 'hardhat';
 import {NFTCollection} from '../../../typechain-types';
 import {getTestingAccounts, setupMockERC20} from '../fixtures';
 
+export enum MintDenialReason {
+  None,
+  NotConfigured,
+  InvalidAmount,
+  GlobalMaxTokensPerWalletExceeded,
+  WaveMaxTokensOverallExceeded,
+  WaveMaxTokensPerWalletExceeded,
+  MaxSupplyExceeded,
+}
+
 export async function setupNFTCollectionContract() {
   const accounts = await getTestingAccounts();
   const collectionName = 'MockNFTTesting';
@@ -205,15 +215,8 @@ function setupWaveSign(contract: Contract, raffleSignWallet: Signer) {
       destinationWallet = await destinationWallet.getAddress();
     }
     const hashedData = ethers.AbiCoder.defaultAbiCoder().encode(
-      ['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
-      [
-        destinationWallet,
-        amount,
-        waveIndex,
-        signatureId,
-        contractAddress,
-        chainId,
-      ]
+      ['address', 'uint256', 'uint256', 'address', 'uint256'],
+      [destinationWallet, waveIndex, signatureId, contractAddress, chainId]
     );
     // https://docs.ethers.org/v6/migrating/
     return signerWallet.signMessage(
