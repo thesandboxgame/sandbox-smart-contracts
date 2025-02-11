@@ -18,6 +18,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/avatar': [
     'contracts/nft-collection/NFTCollection.sol',
     'contracts/avatar/AvatarCollection.sol',
+    'contracts/avatar/AvatarCollectionV2.sol',
     'contracts/proxy',
     'contracts/raffle',
     'contracts/raffleold/contracts',

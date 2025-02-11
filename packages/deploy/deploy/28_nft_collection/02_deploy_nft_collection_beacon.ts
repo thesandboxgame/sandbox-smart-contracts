@@ -1,12 +1,12 @@
-import {ZeroAddress} from 'ethers';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DEPLOY_TAGS} from '../../hardhat.config';
+import { ZeroAddress } from 'ethers';
+import { getNamedAccounts } from 'hardhat';
+import { DeployFunction } from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DEPLOY_TAGS } from '../../hardhat.config';
 import {
   getEventArgsFromReceipt,
   saveDeployment,
 } from '../../utils/hardhatDeployUtils';
-import {getNamedAccounts} from 'hardhat';
 
 // hardhat-deploy don't support factory and beacons the way we use them
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
