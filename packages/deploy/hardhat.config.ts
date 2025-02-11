@@ -459,6 +459,11 @@ const lowRunsOptimizer = {
   runs: 200, // For large contracts that exceed size limits
 };
 
+const veryLowRunsOptimizer = {
+  enabled: true,
+  runs: 100,
+};
+
 const compilers = [
   // Standard optimized compilers
   ...[
@@ -479,10 +484,13 @@ const compilers = [
   })),
 
   // Special cases with lower optimization runs
-  ...[{version: '0.8.26'}, {version: '0.8.15'}].map(({version}) => ({
+  ...[
+    {version: '0.8.26', optimizer: lowRunsOptimizer},
+    {version: '0.8.15', optimizer: veryLowRunsOptimizer},
+  ].map(({version, optimizer}) => ({
     version,
     settings: {
-      optimizer: lowRunsOptimizer,
+      optimizer,
     },
   })),
 ];
