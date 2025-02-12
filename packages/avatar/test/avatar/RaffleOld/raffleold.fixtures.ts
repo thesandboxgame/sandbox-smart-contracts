@@ -3,7 +3,6 @@ import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import {ethers, network} from 'hardhat';
 import {Wallet, ZeroAddress, parseUnits} from 'ethers';
-import {FakePolygonSand, PolygonSand} from '../../../typechain-types';
 import {GenericRaffle} from '../../../typechain-types/contracts/raffleold/contracts/GenericRaffle';
 import {
   getTestingAccounts,
@@ -11,6 +10,7 @@ import {
   deployFakeSandContract,
 } from '../fixtures';
 import {setupRaffleContract} from '../raffleSetup';
+import {MockERC20} from '../../../typechain-types';
 
 export const preSetupAvatar = async (
   contractName: string,
@@ -176,17 +176,14 @@ function signAuthMessageAs(
   return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
-async function setupTransferSand(sandContractAsOwner: FakePolygonSand) {
+async function setupTransferSand(sandContractAsOwner: MockERC20) {
   return async (address: string, amount: string) => {
     const amountToSend = parseUnits(amount.toString(), 'ether');
     await sandContractAsOwner.donateTo(address, amountToSend);
   };
 }
 
-function mintSetup(
-  collectionContract: GenericRaffle,
-  sandContract: PolygonSand
-) {
+function mintSetup(collectionContract: GenericRaffle, sandContract: MockERC20) {
   return async (
     wallet: Wallet | SignerWithAddress | HardhatEthersSigner,
     address: string,

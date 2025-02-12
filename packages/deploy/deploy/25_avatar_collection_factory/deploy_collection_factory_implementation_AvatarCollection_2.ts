@@ -10,7 +10,7 @@ const beaconAlias =
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, nftCollectionAdmin} = await getNamedAccounts();
 
   // deploying the implementation
   const deployment = await deployments.deploy(implementationContractName, {
@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await catchUnknownSigner(
     execute(
       'CollectionFactory',
-      {from: deployer, log: true},
+      {from: nftCollectionAdmin, log: true},
       'updateBeaconImplementation',
       beaconAlias,
       deployment.address

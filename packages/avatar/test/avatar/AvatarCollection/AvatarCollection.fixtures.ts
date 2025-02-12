@@ -4,9 +4,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-
 import {ethers, network} from 'hardhat';
 import {Wallet, parseUnits} from 'ethers';
 import {AvatarCollection} from '../../../typechain-types/contracts/avatar/AvatarCollection';
-import {FakePolygonSand, PolygonSand} from '../../../typechain-types';
 import {getTestingAccounts, topUpAddressWithETH} from '../fixtures';
 import {setupAvatarCollectionContract} from '../collectionSetup';
+import {MockERC20} from '../../../typechain-types';
 
 export const collectionName = 'MockAvatarTesting';
 export const COLLECTION_MAX_SUPPLY = 500;
@@ -198,7 +198,7 @@ function signAuthMessageAs(
   return wallet.signMessage(ethers.getBytes(ethers.keccak256(hashedData)));
 }
 
-async function setupTransferSand(sandContractAsOwner: FakePolygonSand) {
+async function setupTransferSand(sandContractAsOwner: MockERC20) {
   return async (address: string, amount: string) => {
     const amountToSend = parseUnits(amount.toString(), 'ether');
     await sandContractAsOwner.donateTo(address, amountToSend);
@@ -207,7 +207,7 @@ async function setupTransferSand(sandContractAsOwner: FakePolygonSand) {
 
 function mintSetup(
   collectionContract: AvatarCollection,
-  sandContract: PolygonSand
+  sandContract: MockERC20
 ) {
   return async (
     wallet: Wallet | SignerWithAddress | HardhatEthersSigner,
