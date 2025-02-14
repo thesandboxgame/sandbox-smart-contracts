@@ -10,17 +10,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const owner = await read('CollectionFactory', 'owner');
 
   if (nftCollectionAdmin?.toLocaleLowerCase() !== owner?.toLocaleLowerCase()) {
-    await catchUnknownSigner(
+    await catchUnknownSigner(async () => {
       // This only starts the fist step in a 2step ownership transfer
       // the second step involves the "nftCollectionAdmin" multisig to accept the new ownership
       // by calling the "acceptOwnership" function on the CollectionFactory
-      execute(
+      await execute(
         'CollectionFactory',
         {from: owner, log: true},
         'transferOwnership',
         nftCollectionAdmin
-      )
-    );
+      );
+      await execute(
+        'CollectionFactory',
+        {from: nftCollectionAdmin, log: true},
+        'acceptOwnership'
+      );
+    });
   }
 };
 
