@@ -119,7 +119,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function addConfigurator(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.grantRole(CONFIGURATOR_ROLE, account);
+        super._grantRole(CONFIGURATOR_ROLE, account);
     }
 
     /**
@@ -129,7 +129,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function revokeConfiguratorRole(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.revokeRole(CONFIGURATOR_ROLE, account);
+        super._revokeRole(CONFIGURATOR_ROLE, account);
     }
 
     /**
@@ -139,7 +139,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function addTransformer(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.grantRole(TRANSFORMER_ROLE, account);
+        super._grantRole(TRANSFORMER_ROLE, account);
     }
 
     /**
@@ -149,7 +149,7 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
      */
     function revokeTransformerRole(address account) external onlyOwner {
         require(account != address(0), "CollectionAccessControl: account is zero address");
-        super.revokeRole(TRANSFORMER_ROLE, account);
+        super._revokeRole(TRANSFORMER_ROLE, account);
     }
 
     /**
@@ -161,8 +161,8 @@ abstract contract CollectionAccessControl is AccessControlUpgradeable, OwnableUp
         address sender = _msgSender();
         require(pendingOwner() == sender, "CollectionAccessControl: caller is not the new owner");
 
-        super.revokeRole(ADMIN_ROLE, owner());
-        super.grantRole(ADMIN_ROLE, sender);
+        super._revokeRole(ADMIN_ROLE, owner());
+        super._grantRole(ADMIN_ROLE, sender);
 
         _transferOwnership(sender);
     }
