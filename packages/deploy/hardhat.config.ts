@@ -82,6 +82,10 @@ const importedPackages = {
     'contracts/PolygonLand.sol',
     'contracts/LandMetadataRegistry.sol',
   ],
+  '@sandbox-smart-contracts/land-sale': [
+    'contracts/AuthValidator.sol',
+    'contracts/EstateSaleWithAuth.sol',
+  ],
   '@sandbox-smart-contracts/batch-transfers': ['contracts/BatchTransfer.sol'],
   '@sandbox-smart-contracts/oft-sand': [
     'contracts/OFTAdapterForSand.sol',
