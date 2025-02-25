@@ -24,7 +24,7 @@
     "@sandbox-smart-contracts/dependency-royalty-management": "1.0.2",
     "@sandbox-smart-contracts/faucets": "0.0.1",
     "@sandbox-smart-contracts/giveaway": "0.0.3",
-    "@sandbox-smart-contracts/land": "1.0.0-rc.1",
+    "@sandbox-smart-contracts/land": "1.0.0-rc.2",
     "@sandbox-smart-contracts/land-sale": "1.0.0-rc.1",
     "@sandbox-smart-contracts/marketplace": "1.0.2",
     "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1",
