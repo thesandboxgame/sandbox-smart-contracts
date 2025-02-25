@@ -326,39 +326,60 @@ contract SandboxPasses1155Upgradeable is
             revert ArrayLengthMismatch();
         }
 
+        // Process each mint separately to avoid stack depth issues
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            TokenConfig storage config = tokenConfigs[tokenIds[i]];
-
-            if (!config.isConfigured) {
-                revert TokenNotConfigured(tokenIds[i]);
-            }
-
-            MintRequest memory request = MintRequest({
-                caller: caller,
-                tokenId: tokenIds[i],
-                amount: amounts[i],
-                price: prices[i],
-                deadline: deadlines[i],
-                nonce: nonces[caller]++
-            });
-
-            verifySignature(request, signatures[i]);
-
-            _checkMaxPerWallet(tokenIds[i], caller, amounts[i]);
-            _checkMaxSupply(tokenIds[i], amounts[i]);
-
-            // Update minted amount for wallet
-            config.mintedPerWallet[caller] += amounts[i];
-
-            address treasury = tokenConfigs[tokenIds[i]].treasuryWallet;
-            if (treasury == address(0)) {
-                treasury = defaultTreasuryWallet;
-            }
-            SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, prices[i]);
+            _processSingleMint(caller, tokenIds[i], amounts[i], prices[i], deadlines[i], signatures[i]);
         }
 
         // Perform batch mint
         _mintBatch(caller, tokenIds, amounts, "");
+    }
+
+    /**
+     * @dev Internal helper function to process a single mint operation
+     * @param caller The address calling the mint function
+     * @param tokenId The token ID to mint
+     * @param amount The amount to mint
+     * @param price The price to pay
+     * @param deadline The signature deadline
+     * @param signature The EIP-712 signature
+     */
+    function _processSingleMint(
+        address caller,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 price,
+        uint256 deadline,
+        bytes calldata signature
+    ) private {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
+
+        MintRequest memory request = MintRequest({
+            caller: caller,
+            tokenId: tokenId,
+            amount: amount,
+            price: price,
+            deadline: deadline,
+            nonce: nonces[caller]++
+        });
+
+        verifySignature(request, signature);
+
+        _checkMaxPerWallet(tokenId, caller, amount);
+        _checkMaxSupply(tokenId, amount);
+
+        // Update minted amount for wallet
+        config.mintedPerWallet[caller] += amount;
+
+        address treasury = config.treasuryWallet;
+        if (treasury == address(0)) {
+            treasury = defaultTreasuryWallet;
+        }
+        SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, price);
     }
 
     /**
