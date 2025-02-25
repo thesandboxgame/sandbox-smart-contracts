@@ -10,6 +10,7 @@ pragma solidity ^0.8.19;
 import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ERC1155SupplyUpgradeable, ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
@@ -17,6 +18,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract SandboxPasses1155Upgradeable is
     Initializable,
@@ -42,10 +44,20 @@ contract SandboxPasses1155Upgradeable is
     error BurnMintNotConfigured(uint256 burnTokenId);
     /// @dev Revert when token is already configured
     error TokenAlreadyConfigured(uint256 tokenId);
-    /// @dev Revert when trying to decrease max supply below current supply for preminted tokens
-    error CannotDecreaseMaxSupply(uint256 tokenId, uint256 currentSupply, uint256 requestedSupply);
-    /// @dev Revert when trying to mint a preminted token
-    error MintingNotAllowed(uint256 tokenId);
+    /// @dev Revert when array lengths mismatch
+    error ArrayLengthMismatch();
+    /// @dev Revert when invalid caller doesn't match from address
+    error InvalidSender(address from, address caller);
+    /// @dev Revert when signature expired
+    error SignatureExpired();
+    /// @dev Revert when invalid signature
+    error InvalidSignature();
+    /// @dev Revert when invalid signer
+    error InvalidSigner();
+    /// @dev Revert when max supply below current supply
+    error MaxSupplyBelowCurrentSupply(uint256 tokenId);
+    /// @dev Revert when transfer not allowed
+    error TransferNotAllowed(uint256 tokenId);
 
     // =============================================================
     //                           Roles
@@ -56,10 +68,7 @@ contract SandboxPasses1155Upgradeable is
     /// @dev The role that is allowed to sign minting operations
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     /// @dev The role that is allowed to consume tokens
-    bytes32 public constant CONSUMER_ROLE = keccak256("CONSUMER_ROLE");
-
-    /// @dev Signature validity duration (5 minutes)
-    uint256 public constant SIGNATURE_VALIDITY = 5 minutes;
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     // =============================================================
     //                           Events
@@ -69,7 +78,7 @@ contract SandboxPasses1155Upgradeable is
     event BaseURISet(string oldURI, string newURI);
 
     // =============================================================
-    //                      State Variables
+    //                     Structs
     // =============================================================
 
     /// @dev Struct to hold token configuration
@@ -84,6 +93,31 @@ contract SandboxPasses1155Upgradeable is
         mapping(address => bool) transferWhitelist; // whitelist for transfers
     }
 
+    /// @dev Struct to hold burn and mint request
+    struct BurnAndMintRequest {
+        address caller;
+        uint256 burnId;
+        uint256 burnAmount;
+        uint256 mintId;
+        uint256 mintAmount;
+        uint256 deadline;
+        uint256 nonce;
+    }
+
+    /// @dev Struct to hold mint request
+    struct MintRequest {
+        address caller;
+        uint256 tokenId;
+        uint256 amount;
+        uint256 price;
+        uint256 deadline;
+        uint256 nonce;
+    }
+
+    // =============================================================
+    //                      State Variables
+    // =============================================================
+
     /// @dev Mapping of token configurations
     mapping(uint256 => TokenConfig) public tokenConfigs;
 
@@ -92,7 +126,6 @@ contract SandboxPasses1155Upgradeable is
      *      - true => transferable
      *      - false => soulbound (non-transferable by users)
      */
-    mapping(uint256 => bool) public isTransferable;
 
     /**
      * @dev Base URI for computing {uri}.
@@ -103,8 +136,32 @@ contract SandboxPasses1155Upgradeable is
     /// @dev Default treasury wallet
     address public defaultTreasuryWallet;
 
-    /// @dev Mapping to track used signatures
-    mapping(bytes32 => bool) public usedSignatures;
+    /// @dev Payment token
+    address public paymentToken;
+
+    // =============================================================
+    //                      EIP-712 Constants
+    // =============================================================
+
+    /// @dev EIP-712 domain typehash
+    bytes32 public constant EIP712_DOMAIN_TYPEHASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+    bytes32 public DOMAIN_SEPARATOR;
+
+    /// @dev EIP-712 mint request typehash
+    bytes32 public constant MINT_TYPEHASH =
+        keccak256(
+            "MintRequest(address caller,uint256 tokenId,uint256 amount,uint256 price,uint256 deadline,uint256 nonce)"
+        );
+
+    /// @dev EIP-712 burn and mint request typehash
+    bytes32 public constant BURN_AND_MINT_TYPEHASH =
+        keccak256(
+            "BurnAndMintRequest(address caller,uint256 burnId,uint256 burnAmount,uint256 mintId,uint256 mintAmount,uint256 deadline,uint256 nonce)"
+        );
+
+    // Track nonces for replay protection
+    mapping(address => uint256) public nonces;
 
     // =============================================================
     //                          Init
@@ -129,6 +186,8 @@ contract SandboxPasses1155Upgradeable is
         address _royaltyReceiver,
         uint96 _royaltyFeeNumerator,
         address _admin,
+        address _operator,
+        address _paymentToken,
         address _trustedForwarder,
         address _defaultTreasury
     ) public initializer {
@@ -142,10 +201,21 @@ contract SandboxPasses1155Upgradeable is
         // Set up AccessControl roles
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
-
+        _grantRole(OPERATOR_ROLE, _operator);
+        paymentToken = _paymentToken;
         baseURI = _baseURI;
         defaultTreasuryWallet = _defaultTreasury;
         _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
+
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                EIP712_DOMAIN_TYPEHASH,
+                keccak256(bytes("SandboxPasses1155")),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(this)
+            )
+        );
     }
 
     // =============================================================
@@ -153,88 +223,371 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /**
-     * @notice Mint a given amount of a specific token ID to a specified address.
-     * @dev    If this is the first mint of `tokenId`, define its transferability.
-     * @param to Address to which the tokens will be minted.
-     * @param tokenId ID of the token type to mint.
-     * @param amount Number of tokens to mint.
+     * @notice Mints tokens with a valid EIP-712 signature, requiring payment in the configured token
+     * @param from Address that will receive the tokens (must be same as msg.sender)
+     * @param tokenId ID of the token to mint
+     * @param amount Number of tokens to mint
+     * @param price Price to pay in payment token units
+     * @param deadline Timestamp after which the signature becomes invalid
+     * @param signature EIP-712 signature from an authorized signer
+     * @dev Verifies the signature, checks supply limits, processes payment, and mints tokens
+     * @dev Updates the per-wallet minting count and transfers payment to the appropriate treasury
+     * @dev Reverts if:
+     *      - Contract is paused
+     *      - Token is not configured
+     *      - Signature is invalid or expired
+     *      - Max supply would be exceeded
+     *      - Max per wallet would be exceeded
+     *      - Payment transfer fails
      */
-    function mint(address to, uint256 tokenId, uint256 amount) external {
+    function mint(
+        address from,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 price,
+        uint256 deadline,
+        bytes memory signature
+    ) external whenNotPaused {
+        address caller = _msgSender();
+
+        if (from != caller) {
+            revert InvalidSender(from, caller);
+        }
+
         TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
+        MintRequest memory request = MintRequest({
+            caller: caller,
+            tokenId: tokenId,
+            amount: amount,
+            price: price,
+            deadline: deadline,
+            nonce: nonces[caller]++
+        });
+
+        verifySignature(request, signature);
+        _checkMaxPerWallet(tokenId, caller, amount);
+        _checkMaxSupply(tokenId, amount);
+
+        // Update minted amount for wallet
+        config.mintedPerWallet[caller] += amount;
+
+        // Transfer payment
+        address treasury = config.treasuryWallet != address(0) ? config.treasuryWallet : defaultTreasuryWallet;
+        SafeERC20.safeTransferFrom(IERC20(paymentToken), _msgSender(), treasury, price);
+
+        // Mint tokens
+        _mint(caller, tokenId, amount, "");
+    }
+
+    /**
+     * @notice Batch mints multiple tokens with valid EIP-712 signatures in a single transaction
+     * @param from Address that will receive the tokens (must be same as msg.sender)
+     * @param tokenIds Array of token IDs to mint
+     * @param amounts Array of amounts to mint for each token ID
+     * @param prices Array of prices to pay for each mint operation
+     * @param deadlines Array of timestamps after which each signature becomes invalid
+     * @param signatures Array of EIP-712 signatures from authorized signers
+     * @dev Processes multiple mint operations in batch, verifying each signature
+     * @dev All array parameters must be the same length
+     * @dev Updates per-wallet minting counts and transfers payments to appropriate treasuries
+     * @dev Reverts if:
+     *      - Contract is paused
+     *      - Array lengths don't match
+     *      - Any token is not configured
+     *      - Any signature is invalid or expired
+     *      - Any max supply would be exceeded
+     *      - Any max per wallet would be exceeded
+     *      - Any payment transfer fails
+     */
+    function batchMint(
+        address from,
+        uint256[] calldata tokenIds,
+        uint256[] calldata amounts,
+        uint256[] calldata prices,
+        uint256[] calldata deadlines,
+        bytes[] calldata signatures
+    ) external whenNotPaused {
+        address caller = _msgSender();
+
+        if (from != caller) {
+            revert InvalidSender(from, caller);
+        }
+
+        if (
+            tokenIds.length != amounts.length ||
+            amounts.length != prices.length ||
+            prices.length != deadlines.length ||
+            deadlines.length != signatures.length
+        ) {
+            revert ArrayLengthMismatch();
+        }
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            TokenConfig storage config = tokenConfigs[tokenIds[i]];
+
+            if (!config.isConfigured) {
+                revert TokenNotConfigured(tokenIds[i]);
+            }
+
+            MintRequest memory request = MintRequest({
+                caller: caller,
+                tokenId: tokenIds[i],
+                amount: amounts[i],
+                price: prices[i],
+                deadline: deadlines[i],
+                nonce: nonces[caller]++
+            });
+
+            verifySignature(request, signatures[i]);
+
+            _checkMaxPerWallet(tokenIds[i], caller, amounts[i]);
+            _checkMaxSupply(tokenIds[i], amounts[i]);
+
+            // Update minted amount for wallet
+            config.mintedPerWallet[caller] += amounts[i];
+
+            address treasury = tokenConfigs[tokenIds[i]].treasuryWallet;
+            if (treasury == address(0)) {
+                treasury = defaultTreasuryWallet;
+            }
+            SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, prices[i]);
+        }
+
+        // Perform batch mint
+        _mintBatch(caller, tokenIds, amounts, "");
+    }
+
+    /**
+     * @notice Allows admin to mint tokens without requiring payment or signature
+     * @param to Address that will receive the tokens
+     * @param tokenId ID of the token to mint
+     * @param amount Number of tokens to mint
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
+     *      - Max supply would be exceeded
+     */
+    function adminMint(address to, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
         }
 
-        if (totalSupply(tokenId) + amount > config.maxSupply) {
-            revert MaxSupplyExceeded(tokenId);
-        }
+        _checkMaxSupply(tokenId, amount);
 
         _mint(to, tokenId, amount, "");
     }
 
     /**
-     * @notice Batch mint for efficiency.
-     * @dev    Each index in `transferableList` corresponds to the same index in `ids`.
-     * @param to Address to which the tokens will be minted.
-     * @param ids Array of token IDs.
-     * @param amounts Array of amounts to mint.
+     * @notice Allows admin to batch mint multiple tokens to a single recipient
+     * @param to Address that will receive all the tokens
+     * @param ids Array of token IDs to mint
+     * @param amounts Array of amounts to mint for each token ID
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev All array parameters must be the same length
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Array lengths don't match
+     *      - Any token is not configured
+     *      - Any max supply would be exceeded
      */
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external {
+    function adminBatchMint(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external onlyRole(ADMIN_ROLE) {
+        if (ids.length != amounts.length) {
+            revert ArrayLengthMismatch();
+        }
+
         for (uint256 i = 0; i < ids.length; i++) {
             TokenConfig storage config = tokenConfigs[ids[i]];
+
             if (!config.isConfigured) {
                 revert TokenNotConfigured(ids[i]);
             }
 
-            if (totalSupply(ids[i]) + amounts[i] > config.maxSupply) {
-                revert MaxSupplyExceeded(ids[i]);
-            }
+            _checkMaxSupply(ids[i], amounts[i]);
         }
         _mintBatch(to, ids, amounts, "");
     }
 
     /**
-     * @notice Forcibly burn tokens from a user's address.
-     * @dev    Useful to "shutdown" or punish cheaters.
-     * @param account The address whose tokens are burned.
-     * @param tokenId The token ID to burn.
-     * @param amount The number of tokens to burn.
+     * @notice Allows admin to mint multiple tokens to multiple recipients in a single transaction
+     * @param to Array of addresses that will receive tokens
+     * @param ids Array of token IDs to mint
+     * @param amounts Array of amounts to mint
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev All array parameters must be the same length
+     * @dev Each index in the arrays corresponds to a single mint operation:
+     *      to[i] receives amounts[i] of token ids[i]
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Array lengths don't match
+     *      - Any token is not configured
+     *      - Any max supply would be exceeded
      */
-    function adminBurn(address account, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        _burn(account, tokenId, amount);
-    }
-
-    /**
-     * @notice Forcibly burn multiple tokens from a user's address.
-     * @dev    Batch version of adminBurn for gas efficiency.
-     * @param account The address whose tokens are burned.
-     * @param ids Array of token IDs to burn.
-     * @param amounts Array of amounts to burn.
-     */
-    function adminBatchBurn(
-        address account,
-        uint256[] memory ids,
-        uint256[] memory amounts
+    function adminMultiRecipientMint(
+        address[] calldata to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
     ) external onlyRole(ADMIN_ROLE) {
-        _burnBatch(account, ids, amounts);
+        if (to.length != ids.length || ids.length != amounts.length) {
+            revert ArrayLengthMismatch();
+        }
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            TokenConfig storage config = tokenConfigs[ids[i]];
+
+            if (!config.isConfigured) {
+                revert TokenNotConfigured(ids[i]);
+            }
+
+            _checkMaxSupply(ids[i], amounts[i]);
+
+            _mint(to[i], ids[i], amounts[i], "");
+        }
     }
 
     /**
-     * @notice Burn `burnAmount` of tokenId `burnId` from `account`, then mint `mintAmount` of tokenId `mintId` to `account`.
-     * @dev    Can be used for an "upgrade" or "transform" mechanic.
-     * @param account The user wallet to burn from and mint to.
-     * @param burnId ID of the token to burn.
-     * @param burnAmount Number of tokens to burn.
-     * @param mintId ID of the token to mint.
-     * @param mintAmount Number of tokens to mint.
+     * @notice Allows operator to burn tokens from one address and mint different tokens to another address
+     * @param burnFrom Address to burn tokens from
+     * @param mintTo Address to mint tokens to
+     * @param burnTokenId ID of the token to burn
+     * @param burnAmount Amount of tokens to burn
+     * @param mintTokenId ID of the token to mint
+     * @param mintAmount Amount of tokens to mint
+     * @dev Only callable by addresses with OPERATOR_ROLE
+     * @dev Used for token transformation/upgrade scenarios
+     * @dev Contract must not be paused
+     * @dev Reverts if:
+     *      - Contract is paused
+     *      - Caller doesn't have OPERATOR_ROLE
+     *      - Mint token is not configured
+     *      - Max supply would be exceeded for mint token
+     *      - Burn operation fails (insufficient balance)
+     */
+    function operatorBurnAndMint(
+        address burnFrom,
+        address mintTo,
+        uint256 burnTokenId,
+        uint256 burnAmount,
+        uint256 mintTokenId,
+        uint256 mintAmount
+    ) external whenNotPaused onlyRole(OPERATOR_ROLE) {
+        TokenConfig storage mintConfig = tokenConfigs[mintTokenId];
+
+        if (!mintConfig.isConfigured) {
+            revert TokenNotConfigured(mintTokenId);
+        }
+
+        _checkMaxSupply(mintTokenId, mintAmount);
+
+        // Burn first
+        _burn(burnFrom, burnTokenId, burnAmount);
+
+        // Then mint
+        _mint(mintTo, mintTokenId, mintAmount, "");
+    }
+
+    /**
+     * @notice Batch burn and mint operation for multiple tokens (token transformation)
+     * @param burnFrom Address to burn tokens from
+     * @param mintTo Address to mint new tokens to
+     * @param burnTokenIds Array of token IDs to burn
+     * @param burnAmounts Array of amounts to burn for each token ID
+     * @param mintTokenIds Array of token IDs to mint
+     * @param mintAmounts Array of amounts to mint for each token ID
+     * @dev Only callable by addresses with OPERATOR_ROLE
+     * @dev Used for batch token transformation/upgrade scenarios
+     * @dev Contract must not be paused
+     * @dev All array parameters must have matching lengths
+     * @dev Reverts if:
+     *      - Contract is paused
+     *      - Caller doesn't have OPERATOR_ROLE
+     *      - Array lengths don't match
+     *      - Any mint token is not configured
+     *      - Any max supply would be exceeded
+     *      - Any burn operation fails (insufficient balance)
+     */
+    function operatorBatchBurnAndMint(
+        address burnFrom,
+        address mintTo,
+        uint256[] calldata burnTokenIds,
+        uint256[] calldata burnAmounts,
+        uint256[] calldata mintTokenIds,
+        uint256[] calldata mintAmounts
+    ) external whenNotPaused onlyRole(OPERATOR_ROLE) {
+        if (
+            burnTokenIds.length != burnAmounts.length ||
+            burnAmounts.length != mintTokenIds.length ||
+            mintTokenIds.length != mintAmounts.length
+        ) {
+            revert ArrayLengthMismatch();
+        }
+
+        // Validate mint tokens and check max supply
+        for (uint256 i = 0; i < mintTokenIds.length; i++) {
+            TokenConfig storage mintConfig = tokenConfigs[mintTokenIds[i]];
+
+            if (!mintConfig.isConfigured) {
+                revert TokenNotConfigured(mintTokenIds[i]);
+            }
+
+            _checkMaxSupply(mintTokenIds[i], mintAmounts[i]);
+        }
+
+        // Burn tokens first
+        _burnBatch(burnFrom, burnTokenIds, burnAmounts);
+
+        // Then mint new tokens
+        _mintBatch(mintTo, mintTokenIds, mintAmounts, "");
+    }
+
+    /**
+     * @notice Allows users to burn their tokens and mint new ones with a valid EIP-712 signature
+     * @param from Address to burn from and mint to (must be msg.sender)
+     * @param burnId ID of the token to burn
+     * @param burnAmount Number of tokens to burn
+     * @param mintId ID of the token to mint
+     * @param mintAmount Number of tokens to mint
+     * @param deadline Timestamp after which the signature becomes invalid
+     * @param signature EIP-712 signature from authorized signer
+     * @dev Used for user-initiated token transformations
+     * @dev Contract must not be paused
+     * @dev Reverts if:
+     *      - Contract is paused
+     *      - from address doesn't match msg.sender
+     *      - Burn token is not configured
+     *      - Mint token is not configured
+     *      - Signature is invalid or expired
+     *      - Max supply would be exceeded for mint token
+     *      - Burn operation fails (insufficient balance)
      */
     function burnAndMint(
-        address account,
+        address from,
         uint256 burnId,
         uint256 burnAmount,
         uint256 mintId,
-        uint256 mintAmount
-    ) external {
+        uint256 mintAmount,
+        uint256 deadline,
+        bytes memory signature
+    ) external whenNotPaused {
+        address caller = _msgSender();
+
+        if (from != caller) {
+            revert InvalidSender(from, caller);
+        }
+
         TokenConfig storage burnConfig = tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
             revert BurnMintNotConfigured(burnId);
@@ -246,25 +599,124 @@ contract SandboxPasses1155Upgradeable is
             revert TokenNotConfigured(mintId);
         }
 
-        if (totalSupply(mintId) + mintAmount > mintConfig.maxSupply) {
-            revert MaxSupplyExceeded(mintId);
-        }
+        BurnAndMintRequest memory request = BurnAndMintRequest({
+            caller: caller,
+            burnId: burnId,
+            burnAmount: burnAmount,
+            mintId: mintId,
+            mintAmount: mintAmount,
+            deadline: deadline,
+            nonce: nonces[caller]++
+        });
+
+        verifyBurnAndMintSignature(request, signature);
+
+        _checkMaxSupply(mintId, mintAmount);
 
         // Burn first
-        _burn(account, burnId, burnAmount);
+        _burn(caller, burnId, burnAmount);
 
         // Then mint new token
-        _mint(account, mintId, mintAmount, "");
+        _mint(caller, mintId, mintAmount, "");
     }
 
     /**
-     * @notice Configure a new token
+     * @notice Internal function to verify EIP-712 signatures
+     * @param hash The EIP-712 typed data hash to verify
+     * @param signature The signature bytes to verify
+     * @param deadline The timestamp after which the signature is invalid
+     * @dev Used by both mint and burnAndMint operations to verify signatures
+     * @dev Reverts if:
+     *      - Current timestamp is past the deadline
+     *      - Signature is invalid or malformed
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function _verifySignature(bytes32 hash, bytes memory signature, uint256 deadline) private view {
+        if (block.timestamp > deadline) {
+            revert SignatureExpired();
+        }
+
+        bytes32 finalHash = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hash);
+
+        (address recovered, ECDSA.RecoverError err, ) = ECDSA.tryRecover(finalHash, signature);
+        if (err != ECDSA.RecoverError.NoError) {
+            revert InvalidSignature();
+        }
+        if (!hasRole(SIGNER_ROLE, recovered)) {
+            revert InvalidSigner();
+        }
+    }
+
+    /**
+     * @notice Verify signature for mint operation using EIP-712
+     * @param request The MintRequest struct containing all mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Public view function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifySignature(MintRequest memory request, bytes memory signature) public view {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                request.caller,
+                request.tokenId,
+                request.amount,
+                request.price,
+                request.deadline,
+                request.nonce
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline);
+    }
+
+    /**
+     * @notice Verify signature for burn and mint operation using EIP-712
+     * @param request The BurnAndMintRequest struct containing all operation parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Public view function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+
+     */
+    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public view {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BURN_AND_MINT_TYPEHASH,
+                request.caller,
+                request.burnId,
+                request.burnAmount,
+                request.mintId,
+                request.mintAmount,
+                request.deadline,
+                request.nonce
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline);
+    }
+
+    /**
+     * @notice Configure a new token with its properties and restrictions
      * @param tokenId The token ID to configure
-     * @param transferable Whether the token can be transferred
-     * @param maxSupply Maximum supply (0 for open edition)
+     * @param transferable Whether the token can be transferred between users
+     * @param maxSupply Maximum supply (0 for unlimited/open edition)
      * @param maxPerWallet Maximum tokens that can be minted per wallet
-     * @param metadata Token metadata
+     * @param metadata Token metadata string (typically IPFS hash or other identifier)
      * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot configure a token that has already been configured
+     * @dev Sets initial configuration for a new token ID
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is already configured
      */
     function configureToken(
         uint256 tokenId,
@@ -275,7 +727,10 @@ contract SandboxPasses1155Upgradeable is
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = tokenConfigs[tokenId];
-        require(!config.isConfigured, "Token already configured");
+
+        if (config.isConfigured) {
+            revert TokenAlreadyConfigured(tokenId);
+        }
 
         config.isConfigured = true;
         config.transferable = transferable;
@@ -283,9 +738,6 @@ contract SandboxPasses1155Upgradeable is
         config.maxPerWallet = maxPerWallet;
         config.metadata = metadata;
         config.treasuryWallet = treasuryWallet;
-
-        // Set initial transferability state
-        isTransferable[tokenId] = transferable;
     }
 
     /**
@@ -293,8 +745,15 @@ contract SandboxPasses1155Upgradeable is
      * @param tokenId The token ID to update
      * @param maxSupply New maximum supply (0 for open edition)
      * @param maxPerWallet New maximum tokens per wallet
-     * @param metadata New metadata
+     * @param metadata New metadata string (typically IPFS hash)
      * @param treasuryWallet New treasury wallet (or address(0) for default)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Cannot decrease maxSupply below current supply
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
+     *      - New maxSupply is less than current supply
      */
     function updateTokenConfig(
         uint256 tokenId,
@@ -304,12 +763,17 @@ contract SandboxPasses1155Upgradeable is
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.isConfigured, "Token not configured");
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
 
         // Cannot decrease maxSupply below current supply
         if (maxSupply > 0) {
             uint256 currentSupply = totalSupply(tokenId);
-            require(maxSupply >= currentSupply, "Cannot decrease below current supply");
+            if (maxSupply < currentSupply) {
+                revert MaxSupplyBelowCurrentSupply(tokenId);
+            }
         }
 
         config.maxSupply = maxSupply;
@@ -323,6 +787,12 @@ contract SandboxPasses1155Upgradeable is
      * @param tokenId The token ID to update whitelist for
      * @param accounts Array of addresses to update
      * @param allowed Whether the addresses should be allowed to transfer
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Whitelisted addresses can transfer tokens even if token is non-transferable
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
      */
     function updateTransferWhitelist(
         uint256 tokenId,
@@ -330,7 +800,10 @@ contract SandboxPasses1155Upgradeable is
         bool allowed
     ) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.isConfigured, "Token not configured");
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
 
         for (uint256 i = 0; i < accounts.length; i++) {
             config.transferWhitelist[accounts[i]] = allowed;
@@ -341,29 +814,43 @@ contract SandboxPasses1155Upgradeable is
      * @notice Update transferability for a given token ID
      * @param tokenId The token ID to update
      * @param transferable New transferability status
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Setting to false makes token soulbound except for whitelisted addresses
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
      */
     function setTransferable(uint256 tokenId, bool transferable) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.isConfigured, "Token not configured");
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
 
         config.transferable = transferable;
-        isTransferable[tokenId] = transferable;
     }
 
     /**
      * @notice Check if an address is whitelisted for token transfers
      * @param tokenId The token ID to check
-     * @param account The address to check
-     * @return bool Whether the address is whitelisted
+     * @param account The address to check whitelist status for
+     * @dev Used to verify if an address can transfer a non-transferable token
+     * @dev Returns false if token is not configured
+     * @return bool True if the address is whitelisted for transfers, false otherwise
      */
     function isTransferWhitelisted(uint256 tokenId, address account) public view returns (bool) {
         return tokenConfigs[tokenId].transferWhitelist[account];
     }
 
     /**
-     * @notice Set the base URI for token metadata.
-     *         The metadata URI is built as `baseURI + tokenId + ".json"`.
-     * @param newBaseURI The new base URI.
+     * @notice Set the base URI for token metadata
+     * @param newBaseURI The new base URI to set
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev The metadata URI is built as `baseURI + tokenId + ".json"`
+     * @dev Emits BaseURISet event with old and new values
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
      */
     function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
         emit BaseURISet(baseURI, newBaseURI);
@@ -375,19 +862,28 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /**
-     * @notice Sets the default royalty info (applies to all token IDs).
-     * @param receiver Address that will receive the royalties.
-     * @param feeNumerator Royalty amount in basis points (1% = 100).
+     * @notice Sets the default royalty info (applies to all token IDs)
+     * @param receiver Address that will receive the royalties
+     * @param feeNumerator Royalty amount in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Updates the default royalty that applies to all tokens
+     * @dev Can be overridden per token using setTokenRoyalty
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
      */
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
     /**
-     * @notice Sets royalty info for a specific token ID, overriding default royalty.
-     * @param tokenId ID of the token.
-     * @param receiver Address that will receive the royalties.
-     * @param feeNumerator Royalty amount in basis points.
+     * @notice Sets royalty info for a specific token ID, overriding default royalty
+     * @param tokenId ID of the token to set royalties for
+     * @param receiver Address that will receive the royalties for this token
+     * @param feeNumerator Royalty amount in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Overrides the default royalty for the specified token ID
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
      */
     function setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
@@ -398,20 +894,31 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /**
-     * @notice Override to define token-specific metadata URIs if desired.
-     *         Currently, returns `baseURI + tokenId + ".json"`.
+     * @notice Returns the metadata URI for a specific token ID
+     * @param tokenId ID of the token to get URI for
+     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
+     * @dev Can be overridden by derived contracts to implement different URI logic
+     * @return string The complete URI for the token metadata
      */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
         return string(abi.encodePacked(baseURI, tokenId.toString(), ".json"));
     }
 
     /**
-     * @dev Hook to enforce transfer restrictions on soulbound tokens.
-     *      This is triggered on all ERC1155 transfers (mint, burn, or user transfer).
+     * @notice Internal hook to enforce transfer restrictions on soulbound tokens
      * @param from Source address
      * @param to Destination address
      * @param ids Array of token IDs being transferred
      * @param values Array of transfer amounts
+     * @dev Called on all ERC1155 transfers (mint, burn, or user transfer)
+     * @dev Enforces transferability rules:
+     *      - Allows mints (from == address(0))
+     *      - Allows burns (to == address(0))
+     *      - Checks transferability for regular transfers
+     * @dev Reverts if:
+     *      - Token is non-transferable AND
+     *      - Sender is not whitelisted AND
+     *      - Sender is not ADMIN_ROLE or OPERATOR_ROLE
      */
     function _update(
         address from,
@@ -425,13 +932,14 @@ contract SandboxPasses1155Upgradeable is
                 uint256 tokenId = ids[i];
                 TokenConfig storage config = tokenConfigs[tokenId];
 
-                require(
-                    config.transferable ||
-                        config.transferWhitelist[from] ||
-                        config.transferWhitelist[to] ||
-                        hasRole(ADMIN_ROLE, _msgSender()),
-                    "Transfer not allowed"
-                );
+                if (
+                    !config.transferable &&
+                    !config.transferWhitelist[from] &&
+                    !hasRole(ADMIN_ROLE, _msgSender()) &&
+                    !hasRole(OPERATOR_ROLE, _msgSender())
+                ) {
+                    revert TransferNotAllowed(tokenId);
+                }
             }
         }
 
@@ -443,7 +951,11 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /**
-     * @notice Supports interface for ERC1155, ERC2981, AccessControl, etc.
+     * @notice Checks if contract implements various interfaces
+     * @param interfaceId The interface identifier to check
+     * @dev Combines interface support checks from parent contracts
+     * @dev Supports ERC1155, ERC2981, AccessControl interfaces
+     * @return bool True if the contract implements the interface
      */
     function supportsInterface(
         bytes4 interfaceId
@@ -456,7 +968,9 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /**
-     * @notice Override _msgSender and _msgData from Context
+     * @notice Gets the sender address, supporting meta-transactions
+     * @dev Overrides Context's _msgSender to support meta-transactions via ERC2771
+     * @return address The sender's address (original sender for meta-transactions)
      */
     function _msgSender()
         internal
@@ -468,6 +982,11 @@ contract SandboxPasses1155Upgradeable is
         return ERC2771HandlerUpgradeable._msgSender();
     }
 
+    /**
+     * @notice Gets the transaction data, supporting meta-transactions
+     * @dev Overrides Context's _msgData to support meta-transactions via ERC2771
+     * @return bytes calldata The transaction data (modified for meta-transactions)
+     */
     function _msgData()
         internal
         view
@@ -478,179 +997,63 @@ contract SandboxPasses1155Upgradeable is
         return ERC2771HandlerUpgradeable._msgData();
     }
 
-    /**
-     * @notice Verify signature for minting operation
-     * @param signer The address that signed the message
-     * @param to Recipient of the tokens
-     * @param tokenId Token ID to mint
-     * @param amount Amount to mint
-     * @param price Price in wei
-     * @param deadline Signature expiration timestamp
-     * @param signature The signature to verify
-     */
-    function verifySignature(
-        address signer,
-        address to,
-        uint256 tokenId,
-        uint256 amount,
-        uint256 price,
-        uint256 deadline,
-        bytes memory signature
-    ) public view returns (bool) {
-        require(hasRole(SIGNER_ROLE, signer), "Invalid signer");
-        require(block.timestamp <= deadline, "Signature expired");
-
-        bytes32 hash = keccak256(abi.encodePacked(to, tokenId, amount, price, deadline, address(this)));
-
-        bytes32 message = MessageHashUtils.toEthSignedMessageHash(hash);
-        return SignatureChecker.isValidSignatureNow(signer, message, signature);
-    }
-
-    /**
-     * @notice Mint tokens with a valid signature
-     * @param to Recipient of the tokens
-     * @param tokenId Token ID to mint
-     * @param amount Amount to mint
-     * @param price Price in wei
-     * @param deadline Signature expiration timestamp
-     * @param signature The signature to verify
-     */
-    function mintWithSignature(
-        address to,
-        uint256 tokenId,
-        uint256 amount,
-        uint256 price,
-        uint256 deadline,
-        bytes memory signature
-    ) external payable whenNotPaused {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.isConfigured, "Token not configured");
-        require(msg.value >= price, "Insufficient payment");
-
-        // Verify signature hasn't been used
-        bytes32 sigHash = keccak256(abi.encodePacked(signature));
-        require(!usedSignatures[sigHash], "Signature already used");
-        usedSignatures[sigHash] = true;
-
-        // Check max per wallet
-        require(config.mintedPerWallet[to] + amount <= config.maxPerWallet, "Exceeds max per wallet");
-
-        // Check max supply
-        if (config.maxSupply > 0) {
-            require(totalSupply(tokenId) + amount <= config.maxSupply, "Exceeds max supply");
-        }
-
-        // Update minted amount for wallet
-        config.mintedPerWallet[to] += amount;
-
-        // Transfer payment to treasury
-        address treasury = config.treasuryWallet != address(0) ? config.treasuryWallet : defaultTreasuryWallet;
-        (bool success, ) = treasury.call{value: msg.value}("");
-        require(success, "Payment transfer failed");
-
-        _mint(to, tokenId, amount, "");
-    }
-
-    /**
-     * @notice Admin mint function - no price, no signature needed
-     * @param to Recipient of the tokens
-     * @param tokenId Token ID to mint
-     * @param amount Amount to mint
-     */
-    function adminMint(address to, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.isConfigured, "Token not configured");
-
-        if (config.maxSupply > 0) {
-            require(totalSupply(tokenId) + amount <= config.maxSupply, "Exceeds max supply");
-        }
-
-        _mint(to, tokenId, amount, "");
-    }
-
-    /**
-     * @notice Admin batch mint function
-     * @param to Recipient of the tokens
-     * @param ids Array of token IDs
-     * @param amounts Array of amounts
-     */
-    function adminBatchMint(address to, uint256[] memory ids, uint256[] memory amounts) external onlyRole(ADMIN_ROLE) {
-        require(ids.length == amounts.length, "Length mismatch");
-
-        for (uint256 i = 0; i < ids.length; i++) {
-            TokenConfig storage config = tokenConfigs[ids[i]];
-            require(config.isConfigured, "Token not configured");
-
-            if (config.maxSupply > 0) {
-                require(totalSupply(ids[i]) + amounts[i] <= config.maxSupply, "Exceeds max supply");
-            }
-        }
-
-        _mintBatch(to, ids, amounts, "");
-    }
-
-    /**
-     * @notice Burn and mint with signature (token transformation)
-     * @param burnTokenId Token ID to burn
-     * @param burnAmount Amount to burn
-     * @param mintTokenId Token ID to mint
-     * @param mintAmount Amount to mint
-     * @param deadline Signature expiration timestamp
-     * @param signature The signature to verify
-     */
-    function burnAndMintWithSignature(
-        uint256 burnTokenId,
-        uint256 burnAmount,
-        uint256 mintTokenId,
-        uint256 mintAmount,
-        uint256 deadline,
-        bytes memory signature
-    ) external whenNotPaused {
-        TokenConfig storage mintConfig = tokenConfigs[mintTokenId];
-        require(mintConfig.isConfigured, "Mint token not configured");
-
-        // Verify signature hasn't been used
-        bytes32 sigHash = keccak256(abi.encodePacked(signature));
-        require(!usedSignatures[sigHash], "Signature already used");
-        usedSignatures[sigHash] = true;
-
-        // Check max supply for mint token
-        if (mintConfig.maxSupply > 0) {
-            require(totalSupply(mintTokenId) + mintAmount <= mintConfig.maxSupply, "Exceeds max supply");
-        }
-
-        // Burn first
-        _burn(_msgSender(), burnTokenId, burnAmount);
-
-        // Then mint
-        _mint(_msgSender(), mintTokenId, mintAmount, "");
-    }
-
-    /**
-     * @notice Consume tokens (admin burn)
-     * @param from Address to burn from
-     * @param tokenId Token ID to burn
-     * @param amount Amount to burn
-     */
-    function consumeTokens(address from, uint256 tokenId, uint256 amount) external onlyRole(CONSUMER_ROLE) {
-        _burn(from, tokenId, amount);
-    }
-
     // =============================================================
     //                   Pausable Functions
     // =============================================================
 
     /**
-     * @notice Pause the contract
+     * @notice Pauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev When paused, prevents minting, burning, and transfers
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is already paused
      */
     function pause() external onlyRole(ADMIN_ROLE) {
         _pause();
     }
 
     /**
-     * @notice Unpause the contract
+     * @notice Unpauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Restores minting, burning, and transfer functionality
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is not paused
      */
     function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
+    }
+
+    /**
+     * @notice Helper function to check if minting would exceed max supply
+     * @param tokenId The token ID to check
+     * @param amount The amount to mint
+     * @dev Used internally before any mint operation
+     * @dev Reverts if:
+     *      - Token has a max supply (> 0) and
+     *      - Current supply + amount would exceed max supply
+     */
+    function _checkMaxSupply(uint256 tokenId, uint256 amount) private view {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        if (config.maxSupply > 0) {
+            if (totalSupply(tokenId) + amount > config.maxSupply) {
+                revert MaxSupplyExceeded(tokenId);
+            }
+        }
+    }
+
+    /**
+     * @notice Helper function to check if minting would exceed max per wallet
+     * @param tokenId The token ID to check
+     * @param to The recipient address
+     * @param amount The amount to mint
+     * @dev Used internally before user mint operations
+     * @dev Reverts if:
+     *      - Current wallet balance + amount would exceed max per wallet
+     */
+    function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        require(config.mintedPerWallet[to] + amount <= config.maxPerWallet, "Exceeds max per wallet");
     }
 }
