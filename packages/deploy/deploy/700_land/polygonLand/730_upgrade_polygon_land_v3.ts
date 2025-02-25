@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proxy: {
         owner: upgradeAdmin,
         proxyContract: 'OpenZeppelinTransparentProxy',
-        upgradeIndex: 2,
+        upgradeIndex: 3,
       },
       log: true,
     })

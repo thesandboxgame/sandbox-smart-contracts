@@ -24,8 +24,8 @@ import {LandBase} from "./common/LandBase.sol";
 contract PolygonLand is PolygonLandStorageMixin, LandBase, ERC2771Handler {
     /// @notice Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
-        _setTrustedForwarder(trustedForwarder);
+    function setTrustedForwarder(address trustedForwarder) external {
+        _setTrustedForwarder(address(0));
     }
 
     /// @notice Implements the Context msg sender

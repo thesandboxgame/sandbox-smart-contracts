@@ -2946,7 +2946,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@sandbox-smart-contracts/faucets": 0.0.1
     "@sandbox-smart-contracts/giveaway": 0.0.3
-    "@sandbox-smart-contracts/land": 1.0.0-rc.1
+    "@sandbox-smart-contracts/land": 1.0.0-rc.2
     "@sandbox-smart-contracts/land-sale": 1.0.0-rc.1
     "@sandbox-smart-contracts/marketplace": 1.0.2
     "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1"
@@ -3166,7 +3166,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/land@1.0.0-rc.1, @sandbox-smart-contracts/land@workspace:packages/land":
+"@sandbox-smart-contracts/land@1.0.0-rc.2, @sandbox-smart-contracts/land@workspace:packages/land":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land@workspace:packages/land"
   dependencies:
@@ -3213,6 +3213,19 @@ __metadata:
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
+
+"@sandbox-smart-contracts/land@npm:1.0.0-rc.1":
+  version: 1.0.0-rc.1
+  resolution: "@sandbox-smart-contracts/land@npm:1.0.0-rc.1"
+  dependencies:
+    "@manifoldxyz/royalty-registry-solidity": ^2.0.3
+    "@openzeppelin/contracts": 5.0.2
+    "@openzeppelin/contracts-upgradeable": 5.0.2
+    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
+    "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
+  checksum: d88f802ef3547a14b47be378e33c5c44d681604b655e832f12e96a9b3bb1d2f8c4d9f50ff2d74f5bf0dba78a77996e36789cfea78988dcdf1be8cb451ad5c564
+  languageName: node
+  linkType: hard
 
 "@sandbox-smart-contracts/marketplace@1.0.1@npm:@sandbox-smart-contracts/marketplace@1.0.1":
   version: 1.0.1
