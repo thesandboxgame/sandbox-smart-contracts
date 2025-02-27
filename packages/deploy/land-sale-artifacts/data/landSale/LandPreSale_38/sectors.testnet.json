@@ -1,0 +1,126 @@
+[
+  {
+    "sector": 65,
+    "limit": 10000,
+    "lands": [
+      {
+        "coordinateX": -180,
+        "coordinateY": -204,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -180,
+        "coordinateY": -203,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -180,
+        "coordinateY": -202,
+        "ownerAddress": "",
+        "bundleId": "217"
+      },
+      {
+        "coordinateX": -179,
+        "coordinateY": -204,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -179,
+        "coordinateY": -203,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -179,
+        "coordinateY": -202,
+        "ownerAddress": "",
+        "bundleId": "217"
+      },
+      {
+        "coordinateX": -178,
+        "coordinateY": -204,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -178,
+        "coordinateY": -203,
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -178,
+        "coordinateY": -202,
+        "ownerAddress": "",
+        "bundleId": "217"
+      }
+    ],
+    "estates": [
+      {
+        "coordinateX": -177,
+        "coordinateY": -204,
+        "type": 1,
+        "lands": [
+          {
+            "coordinateX": -177,
+            "coordinateY": -204,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -176,
+            "coordinateY": -204,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -175,
+            "coordinateY": -204,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -177,
+            "coordinateY": -203,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -176,
+            "coordinateY": -203,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -175,
+            "coordinateY": -203,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -177,
+            "coordinateY": -202,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -176,
+            "coordinateY": -202,
+            "ownerAddress": "",
+            "bundleId": ""
+          },
+          {
+            "coordinateX": -175,
+            "coordinateY": -202,
+            "ownerAddress": "",
+            "bundleId": ""
+          }
+        ],
+        "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      }
+    ]
+  }
+]
