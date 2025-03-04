@@ -125,6 +125,14 @@ describe('SandboxPasses1155Upgradeable', function () {
     return await signer.signTypedData(domain, types, value);
   }
 
+  const deployToken = async () => {
+    const MockERC20 = await ethers.getContractFactory('MockERC20');
+    return (await MockERC20.deploy(
+      'Payment Token',
+      'PAY',
+      ethers.parseEther('1000000'),
+    )) as MockERC20;
+  };
   beforeEach(async function () {
     [
       admin,
@@ -931,6 +939,311 @@ describe('SandboxPasses1155Upgradeable', function () {
       const AccessControlInterfaceId = '0x7965db0b';
       expect(await sandboxPasses.supportsInterface(AccessControlInterfaceId)).to
         .be.true;
+    });
+  });
+  describe('Event Emissions', function () {
+    it('should emit TokenConfigured event when configuring a token', async function () {
+      const NEW_TOKEN_ID = 5;
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .configureToken(
+            NEW_TOKEN_ID,
+            true,
+            200,
+            20,
+            'ipfs://QmNewToken',
+            user1.address,
+          ),
+      )
+        .to.emit(sandboxPasses, 'TokenConfigured')
+        .withArgs(
+          NEW_TOKEN_ID,
+          true,
+          200,
+          20,
+          'ipfs://QmNewToken',
+          user1.address,
+        );
+    });
+
+    it('should emit TokenConfigUpdated event when updating a token', async function () {
+      await expect(
+        sandboxPasses.connect(admin).updateTokenConfig(
+          TOKEN_ID_1,
+          200, // new max supply
+          15, // new max per wallet
+          'ipfs://QmUpdated',
+          user2.address,
+        ),
+      )
+        .to.emit(sandboxPasses, 'TokenConfigUpdated')
+        .withArgs(TOKEN_ID_1, 200, 15, 'ipfs://QmUpdated', user2.address);
+    });
+
+    it('should emit TransferabilityUpdated event when changing transferability', async function () {
+      await expect(
+        sandboxPasses.connect(admin).setTransferable(TOKEN_ID_1, false),
+      )
+        .to.emit(sandboxPasses, 'TransferabilityUpdated')
+        .withArgs(TOKEN_ID_1, false);
+    });
+
+    it('should emit TransferWhitelistUpdated event when updating whitelist', async function () {
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .updateTransferWhitelist(TOKEN_ID_1, [user1.address], true),
+      )
+        .to.emit(sandboxPasses, 'TransferWhitelistUpdated')
+        .withArgs(TOKEN_ID_1, user1.address, true);
+    });
+
+    it('should emit BaseURISet event when updating base URI', async function () {
+      const newBaseURI = 'https://new-api.example.com/metadata/';
+
+      await expect(sandboxPasses.connect(admin).setBaseURI(newBaseURI))
+        .to.emit(sandboxPasses, 'BaseURISet')
+        .withArgs(BASE_URI, newBaseURI);
+    });
+
+    it('should emit TokensRecovered event when recovering tokens', async function () {
+      const mockToken = await deployToken();
+      const amount = ethers.parseEther('10');
+      await mockToken.mint(await sandboxPasses.getAddress(), amount);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .recoverERC20(await mockToken.getAddress(), treasury.address, amount),
+      )
+        .to.emit(sandboxPasses, 'TokensRecovered')
+        .withArgs(await mockToken.getAddress(), treasury.address, amount);
+    });
+  });
+
+  describe('Token Recovery', function () {
+    it('should allow admin to recover ERC20 tokens', async function () {
+      // Create a mock ERC20 token and send some to the contract
+      const mockToken = await deployToken();
+      const amount = ethers.parseEther('10');
+      await mockToken.mint(await sandboxPasses.getAddress(), amount);
+
+      // Verify the balance
+      expect(
+        await mockToken.balanceOf(await sandboxPasses.getAddress()),
+      ).to.equal(amount);
+
+      // Recover the tokens
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .recoverERC20(await mockToken.getAddress(), treasury.address, amount),
+      )
+        .to.emit(sandboxPasses, 'TokensRecovered')
+        .withArgs(await mockToken.getAddress(), treasury.address, amount);
+
+      // Verify the recovery worked
+      expect(
+        await mockToken.balanceOf(await sandboxPasses.getAddress()),
+      ).to.equal(0);
+      expect(await mockToken.balanceOf(treasury.address)).to.equal(amount);
+    });
+
+    it('should not allow recovering payment token while contract is active', async function () {
+      const amount = ethers.parseEther('10');
+      await paymentToken.mint(await sandboxPasses.getAddress(), amount);
+
+      // Try to recover the payment token while contract is not paused
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .recoverERC20(
+            await paymentToken.getAddress(),
+            treasury.address,
+            amount,
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'PaymentTokenRecoveryNotAllowed',
+      );
+
+      // Pause the contract
+      await sandboxPasses.connect(admin).pause();
+
+      // Now it should work
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .recoverERC20(
+            await paymentToken.getAddress(),
+            treasury.address,
+            amount,
+          ),
+      ).to.not.be.reverted;
+    });
+  });
+
+  describe('Additional Error Cases', function () {
+    it('should revert when configuring token with zero maxPerWallet', async function () {
+      const NEW_TOKEN_ID = 10;
+
+      await expect(
+        sandboxPasses.connect(admin).configureToken(
+          NEW_TOKEN_ID,
+          true,
+          100,
+          0, // Zero maxPerWallet
+          'ipfs://QmNewToken',
+          user1.address,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroMaxPerWallet');
+    });
+
+    it('should revert when updating token with zero maxPerWallet', async function () {
+      await expect(
+        sandboxPasses.connect(admin).updateTokenConfig(
+          TOKEN_ID_1,
+          200,
+          0, // Zero maxPerWallet
+          'ipfs://QmUpdated',
+          user2.address,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroMaxPerWallet');
+    });
+
+    it('should revert with BurnMintNotConfigured for unconfigured burn token', async function () {
+      const NON_CONFIGURED_TOKEN = 999;
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Create signature
+      const signature = await createBurnAndMintSignature(
+        signer,
+        user1.address,
+        NON_CONFIGURED_TOKEN, // Non-configured token
+        2,
+        TOKEN_ID_2,
+        3,
+        deadline,
+        nonce,
+      );
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .burnAndMint(
+            user1.address,
+            NON_CONFIGURED_TOKEN,
+            2,
+            TOKEN_ID_2,
+            3,
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'BurnMintNotConfigured');
+    });
+
+    it('should revert with InvalidSender when from address does not match caller', async function () {
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Create signature
+      const signature = await createMintSignature(
+        signer,
+        user1.address, // user1 as intended receiver
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // user2 tries to use user1's signature
+      await expect(
+        sandboxPasses.connect(user2).mint(
+          user1.address, // from is user1, but caller is user2
+          TOKEN_ID_1,
+          MINT_AMOUNT,
+          price,
+          deadline,
+          signature,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSender');
+    });
+
+    it('should revert with ArrayLengthMismatch in batch operations', async function () {
+      await expect(
+        sandboxPasses.connect(admin).adminBatchMint(
+          user1.address,
+          [TOKEN_ID_1, TOKEN_ID_2], // Length 2
+          [MINT_AMOUNT], // Length 1
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ArrayLengthMismatch');
+    });
+  });
+
+  describe('Initialization Errors', function () {
+    it('should revert when initializing with zero addresses', async function () {
+      const SandboxPasses = await ethers.getContractFactory(
+        'SandboxPasses1155Upgradeable',
+      );
+
+      // Try with zero admin address
+      await expect(
+        upgrades.deployProxy(SandboxPasses, [
+          BASE_URI,
+          royaltyReceiver.address,
+          ROYALTY_PERCENTAGE,
+          ZERO_ADDRESS, // Zero admin address
+          operator.address,
+          signer.address,
+          await paymentToken.getAddress(),
+          trustedForwarder.address,
+          treasury.address,
+        ]),
+      ).to.be.revertedWithCustomError(
+        await SandboxPasses.deploy(),
+        'ZeroAddress',
+      );
+
+      // Try with zero treasury address
+      await expect(
+        upgrades.deployProxy(SandboxPasses, [
+          BASE_URI,
+          royaltyReceiver.address,
+          ROYALTY_PERCENTAGE,
+          admin.address,
+          operator.address,
+          signer.address,
+          await paymentToken.getAddress(),
+          trustedForwarder.address,
+          ZERO_ADDRESS, // Zero treasury address
+        ]),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroAddress');
+    });
+
+    it('should revert when initializing with invalid payment token', async function () {
+      const SandboxPasses = await ethers.getContractFactory(
+        'SandboxPasses1155Upgradeable',
+      );
+
+      // Deploy with an EOA as payment token (which is not a valid ERC20)
+      await expect(
+        upgrades.deployProxy(SandboxPasses, [
+          BASE_URI,
+          royaltyReceiver.address,
+          ROYALTY_PERCENTAGE,
+          admin.address,
+          operator.address,
+          signer.address,
+          user1.address, // Not an ERC20 token
+          trustedForwarder.address,
+          treasury.address,
+        ]),
+      ).to.be.revertedWithCustomError(SandboxPasses, 'InvalidPaymentToken');
     });
   });
 });

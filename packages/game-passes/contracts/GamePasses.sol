@@ -16,10 +16,8 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC2771HandlerUpgradeable} from "@sandbox-smart-contracts/dependency-metatx/contracts/ERC2771HandlerUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 
 contract SandboxPasses1155Upgradeable is
     Initializable,
@@ -61,6 +59,14 @@ contract SandboxPasses1155Upgradeable is
     error TransferNotAllowed(uint256 tokenId);
     /// @dev Revert when exceeds max per wallet
     error ExceedsMaxPerWallet(uint256 tokenId, address wallet, uint256 attempted, uint256 maximum);
+    /// @dev Revert when address is zero
+    error ZeroAddress(string role);
+    /// @dev Revert when max per wallet is zero
+    error ZeroMaxPerWallet();
+    /// @dev Revert when payment token is invalid
+    error InvalidPaymentToken();
+    /// @dev Revert when trying to recover payment token while contract is active
+    error PaymentTokenRecoveryNotAllowed();
 
     // =============================================================
     //                           Roles
@@ -79,6 +85,29 @@ contract SandboxPasses1155Upgradeable is
 
     /// @notice Emitted when the base URI is updated.
     event BaseURISet(string oldURI, string newURI);
+    /// @notice Emitted when a token is configured.
+    event TokenConfigured(
+        uint256 indexed tokenId,
+        bool transferable,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string metadata,
+        address treasuryWallet
+    );
+    /// @notice Emitted when a token configuration is updated.
+    event TokenConfigUpdated(
+        uint256 indexed tokenId,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string metadata,
+        address treasuryWallet
+    );
+    /// @notice Emitted when a token's transferability is updated.
+    event TransferabilityUpdated(uint256 indexed tokenId, bool transferable);
+    /// @notice Emitted when transfer whitelist is updated.
+    event TransferWhitelistUpdated(uint256 indexed tokenId, address indexed account, bool allowed);
+    /// @notice Emitted when tokens are recovered from the contract.
+    event TokensRecovered(address token, address recipient, uint256 amount);
 
     // =============================================================
     //                     Structs
@@ -123,12 +152,6 @@ contract SandboxPasses1155Upgradeable is
 
     /// @dev Mapping of token configurations
     mapping(uint256 => TokenConfig) public tokenConfigs;
-
-    /**
-     * @dev Mapping to determine if a token ID is freely transferable by users.
-     *      - true => transferable
-     *      - false => soulbound (non-transferable by users)
-     */
 
     /**
      * @dev Base URI for computing {uri}.
@@ -202,6 +225,16 @@ contract SandboxPasses1155Upgradeable is
         __ERC2981_init();
         __Pausable_init();
 
+        // Validate inputs
+        if (_admin == address(0)) revert ZeroAddress("admin");
+        if (_defaultTreasury == address(0)) revert ZeroAddress("treasury");
+        if (_paymentToken == address(0)) revert ZeroAddress("payment token");
+
+        // Check if _paymentToken is a contract
+        if (_paymentToken.code.length == 0) {
+            revert InvalidPaymentToken();
+        }
+
         // Set up AccessControl roles
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
@@ -223,7 +256,7 @@ contract SandboxPasses1155Upgradeable is
     }
 
     // =============================================================
-    //                      External Functions
+    //                      External & Public Functions
     // =============================================================
 
     /**
@@ -337,53 +370,6 @@ contract SandboxPasses1155Upgradeable is
 
         // Perform batch mint
         _mintBatch(caller, tokenIds, amounts, "");
-    }
-
-    /**
-     * @dev Internal helper function to process a single mint operation
-     * @param caller The address calling the mint function
-     * @param tokenId The token ID to mint
-     * @param amount The amount to mint
-     * @param price The price to pay
-     * @param deadline The signature deadline
-     * @param signature The EIP-712 signature
-     */
-    function _processSingleMint(
-        address caller,
-        uint256 tokenId,
-        uint256 amount,
-        uint256 price,
-        uint256 deadline,
-        bytes calldata signature
-    ) private {
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-
-        MintRequest memory request = MintRequest({
-            caller: caller,
-            tokenId: tokenId,
-            amount: amount,
-            price: price,
-            deadline: deadline,
-            nonce: nonces[caller]++
-        });
-
-        verifySignature(request, signature);
-
-        _checkMaxPerWallet(tokenId, caller, amount);
-        _checkMaxSupply(tokenId, amount);
-
-        // Update minted amount for wallet
-        config.mintedPerWallet[caller] += amount;
-
-        address treasury = config.treasuryWallet;
-        if (treasury == address(0)) {
-            treasury = defaultTreasuryWallet;
-        }
-        SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, price);
     }
 
     /**
@@ -646,30 +632,159 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Internal function to verify EIP-712 signatures
-     * @param hash The EIP-712 typed data hash to verify
-     * @param signature The signature bytes to verify
-     * @param deadline The timestamp after which the signature is invalid
-     * @dev Used by both mint and burnAndMint operations to verify signatures
+     * @notice Add or remove addresses from token transfer whitelist
+     * @param tokenId The token ID to update whitelist for
+     * @param accounts Array of addresses to update
+     * @param allowed Whether the addresses should be allowed to transfer
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Whitelisted addresses can transfer tokens even if token is non-transferable
      * @dev Reverts if:
-     *      - Current timestamp is past the deadline
-     *      - Signature is invalid or malformed
-     *      - Signer doesn't have SIGNER_ROLE
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
      */
-    function _verifySignature(bytes32 hash, bytes memory signature, uint256 deadline) private view {
-        if (block.timestamp > deadline) {
-            revert SignatureExpired();
+    function updateTransferWhitelist(
+        uint256 tokenId,
+        address[] calldata accounts,
+        bool allowed
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
         }
 
-        bytes32 finalHash = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hash);
+        for (uint256 i = 0; i < accounts.length; i++) {
+            config.transferWhitelist[accounts[i]] = allowed;
+            emit TransferWhitelistUpdated(tokenId, accounts[i], allowed);
+        }
+    }
 
-        (address recovered, ECDSA.RecoverError err, ) = ECDSA.tryRecover(finalHash, signature);
-        if (err != ECDSA.RecoverError.NoError) {
-            revert InvalidSignature();
+    /**
+     * @notice Update transferability for a given token ID
+     * @param tokenId The token ID to update
+     * @param transferable New transferability status
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Setting to false makes token soulbound except for whitelisted addresses
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
+     */
+    function setTransferable(uint256 tokenId, bool transferable) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
         }
-        if (!hasRole(SIGNER_ROLE, recovered)) {
-            revert InvalidSigner();
+
+        config.transferable = transferable;
+        emit TransferabilityUpdated(tokenId, transferable);
+    }
+
+    /**
+     * @notice Configure a new token with its properties and restrictions
+     * @param tokenId The token ID to configure
+     * @param transferable Whether the token can be transferred between users
+     * @param maxSupply Maximum supply (0 for unlimited/open edition)
+     * @param maxPerWallet Maximum tokens that can be minted per wallet
+     * @param metadata Token metadata string (typically IPFS hash or other identifier)
+     * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot configure a token that has already been configured
+     * @dev Sets initial configuration for a new token ID
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is already configured
+     *      - maxPerWallet is 0
+     */
+    function configureToken(
+        uint256 tokenId,
+        bool transferable,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string memory metadata,
+        address treasuryWallet
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (config.isConfigured) {
+            revert TokenAlreadyConfigured(tokenId);
         }
+
+        // Ensure maxPerWallet is not zero
+        if (maxPerWallet == 0) revert ZeroMaxPerWallet();
+
+        config.isConfigured = true;
+        config.transferable = transferable;
+        config.maxSupply = maxSupply;
+        config.maxPerWallet = maxPerWallet;
+        config.metadata = metadata;
+        config.treasuryWallet = treasuryWallet;
+
+        emit TokenConfigured(tokenId, transferable, maxSupply, maxPerWallet, metadata, treasuryWallet);
+    }
+
+    /**
+     * @notice Update existing token configuration
+     * @param tokenId The token ID to update
+     * @param maxSupply New maximum supply (0 for open edition)
+     * @param maxPerWallet New maximum tokens per wallet
+     * @param metadata New metadata string (typically IPFS hash)
+     * @param treasuryWallet New treasury wallet (or address(0) for default)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Token must be already configured
+     * @dev Cannot decrease maxSupply below current supply
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Token is not configured
+     *      - New maxSupply is less than current supply
+     *      - maxPerWallet is 0
+     */
+    function updateTokenConfig(
+        uint256 tokenId,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string memory metadata,
+        address treasuryWallet
+    ) external onlyRole(ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
+
+        // Ensure maxPerWallet is not zero
+        if (maxPerWallet == 0) revert ZeroMaxPerWallet();
+
+        // Cannot decrease maxSupply below current supply
+        if (maxSupply > 0) {
+            uint256 currentSupply = totalSupply(tokenId);
+            if (maxSupply < currentSupply) {
+                revert MaxSupplyBelowCurrentSupply(tokenId);
+            }
+        }
+
+        config.maxSupply = maxSupply;
+        config.maxPerWallet = maxPerWallet;
+        config.metadata = metadata;
+        config.treasuryWallet = treasuryWallet;
+
+        emit TokenConfigUpdated(tokenId, maxSupply, maxPerWallet, metadata, treasuryWallet);
+    }
+
+    /**
+     * @notice Set the base URI for token metadata
+     * @param newBaseURI The new base URI to set
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev The metadata URI is built as `baseURI + tokenId + ".json"`
+     * @dev Emits BaseURISet event with old and new values
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     */
+    function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
+        emit BaseURISet(baseURI, newBaseURI);
+        baseURI = newBaseURI;
     }
 
     /**
@@ -729,134 +844,6 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Configure a new token with its properties and restrictions
-     * @param tokenId The token ID to configure
-     * @param transferable Whether the token can be transferred between users
-     * @param maxSupply Maximum supply (0 for unlimited/open edition)
-     * @param maxPerWallet Maximum tokens that can be minted per wallet
-     * @param metadata Token metadata string (typically IPFS hash or other identifier)
-     * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Cannot configure a token that has already been configured
-     * @dev Sets initial configuration for a new token ID
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Token is already configured
-     */
-    function configureToken(
-        uint256 tokenId,
-        bool transferable,
-        uint256 maxSupply,
-        uint256 maxPerWallet,
-        string memory metadata,
-        address treasuryWallet
-    ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (config.isConfigured) {
-            revert TokenAlreadyConfigured(tokenId);
-        }
-
-        config.isConfigured = true;
-        config.transferable = transferable;
-        config.maxSupply = maxSupply;
-        config.maxPerWallet = maxPerWallet;
-        config.metadata = metadata;
-        config.treasuryWallet = treasuryWallet;
-    }
-
-    /**
-     * @notice Update existing token configuration
-     * @param tokenId The token ID to update
-     * @param maxSupply New maximum supply (0 for open edition)
-     * @param maxPerWallet New maximum tokens per wallet
-     * @param metadata New metadata string (typically IPFS hash)
-     * @param treasuryWallet New treasury wallet (or address(0) for default)
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Token must be already configured
-     * @dev Cannot decrease maxSupply below current supply
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Token is not configured
-     *      - New maxSupply is less than current supply
-     */
-    function updateTokenConfig(
-        uint256 tokenId,
-        uint256 maxSupply,
-        uint256 maxPerWallet,
-        string memory metadata,
-        address treasuryWallet
-    ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-
-        // Cannot decrease maxSupply below current supply
-        if (maxSupply > 0) {
-            uint256 currentSupply = totalSupply(tokenId);
-            if (maxSupply < currentSupply) {
-                revert MaxSupplyBelowCurrentSupply(tokenId);
-            }
-        }
-
-        config.maxSupply = maxSupply;
-        config.maxPerWallet = maxPerWallet;
-        config.metadata = metadata;
-        config.treasuryWallet = treasuryWallet;
-    }
-
-    /**
-     * @notice Add or remove addresses from token transfer whitelist
-     * @param tokenId The token ID to update whitelist for
-     * @param accounts Array of addresses to update
-     * @param allowed Whether the addresses should be allowed to transfer
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Token must be already configured
-     * @dev Whitelisted addresses can transfer tokens even if token is non-transferable
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Token is not configured
-     */
-    function updateTransferWhitelist(
-        uint256 tokenId,
-        address[] calldata accounts,
-        bool allowed
-    ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-
-        for (uint256 i = 0; i < accounts.length; i++) {
-            config.transferWhitelist[accounts[i]] = allowed;
-        }
-    }
-
-    /**
-     * @notice Update transferability for a given token ID
-     * @param tokenId The token ID to update
-     * @param transferable New transferability status
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Token must be already configured
-     * @dev Setting to false makes token soulbound except for whitelisted addresses
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Token is not configured
-     */
-    function setTransferable(uint256 tokenId, bool transferable) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-
-        config.transferable = transferable;
-    }
-
-    /**
      * @notice Check if an address is whitelisted for token transfers
      * @param tokenId The token ID to check
      * @param account The address to check whitelist status for
@@ -868,18 +855,116 @@ contract SandboxPasses1155Upgradeable is
         return tokenConfigs[tokenId].transferWhitelist[account];
     }
 
+    // =============================================================
+    //                  Private and Internal Functions
+    // =============================================================
+
     /**
-     * @notice Set the base URI for token metadata
-     * @param newBaseURI The new base URI to set
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev The metadata URI is built as `baseURI + tokenId + ".json"`
-     * @dev Emits BaseURISet event with old and new values
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
+     * @dev Internal helper function to process a single mint operation
+     * @param caller The address calling the mint function
+     * @param tokenId The token ID to mint
+     * @param amount The amount to mint
+     * @param price The price to pay
+     * @param deadline The signature deadline
+     * @param signature The EIP-712 signature
      */
-    function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
-        emit BaseURISet(baseURI, newBaseURI);
-        baseURI = newBaseURI;
+    function _processSingleMint(
+        address caller,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 price,
+        uint256 deadline,
+        bytes calldata signature
+    ) private {
+        TokenConfig storage config = tokenConfigs[tokenId];
+
+        if (!config.isConfigured) {
+            revert TokenNotConfigured(tokenId);
+        }
+
+        MintRequest memory request = MintRequest({
+            caller: caller,
+            tokenId: tokenId,
+            amount: amount,
+            price: price,
+            deadline: deadline,
+            nonce: nonces[caller]++
+        });
+
+        verifySignature(request, signature);
+
+        _checkMaxPerWallet(tokenId, caller, amount);
+        _checkMaxSupply(tokenId, amount);
+
+        // Update minted amount for wallet
+        config.mintedPerWallet[caller] += amount;
+
+        address treasury = config.treasuryWallet;
+        if (treasury == address(0)) {
+            treasury = defaultTreasuryWallet;
+        }
+        SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, price);
+    }
+
+    /**
+     * @notice Internal function to verify EIP-712 signatures
+     * @param hash The EIP-712 typed data hash to verify
+     * @param signature The signature bytes to verify
+     * @param deadline The timestamp after which the signature is invalid
+     * @dev Used by both mint and burnAndMint operations to verify signatures
+     * @dev Reverts if:
+     *      - Current timestamp is past the deadline
+     *      - Signature is invalid or malformed
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function _verifySignature(bytes32 hash, bytes memory signature, uint256 deadline) private view {
+        if (block.timestamp > deadline) {
+            revert SignatureExpired();
+        }
+
+        bytes32 finalHash = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hash);
+
+        (address recovered, ECDSA.RecoverError err, ) = ECDSA.tryRecover(finalHash, signature);
+        if (err != ECDSA.RecoverError.NoError) {
+            revert InvalidSignature();
+        }
+        if (!hasRole(SIGNER_ROLE, recovered)) {
+            revert InvalidSigner();
+        }
+    }
+
+    /**
+     * @notice Helper function to check if minting would exceed max supply
+     * @param tokenId The token ID to check
+     * @param amount The amount to mint
+     * @dev Used internally before any mint operation
+     * @dev Reverts if:
+     *      - Token has a max supply (> 0) and
+     *      - Current supply + amount would exceed max supply
+     */
+    function _checkMaxSupply(uint256 tokenId, uint256 amount) private view {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        if (config.maxSupply > 0) {
+            if (totalSupply(tokenId) + amount > config.maxSupply) {
+                revert MaxSupplyExceeded(tokenId);
+            }
+        }
+    }
+
+    /**
+     * @notice Helper function to check if minting would exceed max per wallet
+     * @param tokenId The token ID to check
+     * @param to The recipient address
+     * @param amount The amount to mint
+     * @dev Used internally before user mint operations
+     * @dev Reverts if:
+     *      - Current wallet balance + amount would exceed max per wallet
+     */
+    function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
+        TokenConfig storage config = tokenConfigs[tokenId];
+        if (config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+            revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
+        }
     }
 
     // =============================================================
@@ -1050,37 +1135,25 @@ contract SandboxPasses1155Upgradeable is
         _unpause();
     }
 
-    /**
-     * @notice Helper function to check if minting would exceed max supply
-     * @param tokenId The token ID to check
-     * @param amount The amount to mint
-     * @dev Used internally before any mint operation
-     * @dev Reverts if:
-     *      - Token has a max supply (> 0) and
-     *      - Current supply + amount would exceed max supply
-     */
-    function _checkMaxSupply(uint256 tokenId, uint256 amount) private view {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        if (config.maxSupply > 0) {
-            if (totalSupply(tokenId) + amount > config.maxSupply) {
-                revert MaxSupplyExceeded(tokenId);
-            }
-        }
-    }
+    // =============================================================
+    //                   Recovery Functions
+    // =============================================================
 
     /**
-     * @notice Helper function to check if minting would exceed max per wallet
-     * @param tokenId The token ID to check
-     * @param to The recipient address
-     * @param amount The amount to mint
-     * @dev Used internally before user mint operations
-     * @dev Reverts if:
-     *      - Current wallet balance + amount would exceed max per wallet
+     * @notice Recover ERC20 tokens accidentally sent to the contract
+     * @param token The ERC20 token address to recover
+     * @param to The address to send recovered tokens to
+     * @param amount The amount of tokens to recover
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot recover the payment token if contract is not paused
      */
-    function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
-        TokenConfig storage config = tokenConfigs[tokenId];
-        if (config.mintedPerWallet[to] + amount > config.maxPerWallet) {
-            revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
+    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        // If attempting to recover the payment token, contract must be paused
+        if (token == paymentToken && !paused()) {
+            revert PaymentTokenRecoveryNotAllowed();
         }
+
+        SafeERC20.safeTransfer(IERC20(token), to, amount);
+        emit TokensRecovered(token, to, amount);
     }
 }
