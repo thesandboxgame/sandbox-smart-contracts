@@ -19,6 +19,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
 contract SandboxPasses1155Upgradeable is
     Initializable,
@@ -58,6 +59,8 @@ contract SandboxPasses1155Upgradeable is
     error MaxSupplyBelowCurrentSupply(uint256 tokenId);
     /// @dev Revert when transfer not allowed
     error TransferNotAllowed(uint256 tokenId);
+    /// @dev Revert when exceeds max per wallet
+    error ExceedsMaxPerWallet(uint256 tokenId, address wallet, uint256 attempted, uint256 maximum);
 
     // =============================================================
     //                           Roles
@@ -187,6 +190,7 @@ contract SandboxPasses1155Upgradeable is
         uint96 _royaltyFeeNumerator,
         address _admin,
         address _operator,
+        address _signer,
         address _paymentToken,
         address _trustedForwarder,
         address _defaultTreasury
@@ -202,11 +206,11 @@ contract SandboxPasses1155Upgradeable is
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
         _grantRole(OPERATOR_ROLE, _operator);
+        _grantRole(SIGNER_ROLE, _signer);
         paymentToken = _paymentToken;
         baseURI = _baseURI;
         defaultTreasuryWallet = _defaultTreasury;
         _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
-
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -946,7 +950,7 @@ contract SandboxPasses1155Upgradeable is
         address to,
         uint256[] memory ids,
         uint256[] memory values
-    ) internal virtual override {
+    ) internal virtual override(ERC1155SupplyUpgradeable) whenNotPaused {
         // If not a mint (from == address(0)) and not a burn (to == address(0)), enforce transferability
         if (from != address(0) && to != address(0)) {
             for (uint256 i = 0; i < ids.length; i++) {
@@ -1075,6 +1079,8 @@ contract SandboxPasses1155Upgradeable is
      */
     function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
         TokenConfig storage config = tokenConfigs[tokenId];
-        require(config.mintedPerWallet[to] + amount <= config.maxPerWallet, "Exceeds max per wallet");
+        if (config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+            revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
+        }
     }
 }
