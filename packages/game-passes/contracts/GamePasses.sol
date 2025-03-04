@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-/**
- * @title SandboxPasses1155Upgradeable
- * @notice An upgradeable ERC1155 contract with AccessControl-based permissions,
- *         supply tracking, forced burns, burn-and-mint, and EIP-2981 royalties.
- */
-
 import {AccessControlUpgradeable, ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ERC1155SupplyUpgradeable, ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import {ERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
@@ -19,6 +13,11 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+/**
+ * @title SandboxPasses1155Upgradeable
+ * @notice An upgradeable ERC1155 contract with AccessControl-based permissions,
+ *         supply tracking, forced burns, burn-and-mint, and EIP-2981 royalties.
+ */
 contract SandboxPasses1155Upgradeable is
     Initializable,
     ERC2771HandlerUpgradeable,
@@ -172,6 +171,9 @@ contract SandboxPasses1155Upgradeable is
     /// @dev EIP-712 domain typehash
     bytes32 public constant EIP712_DOMAIN_TYPEHASH =
         keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+
+    /// @dev EIP-712 domain separator
+    // solhint-disable-next-line var-name-mixedcase
     bytes32 public DOMAIN_SEPARATOR;
 
     /// @dev EIP-712 mint request typehash

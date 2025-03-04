@@ -1,243 +1,139 @@
-# SandboxPasses1155Upgradeable
+# SandboxPasses1155 - NFT Pass System
 
 ## Overview
 
-**SandboxPasses1155Upgradeable** is an upgradeable ERC-1155-based smart contract
-that introduces:
+SandboxPasses1155 is a smart contract that powers a flexible NFT pass system on
+the Ethereum blockchain. It allows for the creation, management, and
+distribution of digital passes that can be used for various purposes including
+event access, membership benefits, and digital collectibles.
 
-- **AccessControl-based** permissions for admins.
-- **Supply tracking** (`ERC1155SupplyUpgradeable`), providing `totalSupply` for
-  each token ID.
-- **Forced burns** for admin-only removal of tokens.
-- **Burn-and-mint** mechanics that allow upgrading or transforming tokens by
-  burning one type to mint another.
-- **EIP-2981** royalty support for per-token or default royalty distribution.
-- **Preminting** functionality, allowing a specific wallet to receive an initial
-  supply upon token configuration.
+## Key Features
 
-The contract also supports **soulbound** tokens (non-transferable tokens) by
-enforcing transfer restrictions for certain token IDs.
+### 📱 Multi-Token Support
 
-## Roles
+- A single contract can manage many different types of passes
+- Each pass type has its own configuration, supply limits, and transferability
+  rules
 
-The contract defines two main roles:
+### 🔒 Flexible Transferability
 
-- **DEFAULT_ADMIN_ROLE**: Provided by OpenZeppelin’s `AccessControlUpgradeable`.
-  Holds the ultimate authority over role grants/revocations.
-- **ADMIN_ROLE**: Custom role in this contract, used for performing
-  administrative tasks (e.g., forcibly burning tokens, configuring tokens,
-  setting royalties).
+- Passes can be configured as transferable or non-transferable (soulbound)
+- Admins can whitelist specific addresses to transfer otherwise non-transferable
+  passes
+- Helps maintain integrity for access passes and credentials
 
-### Role Hierarchy
+### 🏷️ Supply Controls
 
-- `DEFAULT_ADMIN_ROLE` can grant/revoke any role, including `ADMIN_ROLE`.
-- `ADMIN_ROLE` is intended for operational tasks and does not itself have the
-  power to manage roles (unless also granted `DEFAULT_ADMIN_ROLE`).
+- Set maximum supply limits for each pass type
+- Configure how many of each pass type a single wallet can hold
+- Prevent overconcentration of passes in single wallets
 
-## Errors
+### 💰 Payment Integration
 
-The contract defines custom errors to provide clearer revert messages:
+- Built-in support for payments in ERC20 tokens
+- Configurable treasury addresses to receive payments
+- Different pass types can have different payment recipients
 
-- **NonTransferable(uint256 tokenId)**: Attempted transfer of a soulbound
-  (non-transferable) token.
-- **TokenNotConfigured(uint256 tokenId)**: Attempted operation on a token ID
-  that has not been configured.
-- **MaxSupplyExceeded(uint256 tokenId)**: Minting would exceed the maximum
-  supply of the token.
-- **BurnMintNotConfigured(uint256 burnTokenId)**: No valid burn-to-mint mapping
-  found for the burned token.
-- **TokenAlreadyConfigured(uint256 tokenId)**: Attempt to configure a token that
-  is already configured.
-- **CannotDecreaseMaxSupply(uint256 tokenId, uint256 currentSupply, uint256
-  requestedSupply)**: Attempt to lower max supply below the current supply.
-- **MintingNotAllowed(uint256 tokenId)**: Attempt to mint a token that was
-  marked for premint only.
+### 🔄 Pass Transformation
 
-## Storage Layout
+- Users can burn existing passes to receive new ones
+- Supports upgrade paths and token evolution
+- Operator-controlled transformations for managed ecosystems
 
-1. **`bytes32 public constant ADMIN_ROLE`**
+### 🛡️ Security Features
 
-   - Stores the identifier for the custom `ADMIN_ROLE`.
+- Role-based access control for administrative functions
+- Pausable functionality for emergency situations
+- Signature-based minting for secure off-chain authorization
+- Meta-transaction support for better user experience
 
-2. **`string public baseURI`**
+### 💸 Royalty Support
 
-   - Stores the base URI for metadata. The final token URI is
-     `baseURI + tokenId + ".json"`.
+- ERC2981 royalty standard implementation
+- Configure royalties for secondary market sales
+- Set default royalties or override for specific pass types
 
-3. **`mapping(uint256 => TokenConfig) public tokenConfigs`**
+## User Interactions
 
-   - Tracks configuration details for each token ID, including max supply,
-     transferability, etc.
+### For Pass Holders
 
-4. **`mapping(uint256 => bool) public isTransferable`**
+- Mint passes using authorized signatures
+- Transform existing passes into new pass types
+- Transfer passes (if allowed by configuration)
+- Use passes for access to services or content
 
-   - Simple mapping to track transferability for each token ID.
+### For Administrators
 
-5. **`struct TokenConfig`**
-   - Contains configuration for each token ID:
-     - `bool isConfigured` – Whether the token has been configured.
-     - `bool transferable` – Whether the token is freely transferable.
-     - `uint256 maxSupply` – The maximum mintable supply for the token.
-     - `string metadata` – An optional metadata string (not strictly enforced).
-     - `uint256 burnToMintId` – Token ID that can be burned to mint this token.
-     - `address premintWallet` – If set, all tokens are pre-minted to this
-       address, disallowing any further minting.
+- Configure new pass types with custom properties
+- Mint passes directly to users
+- Update pass configurations and metadata
+- Manage transferability and access control
+- Pause/unpause contract functions in emergencies
+- Recover accidentally sent tokens
 
-## Initialization
+## Technical Details
 
-### `constructor()`
+This contract implements several Ethereum standards:
 
-- Disables initializers to ensure the logic contract cannot be invoked directly.
-- Only relevant for the proxy upgrade pattern.
+- ERC1155: Multi-token standard
+- ERC2981: NFT royalty standard
+- ERC2771: Meta-transactions for gas-less operations
 
-### `initialize(string memory _baseURI, address _royaltyReceiver, uint96 _royaltyFeeNumerator, address _admin, address _trustedForwarder)`
-
-Initializes all inherited contracts, sets up roles, and configures royalty
-information.
-
-**Parameters**
-
-- `_baseURI`: Initial base URI for metadata.
-- `_royaltyReceiver`: Address to receive royalty fees.
-- `_royaltyFeeNumerator`: Royalty fee in basis points (e.g., 500 = 5%).
-- `_admin`: The address that will be granted `DEFAULT_ADMIN_ROLE` and
-  `ADMIN_ROLE`.
-- `_trustedForwarder`: Forwarder address for meta-transactions.
-
-**Details**
-
-- Grants `DEFAULT_ADMIN_ROLE` and `ADMIN_ROLE` to `_admin`.
-- Sets the default royalty info using `_setDefaultRoyalty`.
-- Stores the `_baseURI` in the contract’s `baseURI` variable.
-
-## External Functions
-
-### `mint(address to, uint256 tokenId, uint256 amount)`
-
-Mints a specific amount of tokens of `tokenId` to address `to`.
-
-- **Restrictions**:
-  - The token must be configured (`isConfigured == true`).
-  - Token must not have a premint wallet set (`premintWallet == address(0)`),
-    otherwise minting is forbidden.
-  - Cannot exceed the max supply.
-
-### `mintBatch(address to, uint256[] memory ids, uint256[] memory amounts)`
-
-Batch mints multiple token IDs to the same address. Similar restrictions apply
-as in `mint`:
-
-- **Checks** each token configuration and ensures the operation is valid.
-
-### `burnAndMint(address account, uint256 burnId, uint256 burnAmount, uint256 mintId, uint256 mintAmount)`
-
-Burns `burnAmount` tokens of `burnId` from `account` and then mints `mintAmount`
-tokens of `mintId` to the same address.
-
-- Validates that both `burnId` and `mintId` are configured.
-- Ensures that `burnId` is mapped to `mintId` via `burnToMintId`.
-- Checks max supply constraints for the minted token.
-
-## Admin Functions
-
-### `adminBurn(address account, uint256 tokenId, uint256 amount)`
-
-Allows an `ADMIN_ROLE` holder to forcibly burn tokens from any account.
-
-- Useful for “shutdown” or “punishment” mechanics.
-
-### `adminBatchBurn(address account, uint256[] memory ids, uint256[] memory amounts)`
-
-Batch version of `adminBurn`.
-
-### `configureToken(uint256 tokenId, bool transferable, uint256 maxSupply, string memory metadata, uint256 burnToMintId, address premintWallet)`
-
-Configures a **new** token with optional preminting to a specified wallet:
-
-- **transferable**: Whether the token can be freely transferred.
-- **premintWallet**: If non-zero, the contract mints the entire `maxSupply` to
-  this address and prohibits further minting.
-
-Throws `TokenAlreadyConfigured` if the token was previously configured.
-
-### `updateTokenConfig(uint256 tokenId, uint256 maxSupply, string memory metadata, uint256 burnToMintId)`
-
-Updates the configuration of an **existing** token:
-
-- If `premintWallet` is defined, and the contract tries to increase `maxSupply`,
-  it automatically mints the difference to `premintWallet`.
-- Prevents decreasing `maxSupply` below the current total supply.
-
-### `setTransferable(uint256 tokenId, bool transferable)`
-
-Updates the transferability of a given token ID. Admins can effectively “lock” a
-previously transferable token or vice versa.
-
-### `setBaseURI(string memory newBaseURI)`
-
-Updates the base URI for metadata; triggers an event
-`BaseURISet(oldURI, newURI)`.
-
-### Royalties
-
-#### `setDefaultRoyalty(address receiver, uint96 feeNumerator)`
-
-Sets the default royalty info for all tokens.
-
-#### `setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator)`
-
-Overrides default royalty info for a specific token ID.
-
-## Internal Mechanics
-
-### `_update(address from, address to, uint256[] memory ids, uint256[] memory values)`
-
-- A hook that fires on every transfer-like operation (mint, burn, transfer).
-- Reverts with `NonTransferable(tokenId)` if a user tries to transfer a
-  non-transferable (soulbound) token.
-
-### `_msgSender()` and `_msgData()`
-
-- Overriden to integrate with `ERC2771HandlerUpgradeable` for meta-transaction
-  support.
-
-## Implementation Details
-
-- **Inheritance**:
-
-  1. `ERC2771HandlerUpgradeable` – Provides meta-transaction support.
-  2. `AccessControlUpgradeable` – Role-based permissions.
-  3. `ERC1155SupplyUpgradeable` – ERC-1155 with total supply tracking.
-  4. `ERC2981Upgradeable` – Royalty standard support.
-
-- **supportsInterface(bytes4 interfaceId)**:
-
-  - Combines the interface checks of `AccessControlUpgradeable`,
-    `ERC1155Upgradeable`, and `ERC2981Upgradeable`.
-
-- **Soulbound Logic**:
-  - The contract checks `isTransferable[tokenId]` before finalizing
-    non-mint/burn transfers. If `false`, the transfer reverts.
-
-## Usage Notes
-
-1. **Configure First**:
-   - A token ID must be configured with `configureToken()` before minting
-     (unless preminted).
-2. **Preminting**:
-   - If `premintWallet` is provided, the contract mints `maxSupply` immediately
-     and disallows normal `mint()` calls for that token.
-3. **Lock & Unlock**:
-   - `setTransferable()` can be used to lock or unlock a token’s transferability
-     at any time, subject to an admin’s discretion.
-4. **Upgrades**:
-   - Because this is an upgradeable contract, admin-level controls should be
-     thoroughly secured to avoid malicious upgrades.
+The contract is designed to be deployed behind a proxy for upgradeability,
+allowing the functionality to evolve over time while maintaining the same
+contract address and token balances.
 
 ---
 
-**License**:  
-All code is released under the
-[MIT License](https://opensource.org/licenses/MIT).
+# Pull Request Description
 
----
+## SandboxPasses1155Upgradeable Implementation
+
+This PR introduces a comprehensive, feature-rich ERC1155 implementation for The
+Sandbox passes ecosystem. The contract provides a flexible foundation for
+digital passes, membership tokens, and access credentials with robust security,
+configurability, and user experience features.
+
+### Key Features Added
+
+- **Configurable Passes**: Each token ID represents a unique pass type with
+  customizable properties including transferability, max supply, max per wallet,
+  and dedicated treasury address.
+
+- **Flexible Minting**: Multiple minting paths including admin minting,
+  signature-authorized minting, and burn-to-mint transformations, enabling
+  diverse distribution strategies.
+
+- **Soulbound Functionality**: Optional non-transferable configuration for
+  passes that should remain bound to the original owner, with admin-controlled
+  transfer whitelist exceptions.
+
+- **Supply Controls**: Granular control over token supply, both globally (max
+  supply) and per user (max per wallet), to manage scarcity and fair
+  distribution.
+
+- **Security First**: Comprehensive role-based access control, EIP-712 signature
+  verification, pausable functionality, and meta-transaction support.
+
+- **Payment Integration**: Native support for ERC20 token payments with
+  configurable treasury addresses per token type.
+
+- **Upgradeable Design**: Implemented using OpenZeppelin's upgradeable contracts
+  pattern to allow for future improvements without migration.
+
+- **Royalty Support**: Complete ERC2981 implementation for marketplace royalties
+  on secondary sales.
+
+### Technical Implementation
+
+The contract extends multiple OpenZeppelin base contracts including
+ERC1155SupplyUpgradeable, AccessControlUpgradeable, ERC2981Upgradeable, and
+PausableUpgradeable. It uses structured storage patterns compatible with the
+upgradeable contracts pattern.
+
+Error handling is implemented using custom errors for gas efficiency and
+improved debugging. Events are emitted for all significant state changes to
+support off-chain indexing and UI updates.
+
+The contract has been thoroughly reviewed for security vulnerabilities and gas
+optimization.
