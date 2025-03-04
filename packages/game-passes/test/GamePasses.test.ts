@@ -133,6 +133,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       ethers.parseEther('1000000'),
     )) as MockERC20;
   };
+
   beforeEach(async function () {
     [
       admin,
@@ -941,6 +942,7 @@ describe('SandboxPasses1155Upgradeable', function () {
         .be.true;
     });
   });
+
   describe('Event Emissions', function () {
     it('should emit TokenConfigured event when configuring a token', async function () {
       const NEW_TOKEN_ID = 5;
