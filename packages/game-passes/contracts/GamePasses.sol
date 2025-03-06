@@ -49,7 +49,7 @@ contract SandboxPasses1155Upgradeable is
     /// @dev Revert when signature expired
     error SignatureExpired();
     /// @dev Revert when invalid signature
-    error InvalidSignature();
+    error InvalidSignature(ECDSA.RecoverError error);
     /// @dev Revert when invalid signer
     error InvalidSigner();
     /// @dev Revert when max supply below current supply
@@ -928,7 +928,7 @@ contract SandboxPasses1155Upgradeable is
 
         (address recovered, ECDSA.RecoverError err, ) = ECDSA.tryRecover(finalHash, signature);
         if (err != ECDSA.RecoverError.NoError) {
-            revert InvalidSignature();
+            revert InvalidSignature(err);
         }
         if (!hasRole(SIGNER_ROLE, recovered)) {
             revert InvalidSigner();
