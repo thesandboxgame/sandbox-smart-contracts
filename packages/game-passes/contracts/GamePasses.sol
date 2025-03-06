@@ -83,9 +83,10 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /// @notice Emitted when the base URI is updated.
-    event BaseURISet(string oldURI, string newURI);
+    event BaseURISet(address indexed caller, string oldURI, string newURI);
     /// @notice Emitted when a token is configured.
     event TokenConfigured(
+        address indexed caller,
         uint256 indexed tokenId,
         bool transferable,
         uint256 maxSupply,
@@ -95,6 +96,7 @@ contract SandboxPasses1155Upgradeable is
     );
     /// @notice Emitted when a token configuration is updated.
     event TokenConfigUpdated(
+        address indexed caller,
         uint256 indexed tokenId,
         uint256 maxSupply,
         uint256 maxPerWallet,
@@ -102,11 +104,16 @@ contract SandboxPasses1155Upgradeable is
         address treasuryWallet
     );
     /// @notice Emitted when a token's transferability is updated.
-    event TransferabilityUpdated(uint256 indexed tokenId, bool transferable);
+    event TransferabilityUpdated(address indexed caller, uint256 indexed tokenId, bool transferable);
     /// @notice Emitted when transfer whitelist is updated.
-    event TransferWhitelistUpdated(uint256 indexed tokenId, address indexed account, bool allowed);
+    event TransferWhitelistUpdated(
+        address indexed caller,
+        uint256 indexed tokenId,
+        address[] indexed accounts,
+        bool allowed
+    );
     /// @notice Emitted when tokens are recovered from the contract.
-    event TokensRecovered(address token, address recipient, uint256 amount);
+    event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
 
     // =============================================================
     //                     Structs
@@ -343,7 +350,7 @@ contract SandboxPasses1155Upgradeable is
         }
 
         // Process each mint separately to avoid stack depth issues
-        for (uint256 i = 0; i < tokenIds.length; i++) {
+        for (uint256 i; i < tokenIds.length; i++) {
             _processSingleMint(caller, tokenIds[i], amounts[i], prices[i], deadlines[i], signatures[i]);
         }
 
@@ -398,7 +405,7 @@ contract SandboxPasses1155Upgradeable is
             revert ArrayLengthMismatch();
         }
 
-        for (uint256 i = 0; i < ids.length; i++) {
+        for (uint256 i; i < ids.length; i++) {
             TokenConfig storage config = tokenConfigs[ids[i]];
 
             if (!config.isConfigured) {
@@ -435,7 +442,7 @@ contract SandboxPasses1155Upgradeable is
             revert ArrayLengthMismatch();
         }
 
-        for (uint256 i = 0; i < ids.length; i++) {
+        for (uint256 i; i < ids.length; i++) {
             TokenConfig storage config = tokenConfigs[ids[i]];
 
             if (!config.isConfigured) {
@@ -526,7 +533,7 @@ contract SandboxPasses1155Upgradeable is
         }
 
         // Validate mint tokens and check max supply
-        for (uint256 i = 0; i < mintTokenIds.length; i++) {
+        for (uint256 i; i < mintTokenIds.length; i++) {
             TokenConfig storage mintConfig = tokenConfigs[mintTokenIds[i]];
 
             if (!mintConfig.isConfigured) {
@@ -633,10 +640,10 @@ contract SandboxPasses1155Upgradeable is
             revert TokenNotConfigured(tokenId);
         }
 
-        for (uint256 i = 0; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; i++) {
             config.transferWhitelist[accounts[i]] = allowed;
-            emit TransferWhitelistUpdated(tokenId, accounts[i], allowed);
         }
+        emit TransferWhitelistUpdated(_msgSender(), tokenId, accounts, allowed);
     }
 
     /**
@@ -658,7 +665,7 @@ contract SandboxPasses1155Upgradeable is
         }
 
         config.transferable = transferable;
-        emit TransferabilityUpdated(tokenId, transferable);
+        emit TransferabilityUpdated(_msgSender(), tokenId, transferable);
     }
 
     /**
@@ -701,7 +708,7 @@ contract SandboxPasses1155Upgradeable is
         config.metadata = metadata;
         config.treasuryWallet = treasuryWallet;
 
-        emit TokenConfigured(tokenId, transferable, maxSupply, maxPerWallet, metadata, treasuryWallet);
+        emit TokenConfigured(_msgSender(), tokenId, transferable, maxSupply, maxPerWallet, metadata, treasuryWallet);
     }
 
     /**
@@ -749,7 +756,7 @@ contract SandboxPasses1155Upgradeable is
         config.metadata = metadata;
         config.treasuryWallet = treasuryWallet;
 
-        emit TokenConfigUpdated(tokenId, maxSupply, maxPerWallet, metadata, treasuryWallet);
+        emit TokenConfigUpdated(_msgSender(), tokenId, maxSupply, maxPerWallet, metadata, treasuryWallet);
     }
 
     /**
@@ -762,7 +769,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Caller doesn't have ADMIN_ROLE
      */
     function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
-        emit BaseURISet(baseURI, newBaseURI);
+        emit BaseURISet(_msgSender(), baseURI, newBaseURI);
         baseURI = newBaseURI;
     }
 
@@ -1017,7 +1024,7 @@ contract SandboxPasses1155Upgradeable is
     ) internal virtual override(ERC1155SupplyUpgradeable) whenNotPaused {
         // If not a mint (from == address(0)) and not a burn (to == address(0)), enforce transferability
         if (from != address(0) && to != address(0)) {
-            for (uint256 i = 0; i < ids.length; i++) {
+            for (uint256 i; i < ids.length; i++) {
                 uint256 tokenId = ids[i];
                 TokenConfig storage config = tokenConfigs[tokenId];
 
@@ -1133,6 +1140,6 @@ contract SandboxPasses1155Upgradeable is
         }
 
         SafeERC20.safeTransfer(IERC20(token), to, amount);
-        emit TokensRecovered(token, to, amount);
+        emit TokensRecovered(_msgSender(), token, to, amount);
     }
 }
