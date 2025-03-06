@@ -285,7 +285,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 amount,
         uint256 price,
         uint256 deadline,
-        bytes memory signature
+        bytes calldata signature
     ) external whenNotPaused {
         address caller = _msgSender();
 
@@ -293,30 +293,7 @@ contract SandboxPasses1155Upgradeable is
             revert InvalidSender(from, caller);
         }
 
-        TokenConfig storage config = tokenConfigs[tokenId];
-
-        if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
-        }
-        MintRequest memory request = MintRequest({
-            caller: caller,
-            tokenId: tokenId,
-            amount: amount,
-            price: price,
-            deadline: deadline,
-            nonce: nonces[caller]++
-        });
-
-        verifySignature(request, signature);
-        _checkMaxPerWallet(tokenId, caller, amount);
-        _checkMaxSupply(tokenId, amount);
-
-        // Update minted amount for wallet
-        config.mintedPerWallet[caller] += amount;
-
-        // Transfer payment
-        address treasury = config.treasuryWallet != address(0) ? config.treasuryWallet : defaultTreasuryWallet;
-        SafeERC20.safeTransferFrom(IERC20(paymentToken), _msgSender(), treasury, price);
+        _processSingleMint(caller, tokenId, amount, price, deadline, signature);
 
         // Mint tokens
         _mint(caller, tokenId, amount, "");
