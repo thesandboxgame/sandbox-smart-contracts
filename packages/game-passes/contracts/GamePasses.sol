@@ -1024,17 +1024,15 @@ contract SandboxPasses1155Upgradeable is
     ) internal virtual override(ERC1155SupplyUpgradeable) whenNotPaused {
         // If not a mint (from == address(0)) and not a burn (to == address(0)), enforce transferability
         if (from != address(0) && to != address(0)) {
-            for (uint256 i; i < ids.length; i++) {
-                uint256 tokenId = ids[i];
-                TokenConfig storage config = tokenConfigs[tokenId];
+            bool isAdminOrOperator = hasRole(ADMIN_ROLE, _msgSender()) || hasRole(OPERATOR_ROLE, _msgSender());
+            if (!isAdminOrOperator) {
+                for (uint256 i; i < ids.length; i++) {
+                    uint256 tokenId = ids[i];
+                    TokenConfig storage config = tokenConfigs[tokenId];
 
-                if (
-                    !config.transferable &&
-                    !config.transferWhitelist[from] &&
-                    !hasRole(ADMIN_ROLE, _msgSender()) &&
-                    !hasRole(OPERATOR_ROLE, _msgSender())
-                ) {
-                    revert TransferNotAllowed(tokenId);
+                    if (!config.transferable && !config.transferWhitelist[from]) {
+                        revert TransferNotAllowed(tokenId);
+                    }
                 }
             }
         }
