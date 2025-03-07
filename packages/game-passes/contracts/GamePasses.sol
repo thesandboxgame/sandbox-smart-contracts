@@ -13,7 +13,6 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-
 /**
  * @title SandboxPasses1155Upgradeable
  * @notice An upgradeable ERC1155 contract with AccessControl-based permissions,
@@ -792,6 +791,15 @@ contract SandboxPasses1155Upgradeable is
         config.treasuryWallet = treasuryWallet;
 
         emit TokenConfigUpdated(_msgSender(), tokenId, maxSupply, maxPerWallet, metadata, treasuryWallet);
+    }
+
+    /**
+     * @notice Check if a token exists (has been configured)
+     * @param tokenId The token ID to check
+     * @return bool True if the token has been configured, false otherwise
+     */
+    function exists(uint256 tokenId) public view override returns (bool) {
+        return _tokenStorage().tokenConfigs[tokenId].isConfigured;
     }
 
     /**
