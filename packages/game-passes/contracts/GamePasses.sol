@@ -66,6 +66,10 @@ contract SandboxPasses1155Upgradeable is
     error InvalidPaymentToken();
     /// @dev Revert when trying to recover payment token while contract is active
     error PaymentTokenRecoveryNotAllowed();
+    /// @dev Revert when batch size exceeds maximum
+    error BatchSizeExceeded(uint256 size, uint256 maxSize);
+    /// @dev Revert when invalid batch royalty
+    error InvalidBatchRoyalty();
 
     // =============================================================
     //                           Roles
@@ -106,12 +110,7 @@ contract SandboxPasses1155Upgradeable is
     /// @notice Emitted when a token's transferability is updated.
     event TransferabilityUpdated(address indexed caller, uint256 indexed tokenId, bool transferable);
     /// @notice Emitted when transfer whitelist is updated.
-    event TransferWhitelistUpdated(
-        address indexed caller,
-        uint256 indexed tokenId,
-        address[] indexed accounts,
-        bool allowed
-    );
+    event TransferWhitelistUpdated(address indexed caller, uint256 indexed tokenId, address[] accounts, bool allowed);
     /// @notice Emitted when tokens are recovered from the contract.
     event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
 
@@ -153,26 +152,70 @@ contract SandboxPasses1155Upgradeable is
     }
 
     // =============================================================
-    //                      State Variables
+    //                      Storage - ERC7201
     // =============================================================
-
-    /// @dev Mapping of token configurations
-    mapping(uint256 => TokenConfig) public tokenConfigs;
 
     /**
-     * @dev Base URI for computing {uri}.
-     *      The final token URI is constructed as `string(abi.encodePacked(baseURI, tokenId, ".json"))`.
+     * @dev Core storage layout using ERC7201 namespaced storage pattern
      */
-    string public baseURI;
+    bytes32 constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
 
-    /// @dev Default treasury wallet
-    address public defaultTreasuryWallet;
+    struct CoreStorage {
+        // Base URI for computing {uri}
+        string baseURI;
+        // Default treasury wallet
+        address defaultTreasuryWallet;
+        // Payment token
+        address paymentToken;
+        // Owner
+        address internalOwner;
+        // EIP-712 domain separator
+        bytes32 DOMAIN_SEPARATOR;
+    }
 
-    /// @dev Payment token
-    address public paymentToken;
+    function _coreStorage() private pure returns (CoreStorage storage cs) {
+        bytes32 position = CORE_STORAGE_LOCATION;
+        assembly {
+            cs.slot := position
+        }
+    }
+
+    /**
+     * @dev User storage layout using ERC7201 for nonces
+     */
+    bytes32 constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
+
+    struct UserStorage {
+        // Track nonces for replay protection
+        mapping(address => uint256) nonces;
+    }
+
+    function _userStorage() private pure returns (UserStorage storage us) {
+        bytes32 position = USER_STORAGE_LOCATION;
+        assembly {
+            us.slot := position
+        }
+    }
+
+    /**
+     * @dev Token config storage layout using ERC7201
+     */
+    bytes32 constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
+
+    struct TokenStorage {
+        // Mapping of token configurations
+        mapping(uint256 => TokenConfig) tokenConfigs;
+    }
+
+    function _tokenStorage() private pure returns (TokenStorage storage ts) {
+        bytes32 position = TOKEN_STORAGE_LOCATION;
+        assembly {
+            ts.slot := position
+        }
+    }
 
     // =============================================================
-    //                      EIP-712 Constants
+    //                      Constants
     // =============================================================
 
     /// @dev EIP-712 domain typehash
@@ -195,8 +238,8 @@ contract SandboxPasses1155Upgradeable is
             "BurnAndMintRequest(address caller,uint256 burnId,uint256 burnAmount,uint256 mintId,uint256 mintAmount,uint256 deadline,uint256 nonce)"
         );
 
-    // Track nonces for replay protection
-    mapping(address => uint256) public nonces;
+    /// @dev Maximum number of tokens that can be processed in a batch operation
+    uint256 public constant MAX_BATCH_SIZE = 100;
 
     // =============================================================
     //                          Init
@@ -225,7 +268,8 @@ contract SandboxPasses1155Upgradeable is
         address _signer,
         address _paymentToken,
         address _trustedForwarder,
-        address _defaultTreasury
+        address _defaultTreasury,
+        address _owner
     ) public initializer {
         __ERC2771Handler_init(_trustedForwarder);
         __AccessControl_init();
@@ -249,11 +293,14 @@ contract SandboxPasses1155Upgradeable is
         _grantRole(ADMIN_ROLE, _admin);
         _grantRole(OPERATOR_ROLE, _operator);
         _grantRole(SIGNER_ROLE, _signer);
-        paymentToken = _paymentToken;
-        baseURI = _baseURI;
-        defaultTreasuryWallet = _defaultTreasury;
-        _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
-        DOMAIN_SEPARATOR = keccak256(
+
+        // Initialize storage structs
+        CoreStorage storage cs = _coreStorage();
+        cs.paymentToken = _paymentToken;
+        cs.baseURI = _baseURI;
+        cs.defaultTreasuryWallet = _defaultTreasury;
+        cs.internalOwner = _owner;
+        cs.DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
                 keccak256(bytes("SandboxPasses1155")),
@@ -262,6 +309,8 @@ contract SandboxPasses1155Upgradeable is
                 address(this)
             )
         );
+
+        _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
     }
 
     // =============================================================
@@ -320,6 +369,7 @@ contract SandboxPasses1155Upgradeable is
      * @dev Reverts if:
      *      - Contract is paused
      *      - Array lengths don't match
+     *      - Batch size exceeds MAX_BATCH_SIZE
      *      - Any token is not configured
      *      - Any signature is invalid or expired
      *      - Any max supply would be exceeded
@@ -338,6 +388,10 @@ contract SandboxPasses1155Upgradeable is
 
         if (from != caller) {
             revert InvalidSender(from, caller);
+        }
+
+        if (tokenIds.length > MAX_BATCH_SIZE) {
+            revert BatchSizeExceeded(tokenIds.length, MAX_BATCH_SIZE);
         }
 
         if (
@@ -371,13 +425,15 @@ contract SandboxPasses1155Upgradeable is
      *      - Max supply would be exceeded
      */
     function adminMint(address to, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
         }
 
         _checkMaxSupply(tokenId, amount);
+
+        config.mintedPerWallet[to] += amount;
 
         _mint(to, tokenId, amount, "");
     }
@@ -406,12 +462,12 @@ contract SandboxPasses1155Upgradeable is
         }
 
         for (uint256 i; i < ids.length; i++) {
-            TokenConfig storage config = tokenConfigs[ids[i]];
+            TokenConfig storage config = _tokenStorage().tokenConfigs[ids[i]];
 
             if (!config.isConfigured) {
                 revert TokenNotConfigured(ids[i]);
             }
-
+            config.mintedPerWallet[to] += amounts[i];
             _checkMaxSupply(ids[i], amounts[i]);
         }
         _mintBatch(to, ids, amounts, "");
@@ -443,7 +499,7 @@ contract SandboxPasses1155Upgradeable is
         }
 
         for (uint256 i; i < ids.length; i++) {
-            TokenConfig storage config = tokenConfigs[ids[i]];
+            TokenConfig storage config = _tokenStorage().tokenConfigs[ids[i]];
 
             if (!config.isConfigured) {
                 revert TokenNotConfigured(ids[i]);
@@ -481,7 +537,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 mintTokenId,
         uint256 mintAmount
     ) external whenNotPaused onlyRole(OPERATOR_ROLE) {
-        TokenConfig storage mintConfig = tokenConfigs[mintTokenId];
+        TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintTokenId];
 
         if (!mintConfig.isConfigured) {
             revert TokenNotConfigured(mintTokenId);
@@ -534,7 +590,7 @@ contract SandboxPasses1155Upgradeable is
 
         // Validate mint tokens and check max supply
         for (uint256 i; i < mintTokenIds.length; i++) {
-            TokenConfig storage mintConfig = tokenConfigs[mintTokenIds[i]];
+            TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintTokenIds[i]];
 
             if (!mintConfig.isConfigured) {
                 revert TokenNotConfigured(mintTokenIds[i]);
@@ -585,13 +641,13 @@ contract SandboxPasses1155Upgradeable is
             revert InvalidSender(from, caller);
         }
 
-        TokenConfig storage burnConfig = tokenConfigs[burnId];
+        TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
             revert BurnMintNotConfigured(burnId);
         }
 
         // Check if mint token is configured and respects max supply
-        TokenConfig storage mintConfig = tokenConfigs[mintId];
+        TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintId];
         if (!mintConfig.isConfigured) {
             revert TokenNotConfigured(mintId);
         }
@@ -603,7 +659,7 @@ contract SandboxPasses1155Upgradeable is
             mintId: mintId,
             mintAmount: mintAmount,
             deadline: deadline,
-            nonce: nonces[caller]++
+            nonce: _userStorage().nonces[caller]++
         });
 
         verifyBurnAndMintSignature(request, signature);
@@ -634,7 +690,7 @@ contract SandboxPasses1155Upgradeable is
         address[] calldata accounts,
         bool allowed
     ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
@@ -658,7 +714,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Token is not configured
      */
     function setTransferable(uint256 tokenId, bool transferable) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
@@ -692,7 +748,7 @@ contract SandboxPasses1155Upgradeable is
         string memory metadata,
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (config.isConfigured) {
             revert TokenAlreadyConfigured(tokenId);
@@ -734,7 +790,7 @@ contract SandboxPasses1155Upgradeable is
         string memory metadata,
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
@@ -769,8 +825,19 @@ contract SandboxPasses1155Upgradeable is
      *      - Caller doesn't have ADMIN_ROLE
      */
     function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
-        emit BaseURISet(_msgSender(), baseURI, newBaseURI);
-        baseURI = newBaseURI;
+        CoreStorage storage cs = _coreStorage();
+        emit BaseURISet(_msgSender(), cs.baseURI, newBaseURI);
+        cs.baseURI = newBaseURI;
+    }
+
+    /**
+     * @notice Updates the contract owner address
+     * @param _newOwner The address that will become the new owner
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev The owner may have special permissions outside of the role system
+     */
+    function setOwner(address _newOwner) external onlyRole(ADMIN_ROLE) {
+        _coreStorage().internalOwner = _newOwner;
     }
 
     /**
@@ -810,7 +877,6 @@ contract SandboxPasses1155Upgradeable is
      *      - Signature has expired
      *      - Signature is invalid
      *      - Signer doesn't have SIGNER_ROLE
-
      */
     function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public view {
         bytes32 structHash = keccak256(
@@ -838,7 +904,98 @@ contract SandboxPasses1155Upgradeable is
      * @return bool True if the address is whitelisted for transfers, false otherwise
      */
     function isTransferWhitelisted(uint256 tokenId, address account) public view returns (bool) {
-        return tokenConfigs[tokenId].transferWhitelist[account];
+        return _tokenStorage().tokenConfigs[tokenId].transferWhitelist[account];
+    }
+
+    /**
+     * @notice Returns the current owner address of the contract
+     * @dev This address may have special permissions beyond role-based access control
+     * @return address The current owner address
+     */
+    function owner() public view returns (address) {
+        return _coreStorage().internalOwner;
+    }
+
+    // =============================================================
+    //                   Storage Getters
+    // =============================================================
+
+    /**
+     * @notice Returns the base URI for token metadata
+     * @return string The base URI
+     */
+    function baseURI() external view returns (string memory) {
+        return _coreStorage().baseURI;
+    }
+
+    /**
+     * @notice Returns the default treasury wallet address
+     * @return address The default treasury wallet address
+     */
+    function defaultTreasuryWallet() external view returns (address) {
+        return _coreStorage().defaultTreasuryWallet;
+    }
+
+    /**
+     * @notice Returns the payment token address
+     * @return address The payment token address
+     */
+    function paymentToken() external view returns (address) {
+        return _coreStorage().paymentToken;
+    }
+
+    /**
+     * @notice Returns current nonce for a user address
+     * @param user The address to get nonce for
+     * @return uint256 The current nonce
+     */
+    function getNonce(address user) external view returns (uint256) {
+        return _userStorage().nonces[user];
+    }
+
+    /**
+     * @notice Returns the token configuration
+     * @param tokenId The token ID to get configuration for
+     * @return isConfigured Whether the token is configured
+     * @return transferable Whether the token is transferable
+     * @return maxSupply Maximum supply for the token (0 for unlimited)
+     * @return metadata Token metadata string
+     * @return maxPerWallet Maximum tokens per wallet
+     * @return treasuryWallet Treasury wallet for the token
+     */
+    function tokenConfigs(
+        uint256 tokenId
+    )
+        external
+        view
+        returns (
+            bool isConfigured,
+            bool transferable,
+            uint256 maxSupply,
+            string memory metadata,
+            uint256 maxPerWallet,
+            address treasuryWallet
+        )
+    {
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
+        return (
+            config.isConfigured,
+            config.transferable,
+            config.maxSupply,
+            config.metadata,
+            config.maxPerWallet,
+            config.treasuryWallet
+        );
+    }
+
+    /**
+     * @notice Returns the number of tokens minted per wallet for a specific token ID
+     * @param tokenId The token ID
+     * @param wallet The wallet address
+     * @return uint256 Number of tokens minted by this wallet
+     */
+    function mintedPerWallet(uint256 tokenId, address wallet) external view returns (uint256) {
+        return _tokenStorage().tokenConfigs[tokenId].mintedPerWallet[wallet];
     }
 
     // =============================================================
@@ -862,7 +1019,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 deadline,
         bytes calldata signature
     ) private {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
@@ -874,7 +1031,7 @@ contract SandboxPasses1155Upgradeable is
             amount: amount,
             price: price,
             deadline: deadline,
-            nonce: nonces[caller]++
+            nonce: _userStorage().nonces[caller]++
         });
 
         verifySignature(request, signature);
@@ -887,9 +1044,9 @@ contract SandboxPasses1155Upgradeable is
 
         address treasury = config.treasuryWallet;
         if (treasury == address(0)) {
-            treasury = defaultTreasuryWallet;
+            treasury = _coreStorage().defaultTreasuryWallet;
         }
-        SafeERC20.safeTransferFrom(IERC20(paymentToken), caller, treasury, price);
+        SafeERC20.safeTransferFrom(IERC20(_coreStorage().paymentToken), caller, treasury, price);
     }
 
     /**
@@ -908,7 +1065,7 @@ contract SandboxPasses1155Upgradeable is
             revert SignatureExpired();
         }
 
-        bytes32 finalHash = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hash);
+        bytes32 finalHash = MessageHashUtils.toTypedDataHash(_coreStorage().DOMAIN_SEPARATOR, hash);
 
         (address recovered, ECDSA.RecoverError err, ) = ECDSA.tryRecover(finalHash, signature);
         if (err != ECDSA.RecoverError.NoError) {
@@ -929,7 +1086,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Current supply + amount would exceed max supply
      */
     function _checkMaxSupply(uint256 tokenId, uint256 amount) private view {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         if (config.maxSupply > 0) {
             if (totalSupply(tokenId) + amount > config.maxSupply) {
                 revert MaxSupplyExceeded(tokenId);
@@ -947,7 +1104,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Current wallet balance + amount would exceed max per wallet
      */
     function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
-        TokenConfig storage config = tokenConfigs[tokenId];
+        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         if (config.mintedPerWallet[to] + amount > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
@@ -985,6 +1142,31 @@ contract SandboxPasses1155Upgradeable is
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
+    /**
+     * @notice Sets royalty info for a batch of token IDs, overriding default royalty
+     * @param tokenIds Array of token IDs to set royalties for
+     * @param receivers Array of addresses that will receive the royalties
+     * @param feeNumerators Array of royalty amounts in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Array lengths don't match
+     *      - Invalid batch royalty
+     */
+    function setBatchTokenRoyalty(
+        uint256[] calldata tokenIds,
+        address[] calldata receivers,
+        uint96[] calldata feeNumerators
+    ) external onlyRole(ADMIN_ROLE) {
+        if (tokenIds.length != receivers.length || receivers.length != feeNumerators.length) {
+            revert InvalidBatchRoyalty();
+        }
+
+        for (uint256 i; i < tokenIds.length; i++) {
+            _setTokenRoyalty(tokenIds[i], receivers[i], feeNumerators[i]);
+        }
+    }
+
     // =============================================================
     //                   ERC1155 Overrides
     // =============================================================
@@ -997,7 +1179,7 @@ contract SandboxPasses1155Upgradeable is
      * @return string The complete URI for the token metadata
      */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(baseURI, tokenId.toString(), ".json"));
+        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
     }
 
     /**
@@ -1028,7 +1210,7 @@ contract SandboxPasses1155Upgradeable is
             if (!isAdminOrOperator) {
                 for (uint256 i; i < ids.length; i++) {
                     uint256 tokenId = ids[i];
-                    TokenConfig storage config = tokenConfigs[tokenId];
+                    TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
 
                     if (!config.transferable && !config.transferWhitelist[from]) {
                         revert TransferNotAllowed(tokenId);
@@ -1133,7 +1315,7 @@ contract SandboxPasses1155Upgradeable is
      */
     function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
         // If attempting to recover the payment token, contract must be paused
-        if (token == paymentToken && !paused()) {
+        if (token == _coreStorage().paymentToken && !paused()) {
             revert PaymentTokenRecoveryNotAllowed();
         }
 
