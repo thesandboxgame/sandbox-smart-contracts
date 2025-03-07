@@ -892,7 +892,7 @@ contract SandboxPasses1155Upgradeable is
      * @dev Returns false if token is not configured
      * @return bool True if the address is whitelisted for transfers, false otherwise
      */
-    function isTransferWhitelisted(uint256 tokenId, address account) public view returns (bool) {
+    function isTransferWhitelisted(uint256 tokenId, address account) external view returns (bool) {
         return _tokenStorage().tokenConfigs[tokenId].transferWhitelist[account];
     }
 
