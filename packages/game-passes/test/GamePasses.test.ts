@@ -243,6 +243,50 @@ describe('SandboxPasses1155Upgradeable', function () {
         await sandboxPasses.isTransferWhitelisted(TOKEN_ID_2, user1.address),
       ).to.be.false;
     });
+
+    it('should not allow non-admin to set transferability', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses.connect(user1).setTransferable(TOKEN_ID_1, false),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to update token configuration', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses.connect(user1).updateTokenConfig(
+          TOKEN_ID_1,
+          200, // new max supply
+          15, // new max per wallet
+          'ipfs://QmUpdated',
+          user1.address,
+        ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to update transfer whitelist', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1, user2} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .updateTransferWhitelist(TOKEN_ID_1, [user2.address], true),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
   });
 
   describe('Admin Minting', function () {
@@ -1051,6 +1095,18 @@ describe('SandboxPasses1155Upgradeable', function () {
         2,
       );
     });
+
+    it('should not allow non-admin to set transferability', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses.connect(user1).setTransferable(TOKEN_ID_1, false),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
   });
 
   describe('Royalties', function () {
@@ -1120,6 +1176,44 @@ describe('SandboxPasses1155Upgradeable', function () {
         (salePrice * tokenRoyaltyPercentage) / 10000n,
       );
     });
+
+    it('should not allow non-admin to set default royalty', async function () {
+      const {sandboxPasses, user1} = await loadFixture(runCreateTestSetup);
+
+      const newRoyaltyPercentage = 1000n; // 10%
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .setDefaultRoyalty(
+            await sandboxPasses.getAddress(),
+            newRoyaltyPercentage,
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to set token-specific royalty', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_2} =
+        await loadFixture(runCreateTestSetup);
+
+      const tokenRoyaltyPercentage = 800n; // 8%
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .setTokenRoyalty(
+            TOKEN_ID_2,
+            await sandboxPasses.getAddress(),
+            tokenRoyaltyPercentage,
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
   });
 
   describe('Pause Functionality', function () {
@@ -1133,6 +1227,33 @@ describe('SandboxPasses1155Upgradeable', function () {
 
       await sandboxPasses.connect(admin).unpause();
       expect(await sandboxPasses.paused()).to.be.false;
+    });
+
+    it('should not allow non-admin to pause the contract', async function () {
+      const {sandboxPasses, user1} = await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses.connect(user1).pause(),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to unpause the contract', async function () {
+      const {sandboxPasses, admin, user1} =
+        await loadFixture(runCreateTestSetup);
+
+      // First pause as admin
+      await sandboxPasses.connect(admin).pause();
+
+      // Try to unpause as non-admin
+      await expect(
+        sandboxPasses.connect(user1).unpause(),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
     });
 
     it('should not allow minting when paused', async function () {
@@ -1220,6 +1341,19 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.baseURI()).to.equal(newBaseURI);
       expect(await sandboxPasses.uri(TOKEN_ID_1)).to.equal(
         `${newBaseURI}${TOKEN_ID_1}.json`,
+      );
+    });
+
+    it('should not allow non-admin to update base URI', async function () {
+      const {sandboxPasses, user1} = await loadFixture(runCreateTestSetup);
+
+      const newBaseURI = 'https://new-api.example.com/metadata/';
+
+      await expect(
+        sandboxPasses.connect(user1).setBaseURI(newBaseURI),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
       );
     });
   });
@@ -1396,6 +1530,26 @@ describe('SandboxPasses1155Upgradeable', function () {
         await mockToken.balanceOf(await sandboxPasses.getAddress()),
       ).to.equal(0);
       expect(await mockToken.balanceOf(treasury.address)).to.equal(amount);
+    });
+
+    it('should not allow non-admin to recover ERC20 tokens', async function () {
+      const {sandboxPasses, user1, treasury, deployToken} =
+        await loadFixture(runCreateTestSetup);
+
+      // Create a mock ERC20 token and send some to the contract
+      const mockToken = await deployToken();
+      const amount = ethers.parseEther('10');
+      await mockToken.mint(await sandboxPasses.getAddress(), amount);
+
+      // Try to recover as non-admin
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .recoverERC20(await mockToken.getAddress(), treasury.address, amount),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
     });
 
     it('should not allow recovering payment token while contract is active', async function () {
