@@ -919,6 +919,156 @@ describe('SandboxPasses1155Upgradeable', function () {
         .to.be.revertedWithCustomError(sandboxPasses, 'BatchSizeExceeded')
         .withArgs(EXCEEDED_SIZE, MAX_BATCH_SIZE);
     });
+
+    it('should not allow minting with incorrect nonce', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const incorrectNonce = 1; // User's nonce should be 0 initially
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature with incorrect nonce
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        incorrectNonce,
+      );
+
+      // Try to mint with incorrect nonce
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .mint(
+            user1.address,
+            TOKEN_ID_1,
+            MINT_AMOUNT,
+            price,
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner'); // invalid signer because the hash was incorrect due to bad nonce
+    });
+
+    it('should not allow replay attacks by reusing signatures', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const nonce = 0; // First transaction for user
+
+      // Approve payment token for two transactions
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price * 2n);
+
+      // Create signature
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // First mint should succeed
+      await sandboxPasses
+        .connect(user1)
+        .mint(
+          user1.address,
+          TOKEN_ID_1,
+          MINT_AMOUNT,
+          price,
+          deadline,
+          signature,
+        );
+
+      // Second mint with same signature should fail (replay attack)
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .mint(
+            user1.address,
+            TOKEN_ID_1,
+            MINT_AMOUNT,
+            price,
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner'); // invalid signer because the hash was incorrect due nonce in sig and contract mismatch
+    });
+
+    it('should increment user nonce after successful mint', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+
+      // Check initial nonce
+      expect(await sandboxPasses.getNonce(user1.address)).to.equal(0);
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature with correct nonce
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        0, // Initial nonce
+      );
+
+      // Mint with signature
+      await sandboxPasses
+        .connect(user1)
+        .mint(
+          user1.address,
+          TOKEN_ID_1,
+          MINT_AMOUNT,
+          price,
+          deadline,
+          signature,
+        );
+
+      // Verify nonce was incremented
+      expect(await sandboxPasses.getNonce(user1.address)).to.equal(1);
+    });
   });
 
   describe('Burn and Mint Operations', function () {
