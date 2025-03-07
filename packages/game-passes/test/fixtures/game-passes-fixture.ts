@@ -1,4 +1,5 @@
 import {SignerWithAddress} from '@nomicfoundation/hardhat-ethers/signers';
+import {AddressLike, BigNumberish, BytesLike} from 'ethers';
 import {ethers, upgrades} from 'hardhat';
 import {MockERC20, SandboxPasses1155Upgradeable} from '../../typechain-types';
 
@@ -194,6 +195,54 @@ export async function runCreateTestSetup() {
     await sandboxPasses.connect(admin).adminMint(to, tokenId, amount);
   }
 
+  const approveAndCallMint = async (
+    account: SignerWithAddress,
+    amount: bigint,
+    values: [
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+    ],
+  ) => {
+    const encodedData = sandboxPasses.interface.encodeFunctionData(
+      'mint',
+      values,
+    );
+
+    const tx = await paymentToken
+      .connect(account)
+      .approveAndCall(await sandboxPasses.getAddress(), amount, encodedData);
+    const result = await tx.wait();
+    return result;
+  };
+
+  const approveAndCallBatchMint = async (
+    account: SignerWithAddress,
+    amount: bigint,
+    values: [
+      AddressLike,
+      BigNumberish[],
+      BigNumberish[],
+      BigNumberish[],
+      BigNumberish[],
+      BytesLike[],
+    ],
+  ) => {
+    const encodedData = sandboxPasses.interface.encodeFunctionData(
+      'batchMint',
+      values,
+    );
+
+    const tx = await paymentToken
+      .connect(account)
+      .approveAndCall(await sandboxPasses.getAddress(), amount, encodedData);
+    const result = await tx.wait();
+    return result;
+  };
+
   return {
     SandboxPasses,
     sandboxPasses,
@@ -211,6 +260,8 @@ export async function runCreateTestSetup() {
     createMintSignature,
     createBurnAndMintSignature,
     mintTokensForBurn,
+    approveAndCallMint,
+    approveAndCallBatchMint,
     DOMAIN_NAME,
     DOMAIN_VERSION,
     BASE_URI,

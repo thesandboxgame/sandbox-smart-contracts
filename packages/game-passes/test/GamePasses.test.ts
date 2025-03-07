@@ -378,6 +378,100 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await paymentToken.balanceOf(treasury.address)).to.equal(price);
     });
 
+    it('should allow minting with approveAndCall', async function () {
+      const {
+        signer,
+        user1,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+        approveAndCallMint,
+      } = await loadFixture(runCreateTestSetup);
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const nonce = 0; // First transaction for user
+
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      await expect(
+        approveAndCallMint(user1, price, [
+          user1.address,
+          TOKEN_ID_1,
+          MINT_AMOUNT,
+          price,
+          deadline,
+          signature,
+        ]),
+      ).to.not.be.reverted;
+    });
+
+    it('should allow batch minting with valid signatures', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MINT_AMOUNT,
+        createMintSignature,
+        approveAndCallBatchMint,
+      } = await loadFixture(runCreateTestSetup);
+
+      const price1 = ethers.parseEther('0.1');
+      const price2 = ethers.parseEther('0.2');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const nonce1 = 0;
+      const nonce2 = 1;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price1 + price2);
+
+      // Create signatures
+      const signature1 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price1,
+        deadline,
+        nonce1,
+      );
+
+      const signature2 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_2,
+        MINT_AMOUNT * 2,
+        price2,
+        deadline,
+        nonce2,
+      );
+
+      await expect(
+        approveAndCallBatchMint(user1, price1 + price2, [
+          user1.address,
+          [TOKEN_ID_1, TOKEN_ID_2],
+          [MINT_AMOUNT, MINT_AMOUNT * 2],
+          [price1, price2],
+          [deadline, deadline],
+          [signature1, signature2],
+        ]),
+      ).to.not.be.reverted;
+    });
+
+    // Batch mint with signatures
     it('should allow batch minting with valid signatures', async function () {
       const {
         sandboxPasses,
@@ -1409,44 +1503,6 @@ describe('SandboxPasses1155Upgradeable', function () {
             signature,
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'BurnMintNotConfigured');
-    });
-
-    it('should revert with InvalidSender when from address does not match caller', async function () {
-      const {
-        sandboxPasses,
-        signer,
-        user1,
-        user2,
-        TOKEN_ID_1,
-        MINT_AMOUNT,
-        createMintSignature,
-      } = await loadFixture(runCreateTestSetup);
-      const price = ethers.parseEther('0.1');
-      const deadline = (await time.latest()) + 3600;
-      const nonce = 0;
-
-      // Create signature
-      const signature = await createMintSignature(
-        signer,
-        user1.address, // user1 as intended receiver
-        TOKEN_ID_1,
-        MINT_AMOUNT,
-        price,
-        deadline,
-        nonce,
-      );
-
-      // user2 tries to use user1's signature
-      await expect(
-        sandboxPasses.connect(user2).mint(
-          user1.address, // from is user1, but caller is user2
-          TOKEN_ID_1,
-          MINT_AMOUNT,
-          price,
-          deadline,
-          signature,
-        ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSender');
     });
 
     it('should revert with ArrayLengthMismatch in batch operations', async function () {

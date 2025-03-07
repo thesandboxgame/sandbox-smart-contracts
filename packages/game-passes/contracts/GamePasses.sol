@@ -12,6 +12,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
 /**
  * @title SandboxPasses1155Upgradeable
@@ -44,8 +45,6 @@ contract SandboxPasses1155Upgradeable is
     error TokenAlreadyConfigured(uint256 tokenId);
     /// @dev Revert when array lengths mismatch
     error ArrayLengthMismatch();
-    /// @dev Revert when invalid caller doesn't match from address
-    error InvalidSender(address from, address caller);
     /// @dev Revert when signature expired
     error SignatureExpired();
     /// @dev Revert when invalid signature
@@ -319,7 +318,7 @@ contract SandboxPasses1155Upgradeable is
 
     /**
      * @notice Mints tokens with a valid EIP-712 signature, requiring payment in the configured token
-     * @param from Address that will receive the tokens (must be same as msg.sender)
+     * @param caller Address that will receive the tokens
      * @param tokenId ID of the token to mint
      * @param amount Number of tokens to mint
      * @param price Price to pay in payment token units
@@ -336,28 +335,20 @@ contract SandboxPasses1155Upgradeable is
      *      - Payment transfer fails
      */
     function mint(
-        address from,
+        address caller,
         uint256 tokenId,
         uint256 amount,
         uint256 price,
         uint256 deadline,
         bytes calldata signature
     ) external whenNotPaused {
-        address caller = _msgSender();
-
-        if (from != caller) {
-            revert InvalidSender(from, caller);
-        }
-
         _processSingleMint(caller, tokenId, amount, price, deadline, signature);
-
-        // Mint tokens
         _mint(caller, tokenId, amount, "");
     }
 
     /**
      * @notice Batch mints multiple tokens with valid EIP-712 signatures in a single transaction
-     * @param from Address that will receive the tokens (must be same as msg.sender)
+     * @param caller Address that will receive the tokens (must be same as msg.sender)
      * @param tokenIds Array of token IDs to mint
      * @param amounts Array of amounts to mint for each token ID
      * @param prices Array of prices to pay for each mint operation
@@ -377,19 +368,13 @@ contract SandboxPasses1155Upgradeable is
      *      - Any payment transfer fails
      */
     function batchMint(
-        address from,
+        address caller,
         uint256[] calldata tokenIds,
         uint256[] calldata amounts,
         uint256[] calldata prices,
         uint256[] calldata deadlines,
         bytes[] calldata signatures
     ) external whenNotPaused {
-        address caller = _msgSender();
-
-        if (from != caller) {
-            revert InvalidSender(from, caller);
-        }
-
         if (tokenIds.length > MAX_BATCH_SIZE) {
             revert BatchSizeExceeded(tokenIds.length, MAX_BATCH_SIZE);
         }
@@ -467,8 +452,8 @@ contract SandboxPasses1155Upgradeable is
             if (!config.isConfigured) {
                 revert TokenNotConfigured(ids[i]);
             }
-            config.mintedPerWallet[to] += amounts[i];
             _checkMaxSupply(ids[i], amounts[i]);
+            config.mintedPerWallet[to] += amounts[i];
         }
         _mintBatch(to, ids, amounts, "");
     }
@@ -608,7 +593,7 @@ contract SandboxPasses1155Upgradeable is
 
     /**
      * @notice Allows users to burn their tokens and mint new ones with a valid EIP-712 signature
-     * @param from Address to burn from and mint to (must be msg.sender)
+     * @param caller Address to burn from and mint to (must be msg.sender)
      * @param burnId ID of the token to burn
      * @param burnAmount Number of tokens to burn
      * @param mintId ID of the token to mint
@@ -627,7 +612,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Burn operation fails (insufficient balance)
      */
     function burnAndMint(
-        address from,
+        address caller,
         uint256 burnId,
         uint256 burnAmount,
         uint256 mintId,
@@ -635,12 +620,6 @@ contract SandboxPasses1155Upgradeable is
         uint256 deadline,
         bytes memory signature
     ) external whenNotPaused {
-        address caller = _msgSender();
-
-        if (from != caller) {
-            revert InvalidSender(from, caller);
-        }
-
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
             revert BurnMintNotConfigured(burnId);
