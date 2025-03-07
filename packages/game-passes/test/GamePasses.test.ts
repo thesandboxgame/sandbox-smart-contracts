@@ -1287,7 +1287,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       );
     });
 
-    it('should not allow transferring non-transferable tokens', async function () {
+    it('should not allow transferring non-transferable tokens if not whitelisted or admin or operator', async function () {
       const {sandboxPasses, user1, user2, TOKEN_ID_2, admin, MINT_AMOUNT} =
         await loadFixture(runCreateTestSetup);
 
