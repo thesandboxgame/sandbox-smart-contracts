@@ -115,7 +115,7 @@ contract SandboxPasses1155Upgradeable is
     /**
      * @dev Core storage layout using ERC7201 namespaced storage pattern
      */
-    bytes32 constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
+    bytes32 public constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
 
     struct CoreStorage {
         // Base URI for computing {uri}
@@ -127,6 +127,7 @@ contract SandboxPasses1155Upgradeable is
         // Owner
         address internalOwner;
         // EIP-712 domain separator
+        // solhint-disable-next-line var-name-mixedcase This is a semi-constant variable, its set upon initialization
         bytes32 DOMAIN_SEPARATOR;
     }
 
@@ -140,7 +141,7 @@ contract SandboxPasses1155Upgradeable is
     /**
      * @dev User storage layout using ERC7201 for nonces
      */
-    bytes32 constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
+    bytes32 public constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
 
     struct UserStorage {
         // Track nonces for replay protection
@@ -157,7 +158,7 @@ contract SandboxPasses1155Upgradeable is
     /**
      * @dev Token config storage layout using ERC7201
      */
-    bytes32 constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
+    bytes32 public constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
 
     struct TokenStorage {
         // Mapping of token configurations
