@@ -365,6 +365,56 @@ describe('SandboxPasses1155Upgradeable', function () {
           .adminMint(admin.address, TOKEN_ID_1, MAX_SUPPLY + 1),
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
     });
+
+    it('should not allow non-admin to mint tokens', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to batch mint tokens', async function () {
+      const {sandboxPasses, user1, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .adminBatchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [MINT_AMOUNT, MINT_AMOUNT * 2],
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-admin to mint to multiple recipients', async function () {
+      const {sandboxPasses, user1, user2, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .adminMultiRecipientMint(
+            [user1.address, user2.address],
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [MINT_AMOUNT, MINT_AMOUNT * 2],
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
   });
 
   describe('Signature-Based Minting', function () {
