@@ -29,47 +29,6 @@ contract SandboxPasses1155Upgradeable is
     using Strings for uint256;
 
     // =============================================================
-    //                           Errors
-    // =============================================================
-
-    /// @dev Revert when a non-transferable token is attempted to be transferred.
-    error NonTransferable(uint256 tokenId);
-    /// @dev Revert when trying to mint a token that is not configured
-    error TokenNotConfigured(uint256 tokenId);
-    /// @dev Revert when trying to mint more tokens than the max supply
-    error MaxSupplyExceeded(uint256 tokenId);
-    /// @dev Revert when burn and mint configuration doesn't exist
-    error BurnMintNotConfigured(uint256 burnTokenId);
-    /// @dev Revert when token is already configured
-    error TokenAlreadyConfigured(uint256 tokenId);
-    /// @dev Revert when array lengths mismatch
-    error ArrayLengthMismatch();
-    /// @dev Revert when signature expired
-    error SignatureExpired();
-    /// @dev Revert when invalid signature
-    error InvalidSignature(ECDSA.RecoverError error);
-    /// @dev Revert when invalid signer
-    error InvalidSigner();
-    /// @dev Revert when max supply below current supply
-    error MaxSupplyBelowCurrentSupply(uint256 tokenId);
-    /// @dev Revert when transfer not allowed
-    error TransferNotAllowed(uint256 tokenId);
-    /// @dev Revert when exceeds max per wallet
-    error ExceedsMaxPerWallet(uint256 tokenId, address wallet, uint256 attempted, uint256 maximum);
-    /// @dev Revert when address is zero
-    error ZeroAddress(string role);
-    /// @dev Revert when max per wallet is zero
-    error ZeroMaxPerWallet();
-    /// @dev Revert when payment token is invalid
-    error InvalidPaymentToken();
-    /// @dev Revert when trying to recover payment token while contract is active
-    error PaymentTokenRecoveryNotAllowed();
-    /// @dev Revert when batch size exceeds maximum
-    error BatchSizeExceeded(uint256 size, uint256 maxSize);
-    /// @dev Revert when invalid batch royalty
-    error InvalidBatchRoyalty();
-
-    // =============================================================
     //                           Roles
     // =============================================================
 
@@ -238,6 +197,45 @@ contract SandboxPasses1155Upgradeable is
 
     /// @dev Maximum number of tokens that can be processed in a batch operation
     uint256 public constant MAX_BATCH_SIZE = 100;
+
+    // =============================================================
+    //                           Errors
+    // =============================================================
+
+    /// @dev Revert when trying to mint a token that is not configured
+    error TokenNotConfigured(uint256 tokenId);
+    /// @dev Revert when trying to mint more tokens than the max supply
+    error MaxSupplyExceeded(uint256 tokenId);
+    /// @dev Revert when burn and mint configuration doesn't exist
+    error BurnMintNotConfigured(uint256 burnTokenId);
+    /// @dev Revert when token is already configured
+    error TokenAlreadyConfigured(uint256 tokenId);
+    /// @dev Revert when array lengths mismatch
+    error ArrayLengthMismatch();
+    /// @dev Revert when signature expired
+    error SignatureExpired();
+    /// @dev Revert when invalid signature
+    error InvalidSignature(ECDSA.RecoverError error);
+    /// @dev Revert when invalid signer
+    error InvalidSigner();
+    /// @dev Revert when max supply below current supply
+    error MaxSupplyBelowCurrentSupply(uint256 tokenId);
+    /// @dev Revert when transfer not allowed
+    error TransferNotAllowed(uint256 tokenId);
+    /// @dev Revert when exceeds max per wallet
+    error ExceedsMaxPerWallet(uint256 tokenId, address wallet, uint256 attempted, uint256 maximum);
+    /// @dev Revert when address is zero
+    error ZeroAddress(string role);
+    /// @dev Revert when max per wallet is zero
+    error ZeroMaxPerWallet();
+    /// @dev Revert when payment token is invalid
+    error InvalidPaymentToken();
+    /// @dev Revert when trying to recover payment token while contract is active
+    error PaymentTokenRecoveryNotAllowed();
+    /// @dev Revert when batch size exceeds maximum
+    error BatchSizeExceeded(uint256 size, uint256 maxSize);
+    /// @dev Revert when invalid batch royalty
+    error InvalidBatchRoyalty();
 
     // =============================================================
     //                          Init
