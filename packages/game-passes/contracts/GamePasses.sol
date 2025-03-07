@@ -252,8 +252,12 @@ contract SandboxPasses1155Upgradeable is
      * @param _royaltyReceiver Address to receive royalty fees.
      * @param _royaltyFeeNumerator Royalty fee in basis points (e.g. 500 => 5%).
      * @param _admin Address that will be granted the ADMIN_ROLE.
+     * @param _operator Address that will be granted the OPERATOR_ROLE.
+     * @param _signer Address that will be granted the SIGNER_ROLE.
+     * @param _paymentToken Address of the ERC20 token used for payments.
      * @param _trustedForwarder Address of the trusted meta-transaction forwarder.
      * @param _defaultTreasury Address of the default treasury wallet.
+     * @param _owner Address that will be set as the internal owner.
      */
     function initialize(
         string memory _baseURI,
