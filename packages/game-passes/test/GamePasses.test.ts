@@ -414,7 +414,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       ).to.not.be.reverted;
     });
 
-    it('should allow batch minting with valid signatures', async function () {
+    it('should allow batch minting with approveAndCall', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1436,8 +1436,7 @@ describe('SandboxPasses1155Upgradeable', function () {
 
   describe('Additional Error Cases', function () {
     it('should revert when configuring token with zero maxPerWallet', async function () {
-      const {sandboxPasses, admin, TOKEN_ID_1} =
-        await loadFixture(runCreateTestSetup);
+      const {sandboxPasses, admin} = await loadFixture(runCreateTestSetup);
       const NEW_TOKEN_ID = 10;
 
       await expect(

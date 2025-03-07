@@ -162,7 +162,7 @@ export async function runCreateTestSetup() {
     await paymentToken.getAddress(),
     trustedForwarder.address,
     treasury.address,
-    admin.address,
+    owner.address,
   ])) as unknown as SandboxPasses1155Upgradeable;
   await sandboxPasses.waitForDeployment();
 
