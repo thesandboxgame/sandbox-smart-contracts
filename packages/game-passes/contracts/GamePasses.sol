@@ -127,12 +127,13 @@ contract SandboxPasses1155Upgradeable is
         // Owner
         address internalOwner;
         // EIP-712 domain separator
-        // solhint-disable-next-line var-name-mixedcase This is a semi-constant variable, its set upon initialization
+        // solhint-disable-next-line var-name-mixedcase
         bytes32 DOMAIN_SEPARATOR;
     }
 
     function _coreStorage() private pure returns (CoreStorage storage cs) {
         bytes32 position = CORE_STORAGE_LOCATION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             cs.slot := position
         }
@@ -150,6 +151,7 @@ contract SandboxPasses1155Upgradeable is
 
     function _userStorage() private pure returns (UserStorage storage us) {
         bytes32 position = USER_STORAGE_LOCATION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             us.slot := position
         }
@@ -167,6 +169,7 @@ contract SandboxPasses1155Upgradeable is
 
     function _tokenStorage() private pure returns (TokenStorage storage ts) {
         bytes32 position = TOKEN_STORAGE_LOCATION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             ts.slot := position
         }

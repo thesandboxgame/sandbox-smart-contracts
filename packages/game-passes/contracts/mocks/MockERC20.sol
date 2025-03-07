@@ -1,3 +1,4 @@
+/* solhint-disable */
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
@@ -18,6 +19,7 @@ contract MockERC20 is ERC20, Ownable {
             return false;
         }
         uint256 value;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             value := mload(add(data, 36))
         }
