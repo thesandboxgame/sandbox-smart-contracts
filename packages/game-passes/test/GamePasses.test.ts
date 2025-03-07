@@ -1069,6 +1069,243 @@ describe('SandboxPasses1155Upgradeable', function () {
       // Verify nonce was incremented
       expect(await sandboxPasses.getNonce(user1.address)).to.equal(1);
     });
+
+    it('should reject signature with incorrect recipient', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        user2,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature for user2
+      const signature = await createMintSignature(
+        signer,
+        user2.address, // Signature created for user2
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // User1 attempts to use user2's signature
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .mint(
+            user1.address,
+            TOKEN_ID_1,
+            MINT_AMOUNT,
+            price,
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+    });
+
+    it('should reject signature with incorrect token ID', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature for TOKEN_ID_1
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // Try to mint TOKEN_ID_2 instead
+      await expect(
+        sandboxPasses.connect(user1).mint(
+          user1.address,
+          TOKEN_ID_2, // Different token ID
+          MINT_AMOUNT,
+          price,
+          deadline,
+          signature,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+    });
+
+    it('should reject signature with incorrect mint amount', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature for MINT_AMOUNT
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // Try to mint different amount
+      await expect(
+        sandboxPasses.connect(user1).mint(
+          user1.address,
+          TOKEN_ID_1,
+          MINT_AMOUNT + 1, // Different amount
+          price,
+          deadline,
+          signature,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+    });
+
+    it('should reject signature with incorrect price', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price = ethers.parseEther('0.1');
+      const incorrectPrice = ethers.parseEther('0.05');
+      const deadline = (await time.latest()) + 3600;
+      const nonce = 0;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      // Create signature with price
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price,
+        deadline,
+        nonce,
+      );
+
+      // Try to mint with different price
+      await expect(
+        sandboxPasses.connect(user1).mint(
+          user1.address,
+          TOKEN_ID_1,
+          MINT_AMOUNT,
+          incorrectPrice, // Different price
+          deadline,
+          signature,
+        ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+    });
+
+    // Test for batch mint with one invalid signature
+    it('should revert batch mint if any signature is invalid', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MINT_AMOUNT,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+      const price1 = ethers.parseEther('0.1');
+      const price2 = ethers.parseEther('0.2');
+      const deadline = (await time.latest()) + 3600;
+      const nonce1 = 0;
+      const nonce2 = 1;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price1 + price2);
+
+      // Create valid signature for first token
+      const signature1 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        price1,
+        deadline,
+        nonce1,
+      );
+
+      // Create signature with wrong nonce for second token
+      const signature2 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_2,
+        MINT_AMOUNT * 2,
+        price2,
+        deadline,
+        nonce2 + 1, // Wrong nonce
+      );
+
+      // Batch mint should fail
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .batchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [MINT_AMOUNT, MINT_AMOUNT * 2],
+            [price1, price2],
+            [deadline, deadline],
+            [signature1, signature2],
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+    });
   });
 
   describe('Burn and Mint Operations', function () {
@@ -2006,5 +2243,400 @@ describe('SandboxPasses1155Upgradeable', function () {
         ]),
       ).to.be.revertedWithCustomError(SandboxPasses, 'InvalidPaymentToken');
     });
+  });
+});
+
+describe('Burn and Mint Signature Validation', function () {
+  it('should reject burnAndMint with expired signature', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) - 3600; // 1 hour in the past
+    const nonce = 0;
+
+    // Create expired signature
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to burn and mint with expired signature
+    await expect(
+      sandboxPasses
+        .connect(user1)
+        .burnAndMint(
+          user1.address,
+          TOKEN_ID_1,
+          2,
+          TOKEN_ID_2,
+          3,
+          deadline,
+          signature,
+        ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'SignatureExpired');
+  });
+
+  it('should reject burnAndMint with unauthorized signer', async function () {
+    const {
+      sandboxPasses,
+      user1,
+      user2,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature with unauthorized signer
+    const signature = await createBurnAndMintSignature(
+      user2, // Not an authorized signer
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to burn and mint
+    await expect(
+      sandboxPasses
+        .connect(user1)
+        .burnAndMint(
+          user1.address,
+          TOKEN_ID_1,
+          2,
+          TOKEN_ID_2,
+          3,
+          deadline,
+          signature,
+        ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should reject burnAndMint with incorrect burn token ID', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature for TOKEN_ID_1
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to burn TOKEN_ID_2 instead (which user doesn't have)
+    await expect(
+      sandboxPasses.connect(user1).burnAndMint(
+        user1.address,
+        TOKEN_ID_2, // Different token ID to burn
+        2,
+        TOKEN_ID_2,
+        3,
+        deadline,
+        signature,
+      ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should reject burnAndMint with incorrect burn amount', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature to burn 2 tokens
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to burn 3 tokens instead
+    await expect(
+      sandboxPasses.connect(user1).burnAndMint(
+        user1.address,
+        TOKEN_ID_1,
+        3, // Different burn amount
+        TOKEN_ID_2,
+        3,
+        deadline,
+        signature,
+      ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should reject burnAndMint with incorrect mint token ID', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature to mint TOKEN_ID_2
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to mint TOKEN_ID_1 instead
+    await expect(
+      sandboxPasses.connect(user1).burnAndMint(
+        user1.address,
+        TOKEN_ID_1,
+        2,
+        TOKEN_ID_1, // Different mint token ID
+        3,
+        deadline,
+        signature,
+      ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should reject burnAndMint with incorrect mint amount', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature to mint 3 tokens
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Try to mint 4 tokens instead
+    await expect(
+      sandboxPasses.connect(user1).burnAndMint(
+        user1.address,
+        TOKEN_ID_1,
+        2,
+        TOKEN_ID_2,
+        4, // Different mint amount
+        deadline,
+        signature,
+      ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should reject burnAndMint replay attacks', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint enough tokens to allow two burn operations
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT * 2);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // First burn and mint should succeed
+    await sandboxPasses
+      .connect(user1)
+      .burnAndMint(
+        user1.address,
+        TOKEN_ID_1,
+        2,
+        TOKEN_ID_2,
+        3,
+        deadline,
+        signature,
+      );
+
+    // Second attempt with same signature should fail (replay attack)
+    await expect(
+      sandboxPasses
+        .connect(user1)
+        .burnAndMint(
+          user1.address,
+          TOKEN_ID_1,
+          2,
+          TOKEN_ID_2,
+          3,
+          deadline,
+          signature,
+        ),
+    ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+  });
+
+  it('should increment nonce after successful burnAndMint', async function () {
+    const {
+      sandboxPasses,
+      signer,
+      user1,
+      admin,
+      TOKEN_ID_1,
+      TOKEN_ID_2,
+      MINT_AMOUNT,
+      createBurnAndMintSignature,
+    } = await loadFixture(runCreateTestSetup);
+
+    // Mint some tokens to burn
+    await sandboxPasses
+      .connect(admin)
+      .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+    // Check initial nonce
+    expect(await sandboxPasses.getNonce(user1.address)).to.equal(0);
+
+    const deadline = (await time.latest()) + 3600;
+    const nonce = 0;
+
+    // Create signature
+    const signature = await createBurnAndMintSignature(
+      signer,
+      user1.address,
+      TOKEN_ID_1,
+      2,
+      TOKEN_ID_2,
+      3,
+      deadline,
+      nonce,
+    );
+
+    // Burn and mint
+    await sandboxPasses
+      .connect(user1)
+      .burnAndMint(
+        user1.address,
+        TOKEN_ID_1,
+        2,
+        TOKEN_ID_2,
+        3,
+        deadline,
+        signature,
+      );
+
+    // Verify nonce was incremented
+    expect(await sandboxPasses.getNonce(user1.address)).to.equal(1);
   });
 });
