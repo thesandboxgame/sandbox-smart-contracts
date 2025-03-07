@@ -1144,6 +1144,59 @@ describe('SandboxPasses1155Upgradeable', function () {
       );
     });
 
+    it('should not allow non-operator to burn and mint through operatorBurnAndMint', async function () {
+      const {sandboxPasses, user1, admin, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .operatorBurnAndMint(
+            user1.address,
+            user1.address,
+            TOKEN_ID_1,
+            2,
+            TOKEN_ID_2,
+            3,
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
+    it('should not allow non-operator to batch burn and mint through operatorBatchBurnAndMint', async function () {
+      const {sandboxPasses, user1, admin, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_2, MINT_AMOUNT);
+
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .operatorBatchBurnAndMint(
+            user1.address,
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [2, 3],
+            [TOKEN_ID_2, TOKEN_ID_1],
+            [4, 5],
+          ),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'AccessControlUnauthorizedAccount',
+      );
+    });
+
     it('should allow user to burn and mint with valid signature', async function () {
       const {
         sandboxPasses,
