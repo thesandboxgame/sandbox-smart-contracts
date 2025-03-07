@@ -1486,6 +1486,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       );
     });
   });
+
   describe('Burn and Mint Signature Validation', function () {
     it('should reject burnAndMint with expired signature', async function () {
       const {
