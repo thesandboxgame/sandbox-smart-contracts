@@ -29,17 +29,6 @@ contract SandboxPasses1155Upgradeable is
     using Strings for uint256;
 
     // =============================================================
-    //                           Roles
-    // =============================================================
-
-    /// @dev The role that is allowed to upgrade the contract and manage admin-level operations.
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    /// @dev The role that is allowed to sign minting operations
-    bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
-    /// @dev The role that is allowed to consume tokens
-    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-
-    // =============================================================
     //                           Events
     // =============================================================
 
@@ -112,11 +101,6 @@ contract SandboxPasses1155Upgradeable is
     //                      Storage - ERC7201
     // =============================================================
 
-    /**
-     * @dev Core storage layout using ERC7201 namespaced storage pattern
-     */
-    bytes32 public constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
-
     struct CoreStorage {
         // Base URI for computing {uri}
         string baseURI;
@@ -139,11 +123,6 @@ contract SandboxPasses1155Upgradeable is
         }
     }
 
-    /**
-     * @dev User storage layout using ERC7201 for nonces
-     */
-    bytes32 public constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
-
     struct UserStorage {
         // Track nonces for replay protection
         mapping(address => uint256) nonces;
@@ -156,11 +135,6 @@ contract SandboxPasses1155Upgradeable is
             us.slot := position
         }
     }
-
-    /**
-     * @dev Token config storage layout using ERC7201
-     */
-    bytes32 public constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
 
     struct TokenStorage {
         // Mapping of token configurations
@@ -178,6 +152,28 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
     //                      Constants
     // =============================================================
+
+    /// @dev The role that is allowed to upgrade the contract and manage admin-level operations.
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    /// @dev The role that is allowed to sign minting operations
+    bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
+    /// @dev The role that is allowed to consume tokens
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    /**
+     * @dev Core storage layout using ERC7201 namespaced storage pattern
+     */
+    bytes32 public constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
+
+    /**
+     * @dev User storage layout using ERC7201 for nonces
+     */
+    bytes32 public constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
+
+    /**
+     * @dev Token config storage layout using ERC7201
+     */
+    bytes32 public constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
 
     /// @dev EIP-712 domain typehash
     bytes32 public constant EIP712_DOMAIN_TYPEHASH =
@@ -800,15 +796,6 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Check if a token exists (has been configured)
-     * @param tokenId The token ID to check
-     * @return bool True if the token has been configured, false otherwise
-     */
-    function exists(uint256 tokenId) public view override returns (bool) {
-        return _tokenStorage().tokenConfigs[tokenId].isConfigured;
-    }
-
-    /**
      * @notice Set the base URI for token metadata
      * @param newBaseURI The new base URI to set
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -834,58 +821,56 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Verify signature for mint operation using EIP-712
-     * @param request The MintRequest struct containing all mint parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @notice Sets the default royalty info (applies to all token IDs)
+     * @param receiver Address that will receive the royalties
+     * @param feeNumerator Royalty amount in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Updates the default royalty that applies to all tokens
+     * @dev Can be overridden per token using setTokenRoyalty
      * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
+     *      - Caller doesn't have ADMIN_ROLE
      */
-    function verifySignature(MintRequest memory request, bytes memory signature) public view {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                MINT_TYPEHASH,
-                request.caller,
-                request.tokenId,
-                request.amount,
-                request.price,
-                request.deadline,
-                request.nonce
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline);
+    function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
+        _setDefaultRoyalty(receiver, feeNumerator);
     }
 
     /**
-     * @notice Verify signature for burn and mint operation using EIP-712
-     * @param request The BurnAndMintRequest struct containing all operation parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @notice Sets royalty info for a specific token ID, overriding default royalty
+     * @param tokenId ID of the token to set royalties for
+     * @param receiver Address that will receive the royalties for this token
+     * @param feeNumerator Royalty amount in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Overrides the default royalty for the specified token ID
      * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
+     *      - Caller doesn't have ADMIN_ROLE
      */
-    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public view {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                BURN_AND_MINT_TYPEHASH,
-                request.caller,
-                request.burnId,
-                request.burnAmount,
-                request.mintId,
-                request.mintAmount,
-                request.deadline,
-                request.nonce
-            )
-        );
+    function setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
+        _setTokenRoyalty(tokenId, receiver, feeNumerator);
+    }
 
-        _verifySignature(structHash, signature, request.deadline);
+    /**
+     * @notice Sets royalty info for a batch of token IDs, overriding default royalty
+     * @param tokenIds Array of token IDs to set royalties for
+     * @param receivers Array of addresses that will receive the royalties
+     * @param feeNumerators Array of royalty amounts in basis points (1% = 100)
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Array lengths don't match
+     *      - Invalid batch royalty
+     */
+    function setBatchTokenRoyalty(
+        uint256[] calldata tokenIds,
+        address[] calldata receivers,
+        uint96[] calldata feeNumerators
+    ) external onlyRole(ADMIN_ROLE) {
+        if (tokenIds.length != receivers.length || receivers.length != feeNumerators.length) {
+            revert InvalidBatchRoyalty();
+        }
+
+        for (uint256 i; i < tokenIds.length; i++) {
+            _setTokenRoyalty(tokenIds[i], receivers[i], feeNumerators[i]);
+        }
     }
 
     /**
@@ -901,24 +886,22 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Returns the current owner address of the contract
-     * @dev This address may have special permissions beyond role-based access control
-     * @return address The current owner address
-     */
-    function owner() public view returns (address) {
-        return _coreStorage().internalOwner;
-    }
-
-    // =============================================================
-    //                   Storage Getters
-    // =============================================================
-
-    /**
      * @notice Returns the base URI for token metadata
      * @return string The base URI
      */
     function baseURI() external view returns (string memory) {
         return _coreStorage().baseURI;
+    }
+
+    /**
+     * @notice Returns the metadata URI for a specific token ID
+     * @param tokenId ID of the token to get URI for
+     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
+     * @dev Can be overridden by derived contracts to implement different URI logic
+     * @return string The complete URI for the token metadata
+     */
+    function uri(uint256 tokenId) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
     }
 
     /**
@@ -989,6 +972,134 @@ contract SandboxPasses1155Upgradeable is
      */
     function mintedPerWallet(uint256 tokenId, address wallet) external view returns (uint256) {
         return _tokenStorage().tokenConfigs[tokenId].mintedPerWallet[wallet];
+    }
+
+    /**
+     * @notice Pauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev When paused, prevents minting, burning, and transfers
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is already paused
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice Unpauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Restores minting, burning, and transfer functionality
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is not paused
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @notice Recover ERC20 tokens accidentally sent to the contract
+     * @param token The ERC20 token address to recover
+     * @param to The address to send recovered tokens to
+     * @param amount The amount of tokens to recover
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot recover the payment token if contract is not paused
+     */
+    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        // If attempting to recover the payment token, contract must be paused
+        if (token == _coreStorage().paymentToken && !paused()) {
+            revert PaymentTokenRecoveryNotAllowed();
+        }
+
+        SafeERC20.safeTransfer(IERC20(token), to, amount);
+        emit TokensRecovered(_msgSender(), token, to, amount);
+    }
+
+    /**
+     * @notice Check if a token exists (has been configured)
+     * @param tokenId The token ID to check
+     * @return bool True if the token has been configured, false otherwise
+     */
+    function exists(uint256 tokenId) public view override returns (bool) {
+        return _tokenStorage().tokenConfigs[tokenId].isConfigured;
+    }
+
+    /**
+     * @notice Verify signature for mint operation using EIP-712
+     * @param request The MintRequest struct containing all mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Public view function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifySignature(MintRequest memory request, bytes memory signature) public view {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                request.caller,
+                request.tokenId,
+                request.amount,
+                request.price,
+                request.deadline,
+                request.nonce
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline);
+    }
+
+    /**
+     * @notice Verify signature for burn and mint operation using EIP-712
+     * @param request The BurnAndMintRequest struct containing all operation parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Public view function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public view {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BURN_AND_MINT_TYPEHASH,
+                request.caller,
+                request.burnId,
+                request.burnAmount,
+                request.mintId,
+                request.mintAmount,
+                request.deadline,
+                request.nonce
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline);
+    }
+
+    /**
+     * @notice Returns the current owner address of the contract
+     * @dev This address may have special permissions beyond role-based access control
+     * @return address The current owner address
+     */
+    function owner() public view returns (address) {
+        return _coreStorage().internalOwner;
+    }
+
+    /**
+     * @notice Checks if contract implements various interfaces
+     * @param interfaceId The interface identifier to check
+     * @dev Combines interface support checks from parent contracts
+     * @dev Supports ERC1155, ERC2981, AccessControl interfaces
+     * @return bool True if the contract implements the interface
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControlUpgradeable, ERC1155Upgradeable, ERC2981Upgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
     // =============================================================
@@ -1103,78 +1214,6 @@ contract SandboxPasses1155Upgradeable is
         }
     }
 
-    // =============================================================
-    //                   Royalties (ERC2981)
-    // =============================================================
-
-    /**
-     * @notice Sets the default royalty info (applies to all token IDs)
-     * @param receiver Address that will receive the royalties
-     * @param feeNumerator Royalty amount in basis points (1% = 100)
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Updates the default royalty that applies to all tokens
-     * @dev Can be overridden per token using setTokenRoyalty
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     */
-    function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
-        _setDefaultRoyalty(receiver, feeNumerator);
-    }
-
-    /**
-     * @notice Sets royalty info for a specific token ID, overriding default royalty
-     * @param tokenId ID of the token to set royalties for
-     * @param receiver Address that will receive the royalties for this token
-     * @param feeNumerator Royalty amount in basis points (1% = 100)
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Overrides the default royalty for the specified token ID
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     */
-    function setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator) external onlyRole(ADMIN_ROLE) {
-        _setTokenRoyalty(tokenId, receiver, feeNumerator);
-    }
-
-    /**
-     * @notice Sets royalty info for a batch of token IDs, overriding default royalty
-     * @param tokenIds Array of token IDs to set royalties for
-     * @param receivers Array of addresses that will receive the royalties
-     * @param feeNumerators Array of royalty amounts in basis points (1% = 100)
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Array lengths don't match
-     *      - Invalid batch royalty
-     */
-    function setBatchTokenRoyalty(
-        uint256[] calldata tokenIds,
-        address[] calldata receivers,
-        uint96[] calldata feeNumerators
-    ) external onlyRole(ADMIN_ROLE) {
-        if (tokenIds.length != receivers.length || receivers.length != feeNumerators.length) {
-            revert InvalidBatchRoyalty();
-        }
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            _setTokenRoyalty(tokenIds[i], receivers[i], feeNumerators[i]);
-        }
-    }
-
-    // =============================================================
-    //                   ERC1155 Overrides
-    // =============================================================
-
-    /**
-     * @notice Returns the metadata URI for a specific token ID
-     * @param tokenId ID of the token to get URI for
-     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
-     * @dev Can be overridden by derived contracts to implement different URI logic
-     * @return string The complete URI for the token metadata
-     */
-    function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
-    }
-
     /**
      * @notice Internal hook to enforce transfer restrictions on soulbound tokens
      * @param from Source address
@@ -1215,27 +1254,6 @@ contract SandboxPasses1155Upgradeable is
         super._update(from, to, ids, values);
     }
 
-    // =============================================================
-    //                   ERC165 / ERC2981 Overrides
-    // =============================================================
-
-    /**
-     * @notice Checks if contract implements various interfaces
-     * @param interfaceId The interface identifier to check
-     * @dev Combines interface support checks from parent contracts
-     * @dev Supports ERC1155, ERC2981, AccessControl interfaces
-     * @return bool True if the contract implements the interface
-     */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(AccessControlUpgradeable, ERC1155Upgradeable, ERC2981Upgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    // =============================================================
-    //                   Context Overrides
-    // =============================================================
-
     /**
      * @notice Gets the sender address, supporting meta-transactions
      * @dev Overrides Context's _msgSender to support meta-transactions via ERC2771
@@ -1264,55 +1282,5 @@ contract SandboxPasses1155Upgradeable is
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
-    }
-
-    // =============================================================
-    //                   Pausable Functions
-    // =============================================================
-
-    /**
-     * @notice Pauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev When paused, prevents minting, burning, and transfers
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is already paused
-     */
-    function pause() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Restores minting, burning, and transfer functionality
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is not paused
-     */
-    function unpause() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
-
-    // =============================================================
-    //                   Recovery Functions
-    // =============================================================
-
-    /**
-     * @notice Recover ERC20 tokens accidentally sent to the contract
-     * @param token The ERC20 token address to recover
-     * @param to The address to send recovered tokens to
-     * @param amount The amount of tokens to recover
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Cannot recover the payment token if contract is not paused
-     */
-    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        // If attempting to recover the payment token, contract must be paused
-        if (token == _coreStorage().paymentToken && !paused()) {
-            revert PaymentTokenRecoveryNotAllowed();
-        }
-
-        SafeERC20.safeTransfer(IERC20(token), to, amount);
-        emit TokensRecovered(_msgSender(), token, to, amount);
     }
 }
