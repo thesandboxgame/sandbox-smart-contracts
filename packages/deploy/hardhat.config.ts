@@ -107,6 +107,7 @@ const namedAccounts = {
     baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
     base: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
     bscMainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
+    avalancheFuji: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
@@ -121,6 +122,7 @@ const namedAccounts = {
     baseSepolia: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     base: '0x18987794f808eE72Ae9127058F1C7d079736Ca45',
     bscMainnet: '0x47032F58129341B90c83E312eE22d2e74D584B4A',
+    avalancheFuji: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
   }, // can add super operators and change admin
 
   operationsAdmin: {
@@ -174,6 +176,7 @@ const namedAccounts = {
     sepolia: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
     mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     amoy: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
+    avalancheFuji: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
   },
 
   treasury: {
@@ -196,6 +199,7 @@ const namedAccounts = {
     sepolia: 5,
     mumbai: 5,
     amoy: 5,
+    avalancheFuji: 5,
     mainnet: 'sandSaleBeneficiary',
     polygon: '0x42a4a3795446A4c070565da201c6303fC78a2569',
   }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
@@ -214,6 +218,7 @@ const namedAccounts = {
     sepolia: 'sandAdmin',
     mumbai: 'sandAdmin',
     amoy: 'sandAdmin',
+    avalancheFuji: 'sandAdmin',
   }, // can add super operators and change admin
 
   gemsAndCatalystsAdmin: 'sandAdmin',
@@ -228,6 +233,7 @@ const namedAccounts = {
     mumbai: 'sandAdmin',
     amoy: 'sandAdmin',
     baseSepolia: 'sandAdmin',
+    avalancheFuji: 'sandAdmin',
   },
 
   landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -245,6 +251,7 @@ const namedAccounts = {
     sepolia: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     mumbai: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     amoy: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+    avalancheFuji: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
   },
   // To be used with AuthValidator only
   backendAuthWallet: {
@@ -257,6 +264,7 @@ const namedAccounts = {
     polygon: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
     mumbai: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     amoy: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+    avalancheFuji: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
   },
   backendCashbackWallet: {
     // default is computed from private key:
@@ -353,6 +361,7 @@ export enum DEPLOY_NETWORKS {
   MUMBAI = 'mumbai',
   BASE_SEPOLIA = 'baseSepolia',
   BASE_MAINNET = 'base',
+  AVALANCHE_FUJI = 'avalancheFuji',
 }
 
 export enum DEPLOY_TAGS {
@@ -450,6 +459,12 @@ const networks = {
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
       [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
+    },
+  },
+  [DEPLOY_NETWORKS.AVALANCHE_FUJI]: {
+    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    companionNetworks: {
+      [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
     },
   },
 };
