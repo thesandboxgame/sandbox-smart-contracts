@@ -1,3 +1,4 @@
+import '@matterlabs/hardhat-zksync-solc';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-ethers';
 import '@nomicfoundation/hardhat-network-helpers';
@@ -461,6 +462,7 @@ const networks = {
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
     },
+    zksync: true,
   },
 };
 
