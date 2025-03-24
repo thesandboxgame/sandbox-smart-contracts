@@ -98,6 +98,16 @@ contract SandboxPasses1155Upgradeable is
         uint256 nonce;
     }
 
+    /// @dev Struct to hold batch mint request
+    struct BatchMintRequest {
+        address caller;
+        uint256[] tokenIds;
+        uint256[] amounts;
+        uint256[] prices;
+        uint256 deadline;
+        uint256 nonce;
+    }
+
     // =============================================================
     //                      Storage - ERC7201
     // =============================================================
@@ -194,6 +204,12 @@ contract SandboxPasses1155Upgradeable is
     bytes32 public constant BURN_AND_MINT_TYPEHASH =
         keccak256(
             "BurnAndMintRequest(address caller,uint256 burnId,uint256 burnAmount,uint256 mintId,uint256 mintAmount,uint256 deadline,uint256 nonce)"
+        );
+
+    /// @dev EIP-712 batch mint request typehash
+    bytes32 public constant BATCH_MINT_TYPEHASH =
+        keccak256(
+            "BatchMintRequest(address caller,uint256[] tokenIds,uint256[] amounts,uint256[] prices,uint256 deadline,uint256 nonce)"
         );
 
     /// @dev Maximum number of tokens that can be processed in a batch operation
@@ -347,14 +363,14 @@ contract SandboxPasses1155Upgradeable is
     }
 
     /**
-     * @notice Batch mints multiple tokens with valid EIP-712 signatures in a single transaction
+     * @notice Batch mints multiple tokens with a single valid EIP-712 signature in a transaction
      * @param caller Address that will receive the tokens (must be same as msg.sender)
      * @param tokenIds Array of token IDs to mint
      * @param amounts Array of amounts to mint for each token ID
      * @param prices Array of prices to pay for each mint operation
-     * @param deadlines Array of timestamps after which each signature becomes invalid
-     * @param signatures Array of EIP-712 signatures from authorized signers
-     * @dev Processes multiple mint operations in batch, verifying each signature
+     * @param deadline Timestamp after which the signature becomes invalid
+     * @param signature Single EIP-712 signature from authorized signer
+     * @dev Processes multiple mint operations in batch, verifying a single signature
      * @dev All array parameters must be the same length
      * @dev Updates per-wallet minting counts and transfers payments to appropriate treasuries
      * @dev Reverts if:
@@ -362,7 +378,7 @@ contract SandboxPasses1155Upgradeable is
      *      - Array lengths don't match
      *      - Batch size exceeds MAX_BATCH_SIZE
      *      - Any token is not configured
-     *      - Any signature is invalid or expired
+     *      - Signature is invalid or expired
      *      - Any max supply would be exceeded
      *      - Any max per wallet would be exceeded
      *      - Any payment transfer fails
@@ -372,25 +388,47 @@ contract SandboxPasses1155Upgradeable is
         uint256[] calldata tokenIds,
         uint256[] calldata amounts,
         uint256[] calldata prices,
-        uint256[] calldata deadlines,
-        bytes[] calldata signatures
+        uint256 deadline,
+        bytes calldata signature
     ) external whenNotPaused {
         if (tokenIds.length > MAX_BATCH_SIZE) {
             revert BatchSizeExceeded(tokenIds.length, MAX_BATCH_SIZE);
         }
 
-        if (
-            tokenIds.length != amounts.length ||
-            amounts.length != prices.length ||
-            prices.length != deadlines.length ||
-            deadlines.length != signatures.length
-        ) {
+        if (tokenIds.length != amounts.length || amounts.length != prices.length) {
             revert ArrayLengthMismatch();
         }
 
-        // Process each mint separately to avoid stack depth issues
+        BatchMintRequest memory request = BatchMintRequest({
+            caller: caller,
+            tokenIds: tokenIds,
+            amounts: amounts,
+            prices: prices,
+            deadline: deadline,
+            nonce: _userStorage().nonces[caller]++
+        });
+
+        verifyBatchSignature(request, signature);
+
+        // Process each mint separately
         for (uint256 i; i < tokenIds.length; i++) {
-            _processSingleMint(caller, tokenIds[i], amounts[i], prices[i], deadlines[i], signatures[i]);
+            TokenConfig storage config = _tokenStorage().tokenConfigs[tokenIds[i]];
+
+            if (!config.isConfigured) {
+                revert TokenNotConfigured(tokenIds[i]);
+            }
+
+            _checkMaxPerWallet(tokenIds[i], caller, amounts[i]);
+            _checkMaxSupply(tokenIds[i], amounts[i]);
+
+            // Update minted amount for wallet
+            config.mintedPerWallet[caller] += amounts[i];
+
+            address treasury = config.treasuryWallet;
+            if (treasury == address(0)) {
+                treasury = _coreStorage().defaultTreasuryWallet;
+            }
+            SafeERC20.safeTransferFrom(IERC20(_coreStorage().paymentToken), caller, treasury, prices[i]);
         }
 
         // Perform batch mint
@@ -1069,6 +1107,33 @@ contract SandboxPasses1155Upgradeable is
                 request.burnAmount,
                 request.mintId,
                 request.mintAmount,
+                request.deadline,
+                request.nonce
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline);
+    }
+
+    /**
+     * @notice Verify signature for batch mint operation using EIP-712
+     * @param request The BatchMintRequest struct containing all batch mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Public view function that can be used to verify batch signatures off-chain
+     * @dev Validates the signature against the BATCH_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) public view {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BATCH_MINT_TYPEHASH,
+                request.caller,
+                keccak256(abi.encodePacked(request.tokenIds)),
+                keccak256(abi.encodePacked(request.amounts)),
+                keccak256(abi.encodePacked(request.prices)),
                 request.deadline,
                 request.nonce
             )

@@ -591,7 +591,7 @@ describe('SandboxPasses1155Upgradeable', function () {
         TOKEN_ID_1,
         TOKEN_ID_2,
         MINT_AMOUNT,
-        createMintSignature,
+        createBatchMintSignature,
         approveAndCallBatchMint,
       } = await loadFixture(runCreateTestSetup);
 
@@ -599,7 +599,6 @@ describe('SandboxPasses1155Upgradeable', function () {
       const price2 = ethers.parseEther('0.2');
       const deadline = (await time.latest()) + 3600; // 1 hour from now
       const nonce1 = 0;
-      const nonce2 = 1;
 
       // Approve payment token
       await paymentToken
@@ -607,24 +606,15 @@ describe('SandboxPasses1155Upgradeable', function () {
         .approve(await sandboxPasses.getAddress(), price1 + price2);
 
       // Create signatures
-      const signature1 = await createMintSignature(
+
+      const signature = await createBatchMintSignature(
         signer,
         user1.address,
-        TOKEN_ID_1,
-        MINT_AMOUNT,
-        price1,
+        [TOKEN_ID_1, TOKEN_ID_2],
+        [MINT_AMOUNT, MINT_AMOUNT * 2],
+        [price1, price2],
         deadline,
         nonce1,
-      );
-
-      const signature2 = await createMintSignature(
-        signer,
-        user1.address,
-        TOKEN_ID_2,
-        MINT_AMOUNT * 2,
-        price2,
-        deadline,
-        nonce2,
       );
 
       await expect(
@@ -633,8 +623,8 @@ describe('SandboxPasses1155Upgradeable', function () {
           [TOKEN_ID_1, TOKEN_ID_2],
           [MINT_AMOUNT, MINT_AMOUNT * 2],
           [price1, price2],
-          [deadline, deadline],
-          [signature1, signature2],
+          deadline,
+          signature,
         ]),
       ).to.not.be.reverted;
     });
@@ -649,14 +639,13 @@ describe('SandboxPasses1155Upgradeable', function () {
         TOKEN_ID_1,
         TOKEN_ID_2,
         MINT_AMOUNT,
-        createMintSignature,
+        createBatchMintSignature,
         treasury,
       } = await loadFixture(runCreateTestSetup);
       const price1 = ethers.parseEther('0.1');
       const price2 = ethers.parseEther('0.2');
       const deadline = (await time.latest()) + 3600; // 1 hour from now
       const nonce1 = 0;
-      const nonce2 = 1;
 
       // Approve payment token
       await paymentToken
@@ -664,24 +653,14 @@ describe('SandboxPasses1155Upgradeable', function () {
         .approve(await sandboxPasses.getAddress(), price1 + price2);
 
       // Create signatures
-      const signature1 = await createMintSignature(
+      const signature = await createBatchMintSignature(
         signer,
         user1.address,
-        TOKEN_ID_1,
-        MINT_AMOUNT,
-        price1,
+        [TOKEN_ID_1, TOKEN_ID_2],
+        [MINT_AMOUNT, MINT_AMOUNT * 2],
+        [price1, price2],
         deadline,
         nonce1,
-      );
-
-      const signature2 = await createMintSignature(
-        signer,
-        user1.address,
-        TOKEN_ID_2,
-        MINT_AMOUNT * 2,
-        price2,
-        deadline,
-        nonce2,
       );
 
       // Batch mint with signatures
@@ -692,8 +671,8 @@ describe('SandboxPasses1155Upgradeable', function () {
           [TOKEN_ID_1, TOKEN_ID_2],
           [MINT_AMOUNT, MINT_AMOUNT * 2],
           [price1, price2],
-          [deadline, deadline],
-          [signature1, signature2],
+          deadline,
+          signature,
         );
 
       expect(await sandboxPasses.balanceOf(user1.address, TOKEN_ID_1)).to.equal(
@@ -839,7 +818,7 @@ describe('SandboxPasses1155Upgradeable', function () {
         user1,
         paymentToken,
         admin,
-        createMintSignature,
+        createBatchMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
       const MAX_BATCH_SIZE = 100; // Match the contract's constant
@@ -850,8 +829,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       const tokenIds = [];
       const amounts = [];
       const prices = [];
-      const deadlines = [];
-      const signatures = [];
+      const nonce = 0;
 
       // First configure all needed tokens
       for (let i = 4; i < MAX_BATCH_SIZE + 4; i++) {
@@ -868,23 +846,17 @@ describe('SandboxPasses1155Upgradeable', function () {
         tokenIds.push(i);
         amounts.push(1); // mint 1 of each
         prices.push(price);
-        deadlines.push(deadline);
       }
 
-      // Generate signatures for each token
-      for (let i = 0; i < MAX_BATCH_SIZE; i++) {
-        signatures.push(
-          await createMintSignature(
-            signer,
-            user1.address,
-            tokenIds[i],
-            amounts[i],
-            price,
-            deadline,
-            i, // nonce
-          ),
-        );
-      }
+      const signature = await createBatchMintSignature(
+        signer,
+        user1.address,
+        tokenIds,
+        amounts,
+        prices,
+        deadline,
+        nonce,
+      );
 
       // Approve payment token for the whole batch
       await paymentToken
@@ -902,8 +874,8 @@ describe('SandboxPasses1155Upgradeable', function () {
           tokenIds,
           amounts,
           prices,
-          deadlines,
-          signatures,
+          deadline,
+          signature,
         );
 
       // Verify a few tokens were minted successfully
@@ -921,7 +893,7 @@ describe('SandboxPasses1155Upgradeable', function () {
         user1,
         paymentToken,
         admin,
-        createMintSignature,
+        createBatchMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
       const MAX_BATCH_SIZE = 100; // Match the contract's constant
@@ -933,8 +905,7 @@ describe('SandboxPasses1155Upgradeable', function () {
       const tokenIds = [];
       const amounts = [];
       const prices = [];
-      const deadlines = [];
-      const signatures = [];
+      const nonce = 0;
 
       // First configure all needed tokens, start from 4 as previous tokens have been configured
       for (let i = 4; i < EXCEEDED_SIZE + 4; i++) {
@@ -951,23 +922,18 @@ describe('SandboxPasses1155Upgradeable', function () {
         tokenIds.push(i);
         amounts.push(1); // mint 1 of each
         prices.push(price);
-        deadlines.push(deadline);
       }
 
       // Generate signatures for each token
-      for (let i = 0; i < EXCEEDED_SIZE; i++) {
-        signatures.push(
-          await createMintSignature(
-            signer,
-            user1.address,
-            tokenIds[i],
-            amounts[i],
-            price,
-            deadline,
-            i, // nonce
-          ),
-        );
-      }
+      const signature = await createBatchMintSignature(
+        signer,
+        user1.address,
+        tokenIds,
+        amounts,
+        prices,
+        deadline,
+        nonce,
+      );
 
       // Approve payment token for the whole batch
       await paymentToken
@@ -986,8 +952,8 @@ describe('SandboxPasses1155Upgradeable', function () {
             tokenIds,
             amounts,
             prices,
-            deadlines,
-            signatures,
+            deadline,
+            signature,
           ),
       )
         .to.be.revertedWithCustomError(sandboxPasses, 'BatchSizeExceeded')
@@ -1322,7 +1288,7 @@ describe('SandboxPasses1155Upgradeable', function () {
     });
 
     // Test for batch mint with one invalid signature
-    it('should revert batch mint if any signature is invalid', async function () {
+    it('should revert batch mint if batch mint signature is invalid', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1331,13 +1297,12 @@ describe('SandboxPasses1155Upgradeable', function () {
         TOKEN_ID_1,
         TOKEN_ID_2,
         MINT_AMOUNT,
-        createMintSignature,
+        createBatchMintSignature,
       } = await loadFixture(runCreateTestSetup);
       const price1 = ethers.parseEther('0.1');
       const price2 = ethers.parseEther('0.2');
       const deadline = (await time.latest()) + 3600;
-      const nonce1 = 0;
-      const nonce2 = 1;
+      const nonce = 0;
 
       // Approve payment token
       await paymentToken
@@ -1345,28 +1310,61 @@ describe('SandboxPasses1155Upgradeable', function () {
         .approve(await sandboxPasses.getAddress(), price1 + price2);
 
       // Create valid signature for first token
-      const signature1 = await createMintSignature(
+      const signature = await createBatchMintSignature(
         signer,
         user1.address,
-        TOKEN_ID_1,
-        MINT_AMOUNT,
-        price1,
+        [TOKEN_ID_1, TOKEN_ID_2],
+        [MINT_AMOUNT, MINT_AMOUNT * 2],
+        [price1, price2],
         deadline,
-        nonce1,
+        nonce,
       );
 
-      // Create signature with wrong nonce for second token
-      const signature2 = await createMintSignature(
-        signer,
-        user1.address,
-        TOKEN_ID_2,
-        MINT_AMOUNT * 2,
-        price2,
-        deadline,
-        nonce2 + 1, // Wrong nonce
-      );
+      // INVALID TOKEN_ID of the second token
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .batchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_1],
+            [MINT_AMOUNT, MINT_AMOUNT * 2],
+            [price1, price2],
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
 
-      // Batch mint should fail
+      // INVALID MINT_AMOUNT of the first token
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .batchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [MINT_AMOUNT + 1, MINT_AMOUNT * 2],
+            [price1, price2],
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+
+      // INVALID PRICE of the first token
+      const incorrectPrice = ethers.parseEther('0.05');
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .batchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_2],
+            [MINT_AMOUNT, MINT_AMOUNT * 2],
+            [incorrectPrice, price2],
+            deadline,
+            signature,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
+
+      // INVALID DEADLINE
+      const incorrectDeadline = (await time.latest()) + 3600;
       await expect(
         sandboxPasses
           .connect(user1)
@@ -1375,8 +1373,8 @@ describe('SandboxPasses1155Upgradeable', function () {
             [TOKEN_ID_1, TOKEN_ID_2],
             [MINT_AMOUNT, MINT_AMOUNT * 2],
             [price1, price2],
-            [deadline, deadline],
-            [signature1, signature2],
+            incorrectDeadline,
+            signature,
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
     });
@@ -1389,7 +1387,7 @@ describe('SandboxPasses1155Upgradeable', function () {
         admin,
         paymentToken,
         TOKEN_ID_1,
-        createMintSignature,
+        createBatchMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
       // First mint 90 tokens
@@ -1399,8 +1397,7 @@ describe('SandboxPasses1155Upgradeable', function () {
 
       const price = ethers.parseEther('0.1');
       const deadline = (await time.latest()) + 3600;
-      const nonce1 = 0;
-      const nonce2 = 1;
+      const nonce = 0;
 
       // Approve payment token
       await paymentToken
@@ -1408,24 +1405,14 @@ describe('SandboxPasses1155Upgradeable', function () {
         .approve(await sandboxPasses.getAddress(), price * 2n);
 
       // Create signatures for the same token ID
-      const signature1 = await createMintSignature(
+      const signature = await createBatchMintSignature(
         signer,
         user1.address,
-        TOKEN_ID_1,
-        3,
-        price,
+        [TOKEN_ID_1, TOKEN_ID_1],
+        [3, 3],
+        [price, price],
         deadline,
-        nonce1,
-      );
-
-      const signature2 = await createMintSignature(
-        signer,
-        user1.address,
-        TOKEN_ID_1,
-        3,
-        price,
-        deadline,
-        nonce2,
+        nonce,
       );
 
       // Try to batch mint the same token ID twice (6 + 5 = 11)
@@ -1438,8 +1425,8 @@ describe('SandboxPasses1155Upgradeable', function () {
             [TOKEN_ID_1, TOKEN_ID_1],
             [3, 3],
             [price, price],
-            [deadline, deadline],
-            [signature1, signature2],
+            deadline,
+            signature,
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
     });
