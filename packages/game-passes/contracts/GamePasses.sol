@@ -17,6 +17,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
  * @title GamePasses
  * @notice An upgradeable ERC1155 contract with AccessControl-based permissions,
  *         supply tracking, forced burns, burn-and-mint, and EIP-2981 royalties.
+ * @custom:security-contact contact-blockchain@sandbox.game
  */
 contract GamePasses is
     Initializable,
