@@ -86,6 +86,11 @@ contract SandboxPasses1155Upgradeable is
     /// @param recipient Address receiving the recovered tokens
     /// @param amount Amount of tokens recovered
     event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
+    /// @notice Emitted when the owner is updated
+    /// @param caller Address that initiated the owner update
+    /// @param oldOwner Previous owner address before the update
+    /// @param newOwner New owner address after the update
+    event OwnerUpdated(address indexed caller, address oldOwner, address newOwner);
 
     // =============================================================
     //                     Structs
@@ -887,7 +892,9 @@ contract SandboxPasses1155Upgradeable is
      * @dev The owner may have special permissions outside of the role system
      */
     function setOwner(address _newOwner) external onlyRole(ADMIN_ROLE) {
+        address oldOwner = _coreStorage().internalOwner;
         _coreStorage().internalOwner = _newOwner;
+        emit OwnerUpdated(_msgSender(), oldOwner, _newOwner);
     }
 
     /**
