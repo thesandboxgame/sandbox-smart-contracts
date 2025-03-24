@@ -316,7 +316,7 @@ contract GamePasses is
         address _trustedForwarder,
         address _defaultTreasury,
         address _owner
-    ) public initializer {
+    ) external initializer {
         __ERC2771Handler_init(_trustedForwarder);
         __AccessControl_init();
         __ERC1155_init(_baseURI);
@@ -1063,6 +1063,15 @@ contract GamePasses is
     }
 
     /**
+     * @notice Returns the current owner address of the contract
+     * @dev This address may have special permissions beyond role-based access control
+     * @return address The current owner address
+     */
+    function owner() external view returns (address) {
+        return _coreStorage().internalOwner;
+    }
+
+    /**
      * @notice Recover ERC20 tokens accidentally sent to the contract
      * @param token The ERC20 token address to recover
      * @param to The address to send recovered tokens to
@@ -1180,15 +1189,6 @@ contract GamePasses is
         );
 
         _verifySignature(structHash, signature, request.deadline);
-    }
-
-    /**
-     * @notice Returns the current owner address of the contract
-     * @dev This address may have special permissions beyond role-based access control
-     * @return address The current owner address
-     */
-    function owner() public view returns (address) {
-        return _coreStorage().internalOwner;
     }
 
     /**
