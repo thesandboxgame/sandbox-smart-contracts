@@ -68,10 +68,10 @@ contract SandboxPasses1155Upgradeable is
     struct TokenConfig {
         bool isConfigured;
         bool transferable;
+        address treasuryWallet; // specific treasury wallet for this token
         uint256 maxSupply; // 0 for open edition
         string metadata;
         uint256 maxPerWallet; // max tokens that can be minted per wallet
-        address treasuryWallet; // specific treasury wallet for this token
         uint256 totalMinted; // total tokens already minted
         mapping(address => uint256) mintedPerWallet; // track mints per wallet
         mapping(address => bool) transferWhitelist; // whitelist for transfers
