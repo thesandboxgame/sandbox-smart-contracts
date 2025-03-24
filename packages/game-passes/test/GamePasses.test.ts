@@ -1647,6 +1647,35 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(mintedPerWallet2).to.equal(MINT_AMOUNT + 4);
     });
 
+    it('should not allow operator to burn and mint more than max per wallet', async function () {
+      const {
+        sandboxPasses,
+        operator,
+        admin,
+        user1,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MAX_PER_WALLET,
+      } = await loadFixture(runCreateTestSetup);
+
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MAX_PER_WALLET);
+
+      await expect(
+        sandboxPasses
+          .connect(operator)
+          .operatorBurnAndMint(
+            user1.address,
+            user1.address,
+            TOKEN_ID_1,
+            MAX_PER_WALLET,
+            TOKEN_ID_2,
+            MAX_PER_WALLET + 1,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ExceedsMaxPerWallet');
+    });
+
     it('should not allow non-operator to burn and mint through operatorBurnAndMint', async function () {
       const {sandboxPasses, user1, admin, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
         await loadFixture(runCreateTestSetup);
@@ -1758,7 +1787,7 @@ describe('SandboxPasses1155Upgradeable', function () {
     });
 
     it('should not allow operatorBatchBurnAndMint to exceed max supply with duplicate token IDs', async function () {
-      const {sandboxPasses, operator, admin, TOKEN_ID_1, TOKEN_ID_2} =
+      const {sandboxPasses, operator, admin, user1, TOKEN_ID_1, TOKEN_ID_2} =
         await loadFixture(runCreateTestSetup);
 
       // First mint some tokens of TOKEN_ID_2 to burn
@@ -1778,13 +1807,44 @@ describe('SandboxPasses1155Upgradeable', function () {
           .connect(operator)
           .operatorBatchBurnAndMint(
             admin.address,
-            admin.address,
+            user1.address,
             [TOKEN_ID_2, TOKEN_ID_2],
             [5, 5],
             [TOKEN_ID_1, TOKEN_ID_1],
             [6, 5],
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+    });
+
+    it('should not allow operatorBatchBurnAndMint to exceed max per wallet with duplicate token IDs', async function () {
+      const {
+        sandboxPasses,
+        operator,
+        admin,
+        user1,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MAX_PER_WALLET,
+      } = await loadFixture(runCreateTestSetup);
+
+      // Mint 10 tokens of TOKEN_ID_1
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MAX_PER_WALLET);
+
+      // Try to mint 11 tokens of TOKEN_ID_1 (exceeds max per wallet of 10)
+      await expect(
+        sandboxPasses
+          .connect(operator)
+          .operatorBatchBurnAndMint(
+            user1.address,
+            user1.address,
+            [TOKEN_ID_1],
+            [MAX_PER_WALLET],
+            [TOKEN_ID_2],
+            [MAX_PER_WALLET + 1],
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ExceedsMaxPerWallet');
     });
   });
 

@@ -533,6 +533,7 @@ contract SandboxPasses1155Upgradeable is
         _burn(burnFrom, burnTokenId, burnAmount);
 
         // Then mint
+        _checkMaxPerWallet(mintTokenId, mintTo, mintAmount);
         _mint(mintTo, mintTokenId, mintAmount, "");
     }
 
@@ -581,6 +582,7 @@ contract SandboxPasses1155Upgradeable is
             }
 
             _checkMaxSupply(mintTokenIds[i], mintAmounts[i]);
+            _checkMaxPerWallet(mintTokenIds[i], mintTo, mintAmounts[i]);
             mintConfig.mintedPerWallet[mintTo] += mintAmounts[i];
         }
 
@@ -649,6 +651,7 @@ contract SandboxPasses1155Upgradeable is
         _burn(caller, burnId, burnAmount);
 
         // Then mint new token
+        _checkMaxPerWallet(mintId, caller, mintAmount);
         _mint(caller, mintId, mintAmount, "");
     }
 
