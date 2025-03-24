@@ -688,7 +688,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 mintId,
         uint256 mintAmount,
         uint256 deadline,
-        bytes memory signature
+        bytes calldata signature
     ) external whenNotPaused {
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
@@ -801,7 +801,7 @@ contract SandboxPasses1155Upgradeable is
         bool transferable,
         uint256 maxSupply,
         uint256 maxPerWallet,
-        string memory metadata,
+        string calldata metadata,
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
@@ -839,7 +839,7 @@ contract SandboxPasses1155Upgradeable is
         uint256 tokenId,
         uint256 maxSupply,
         uint256 maxPerWallet,
-        string memory metadata,
+        string calldata metadata,
         address treasuryWallet
     ) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
@@ -873,7 +873,7 @@ contract SandboxPasses1155Upgradeable is
      * @dev Reverts if:
      *      - Caller doesn't have ADMIN_ROLE
      */
-    function setBaseURI(string memory newBaseURI) external onlyRole(ADMIN_ROLE) {
+    function setBaseURI(string calldata newBaseURI) external onlyRole(ADMIN_ROLE) {
         CoreStorage storage cs = _coreStorage();
         emit BaseURISet(_msgSender(), cs.baseURI, newBaseURI);
         cs.baseURI = newBaseURI;
