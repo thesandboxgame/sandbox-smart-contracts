@@ -124,6 +124,52 @@ export async function runCreateTestSetup() {
     return await signer.signTypedData(domain, types, value);
   }
 
+  // Helper function to create an EIP-712 signature for batch minting
+  async function createBatchMintSignature(
+    signer: SignerWithAddress,
+    caller: string,
+    tokenIds: number[],
+    amounts: number[],
+    prices: bigint[],
+    deadline: number,
+    nonce: number,
+  ): Promise<string> {
+    const chainId = (await ethers.provider.getNetwork()).chainId;
+
+    // Create domain data according to EIP-712
+    const domain = {
+      name: DOMAIN_NAME,
+      version: DOMAIN_VERSION,
+      chainId: chainId,
+      verifyingContract: await sandboxPasses.getAddress(),
+    };
+
+    // Define the types
+    const types = {
+      BatchMintRequest: [
+        {name: 'caller', type: 'address'},
+        {name: 'tokenIds', type: 'uint256[]'},
+        {name: 'amounts', type: 'uint256[]'},
+        {name: 'prices', type: 'uint256[]'},
+        {name: 'deadline', type: 'uint256'},
+        {name: 'nonce', type: 'uint256'},
+      ],
+    };
+
+    // Create the data to sign
+    const value = {
+      caller: caller,
+      tokenIds: tokenIds,
+      amounts: amounts,
+      prices: prices,
+      deadline: deadline,
+      nonce: nonce,
+    };
+
+    // Sign the typed data properly
+    return await signer.signTypedData(domain, types, value);
+  }
+
   const deployToken = async () => {
     const MockERC20 = await ethers.getContractFactory('MockERC20');
     return (await MockERC20.deploy(
@@ -227,8 +273,8 @@ export async function runCreateTestSetup() {
       BigNumberish[],
       BigNumberish[],
       BigNumberish[],
-      BigNumberish[],
-      BytesLike[],
+      BigNumberish,
+      BytesLike,
     ],
   ) => {
     const encodedData = sandboxPasses.interface.encodeFunctionData(
@@ -259,6 +305,7 @@ export async function runCreateTestSetup() {
     deployToken,
     createMintSignature,
     createBurnAndMintSignature,
+    createBatchMintSignature,
     mintTokensForBurn,
     approveAndCallMint,
     approveAndCallBatchMint,
