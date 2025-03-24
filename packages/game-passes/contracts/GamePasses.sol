@@ -41,8 +41,8 @@ contract GamePasses is
         string metadata;
         uint256 maxPerWallet; // max tokens that can be minted per wallet
         uint256 totalMinted; // total tokens already minted
-        mapping(address => uint256) mintedPerWallet; // track mints per wallet
-        mapping(address => bool) transferWhitelist; // whitelist for transfers
+        mapping(address owner => uint256 mintedCount) mintedPerWallet; // track mints per wallet
+        mapping(address caller => bool isWhitelisted) transferWhitelist; // whitelist for transfers
     }
 
     /// @dev Struct to hold burn and mint request
@@ -108,7 +108,7 @@ contract GamePasses is
     /// @custom:storage-location erc7201:sandbox.game-passes.storage.UserStorage
     struct UserStorage {
         // Track nonces for replay protection
-        mapping(address => uint256) nonces;
+        mapping(address caller => uint256 nonce) nonces;
     }
 
     function _userStorage() private pure returns (UserStorage storage us) {
@@ -124,7 +124,7 @@ contract GamePasses is
     /// @custom:storage-location erc7201:sandbox.game-passes.storage.TokenStorage
     struct TokenStorage {
         // Mapping of token configurations
-        mapping(uint256 => TokenConfig) tokenConfigs;
+        mapping(uint256 tokenId => TokenConfig tokenConfig) tokenConfigs;
     }
 
     function _tokenStorage() private pure returns (TokenStorage storage ts) {
