@@ -144,6 +144,7 @@ contract SandboxPasses1155Upgradeable is
     //                      Storage - ERC7201
     // =============================================================
 
+    /// @custom:storage-location erc7201:sandbox.game-passes.storage.CoreStorage
     struct CoreStorage {
         // Base URI for computing {uri}
         string baseURI;
@@ -159,33 +160,41 @@ contract SandboxPasses1155Upgradeable is
     }
 
     function _coreStorage() private pure returns (CoreStorage storage cs) {
-        bytes32 position = CORE_STORAGE_LOCATION;
+        bytes32 position = keccak256(
+            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.CoreStorage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cs.slot := position
         }
     }
 
+    /// @custom:storage-location erc7201:sandbox.game-passes.storage.UserStorage
     struct UserStorage {
         // Track nonces for replay protection
         mapping(address => uint256) nonces;
     }
 
     function _userStorage() private pure returns (UserStorage storage us) {
-        bytes32 position = USER_STORAGE_LOCATION;
+        bytes32 position = keccak256(
+            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.UserStorage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             us.slot := position
         }
     }
 
+    /// @custom:storage-location erc7201:sandbox.game-passes.storage.TokenStorage
     struct TokenStorage {
         // Mapping of token configurations
         mapping(uint256 => TokenConfig) tokenConfigs;
     }
 
     function _tokenStorage() private pure returns (TokenStorage storage ts) {
-        bytes32 position = TOKEN_STORAGE_LOCATION;
+        bytes32 position = keccak256(
+            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.TokenStorage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ts.slot := position
@@ -202,21 +211,6 @@ contract SandboxPasses1155Upgradeable is
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     /// @dev The role that is allowed to consume tokens
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-
-    /**
-     * @dev Core storage layout using ERC7201 namespaced storage pattern
-     */
-    bytes32 public constant CORE_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.CoreStorage");
-
-    /**
-     * @dev User storage layout using ERC7201 for nonces
-     */
-    bytes32 public constant USER_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.UserStorage");
-
-    /**
-     * @dev Token config storage layout using ERC7201
-     */
-    bytes32 public constant TOKEN_STORAGE_LOCATION = keccak256("sandbox.game-passes.storage.TokenStorage");
 
     /// @dev EIP-712 domain typehash
     bytes32 public constant EIP712_DOMAIN_TYPEHASH =
