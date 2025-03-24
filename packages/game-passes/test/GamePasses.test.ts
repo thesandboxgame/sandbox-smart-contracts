@@ -57,11 +57,11 @@ describe('GamePasses', function () {
 
       // Check token configuration
       const tokenConfig = await sandboxPasses.tokenConfigs(TOKEN_ID_1);
-      expect(tokenConfig.isConfigured).to.be.true;
-      expect(tokenConfig.transferable).to.be.true;
-      expect(tokenConfig.maxSupply).to.equal(MAX_SUPPLY);
-      expect(tokenConfig.metadata).to.equal(TOKEN_METADATA);
-      expect(tokenConfig.maxPerWallet).to.equal(MAX_PER_WALLET);
+      expect(tokenConfig[0]).to.be.true;
+      expect(tokenConfig[1]).to.be.true;
+      expect(tokenConfig[2]).to.equal(MAX_SUPPLY);
+      expect(tokenConfig[3]).to.equal(TOKEN_METADATA);
+      expect(tokenConfig[4]).to.equal(MAX_PER_WALLET);
     });
   });
 
@@ -95,12 +95,13 @@ describe('GamePasses', function () {
         );
 
       const tokenConfig = await sandboxPasses.tokenConfigs(NEW_TOKEN_ID);
-      expect(tokenConfig.isConfigured).to.be.true;
-      expect(tokenConfig.transferable).to.be.true;
-      expect(tokenConfig.maxSupply).to.equal(200);
-      expect(tokenConfig.maxPerWallet).to.equal(20);
-      expect(tokenConfig.metadata).to.equal('ipfs://QmNewToken');
-      expect(tokenConfig.treasuryWallet).to.equal(user1.address);
+      expect(tokenConfig[0]).to.be.true;
+      expect(tokenConfig[1]).to.be.true;
+      expect(tokenConfig[2]).to.equal(200);
+      expect(tokenConfig[3]).to.equal('ipfs://QmNewToken');
+      expect(tokenConfig[4]).to.equal(20);
+      expect(tokenConfig[5]).to.equal(user1.address);
+      expect(tokenConfig[6]).to.equal(0);
     });
 
     it('should not allow non-admin to configure a token', async function () {
@@ -156,10 +157,10 @@ describe('GamePasses', function () {
         );
 
       const tokenConfig = await sandboxPasses.tokenConfigs(TOKEN_ID_1);
-      expect(tokenConfig.maxSupply).to.equal(200);
-      expect(tokenConfig.maxPerWallet).to.equal(15);
-      expect(tokenConfig.metadata).to.equal('ipfs://QmUpdated');
-      expect(tokenConfig.treasuryWallet).to.equal(user2.address);
+      expect(tokenConfig[2]).to.equal(200);
+      expect(tokenConfig[4]).to.equal(15);
+      expect(tokenConfig[3]).to.equal('ipfs://QmUpdated');
+      expect(tokenConfig[5]).to.equal(user2.address);
     });
 
     it('should not allow decreasing max supply below current supply', async function () {
@@ -200,7 +201,7 @@ describe('GamePasses', function () {
         .withArgs(admin.address, TOKEN_ID_1, false);
 
       const tokenConfig = await sandboxPasses.tokenConfigs(TOKEN_ID_1);
-      expect(tokenConfig.transferable).to.be.false;
+      expect(tokenConfig[1]).to.be.false;
 
       // Change non-transferable token to transferable
       await expect(
@@ -210,7 +211,7 @@ describe('GamePasses', function () {
         .withArgs(admin.address, TOKEN_ID_2, true);
 
       const tokenConfig2 = await sandboxPasses.tokenConfigs(TOKEN_ID_2);
-      expect(tokenConfig2.transferable).to.be.true;
+      expect(tokenConfig2[1]).to.be.true;
     });
 
     it('should not allow setting transferability to the same value', async function () {
