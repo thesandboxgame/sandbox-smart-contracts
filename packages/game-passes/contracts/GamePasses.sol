@@ -1003,19 +1003,7 @@ contract GamePasses is
      */
     function tokenConfigs(
         uint256 tokenId
-    )
-        external
-        view
-        returns (
-            bool isConfigured,
-            bool transferable,
-            uint256 maxSupply,
-            string memory metadata,
-            uint256 maxPerWallet,
-            address treasuryWallet,
-            uint256 totalMinted
-        )
-    {
+    ) external view returns (bool, bool, uint256, string memory, uint256, address, uint256) {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         return (
             config.isConfigured,
