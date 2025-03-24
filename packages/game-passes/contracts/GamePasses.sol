@@ -929,6 +929,7 @@ contract SandboxPasses1155Upgradeable is
      * @return metadata Token metadata string
      * @return maxPerWallet Maximum tokens per wallet
      * @return treasuryWallet Treasury wallet for the token
+     * @return totalMinted Total tokens minted for the token
      */
     function tokenConfigs(
         uint256 tokenId
@@ -941,7 +942,8 @@ contract SandboxPasses1155Upgradeable is
             uint256 maxSupply,
             string memory metadata,
             uint256 maxPerWallet,
-            address treasuryWallet
+            address treasuryWallet,
+            uint256 totalMinted
         )
     {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
@@ -951,7 +953,8 @@ contract SandboxPasses1155Upgradeable is
             config.maxSupply,
             config.metadata,
             config.maxPerWallet,
-            config.treasuryWallet
+            config.treasuryWallet,
+            config.totalMinted
         );
     }
 
