@@ -213,6 +213,18 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(tokenConfig2.transferable).to.be.true;
     });
 
+    it('should not allow setting transferability to the same value', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses.connect(admin).setTransferable(TOKEN_ID_1, true),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'TransferabilityAlreadySet',
+      );
+    });
+
     it('should allow updating transfer whitelist', async function () {
       const {sandboxPasses, admin, user1, user2, TOKEN_ID_2} =
         await loadFixture(runCreateTestSetup);
@@ -242,6 +254,24 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(
         await sandboxPasses.isTransferWhitelisted(TOKEN_ID_2, user1.address),
       ).to.be.false;
+    });
+
+    it('should not allow setting transfer whitelist to the same value', async function () {
+      const {sandboxPasses, admin, user1, TOKEN_ID_2} =
+        await loadFixture(runCreateTestSetup);
+
+      await sandboxPasses
+        .connect(admin)
+        .updateTransferWhitelist(TOKEN_ID_2, [user1.address], true);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .updateTransferWhitelist(TOKEN_ID_2, [user1.address], true),
+      ).to.be.revertedWithCustomError(
+        sandboxPasses,
+        'TransferWhitelistAlreadySet',
+      );
     });
 
     it('should not allow non-admin to set transferability', async function () {
