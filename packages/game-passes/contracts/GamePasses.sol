@@ -72,6 +72,7 @@ contract SandboxPasses1155Upgradeable is
         string metadata;
         uint256 maxPerWallet; // max tokens that can be minted per wallet
         address treasuryWallet; // specific treasury wallet for this token
+        uint256 totalMinted; // total tokens already minted
         mapping(address => uint256) mintedPerWallet; // track mints per wallet
         mapping(address => bool) transferWhitelist; // whitelist for transfers
     }
@@ -1189,10 +1190,12 @@ contract SandboxPasses1155Upgradeable is
      *      - Token has a max supply (> 0) and
      *      - Current supply + amount would exceed max supply
      */
-    function _checkMaxSupply(uint256 tokenId, uint256 amount) private view {
+    function _checkMaxSupply(uint256 tokenId, uint256 amount) private {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
+        // update the config total minted and check if it exceeds the max supply
+        config.totalMinted += amount;
         if (config.maxSupply > 0) {
-            if (totalSupply(tokenId) + amount > config.maxSupply) {
+            if (config.totalMinted > config.maxSupply) {
                 revert MaxSupplyExceeded(tokenId);
             }
         }

@@ -415,6 +415,47 @@ describe('SandboxPasses1155Upgradeable', function () {
         'AccessControlUnauthorizedAccount',
       );
     });
+
+    it('should not allow adminBatchMint to exceed max supply with duplicate token IDs', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      // Let's assume TOKEN_ID_1 has a max supply of 100 (from test setup)
+      // First mint 90 tokens
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(admin.address, TOKEN_ID_1, 90);
+
+      // Now try to mint the same token ID twice in a batch (5 + 6 = 11)
+      // This would exceed the max supply of 100 (90 + 11 > 100)
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .adminBatchMint(admin.address, [TOKEN_ID_1, TOKEN_ID_1], [5, 6]),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+    });
+
+    it('should not allow adminMultiRecipientMint to exceed max supply with duplicate token IDs', async function () {
+      const {sandboxPasses, admin, user1, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      // First mint 90 tokens
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(admin.address, TOKEN_ID_1, 90);
+
+      // Now try to mint the same token ID to different recipients (6 + 5 = 11)
+      // This would exceed the max supply of 100 (90 + 11 > 100)
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .adminMultiRecipientMint(
+            [admin.address, user1.address],
+            [TOKEN_ID_1, TOKEN_ID_1],
+            [6, 5],
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+    });
   });
 
   describe('Signature-Based Minting', function () {
@@ -1306,6 +1347,69 @@ describe('SandboxPasses1155Upgradeable', function () {
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
     });
+
+    it('should not allow batchMint to exceed max supply with duplicate token IDs', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        admin,
+        paymentToken,
+        TOKEN_ID_1,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // First mint 90 tokens
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(admin.address, TOKEN_ID_1, 95);
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600;
+      const nonce1 = 0;
+      const nonce2 = 1;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price * 2n);
+
+      // Create signatures for the same token ID
+      const signature1 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        3,
+        price,
+        deadline,
+        nonce1,
+      );
+
+      const signature2 = await createMintSignature(
+        signer,
+        user1.address,
+        TOKEN_ID_1,
+        3,
+        price,
+        deadline,
+        nonce2,
+      );
+
+      // Try to batch mint the same token ID twice (6 + 5 = 11)
+      // This would exceed the max supply of 100 (90 + 11 > 100)
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .batchMint(
+            user1.address,
+            [TOKEN_ID_1, TOKEN_ID_1],
+            [3, 3],
+            [price, price],
+            [deadline, deadline],
+            [signature1, signature2],
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+    });
   });
 
   describe('Burn and Mint Operations', function () {
@@ -1484,6 +1588,36 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.balanceOf(user1.address, TOKEN_ID_2)).to.equal(
         3,
       );
+    });
+
+    it('should not allow operatorBatchBurnAndMint to exceed max supply with duplicate token IDs', async function () {
+      const {sandboxPasses, operator, admin, TOKEN_ID_1, TOKEN_ID_2} =
+        await loadFixture(runCreateTestSetup);
+
+      // First mint some tokens of TOKEN_ID_2 to burn
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(admin.address, TOKEN_ID_2, 10);
+
+      // Then mint 90 tokens of TOKEN_ID_1
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(admin.address, TOKEN_ID_1, 90);
+
+      // Try to mint the same token ID twice in a batch mint (6 + 5 = 11)
+      // This would exceed the max supply of 100 (90 + 11 > 100)
+      await expect(
+        sandboxPasses
+          .connect(operator)
+          .operatorBatchBurnAndMint(
+            admin.address,
+            admin.address,
+            [TOKEN_ID_2, TOKEN_ID_2],
+            [5, 5],
+            [TOKEN_ID_1, TOKEN_ID_1],
+            [6, 5],
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
     });
   });
 
