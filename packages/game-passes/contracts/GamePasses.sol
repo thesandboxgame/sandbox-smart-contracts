@@ -29,70 +29,6 @@ contract GamePasses is
     using Strings for uint256;
 
     // =============================================================
-    //                           Events
-    // =============================================================
-
-    /// @notice Emitted when the base URI is updated.
-    /// @param caller Address that initiated the base URI update
-    /// @param oldURI Previous base URI value before the update
-    /// @param newURI New base URI value after the update
-    event BaseURISet(address indexed caller, string oldURI, string newURI);
-    /// @notice Emitted when a token is configured.
-    /// @param caller Address that initiated the token configuration
-    /// @param tokenId ID of the token being configured
-    /// @param transferable Whether the token can be transferred
-    /// @param maxSupply Maximum supply for this token (0 means unlimited)
-    /// @param maxPerWallet Maximum number of tokens a single wallet can mint (0 means unlimited)
-    /// @param metadata Token-specific metadata string
-    /// @param treasuryWallet Address where payments for this token will be sent
-    event TokenConfigured(
-        address indexed caller,
-        uint256 indexed tokenId,
-        bool transferable,
-        uint256 maxSupply,
-        uint256 maxPerWallet,
-        string metadata,
-        address treasuryWallet
-    );
-    /// @notice Emitted when a token configuration is updated.
-    /// @param caller Address that initiated the token configuration update
-    /// @param tokenId ID of the token being updated
-    /// @param maxSupply New maximum supply for this token (0 means unlimited)
-    /// @param maxPerWallet New maximum number of tokens a single wallet can mint (0 means unlimited)
-    /// @param metadata New token-specific metadata string
-    /// @param treasuryWallet New address where payments for this token will be sent
-    event TokenConfigUpdated(
-        address indexed caller,
-        uint256 indexed tokenId,
-        uint256 maxSupply,
-        uint256 maxPerWallet,
-        string metadata,
-        address treasuryWallet
-    );
-    /// @notice Emitted when a token's transferability is updated.
-    /// @param caller Address that initiated the transferability update
-    /// @param tokenId ID of the token whose transferability was changed
-    /// @param transferable New transferability status (true = transferable, false = soulbound)
-    event TransferabilityUpdated(address indexed caller, uint256 indexed tokenId, bool transferable);
-    /// @notice Emitted when transfer whitelist is updated.
-    /// @param caller Address that initiated the whitelist update
-    /// @param tokenId ID of the token whose whitelist was updated
-    /// @param accounts Array of addresses that were added to or removed from the whitelist
-    /// @param allowed Whether the addresses were added to (true) or removed from (false) the whitelist
-    event TransferWhitelistUpdated(address indexed caller, uint256 indexed tokenId, address[] accounts, bool allowed);
-    /// @notice Emitted when tokens are recovered from the contract.
-    /// @param caller Address that initiated the token recovery
-    /// @param token Address of the ERC20 token being recovered
-    /// @param recipient Address receiving the recovered tokens
-    /// @param amount Amount of tokens recovered
-    event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
-    /// @notice Emitted when the owner is updated
-    /// @param caller Address that initiated the owner update
-    /// @param oldOwner Previous owner address before the update
-    /// @param newOwner New owner address after the update
-    event OwnerUpdated(address indexed caller, address oldOwner, address newOwner);
-
-    // =============================================================
     //                     Structs
     // =============================================================
 
@@ -240,6 +176,70 @@ contract GamePasses is
 
     /// @dev Maximum number of tokens that can be processed in a batch operation
     uint256 public constant MAX_BATCH_SIZE = 100;
+
+    // =============================================================
+    //                           Events
+    // =============================================================
+
+    /// @notice Emitted when the base URI is updated.
+    /// @param caller Address that initiated the base URI update
+    /// @param oldURI Previous base URI value before the update
+    /// @param newURI New base URI value after the update
+    event BaseURISet(address indexed caller, string oldURI, string newURI);
+    /// @notice Emitted when a token is configured.
+    /// @param caller Address that initiated the token configuration
+    /// @param tokenId ID of the token being configured
+    /// @param transferable Whether the token can be transferred
+    /// @param maxSupply Maximum supply for this token (0 means unlimited)
+    /// @param maxPerWallet Maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param metadata Token-specific metadata string
+    /// @param treasuryWallet Address where payments for this token will be sent
+    event TokenConfigured(
+        address indexed caller,
+        uint256 indexed tokenId,
+        bool transferable,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string metadata,
+        address treasuryWallet
+    );
+    /// @notice Emitted when a token configuration is updated.
+    /// @param caller Address that initiated the token configuration update
+    /// @param tokenId ID of the token being updated
+    /// @param maxSupply New maximum supply for this token (0 means unlimited)
+    /// @param maxPerWallet New maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param metadata New token-specific metadata string
+    /// @param treasuryWallet New address where payments for this token will be sent
+    event TokenConfigUpdated(
+        address indexed caller,
+        uint256 indexed tokenId,
+        uint256 maxSupply,
+        uint256 maxPerWallet,
+        string metadata,
+        address treasuryWallet
+    );
+    /// @notice Emitted when a token's transferability is updated.
+    /// @param caller Address that initiated the transferability update
+    /// @param tokenId ID of the token whose transferability was changed
+    /// @param transferable New transferability status (true = transferable, false = soulbound)
+    event TransferabilityUpdated(address indexed caller, uint256 indexed tokenId, bool transferable);
+    /// @notice Emitted when transfer whitelist is updated.
+    /// @param caller Address that initiated the whitelist update
+    /// @param tokenId ID of the token whose whitelist was updated
+    /// @param accounts Array of addresses that were added to or removed from the whitelist
+    /// @param allowed Whether the addresses were added to (true) or removed from (false) the whitelist
+    event TransferWhitelistUpdated(address indexed caller, uint256 indexed tokenId, address[] accounts, bool allowed);
+    /// @notice Emitted when tokens are recovered from the contract.
+    /// @param caller Address that initiated the token recovery
+    /// @param token Address of the ERC20 token being recovered
+    /// @param recipient Address receiving the recovered tokens
+    /// @param amount Amount of tokens recovered
+    event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
+    /// @notice Emitted when the owner is updated
+    /// @param caller Address that initiated the owner update
+    /// @param oldOwner Previous owner address before the update
+    /// @param newOwner New owner address after the update
+    event OwnerUpdated(address indexed caller, address oldOwner, address newOwner);
 
     // =============================================================
     //                           Errors
@@ -965,17 +965,6 @@ contract GamePasses is
     }
 
     /**
-     * @notice Returns the metadata URI for a specific token ID
-     * @param tokenId ID of the token to get URI for
-     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
-     * @dev Can be overridden by derived contracts to implement different URI logic
-     * @return string The complete URI for the token metadata
-     */
-    function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
-    }
-
-    /**
      * @notice Returns the default treasury wallet address
      * @return address The default treasury wallet address
      */
@@ -1088,6 +1077,17 @@ contract GamePasses is
 
         SafeERC20.safeTransfer(IERC20(token), to, amount);
         emit TokensRecovered(_msgSender(), token, to, amount);
+    }
+
+    /**
+     * @notice Returns the metadata URI for a specific token ID
+     * @param tokenId ID of the token to get URI for
+     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
+     * @dev Can be overridden by derived contracts to implement different URI logic
+     * @return string The complete URI for the token metadata
+     */
+    function uri(uint256 tokenId) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
     }
 
     /**
@@ -1208,6 +1208,76 @@ contract GamePasses is
     // =============================================================
 
     /**
+     * @notice Internal hook to enforce transfer restrictions on soulbound tokens
+     * @param from Source address
+     * @param to Destination address
+     * @param ids Array of token IDs being transferred
+     * @param values Array of transfer amounts
+     * @dev Called on all ERC1155 transfers (mint, burn, or user transfer)
+     * @dev Enforces transferability rules:
+     *      - Allows mints (from == address(0))
+     *      - Allows burns (to == address(0))
+     *      - Checks transferability for regular transfers
+     * @dev Reverts if:
+     *      - Token is non-transferable AND
+     *      - Sender is not whitelisted AND
+     *      - Sender is not ADMIN_ROLE or OPERATOR_ROLE
+     */
+    function _update(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values
+    ) internal virtual override(ERC1155SupplyUpgradeable) whenNotPaused {
+        // If not a mint (from == address(0)) and not a burn (to == address(0)), enforce transferability
+        if (from != address(0) && to != address(0)) {
+            bool isAdminOrOperator = hasRole(ADMIN_ROLE, _msgSender()) || hasRole(OPERATOR_ROLE, _msgSender());
+            if (!isAdminOrOperator) {
+                for (uint256 i; i < ids.length; i++) {
+                    uint256 tokenId = ids[i];
+                    TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
+
+                    if (!config.transferable && !config.transferWhitelist[from]) {
+                        revert TransferNotAllowed(tokenId);
+                    }
+                }
+            }
+        }
+
+        super._update(from, to, ids, values);
+    }
+
+    /**
+     * @notice Gets the sender address, supporting meta-transactions
+     * @dev Overrides Context's _msgSender to support meta-transactions via ERC2771
+     * @return address The sender's address (original sender for meta-transactions)
+     */
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (address)
+    {
+        return ERC2771HandlerUpgradeable._msgSender();
+    }
+
+    /**
+     * @notice Gets the transaction data, supporting meta-transactions
+     * @dev Overrides Context's _msgData to support meta-transactions via ERC2771
+     * @return bytes calldata The transaction data (modified for meta-transactions)
+     */
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
+        returns (bytes calldata)
+    {
+        return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    /**
      * @dev Internal helper function to process a single mint operation
      * @param caller The address calling the mint function
      * @param tokenId The token ID to mint
@@ -1317,75 +1387,5 @@ contract GamePasses is
         if (config.maxPerWallet > 0 && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
-    }
-
-    /**
-     * @notice Internal hook to enforce transfer restrictions on soulbound tokens
-     * @param from Source address
-     * @param to Destination address
-     * @param ids Array of token IDs being transferred
-     * @param values Array of transfer amounts
-     * @dev Called on all ERC1155 transfers (mint, burn, or user transfer)
-     * @dev Enforces transferability rules:
-     *      - Allows mints (from == address(0))
-     *      - Allows burns (to == address(0))
-     *      - Checks transferability for regular transfers
-     * @dev Reverts if:
-     *      - Token is non-transferable AND
-     *      - Sender is not whitelisted AND
-     *      - Sender is not ADMIN_ROLE or OPERATOR_ROLE
-     */
-    function _update(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values
-    ) internal virtual override(ERC1155SupplyUpgradeable) whenNotPaused {
-        // If not a mint (from == address(0)) and not a burn (to == address(0)), enforce transferability
-        if (from != address(0) && to != address(0)) {
-            bool isAdminOrOperator = hasRole(ADMIN_ROLE, _msgSender()) || hasRole(OPERATOR_ROLE, _msgSender());
-            if (!isAdminOrOperator) {
-                for (uint256 i; i < ids.length; i++) {
-                    uint256 tokenId = ids[i];
-                    TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
-
-                    if (!config.transferable && !config.transferWhitelist[from]) {
-                        revert TransferNotAllowed(tokenId);
-                    }
-                }
-            }
-        }
-
-        super._update(from, to, ids, values);
-    }
-
-    /**
-     * @notice Gets the sender address, supporting meta-transactions
-     * @dev Overrides Context's _msgSender to support meta-transactions via ERC2771
-     * @return address The sender's address (original sender for meta-transactions)
-     */
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (address)
-    {
-        return ERC2771HandlerUpgradeable._msgSender();
-    }
-
-    /**
-     * @notice Gets the transaction data, supporting meta-transactions
-     * @dev Overrides Context's _msgData to support meta-transactions via ERC2771
-     * @return bytes calldata The transaction data (modified for meta-transactions)
-     */
-    function _msgData()
-        internal
-        view
-        virtual
-        override(ContextUpgradeable, ERC2771HandlerUpgradeable)
-        returns (bytes calldata)
-    {
-        return ERC2771HandlerUpgradeable._msgData();
     }
 }
