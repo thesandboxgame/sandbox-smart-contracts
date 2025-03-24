@@ -251,6 +251,10 @@ contract SandboxPasses1155Upgradeable is
     error BatchSizeExceeded(uint256 size, uint256 maxSize);
     /// @dev Revert when invalid batch royalty
     error InvalidBatchRoyalty();
+    /// @dev Revert when transfer whitelist is already set
+    error TransferWhitelistAlreadySet(uint256 tokenId, address account);
+    /// @dev Revert when transferability is already set
+    error TransferabilityAlreadySet(uint256 tokenId);
 
     // =============================================================
     //                          Init
@@ -717,6 +721,9 @@ contract SandboxPasses1155Upgradeable is
         }
 
         for (uint256 i; i < accounts.length; i++) {
+            if (config.transferWhitelist[accounts[i]] == allowed) {
+                revert TransferWhitelistAlreadySet(tokenId, accounts[i]);
+            }
             config.transferWhitelist[accounts[i]] = allowed;
         }
         emit TransferWhitelistUpdated(_msgSender(), tokenId, accounts, allowed);
@@ -738,6 +745,10 @@ contract SandboxPasses1155Upgradeable is
 
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
+        }
+
+        if (config.transferable == transferable) {
+            revert TransferabilityAlreadySet(tokenId);
         }
 
         config.transferable = transferable;
