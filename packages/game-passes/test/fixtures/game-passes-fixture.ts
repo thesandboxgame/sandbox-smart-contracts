@@ -1,7 +1,7 @@
 import {SignerWithAddress} from '@nomicfoundation/hardhat-ethers/signers';
 import {AddressLike, BigNumberish, BytesLike} from 'ethers';
 import {ethers, upgrades} from 'hardhat';
-import {MockERC20, SandboxPasses1155Upgradeable} from '../../typechain-types';
+import {GamePasses, MockERC20} from '../../typechain-types';
 
 export async function runCreateTestSetup() {
   const DOMAIN_NAME = 'SandboxPasses1155';
@@ -195,9 +195,7 @@ export async function runCreateTestSetup() {
   await paymentToken.mint(user2.address, ethers.parseEther('1000'));
 
   // Deploy the contract using upgrades plugin
-  const SandboxPasses = await ethers.getContractFactory(
-    'SandboxPasses1155Upgradeable',
-  );
+  const SandboxPasses = await ethers.getContractFactory('GamePasses');
   const sandboxPasses = (await upgrades.deployProxy(SandboxPasses, [
     BASE_URI,
     royaltyReceiver.address,
@@ -209,7 +207,7 @@ export async function runCreateTestSetup() {
     trustedForwarder.address,
     treasury.address,
     owner.address,
-  ])) as unknown as SandboxPasses1155Upgradeable;
+  ])) as unknown as GamePasses;
   await sandboxPasses.waitForDeployment();
 
   // Set up default token configuration

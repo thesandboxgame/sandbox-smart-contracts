@@ -14,11 +14,11 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
- * @title SandboxPasses1155Upgradeable
+ * @title GamePasses
  * @notice An upgradeable ERC1155 contract with AccessControl-based permissions,
  *         supply tracking, forced burns, burn-and-mint, and EIP-2981 royalties.
  */
-contract SandboxPasses1155Upgradeable is
+contract GamePasses is
     Initializable,
     ERC2771HandlerUpgradeable,
     AccessControlUpgradeable,

@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {ethers, upgrades} from 'hardhat';
 import {runCreateTestSetup} from './fixtures/game-passes-fixture';
 
-describe('SandboxPasses1155Upgradeable', function () {
+describe('GamePasses', function () {
   describe('Initialization', function () {
     it('should initialize with correct values', async function () {
       const {
