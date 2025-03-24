@@ -304,6 +304,12 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses['totalSupply(uint256)'](TOKEN_ID_1)).to.equal(
         MINT_AMOUNT,
       );
+
+      const mintedPerWallet = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_1,
+        user1.address,
+      );
+      expect(mintedPerWallet).to.equal(MINT_AMOUNT);
     });
 
     it('should allow admin to batch mint tokens', async function () {
@@ -324,26 +330,53 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.balanceOf(admin.address, TOKEN_ID_2)).to.equal(
         MINT_AMOUNT * 2,
       );
+      const mintedPerWallet1 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_1,
+        admin.address,
+      );
+      expect(mintedPerWallet1).to.equal(MINT_AMOUNT);
+      const mintedPerWallet2 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_2,
+        admin.address,
+      );
+      expect(mintedPerWallet2).to.equal(MINT_AMOUNT * 2);
     });
 
     it('should allow admin to mint to multiple recipients', async function () {
-      const {sandboxPasses, admin, TOKEN_ID_1, TOKEN_ID_2, MINT_AMOUNT} =
-        await loadFixture(runCreateTestSetup);
+      const {
+        sandboxPasses,
+        admin,
+        user1,
+        user2,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        MINT_AMOUNT,
+      } = await loadFixture(runCreateTestSetup);
 
       await sandboxPasses
         .connect(admin)
         .adminMultiRecipientMint(
-          [admin.address, admin.address],
+          [user1.address, user2.address],
           [TOKEN_ID_1, TOKEN_ID_2],
           [MINT_AMOUNT, MINT_AMOUNT * 2],
         );
 
-      expect(await sandboxPasses.balanceOf(admin.address, TOKEN_ID_1)).to.equal(
+      expect(await sandboxPasses.balanceOf(user1.address, TOKEN_ID_1)).to.equal(
         MINT_AMOUNT,
       );
-      expect(await sandboxPasses.balanceOf(admin.address, TOKEN_ID_2)).to.equal(
+      expect(await sandboxPasses.balanceOf(user2.address, TOKEN_ID_2)).to.equal(
         MINT_AMOUNT * 2,
       );
+      const mintedPerWallet1 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_1,
+        user1.address,
+      );
+      expect(mintedPerWallet1).to.equal(MINT_AMOUNT);
+      const mintedPerWallet2 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_2,
+        user2.address,
+      );
+      expect(mintedPerWallet2).to.equal(MINT_AMOUNT * 2);
     });
 
     it('should not allow minting unconfigured tokens', async function () {
@@ -1410,6 +1443,112 @@ describe('SandboxPasses1155Upgradeable', function () {
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
     });
+
+    it('should allow unlimited mints when maxPerWallet is 0', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        admin,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // Configure a new token with maxPerWallet = 0 (unlimited)
+      const UNLIMITED_TOKEN_ID = 9999;
+      const LARGE_MAX_SUPPLY = 1000; // Just to make sure we don't hit max supply
+
+      await sandboxPasses.connect(admin).configureToken(
+        UNLIMITED_TOKEN_ID,
+        true, // transferable
+        LARGE_MAX_SUPPLY, // max supply
+        0, // maxPerWallet = 0 (unlimited)
+        'ipfs://unlimited-token', // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+
+      // First mint
+      const mintAmount1 = 10;
+      const nonce1 = 0;
+
+      // Approve payment token for first mint
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      const signature1 = await createMintSignature(
+        signer,
+        user1.address,
+        UNLIMITED_TOKEN_ID,
+        mintAmount1,
+        price,
+        deadline,
+        nonce1,
+      );
+
+      // First mint should succeed
+      await sandboxPasses
+        .connect(user1)
+        .mint(
+          user1.address,
+          UNLIMITED_TOKEN_ID,
+          mintAmount1,
+          price,
+          deadline,
+          signature1,
+        );
+
+      // Check balance after first mint
+      expect(
+        await sandboxPasses.balanceOf(user1.address, UNLIMITED_TOKEN_ID),
+      ).to.equal(mintAmount1);
+
+      // Second mint with a larger amount
+      const mintAmount2 = 20;
+      const nonce2 = 1;
+
+      // Approve payment token for second mint
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      const signature2 = await createMintSignature(
+        signer,
+        user1.address,
+        UNLIMITED_TOKEN_ID,
+        mintAmount2,
+        price,
+        deadline,
+        nonce2,
+      );
+
+      // Second mint should also succeed despite exceeding what would normally be max per wallet
+      await sandboxPasses
+        .connect(user1)
+        .mint(
+          user1.address,
+          UNLIMITED_TOKEN_ID,
+          mintAmount2,
+          price,
+          deadline,
+          signature2,
+        );
+
+      // Check total balance after both mints
+      expect(
+        await sandboxPasses.balanceOf(user1.address, UNLIMITED_TOKEN_ID),
+      ).to.equal(mintAmount1 + mintAmount2);
+
+      // Check that mintedPerWallet is being tracked correctly
+      const mintedPerWallet = await sandboxPasses.mintedPerWallet(
+        UNLIMITED_TOKEN_ID,
+        user1.address,
+      );
+      expect(mintedPerWallet).to.equal(mintAmount1 + mintAmount2);
+    });
   });
 
   describe('Burn and Mint Operations', function () {
@@ -1444,6 +1583,17 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.balanceOf(admin.address, TOKEN_ID_2)).to.equal(
         3,
       );
+
+      const mintedPerWallet1 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_1,
+        admin.address,
+      );
+      expect(mintedPerWallet1).to.equal(MINT_AMOUNT);
+      const mintedPerWallet2 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_2,
+        admin.address,
+      );
+      expect(mintedPerWallet2).to.equal(3);
     });
 
     it('should allow operator to batch burn and mint', async function () {
@@ -1483,6 +1633,18 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.balanceOf(user1.address, TOKEN_ID_2)).to.equal(
         MINT_AMOUNT - 3 + 4,
       );
+
+      const mintedPerWallet1 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_1,
+        user1.address,
+      );
+      expect(mintedPerWallet1).to.equal(MINT_AMOUNT + 5);
+
+      const mintedPerWallet2 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_2,
+        user1.address,
+      );
+      expect(mintedPerWallet2).to.equal(MINT_AMOUNT + 4);
     });
 
     it('should not allow non-operator to burn and mint through operatorBurnAndMint', async function () {
@@ -1588,6 +1750,11 @@ describe('SandboxPasses1155Upgradeable', function () {
       expect(await sandboxPasses.balanceOf(user1.address, TOKEN_ID_2)).to.equal(
         3,
       );
+      const mintedPerWallet1 = await sandboxPasses.mintedPerWallet(
+        TOKEN_ID_2,
+        user1.address,
+      );
+      expect(mintedPerWallet1).to.equal(3);
     });
 
     it('should not allow operatorBatchBurnAndMint to exceed max supply with duplicate token IDs', async function () {
@@ -2608,36 +2775,6 @@ describe('SandboxPasses1155Upgradeable', function () {
   });
 
   describe('Additional Error Cases', function () {
-    it('should revert when configuring token with zero maxPerWallet', async function () {
-      const {sandboxPasses, admin} = await loadFixture(runCreateTestSetup);
-      const NEW_TOKEN_ID = 10;
-
-      await expect(
-        sandboxPasses.connect(admin).configureToken(
-          NEW_TOKEN_ID,
-          true,
-          100,
-          0, // Zero maxPerWallet
-          'ipfs://QmNewToken',
-          admin.address,
-        ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroMaxPerWallet');
-    });
-
-    it('should revert when updating token with zero maxPerWallet', async function () {
-      const {sandboxPasses, admin, TOKEN_ID_1} =
-        await loadFixture(runCreateTestSetup);
-      await expect(
-        sandboxPasses.connect(admin).updateTokenConfig(
-          TOKEN_ID_1,
-          200,
-          0, // Zero maxPerWallet
-          'ipfs://QmUpdated',
-          admin.address,
-        ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroMaxPerWallet');
-    });
-
     it('should revert with BurnMintNotConfigured for unconfigured burn token', async function () {
       const {
         sandboxPasses,

@@ -227,8 +227,6 @@ contract SandboxPasses1155Upgradeable is
     error ExceedsMaxPerWallet(uint256 tokenId, address wallet, uint256 attempted, uint256 maximum);
     /// @dev Revert when address is zero
     error ZeroAddress(string role);
-    /// @dev Revert when max per wallet is zero
-    error ZeroMaxPerWallet();
     /// @dev Revert when payment token is invalid
     error InvalidPaymentToken();
     /// @dev Revert when trying to recover payment token while contract is active
@@ -419,7 +417,6 @@ contract SandboxPasses1155Upgradeable is
         }
 
         _checkMaxSupply(tokenId, amount);
-
         config.mintedPerWallet[to] += amount;
 
         _mint(to, tokenId, amount, "");
@@ -493,7 +490,7 @@ contract SandboxPasses1155Upgradeable is
             }
 
             _checkMaxSupply(ids[i], amounts[i]);
-
+            config.mintedPerWallet[to[i]] += amounts[i];
             _mint(to[i], ids[i], amounts[i], "");
         }
     }
@@ -531,7 +528,7 @@ contract SandboxPasses1155Upgradeable is
         }
 
         _checkMaxSupply(mintTokenId, mintAmount);
-
+        mintConfig.mintedPerWallet[mintTo] += mintAmount;
         // Burn first
         _burn(burnFrom, burnTokenId, burnAmount);
 
@@ -584,6 +581,7 @@ contract SandboxPasses1155Upgradeable is
             }
 
             _checkMaxSupply(mintTokenIds[i], mintAmounts[i]);
+            mintConfig.mintedPerWallet[mintTo] += mintAmounts[i];
         }
 
         // Burn tokens first
@@ -646,7 +644,7 @@ contract SandboxPasses1155Upgradeable is
         verifyBurnAndMintSignature(request, signature);
 
         _checkMaxSupply(mintId, mintAmount);
-
+        mintConfig.mintedPerWallet[caller] += mintAmount;
         // Burn first
         _burn(caller, burnId, burnAmount);
 
@@ -710,7 +708,7 @@ contract SandboxPasses1155Upgradeable is
      * @param tokenId The token ID to configure
      * @param transferable Whether the token can be transferred between users
      * @param maxSupply Maximum supply (0 for unlimited/open edition)
-     * @param maxPerWallet Maximum tokens that can be minted per wallet
+     * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for unlimited)
      * @param metadata Token metadata string (typically IPFS hash or other identifier)
      * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -719,7 +717,6 @@ contract SandboxPasses1155Upgradeable is
      * @dev Reverts if:
      *      - Caller doesn't have ADMIN_ROLE
      *      - Token is already configured
-     *      - maxPerWallet is 0
      */
     function configureToken(
         uint256 tokenId,
@@ -735,9 +732,6 @@ contract SandboxPasses1155Upgradeable is
             revert TokenAlreadyConfigured(tokenId);
         }
 
-        // Ensure maxPerWallet is not zero
-        if (maxPerWallet == 0) revert ZeroMaxPerWallet();
-
         config.isConfigured = true;
         config.transferable = transferable;
         config.maxSupply = maxSupply;
@@ -752,7 +746,7 @@ contract SandboxPasses1155Upgradeable is
      * @notice Update existing token configuration
      * @param tokenId The token ID to update
      * @param maxSupply New maximum supply (0 for open edition)
-     * @param maxPerWallet New maximum tokens per wallet
+     * @param maxPerWallet New maximum tokens per wallet (0 for unlimited)
      * @param metadata New metadata string (typically IPFS hash)
      * @param treasuryWallet New treasury wallet (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -762,7 +756,6 @@ contract SandboxPasses1155Upgradeable is
      *      - Caller doesn't have ADMIN_ROLE
      *      - Token is not configured
      *      - New maxSupply is less than current supply
-     *      - maxPerWallet is 0
      */
     function updateTokenConfig(
         uint256 tokenId,
@@ -776,9 +769,6 @@ contract SandboxPasses1155Upgradeable is
         if (!config.isConfigured) {
             revert TokenNotConfigured(tokenId);
         }
-
-        // Ensure maxPerWallet is not zero
-        if (maxPerWallet == 0) revert ZeroMaxPerWallet();
 
         // Cannot decrease maxSupply below current supply
         if (maxSupply > 0) {
@@ -1209,10 +1199,12 @@ contract SandboxPasses1155Upgradeable is
      * @dev Used internally before user mint operations
      * @dev Reverts if:
      *      - Current wallet balance + amount would exceed max per wallet
+     * @dev Skips check if maxPerWallet is 0 (unlimited)
      */
     function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
-        if (config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+        // Skip check if maxPerWallet is 0 (unlimited)
+        if (config.maxPerWallet > 0 && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
     }
