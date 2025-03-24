@@ -33,8 +33,18 @@ contract SandboxPasses1155Upgradeable is
     // =============================================================
 
     /// @notice Emitted when the base URI is updated.
+    /// @param caller Address that initiated the base URI update
+    /// @param oldURI Previous base URI value before the update
+    /// @param newURI New base URI value after the update
     event BaseURISet(address indexed caller, string oldURI, string newURI);
     /// @notice Emitted when a token is configured.
+    /// @param caller Address that initiated the token configuration
+    /// @param tokenId ID of the token being configured
+    /// @param transferable Whether the token can be transferred
+    /// @param maxSupply Maximum supply for this token (0 means unlimited)
+    /// @param maxPerWallet Maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param metadata Token-specific metadata string
+    /// @param treasuryWallet Address where payments for this token will be sent
     event TokenConfigured(
         address indexed caller,
         uint256 indexed tokenId,
@@ -45,6 +55,12 @@ contract SandboxPasses1155Upgradeable is
         address treasuryWallet
     );
     /// @notice Emitted when a token configuration is updated.
+    /// @param caller Address that initiated the token configuration update
+    /// @param tokenId ID of the token being updated
+    /// @param maxSupply New maximum supply for this token (0 means unlimited)
+    /// @param maxPerWallet New maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param metadata New token-specific metadata string
+    /// @param treasuryWallet New address where payments for this token will be sent
     event TokenConfigUpdated(
         address indexed caller,
         uint256 indexed tokenId,
@@ -54,10 +70,21 @@ contract SandboxPasses1155Upgradeable is
         address treasuryWallet
     );
     /// @notice Emitted when a token's transferability is updated.
+    /// @param caller Address that initiated the transferability update
+    /// @param tokenId ID of the token whose transferability was changed
+    /// @param transferable New transferability status (true = transferable, false = soulbound)
     event TransferabilityUpdated(address indexed caller, uint256 indexed tokenId, bool transferable);
     /// @notice Emitted when transfer whitelist is updated.
+    /// @param caller Address that initiated the whitelist update
+    /// @param tokenId ID of the token whose whitelist was updated
+    /// @param accounts Array of addresses that were added to or removed from the whitelist
+    /// @param allowed Whether the addresses were added to (true) or removed from (false) the whitelist
     event TransferWhitelistUpdated(address indexed caller, uint256 indexed tokenId, address[] accounts, bool allowed);
     /// @notice Emitted when tokens are recovered from the contract.
+    /// @param caller Address that initiated the token recovery
+    /// @param token Address of the ERC20 token being recovered
+    /// @param recipient Address receiving the recovered tokens
+    /// @param amount Amount of tokens recovered
     event TokensRecovered(address indexed caller, address token, address recipient, uint256 amount);
 
     // =============================================================
