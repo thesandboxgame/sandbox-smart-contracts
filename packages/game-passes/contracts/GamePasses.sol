@@ -312,23 +312,19 @@ contract GamePasses is
         __ERC2981_init();
         __Pausable_init();
 
-        // Validate inputs
         if (_admin == address(0)) revert ZeroAddress("admin");
         if (_defaultTreasury == address(0)) revert ZeroAddress("treasury");
         if (_paymentToken == address(0)) revert ZeroAddress("payment token");
 
-        // Check if _paymentToken is a contract
         if (_paymentToken.code.length == 0) {
             revert InvalidPaymentToken();
         }
 
-        // Set up AccessControl roles
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
         _grantRole(OPERATOR_ROLE, _operator);
         _grantRole(SIGNER_ROLE, _signer);
 
-        // Initialize storage structs
         CoreStorage storage cs = _coreStorage();
         cs.paymentToken = _paymentToken;
         cs.baseURI = _baseURI;
@@ -562,10 +558,9 @@ contract GamePasses is
 
         _checkMaxSupply(mintTokenId, mintAmount);
         mintConfig.mintedPerWallet[mintTo] += mintAmount;
-        // Burn first
+
         _burn(burnFrom, burnTokenId, burnAmount);
 
-        // Then mint
         _checkMaxPerWallet(mintTokenId, mintTo, mintAmount);
         _mint(mintTo, mintTokenId, mintAmount, "");
     }
@@ -619,10 +614,8 @@ contract GamePasses is
             mintConfig.mintedPerWallet[mintTo] += mintAmounts[i];
         }
 
-        // Burn tokens first
         _burnBatch(burnFrom, burnTokenIds, burnAmounts);
 
-        // Then mint new tokens
         _mintBatch(mintTo, mintTokenIds, mintAmounts, "");
     }
 
@@ -661,7 +654,6 @@ contract GamePasses is
             revert BurnMintNotConfigured(burnId);
         }
 
-        // Check if mint token is configured and respects max supply
         TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintId];
         if (!mintConfig.isConfigured) {
             revert TokenNotConfigured(mintId);
@@ -681,10 +673,9 @@ contract GamePasses is
 
         _checkMaxSupply(mintId, mintAmount);
         mintConfig.mintedPerWallet[caller] += mintAmount;
-        // Burn first
+
         _burn(caller, burnId, burnAmount);
 
-        // Then mint new token
         _checkMaxPerWallet(mintId, caller, mintAmount);
         _mint(caller, mintId, mintAmount, "");
     }
@@ -751,8 +742,8 @@ contract GamePasses is
      * @notice Configure a new token with its properties and restrictions
      * @param tokenId The token ID to configure
      * @param transferable Whether the token can be transferred between users
-     * @param maxSupply Maximum supply (0 for unlimited/open edition)
-     * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for unlimited)
+     * @param maxSupply Maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata Token metadata string (typically IPFS hash or other identifier)
      * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -789,8 +780,8 @@ contract GamePasses is
     /**
      * @notice Update existing token configuration
      * @param tokenId The token ID to update
-     * @param maxSupply New maximum supply (0 for open edition)
-     * @param maxPerWallet New maximum tokens per wallet (0 for unlimited)
+     * @param maxSupply New maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxPerWallet New maximum tokens per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata New metadata string (typically IPFS hash)
      * @param treasuryWallet New treasury wallet (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -814,12 +805,9 @@ contract GamePasses is
             revert TokenNotConfigured(tokenId);
         }
 
-        // Cannot decrease maxSupply below current supply
-        if (maxSupply > 0) {
-            uint256 currentSupply = totalSupply(tokenId);
-            if (maxSupply < currentSupply) {
-                revert MaxSupplyBelowCurrentSupply(tokenId);
-            }
+        uint256 currentSupply = totalSupply(tokenId);
+        if (maxSupply < currentSupply) {
+            revert MaxSupplyBelowCurrentSupply(tokenId);
         }
 
         config.maxSupply = maxSupply;
@@ -1033,7 +1021,6 @@ contract GamePasses is
      * @dev Cannot recover the payment token if contract is not paused
      */
     function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        // If attempting to recover the payment token, contract must be paused
         if (token == _coreStorage().paymentToken && !paused()) {
             revert PaymentTokenRecoveryNotAllowed();
         }
@@ -1248,7 +1235,6 @@ contract GamePasses is
         _checkMaxPerWallet(request.tokenId, request.caller, request.amount);
         _checkMaxSupply(request.tokenId, request.amount);
 
-        // Update minted amount for wallet
         config.mintedPerWallet[request.caller] += request.amount;
 
         address treasury = config.treasuryWallet;
@@ -1275,7 +1261,6 @@ contract GamePasses is
 
         verifyBatchSignature(request, signature);
 
-        // Process each mint separately
         for (uint256 i; i < request.tokenIds.length; i++) {
             TokenConfig storage config = _tokenStorage().tokenConfigs[request.tokenIds[i]];
 
@@ -1286,7 +1271,6 @@ contract GamePasses is
             _checkMaxPerWallet(request.tokenIds[i], request.caller, request.amounts[i]);
             _checkMaxSupply(request.tokenIds[i], request.amounts[i]);
 
-            // Update minted amount for wallet
             config.mintedPerWallet[request.caller] += request.amounts[i];
 
             address treasury = config.treasuryWallet;
@@ -1301,7 +1285,6 @@ contract GamePasses is
             );
         }
 
-        // Perform batch mint
         _mintBatch(request.caller, request.tokenIds, request.amounts, "");
     }
 
@@ -1344,17 +1327,15 @@ contract GamePasses is
      * @param amount The amount to mint
      * @dev Used internally before any mint operation
      * @dev Reverts if:
-     *      - Token has a max supply (> 0) and
+     *      - Token has maxSupply = 0 (minting disabled) or
      *      - Current supply + amount would exceed max supply
      */
     function _checkMaxSupply(uint256 tokenId, uint256 amount) private {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
-        // update the config total minted and check if it exceeds the max supply
         config.totalMinted += amount;
-        if (config.maxSupply > 0) {
-            if (config.totalMinted > config.maxSupply) {
-                revert MaxSupplyExceeded(tokenId);
-            }
+
+        if (config.maxSupply != type(uint256).max && config.totalMinted > config.maxSupply) {
+            revert MaxSupplyExceeded(tokenId);
         }
     }
 
@@ -1365,13 +1346,18 @@ contract GamePasses is
      * @param amount The amount to mint
      * @dev Used internally before user mint operations
      * @dev Reverts if:
+     *      - maxPerWallet is 0 (per-wallet minting disabled) or
      *      - Current wallet balance + amount would exceed max per wallet
-     * @dev Skips check if maxPerWallet is 0 (unlimited)
+     * @dev Skips check if maxPerWallet is type(uint256).max (unlimited)
      */
     function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
-        // Skip check if maxPerWallet is 0 (unlimited)
-        if (config.maxPerWallet > 0 && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+
+        if (config.maxPerWallet == 0) {
+            revert ExceedsMaxPerWallet(tokenId, to, amount, 0);
+        }
+
+        if (config.maxPerWallet != type(uint256).max && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
     }
