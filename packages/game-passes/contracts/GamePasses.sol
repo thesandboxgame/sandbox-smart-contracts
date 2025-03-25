@@ -54,7 +54,7 @@ contract GamePasses is
         uint256 mintId;
         uint256 mintAmount;
         uint256 deadline;
-        uint256 nonce;
+        uint256 signatureId;
     }
 
     /// @dev Struct to hold mint request
@@ -64,7 +64,7 @@ contract GamePasses is
         uint256 amount;
         uint256 price;
         uint256 deadline;
-        uint256 nonce;
+        uint256 signatureId;
     }
 
     /// @dev Struct to hold batch mint request
@@ -74,7 +74,7 @@ contract GamePasses is
         uint256[] amounts;
         uint256[] prices;
         uint256 deadline;
-        uint256 nonce;
+        uint256 signatureId;
     }
 
     // =============================================================
@@ -89,8 +89,10 @@ contract GamePasses is
         address defaultTreasuryWallet;
         // Payment token
         address paymentToken;
-        // Owner
+        // Owner of the contract
         address internalOwner;
+        // map used to mark if a specific signatureId was used
+        mapping(uint256 signatureId => bool used) signatureIds;
         // EIP-712 domain separator
         // solhint-disable-next-line var-name-mixedcase
         bytes32 DOMAIN_SEPARATOR;
@@ -103,22 +105,6 @@ contract GamePasses is
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cs.slot := position
-        }
-    }
-
-    /// @custom:storage-location erc7201:sandbox.game-passes.storage.UserStorage
-    struct UserStorage {
-        // Track nonces for replay protection
-        mapping(address caller => uint256 nonce) nonces;
-    }
-
-    function _userStorage() private pure returns (UserStorage storage us) {
-        bytes32 position = keccak256(
-            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.UserStorage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            us.slot := position
         }
     }
 
@@ -160,19 +146,19 @@ contract GamePasses is
     /// @dev EIP-712 mint request typehash
     bytes32 public constant MINT_TYPEHASH =
         keccak256(
-            "MintRequest(address caller,uint256 tokenId,uint256 amount,uint256 price,uint256 deadline,uint256 nonce)"
+            "MintRequest(address caller,uint256 tokenId,uint256 amount,uint256 price,uint256 deadline,uint256 signatureId)"
         );
 
     /// @dev EIP-712 burn and mint request typehash
     bytes32 public constant BURN_AND_MINT_TYPEHASH =
         keccak256(
-            "BurnAndMintRequest(address caller,uint256 burnId,uint256 burnAmount,uint256 mintId,uint256 mintAmount,uint256 deadline,uint256 nonce)"
+            "BurnAndMintRequest(address caller,uint256 burnId,uint256 burnAmount,uint256 mintId,uint256 mintAmount,uint256 deadline,uint256 signatureId)"
         );
 
     /// @dev EIP-712 batch mint request typehash
     bytes32 public constant BATCH_MINT_TYPEHASH =
         keccak256(
-            "BatchMintRequest(address caller,uint256[] tokenIds,uint256[] amounts,uint256[] prices,uint256 deadline,uint256 nonce)"
+            "BatchMintRequest(address caller,uint256[] tokenIds,uint256[] amounts,uint256[] prices,uint256 deadline,uint256 signatureId)"
         );
 
     /// @dev Maximum number of tokens that can be processed in a batch operation
@@ -262,6 +248,8 @@ contract GamePasses is
     error InvalidSignature(ECDSA.RecoverError error);
     /// @dev Revert when invalid signer
     error InvalidSigner();
+    /// @dev Revert when signature already used
+    error SignatureAlreadyUsed(uint256 signatureId);
     /// @dev Revert when max supply below current supply
     error MaxSupplyBelowCurrentSupply(uint256 tokenId);
     /// @dev Revert when transfer not allowed
@@ -387,10 +375,18 @@ contract GamePasses is
         uint256 amount,
         uint256 price,
         uint256 deadline,
-        bytes calldata signature
+        bytes calldata signature,
+        uint256 signatureId
     ) external whenNotPaused {
-        _processSingleMint(caller, tokenId, amount, price, deadline, signature);
-        _mint(caller, tokenId, amount, "");
+        MintRequest memory request = MintRequest({
+            caller: caller,
+            tokenId: tokenId,
+            amount: amount,
+            price: price,
+            deadline: deadline,
+            signatureId: signatureId
+        });
+        _processSingleMint(request, signature);
     }
 
     /**
@@ -420,50 +416,18 @@ contract GamePasses is
         uint256[] calldata amounts,
         uint256[] calldata prices,
         uint256 deadline,
-        bytes calldata signature
+        bytes calldata signature,
+        uint256 signatureId
     ) external whenNotPaused {
-        if (tokenIds.length > MAX_BATCH_SIZE) {
-            revert BatchSizeExceeded(tokenIds.length, MAX_BATCH_SIZE);
-        }
-
-        if (tokenIds.length != amounts.length || amounts.length != prices.length) {
-            revert ArrayLengthMismatch();
-        }
-
         BatchMintRequest memory request = BatchMintRequest({
             caller: caller,
             tokenIds: tokenIds,
             amounts: amounts,
             prices: prices,
             deadline: deadline,
-            nonce: _userStorage().nonces[caller]++
+            signatureId: signatureId
         });
-
-        verifyBatchSignature(request, signature);
-
-        // Process each mint separately
-        for (uint256 i; i < tokenIds.length; i++) {
-            TokenConfig storage config = _tokenStorage().tokenConfigs[tokenIds[i]];
-
-            if (!config.isConfigured) {
-                revert TokenNotConfigured(tokenIds[i]);
-            }
-
-            _checkMaxPerWallet(tokenIds[i], caller, amounts[i]);
-            _checkMaxSupply(tokenIds[i], amounts[i]);
-
-            // Update minted amount for wallet
-            config.mintedPerWallet[caller] += amounts[i];
-
-            address treasury = config.treasuryWallet;
-            if (treasury == address(0)) {
-                treasury = _coreStorage().defaultTreasuryWallet;
-            }
-            SafeERC20.safeTransferFrom(IERC20(_coreStorage().paymentToken), caller, treasury, prices[i]);
-        }
-
-        // Perform batch mint
-        _mintBatch(caller, tokenIds, amounts, "");
+        _processBatchMint(request, signature);
     }
 
     /**
@@ -689,7 +653,8 @@ contract GamePasses is
         uint256 mintId,
         uint256 mintAmount,
         uint256 deadline,
-        bytes calldata signature
+        bytes calldata signature,
+        uint256 signatureId
     ) external whenNotPaused {
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
@@ -709,7 +674,7 @@ contract GamePasses is
             mintId: mintId,
             mintAmount: mintAmount,
             deadline: deadline,
-            nonce: _userStorage().nonces[caller]++
+            signatureId: signatureId
         });
 
         verifyBurnAndMintSignature(request, signature);
@@ -982,12 +947,12 @@ contract GamePasses is
     }
 
     /**
-     * @notice Returns current nonce for a user address
-     * @param user The address to get nonce for
-     * @return uint256 The current nonce
+     * @notice Returns current status for a signatureId
+     * @param signatureId The signatureId to get status for
+     * @return bool The status of the signatureId, true if used, false otherwise
      */
-    function getNonce(address user) external view returns (uint256) {
-        return _userStorage().nonces[user];
+    function getSignatureStatus(uint256 signatureId) external view returns (bool) {
+        return _coreStorage().signatureIds[signatureId];
     }
 
     /**
@@ -1108,7 +1073,7 @@ contract GamePasses is
      *      - Signature is invalid
      *      - Signer doesn't have SIGNER_ROLE
      */
-    function verifySignature(MintRequest memory request, bytes memory signature) public view {
+    function verifySignature(MintRequest memory request, bytes memory signature) public {
         bytes32 structHash = keccak256(
             abi.encode(
                 MINT_TYPEHASH,
@@ -1117,11 +1082,11 @@ contract GamePasses is
                 request.amount,
                 request.price,
                 request.deadline,
-                request.nonce
+                request.signatureId
             )
         );
 
-        _verifySignature(structHash, signature, request.deadline);
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
     }
 
     /**
@@ -1135,7 +1100,7 @@ contract GamePasses is
      *      - Signature is invalid
      *      - Signer doesn't have SIGNER_ROLE
      */
-    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public view {
+    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public {
         bytes32 structHash = keccak256(
             abi.encode(
                 BURN_AND_MINT_TYPEHASH,
@@ -1145,11 +1110,11 @@ contract GamePasses is
                 request.mintId,
                 request.mintAmount,
                 request.deadline,
-                request.nonce
+                request.signatureId
             )
         );
 
-        _verifySignature(structHash, signature, request.deadline);
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
     }
 
     /**
@@ -1163,7 +1128,7 @@ contract GamePasses is
      *      - Signature is invalid
      *      - Signer doesn't have SIGNER_ROLE
      */
-    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) public view {
+    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) public {
         bytes32 structHash = keccak256(
             abi.encode(
                 BATCH_MINT_TYPEHASH,
@@ -1172,11 +1137,11 @@ contract GamePasses is
                 keccak256(abi.encodePacked(request.amounts)),
                 keccak256(abi.encodePacked(request.prices)),
                 request.deadline,
-                request.nonce
+                request.signatureId
             )
         );
 
-        _verifySignature(structHash, signature, request.deadline);
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
     }
 
     /**
@@ -1268,49 +1233,76 @@ contract GamePasses is
 
     /**
      * @dev Internal helper function to process a single mint operation
-     * @param caller The address calling the mint function
-     * @param tokenId The token ID to mint
-     * @param amount The amount to mint
-     * @param price The price to pay
-     * @param deadline The signature deadline
+     * @param request The MintRequest struct containing all mint parameters
      * @param signature The EIP-712 signature
      */
-    function _processSingleMint(
-        address caller,
-        uint256 tokenId,
-        uint256 amount,
-        uint256 price,
-        uint256 deadline,
-        bytes calldata signature
-    ) private {
-        TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
+    function _processSingleMint(MintRequest memory request, bytes calldata signature) private {
+        TokenConfig storage config = _tokenStorage().tokenConfigs[request.tokenId];
 
         if (!config.isConfigured) {
-            revert TokenNotConfigured(tokenId);
+            revert TokenNotConfigured(request.tokenId);
         }
-
-        MintRequest memory request = MintRequest({
-            caller: caller,
-            tokenId: tokenId,
-            amount: amount,
-            price: price,
-            deadline: deadline,
-            nonce: _userStorage().nonces[caller]++
-        });
 
         verifySignature(request, signature);
 
-        _checkMaxPerWallet(tokenId, caller, amount);
-        _checkMaxSupply(tokenId, amount);
+        _checkMaxPerWallet(request.tokenId, request.caller, request.amount);
+        _checkMaxSupply(request.tokenId, request.amount);
 
         // Update minted amount for wallet
-        config.mintedPerWallet[caller] += amount;
+        config.mintedPerWallet[request.caller] += request.amount;
 
         address treasury = config.treasuryWallet;
         if (treasury == address(0)) {
             treasury = _coreStorage().defaultTreasuryWallet;
         }
-        SafeERC20.safeTransferFrom(IERC20(_coreStorage().paymentToken), caller, treasury, price);
+        SafeERC20.safeTransferFrom(IERC20(_coreStorage().paymentToken), request.caller, treasury, request.price);
+        _mint(request.caller, request.tokenId, request.amount, "");
+    }
+
+    /**
+     * @dev Internal helper function to process batch minting
+     * @param request The BatchMintRequest struct containing all batch mint parameters
+     * @param signature The EIP-712 signature
+     */
+    function _processBatchMint(BatchMintRequest memory request, bytes calldata signature) private {
+        if (request.tokenIds.length > MAX_BATCH_SIZE) {
+            revert BatchSizeExceeded(request.tokenIds.length, MAX_BATCH_SIZE);
+        }
+
+        if (request.tokenIds.length != request.amounts.length || request.amounts.length != request.prices.length) {
+            revert ArrayLengthMismatch();
+        }
+
+        verifyBatchSignature(request, signature);
+
+        // Process each mint separately
+        for (uint256 i; i < request.tokenIds.length; i++) {
+            TokenConfig storage config = _tokenStorage().tokenConfigs[request.tokenIds[i]];
+
+            if (!config.isConfigured) {
+                revert TokenNotConfigured(request.tokenIds[i]);
+            }
+
+            _checkMaxPerWallet(request.tokenIds[i], request.caller, request.amounts[i]);
+            _checkMaxSupply(request.tokenIds[i], request.amounts[i]);
+
+            // Update minted amount for wallet
+            config.mintedPerWallet[request.caller] += request.amounts[i];
+
+            address treasury = config.treasuryWallet;
+            if (treasury == address(0)) {
+                treasury = _coreStorage().defaultTreasuryWallet;
+            }
+            SafeERC20.safeTransferFrom(
+                IERC20(_coreStorage().paymentToken),
+                request.caller,
+                treasury,
+                request.prices[i]
+            );
+        }
+
+        // Perform batch mint
+        _mintBatch(request.caller, request.tokenIds, request.amounts, "");
     }
 
     /**
@@ -1324,10 +1316,16 @@ contract GamePasses is
      *      - Signature is invalid or malformed
      *      - Signer doesn't have SIGNER_ROLE
      */
-    function _verifySignature(bytes32 hash, bytes memory signature, uint256 deadline) private view {
+    function _verifySignature(bytes32 hash, bytes memory signature, uint256 deadline, uint256 signatureId) private {
         if (block.timestamp > deadline) {
             revert SignatureExpired();
         }
+
+        if (_coreStorage().signatureIds[signatureId]) {
+            revert SignatureAlreadyUsed(signatureId);
+        }
+
+        _coreStorage().signatureIds[signatureId] = true;
 
         bytes32 finalHash = MessageHashUtils.toTypedDataHash(_coreStorage().DOMAIN_SEPARATOR, hash);
 
