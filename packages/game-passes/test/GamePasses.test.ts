@@ -1403,7 +1403,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
     });
 
-    it('should allow unlimited mints when maxPerWallet is 0', async function () {
+    it('should allow unlimited mints when maxPerWallet is type(uint256).max', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1413,7 +1413,7 @@ describe('GamePasses', function () {
         createMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
-      // Configure a new token with maxPerWallet = 0 (unlimited)
+      // Configure a new token with maxPerWallet = type(uint256).max (unlimited)
       const UNLIMITED_TOKEN_ID = 9999;
       const LARGE_MAX_SUPPLY = 1000; // Just to make sure we don't hit max supply
 
@@ -1421,7 +1421,7 @@ describe('GamePasses', function () {
         UNLIMITED_TOKEN_ID,
         true, // transferable
         LARGE_MAX_SUPPLY, // max supply
-        0, // maxPerWallet = 0 (unlimited)
+        ethers.MaxUint256, // maxPerWallet = type(uint256).max (unlimited)
         'ipfs://unlimited-token', // metadata
         ethers.ZeroAddress, // use default treasury
       );
@@ -1509,6 +1509,184 @@ describe('GamePasses', function () {
         user1.address,
       );
       expect(mintedPerWallet).to.equal(mintAmount1 + mintAmount2);
+    });
+
+    it('should reject mints when maxPerWallet is 0 (disabled)', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        admin,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // Configure a new token with maxPerWallet = 0 (disabled)
+      const DISABLED_TOKEN_ID = 8888;
+      const LARGE_MAX_SUPPLY = 1000;
+
+      await sandboxPasses.connect(admin).configureToken(
+        DISABLED_TOKEN_ID,
+        true, // transferable
+        LARGE_MAX_SUPPLY, // max supply
+        0, // maxPerWallet = 0 (disabled)
+        'ipfs://disabled-token', // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const mintAmount = 10;
+      const signatureId = 12345;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        DISABLED_TOKEN_ID,
+        mintAmount,
+        price,
+        deadline,
+        signatureId,
+      );
+
+      // Mint should be rejected because maxPerWallet is 0 (disabled)
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .mint(
+            user1.address,
+            DISABLED_TOKEN_ID,
+            mintAmount,
+            price,
+            deadline,
+            signature,
+            signatureId,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'ExceedsMaxPerWallet');
+    });
+
+    it('should reject mints when maxSupply is 0 (disabled)', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        admin,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // Configure a new token with maxSupply = 0 (disabled)
+      const DISABLED_TOKEN_ID = 7777;
+
+      await sandboxPasses.connect(admin).configureToken(
+        DISABLED_TOKEN_ID,
+        true, // transferable
+        0, // maxSupply = 0 (disabled)
+        10, // maxPerWallet = 10
+        'ipfs://disabled-supply-token', // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const mintAmount = 5;
+      const signatureId = 12345;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        DISABLED_TOKEN_ID,
+        mintAmount,
+        price,
+        deadline,
+        signatureId,
+      );
+
+      // Mint should be rejected because maxSupply is 0 (disabled)
+      await expect(
+        sandboxPasses
+          .connect(user1)
+          .mint(
+            user1.address,
+            DISABLED_TOKEN_ID,
+            mintAmount,
+            price,
+            deadline,
+            signature,
+            signatureId,
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+    });
+
+    it('should allow unlimited supply when maxSupply is type(uint256).max', async function () {
+      const {
+        sandboxPasses,
+        signer,
+        user1,
+        paymentToken,
+        admin,
+        createMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // Configure a new token with maxSupply = type(uint256).max (unlimited)
+      const UNLIMITED_TOKEN_ID = 6666;
+      const NORMAL_MAX_PER_WALLET = 50;
+
+      await sandboxPasses.connect(admin).configureToken(
+        UNLIMITED_TOKEN_ID,
+        true, // transferable
+        ethers.MaxUint256, // maxSupply = type(uint256).max (unlimited)
+        NORMAL_MAX_PER_WALLET, // maxPerWallet
+        'ipfs://unlimited-supply-token', // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
+      const price = ethers.parseEther('0.1');
+      const deadline = (await time.latest()) + 3600; // 1 hour from now
+      const mintAmount = 25; // within per-wallet limit
+      const signatureId = 12345;
+
+      // Approve payment token
+      await paymentToken
+        .connect(user1)
+        .approve(await sandboxPasses.getAddress(), price);
+
+      const signature = await createMintSignature(
+        signer,
+        user1.address,
+        UNLIMITED_TOKEN_ID,
+        mintAmount,
+        price,
+        deadline,
+        signatureId,
+      );
+
+      // Mint should succeed with unlimited supply
+      await sandboxPasses
+        .connect(user1)
+        .mint(
+          user1.address,
+          UNLIMITED_TOKEN_ID,
+          mintAmount,
+          price,
+          deadline,
+          signature,
+          signatureId,
+        );
+
+      expect(
+        await sandboxPasses.balanceOf(user1.address, UNLIMITED_TOKEN_ID),
+      ).to.equal(mintAmount);
     });
   });
 

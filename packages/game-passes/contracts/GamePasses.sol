@@ -751,8 +751,8 @@ contract GamePasses is
      * @notice Configure a new token with its properties and restrictions
      * @param tokenId The token ID to configure
      * @param transferable Whether the token can be transferred between users
-     * @param maxSupply Maximum supply (0 for unlimited/open edition)
-     * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for unlimited)
+     * @param maxSupply Maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata Token metadata string (typically IPFS hash or other identifier)
      * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -789,8 +789,8 @@ contract GamePasses is
     /**
      * @notice Update existing token configuration
      * @param tokenId The token ID to update
-     * @param maxSupply New maximum supply (0 for open edition)
-     * @param maxPerWallet New maximum tokens per wallet (0 for unlimited)
+     * @param maxSupply New maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxPerWallet New maximum tokens per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata New metadata string (typically IPFS hash)
      * @param treasuryWallet New treasury wallet (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
@@ -815,11 +815,9 @@ contract GamePasses is
         }
 
         // Cannot decrease maxSupply below current supply
-        if (maxSupply > 0) {
-            uint256 currentSupply = totalSupply(tokenId);
-            if (maxSupply < currentSupply) {
-                revert MaxSupplyBelowCurrentSupply(tokenId);
-            }
+        uint256 currentSupply = totalSupply(tokenId);
+        if (maxSupply < currentSupply) {
+            revert MaxSupplyBelowCurrentSupply(tokenId);
         }
 
         config.maxSupply = maxSupply;
@@ -1344,17 +1342,17 @@ contract GamePasses is
      * @param amount The amount to mint
      * @dev Used internally before any mint operation
      * @dev Reverts if:
-     *      - Token has a max supply (> 0) and
+     *      - Token has maxSupply = 0 (minting disabled) or
      *      - Current supply + amount would exceed max supply
      */
     function _checkMaxSupply(uint256 tokenId, uint256 amount) private {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         // update the config total minted and check if it exceeds the max supply
         config.totalMinted += amount;
-        if (config.maxSupply > 0) {
-            if (config.totalMinted > config.maxSupply) {
-                revert MaxSupplyExceeded(tokenId);
-            }
+
+        // Otherwise check if it exceeds the max supply (unlimited if maxSupply is type(uint256).max)
+        if (config.maxSupply != type(uint256).max && config.totalMinted > config.maxSupply) {
+            revert MaxSupplyExceeded(tokenId);
         }
     }
 
@@ -1365,13 +1363,20 @@ contract GamePasses is
      * @param amount The amount to mint
      * @dev Used internally before user mint operations
      * @dev Reverts if:
+     *      - maxPerWallet is 0 (per-wallet minting disabled) or
      *      - Current wallet balance + amount would exceed max per wallet
-     * @dev Skips check if maxPerWallet is 0 (unlimited)
+     * @dev Skips check if maxPerWallet is type(uint256).max (unlimited)
      */
     function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
-        // Skip check if maxPerWallet is 0 (unlimited)
-        if (config.maxPerWallet > 0 && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+
+        // If maxPerWallet is 0, per-wallet minting is disabled
+        if (config.maxPerWallet == 0) {
+            revert ExceedsMaxPerWallet(tokenId, to, amount, 0);
+        }
+
+        // Skip check if maxPerWallet is type(uint256).max (unlimited)
+        if (config.maxPerWallet != type(uint256).max && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
     }
