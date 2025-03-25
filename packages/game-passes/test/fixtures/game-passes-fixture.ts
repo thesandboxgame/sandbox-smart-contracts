@@ -37,7 +37,7 @@ export async function runCreateTestSetup() {
     amount: number,
     price: bigint,
     deadline: number,
-    nonce: number,
+    signatureId: number,
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
 
@@ -57,7 +57,7 @@ export async function runCreateTestSetup() {
         {name: 'amount', type: 'uint256'},
         {name: 'price', type: 'uint256'},
         {name: 'deadline', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
       ],
     };
 
@@ -68,7 +68,7 @@ export async function runCreateTestSetup() {
       amount: amount,
       price: price,
       deadline: deadline,
-      nonce: nonce,
+      signatureId: signatureId,
     };
 
     // Sign the typed data properly
@@ -84,7 +84,7 @@ export async function runCreateTestSetup() {
     mintId: number,
     mintAmount: number,
     deadline: number,
-    nonce: number,
+    signatureId: number,
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
 
@@ -105,7 +105,7 @@ export async function runCreateTestSetup() {
         {name: 'mintId', type: 'uint256'},
         {name: 'mintAmount', type: 'uint256'},
         {name: 'deadline', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
       ],
     };
 
@@ -117,7 +117,7 @@ export async function runCreateTestSetup() {
       mintId: mintId,
       mintAmount: mintAmount,
       deadline: deadline,
-      nonce: nonce,
+      signatureId: signatureId,
     };
 
     // Sign the typed data properly
@@ -132,7 +132,7 @@ export async function runCreateTestSetup() {
     amounts: number[],
     prices: bigint[],
     deadline: number,
-    nonce: number,
+    signatureId: number,
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
 
@@ -152,7 +152,7 @@ export async function runCreateTestSetup() {
         {name: 'amounts', type: 'uint256[]'},
         {name: 'prices', type: 'uint256[]'},
         {name: 'deadline', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
       ],
     };
 
@@ -163,7 +163,7 @@ export async function runCreateTestSetup() {
       amounts: amounts,
       prices: prices,
       deadline: deadline,
-      nonce: nonce,
+      signatureId: signatureId,
     };
 
     // Sign the typed data properly
@@ -249,6 +249,7 @@ export async function runCreateTestSetup() {
       BigNumberish,
       BigNumberish,
       BytesLike,
+      BigNumberish,
     ],
   ) => {
     const encodedData = sandboxPasses.interface.encodeFunctionData(
@@ -273,6 +274,7 @@ export async function runCreateTestSetup() {
       BigNumberish[],
       BigNumberish,
       BytesLike,
+      BigNumberish,
     ],
   ) => {
     const encodedData = sandboxPasses.interface.encodeFunctionData(
