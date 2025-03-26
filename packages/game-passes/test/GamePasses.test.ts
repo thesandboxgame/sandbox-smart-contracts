@@ -304,6 +304,7 @@ describe('GamePasses', function () {
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
     });
+
     it('should not allow updating treasury wallet to the same address as the contract', async function () {
       const {sandboxPasses, admin, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
@@ -320,6 +321,7 @@ describe('GamePasses', function () {
           ),
       ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
     });
+
     it('should not allow non-admin to update token configuration', async function () {
       const {sandboxPasses, user1, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
