@@ -3056,16 +3056,18 @@ describe('GamePasses', function () {
       // Try with zero admin address
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          ethers.ZeroAddress, // Zero admin address
-          operator.address,
-          signer.address,
-          await paymentToken.getAddress(),
-          trustedForwarder.address,
-          treasury.address,
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: ethers.ZeroAddress, // Zero admin address
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: await paymentToken.getAddress(),
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: treasury.address,
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(
         await SandboxPasses.deploy(),
@@ -3075,16 +3077,18 @@ describe('GamePasses', function () {
       // Try with zero treasury address
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          admin.address,
-          operator.address,
-          signer.address,
-          await paymentToken.getAddress(),
-          trustedForwarder.address,
-          ethers.ZeroAddress, // Zero treasury address
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: admin.address,
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: await paymentToken.getAddress(),
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: ethers.ZeroAddress, // Zero treasury address
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroAddress');
     });
@@ -3106,16 +3110,18 @@ describe('GamePasses', function () {
       // Deploy with an EOA as payment token (which is not a valid ERC20)
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          admin.address,
-          operator.address,
-          signer.address,
-          user1.address, // Not an ERC20 token
-          trustedForwarder.address,
-          treasury.address,
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: admin.address,
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: user1.address, // Not an ERC20 token
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: treasury.address,
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(SandboxPasses, 'InvalidPaymentToken');
     });

@@ -197,16 +197,18 @@ export async function runCreateTestSetup() {
   // Deploy the contract using upgrades plugin
   const SandboxPasses = await ethers.getContractFactory('GamePasses');
   const sandboxPasses = (await upgrades.deployProxy(SandboxPasses, [
-    BASE_URI,
-    royaltyReceiver.address,
-    ROYALTY_PERCENTAGE,
-    admin.address,
-    operator.address,
-    signer.address,
-    await paymentToken.getAddress(),
-    trustedForwarder.address,
-    treasury.address,
-    owner.address,
+    {
+      baseURI: BASE_URI,
+      royaltyReceiver: royaltyReceiver.address,
+      royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+      admin: admin.address,
+      operator: operator.address,
+      signer: signer.address,
+      paymentToken: await paymentToken.getAddress(),
+      trustedForwarder: trustedForwarder.address,
+      defaultTreasury: treasury.address,
+      owner: owner.address,
+    },
   ])) as unknown as GamePasses;
   await sandboxPasses.waitForDeployment();
 

@@ -77,6 +77,20 @@ contract GamePasses is
         uint256 signatureId;
     }
 
+    /// @dev Struct to hold initialization parameters
+    struct InitParams {
+        string baseURI;
+        address royaltyReceiver;
+        uint96 royaltyFeeNumerator;
+        address admin;
+        address operator;
+        address signer;
+        address paymentToken;
+        address trustedForwarder;
+        address defaultTreasury;
+        address owner;
+    }
+
     // =============================================================
     //                      Storage - ERC7201
     // =============================================================
@@ -87,7 +101,7 @@ contract GamePasses is
         string baseURI;
         // Default treasury wallet
         address defaultTreasuryWallet;
-        // Payment token
+        // Payment token, SAND contract
         address paymentToken;
         // Owner of the contract
         address internalOwner;
@@ -270,6 +284,8 @@ contract GamePasses is
     error TransferWhitelistAlreadySet(uint256 tokenId, address account);
     /// @dev Revert when transferability is already set
     error TransferabilityAlreadySet(uint256 tokenId);
+    /// @dev Revert when sender of the transaction does not equal the caller value
+    error InvalidSender();
 
     // =============================================================
     //                          Init
@@ -282,54 +298,45 @@ contract GamePasses is
 
     /**
      * @notice Initializes the upgradeable contract (replaces constructor).
-     * @param _baseURI Initial base URI for metadata.
-     * @param _royaltyReceiver Address to receive royalty fees.
-     * @param _royaltyFeeNumerator Royalty fee in basis points (e.g. 500 => 5%).
-     * @param _admin Address that will be granted the ADMIN_ROLE.
-     * @param _operator Address that will be granted the OPERATOR_ROLE.
-     * @param _signer Address that will be granted the SIGNER_ROLE.
-     * @param _paymentToken Address of the ERC20 token used for payments.
-     * @param _trustedForwarder Address of the trusted meta-transaction forwarder.
-     * @param _defaultTreasury Address of the default treasury wallet.
-     * @param _owner Address that will be set as the internal owner.
+     * @param params Struct containing all initialization parameters:
+     *        - baseURI: Initial base URI for metadata.
+     *        - royaltyReceiver: Address to receive royalty fees.
+     *        - royaltyFeeNumerator: Royalty fee in basis points (e.g. 500 => 5%).
+     *        - admin: Address that will be granted the ADMIN_ROLE.
+     *        - operator: Address that will be granted the OPERATOR_ROLE.
+     *        - signer: Address that will be granted the SIGNER_ROLE.
+     *        - paymentToken: Address of the ERC20 token used for payments.
+     *        - trustedForwarder: Address of the trusted meta-transaction forwarder.
+     *        - defaultTreasury: Address of the default treasury wallet.
+     *        - owner: Address that will be set as the internal owner.
+     *        - sandContract: Address of the SAND contract.
      */
-    function initialize(
-        string memory _baseURI,
-        address _royaltyReceiver,
-        uint96 _royaltyFeeNumerator,
-        address _admin,
-        address _operator,
-        address _signer,
-        address _paymentToken,
-        address _trustedForwarder,
-        address _defaultTreasury,
-        address _owner
-    ) external initializer {
-        __ERC2771Handler_init(_trustedForwarder);
+    function initialize(InitParams calldata params) external initializer {
+        __ERC2771Handler_init(params.trustedForwarder);
         __AccessControl_init();
-        __ERC1155_init(_baseURI);
+        __ERC1155_init(params.baseURI);
         __ERC1155Supply_init();
         __ERC2981_init();
         __Pausable_init();
 
-        if (_admin == address(0)) revert ZeroAddress("admin");
-        if (_defaultTreasury == address(0)) revert ZeroAddress("treasury");
-        if (_paymentToken == address(0)) revert ZeroAddress("payment token");
+        if (params.admin == address(0)) revert ZeroAddress("admin");
+        if (params.defaultTreasury == address(0)) revert ZeroAddress("treasury");
+        if (params.paymentToken == address(0)) revert ZeroAddress("payment token");
 
-        if (_paymentToken.code.length == 0) {
+        if (params.paymentToken.code.length == 0) {
             revert InvalidPaymentToken();
         }
 
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        _grantRole(ADMIN_ROLE, _admin);
-        _grantRole(OPERATOR_ROLE, _operator);
-        _grantRole(SIGNER_ROLE, _signer);
+        _grantRole(DEFAULT_ADMIN_ROLE, params.admin);
+        _grantRole(ADMIN_ROLE, params.admin);
+        _grantRole(OPERATOR_ROLE, params.operator);
+        _grantRole(SIGNER_ROLE, params.signer);
 
         CoreStorage storage cs = _coreStorage();
-        cs.paymentToken = _paymentToken;
-        cs.baseURI = _baseURI;
-        cs.defaultTreasuryWallet = _defaultTreasury;
-        cs.internalOwner = _owner;
+        cs.paymentToken = params.paymentToken;
+        cs.baseURI = params.baseURI;
+        cs.defaultTreasuryWallet = params.defaultTreasury;
+        cs.internalOwner = params.owner;
         cs.DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -340,7 +347,7 @@ contract GamePasses is
             )
         );
 
-        _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
+        _setDefaultRoyalty(params.royaltyReceiver, params.royaltyFeeNumerator);
     }
 
     // =============================================================
@@ -359,6 +366,7 @@ contract GamePasses is
      * @dev Updates the per-wallet minting count and transfers payment to the appropriate treasury
      * @dev Reverts if:
      *      - Contract is paused
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Token is not configured
      *      - Signature is invalid or expired
      *      - Max supply would be exceeded
@@ -374,6 +382,11 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
+
         MintRequest memory request = MintRequest({
             caller: caller,
             tokenId: tokenId,
@@ -387,7 +400,7 @@ contract GamePasses is
 
     /**
      * @notice Batch mints multiple tokens with a single valid EIP-712 signature in a transaction
-     * @param caller Address that will receive the tokens (must be same as msg.sender)
+     * @param caller Address that will receive the tokens
      * @param tokenIds Array of token IDs to mint
      * @param amounts Array of amounts to mint for each token ID
      * @param prices Array of prices to pay for each mint operation
@@ -398,6 +411,7 @@ contract GamePasses is
      * @dev Updates per-wallet minting counts and transfers payments to appropriate treasuries
      * @dev Reverts if:
      *      - Contract is paused
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Array lengths don't match
      *      - Batch size exceeds MAX_BATCH_SIZE
      *      - Any token is not configured
@@ -415,6 +429,10 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
         BatchMintRequest memory request = BatchMintRequest({
             caller: caller,
             tokenIds: tokenIds,
@@ -632,7 +650,7 @@ contract GamePasses is
      * @dev Contract must not be paused
      * @dev Reverts if:
      *      - Contract is paused
-     *      - from address doesn't match msg.sender
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Burn token is not configured
      *      - Mint token is not configured
      *      - Signature is invalid or expired
@@ -649,6 +667,11 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
+
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
             revert BurnMintNotConfigured(burnId);
