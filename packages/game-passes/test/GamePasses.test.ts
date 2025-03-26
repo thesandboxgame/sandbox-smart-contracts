@@ -287,6 +287,39 @@ describe('GamePasses', function () {
       );
     });
 
+    it('should not allow configuring a token with the same treasury wallet as the contract', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_3} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .configureToken(
+            TOKEN_ID_3,
+            true,
+            100,
+            10,
+            'ipfs://QmToken1',
+            await sandboxPasses.getAddress(),
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
+    });
+    it('should not allow updating treasury wallet to the same address as the contract', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .updateTokenConfig(
+            TOKEN_ID_1,
+            100,
+            10,
+            'ipfs://QmToken1',
+            await sandboxPasses.getAddress(),
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
+    });
     it('should not allow non-admin to update token configuration', async function () {
       const {sandboxPasses, user1, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
@@ -2095,6 +2128,7 @@ describe('GamePasses', function () {
         admin,
         TOKEN_ID_1,
         TOKEN_ID_2,
+        TOKEN_ID_3,
         MINT_AMOUNT,
         createBurnAndMintSignature,
       } = await loadFixture(runCreateTestSetup);
@@ -2106,6 +2140,16 @@ describe('GamePasses', function () {
 
       const deadline = (await time.latest()) + 3600;
       const signatureId = 12345;
+
+      //   configure TOKEN_ID_3
+      await sandboxPasses.connect(admin).configureToken(
+        TOKEN_ID_3,
+        true, // transferable
+        100, // max supply
+        10, // max per wallet
+        `ipfs://token${TOKEN_ID_3}`, // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
 
       // Create signature for TOKEN_ID_1
       const signature = await createBurnAndMintSignature(
@@ -2123,7 +2167,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(user1).burnAndMint(
           user1.address,
-          TOKEN_ID_2, // Different token ID to burn
+          TOKEN_ID_3, // Different token ID to burn
           2,
           TOKEN_ID_2,
           3,
@@ -2189,6 +2233,7 @@ describe('GamePasses', function () {
         admin,
         TOKEN_ID_1,
         TOKEN_ID_2,
+        TOKEN_ID_3,
         MINT_AMOUNT,
         createBurnAndMintSignature,
       } = await loadFixture(runCreateTestSetup);
@@ -2213,13 +2258,23 @@ describe('GamePasses', function () {
         signatureId,
       );
 
+      //   configure TOKEN_ID_3
+      await sandboxPasses.connect(admin).configureToken(
+        TOKEN_ID_3,
+        true, // transferable
+        100, // max supply
+        10, // max per wallet
+        `ipfs://token${TOKEN_ID_3}`, // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
       // Try to mint TOKEN_ID_1 instead
       await expect(
         sandboxPasses.connect(user1).burnAndMint(
           user1.address,
           TOKEN_ID_1,
           2,
-          TOKEN_ID_1, // Different mint token ID
+          TOKEN_ID_3, // Different mint token ID
           3,
           deadline,
           signature,
@@ -2984,7 +3039,7 @@ describe('GamePasses', function () {
   });
 
   describe('Additional Error Cases', function () {
-    it('should revert with BurnMintNotConfigured for unconfigured burn token', async function () {
+    it('should revert with TokenNotConfigured for unconfigured burn token', async function () {
       const {
         sandboxPasses,
         signer,
@@ -3021,7 +3076,7 @@ describe('GamePasses', function () {
             signature,
             signatureId,
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'BurnMintNotConfigured');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'TokenNotConfigured');
     });
 
     it('should revert with ArrayLengthMismatch in batch operations', async function () {
@@ -3124,6 +3179,151 @@ describe('GamePasses', function () {
           },
         ]),
       ).to.be.revertedWithCustomError(SandboxPasses, 'InvalidPaymentToken');
+    });
+  });
+
+  describe('Burn and Mint Validations', function () {
+    it('should revert when burning and minting the same token ID in burnAndMint', async function () {
+      const {
+        sandboxPasses,
+        admin,
+        user1,
+        TOKEN_ID_1,
+        MINT_AMOUNT,
+        createBurnAndMintSignature,
+      } = await loadFixture(runCreateTestSetup);
+
+      // First mint some tokens to the user
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+      // Create signature for burning and minting the same token
+      const burnAmount = MINT_AMOUNT;
+      const mintAmount = MINT_AMOUNT;
+      const deadline = (await time.latest()) + 3600;
+      const signatureId = 12345;
+
+      const signature = await createBurnAndMintSignature(
+        admin,
+        user1.address,
+        TOKEN_ID_1, // Same token ID for burn
+        burnAmount,
+        TOKEN_ID_1, // Same token ID for mint
+        mintAmount,
+        deadline,
+        signatureId,
+      );
+
+      // Should revert with SameTokenIdBurnAndMint
+      await expect(
+        sandboxPasses.connect(user1).burnAndMint(
+          user1.address,
+          TOKEN_ID_1,
+          burnAmount,
+          TOKEN_ID_1, // Same token ID
+          mintAmount,
+          deadline,
+          signature,
+          signatureId,
+        ),
+      )
+        .to.be.revertedWithCustomError(sandboxPasses, 'SameTokenIdBurnAndMint')
+        .withArgs(TOKEN_ID_1);
+    });
+
+    it('should revert when burning and minting the same token ID in operatorBurnAndMint', async function () {
+      const {sandboxPasses, admin, operator, user1, TOKEN_ID_1, MINT_AMOUNT} =
+        await loadFixture(runCreateTestSetup);
+
+      // First mint some tokens to the user
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+
+      // Should revert with SameTokenIdBurnAndMint
+      await expect(
+        sandboxPasses.connect(operator).operatorBurnAndMint(
+          user1.address,
+          user1.address,
+          TOKEN_ID_1, // Same token ID for burn
+          MINT_AMOUNT,
+          TOKEN_ID_1, // Same token ID for mint
+          MINT_AMOUNT,
+        ),
+      )
+        .to.be.revertedWithCustomError(sandboxPasses, 'SameTokenIdBurnAndMint')
+        .withArgs(TOKEN_ID_1);
+    });
+
+    it('should revert when burning and minting the same token ID in operatorBatchBurnAndMint', async function () {
+      const {
+        sandboxPasses,
+        admin,
+        operator,
+        user1,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        TOKEN_ID_3,
+        MINT_AMOUNT,
+      } = await loadFixture(runCreateTestSetup);
+
+      // First mint some tokens to the user
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_2, MINT_AMOUNT);
+
+      // Should revert with SameTokenIdBurnAndMint for the first matching token ID
+      await expect(
+        sandboxPasses.connect(operator).operatorBatchBurnAndMint(
+          user1.address,
+          user1.address,
+          [TOKEN_ID_1, TOKEN_ID_2], // Burn token IDs
+          [MINT_AMOUNT, MINT_AMOUNT], // Burn amounts
+          [TOKEN_ID_1, TOKEN_ID_3], // Same token ID as burn for the first element
+          [MINT_AMOUNT, MINT_AMOUNT], // Mint amounts
+        ),
+      )
+        .to.be.revertedWithCustomError(sandboxPasses, 'SameTokenIdBurnAndMint')
+        .withArgs(TOKEN_ID_1);
+    });
+
+    it('should revert when burning and minting the same token ID in operatorBatchBurnAndMint (second element)', async function () {
+      const {
+        sandboxPasses,
+        admin,
+        operator,
+        user1,
+        TOKEN_ID_1,
+        TOKEN_ID_2,
+        TOKEN_ID_3,
+        MINT_AMOUNT,
+      } = await loadFixture(runCreateTestSetup);
+
+      // First mint some tokens to the user
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_1, MINT_AMOUNT);
+      await sandboxPasses
+        .connect(admin)
+        .adminMint(user1.address, TOKEN_ID_2, MINT_AMOUNT);
+
+      // Should revert with SameTokenIdBurnAndMint for the second matching token ID
+      await expect(
+        sandboxPasses.connect(operator).operatorBatchBurnAndMint(
+          user1.address,
+          user1.address,
+          [TOKEN_ID_1, TOKEN_ID_2], // Burn token IDs
+          [MINT_AMOUNT, MINT_AMOUNT], // Burn amounts
+          [TOKEN_ID_3, TOKEN_ID_2], // Same token ID as burn for the second element
+          [MINT_AMOUNT, MINT_AMOUNT], // Mint amounts
+        ),
+      )
+        .to.be.revertedWithCustomError(sandboxPasses, 'SameTokenIdBurnAndMint')
+        .withArgs(TOKEN_ID_2);
     });
   });
 });

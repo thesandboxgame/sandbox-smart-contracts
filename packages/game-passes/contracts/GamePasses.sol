@@ -250,8 +250,6 @@ contract GamePasses is
     error TokenNotConfigured(uint256 tokenId);
     /// @dev Revert when trying to mint more tokens than the max supply
     error MaxSupplyExceeded(uint256 tokenId);
-    /// @dev Revert when burn and mint configuration doesn't exist
-    error BurnMintNotConfigured(uint256 burnTokenId);
     /// @dev Revert when token is already configured
     error TokenAlreadyConfigured(uint256 tokenId);
     /// @dev Revert when array lengths mismatch
@@ -286,6 +284,10 @@ contract GamePasses is
     error TransferabilityAlreadySet(uint256 tokenId);
     /// @dev Revert when sender of the transaction does not equal the caller value
     error InvalidSender();
+    /// @dev Revert when burn and mint token IDs are the same
+    error SameTokenIdBurnAndMint(uint256 tokenId);
+    /// @dev Revert when treasury wallet is the same as the contract address
+    error InvalidTreasuryWallet();
 
     // =============================================================
     //                          Init
@@ -568,6 +570,10 @@ contract GamePasses is
         uint256 mintTokenId,
         uint256 mintAmount
     ) external whenNotPaused onlyRole(OPERATOR_ROLE) {
+        if (burnTokenId == mintTokenId) {
+            revert SameTokenIdBurnAndMint(burnTokenId);
+        }
+
         TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintTokenId];
 
         if (!mintConfig.isConfigured) {
@@ -617,6 +623,13 @@ contract GamePasses is
             mintTokenIds.length != mintAmounts.length
         ) {
             revert ArrayLengthMismatch();
+        }
+
+        // Check for same token IDs in burn and mint operations
+        for (uint256 i; i < burnTokenIds.length; i++) {
+            if (burnTokenIds[i] == mintTokenIds[i]) {
+                revert SameTokenIdBurnAndMint(burnTokenIds[i]);
+            }
         }
 
         // Validate mint tokens and check max supply
@@ -672,9 +685,13 @@ contract GamePasses is
             revert InvalidSender();
         }
 
+        if (burnId == mintId) {
+            revert SameTokenIdBurnAndMint(burnId);
+        }
+
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
-            revert BurnMintNotConfigured(burnId);
+            revert TokenNotConfigured(burnId);
         }
 
         TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintId];
@@ -790,6 +807,10 @@ contract GamePasses is
             revert TokenAlreadyConfigured(tokenId);
         }
 
+        if (treasuryWallet == address(this)) {
+            revert InvalidTreasuryWallet();
+        }
+
         config.isConfigured = true;
         config.transferable = transferable;
         config.maxSupply = maxSupply;
@@ -831,6 +852,10 @@ contract GamePasses is
         uint256 currentSupply = totalSupply(tokenId);
         if (maxSupply < currentSupply) {
             revert MaxSupplyBelowCurrentSupply(tokenId);
+        }
+
+        if (treasuryWallet == address(this)) {
+            revert InvalidTreasuryWallet();
         }
 
         config.maxSupply = maxSupply;
