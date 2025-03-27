@@ -1183,9 +1183,7 @@ contract GamePasses is
      *      - Allows burns (to == address(0))
      *      - Checks transferability for regular transfers
      * @dev Reverts if:
-     *      - Token is non-transferable AND
-     *      - Sender is not whitelisted AND
-     *      - Sender is not ADMIN_ROLE or OPERATOR_ROLE
+     *      - Token is non-transferable AND sender is not whitelisted AND sender is not ADMIN_ROLE or OPERATOR_ROLE
      */
     function _update(
         address from,
