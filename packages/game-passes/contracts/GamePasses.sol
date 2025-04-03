@@ -942,6 +942,47 @@ contract GamePasses is
     }
 
     /**
+     * @notice Pauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev When paused, prevents minting, burning, and transfers
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is already paused
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice Unpauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Restores minting, burning, and transfer functionality
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is not paused
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @notice Recover ERC20 tokens accidentally sent to the contract
+     * @param token The ERC20 token address to recover
+     * @param to The address to send recovered tokens to
+     * @param amount The amount of tokens to recover
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot recover the payment token if contract is not paused
+     */
+    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        if (token == _coreStorage().paymentToken && !paused()) {
+            revert PaymentTokenRecoveryNotAllowed();
+        }
+
+        SafeERC20.safeTransfer(IERC20(token), to, amount);
+        emit TokensRecovered(_msgSender(), token, to, amount);
+    }
+
+    /**
      * @notice Check if an address is whitelisted for token transfers
      * @param tokenId The token ID to check
      * @param account The address to check whitelist status for
@@ -1023,53 +1064,12 @@ contract GamePasses is
     }
 
     /**
-     * @notice Pauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev When paused, prevents minting, burning, and transfers
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is already paused
-     */
-    function pause() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Restores minting, burning, and transfer functionality
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is not paused
-     */
-    function unpause() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
-
-    /**
      * @notice Returns the current owner address of the contract
      * @dev This address may have special permissions beyond role-based access control
      * @return address The current owner address
      */
     function owner() external view returns (address) {
         return _coreStorage().internalOwner;
-    }
-
-    /**
-     * @notice Recover ERC20 tokens accidentally sent to the contract
-     * @param token The ERC20 token address to recover
-     * @param to The address to send recovered tokens to
-     * @param amount The amount of tokens to recover
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Cannot recover the payment token if contract is not paused
-     */
-    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        if (token == _coreStorage().paymentToken && !paused()) {
-            revert PaymentTokenRecoveryNotAllowed();
-        }
-
-        SafeERC20.safeTransfer(IERC20(token), to, amount);
-        emit TokensRecovered(_msgSender(), token, to, amount);
     }
 
     /**
