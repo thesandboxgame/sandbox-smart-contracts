@@ -140,7 +140,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(admin).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user2.address,
@@ -329,7 +329,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(user1).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user1.address,
@@ -909,7 +909,7 @@ describe('GamePasses', function () {
         await sandboxPasses.connect(admin).configureToken(
           i,
           true, // transferable
-          100, // max supply
+          100, // max mintable
           10, // max per wallet
           `ipfs://token${i}`, // metadata
           ethers.ZeroAddress, // use default treasury
@@ -986,7 +986,7 @@ describe('GamePasses', function () {
         await sandboxPasses.connect(admin).configureToken(
           i,
           true, // transferable
-          100, // max supply
+          100, // max mintable
           10, // max per wallet
           `ipfs://token${i}`, // metadata
           ethers.ZeroAddress, // use default treasury
@@ -1455,7 +1455,7 @@ describe('GamePasses', function () {
       await sandboxPasses.connect(admin).configureToken(
         UNLIMITED_TOKEN_ID,
         true, // transferable
-        LARGE_MAX_SUPPLY, // max supply
+        LARGE_MAX_SUPPLY, // max mintable
         ethers.MaxUint256, // maxPerWallet = type(uint256).max (unlimited)
         'ipfs://unlimited-token', // metadata
         ethers.ZeroAddress, // use default treasury
@@ -1563,7 +1563,7 @@ describe('GamePasses', function () {
       await sandboxPasses.connect(admin).configureToken(
         DISABLED_TOKEN_ID,
         true, // transferable
-        LARGE_MAX_SUPPLY, // max supply
+        LARGE_MAX_SUPPLY, // max mintable
         0, // maxPerWallet = 0 (disabled)
         'ipfs://disabled-token', // metadata
         ethers.ZeroAddress, // use default treasury
@@ -1605,7 +1605,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'ExceedsMaxPerWallet');
     });
 
-    it('should reject mints when maxSupply is 0 (disabled)', async function () {
+    it('should reject mints when maxMintable is 0 (disabled)', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1615,15 +1615,15 @@ describe('GamePasses', function () {
         createMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
-      // Configure a new token with maxSupply = 0 (disabled)
+      // Configure a new token with maxMintable = 0 (disabled)
       const DISABLED_TOKEN_ID = 7777;
 
       await sandboxPasses.connect(admin).configureToken(
         DISABLED_TOKEN_ID,
         true, // transferable
-        0, // maxSupply = 0 (disabled)
+        0, // maxMintable = 0 (disabled)
         10, // maxPerWallet = 10
-        'ipfs://disabled-supply-token', // metadata
+        'ipfs://disabled-mintable-token', // metadata
         ethers.ZeroAddress, // use default treasury
       );
 
@@ -1647,7 +1647,7 @@ describe('GamePasses', function () {
         signatureId,
       );
 
-      // Mint should be rejected because maxSupply is 0 (disabled)
+      // Mint should be rejected because maxMintable is 0 (disabled)
       await expect(
         sandboxPasses
           .connect(user1)
@@ -1663,7 +1663,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
-    it('should allow unlimited supply when maxSupply is type(uint256).max', async function () {
+    it('should allow unlimited mints when maxMintable is type(uint256).max', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1673,16 +1673,16 @@ describe('GamePasses', function () {
         createMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
-      // Configure a new token with maxSupply = type(uint256).max (unlimited)
+      // Configure a new token with maxMintable = type(uint256).max (unlimited)
       const UNLIMITED_TOKEN_ID = 6666;
       const NORMAL_MAX_PER_WALLET = 50;
 
       await sandboxPasses.connect(admin).configureToken(
         UNLIMITED_TOKEN_ID,
         true, // transferable
-        ethers.MaxUint256, // maxSupply = type(uint256).max (unlimited)
+        ethers.MaxUint256, // maxMintable = type(uint256).max (unlimited)
         NORMAL_MAX_PER_WALLET, // maxPerWallet
-        'ipfs://unlimited-supply-token', // metadata
+        'ipfs://unlimited-mintable-token', // metadata
         ethers.ZeroAddress, // use default treasury
       );
 
@@ -1706,7 +1706,7 @@ describe('GamePasses', function () {
         signatureId,
       );
 
-      // Mint should succeed with unlimited supply
+      // Mint should succeed with unlimited mintable
       await sandboxPasses
         .connect(user1)
         .mint(
@@ -2147,7 +2147,7 @@ describe('GamePasses', function () {
       await sandboxPasses.connect(admin).configureToken(
         TOKEN_ID_3,
         true, // transferable
-        100, // max supply
+        100, // max mintable
         10, // max per wallet
         `ipfs://token${TOKEN_ID_3}`, // metadata
         ethers.ZeroAddress, // use default treasury
@@ -2264,7 +2264,7 @@ describe('GamePasses', function () {
       await sandboxPasses.connect(admin).configureToken(
         TOKEN_ID_3,
         true, // transferable
-        100, // max supply
+        100, // max mintable
         10, // max per wallet
         `ipfs://token${TOKEN_ID_3}`, // metadata
         ethers.ZeroAddress, // use default treasury
@@ -2873,7 +2873,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(admin).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user2.address,
