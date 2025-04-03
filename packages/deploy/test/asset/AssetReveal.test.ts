@@ -13,7 +13,7 @@ const setupTest = deployments.createFixture(
     const AssetContract = await getEthersContract('Asset');
     const AssetRevealContract = await getEthersContract('AssetReveal');
     const CatalystContract = await getEthersContract('Catalyst');
-    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const SandboxForwarder = await getEthersContract('SandboxForwarder');
     const AuthSuperValidatorContract = await getEthersContract(
       'AuthSuperValidator'
     );
@@ -22,7 +22,7 @@ const setupTest = deployments.createFixture(
       AssetContract,
       AssetRevealContract,
       CatalystContract,
-      TRUSTED_FORWARDER,
+      SandboxForwarder,
       AuthSuperValidatorContract,
       assetAdmin,
       backendAuthWallet,
@@ -102,9 +102,9 @@ describe('Asset Reveal', function () {
 
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const {AssetRevealContract, TRUSTED_FORWARDER} = await setupTest();
+      const {AssetRevealContract, SandboxForwarder} = await setupTest();
       expect(await AssetRevealContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER
+        SandboxForwarder
       );
     });
   });

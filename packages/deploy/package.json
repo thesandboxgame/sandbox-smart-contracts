@@ -29,6 +29,7 @@
     "@sandbox-smart-contracts/marketplace": "1.0.2",
     "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1",
     "@sandbox-smart-contracts/oft-sand": "0.0.1",
+    "@sandbox-smart-contracts/sandbox-forwarder": "1.0.0",
     "@urql/core": "^4.3.0",
     "isomorphic-unfetch": "^4.0.2"
   },

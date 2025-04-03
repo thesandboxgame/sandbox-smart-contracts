@@ -1,12 +1,12 @@
+import {expect} from 'chai';
+import {deployments} from 'hardhat';
 import {royaltyAmount} from '../../deploy/300_catalyst/302_catalyst_setup';
+import {OperatorFilterRegistry_ABI} from '../../utils/abi';
+import {OperatorFilterRegistryBytecode} from '../../utils/bytecodes';
 import {
   DEFAULT_SUBSCRIPTION,
   OPERATOR_FILTER_REGISTRY,
 } from './../../../asset/data/constants';
-import {expect} from 'chai';
-import {OperatorFilterRegistryBytecode} from '../../utils/bytecodes';
-import {OperatorFilterRegistry_ABI} from '../../utils/abi';
-import {deployments} from 'hardhat';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
@@ -106,13 +106,13 @@ const setupTest = deployments.createFixture(
     const CatalystContract = await getEthersContract('Catalyst');
 
     const RoyaltyManagerContract = await getEthersContract('RoyaltyManager');
-    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const SandboxForwarder = await getEthersContract('SandboxForwarder');
     return {
       CatalystContract,
       OperatorFilterCatalystSubscription,
       RoyaltyManagerContract,
       catalystAdmin,
-      TRUSTED_FORWARDER,
+      SandboxForwarder,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
       catalystMinter,
@@ -217,9 +217,9 @@ describe('Catalyst', function () {
 
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const {CatalystContract, TRUSTED_FORWARDER} = await setupTest();
+      const {CatalystContract, SandboxForwarder} = await setupTest();
       expect(await CatalystContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER
+        SandboxForwarder
       );
     });
   });

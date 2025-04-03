@@ -1,12 +1,12 @@
+import {expect} from 'chai';
+import {deployments} from 'hardhat';
+import {DEFAULT_BPS} from '../../deploy/400_asset/407_asset_setup';
+import {OperatorFilterRegistry_ABI} from '../../utils/abi';
+import {OperatorFilterRegistryBytecode} from '../../utils/bytecodes';
 import {
   DEFAULT_SUBSCRIPTION,
   OPERATOR_FILTER_REGISTRY,
 } from './../../../asset/data/constants';
-import {DEFAULT_BPS} from '../../deploy/400_asset/407_asset_setup';
-import {expect} from 'chai';
-import {deployments} from 'hardhat';
-import {OperatorFilterRegistryBytecode} from '../../utils/bytecodes';
-import {OperatorFilterRegistry_ABI} from '../../utils/abi';
 
 const setupTest = deployments.createFixture(
   async ({deployments, network, getNamedAccounts, ethers}) => {
@@ -97,7 +97,7 @@ const setupTest = deployments.createFixture(
     const AssetContract = await getEthersContract('Asset');
     const AssetCreateContract = await getEthersContract('AssetCreate');
     const RoyaltyManagerContract = await getEthersContract('RoyaltyManager');
-    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const SandboxForwarder = await getEthersContract('SandboxForwarder');
 
     // grant moderator role to the assetAdmin
     const adminSigner = await ethers.getSigner(assetAdmin);
@@ -117,7 +117,7 @@ const setupTest = deployments.createFixture(
       deployer,
       sandAdmin,
       OperatorFilterAssetSubscription,
-      TRUSTED_FORWARDER,
+      SandboxForwarder,
       OPERATOR_FILTER_REGISTRY,
       OperatorFilterRegistryContract,
       mockMetadataHash,
@@ -176,9 +176,9 @@ describe('Asset', function () {
 
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const {AssetContract, TRUSTED_FORWARDER} = await setupTest();
+      const {AssetContract, SandboxForwarder} = await setupTest();
       expect(await AssetContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER
+        SandboxForwarder
       );
     });
   });

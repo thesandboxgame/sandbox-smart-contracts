@@ -92,6 +92,9 @@ const importedPackages = {
     'contracts/OFTSand.sol',
     'contracts/mock/EndpointMock.sol',
   ],
+  '@sandbox-smart-contracts/sandbox-forwarder': [
+    'contracts/SandboxForwarder.sol',
+  ],
 };
 
 const namedAccounts = {

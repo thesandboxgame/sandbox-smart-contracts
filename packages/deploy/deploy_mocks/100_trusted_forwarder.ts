@@ -1,16 +1,17 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-  await deploy('TRUSTED_FORWARDER_V2', {
+  await deploy('SandboxForwarder', {
     from: deployer,
-    contract: 'contracts/mocks/TrustedForwarderMock.sol:TrustedForwarderMock',
+    contract:
+      '@sandbox-smart-contracts/sandbox-forwarder/contracts/SandboxForwarder.sol:SandboxForwarder',
     log: true,
   });
 };
 export default func;
-func.tags = ['TRUSTED_FORWARDER', 'TRUSTED_FORWARDER_V2'];
+func.tags = ['SandboxForwarder'];

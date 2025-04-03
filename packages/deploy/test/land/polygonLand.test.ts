@@ -14,7 +14,7 @@ const setupTest = deployments.createFixture(
 
     const RoyaltyManagerContract = await getEthersContract('RoyaltyManager');
 
-    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const SandboxForwarder = await getEthersContract('SandboxForwarder');
 
     const PolygonOperatorFilterSubscription = await getEthersContract(
       'PolygonOperatorFilterSubscription'
@@ -26,7 +26,7 @@ const setupTest = deployments.createFixture(
     return {
       PolygonLandContract,
       RoyaltyManagerContract,
-      TRUSTED_FORWARDER,
+      SandboxForwarder,
       PolygonOperatorFilterSubscription,
       PolygonOperatorFilterRegistry,
       deployer,
@@ -54,9 +54,9 @@ describe('PolygonLand', function () {
 
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const {PolygonLandContract, TRUSTED_FORWARDER} = await setupTest();
+      const {PolygonLandContract, SandboxForwarder} = await setupTest();
       expect(await PolygonLandContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER
+        SandboxForwarder
       );
     });
   });

@@ -1,3 +1,4 @@
+import {parseEther} from 'ethers';
 import {deployments} from 'hardhat';
 import {
   LazyMintBatchData,
@@ -6,7 +7,6 @@ import {
   createMultipleLazyMintSignature,
   giveSandToAccount,
 } from '../../utils/lazyMinting';
-import {parseEther} from 'ethers';
 
 const setupAssetCreateTests = deployments.createFixture(
   async ({deployments, getNamedAccounts, ethers, network}) => {
@@ -33,7 +33,7 @@ const setupAssetCreateTests = deployments.createFixture(
     const CatalystContract = await getEthersContract('Catalyst');
     const ExchangeContract = await getEthersContract('Exchange');
     const SandContract = await getEthersContract('PolygonSand');
-    const TRUSTED_FORWARDER = await getEthersContract('TRUSTED_FORWARDER_V2');
+    const SandboxForwarder = await getEthersContract('SandboxForwarder');
     const OrderValidatorContract = await getEthersContract('OrderValidator');
     const AuthSuperValidatorContract = await getEthersContract(
       'AuthSuperValidator'
@@ -100,7 +100,7 @@ const setupAssetCreateTests = deployments.createFixture(
       OrderValidatorContract,
       ExchangeContract,
       treasury,
-      TRUSTED_FORWARDER,
+      SandboxForwarder,
       AuthSuperValidatorContract,
       assetAdmin,
       backendAuthWallet,

@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, catchUnknownSigner} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   await catchUnknownSigner(
     deploy('PolygonLand', {
       from: deployer,
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         proxyContract: 'OpenZeppelinTransparentProxy',
         execute: {
           methodName: 'initialize',
-          args: [TRUSTED_FORWARDER.address],
+          args: [SandboxForwarder.address],
         },
         upgradeIndex: 0,
       },
@@ -34,4 +34,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['TRUSTED_FORWARDER_V2'];
+func.dependencies = ['SandboxForwarder'];

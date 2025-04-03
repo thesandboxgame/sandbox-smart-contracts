@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const name = 'Sandbox Asset Reveal';
   const version = '1.0';
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
 
   await deploy('AssetReveal', {
     from: deployer,
@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           version,
           AssetContract.address,
           AuthValidatorContract.address,
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           assetAdmin,
         ],
       },
@@ -50,6 +50,6 @@ func.tags = [
 func.dependencies = [
   'Asset_deploy',
   'AuthSuperValidator_deploy',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
   'AuthSuperValidator_v2', // use updated AuthSuperValidator
 ];

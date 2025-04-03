@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, assetAdmin, upgradeAdmin} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   const RoyaltyManager = await deployments.get('RoyaltyManager');
   const OperatorFilterAssetSubscription = await deployments.get(
     'OperatorFilterAssetSubscription'
@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         methodName: 'initialize',
         args: [
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           assetAdmin,
           'ipfs://',
           OperatorFilterAssetSubscription.address,
@@ -45,6 +45,6 @@ func.tags = [
 ];
 func.dependencies = [
   'OperatorFilterAssetSubscription_deploy',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
   'RoyaltyManager_deploy',
 ];

@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, sandAdmin, sandExecutionAdmin} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
 
   await deploy('PolygonSand', {
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       '@sandbox-smart-contracts/core/src/solc_0.8/polygon/child/sand/PolygonSand.sol:PolygonSand',
     args: [
       CHILD_CHAIN_MANAGER.address,
-      TRUSTED_FORWARDER_V2?.address,
+      SandboxForwarder?.address,
       sandAdmin,
       sandExecutionAdmin,
     ],
@@ -33,4 +33,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER_V2'];
+func.dependencies = ['CHILD_CHAIN_MANAGER', 'SandboxForwarder'];
