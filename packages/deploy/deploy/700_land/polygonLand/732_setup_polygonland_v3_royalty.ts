@@ -10,6 +10,7 @@ const func: DeployFunction = async function (
   const {execute, read, catchUnknownSigner} = deployments;
   const {royaltyManagerAdmin, commonRoyaltyReceiver} = await getNamedAccounts();
   const PolygonLand = await deployments.get('PolygonLand');
+  // Here we assume a fixed royalty percentage that does not depend on the tokenId
   const info = await read('PolygonLand', 'royaltyInfo', 1, 10000);
   if (info.receiver != commonRoyaltyReceiver) {
     console.warn(
