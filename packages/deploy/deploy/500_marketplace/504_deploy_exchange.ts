@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer, sandAdmin, upgradeAdmin, exchangeFeeRecipient} =
     await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   const orderValidator = await deployments.get('OrderValidator');
   const royaltiesRegistry = await deployments.get('RoyaltiesRegistry');
 
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         methodName: 'initialize',
         args: [
           sandAdmin,
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           newProtocolFeePrimary,
           newProtocolFeeSecondary,
           exchangeFeeRecipient,
@@ -55,5 +55,5 @@ func.tags = [
 func.dependencies = [
   'RoyaltiesRegistry_deploy',
   'OrderValidator_deploy',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
 ];

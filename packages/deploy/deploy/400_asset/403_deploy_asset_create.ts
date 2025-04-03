@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const name = 'Sandbox Asset Create';
   const version = '1.0';
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
 
   await deploy('AssetCreate', {
     from: deployer,
@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           AssetContract.address,
           CatalystContract.address,
           AuthValidatorContract.address,
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           assetAdmin, // DEFAULT_ADMIN_ROLE
         ],
       },
@@ -55,5 +55,5 @@ func.dependencies = [
   'Catalyst_deploy',
   'Catalyst_setup',
   'AuthSuperValidator_deploy',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
 ];

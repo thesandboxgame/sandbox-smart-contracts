@@ -2296,6 +2296,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:5.2.0":
+  version: 5.2.0
+  resolution: "@openzeppelin/contracts@npm:5.2.0"
+  checksum: badff8c3be46b099c331e90ba27f75e36f7af681279952cf0b123c7448bc53cd541ef447de8e6ebc38e7b29aed8f17dacf0756aac5891eed03fe96a0a4eba1a0
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/contracts@npm:^3.2.1-solc-0.7":
   version: 3.4.2
   resolution: "@openzeppelin/contracts@npm:3.4.2"
@@ -2951,6 +2958,7 @@ __metadata:
     "@sandbox-smart-contracts/marketplace": 1.0.2
     "@sandbox-smart-contracts/marketplace@1.0.1": "npm:@sandbox-smart-contracts/marketplace@1.0.1"
     "@sandbox-smart-contracts/oft-sand": 0.0.1
+    "@sandbox-smart-contracts/sandbox-forwarder": 1.0.0
     "@typechain/ethers-v5": ^11.0.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.5
@@ -3323,6 +3331,14 @@ __metadata:
     ts-node: ^10.9.2
     typechain: ^8.3.2
     typescript: 5.3.3
+  languageName: unknown
+  linkType: soft
+
+"@sandbox-smart-contracts/sandbox-forwarder@1.0.0, @sandbox-smart-contracts/sandbox-forwarder@workspace:packages/sandbox-forwarder":
+  version: 0.0.0-use.local
+  resolution: "@sandbox-smart-contracts/sandbox-forwarder@workspace:packages/sandbox-forwarder"
+  dependencies:
+    "@openzeppelin/contracts": 5.2.0
   languageName: unknown
   linkType: soft
 
