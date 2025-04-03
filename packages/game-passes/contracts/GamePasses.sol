@@ -113,12 +113,9 @@ contract GamePasses is
     }
 
     function _coreStorage() private pure returns (CoreStorage storage cs) {
-        bytes32 position = keccak256(
-            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.CoreStorage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            cs.slot := position
+            cs.slot := CORE_STORAGE_LOCATION
         }
     }
 
@@ -129,18 +126,23 @@ contract GamePasses is
     }
 
     function _tokenStorage() private pure returns (TokenStorage storage ts) {
-        bytes32 position = keccak256(
-            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.TokenStorage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            ts.slot := position
+            ts.slot := TOKEN_STORAGE_LOCATION
         }
     }
 
     // =============================================================
     //                      Constants
     // =============================================================
+
+    // keccak256(abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.CoreStorage"))) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 internal constant CORE_STORAGE_LOCATION =
+        0xba0c4bc36712a57d2047a947603622e9142187f10a1421293cb6d7500dee6f00;
+
+    // keccak256(abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.TokenStorage"))) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 internal constant TOKEN_STORAGE_LOCATION =
+        0x437f928739e2760da74c662888f938178fa33ad7fb16b9bdbb0b29abf5edec00;
 
     /// @dev The role that is allowed to upgrade the contract and manage admin-level operations.
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
