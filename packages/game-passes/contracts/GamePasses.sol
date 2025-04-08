@@ -1092,88 +1092,6 @@ contract GamePasses is
     }
 
     /**
-     * @notice Verify signature for mint operation using EIP-712
-     * @param request The MintRequest struct containing all mint parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifySignature(MintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                MINT_TYPEHASH,
-                request.caller,
-                request.tokenId,
-                request.amount,
-                request.price,
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
-    }
-
-    /**
-     * @notice Verify signature for burn and mint operation using EIP-712
-     * @param request The BurnAndMintRequest struct containing all operation parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                BURN_AND_MINT_TYPEHASH,
-                request.caller,
-                request.burnId,
-                request.burnAmount,
-                request.mintId,
-                request.mintAmount,
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
-    }
-
-    /**
-     * @notice Verify signature for batch mint operation using EIP-712
-     * @param request The BatchMintRequest struct containing all batch mint parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify batch signatures off-chain
-     * @dev Validates the signature against the BATCH_MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                BATCH_MINT_TYPEHASH,
-                request.caller,
-                keccak256(abi.encodePacked(request.tokenIds)),
-                keccak256(abi.encodePacked(request.amounts)),
-                keccak256(abi.encodePacked(request.prices)),
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
-    }
-
-    /**
      * @notice Checks if contract implements various interfaces
      * @param interfaceId The interface identifier to check
      * @dev Combines interface support checks from parent contracts
@@ -1258,6 +1176,88 @@ contract GamePasses is
         returns (bytes calldata)
     {
         return ERC2771HandlerUpgradeable._msgData();
+    }
+
+    /**
+     * @notice Verify signature for mint operation using EIP-712
+     * @param request The MintRequest struct containing all mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifySignature(MintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                request.caller,
+                request.tokenId,
+                request.amount,
+                request.price,
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
+    }
+
+    /**
+     * @notice Verify signature for burn and mint operation using EIP-712
+     * @param request The BurnAndMintRequest struct containing all operation parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BURN_AND_MINT_TYPEHASH,
+                request.caller,
+                request.burnId,
+                request.burnAmount,
+                request.mintId,
+                request.mintAmount,
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
+    }
+
+    /**
+     * @notice Verify signature for batch mint operation using EIP-712
+     * @param request The BatchMintRequest struct containing all batch mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify batch signatures off-chain
+     * @dev Validates the signature against the BATCH_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BATCH_MINT_TYPEHASH,
+                request.caller,
+                keccak256(abi.encodePacked(request.tokenIds)),
+                keccak256(abi.encodePacked(request.amounts)),
+                keccak256(abi.encodePacked(request.prices)),
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
     }
 
     /**
