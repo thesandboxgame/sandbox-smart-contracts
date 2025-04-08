@@ -1377,7 +1377,7 @@ contract GamePasses is
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         config.totalMinted += amount;
 
-        if (config.maxMintable != type(uint256).max && config.totalMinted > config.maxMintable) {
+        if (config.totalMinted > config.maxMintable) {
             revert MaxMintableExceeded(tokenId);
         }
     }
