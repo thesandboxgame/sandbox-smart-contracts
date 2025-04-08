@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const Sand = await deployments.get('Sand');
   const EndpointV2 = await deployments.get('EndpointV2');
-  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
 
   await deploy('OFTAdapterForSand', {
     from: deployer,
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       Sand.address,
       EndpointV2.address,
       deployer,
-      TRUSTED_FORWARDER_V2.address,
+      SandboxForwarder.address,
       sandAdmin,
     ],
     log: true,
@@ -26,4 +26,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['OFTAdapterForSand', 'OFTAdapterForSand_deploy'];
-func.dependencies = ['Sand', 'TRUSTED_FORWARDER_V2', 'EndpointV2'];
+func.dependencies = ['Sand', 'SandboxForwarder', 'EndpointV2'];
