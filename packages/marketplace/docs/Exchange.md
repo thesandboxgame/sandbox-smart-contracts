@@ -4,7 +4,7 @@
 
 The [Exchange contract](../contracts/Exchange.sol) is the entrypoint and main
 contract to the marketplace protocol. It safely offers a decentralized way to
-exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders.It
+exchange tokens of any nature (ERC20, ERC1155, ERC721) using signed orders. It
 also supports exchanging bundles of assets, which can include multiple ERC1155,
 ERC721, and Quads.
 
@@ -29,23 +29,81 @@ seller is asking for (and more).
 ### Bundle Order
 
 In addition to single-asset orders, the protocol supports bundle orders, where
-multiple assets are grouped together as a single entity for exchange. Let's
-consider this use case:
+multiple assets are grouped together as a single entity for exchange. A bundle
+can contain:
 
-Order B
+- Multiple ERC721 tokens
+- Multiple ERC1155 tokens
+- Multiple Quads
+- Any combination of the above
+
+Important restrictions for bundles:
+
+- Bundles cannot contain ERC20 tokens
+- Bundles can only be exchanged for ERC20 tokens (not for other NFTs or bundles)
+
+Each asset in the bundle can have its own individual price, and the total price
+of the bundle is the sum of all individual asset prices.
+
+#### Bundle Examples
+
+##### Example 1: Simple Bundle with ERC721 and ERC1155
 
 ```
-Alice wants to sell a bundle of assets:
- 1 LAND (ERC721) with token id 1000
+Alice wants to sell a bundle containing:
+- 1 LAND (ERC721) with token id 1000
   - Price: 1200 MATIC
- 10 ASSET (ERC1155) with token id 2000
-  - Price: 700 MATIC
-against 2000 MATIC (ERC20).
+- 10 ASSET (ERC1155) with token id 2000
+  - Price: 800 MATIC
+Total bundle price: 2000 MATIC
 ```
 
-The order represents this intent and includes the address of the seller, the
-address for the tokens(ERC721 and ERC1155), the token ids, the individual prices
-of the assets, the address of the ERC20 and the amount the seller is asking for.
+##### Example 2: Bundle with Quads
+
+```
+Alice wants to sell a bundle containing:
+- 2 Quads (3x3 size each)
+  - First Quad: 500 MATIC
+  - Second Quad: 500 MATIC
+- 1 LAND (ERC721) with token id 1000
+  - Price: 4000 MATIC
+Total bundle price: 5000 MATIC
+```
+
+##### Example 3: Bundle with Multiple ERC1155
+
+```
+Alice wants to sell a bundle containing:
+- 10 ASSET_A (ERC1155) with token id 1000
+  - Price: 10000 MATIC
+- 5 ASSET_B (ERC1155) with token id 2000
+  - Price: 5000 MATIC
+Total bundle price: 15000 MATIC
+```
+
+#### Invalid Bundle Examples
+
+##### Example 1: Bundle with ERC20 (Not Allowed)
+
+```
+- 1 LAND (ERC721)
+- 1000 SAND (ERC20)  // ERC20 tokens cannot be part of a bundle
+```
+
+##### Example 2: Bundle-to-Bundle Exchange (Not Allowed)
+
+```
+- Bundle A (containing ERC721) <-> Bundle B (containing ERC1155)
+// Bundles can only be exchanged for ERC20 tokens
+```
+
+##### Example 3: Bundle with Value > 1 for ERC721 (Not Allowed)
+
+```
+- 2 LAND (ERC721) with token id 1000
+  - Price: 1200 MATIC each
+// ERC721 tokens are unique and cannot have a value > 1 in a bundle
+```
 
 ### Maker & Taker
 

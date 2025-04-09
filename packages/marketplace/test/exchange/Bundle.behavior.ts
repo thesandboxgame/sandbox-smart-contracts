@@ -530,7 +530,6 @@ export function shouldMatchOrdersForBundle() {
           maker,
           bundleWithoutERC721Left, // makeAsset
           ZeroAddress,
-
           ERC20AssetForLeftOrder, // takeAsset
           1,
           0,
@@ -541,7 +540,6 @@ export function shouldMatchOrdersForBundle() {
           taker,
           ERC20AssetForRightOrder, // makeAsset
           ZeroAddress,
-
           bundleWithoutERC721Right, // takeAsset
           1,
           0,
@@ -656,7 +654,6 @@ export function shouldMatchOrdersForBundle() {
           maker,
           bundleWithoutERC721Left, // makeAsset
           ZeroAddress,
-
           ERC20AssetForLeftOrder, // takeAsset
           1,
           0,
@@ -862,7 +859,6 @@ export function shouldMatchOrdersForBundle() {
           maker,
           bundleWithoutERC721Left, // makeAsset
           ZeroAddress,
-
           ERC20AssetForLeftOrder, // takeAsset
           1,
           0,
