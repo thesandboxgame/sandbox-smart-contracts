@@ -38,7 +38,7 @@ contract GamePasses is
         bool isConfigured;
         bool transferable;
         address treasuryWallet; // specific treasury wallet for this token
-        uint256 maxSupply; // 0 for open edition
+        uint256 maxMintable; // 0 for open edition
         string metadata;
         uint256 maxPerWallet; // max tokens that can be minted per wallet
         uint256 totalMinted; // total tokens already minted
@@ -77,6 +77,20 @@ contract GamePasses is
         uint256 signatureId;
     }
 
+    /// @dev Struct to hold initialization parameters
+    struct InitParams {
+        string baseURI;
+        address royaltyReceiver;
+        uint96 royaltyFeeNumerator;
+        address admin;
+        address operator;
+        address signer;
+        address paymentToken;
+        address trustedForwarder;
+        address defaultTreasury;
+        address owner;
+    }
+
     // =============================================================
     //                      Storage - ERC7201
     // =============================================================
@@ -87,7 +101,7 @@ contract GamePasses is
         string baseURI;
         // Default treasury wallet
         address defaultTreasuryWallet;
-        // Payment token
+        // Payment token, SAND contract
         address paymentToken;
         // Owner of the contract
         address internalOwner;
@@ -99,12 +113,9 @@ contract GamePasses is
     }
 
     function _coreStorage() private pure returns (CoreStorage storage cs) {
-        bytes32 position = keccak256(
-            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.CoreStorage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            cs.slot := position
+            cs.slot := CORE_STORAGE_LOCATION
         }
     }
 
@@ -115,18 +126,23 @@ contract GamePasses is
     }
 
     function _tokenStorage() private pure returns (TokenStorage storage ts) {
-        bytes32 position = keccak256(
-            abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.TokenStorage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            ts.slot := position
+            ts.slot := TOKEN_STORAGE_LOCATION
         }
     }
 
     // =============================================================
     //                      Constants
     // =============================================================
+
+    // keccak256(abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.CoreStorage"))) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 internal constant CORE_STORAGE_LOCATION =
+        0xba0c4bc36712a57d2047a947603622e9142187f10a1421293cb6d7500dee6f00;
+
+    // keccak256(abi.encode(uint256(keccak256(bytes("sandbox.game-passes.storage.TokenStorage"))) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 internal constant TOKEN_STORAGE_LOCATION =
+        0x437f928739e2760da74c662888f938178fa33ad7fb16b9bdbb0b29abf5edec00;
 
     /// @dev The role that is allowed to upgrade the contract and manage admin-level operations.
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -177,15 +193,15 @@ contract GamePasses is
     /// @param caller Address that initiated the token configuration
     /// @param tokenId ID of the token being configured
     /// @param transferable Whether the token can be transferred
-    /// @param maxSupply Maximum supply for this token (0 means unlimited)
-    /// @param maxPerWallet Maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param maxMintable Maximum copies to be minted for this token (type(uint256).max means unlimited)
+    /// @param maxPerWallet Maximum number of tokens a single wallet can mint (type(uint256).max means unlimited)
     /// @param metadata Token-specific metadata string
     /// @param treasuryWallet Address where payments for this token will be sent
     event TokenConfigured(
         address indexed caller,
         uint256 indexed tokenId,
         bool transferable,
-        uint256 maxSupply,
+        uint256 maxMintable,
         uint256 maxPerWallet,
         string metadata,
         address treasuryWallet
@@ -193,14 +209,14 @@ contract GamePasses is
     /// @notice Emitted when a token configuration is updated.
     /// @param caller Address that initiated the token configuration update
     /// @param tokenId ID of the token being updated
-    /// @param maxSupply New maximum supply for this token (0 means unlimited)
-    /// @param maxPerWallet New maximum number of tokens a single wallet can mint (0 means unlimited)
+    /// @param maxMintable New Maximum copies to be minted for this token (type(uint256).max means unlimited)
+    /// @param maxPerWallet New maximum number of tokens a single wallet can mint (type(uint256).max means unlimited)
     /// @param metadata New token-specific metadata string
     /// @param treasuryWallet New address where payments for this token will be sent
     event TokenConfigUpdated(
         address indexed caller,
         uint256 indexed tokenId,
-        uint256 maxSupply,
+        uint256 maxMintable,
         uint256 maxPerWallet,
         string metadata,
         address treasuryWallet
@@ -234,10 +250,8 @@ contract GamePasses is
 
     /// @dev Revert when trying to mint a token that is not configured
     error TokenNotConfigured(uint256 tokenId);
-    /// @dev Revert when trying to mint more tokens than the max supply
-    error MaxSupplyExceeded(uint256 tokenId);
-    /// @dev Revert when burn and mint configuration doesn't exist
-    error BurnMintNotConfigured(uint256 burnTokenId);
+    /// @dev Revert when trying to mint more tokens than the max mintable
+    error MaxMintableExceeded(uint256 tokenId);
     /// @dev Revert when token is already configured
     error TokenAlreadyConfigured(uint256 tokenId);
     /// @dev Revert when array lengths mismatch
@@ -250,8 +264,8 @@ contract GamePasses is
     error InvalidSigner();
     /// @dev Revert when signature already used
     error SignatureAlreadyUsed(uint256 signatureId);
-    /// @dev Revert when max supply below current supply
-    error MaxSupplyBelowCurrentSupply(uint256 tokenId);
+    /// @dev Revert when max mintable below current total minted for a token
+    error MaxMintableBelowCurrentMinted(uint256 tokenId);
     /// @dev Revert when transfer not allowed
     error TransferNotAllowed(uint256 tokenId);
     /// @dev Revert when exceeds max per wallet
@@ -270,6 +284,10 @@ contract GamePasses is
     error TransferWhitelistAlreadySet(uint256 tokenId, address account);
     /// @dev Revert when transferability is already set
     error TransferabilityAlreadySet(uint256 tokenId);
+    /// @dev Revert when sender of the transaction does not equal the caller value
+    error InvalidSender();
+    /// @dev Revert when treasury wallet is the same as the contract address
+    error InvalidTreasuryWallet();
 
     // =============================================================
     //                          Init
@@ -282,54 +300,45 @@ contract GamePasses is
 
     /**
      * @notice Initializes the upgradeable contract (replaces constructor).
-     * @param _baseURI Initial base URI for metadata.
-     * @param _royaltyReceiver Address to receive royalty fees.
-     * @param _royaltyFeeNumerator Royalty fee in basis points (e.g. 500 => 5%).
-     * @param _admin Address that will be granted the ADMIN_ROLE.
-     * @param _operator Address that will be granted the OPERATOR_ROLE.
-     * @param _signer Address that will be granted the SIGNER_ROLE.
-     * @param _paymentToken Address of the ERC20 token used for payments.
-     * @param _trustedForwarder Address of the trusted meta-transaction forwarder.
-     * @param _defaultTreasury Address of the default treasury wallet.
-     * @param _owner Address that will be set as the internal owner.
+     * @param params Struct containing all initialization parameters:
+     *        - baseURI: Initial base URI for metadata.
+     *        - royaltyReceiver: Address to receive royalty fees.
+     *        - royaltyFeeNumerator: Royalty fee in basis points (e.g. 500 => 5%).
+     *        - admin: Address that will be granted the ADMIN_ROLE.
+     *        - operator: Address that will be granted the OPERATOR_ROLE.
+     *        - signer: Address that will be granted the SIGNER_ROLE.
+     *        - paymentToken: Address of the ERC20 token used for payments.
+     *        - trustedForwarder: Address of the trusted meta-transaction forwarder.
+     *        - defaultTreasury: Address of the default treasury wallet.
+     *        - owner: Address that will be set as the internal owner.
+     *        - sandContract: Address of the SAND contract.
      */
-    function initialize(
-        string memory _baseURI,
-        address _royaltyReceiver,
-        uint96 _royaltyFeeNumerator,
-        address _admin,
-        address _operator,
-        address _signer,
-        address _paymentToken,
-        address _trustedForwarder,
-        address _defaultTreasury,
-        address _owner
-    ) external initializer {
-        __ERC2771Handler_init(_trustedForwarder);
+    function initialize(InitParams calldata params) external initializer {
+        __ERC2771Handler_init(params.trustedForwarder);
         __AccessControl_init();
-        __ERC1155_init(_baseURI);
+        __ERC1155_init(params.baseURI);
         __ERC1155Supply_init();
         __ERC2981_init();
         __Pausable_init();
 
-        if (_admin == address(0)) revert ZeroAddress("admin");
-        if (_defaultTreasury == address(0)) revert ZeroAddress("treasury");
-        if (_paymentToken == address(0)) revert ZeroAddress("payment token");
+        if (params.admin == address(0)) revert ZeroAddress("admin");
+        if (params.defaultTreasury == address(0)) revert ZeroAddress("treasury");
+        if (params.paymentToken == address(0)) revert ZeroAddress("payment token");
 
-        if (_paymentToken.code.length == 0) {
+        if (params.paymentToken.code.length == 0) {
             revert InvalidPaymentToken();
         }
 
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        _grantRole(ADMIN_ROLE, _admin);
-        _grantRole(OPERATOR_ROLE, _operator);
-        _grantRole(SIGNER_ROLE, _signer);
+        _grantRole(DEFAULT_ADMIN_ROLE, params.admin);
+        _grantRole(ADMIN_ROLE, params.admin);
+        _grantRole(OPERATOR_ROLE, params.operator);
+        _grantRole(SIGNER_ROLE, params.signer);
 
         CoreStorage storage cs = _coreStorage();
-        cs.paymentToken = _paymentToken;
-        cs.baseURI = _baseURI;
-        cs.defaultTreasuryWallet = _defaultTreasury;
-        cs.internalOwner = _owner;
+        cs.paymentToken = params.paymentToken;
+        cs.baseURI = params.baseURI;
+        cs.defaultTreasuryWallet = params.defaultTreasury;
+        cs.internalOwner = params.owner;
         cs.DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -340,7 +349,7 @@ contract GamePasses is
             )
         );
 
-        _setDefaultRoyalty(_royaltyReceiver, _royaltyFeeNumerator);
+        _setDefaultRoyalty(params.royaltyReceiver, params.royaltyFeeNumerator);
     }
 
     // =============================================================
@@ -355,13 +364,14 @@ contract GamePasses is
      * @param price Price to pay in payment token units
      * @param deadline Timestamp after which the signature becomes invalid
      * @param signature EIP-712 signature from an authorized signer
-     * @dev Verifies the signature, checks supply limits, processes payment, and mints tokens
+     * @dev Verifies the signature, checks mint limits, processes payment, and mints tokens
      * @dev Updates the per-wallet minting count and transfers payment to the appropriate treasury
      * @dev Reverts if:
      *      - Contract is paused
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Token is not configured
      *      - Signature is invalid or expired
-     *      - Max supply would be exceeded
+     *      - Max mintable would be exceeded
      *      - Max per wallet would be exceeded
      *      - Payment transfer fails
      */
@@ -374,6 +384,11 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
+
         MintRequest memory request = MintRequest({
             caller: caller,
             tokenId: tokenId,
@@ -387,7 +402,7 @@ contract GamePasses is
 
     /**
      * @notice Batch mints multiple tokens with a single valid EIP-712 signature in a transaction
-     * @param caller Address that will receive the tokens (must be same as msg.sender)
+     * @param caller Address that will receive the tokens
      * @param tokenIds Array of token IDs to mint
      * @param amounts Array of amounts to mint for each token ID
      * @param prices Array of prices to pay for each mint operation
@@ -398,11 +413,12 @@ contract GamePasses is
      * @dev Updates per-wallet minting counts and transfers payments to appropriate treasuries
      * @dev Reverts if:
      *      - Contract is paused
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Array lengths don't match
      *      - Batch size exceeds MAX_BATCH_SIZE
      *      - Any token is not configured
      *      - Signature is invalid or expired
-     *      - Any max supply would be exceeded
+     *      - Any max mintable would be exceeded
      *      - Any max per wallet would be exceeded
      *      - Any payment transfer fails
      */
@@ -415,6 +431,10 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
         BatchMintRequest memory request = BatchMintRequest({
             caller: caller,
             tokenIds: tokenIds,
@@ -432,11 +452,11 @@ contract GamePasses is
      * @param tokenId ID of the token to mint
      * @param amount Number of tokens to mint
      * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev Still respects max mintable limits but bypasses per-wallet limits
      * @dev Reverts if:
      *      - Caller doesn't have ADMIN_ROLE
      *      - Token is not configured
-     *      - Max supply would be exceeded
+     *      - Max mintable would be exceeded
      */
     function adminMint(address to, uint256 tokenId, uint256 amount) external onlyRole(ADMIN_ROLE) {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
@@ -445,7 +465,7 @@ contract GamePasses is
             revert TokenNotConfigured(tokenId);
         }
 
-        _checkMaxSupply(tokenId, amount);
+        _updateAndCheckTotalMinted(tokenId, amount);
         config.mintedPerWallet[to] += amount;
 
         _mint(to, tokenId, amount, "");
@@ -457,13 +477,13 @@ contract GamePasses is
      * @param ids Array of token IDs to mint
      * @param amounts Array of amounts to mint for each token ID
      * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev Still respects max mintable limits but bypasses per-wallet limits
      * @dev All array parameters must be the same length
      * @dev Reverts if:
      *      - Caller doesn't have ADMIN_ROLE
      *      - Array lengths don't match
      *      - Any token is not configured
-     *      - Any max supply would be exceeded
+     *      - Any max mintable would be exceeded
      */
     function adminBatchMint(
         address to,
@@ -480,7 +500,7 @@ contract GamePasses is
             if (!config.isConfigured) {
                 revert TokenNotConfigured(ids[i]);
             }
-            _checkMaxSupply(ids[i], amounts[i]);
+            _updateAndCheckTotalMinted(ids[i], amounts[i]);
             config.mintedPerWallet[to] += amounts[i];
         }
         _mintBatch(to, ids, amounts, "");
@@ -492,7 +512,7 @@ contract GamePasses is
      * @param ids Array of token IDs to mint
      * @param amounts Array of amounts to mint
      * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Still respects max supply limits but bypasses per-wallet limits
+     * @dev Still respects max mintable limits but bypasses per-wallet limits
      * @dev All array parameters must be the same length
      * @dev Each index in the arrays corresponds to a single mint operation:
      *      to[i] receives amounts[i] of token ids[i]
@@ -500,7 +520,7 @@ contract GamePasses is
      *      - Caller doesn't have ADMIN_ROLE
      *      - Array lengths don't match
      *      - Any token is not configured
-     *      - Any max supply would be exceeded
+     *      - Any max mintable would be exceeded
      */
     function adminMultiRecipientMint(
         address[] calldata to,
@@ -518,7 +538,7 @@ contract GamePasses is
                 revert TokenNotConfigured(ids[i]);
             }
 
-            _checkMaxSupply(ids[i], amounts[i]);
+            _updateAndCheckTotalMinted(ids[i], amounts[i]);
             config.mintedPerWallet[to[i]] += amounts[i];
             _mint(to[i], ids[i], amounts[i], "");
         }
@@ -539,7 +559,7 @@ contract GamePasses is
      *      - Contract is paused
      *      - Caller doesn't have OPERATOR_ROLE
      *      - Mint token is not configured
-     *      - Max supply would be exceeded for mint token
+     *      - Max mintable would be exceeded for mint token
      *      - Burn operation fails (insufficient balance)
      */
     function operatorBurnAndMint(
@@ -551,12 +571,17 @@ contract GamePasses is
         uint256 mintAmount
     ) external whenNotPaused onlyRole(OPERATOR_ROLE) {
         TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintTokenId];
+        TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnTokenId];
 
         if (!mintConfig.isConfigured) {
             revert TokenNotConfigured(mintTokenId);
         }
 
-        _checkMaxSupply(mintTokenId, mintAmount);
+        if (!burnConfig.isConfigured) {
+            revert TokenNotConfigured(burnTokenId);
+        }
+
+        _updateAndCheckTotalMinted(mintTokenId, mintAmount);
         mintConfig.mintedPerWallet[mintTo] += mintAmount;
 
         _burn(burnFrom, burnTokenId, burnAmount);
@@ -582,7 +607,7 @@ contract GamePasses is
      *      - Caller doesn't have OPERATOR_ROLE
      *      - Array lengths don't match
      *      - Any mint token is not configured
-     *      - Any max supply would be exceeded
+     *      - Any max mintable would be exceeded
      *      - Any burn operation fails (insufficient balance)
      */
     function operatorBatchBurnAndMint(
@@ -601,15 +626,20 @@ contract GamePasses is
             revert ArrayLengthMismatch();
         }
 
-        // Validate mint tokens and check max supply
+        // Validate mint tokens and check max mintable
         for (uint256 i; i < mintTokenIds.length; i++) {
             TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintTokenIds[i]];
+            TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnTokenIds[i]];
 
             if (!mintConfig.isConfigured) {
                 revert TokenNotConfigured(mintTokenIds[i]);
             }
 
-            _checkMaxSupply(mintTokenIds[i], mintAmounts[i]);
+            if (!burnConfig.isConfigured) {
+                revert TokenNotConfigured(burnTokenIds[i]);
+            }
+
+            _updateAndCheckTotalMinted(mintTokenIds[i], mintAmounts[i]);
             _checkMaxPerWallet(mintTokenIds[i], mintTo, mintAmounts[i]);
             mintConfig.mintedPerWallet[mintTo] += mintAmounts[i];
         }
@@ -632,11 +662,11 @@ contract GamePasses is
      * @dev Contract must not be paused
      * @dev Reverts if:
      *      - Contract is paused
-     *      - from address doesn't match msg.sender
+     *      - Caller is not the same as msg.sender and its not an approveAndCall operation through SAND contract
      *      - Burn token is not configured
      *      - Mint token is not configured
      *      - Signature is invalid or expired
-     *      - Max supply would be exceeded for mint token
+     *      - Max mintable would be exceeded for mint token
      *      - Burn operation fails (insufficient balance)
      */
     function burnAndMint(
@@ -649,9 +679,14 @@ contract GamePasses is
         bytes calldata signature,
         uint256 signatureId
     ) external whenNotPaused {
+        CoreStorage storage cs = _coreStorage();
+        if (_msgSender() != caller && _msgSender() != cs.paymentToken) {
+            revert InvalidSender();
+        }
+
         TokenConfig storage burnConfig = _tokenStorage().tokenConfigs[burnId];
         if (!burnConfig.isConfigured) {
-            revert BurnMintNotConfigured(burnId);
+            revert TokenNotConfigured(burnId);
         }
 
         TokenConfig storage mintConfig = _tokenStorage().tokenConfigs[mintId];
@@ -671,7 +706,7 @@ contract GamePasses is
 
         verifyBurnAndMintSignature(request, signature);
 
-        _checkMaxSupply(mintId, mintAmount);
+        _updateAndCheckTotalMinted(mintId, mintAmount);
         mintConfig.mintedPerWallet[caller] += mintAmount;
 
         _burn(caller, burnId, burnAmount);
@@ -742,7 +777,7 @@ contract GamePasses is
      * @notice Configure a new token with its properties and restrictions
      * @param tokenId The token ID to configure
      * @param transferable Whether the token can be transferred between users
-     * @param maxSupply Maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxMintable Maximum copies to be minted (0 for disabled, type(uint256).max for unlimited/open edition)
      * @param maxPerWallet Maximum tokens that can be minted per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata Token metadata string (typically IPFS hash or other identifier)
      * @param treasuryWallet Specific treasury wallet for this token (or address(0) for default)
@@ -756,7 +791,7 @@ contract GamePasses is
     function configureToken(
         uint256 tokenId,
         bool transferable,
-        uint256 maxSupply,
+        uint256 maxMintable,
         uint256 maxPerWallet,
         string calldata metadata,
         address treasuryWallet
@@ -767,34 +802,38 @@ contract GamePasses is
             revert TokenAlreadyConfigured(tokenId);
         }
 
+        if (treasuryWallet == address(this)) {
+            revert InvalidTreasuryWallet();
+        }
+
         config.isConfigured = true;
         config.transferable = transferable;
-        config.maxSupply = maxSupply;
+        config.maxMintable = maxMintable;
         config.maxPerWallet = maxPerWallet;
         config.metadata = metadata;
         config.treasuryWallet = treasuryWallet;
 
-        emit TokenConfigured(_msgSender(), tokenId, transferable, maxSupply, maxPerWallet, metadata, treasuryWallet);
+        emit TokenConfigured(_msgSender(), tokenId, transferable, maxMintable, maxPerWallet, metadata, treasuryWallet);
     }
 
     /**
      * @notice Update existing token configuration
      * @param tokenId The token ID to update
-     * @param maxSupply New maximum supply (0 for disabled, type(uint256).max for unlimited/open edition)
+     * @param maxMintable New Maximum copies to be minted (0 for disabled, type(uint256).max for unlimited/open edition)
      * @param maxPerWallet New maximum tokens per wallet (0 for disabled, type(uint256).max for unlimited)
      * @param metadata New metadata string (typically IPFS hash)
      * @param treasuryWallet New treasury wallet (or address(0) for default)
      * @dev Only callable by addresses with ADMIN_ROLE
      * @dev Token must be already configured
-     * @dev Cannot decrease maxSupply below current supply
+     * @dev Cannot decrease maxMintable below current total minted
      * @dev Reverts if:
      *      - Caller doesn't have ADMIN_ROLE
      *      - Token is not configured
-     *      - New maxSupply is less than current supply
+     *      - New maxMintable is less than current total minted
      */
     function updateTokenConfig(
         uint256 tokenId,
-        uint256 maxSupply,
+        uint256 maxMintable,
         uint256 maxPerWallet,
         string calldata metadata,
         address treasuryWallet
@@ -805,17 +844,20 @@ contract GamePasses is
             revert TokenNotConfigured(tokenId);
         }
 
-        uint256 currentSupply = totalSupply(tokenId);
-        if (maxSupply < currentSupply) {
-            revert MaxSupplyBelowCurrentSupply(tokenId);
+        if (maxMintable < config.totalMinted) {
+            revert MaxMintableBelowCurrentMinted(tokenId);
         }
 
-        config.maxSupply = maxSupply;
+        if (treasuryWallet == address(this)) {
+            revert InvalidTreasuryWallet();
+        }
+
+        config.maxMintable = maxMintable;
         config.maxPerWallet = maxPerWallet;
         config.metadata = metadata;
         config.treasuryWallet = treasuryWallet;
 
-        emit TokenConfigUpdated(_msgSender(), tokenId, maxSupply, maxPerWallet, metadata, treasuryWallet);
+        emit TokenConfigUpdated(_msgSender(), tokenId, maxMintable, maxPerWallet, metadata, treasuryWallet);
     }
 
     /**
@@ -899,6 +941,47 @@ contract GamePasses is
     }
 
     /**
+     * @notice Pauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev When paused, prevents minting, burning, and transfers
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is already paused
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice Unpauses all contract operations
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Restores minting, burning, and transfer functionality
+     * @dev Reverts if:
+     *      - Caller doesn't have ADMIN_ROLE
+     *      - Contract is not paused
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @notice Recover ERC20 tokens accidentally sent to the contract
+     * @param token The ERC20 token address to recover
+     * @param to The address to send recovered tokens to
+     * @param amount The amount of tokens to recover
+     * @dev Only callable by addresses with ADMIN_ROLE
+     * @dev Cannot recover the payment token if contract is not paused
+     */
+    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        if (token == _coreStorage().paymentToken && !paused()) {
+            revert PaymentTokenRecoveryNotAllowed();
+        }
+
+        SafeERC20.safeTransfer(IERC20(token), to, amount);
+        emit TokensRecovered(_msgSender(), token, to, amount);
+    }
+
+    /**
      * @notice Check if an address is whitelisted for token transfers
      * @param tokenId The token ID to check
      * @param account The address to check whitelist status for
@@ -948,7 +1031,7 @@ contract GamePasses is
      * @param tokenId The token ID to get configuration for
      * @return isConfigured Whether the token is configured
      * @return transferable Whether the token is transferable
-     * @return maxSupply Maximum supply for the token (0 for unlimited)
+     * @return maxMintable Maximum copies to be minted for the token (type(uint256).max for unlimited)
      * @return metadata Token metadata string
      * @return maxPerWallet Maximum tokens per wallet
      * @return treasuryWallet Treasury wallet for the token
@@ -961,7 +1044,7 @@ contract GamePasses is
         return (
             config.isConfigured,
             config.transferable,
-            config.maxSupply,
+            config.maxMintable,
             config.metadata,
             config.maxPerWallet,
             config.treasuryWallet,
@@ -980,53 +1063,12 @@ contract GamePasses is
     }
 
     /**
-     * @notice Pauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev When paused, prevents minting, burning, and transfers
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is already paused
-     */
-    function pause() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpauses all contract operations
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Restores minting, burning, and transfer functionality
-     * @dev Reverts if:
-     *      - Caller doesn't have ADMIN_ROLE
-     *      - Contract is not paused
-     */
-    function unpause() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
-
-    /**
      * @notice Returns the current owner address of the contract
      * @dev This address may have special permissions beyond role-based access control
      * @return address The current owner address
      */
     function owner() external view returns (address) {
         return _coreStorage().internalOwner;
-    }
-
-    /**
-     * @notice Recover ERC20 tokens accidentally sent to the contract
-     * @param token The ERC20 token address to recover
-     * @param to The address to send recovered tokens to
-     * @param amount The amount of tokens to recover
-     * @dev Only callable by addresses with ADMIN_ROLE
-     * @dev Cannot recover the payment token if contract is not paused
-     */
-    function recoverERC20(address token, address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
-        if (token == _coreStorage().paymentToken && !paused()) {
-            revert PaymentTokenRecoveryNotAllowed();
-        }
-
-        SafeERC20.safeTransfer(IERC20(token), to, amount);
-        emit TokensRecovered(_msgSender(), token, to, amount);
     }
 
     /**
@@ -1047,88 +1089,6 @@ contract GamePasses is
      */
     function exists(uint256 tokenId) public view override returns (bool) {
         return _tokenStorage().tokenConfigs[tokenId].isConfigured;
-    }
-
-    /**
-     * @notice Verify signature for mint operation using EIP-712
-     * @param request The MintRequest struct containing all mint parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifySignature(MintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                MINT_TYPEHASH,
-                request.caller,
-                request.tokenId,
-                request.amount,
-                request.price,
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
-    }
-
-    /**
-     * @notice Verify signature for burn and mint operation using EIP-712
-     * @param request The BurnAndMintRequest struct containing all operation parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify signatures off-chain
-     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                BURN_AND_MINT_TYPEHASH,
-                request.caller,
-                request.burnId,
-                request.burnAmount,
-                request.mintId,
-                request.mintAmount,
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
-    }
-
-    /**
-     * @notice Verify signature for batch mint operation using EIP-712
-     * @param request The BatchMintRequest struct containing all batch mint parameters
-     * @param signature The EIP-712 signature to verify
-     * @dev Public view function that can be used to verify batch signatures off-chain
-     * @dev Validates the signature against the BATCH_MINT_TYPEHASH and DOMAIN_SEPARATOR
-     * @dev Reverts if:
-     *      - Signature has expired
-     *      - Signature is invalid
-     *      - Signer doesn't have SIGNER_ROLE
-     */
-    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) public {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                BATCH_MINT_TYPEHASH,
-                request.caller,
-                keccak256(abi.encodePacked(request.tokenIds)),
-                keccak256(abi.encodePacked(request.amounts)),
-                keccak256(abi.encodePacked(request.prices)),
-                request.deadline,
-                request.signatureId
-            )
-        );
-
-        _verifySignature(structHash, signature, request.deadline, request.signatureId);
     }
 
     /**
@@ -1160,9 +1120,7 @@ contract GamePasses is
      *      - Allows burns (to == address(0))
      *      - Checks transferability for regular transfers
      * @dev Reverts if:
-     *      - Token is non-transferable AND
-     *      - Sender is not whitelisted AND
-     *      - Sender is not ADMIN_ROLE or OPERATOR_ROLE
+     *      - Token is non-transferable AND sender is not whitelisted AND sender is not ADMIN_ROLE or OPERATOR_ROLE
      */
     function _update(
         address from,
@@ -1219,6 +1177,88 @@ contract GamePasses is
     }
 
     /**
+     * @notice Verify signature for mint operation using EIP-712
+     * @param request The MintRequest struct containing all mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifySignature(MintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                request.caller,
+                request.tokenId,
+                request.amount,
+                request.price,
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
+    }
+
+    /**
+     * @notice Verify signature for burn and mint operation using EIP-712
+     * @param request The BurnAndMintRequest struct containing all operation parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify signatures off-chain
+     * @dev Validates the signature against the BURN_AND_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBurnAndMintSignature(BurnAndMintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BURN_AND_MINT_TYPEHASH,
+                request.caller,
+                request.burnId,
+                request.burnAmount,
+                request.mintId,
+                request.mintAmount,
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
+    }
+
+    /**
+     * @notice Verify signature for batch mint operation using EIP-712
+     * @param request The BatchMintRequest struct containing all batch mint parameters
+     * @param signature The EIP-712 signature to verify
+     * @dev Internal function that can be used to verify batch signatures off-chain
+     * @dev Validates the signature against the BATCH_MINT_TYPEHASH and DOMAIN_SEPARATOR
+     * @dev Reverts if:
+     *      - Signature has expired
+     *      - Signature is invalid
+     *      - Signer doesn't have SIGNER_ROLE
+     */
+    function verifyBatchSignature(BatchMintRequest memory request, bytes memory signature) internal {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                BATCH_MINT_TYPEHASH,
+                request.caller,
+                keccak256(abi.encodePacked(request.tokenIds)),
+                keccak256(abi.encodePacked(request.amounts)),
+                keccak256(abi.encodePacked(request.prices)),
+                request.deadline,
+                request.signatureId
+            )
+        );
+
+        _verifySignature(structHash, signature, request.deadline, request.signatureId);
+    }
+
+    /**
      * @dev Internal helper function to process a single mint operation
      * @param request The MintRequest struct containing all mint parameters
      * @param signature The EIP-712 signature
@@ -1233,7 +1273,7 @@ contract GamePasses is
         verifySignature(request, signature);
 
         _checkMaxPerWallet(request.tokenId, request.caller, request.amount);
-        _checkMaxSupply(request.tokenId, request.amount);
+        _updateAndCheckTotalMinted(request.tokenId, request.amount);
 
         config.mintedPerWallet[request.caller] += request.amount;
 
@@ -1269,7 +1309,7 @@ contract GamePasses is
             }
 
             _checkMaxPerWallet(request.tokenIds[i], request.caller, request.amounts[i]);
-            _checkMaxSupply(request.tokenIds[i], request.amounts[i]);
+            _updateAndCheckTotalMinted(request.tokenIds[i], request.amounts[i]);
 
             config.mintedPerWallet[request.caller] += request.amounts[i];
 
@@ -1322,20 +1362,21 @@ contract GamePasses is
     }
 
     /**
-     * @notice Helper function to check if minting would exceed max supply
+     * @notice Updates the total minted count and checks if it would exceed max mintable
      * @param tokenId The token ID to check
      * @param amount The amount to mint
-     * @dev Used internally before any mint operation
+     * @dev This function both increments totalMinted and checks against maxMintable limit
+     * @dev MaxMintable tracks the total number of tokens that can ever be minted, regardless of burns
      * @dev Reverts if:
-     *      - Token has maxSupply = 0 (minting disabled) or
-     *      - Current supply + amount would exceed max supply
+     *      - Token has maxMintable = 0 (minting disabled) or
+     *      - Total minted (including any previously burned tokens) would exceed maxMintable
      */
-    function _checkMaxSupply(uint256 tokenId, uint256 amount) private {
+    function _updateAndCheckTotalMinted(uint256 tokenId, uint256 amount) private {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
         config.totalMinted += amount;
 
-        if (config.maxSupply != type(uint256).max && config.totalMinted > config.maxSupply) {
-            revert MaxSupplyExceeded(tokenId);
+        if (config.totalMinted > config.maxMintable) {
+            revert MaxMintableExceeded(tokenId);
         }
     }
 

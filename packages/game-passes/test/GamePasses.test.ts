@@ -140,7 +140,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(admin).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user2.address,
@@ -163,7 +163,7 @@ describe('GamePasses', function () {
       expect(tokenConfig[5]).to.equal(user2.address);
     });
 
-    it('should not allow decreasing max supply below current supply', async function () {
+    it('should not allow decreasing max mintable below current total minted', async function () {
       const {sandboxPasses, admin, user1, TOKEN_ID_1, TOKEN_METADATA} =
         await loadFixture(runCreateTestSetup);
 
@@ -172,7 +172,7 @@ describe('GamePasses', function () {
         .connect(admin)
         .adminMint(user1.address, TOKEN_ID_1, 50);
 
-      // Try to update max supply to below current supply
+      // Try to update max mintable to below current minted
       await expect(
         sandboxPasses
           .connect(admin)
@@ -185,7 +185,7 @@ describe('GamePasses', function () {
           ),
       ).to.be.revertedWithCustomError(
         sandboxPasses,
-        'MaxSupplyBelowCurrentSupply',
+        'MaxMintableBelowCurrentMinted',
       );
     });
 
@@ -287,6 +287,41 @@ describe('GamePasses', function () {
       );
     });
 
+    it('should not allow configuring a token with the same treasury wallet as the contract', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_3} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .configureToken(
+            TOKEN_ID_3,
+            true,
+            100,
+            10,
+            'ipfs://QmToken1',
+            await sandboxPasses.getAddress(),
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
+    });
+
+    it('should not allow updating treasury wallet to the same address as the contract', async function () {
+      const {sandboxPasses, admin, TOKEN_ID_1} =
+        await loadFixture(runCreateTestSetup);
+
+      await expect(
+        sandboxPasses
+          .connect(admin)
+          .updateTokenConfig(
+            TOKEN_ID_1,
+            100,
+            10,
+            'ipfs://QmToken1',
+            await sandboxPasses.getAddress(),
+          ),
+      ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidTreasuryWallet');
+    });
+
     it('should not allow non-admin to update token configuration', async function () {
       const {sandboxPasses, user1, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
@@ -294,7 +329,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(user1).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user1.address,
@@ -419,7 +454,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'TokenNotConfigured');
     });
 
-    it('should not allow exceeding max supply', async function () {
+    it('should not allow exceeding max mintable', async function () {
       const {sandboxPasses, admin, TOKEN_ID_1, MAX_SUPPLY} =
         await loadFixture(runCreateTestSetup);
 
@@ -427,7 +462,7 @@ describe('GamePasses', function () {
         sandboxPasses
           .connect(admin)
           .adminMint(admin.address, TOKEN_ID_1, MAX_SUPPLY + 1),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
     it('should not allow non-admin to mint tokens', async function () {
@@ -480,26 +515,26 @@ describe('GamePasses', function () {
       );
     });
 
-    it('should not allow adminBatchMint to exceed max supply with duplicate token IDs', async function () {
+    it('should not allow adminBatchMint to exceed max mintable with duplicate token IDs', async function () {
       const {sandboxPasses, admin, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
 
-      // Let's assume TOKEN_ID_1 has a max supply of 100 (from test setup)
+      // Let's assume TOKEN_ID_1 has a max mintable of 100 (from test setup)
       // First mint 90 tokens
       await sandboxPasses
         .connect(admin)
         .adminMint(admin.address, TOKEN_ID_1, 90);
 
       // Now try to mint the same token ID twice in a batch (5 + 6 = 11)
-      // This would exceed the max supply of 100 (90 + 11 > 100)
+      // This would exceed the max mintable of 100 (90 + 11 > 100)
       await expect(
         sandboxPasses
           .connect(admin)
           .adminBatchMint(admin.address, [TOKEN_ID_1, TOKEN_ID_1], [5, 6]),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
-    it('should not allow adminMultiRecipientMint to exceed max supply with duplicate token IDs', async function () {
+    it('should not allow adminMultiRecipientMint to exceed max mintable with duplicate token IDs', async function () {
       const {sandboxPasses, admin, user1, TOKEN_ID_1} =
         await loadFixture(runCreateTestSetup);
 
@@ -509,7 +544,7 @@ describe('GamePasses', function () {
         .adminMint(admin.address, TOKEN_ID_1, 90);
 
       // Now try to mint the same token ID to different recipients (6 + 5 = 11)
-      // This would exceed the max supply of 100 (90 + 11 > 100)
+      // This would exceed the max mintable of 100 (90 + 11 > 100)
       await expect(
         sandboxPasses
           .connect(admin)
@@ -518,7 +553,7 @@ describe('GamePasses', function () {
             [TOKEN_ID_1, TOKEN_ID_1],
             [6, 5],
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
   });
 
@@ -874,7 +909,7 @@ describe('GamePasses', function () {
         await sandboxPasses.connect(admin).configureToken(
           i,
           true, // transferable
-          100, // max supply
+          100, // max mintable
           10, // max per wallet
           `ipfs://token${i}`, // metadata
           ethers.ZeroAddress, // use default treasury
@@ -951,7 +986,7 @@ describe('GamePasses', function () {
         await sandboxPasses.connect(admin).configureToken(
           i,
           true, // transferable
-          100, // max supply
+          100, // max mintable
           10, // max per wallet
           `ipfs://token${i}`, // metadata
           ethers.ZeroAddress, // use default treasury
@@ -1350,7 +1385,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'InvalidSigner');
     });
 
-    it('should not allow batchMint to exceed max supply with duplicate token IDs', async function () {
+    it('should not allow batchMint to exceed max mintable with duplicate token IDs', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1387,7 +1422,7 @@ describe('GamePasses', function () {
       );
 
       // Try to batch mint the same token ID twice (6 + 5 = 11)
-      // This would exceed the max supply of 100 (90 + 11 > 100)
+      // This would exceed the max mintable of 100 (90 + 11 > 100)
       await expect(
         sandboxPasses
           .connect(user1)
@@ -1400,7 +1435,7 @@ describe('GamePasses', function () {
             signature,
             signatureId,
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
     it('should allow unlimited mints when maxPerWallet is type(uint256).max', async function () {
@@ -1415,12 +1450,12 @@ describe('GamePasses', function () {
 
       // Configure a new token with maxPerWallet = type(uint256).max (unlimited)
       const UNLIMITED_TOKEN_ID = 9999;
-      const LARGE_MAX_SUPPLY = 1000; // Just to make sure we don't hit max supply
+      const LARGE_MAX_SUPPLY = 1000; // Just to make sure we don't hit max mintable
 
       await sandboxPasses.connect(admin).configureToken(
         UNLIMITED_TOKEN_ID,
         true, // transferable
-        LARGE_MAX_SUPPLY, // max supply
+        LARGE_MAX_SUPPLY, // max mintable
         ethers.MaxUint256, // maxPerWallet = type(uint256).max (unlimited)
         'ipfs://unlimited-token', // metadata
         ethers.ZeroAddress, // use default treasury
@@ -1528,7 +1563,7 @@ describe('GamePasses', function () {
       await sandboxPasses.connect(admin).configureToken(
         DISABLED_TOKEN_ID,
         true, // transferable
-        LARGE_MAX_SUPPLY, // max supply
+        LARGE_MAX_SUPPLY, // max mintable
         0, // maxPerWallet = 0 (disabled)
         'ipfs://disabled-token', // metadata
         ethers.ZeroAddress, // use default treasury
@@ -1570,7 +1605,7 @@ describe('GamePasses', function () {
       ).to.be.revertedWithCustomError(sandboxPasses, 'ExceedsMaxPerWallet');
     });
 
-    it('should reject mints when maxSupply is 0 (disabled)', async function () {
+    it('should reject mints when maxMintable is 0 (disabled)', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1580,15 +1615,15 @@ describe('GamePasses', function () {
         createMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
-      // Configure a new token with maxSupply = 0 (disabled)
+      // Configure a new token with maxMintable = 0 (disabled)
       const DISABLED_TOKEN_ID = 7777;
 
       await sandboxPasses.connect(admin).configureToken(
         DISABLED_TOKEN_ID,
         true, // transferable
-        0, // maxSupply = 0 (disabled)
+        0, // maxMintable = 0 (disabled)
         10, // maxPerWallet = 10
-        'ipfs://disabled-supply-token', // metadata
+        'ipfs://disabled-mintable-token', // metadata
         ethers.ZeroAddress, // use default treasury
       );
 
@@ -1612,7 +1647,7 @@ describe('GamePasses', function () {
         signatureId,
       );
 
-      // Mint should be rejected because maxSupply is 0 (disabled)
+      // Mint should be rejected because maxMintable is 0 (disabled)
       await expect(
         sandboxPasses
           .connect(user1)
@@ -1625,10 +1660,10 @@ describe('GamePasses', function () {
             signature,
             signatureId,
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
-    it('should allow unlimited supply when maxSupply is type(uint256).max', async function () {
+    it('should allow unlimited mints when maxMintable is type(uint256).max', async function () {
       const {
         sandboxPasses,
         signer,
@@ -1638,16 +1673,16 @@ describe('GamePasses', function () {
         createMintSignature,
       } = await loadFixture(runCreateTestSetup);
 
-      // Configure a new token with maxSupply = type(uint256).max (unlimited)
+      // Configure a new token with maxMintable = type(uint256).max (unlimited)
       const UNLIMITED_TOKEN_ID = 6666;
       const NORMAL_MAX_PER_WALLET = 50;
 
       await sandboxPasses.connect(admin).configureToken(
         UNLIMITED_TOKEN_ID,
         true, // transferable
-        ethers.MaxUint256, // maxSupply = type(uint256).max (unlimited)
+        ethers.MaxUint256, // maxMintable = type(uint256).max (unlimited)
         NORMAL_MAX_PER_WALLET, // maxPerWallet
-        'ipfs://unlimited-supply-token', // metadata
+        'ipfs://unlimited-mintable-token', // metadata
         ethers.ZeroAddress, // use default treasury
       );
 
@@ -1671,7 +1706,7 @@ describe('GamePasses', function () {
         signatureId,
       );
 
-      // Mint should succeed with unlimited supply
+      // Mint should succeed with unlimited mintable
       await sandboxPasses
         .connect(user1)
         .mint(
@@ -1926,7 +1961,7 @@ describe('GamePasses', function () {
       expect(mintedPerWallet1).to.equal(3);
     });
 
-    it('should not allow operatorBatchBurnAndMint to exceed max supply with duplicate token IDs', async function () {
+    it('should not allow operatorBatchBurnAndMint to exceed max mintable with duplicate token IDs', async function () {
       const {sandboxPasses, operator, admin, user1, TOKEN_ID_1, TOKEN_ID_2} =
         await loadFixture(runCreateTestSetup);
 
@@ -1941,7 +1976,7 @@ describe('GamePasses', function () {
         .adminMint(admin.address, TOKEN_ID_1, 90);
 
       // Try to mint the same token ID twice in a batch mint (6 + 5 = 11)
-      // This would exceed the max supply of 100 (90 + 11 > 100)
+      // This would exceed the max mintable of 100 (90 + 11 > 100)
       await expect(
         sandboxPasses
           .connect(operator)
@@ -1953,7 +1988,7 @@ describe('GamePasses', function () {
             [TOKEN_ID_1, TOKEN_ID_1],
             [6, 5],
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxSupplyExceeded');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'MaxMintableExceeded');
     });
 
     it('should not allow operatorBatchBurnAndMint to exceed max per wallet with duplicate token IDs', async function () {
@@ -2095,6 +2130,7 @@ describe('GamePasses', function () {
         admin,
         TOKEN_ID_1,
         TOKEN_ID_2,
+        TOKEN_ID_3,
         MINT_AMOUNT,
         createBurnAndMintSignature,
       } = await loadFixture(runCreateTestSetup);
@@ -2106,6 +2142,16 @@ describe('GamePasses', function () {
 
       const deadline = (await time.latest()) + 3600;
       const signatureId = 12345;
+
+      //   configure TOKEN_ID_3
+      await sandboxPasses.connect(admin).configureToken(
+        TOKEN_ID_3,
+        true, // transferable
+        100, // max mintable
+        10, // max per wallet
+        `ipfs://token${TOKEN_ID_3}`, // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
 
       // Create signature for TOKEN_ID_1
       const signature = await createBurnAndMintSignature(
@@ -2123,7 +2169,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(user1).burnAndMint(
           user1.address,
-          TOKEN_ID_2, // Different token ID to burn
+          TOKEN_ID_3, // Different token ID to burn
           2,
           TOKEN_ID_2,
           3,
@@ -2189,6 +2235,7 @@ describe('GamePasses', function () {
         admin,
         TOKEN_ID_1,
         TOKEN_ID_2,
+        TOKEN_ID_3,
         MINT_AMOUNT,
         createBurnAndMintSignature,
       } = await loadFixture(runCreateTestSetup);
@@ -2213,13 +2260,23 @@ describe('GamePasses', function () {
         signatureId,
       );
 
+      //   configure TOKEN_ID_3
+      await sandboxPasses.connect(admin).configureToken(
+        TOKEN_ID_3,
+        true, // transferable
+        100, // max mintable
+        10, // max per wallet
+        `ipfs://token${TOKEN_ID_3}`, // metadata
+        ethers.ZeroAddress, // use default treasury
+      );
+
       // Try to mint TOKEN_ID_1 instead
       await expect(
         sandboxPasses.connect(user1).burnAndMint(
           user1.address,
           TOKEN_ID_1,
           2,
-          TOKEN_ID_1, // Different mint token ID
+          TOKEN_ID_3, // Different mint token ID
           3,
           deadline,
           signature,
@@ -2816,7 +2873,7 @@ describe('GamePasses', function () {
       await expect(
         sandboxPasses.connect(admin).updateTokenConfig(
           TOKEN_ID_1,
-          200, // new max supply
+          200, // new max mintable
           15, // new max per wallet
           'ipfs://QmUpdated',
           user2.address,
@@ -2984,7 +3041,7 @@ describe('GamePasses', function () {
   });
 
   describe('Additional Error Cases', function () {
-    it('should revert with BurnMintNotConfigured for unconfigured burn token', async function () {
+    it('should revert with TokenNotConfigured for unconfigured burn token', async function () {
       const {
         sandboxPasses,
         signer,
@@ -3021,7 +3078,7 @@ describe('GamePasses', function () {
             signature,
             signatureId,
           ),
-      ).to.be.revertedWithCustomError(sandboxPasses, 'BurnMintNotConfigured');
+      ).to.be.revertedWithCustomError(sandboxPasses, 'TokenNotConfigured');
     });
 
     it('should revert with ArrayLengthMismatch in batch operations', async function () {
@@ -3056,16 +3113,18 @@ describe('GamePasses', function () {
       // Try with zero admin address
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          ethers.ZeroAddress, // Zero admin address
-          operator.address,
-          signer.address,
-          await paymentToken.getAddress(),
-          trustedForwarder.address,
-          treasury.address,
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: ethers.ZeroAddress, // Zero admin address
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: await paymentToken.getAddress(),
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: treasury.address,
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(
         await SandboxPasses.deploy(),
@@ -3075,16 +3134,18 @@ describe('GamePasses', function () {
       // Try with zero treasury address
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          admin.address,
-          operator.address,
-          signer.address,
-          await paymentToken.getAddress(),
-          trustedForwarder.address,
-          ethers.ZeroAddress, // Zero treasury address
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: admin.address,
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: await paymentToken.getAddress(),
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: ethers.ZeroAddress, // Zero treasury address
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(sandboxPasses, 'ZeroAddress');
     });
@@ -3106,16 +3167,18 @@ describe('GamePasses', function () {
       // Deploy with an EOA as payment token (which is not a valid ERC20)
       await expect(
         upgrades.deployProxy(SandboxPasses, [
-          BASE_URI,
-          royaltyReceiver.address,
-          ROYALTY_PERCENTAGE,
-          admin.address,
-          operator.address,
-          signer.address,
-          user1.address, // Not an ERC20 token
-          trustedForwarder.address,
-          treasury.address,
-          admin.address,
+          {
+            baseURI: BASE_URI,
+            royaltyReceiver: royaltyReceiver.address,
+            royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+            admin: admin.address,
+            operator: operator.address,
+            signer: signer.address,
+            paymentToken: user1.address, // Not an ERC20 token
+            trustedForwarder: trustedForwarder.address,
+            defaultTreasury: treasury.address,
+            owner: admin.address,
+          },
         ]),
       ).to.be.revertedWithCustomError(SandboxPasses, 'InvalidPaymentToken');
     });
