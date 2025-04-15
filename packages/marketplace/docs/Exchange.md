@@ -52,10 +52,10 @@ of the bundle is the sum of all individual asset prices.
 ```
 Alice wants to sell a bundle containing:
 - 1 LAND (ERC721) with token id 1000
-  - Price: 1200 MATIC
+  - Price: 1200 POL
 - 10 ASSET (ERC1155) with token id 2000
-  - Price: 800 MATIC
-Total bundle price: 2000 MATIC
+  - Price: 800 POL
+Total bundle price: 2000 POL
 ```
 
 ##### Example 2: Bundle with Quads
@@ -63,11 +63,11 @@ Total bundle price: 2000 MATIC
 ```
 Alice wants to sell a bundle containing:
 - 2 Quads (3x3 size each)
-  - First Quad: 500 MATIC
-  - Second Quad: 500 MATIC
+  - First Quad: 500 POL
+  - Second Quad: 500 POL
 - 1 LAND (ERC721) with token id 1000
-  - Price: 4000 MATIC
-Total bundle price: 5000 MATIC
+  - Price: 4000 POL
+Total bundle price: 5000 POL
 ```
 
 ##### Example 3: Bundle with Multiple ERC1155
@@ -75,10 +75,10 @@ Total bundle price: 5000 MATIC
 ```
 Alice wants to sell a bundle containing:
 - 10 ASSET_A (ERC1155) with token id 1000
-  - Price: 10000 MATIC
+  - Price: 10000 POL
 - 5 ASSET_B (ERC1155) with token id 2000
-  - Price: 5000 MATIC
-Total bundle price: 15000 MATIC
+  - Price: 5000 POL
+Total bundle price: 15000 POL
 ```
 
 #### Invalid Bundle Examples
@@ -101,8 +101,135 @@ Total bundle price: 15000 MATIC
 
 ```
 - 2 LAND (ERC721) with token id 1000
-  - Price: 1200 MATIC each
+  - Price: 1200 POL each
 // ERC721 tokens are unique and cannot have a value > 1 in a bundle
+```
+
+#### Code Examples
+
+##### Example 1: Simple Bundle with ERC721 and ERC1155
+
+```typescript
+// Bundle containing 1 ERC721 and 10 ERC1155
+const bundleData = {
+  bundledERC721: [
+    {
+      erc721Address: '0x...', // ERC721 contract address
+      ids: [1], // Token ID
+    },
+  ],
+  bundledERC1155: [
+    {
+      erc1155Address: '0x...', // ERC1155 contract address
+      ids: [1], // Token ID
+      supplies: [10], // Quantity
+    },
+  ],
+  quads: {
+    sizes: [], // No quads in this bundle
+    xs: [],
+    ys: [],
+    data: '0x',
+  },
+  priceDistribution: {
+    erc721Prices: [[1200000000000]], // 1200 POL
+    erc1155Prices: [[800000000000]], // 800 POL
+    quadPrices: [],
+  },
+};
+```
+
+##### Example 2: Bundle with Quads
+
+```typescript
+// Bundle containing 2 Quads and 1 ERC721
+const bundleData = {
+  bundledERC721: [
+    {
+      erc721Address: '0x...', // ERC721 contract address
+      ids: [1], // Token ID
+    },
+  ],
+  bundledERC1155: [], // No ERC1155 in this bundle
+  quads: {
+    sizes: [3, 3], // Two 3x3 quads
+    xs: [0, 3], // X coordinates
+    ys: [0, 3], // Y coordinates
+    data: '0x',
+  },
+  priceDistribution: {
+    erc721Prices: [[4000000000000]], // 4000 POL
+    erc1155Prices: [],
+    quadPrices: [500000000000, 500000000000], // 500 POL each in wei
+  },
+};
+```
+
+##### Example 3: Bundle with Multiple ERC1155
+
+```typescript
+// Bundle containing multiple ERC1155 tokens
+const bundleData = {
+  bundledERC721: [], // No ERC721 in this bundle
+  bundledERC1155: [
+    {
+      erc1155Address: '0x...', // First ERC1155 contract address
+      ids: [1],
+      supplies: [10],
+    },
+    {
+      erc1155Address: '0x...', // Second ERC1155 contract address
+      ids: [2],
+      supplies: [5],
+    },
+  ],
+  quads: {
+    sizes: [],
+    xs: [],
+    ys: [],
+    data: '0x',
+  },
+  priceDistribution: {
+    erc721Prices: [],
+    erc1155Prices: [[10000000000000], [5000000000000]], // 10000 POL and 5000 POL
+    quadPrices: [],
+  },
+};
+```
+
+##### Example 4: Creating and Signing a Bundle Order
+
+```typescript
+// Create the bundle asset
+const bundleAsset = await AssetBundle(bundleData, 1); // Value must be 1 if bundle contains ERC721
+
+// Create the bundle order
+const bundleOrder = await OrderDefault(
+  maker, // Signer
+  bundleAsset, // The bundle to sell
+  ZeroAddress, // No specific taker
+  erc20Asset, // The ERC20 token to receive
+  1, // Salt
+  0, // Start time
+  0 // End time
+);
+
+// Sign the bundle order
+const bundleSignature = await signOrder(bundleOrder, maker, orderValidator);
+```
+
+##### Example 5: Matching Bundle Orders
+
+```typescript
+// Match a bundle order with an ERC20 order
+await exchangeContract.matchOrders([
+  {
+    orderLeft: bundleOrder, // The bundle order
+    signatureLeft: bundleSignature,
+    orderRight: erc20Order, // The ERC20 order
+    signatureRight: erc20Signature,
+  },
+]);
 ```
 
 ### Maker & Taker
@@ -127,7 +254,7 @@ satisfy each party. For instance, let's take again our seller use case:
 `Order A`
 
 ```
-Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
+Alice wants to sell to anybody 1 LAND (ERC721) with token id 1000 against 100 POL (ERC20).
 ```
 
 An order satisfying `Order A` could simply be:
@@ -135,7 +262,7 @@ An order satisfying `Order A` could simply be:
 `Order B`
 
 ```
-Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 MATIC (ERC20).
+Bob wants to buy from anybody 1 LAND (ERC721) with token id 1000 against 100 POL (ERC20).
 ```
 
 ### Validation
@@ -171,15 +298,14 @@ right) and deciding how much to transfer to each user accordingly. To represent
 the prices each order has two fields:
 
 1. The make side: the maximum the user is ready to give. For example less than
-   `2000 SAND`.
+   `2000 POL`.
 2. The take side: the minimum the user wants to get. For example more than
    `4000 USDT`.
 
 The minimum price the user accepts is the division between the take and the make
-side, the lower bound for the price is `2 = 4000/2000 [USDT/SAND]`. An
-equivalent way of expressing it is the inverse, if you divide make side by the
-take side then you get an upper bound for the price:
-`2000/4000 = 0.5 [SAND/USDT]`.
+side, the lower bound for the price is `2 = 4000/2000 [USDT/POL]`. An equivalent
+way of expressing it is the inverse, if you divide make side by the take side
+then you get an upper bound for the price: `2000/4000 = 0.5 [POL/USDT]`.
 
 When comparing two orders the amount that the left side wants to make is
 compared against the amount that the right side wants to take and vise versa. If
@@ -192,8 +318,8 @@ For example:
 `Order A`
 
 ```
-Alice wants to sell to anybody 2000 SAND (make) against 4000 USDT (take).
-The lower bound is 4000/2000 = 2 [USDT/SAND].
+Alice wants to sell to anybody 2000 POL (make) against 4000 USDT (take).
+The lower bound is 4000/2000 = 2 [USDT/POL].
 ```
 
 An order satisfying `Order A` could be:
@@ -201,12 +327,12 @@ An order satisfying `Order A` could be:
 `Order B`
 
 ```
-Bob wants to buy from anybody 1000 SAND (take) against 3000 USDT (make).
-The upper bound is 3000/1000 = 3 [USDT/SAND]
+Bob wants to buy from anybody 1000 POL (take) against 3000 USDT (make).
+The upper bound is 3000/1000 = 3 [USDT/POL]
 ```
 
-The equilibrium price must be anything between `2 [USDT/SAND]` and
-`3 [USDT/SAND]`.
+The equilibrium price must be anything between `2 [USDT/POL]` and
+`3 [USDT/POL]`.
 
 After deciding the equilibrium price, the quantity to transfer of each asset is
 calculated. The marketplace supports partial filling, that is: respecting the
@@ -218,16 +344,16 @@ For example: Let's consider `Order C` and `Order D`:
 `Order C`
 
 ```
-Alice wants to sell to anybody 10 ASSET (ERC1155) against 100 MATIC (ERC20) for each token.
+Alice wants to sell to anybody 10 ASSET (ERC1155) against 100 POL (ERC20) for each token.
 ```
 
 `Order D`
 
 ```
-Bob wants to buy from anybody 1 ASSET (ERC1155) against 100 MATIC (ERC20) for each token.
+Bob wants to buy from anybody 1 ASSET (ERC1155) against 100 POL (ERC20) for each token.
 ```
 
-The equilibrium price is `100 [MATIC/ASSET]`, but, the selling order can't be
+The equilibrium price is `100 [POL/ASSET]`, but, the selling order can't be
 fully matched because the buyer can only buy 1 ASSET of 10. In that case, the
 `Order C` is partially filled. `Order C` can be re-matched with another order in
 a different transaction until being fully filled.
@@ -238,29 +364,29 @@ the other. Let's consider `Order E` and `Order F`:
 `Order E`
 
 ```
-Alice wants to sell 8 ASSETs at 1000 MATIC for each.
-Alice wants to get 8000 MATIC in total. The lower bound for the price is 1000 [MATIC/ASSET]
+Alice wants to sell 8 ASSETs at 1000 POL for each.
+Alice wants to get 8000 POL in total. The lower bound for the price is 1000 [POL/ASSET]
 ```
 
 `Order F`
 
 ```
-Bob wants to buy 6 ASSETs at 2000 MATIC each.
-Bob is ready to spend 12000 MATIC for 6 ASSETs. The upper bound for the price is 2000 [MATIC/ASSET]
+Bob wants to buy 6 ASSETs at 2000 POL each.
+Bob is ready to spend 12000 POL for 6 ASSETs. The upper bound for the price is 2000 [POL/ASSET]
 ```
 
-The equilibrium price must be between 1000 and 2000 MATIC for each ASSET.  
+The equilibrium price must be between 1000 and 2000 POL for each ASSET.  
 In the extreme cases:
 
-- Equilibrium price 1000 MATIC/ASSET: Bob buys 8 ASSETS at 1000 MATIC each,
-  Alice gets 8000 MATIC and sells everything, Bob buys partially. Both sides are
-  happy and Bob has an extra benefit because he is paying 1000 MATIC instead of
-  2000 MATIC each ASSET. Bob gets more assets than expected.
-- Equilibrium price 2000 MATIC/ASSET: Bob buys 6 ASSETS at 2000 MATIC spending
-  12000 MATIC and fully fill his order. Alice gets 12000 MATIC for 6 ASSETS
-  filling partially his order. Both sides are happy, but, in this case Alice
-  gets the benefit because she sells at 2000 MATIC each ASSET. Alice gets more
-  MATIC than expected.
+- Equilibrium price 1000 POL/ASSET: Bob buys 8 ASSETS at 1000 POL each, Alice
+  gets 8000 POL and sells everything, Bob buys partially. Both sides are happy
+  and Bob has an extra benefit because he is paying 1000 POL instead of 2000 POL
+  each ASSET. Bob gets more assets than expected.
+- Equilibrium price 2000 POL/ASSET: Bob buys 6 ASSETS at 2000 POL spending 12000
+  POL and fully fill his order. Alice gets 12000 POL for 6 ASSETS filling
+  partially his order. Both sides are happy, but, in this case Alice gets the
+  benefit because she sells at 2000 POL each ASSET. Alice gets more POL than
+  expected.
 
 ### Custom recipients
 
@@ -339,18 +465,18 @@ fee is set 5%.
 Bob is the creator of the ASSET (ERC1155) with token id 1.
 
 ```
-Bob sells 1 ASSET (ERC1155) with token id 1 to Alice for 100 SAND (ERC20)
-Bob receives 98 SAND from Alice
-Fee Receiver receives 2 SAND from Alice
+Bob sells 1 ASSET (ERC1155) with token id 1 to Alice for 100 POL (ERC20)
+Bob receives 98 POL from Alice
+Fee Receiver receives 2 POL from Alice
 Alice receives 1 ASSET (ERC1155) with token id 1
 ```
 
 Carol is the creator of the ASSET (ERC1155) with token id 2.
 
 ```
-Bob sells 1 ASSET (ERC1155) with token id 2 to Alice for 100 SAND (ERC20)
-Bob receives 95 SAND from Alice
-Fee Receiver receives 5 SAND from Alice
+Bob sells 1 ASSET (ERC1155) with token id 2 to Alice for 100 POL (ERC20)
+Bob receives 95 POL from Alice
+Fee Receiver receives 5 POL from Alice
 Alice receives 1 ASSET (ERC1155) with token id 1
 ```
 
