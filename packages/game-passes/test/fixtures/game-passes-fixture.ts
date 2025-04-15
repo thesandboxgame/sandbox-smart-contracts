@@ -1,7 +1,7 @@
 import {SignerWithAddress} from '@nomicfoundation/hardhat-ethers/signers';
 import {AddressLike, BigNumberish, BytesLike} from 'ethers';
 import {ethers, upgrades} from 'hardhat';
-import {MockERC20, SandboxPasses1155Upgradeable} from '../../typechain-types';
+import {GamePasses, MockERC20} from '../../typechain-types';
 
 export async function runCreateTestSetup() {
   const DOMAIN_NAME = 'SandboxPasses1155';
@@ -37,7 +37,7 @@ export async function runCreateTestSetup() {
     amount: number,
     price: bigint,
     deadline: number,
-    nonce: number,
+    signatureId: number,
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
 
@@ -57,7 +57,7 @@ export async function runCreateTestSetup() {
         {name: 'amount', type: 'uint256'},
         {name: 'price', type: 'uint256'},
         {name: 'deadline', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
       ],
     };
 
@@ -68,7 +68,7 @@ export async function runCreateTestSetup() {
       amount: amount,
       price: price,
       deadline: deadline,
-      nonce: nonce,
+      signatureId: signatureId,
     };
 
     // Sign the typed data properly
@@ -84,7 +84,7 @@ export async function runCreateTestSetup() {
     mintId: number,
     mintAmount: number,
     deadline: number,
-    nonce: number,
+    signatureId: number,
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
 
@@ -105,7 +105,7 @@ export async function runCreateTestSetup() {
         {name: 'mintId', type: 'uint256'},
         {name: 'mintAmount', type: 'uint256'},
         {name: 'deadline', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
       ],
     };
 
@@ -117,7 +117,53 @@ export async function runCreateTestSetup() {
       mintId: mintId,
       mintAmount: mintAmount,
       deadline: deadline,
-      nonce: nonce,
+      signatureId: signatureId,
+    };
+
+    // Sign the typed data properly
+    return await signer.signTypedData(domain, types, value);
+  }
+
+  // Helper function to create an EIP-712 signature for batch minting
+  async function createBatchMintSignature(
+    signer: SignerWithAddress,
+    caller: string,
+    tokenIds: number[],
+    amounts: number[],
+    prices: bigint[],
+    deadline: number,
+    signatureId: number,
+  ): Promise<string> {
+    const chainId = (await ethers.provider.getNetwork()).chainId;
+
+    // Create domain data according to EIP-712
+    const domain = {
+      name: DOMAIN_NAME,
+      version: DOMAIN_VERSION,
+      chainId: chainId,
+      verifyingContract: await sandboxPasses.getAddress(),
+    };
+
+    // Define the types
+    const types = {
+      BatchMintRequest: [
+        {name: 'caller', type: 'address'},
+        {name: 'tokenIds', type: 'uint256[]'},
+        {name: 'amounts', type: 'uint256[]'},
+        {name: 'prices', type: 'uint256[]'},
+        {name: 'deadline', type: 'uint256'},
+        {name: 'signatureId', type: 'uint256'},
+      ],
+    };
+
+    // Create the data to sign
+    const value = {
+      caller: caller,
+      tokenIds: tokenIds,
+      amounts: amounts,
+      prices: prices,
+      deadline: deadline,
+      signatureId: signatureId,
     };
 
     // Sign the typed data properly
@@ -149,21 +195,21 @@ export async function runCreateTestSetup() {
   await paymentToken.mint(user2.address, ethers.parseEther('1000'));
 
   // Deploy the contract using upgrades plugin
-  const SandboxPasses = await ethers.getContractFactory(
-    'SandboxPasses1155Upgradeable',
-  );
+  const SandboxPasses = await ethers.getContractFactory('GamePasses');
   const sandboxPasses = (await upgrades.deployProxy(SandboxPasses, [
-    BASE_URI,
-    royaltyReceiver.address,
-    ROYALTY_PERCENTAGE,
-    admin.address,
-    operator.address,
-    signer.address,
-    await paymentToken.getAddress(),
-    trustedForwarder.address,
-    treasury.address,
-    owner.address,
-  ])) as unknown as SandboxPasses1155Upgradeable;
+    {
+      baseURI: BASE_URI,
+      royaltyReceiver: royaltyReceiver.address,
+      royaltyFeeNumerator: ROYALTY_PERCENTAGE,
+      admin: admin.address,
+      operator: operator.address,
+      signer: signer.address,
+      paymentToken: await paymentToken.getAddress(),
+      trustedForwarder: trustedForwarder.address,
+      defaultTreasury: treasury.address,
+      owner: owner.address,
+    },
+  ])) as unknown as GamePasses;
   await sandboxPasses.waitForDeployment();
 
   // Set up default token configuration
@@ -205,6 +251,7 @@ export async function runCreateTestSetup() {
       BigNumberish,
       BigNumberish,
       BytesLike,
+      BigNumberish,
     ],
   ) => {
     const encodedData = sandboxPasses.interface.encodeFunctionData(
@@ -227,8 +274,9 @@ export async function runCreateTestSetup() {
       BigNumberish[],
       BigNumberish[],
       BigNumberish[],
-      BigNumberish[],
-      BytesLike[],
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
     ],
   ) => {
     const encodedData = sandboxPasses.interface.encodeFunctionData(
@@ -259,6 +307,7 @@ export async function runCreateTestSetup() {
     deployToken,
     createMintSignature,
     createBurnAndMintSignature,
+    createBatchMintSignature,
     mintTokensForBurn,
     approveAndCallMint,
     approveAndCallBatchMint,
