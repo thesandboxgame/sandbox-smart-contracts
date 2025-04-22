@@ -1,5 +1,5 @@
 import 'isomorphic-unfetch';
-import {Client, createClient} from '@urql/core';
+import {Client, createClient, fetchExchange} from '@urql/core';
 
 export class TheGraph {
   private client: Client;
@@ -7,6 +7,7 @@ export class TheGraph {
   constructor(url: string) {
     this.client = createClient({
       url,
+      exchanges: [fetchExchange],
     });
   }
 

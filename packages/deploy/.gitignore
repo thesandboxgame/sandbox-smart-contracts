@@ -16,3 +16,6 @@ generated-markups
 .idea
 
 deployments/localhost
+
+# Land Sale secrets
+secret

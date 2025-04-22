@@ -7,7 +7,7 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {deployer, upgradeAdmin, sandAdmin} = await getNamedAccounts();
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   await deployments.deploy('SignedMultiGiveaway', {
     from: deployer,
     contract:
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (
       proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [TRUSTED_FORWARDER.address, sandAdmin],
+        args: [SandboxForwarder.address, sandAdmin],
       },
       upgradeIndex: 0,
     },
@@ -34,4 +34,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['TRUSTED_FORWARDER_V2'];
+func.dependencies = ['SandboxForwarder'];

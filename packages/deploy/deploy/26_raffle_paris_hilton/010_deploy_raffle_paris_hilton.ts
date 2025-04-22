@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     defaultOperatorFiltererSubscription,
   } = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
 
   let metadataUrl;
   if (hre.network.name === 'polygon') {
@@ -39,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           'PH',
           treasury,
           raffleSignWallet,
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           defaultOperatorFiltererRegistry,
           defaultOperatorFiltererSubscription,
           true, // we want to subscribe to OpenSea's list
@@ -60,4 +60,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = ['TRUSTED_FORWARDER_V2'];
+func.dependencies = ['SandboxForwarder'];
