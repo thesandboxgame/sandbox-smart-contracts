@@ -95,6 +95,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/sandbox-forwarder': [
     'contracts/SandboxForwarder.sol',
   ],
+  '@sandbox-smart-contracts/game-passes': ['contracts/GamePasses.sol'],
 };
 
 const namedAccounts = {
