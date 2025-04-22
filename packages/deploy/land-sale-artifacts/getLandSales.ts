@@ -54,6 +54,7 @@ export type SectorData = {
 const sandboxWallet = addresses['sandbox'];
 
 let errors = false;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function reportError(e: any) {
   errors = true;
@@ -315,7 +316,7 @@ export async function getLandSaleFiles(
       '0x4467363716526536535425451427798982881775318563547751090997863683';
   } else {
     secret = loadSecret(secretPath);
-    if (!secret && hre.network.tags.mainnet)
+    if (!secret && !hre.network.tags.generate_random_secret)
       throw new Error(`LandPreSale secret not found.`);
     else secret = generateSecret(secretPath);
   }
@@ -336,6 +337,7 @@ function loadSecret(path: string) {
 
 function generateSecret(path: string) {
   const secret = ethers.Wallet.createRandom().privateKey.toString();
+  console.warn(`WARN: writing secret file ${path} !!!`);
   fs.writeFileSync(path, secret);
   return secret;
 }
