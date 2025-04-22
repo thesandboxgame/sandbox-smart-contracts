@@ -2961,6 +2961,7 @@ __metadata:
     "@sandbox-smart-contracts/dependency-operator-filter": 1.0.1
     "@sandbox-smart-contracts/dependency-royalty-management": 1.0.2
     "@sandbox-smart-contracts/faucets": 0.0.1
+    "@sandbox-smart-contracts/game-passes": "*"
     "@sandbox-smart-contracts/giveaway": 0.0.3
     "@sandbox-smart-contracts/land": 1.0.0-rc.1
     "@sandbox-smart-contracts/land-sale": 1.0.0-rc.1
@@ -3082,7 +3083,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sandbox-smart-contracts/game-passes@workspace:packages/game-passes":
+"@sandbox-smart-contracts/game-passes@*, @sandbox-smart-contracts/game-passes@workspace:packages/game-passes":
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/game-passes@workspace:packages/game-passes"
   dependencies:
