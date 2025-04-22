@@ -23,7 +23,7 @@ const func: DeployFunction = async function (
   const {deployer, upgradeAdmin, catalystMinter, catalystAdmin} =
     await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2');
+  const SandboxForwarder = await deployments.get('SandboxForwarder');
   const OperatorFilterCatalystSubscription = await deployments.get(
     'OperatorFilterCatalystSubscription'
   );
@@ -40,7 +40,7 @@ const func: DeployFunction = async function (
         methodName: 'initialize',
         args: [
           CATALYST_BASE_URI,
-          TRUSTED_FORWARDER.address,
+          SandboxForwarder.address,
           OperatorFilterCatalystSubscription.address,
           catalystAdmin, // DEFAULT_ADMIN_ROLE
           catalystMinter, // MINTER_ROLE
@@ -65,5 +65,5 @@ func.tags = [
 func.dependencies = [
   'OperatorFilterCatalystSubscription_deploy',
   'RoyaltyManager_deploy',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
 ];

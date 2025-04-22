@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   } = await getNamedAccounts();
 
   // setup arguments
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER_V2'); // Metatransaction address
+  const SandboxForwarder = await deployments.get('SandboxForwarder'); // Metatransaction address
 
   // This deployment script worked when PolygonSand was also in the deploy scripts. This was in core package
   // For now, we hardcode the address here directly sandContractAddress
@@ -95,7 +95,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       collectionSymbol,
       treasury,
       raffleSignWallet,
-      TRUSTED_FORWARDER.address,
+      SandboxForwarder.address,
       // sandContract.address,
       sandContractAddress,
       MAX_SUPPLY,
@@ -180,5 +180,5 @@ func.tags = [
 func.dependencies = [
   'PolygonSand_deploy',
   'CollectionFactory_deploy_beacon_main_avatar',
-  'TRUSTED_FORWARDER_V2',
+  'SandboxForwarder',
 ];

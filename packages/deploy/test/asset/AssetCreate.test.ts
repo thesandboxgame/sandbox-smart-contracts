@@ -104,10 +104,10 @@ describe('Asset Create', function () {
 
   describe('Trusted Forwarder', function () {
     it('Trusted forwarder address is set correctly', async function () {
-      const {AssetCreateContract, TRUSTED_FORWARDER} =
+      const {AssetCreateContract, SandboxForwarder} =
         await setupAssetCreateTests();
       expect(await AssetCreateContract.getTrustedForwarder()).to.be.equal(
-        TRUSTED_FORWARDER
+        SandboxForwarder
       );
     });
   });
