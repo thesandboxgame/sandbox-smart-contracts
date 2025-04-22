@@ -311,12 +311,11 @@ contract GamePasses is
      *        - trustedForwarder: Address of the trusted meta-transaction forwarder.
      *        - defaultTreasury: Address of the default treasury wallet.
      *        - owner: Address that will be set as the internal owner.
-     *        - sandContract: Address of the SAND contract.
      */
     function initialize(InitParams calldata params) external initializer {
         __ERC2771Handler_init(params.trustedForwarder);
         __AccessControl_init();
-        __ERC1155_init(params.baseURI);
+        __ERC1155_init("");
         __ERC1155Supply_init();
         __ERC2981_init();
         __Pausable_init();
@@ -336,7 +335,6 @@ contract GamePasses is
 
         CoreStorage storage cs = _coreStorage();
         cs.paymentToken = params.paymentToken;
-        cs.baseURI = params.baseURI;
         cs.defaultTreasuryWallet = params.defaultTreasury;
         cs.internalOwner = params.owner;
         cs.DOMAIN_SEPARATOR = keccak256(
@@ -1074,12 +1072,11 @@ contract GamePasses is
     /**
      * @notice Returns the metadata URI for a specific token ID
      * @param tokenId ID of the token to get URI for
-     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
-     * @dev Can be overridden by derived contracts to implement different URI logic
-     * @return string The complete URI for the token metadata
+     * @dev Returns the token-specific metadata string stored in the token configuration
+     * @return string The metadata URI for the token
      */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
+        return _tokenStorage().tokenConfigs[tokenId].metadata;
     }
 
     /**
