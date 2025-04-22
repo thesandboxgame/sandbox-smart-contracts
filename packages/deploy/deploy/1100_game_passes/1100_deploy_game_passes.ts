@@ -56,8 +56,4 @@ func.tags = [
   DEPLOY_TAGS.L2_PROD,
   DEPLOY_TAGS.L2_TEST,
 ];
-func.dependencies = [
-  'OperatorFilterAssetSubscription_deploy',
-  'TRUSTED_FORWARDER_V2',
-  'RoyaltyManager_deploy',
-];
+func.dependencies = ['SandboxForwarder'];

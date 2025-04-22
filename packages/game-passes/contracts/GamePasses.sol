@@ -1390,7 +1390,7 @@ contract GamePasses is
             revert ExceedsMaxPerWallet(tokenId, to, amount, 0);
         }
 
-        if (config.maxPerWallet != type(uint256).max && config.mintedPerWallet[to] > config.maxPerWallet) {
+        if (config.mintedPerWallet[to] > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
     }
