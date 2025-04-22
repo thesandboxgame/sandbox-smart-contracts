@@ -2772,16 +2772,14 @@ describe('GamePasses', function () {
 
   describe('URI', function () {
     it('should return correct token URI', async function () {
-      const {sandboxPasses, TOKEN_ID_1, BASE_URI} =
+      const {sandboxPasses, TOKEN_ID_1, TOKEN_METADATA} =
         await loadFixture(runCreateTestSetup);
 
-      expect(await sandboxPasses.uri(TOKEN_ID_1)).to.equal(
-        `${BASE_URI}${TOKEN_ID_1}.json`,
-      );
+      expect(await sandboxPasses.uri(TOKEN_ID_1)).to.equal(TOKEN_METADATA);
     });
 
     it('should allow admin to update base URI', async function () {
-      const {sandboxPasses, admin, TOKEN_ID_1, BASE_URI} =
+      const {sandboxPasses, admin, TOKEN_ID_1, BASE_URI, TOKEN_METADATA} =
         await loadFixture(runCreateTestSetup);
 
       const newBaseURI = 'https://new-api.example.com/metadata/';
@@ -2791,9 +2789,7 @@ describe('GamePasses', function () {
         .withArgs(admin.address, BASE_URI, newBaseURI);
 
       expect(await sandboxPasses.baseURI()).to.equal(newBaseURI);
-      expect(await sandboxPasses.uri(TOKEN_ID_1)).to.equal(
-        `${newBaseURI}${TOKEN_ID_1}.json`,
-      );
+      expect(await sandboxPasses.uri(TOKEN_ID_1)).to.equal(TOKEN_METADATA);
     });
 
     it('should not allow non-admin to update base URI', async function () {

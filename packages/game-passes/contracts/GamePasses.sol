@@ -315,7 +315,7 @@ contract GamePasses is
     function initialize(InitParams calldata params) external initializer {
         __ERC2771Handler_init(params.trustedForwarder);
         __AccessControl_init();
-        __ERC1155_init("");
+        __ERC1155_init(params.baseURI);
         __ERC1155Supply_init();
         __ERC2981_init();
         __Pausable_init();
@@ -335,6 +335,7 @@ contract GamePasses is
 
         CoreStorage storage cs = _coreStorage();
         cs.paymentToken = params.paymentToken;
+        cs.baseURI = params.baseURI;
         cs.defaultTreasuryWallet = params.defaultTreasury;
         cs.internalOwner = params.owner;
         cs.DOMAIN_SEPARATOR = keccak256(
