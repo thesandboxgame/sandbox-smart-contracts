@@ -4,7 +4,7 @@
 
 <a href="https://github.com/thesandboxgame/sandbox-smart-contracts/actions"><img alt="Build Status" src="https://github.com/thesandboxgame/sandbox-smart-contracts/actions/workflows/main.yml/badge.svg"/></a>
 ![Node Version](https://img.shields.io/badge/node-18.x-green)
-[![Discord](https://img.shields.io/discord/497312527093334036.svg?label=Discord&logo=discord)](<https://discord.gg/vAe4zvY>)
+[![Discord](https://img.shields.io/discord/497312527093334036.svg?label=Discord&logo=discord)](https://discord.com/invite/thesandboxgame)
 
 [The Sandbox](https://sandbox.game) is a user-generated content (UGC) gaming platform, that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
 
