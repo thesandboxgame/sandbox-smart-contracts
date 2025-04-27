@@ -13,7 +13,7 @@ This mono-repo contains The Sandbox smart contracts, underpinning The Sandbox me
 ## Learn more
 
 - [Website](www.sandbox.game)
-- [Discord](https://discordapp.com/invite/vAe4zvY)
+- [Discord](https://discord.com/invite/thesandboxgame)
 - [Telegram](https://t.me/sandboxgame)
 - [Medium](https://medium.com/sandbox-game)
 
