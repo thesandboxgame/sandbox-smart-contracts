@@ -311,7 +311,6 @@ contract GamePasses is
      *        - trustedForwarder: Address of the trusted meta-transaction forwarder.
      *        - defaultTreasury: Address of the default treasury wallet.
      *        - owner: Address that will be set as the internal owner.
-     *        - sandContract: Address of the SAND contract.
      */
     function initialize(InitParams calldata params) external initializer {
         __ERC2771Handler_init(params.trustedForwarder);
@@ -582,11 +581,10 @@ contract GamePasses is
         }
 
         _updateAndCheckTotalMinted(mintTokenId, mintAmount);
-        mintConfig.mintedPerWallet[mintTo] += mintAmount;
+        _updateAndCheckMaxPerWallet(mintTokenId, mintTo, mintAmount);
 
         _burn(burnFrom, burnTokenId, burnAmount);
 
-        _checkMaxPerWallet(mintTokenId, mintTo, mintAmount);
         _mint(mintTo, mintTokenId, mintAmount, "");
     }
 
@@ -640,8 +638,7 @@ contract GamePasses is
             }
 
             _updateAndCheckTotalMinted(mintTokenIds[i], mintAmounts[i]);
-            _checkMaxPerWallet(mintTokenIds[i], mintTo, mintAmounts[i]);
-            mintConfig.mintedPerWallet[mintTo] += mintAmounts[i];
+            _updateAndCheckMaxPerWallet(mintTokenIds[i], mintTo, mintAmounts[i]);
         }
 
         _burnBatch(burnFrom, burnTokenIds, burnAmounts);
@@ -707,11 +704,9 @@ contract GamePasses is
         verifyBurnAndMintSignature(request, signature);
 
         _updateAndCheckTotalMinted(mintId, mintAmount);
-        mintConfig.mintedPerWallet[caller] += mintAmount;
+        _updateAndCheckMaxPerWallet(mintId, caller, mintAmount);
 
         _burn(caller, burnId, burnAmount);
-
-        _checkMaxPerWallet(mintId, caller, mintAmount);
         _mint(caller, mintId, mintAmount, "");
     }
 
@@ -1074,12 +1069,11 @@ contract GamePasses is
     /**
      * @notice Returns the metadata URI for a specific token ID
      * @param tokenId ID of the token to get URI for
-     * @dev Constructs the URI by concatenating baseURI + tokenId + ".json"
-     * @dev Can be overridden by derived contracts to implement different URI logic
-     * @return string The complete URI for the token metadata
+     * @dev Returns the token-specific metadata string stored in the token configuration
+     * @return string The metadata URI for the token
      */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_coreStorage().baseURI, tokenId.toString(), ".json"));
+        return _tokenStorage().tokenConfigs[tokenId].metadata;
     }
 
     /**
@@ -1272,10 +1266,8 @@ contract GamePasses is
 
         verifySignature(request, signature);
 
-        _checkMaxPerWallet(request.tokenId, request.caller, request.amount);
+        _updateAndCheckMaxPerWallet(request.tokenId, request.caller, request.amount);
         _updateAndCheckTotalMinted(request.tokenId, request.amount);
-
-        config.mintedPerWallet[request.caller] += request.amount;
 
         address treasury = config.treasuryWallet;
         if (treasury == address(0)) {
@@ -1308,10 +1300,8 @@ contract GamePasses is
                 revert TokenNotConfigured(request.tokenIds[i]);
             }
 
-            _checkMaxPerWallet(request.tokenIds[i], request.caller, request.amounts[i]);
+            _updateAndCheckMaxPerWallet(request.tokenIds[i], request.caller, request.amounts[i]);
             _updateAndCheckTotalMinted(request.tokenIds[i], request.amounts[i]);
-
-            config.mintedPerWallet[request.caller] += request.amounts[i];
 
             address treasury = config.treasuryWallet;
             if (treasury == address(0)) {
@@ -1391,14 +1381,16 @@ contract GamePasses is
      *      - Current wallet balance + amount would exceed max per wallet
      * @dev Skips check if maxPerWallet is type(uint256).max (unlimited)
      */
-    function _checkMaxPerWallet(uint256 tokenId, address to, uint256 amount) private view {
+    function _updateAndCheckMaxPerWallet(uint256 tokenId, address to, uint256 amount) private {
         TokenConfig storage config = _tokenStorage().tokenConfigs[tokenId];
+
+        config.mintedPerWallet[to] += amount;
 
         if (config.maxPerWallet == 0) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, 0);
         }
 
-        if (config.maxPerWallet != type(uint256).max && config.mintedPerWallet[to] + amount > config.maxPerWallet) {
+        if (config.mintedPerWallet[to] > config.maxPerWallet) {
             revert ExceedsMaxPerWallet(tokenId, to, amount, config.maxPerWallet);
         }
     }
