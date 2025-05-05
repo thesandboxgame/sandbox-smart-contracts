@@ -365,6 +365,7 @@ export enum DEPLOY_TAGS {
   L2 = 'L2', // Layer two networks like Polygon, mumbai
   L2_PROD = 'L2-prod', // Layer two production networks like Polygon
   L2_TEST = 'L2-test', // Layer two test networks like Mumbai
+  GENERATE_RANDOM_SECRET = 'generate_random_secret', // during landsales generate a random secret
 }
 
 const networks = {
@@ -376,6 +377,7 @@ const networks = {
       DEPLOY_TAGS.L2,
       DEPLOY_TAGS.L2_PROD,
       DEPLOY_TAGS.L2_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
     deploy: ['deploy_mocks/', 'deploy/'],
     companionNetworks: {
@@ -387,14 +389,22 @@ const networks = {
       parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
   },
   [DEPLOY_NETWORKS.ETH_GOERLI]: {
-    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
+    tags: [
+      DEPLOY_TAGS.L1,
+      DEPLOY_TAGS.L1_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
     companionNetworks: {
       [DEPLOY_NETWORKS.MUMBAI]: DEPLOY_NETWORKS.MUMBAI,
     },
   },
   [DEPLOY_NETWORKS.ETH_SEPOLIA]: {
-    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
+    tags: [
+      DEPLOY_TAGS.L1,
+      DEPLOY_TAGS.L1_PROD,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     companionNetworks: {
       [DEPLOY_NETWORKS.AMOY]: DEPLOY_NETWORKS.AMOY,
       [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
@@ -410,7 +420,11 @@ const networks = {
     },
   },
   [DEPLOY_NETWORKS.BSC_TESTNET]: {
-    tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_TEST],
+    tags: [
+      DEPLOY_TAGS.L1,
+      DEPLOY_TAGS.L1_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
       [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
@@ -424,13 +438,21 @@ const networks = {
     },
   },
   [DEPLOY_NETWORKS.MUMBAI]: {
-    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    tags: [
+      DEPLOY_TAGS.L2,
+      DEPLOY_TAGS.L2_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_GOERLI]: DEPLOY_NETWORKS.ETH_GOERLI,
     },
   },
   [DEPLOY_NETWORKS.AMOY]: {
-    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    tags: [
+      DEPLOY_TAGS.L2,
+      DEPLOY_TAGS.L2_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
     },
@@ -442,7 +464,11 @@ const networks = {
     },
   },
   [DEPLOY_NETWORKS.BASE_SEPOLIA]: {
-    tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_TEST],
+    tags: [
+      DEPLOY_TAGS.L2,
+      DEPLOY_TAGS.L2_TEST,
+      DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
+    ],
     companionNetworks: {
       [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
       [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
