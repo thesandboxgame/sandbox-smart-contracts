@@ -325,6 +325,12 @@ export async function getLandSaleFiles(
   return {secret, sectors, bundles, prices};
 }
 
+/**
+ * Loads a secret from the specified file path.
+ *
+ * @param path - The file path to read the secret from.
+ * @returns The secret as a string, or null if the file does not exist or cannot be read.
+ */
 function loadSecret(path: string) {
   let secret = null;
   try {
@@ -334,6 +340,14 @@ function loadSecret(path: string) {
   }
   return secret;
 }
+/**
+ * Generates a new Ethereum wallet private key and writes it to the specified file path.
+ *
+ * @param path - The file path where the generated secret will be saved.
+ * @returns The generated private key as a string.
+ *
+ * @throws {Error} If writing the secret to the file fails.
+ */
 function generateSecret(path: string): string {
   const wallet = ethers.Wallet.createRandom();
   const secret = wallet.privateKey;
@@ -350,6 +364,14 @@ function generateSecret(path: string): string {
 }
 
 
+/**
+ * Attempts to import and return the first available bundles object from a list of module paths.
+ *
+ * @param paths - An array of module paths to search for bundles.
+ * @returns The bundles object from the first successfully imported module.
+ *
+ * @throws {Error} If none of the provided paths contain a valid bundles module.
+ */
 async function loadBundles(paths: string[]) {
   for (const path of paths) {
     try {
