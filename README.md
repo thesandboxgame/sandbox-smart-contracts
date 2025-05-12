@@ -73,3 +73,5 @@ pip3 install -r requirements.txt
 ### Bug bounties
 
 Submit a bug at [Immunefi](https://immunefi.com/bounty/thesandbox/) to help secure our smart contracts!
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/thesandboxgame/sandbox-smart-contracts?utm_source=oss&utm_medium=github&utm_campaign=thesandboxgame%2Fsandbox-smart-contracts&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
