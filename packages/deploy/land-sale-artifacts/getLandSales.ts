@@ -334,13 +334,21 @@ function loadSecret(path: string) {
   }
   return secret;
 }
+function generateSecret(path: string): string {
+  const wallet = ethers.Wallet.createRandom();
+  const secret = wallet.privateKey;
 
-function generateSecret(path: string) {
-  const secret = ethers.Wallet.createRandom().privateKey.toString();
-  console.warn(`WARN: writing secret file ${path} !!!`);
-  fs.writeFileSync(path, secret);
+  try {
+    fs.outputFileSync(path, secret);
+    console.warn(`[WARNING] Secret generated and written to: ${path}`);
+  } catch (err) {
+    console.error(`[ERROR] Failed to write secret to ${path}:`, err);
+    throw err;
+  }
+
   return secret;
 }
+
 
 async function loadBundles(paths: string[]) {
   for (const path of paths) {
