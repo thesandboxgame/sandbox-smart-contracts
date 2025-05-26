@@ -6,7 +6,6 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {INFTCollection} from "./INFTCollection.sol";
-import "hardhat/console.sol";
 
 /**
  * @title PurchaseWrapper
