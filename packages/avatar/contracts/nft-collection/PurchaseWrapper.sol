@@ -15,9 +15,6 @@ import "hardhat/console.sol";
  * @dev Implements a fake ERC721 interface and acts as an intermediary for NFT purchases
  */
 contract PurchaseWrapper is Ownable, IERC721Receiver {
-    // NFT Collection contract reference
-    INFTCollection public nftCollection;
-
     // Sand token contract reference
     IERC20 public sandToken;
 
@@ -29,11 +26,9 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
 
     /**
      * @notice Constructor to set initial configuration
-     * @param _nftCollection Address of the NFT Collection contract
      * @param _sandToken Address of the Sand token contract
      */
-    constructor(address _nftCollection, address _sandToken) Ownable(msg.sender) {
-        nftCollection = INFTCollection(_nftCollection);
+    constructor(address _sandToken) Ownable(msg.sender) {
         sandToken = IERC20(_sandToken);
     }
 
@@ -41,9 +36,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @notice Updates the NFT Collection contract address
      * @param _nftCollection Address of the new NFT Collection contract
      */
-    function setNFTCollection(address _nftCollection) external onlyOwner {
-        nftCollection = INFTCollection(_nftCollection);
-    }
 
     /**
      * @notice Updates the Sand token contract address
@@ -56,6 +48,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
     /**
      * @notice Handles the purchase confirmation and initiates the NFT minting
      * @param sender The original sender of the approveAndCall transaction
+     * @param nftCollection Address of the NFT Collection contract
      * @param amount The amount of tokens approved for the purchase
      * @param wallet The wallet to receive the NFT
      * @param waveIndex The wave index for minting
@@ -66,6 +59,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      */
     function confirmPurchase(
         address sender,
+        address nftCollection,
         uint256 amount,
         address wallet,
         uint256 waveIndex,
@@ -105,7 +99,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
             abi.encodeWithSelector(
                 // Selector for approveAndCall(address,uint256,bytes)
                 bytes4(keccak256("approveAndCall(address,uint256,bytes)")),
-                address(nftCollection),
+                nftCollection,
                 amount,
                 data
             )

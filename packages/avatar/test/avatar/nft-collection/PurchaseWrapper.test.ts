@@ -7,19 +7,18 @@ describe.only('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     // Get the NFT collection fixture first
     const nftCollectionFixture = await setupNFTCollectionContract();
+    const {collectionContract} = nftCollectionFixture;
 
     // Deploy PurchaseWrapper
     const PurchaseWrapperFactory = await ethers.getContractFactory(
       'PurchaseWrapper'
     );
-    const collectionContractAddress =
-      await nftCollectionFixture.collectionContract.getAddress();
     const sandContractAddress =
       await nftCollectionFixture.sandContract.getAddress();
 
     const purchaseWrapper = await PurchaseWrapperFactory.connect(
       nftCollectionFixture.deployer
-    ).deploy(collectionContractAddress, sandContractAddress);
+    ).deploy(sandContractAddress);
 
     return {
       ...nftCollectionFixture,
@@ -80,8 +79,9 @@ describe.only('PurchaseWrapper', function () {
         'confirmPurchase',
         [
           await userA.getAddress(),
+          await contract.getAddress(),
           totalPrice,
-          await userB.getAddress(), // userB will be the recipient of the NFT
+          await userB.getAddress(),
           waveIndex,
           tokenAmount,
           signatureId,
