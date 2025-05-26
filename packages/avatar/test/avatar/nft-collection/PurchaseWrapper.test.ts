@@ -3,11 +3,10 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
-describe.only('PurchaseWrapper', function () {
+describe('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     // Get the NFT collection fixture first
     const nftCollectionFixture = await setupNFTCollectionContract();
-    const {collectionContract} = nftCollectionFixture;
 
     // Deploy PurchaseWrapper
     const PurchaseWrapperFactory = await ethers.getContractFactory(
