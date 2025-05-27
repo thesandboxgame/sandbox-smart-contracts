@@ -58,8 +58,6 @@ describe('PurchaseWrapper', function () {
         unitPrice
       );
 
-      console.log('sandContract TST', await sandContract.getAddress());
-
       // Give userA some SAND tokens to pay for the purchase
       await sandContract.donateTo(userA, totalPrice);
       expect(await sandContract.balanceOf(userA)).to.be.eq(totalPrice);
