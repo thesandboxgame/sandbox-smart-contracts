@@ -6,6 +6,9 @@ import {
   Receipt,
 } from 'hardhat-deploy/types';
 import {Contract} from 'ethers';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import * as fs from 'node:fs';
+import path from 'path';
 
 export async function saveDeployment(
   deployments: DeploymentsExtension,
@@ -14,7 +17,7 @@ export async function saveDeployment(
   contractName: string,
   receipt?: Receipt,
   proxyImplAddress?: string,
-  args?
+  args?: unknown[]
 ) {
   const extendedArtifact = await deployments.getExtendedArtifact(contractName);
   if (receipt) {
@@ -46,6 +49,26 @@ export function getEventArgsFromReceipt(
   eventName: string
 ) {
   const fragment = contract.filters[eventName].fragment;
-  const ev = receipt.events.find((x) => x.topics[0] == fragment.topicHash);
+  const ev = receipt.events?.find((x) => x.topics[0] == fragment.topicHash);
   return ev.args;
+}
+
+export async function getAddressOrNull(
+  hre: HardhatRuntimeEnvironment,
+  networkName: string,
+  contractName: string
+) {
+  const deploymentsPath = path.join(hre.config.paths.deployments, networkName);
+  const deploymentFile = path.join(deploymentsPath, `${contractName}.json`);
+  if (!fs.existsSync(deploymentFile)) {
+    console.warn(
+      `getAddressOrNull missing deployment for ${contractName} in ${deploymentsPath}`
+    );
+    return null;
+  }
+  const deployment = JSON.parse(fs.readFileSync(deploymentFile, 'utf-8'));
+  if (!deployment.address) {
+    throw new Error(`getAddressOrNull wrong deployment file ${deploymentFile}`);
+  }
+  return deployment.address;
 }
