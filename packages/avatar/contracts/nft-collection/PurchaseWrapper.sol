@@ -16,11 +16,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract PurchaseWrapper is Ownable, IERC721Receiver {
     /**
-     * @notice Address of the SAND token used for purchases.
-     */
-    IERC20 public sandToken;
-
-    /**
      * @dev Stores information about a purchase linked to a local temporary token ID.
      * @param caller The EOA who called the `confirmPurchase` function.
      * @param nftCollection The address of the NFT collection contract from which the NFT was/will be minted.
@@ -31,6 +26,11 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         address nftCollection;
         uint256 nftTokenId;
     }
+
+    /**
+     * @notice Address of the SAND token used for purchases.
+     */
+    IERC20 public sandToken;
 
     /**
      * @notice Mapping from a local temporary token ID to the details of the purchase.
@@ -45,28 +45,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
     address private _txContext_caller;
     address private _txContext_expectedCollection;
     uint256 private _txContext_localTokenId;
-
-    // Custom Errors
-    error PurchaseWrapper__SandTokenAddressCannotBeZero();
-    error PurchaseWrapper__SenderAddressCannotBeZero();
-    error PurchaseWrapper__NftCollectionAddressCannotBeZero();
-    error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);
-    error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
-    error PurchaseWrapper__ReceivedNftFromUnexpectedCollection(address expected, address actual);
-    error PurchaseWrapper__PurchaseContextNotSet();
-    error PurchaseWrapper__MismatchInPurchaseContext(
-        address expectedCaller,
-        address actualCaller,
-        uint256 localTokenId
-    );
-    error PurchaseWrapper__InvalidRecipientAddress();
-    error PurchaseWrapper__NoSandTokensToRecover();
-    error PurchaseWrapper__TransferToZeroAddress();
-    error PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);
-    error PurchaseWrapper__NftNotYetMintedOrRecorded(uint256 localTokenId);
-    error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
-    error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
-    error PurchaseWrapper__CallerMustBeFromAddress(address expected, address actual);
 
     /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
@@ -109,6 +87,28 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         address indexed to,
         uint256 nftTokenId
     );
+
+    // Custom Errors
+    error PurchaseWrapper__SandTokenAddressCannotBeZero();
+    error PurchaseWrapper__SenderAddressCannotBeZero();
+    error PurchaseWrapper__NftCollectionAddressCannotBeZero();
+    error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);
+    error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
+    error PurchaseWrapper__ReceivedNftFromUnexpectedCollection(address expected, address actual);
+    error PurchaseWrapper__PurchaseContextNotSet();
+    error PurchaseWrapper__MismatchInPurchaseContext(
+        address expectedCaller,
+        address actualCaller,
+        uint256 localTokenId
+    );
+    error PurchaseWrapper__InvalidRecipientAddress();
+    error PurchaseWrapper__NoSandTokensToRecover();
+    error PurchaseWrapper__TransferToZeroAddress();
+    error PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);
+    error PurchaseWrapper__NftNotYetMintedOrRecorded(uint256 localTokenId);
+    error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
+    error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
+    error PurchaseWrapper__CallerMustBeFromAddress(address expected, address actual);
 
     /**
      * @notice Constructor to set the SAND token contract address.
