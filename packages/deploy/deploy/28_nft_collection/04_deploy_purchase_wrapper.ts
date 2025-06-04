@@ -4,7 +4,7 @@ import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, sandAdmin} = await getNamedAccounts();
 
   // Get the PolygonSand contract address
   const sandContract = await deployments.get('PolygonSand');
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     contract:
       '@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper',
-    args: [sandContract.address],
+    args: [sandAdmin, sandContract.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });

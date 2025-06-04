@@ -484,23 +484,9 @@ describe('PurchaseWrapper', function () {
       );
     });
 
-    it('should allow original recipient (userA) to transfer NFT to userB via wrapper', async function () {
-      await expect(
-        purchaseWrapperAsUserA.transferFrom(
-          userAAddress,
-          userBAddress,
-          randomTempTokenId
-        )
-      )
-        .to.emit(purchaseWrapperAsUserA, 'NftTransferredViaWrapper')
-        .withArgs(randomTempTokenId, userAAddress, userBAddress, mintedTokenId);
-
-      expect(await nftCollection.ownerOf(mintedTokenId)).to.equal(userBAddress);
-    });
-
     it('should allow original recipient (userA) to safeTransfer NFT to userB via wrapper', async function () {
       await expect(
-        purchaseWrapperAsUserA['safeTransferFrom(address,address,uint256)'](
+        purchaseWrapperAsUserA.safeTransferFrom(
           userAAddress,
           userBAddress,
           randomTempTokenId
@@ -511,37 +497,22 @@ describe('PurchaseWrapper', function () {
       expect(await nftCollection.ownerOf(mintedTokenId)).to.equal(userBAddress);
     });
 
-    it('should allow original recipient (userA) to safeTransfer NFT with data to userB via wrapper', async function () {
-      const data = '0x1234';
-      // Note: The actual NFT collection's safeTransferFrom must handle the data or ignore it.
-      // The wrapper just passes it along.
+    it('should allow original recipient (userA) to transfer NFT to userB via wrapper', async function () {
       await expect(
-        purchaseWrapperAsUserA[
-          'safeTransferFrom(address,address,uint256,bytes)'
-        ](userAAddress, userBAddress, randomTempTokenId, data)
+        purchaseWrapperAsUserA.safeTransferFrom(
+          userAAddress,
+          userBAddress,
+          randomTempTokenId
+        )
       )
         .to.emit(purchaseWrapperAsUserA, 'NftTransferredViaWrapper')
         .withArgs(randomTempTokenId, userAAddress, userBAddress, mintedTokenId);
-
       expect(await nftCollection.ownerOf(mintedTokenId)).to.equal(userBAddress);
-    });
-
-    it('should revert transferFrom if to address is zero', async function () {
-      await expect(
-        purchaseWrapperAsUserA.transferFrom(
-          userAAddress,
-          ZeroAddress,
-          randomTempTokenId
-        )
-      ).to.be.revertedWithCustomError(
-        purchaseWrapperAsUserA,
-        'PurchaseWrapper__TransferToZeroAddress'
-      );
     });
 
     it('should revert safeTransferFrom if to address is zero', async function () {
       await expect(
-        purchaseWrapperAsUserA['safeTransferFrom(address,address,uint256)'](
+        purchaseWrapperAsUserA.safeTransferFrom(
           userAAddress,
           ZeroAddress,
           randomTempTokenId
@@ -550,79 +521,6 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsUserA,
         'PurchaseWrapper__TransferToZeroAddress'
       );
-    });
-
-    it('should revert safeTransferFrom with data if to address is zero', async function () {
-      await expect(
-        purchaseWrapperAsUserA[
-          'safeTransferFrom(address,address,uint256,bytes)'
-        ](userAAddress, ZeroAddress, randomTempTokenId, '0x12')
-      ).to.be.revertedWithCustomError(
-        purchaseWrapperAsUserA,
-        'PurchaseWrapper__TransferToZeroAddress'
-      );
-    });
-
-    it('should revert if localTokenId is invalid/not used', async function () {
-      const invalidLocalTokenId = 11111;
-      await expect(
-        purchaseWrapperAsUserA.transferFrom(
-          userAAddress,
-          userBAddress,
-          invalidLocalTokenId
-        )
-      )
-        .to.be.revertedWithCustomError(
-          purchaseWrapperAsUserA,
-          'PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted'
-        )
-        .withArgs(invalidLocalTokenId);
-    });
-
-    it('should revert if "from" address is not the original recipient', async function () {
-      // User B (not original recipient) tries to transfer
-      await expect(
-        purchaseWrapperAsUserB.transferFrom(
-          userAAddress, // from is still userA
-          userBAddress,
-          randomTempTokenId
-        )
-      )
-        .to.be.revertedWithCustomError(
-          purchaseWrapperAsUserB,
-          'PurchaseWrapper__CallerMustBeFromAddress'
-        )
-        .withArgs(userBAddress, userAAddress);
-
-      // Also test if from address itself is wrong
-      await expect(
-        purchaseWrapperAsUserA.transferFrom(
-          userBAddress, // from is userB
-          userAAddress,
-          randomTempTokenId
-        )
-      )
-        .to.be.revertedWithCustomError(
-          purchaseWrapperAsUserA,
-          'PurchaseWrapper__FromAddressIsNotOriginalRecipient'
-        )
-        .withArgs(userBAddress, userAAddress);
-    });
-
-    it('should revert if caller (msg.sender) is not the "from" address', async function () {
-      // User B tries to initiate a transfer FROM user A
-      await expect(
-        purchaseWrapperAsUserB.transferFrom(
-          userAAddress,
-          userBAddress,
-          randomTempTokenId
-        )
-      )
-        .to.be.revertedWithCustomError(
-          purchaseWrapperAsUserB,
-          'PurchaseWrapper__CallerMustBeFromAddress'
-        )
-        .withArgs(userBAddress, userAAddress);
     });
   });
 

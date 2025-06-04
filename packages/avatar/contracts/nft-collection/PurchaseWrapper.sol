@@ -235,6 +235,11 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
 
         emit NftReceivedAndForwarded(_txContext_localTokenId, msg.sender, tokenId, _txContext_caller);
 
+        // reset context to prevent reuse / re-entrancy
+        _txContext_caller = address(0);
+        _txContext_expectedCollection = address(0);
+        _txContext_localTokenId = 0;
+
         return IERC721Receiver.onERC721Received.selector;
     }
 
@@ -250,31 +255,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         if (balance == 0) revert PurchaseWrapper__NoSandTokensToRecover();
 
         SafeERC20.safeTransfer(sandToken, recipient, balance);
-    }
-
-    /**
-     * @notice Transfers an NFT associated with a `localTokenId` from its original recipient
-     *         (who received it after a purchase via this wrapper) to a new address.
-     * @dev This function acts as a convenience for the NFT owner (`from` address, who must be
-     *      the `originalSender` for the `localTokenId`) to transfer the NFT they own.
-     *      The `msg.sender` must be the `from` address.
-     * @param from The current owner of the NFT (must be the original recipient of the purchase).
-     * @param to The new address to receive the NFT.
-     * @param localTokenId The local temporary token ID that was used during the `confirmPurchase` call,
-     *                     which now maps to the actual minted NFT.
-     */
-    function transferFrom(address from, address to, uint256 localTokenId) external {
-        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
-        PurchaseInfo storage info = _purchaseInfo[localTokenId];
-
-        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
-        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
-        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
-        if (from != info.caller) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
-        if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
-
-        IERC721(info.nftCollection).transferFrom(from, to, info.nftTokenId);
-        emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
     }
 
     /**
@@ -296,29 +276,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
 
         IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
-        emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
-    }
-
-    /**
-     * @notice Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom` with data.
-     * @dev Similar to `safeTransferFrom` but includes a `data` parameter.
-     *      The `msg.sender` must be the `from` address.
-     * @param from The current owner of the NFT.
-     * @param to The new address to receive the NFT.
-     * @param localTokenId The local temporary token ID.
-     * @param data Additional data with no specified format to accompany the transfer.
-     */
-    function safeTransferFrom(address from, address to, uint256 localTokenId, bytes calldata data) external {
-        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
-        PurchaseInfo storage info = _purchaseInfo[localTokenId];
-
-        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
-        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
-        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
-        if (from != info.caller) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
-        if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
-
-        IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId, data);
         emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
     }
 }
