@@ -68,7 +68,10 @@ describe.only('PurchaseWrapper', function () {
           deployerAddress,
           ZeroAddress
         )
-      ).to.be.revertedWith('PW: SAND token address cannot be zero');
+      ).to.be.revertedWithCustomError(
+        PurchaseWrapperFactory,
+        'PurchaseWrapper__SandTokenAddressCannotBeZero'
+      );
     });
   });
 
@@ -211,7 +214,10 @@ describe.only('PurchaseWrapper', function () {
           randomTempTokenId,
           signature
         )
-      ).to.be.revertedWith('PW: Sender address cannot be zero');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapper,
+        'PurchaseWrapper__SenderAddressCannotBeZero'
+      );
     });
 
     it('should revert if NFT Collection address is zero', async function () {
@@ -254,7 +260,10 @@ describe.only('PurchaseWrapper', function () {
           randomTempTokenId,
           signature
         )
-      ).to.be.revertedWith('PW: NFT Collection address cannot be zero');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapper,
+        'PurchaseWrapper__NftCollectionAddressCannotBeZero'
+      );
     });
 
     it('should revert if local token ID is already in use', async function () {
@@ -325,7 +334,12 @@ describe.only('PurchaseWrapper', function () {
           randomTempTokenId, // Reuse the ID
           signature2
         )
-      ).to.be.revertedWith('PW: Local token ID already in use');
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapper,
+          'PurchaseWrapper__LocalTokenIdAlreadyInUse'
+        )
+        .withArgs(randomTempTokenId);
     });
 
     it('should refund sender if approveAndCall on SAND fails (e.g. NFT collection reverts)', async function () {
@@ -368,7 +382,10 @@ describe.only('PurchaseWrapper', function () {
             randomTempTokenId,
             invalidSignature
           )
-      ).to.be.revertedWith('PW: NFT purchase failed via approveAndCall');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapper,
+        'PurchaseWrapper__NftPurchaseFailedViaApproveAndCall'
+      );
 
       expect(await sandContract.balanceOf(userAAddress)).to.equal(
         balanceBefore
@@ -516,7 +533,10 @@ describe.only('PurchaseWrapper', function () {
           ZeroAddress,
           randomTempTokenId
         )
-      ).to.be.revertedWith('PW: Transfer to the zero address');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsUserA,
+        'PurchaseWrapper__TransferToZeroAddress'
+      );
     });
 
     it('should revert safeTransferFrom if to address is zero', async function () {
@@ -526,7 +546,10 @@ describe.only('PurchaseWrapper', function () {
           ZeroAddress,
           randomTempTokenId
         )
-      ).to.be.revertedWith('PW: Safe transfer to the zero address');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsUserA,
+        'PurchaseWrapper__TransferToZeroAddress'
+      );
     });
 
     it('should revert safeTransferFrom with data if to address is zero', async function () {
@@ -534,7 +557,10 @@ describe.only('PurchaseWrapper', function () {
         purchaseWrapperAsUserA[
           'safeTransferFrom(address,address,uint256,bytes)'
         ](userAAddress, ZeroAddress, randomTempTokenId, '0x12')
-      ).to.be.revertedWith('PW: Safe transfer with data to the zero address');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsUserA,
+        'PurchaseWrapper__TransferToZeroAddress'
+      );
     });
 
     it('should revert if localTokenId is invalid/not used', async function () {
@@ -545,33 +571,42 @@ describe.only('PurchaseWrapper', function () {
           userBAddress,
           invalidLocalTokenId
         )
-      ).to.be.revertedWith(
-        'PW: Invalid local token ID or purchase not completed'
-      );
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapperAsUserA,
+          'PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted'
+        )
+        .withArgs(invalidLocalTokenId);
     });
 
     it('should revert if "from" address is not the original recipient', async function () {
       // User B (not original recipient) tries to transfer
       await expect(
         purchaseWrapperAsUserB.transferFrom(
-          userAAddress,
+          userAAddress, // from is still userA
           userBAddress,
           randomTempTokenId
-        ) // from is still userA, but caller is userB
-      ).to.be.revertedWith(
-        "PW: Caller must be the 'from' address (the NFT owner)"
-      );
+        )
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapperAsUserB,
+          'PurchaseWrapper__CallerMustBeFromAddress'
+        )
+        .withArgs(userBAddress, userAAddress);
 
       // Also test if from address itself is wrong
       await expect(
         purchaseWrapperAsUserA.transferFrom(
-          userBAddress,
+          userBAddress, // from is userB
           userAAddress,
           randomTempTokenId
-        ) // from is userB
-      ).to.be.revertedWith(
-        "PW: 'from' address is not the original recipient of the NFT"
-      );
+        )
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapperAsUserA,
+          'PurchaseWrapper__FromAddressIsNotOriginalRecipient'
+        )
+        .withArgs(userBAddress, userAAddress);
     });
 
     it('should revert if caller (msg.sender) is not the "from" address', async function () {
@@ -582,9 +617,12 @@ describe.only('PurchaseWrapper', function () {
           userBAddress,
           randomTempTokenId
         )
-      ).to.be.revertedWith(
-        "PW: Caller must be the 'from' address (the NFT owner)"
-      );
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapperAsUserB,
+          'PurchaseWrapper__CallerMustBeFromAddress'
+        )
+        .withArgs(userBAddress, userAAddress);
     });
   });
 
@@ -647,7 +685,10 @@ describe.only('PurchaseWrapper', function () {
       );
       await expect(
         purchaseWrapperAsDeployer.recoverSand(ZeroAddress)
-      ).to.be.revertedWith('PW: Invalid recipient address for SAND recovery');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsDeployer,
+        'PurchaseWrapper__InvalidRecipientAddress'
+      );
     });
 
     it('should revert recoverSand if no SAND tokens to recover', async function () {
@@ -660,7 +701,10 @@ describe.only('PurchaseWrapper', function () {
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.equal(0); // Ensure no balance
       await expect(
         purchaseWrapperAsDeployer.recoverSand(await randomWallet.getAddress())
-      ).to.be.revertedWith('PW: No SAND tokens to recover');
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsDeployer,
+        'PurchaseWrapper__NoSandTokensToRecover'
+      );
     });
   });
 });

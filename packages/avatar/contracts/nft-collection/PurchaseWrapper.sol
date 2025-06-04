@@ -46,6 +46,28 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
     address private _txContext_expectedCollection;
     uint256 private _txContext_localTokenId;
 
+    // Custom Errors
+    error PurchaseWrapper__SandTokenAddressCannotBeZero();
+    error PurchaseWrapper__SenderAddressCannotBeZero();
+    error PurchaseWrapper__NftCollectionAddressCannotBeZero();
+    error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);
+    error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
+    error PurchaseWrapper__ReceivedNftFromUnexpectedCollection(address expected, address actual);
+    error PurchaseWrapper__PurchaseContextNotSet();
+    error PurchaseWrapper__MismatchInPurchaseContext(
+        address expectedCaller,
+        address actualCaller,
+        uint256 localTokenId
+    );
+    error PurchaseWrapper__InvalidRecipientAddress();
+    error PurchaseWrapper__NoSandTokensToRecover();
+    error PurchaseWrapper__TransferToZeroAddress();
+    error PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);
+    error PurchaseWrapper__NftNotYetMintedOrRecorded(uint256 localTokenId);
+    error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
+    error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
+    error PurchaseWrapper__CallerMustBeFromAddress(address expected, address actual);
+
     /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
      * @param originalSender The address that initiated the purchase.
@@ -94,7 +116,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @param _sandToken Address of the Sand (ERC20) token contract.
      */
     constructor(address initialOwner, address _sandToken) Ownable(initialOwner) {
-        require(_sandToken != address(0), "PW: SAND token address cannot be zero");
+        if (_sandToken == address(0)) revert PurchaseWrapper__SandTokenAddressCannotBeZero();
         sandToken = IERC20(_sandToken);
     }
 
@@ -126,9 +148,10 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external returns (bytes memory) {
-        require(sender != address(0), "PW: Sender address cannot be zero");
-        require(nftCollection != address(0), "PW: NFT Collection address cannot be zero");
-        require(_purchaseInfo[randomTempTokenId].nftTokenId == 0, "PW: Local token ID already in use");
+        if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
+        if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
+        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0)
+            revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
 
         _txContext_expectedCollection = nftCollection;
         _txContext_localTokenId = randomTempTokenId;
@@ -170,7 +193,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
             SafeERC20.safeTransfer(sandToken, sender, amount);
             // Clear partial purchase info if it was only sender dependent before this point.
             _purchaseInfo[randomTempTokenId].caller = address(0);
-            revert("PW: NFT purchase failed via approveAndCall");
+            revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
 
         emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, amount);
@@ -196,12 +219,14 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
-        require(msg.sender == _txContext_expectedCollection, "PW: Received NFT from unexpected collection");
-        require(_txContext_caller != address(0), "PW: Purchase context not set"); // Should always be set if flow is correct
+        if (msg.sender != _txContext_expectedCollection)
+            revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(msg.sender, _txContext_expectedCollection);
+        if (_txContext_caller == address(0)) revert PurchaseWrapper__PurchaseContextNotSet(); // Should always be set if flow is correct
 
         PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];
         // Ensure this localTokenId was indeed part of an active purchase context
-        require(info.caller == _txContext_caller, "PW: Mismatch in purchase context");
+        if (info.caller != _txContext_caller)
+            revert PurchaseWrapper__MismatchInPurchaseContext(info.caller, _txContext_caller, _txContext_localTokenId);
 
         info.nftTokenId = tokenId;
         info.nftCollection = msg.sender; // Record the actual collection address
@@ -220,9 +245,9 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @param recipient Address to receive the recovered ERC20 tokens.
      */
     function recoverSand(address recipient) external onlyOwner {
-        require(recipient != address(0), "PW: Invalid recipient address for SAND recovery");
+        if (recipient == address(0)) revert PurchaseWrapper__InvalidRecipientAddress();
         uint256 balance = sandToken.balanceOf(address(this));
-        require(balance > 0, "PW: No SAND tokens to recover");
+        if (balance == 0) revert PurchaseWrapper__NoSandTokensToRecover();
 
         SafeERC20.safeTransfer(sandToken, recipient, balance);
     }
@@ -239,14 +264,14 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      *                     which now maps to the actual minted NFT.
      */
     function transferFrom(address from, address to, uint256 localTokenId) external {
-        require(to != address(0), "PW: Transfer to the zero address");
+        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
-        require(info.caller != address(0), "PW: Invalid local token ID or purchase not completed");
-        require(info.nftTokenId != 0, "PW: NFT not yet minted or recorded for this local token ID");
-        require(info.nftCollection != address(0), "PW: NFT collection not recorded for this local token ID");
-        require(from == info.caller, "PW: 'from' address is not the original recipient of the NFT");
-        require(msg.sender == from, "PW: Caller must be the 'from' address (the NFT owner)");
+        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
+        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
+        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
+        if (from != info.caller) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
+        if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
 
         IERC721(info.nftCollection).transferFrom(from, to, info.nftTokenId);
         emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
@@ -261,14 +286,14 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @param localTokenId The local temporary token ID.
      */
     function safeTransferFrom(address from, address to, uint256 localTokenId) external {
-        require(to != address(0), "PW: Safe transfer to the zero address");
+        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
-        require(info.caller != address(0), "PW: Invalid local token ID or purchase not completed");
-        require(info.nftTokenId != 0, "PW: NFT not yet minted or recorded for this local token ID");
-        require(info.nftCollection != address(0), "PW: NFT collection not recorded for this local token ID");
-        require(from == info.caller, "PW: 'from' address is not the original recipient of the NFT");
-        require(msg.sender == from, "PW: Caller must be the 'from' address (the NFT owner)");
+        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
+        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
+        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
+        if (from != info.caller) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
+        if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
 
         IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
         emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
@@ -284,14 +309,14 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @param data Additional data with no specified format to accompany the transfer.
      */
     function safeTransferFrom(address from, address to, uint256 localTokenId, bytes calldata data) external {
-        require(to != address(0), "PW: Safe transfer with data to the zero address");
+        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
-        require(info.caller != address(0), "PW: Invalid local token ID or purchase not completed");
-        require(info.nftTokenId != 0, "PW: NFT not yet minted or recorded for this local token ID");
-        require(info.nftCollection != address(0), "PW: NFT collection not recorded for this local token ID");
-        require(from == info.caller, "PW: 'from' address is not the original recipient of the NFT");
-        require(msg.sender == from, "PW: Caller must be the 'from' address (the NFT owner)");
+        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
+        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
+        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
+        if (from != info.caller) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
+        if (msg.sender != from) revert PurchaseWrapper__CallerMustBeFromAddress(msg.sender, from);
 
         IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId, data);
         emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
