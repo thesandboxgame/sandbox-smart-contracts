@@ -142,6 +142,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         address nftCollection,
         uint256 amount,
         uint256 waveIndex,
+        uint256 tokenAmount,
         uint256 signatureId,
         uint256 randomTempTokenId,
         bytes calldata signature
@@ -168,7 +169,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         bytes memory data = abi.encodeWithSelector(
             waveMintSelector,
             address(this), // NFTs will be minted to this contract first
-            1, // the current implementation and external party only support 1 NFT per purchase
+            tokenAmount,
             waveIndex,
             signatureId,
             signature
