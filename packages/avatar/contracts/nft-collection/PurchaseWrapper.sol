@@ -10,21 +10,13 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 /**
  * @title PurchaseWrapper
  * @author The Sandbox
- * @notice Contract that facilitates NFT purchases using ERC20 tokens (e.g., SAND).
- * It acts as an intermediary: users approve this contract to spend their ERC20 tokens,
- * then call `confirmPurchase`. This contract takes the ERC20 tokens and calls an
- * `approveAndCall` function on the ERC20 token contract, targeting the NFT collection's
- * minting function. The NFT is minted to this wrapper contract, which then, upon receiving
- * the NFT via `onERC721Received`, transfers it to the original purchaser.
- * The contract also provides ERC721-like transfer functions that operate on a temporary
- * `localTokenId` which maps to the actual minted NFT, allowing the original purchaser
- * to transfer the NFT through this wrapper.
+ * @notice Contract that facilitates NFT purchases using SAND.
  * @custom:security-contact contact-blockchain@sandbox.game
  * @dev Implements IERC721Receiver to handle NFT receipts. Uses Ownable for admin functions.
  */
 contract PurchaseWrapper is Ownable, IERC721Receiver {
     /**
-     * @notice Address of the SAND (or other ERC20) token used for purchases.
+     * @notice Address of the SAND token used for purchases.
      */
     IERC20 public sandToken;
 
@@ -113,7 +105,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @dev The `randomTempTokenId` must be unique for each purchase attempt and is used to track
      *      the purchase through to NFT delivery. This function sets transaction-scoped context
      *      variables (`_txContext_...`) that are used by `onERC721Received`.
-     * @param sender The original EOA initiating the purchase and who will ultimately receive the NFT.
+     * @param sender The original EOA initiating the purchase and who will receive the NFT.
      * @param nftCollection Address of the target NFT Collection contract for minting.
      * @param amount The amount of `sandToken` to be transferred for the purchase.
      * @param waveIndex The wave index for minting on the NFT Collection.
@@ -142,10 +134,8 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         _txContext_localTokenId = randomTempTokenId;
         _txContext_caller = sender;
 
-        // Store initial purchase info. nftTokenId will be set in onERC721Received.
+        // Store initial purchase info. nftTokenId and nftCollection will be set in onERC721Received.
         _purchaseInfo[randomTempTokenId].caller = sender;
-        // _purchaseInfo[randomTempTokenId].nftCollection will be set in onERC721Received from msg.sender
-        // to confirm it came from the expected collection.
 
         // Transfer sand tokens from sender to this contract
         SafeERC20.safeTransferFrom(sandToken, sender, address(this), amount);
@@ -201,10 +191,10 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
      */
     function onERC721Received(
-        address operator, // solhint-disable-line no-unused-vars
-        address from, // solhint-disable-line no-unused-vars
+        address operator,
+        address from,
         uint256 tokenId,
-        bytes calldata data // solhint-disable-line no-unused-vars
+        bytes calldata data
     ) external override returns (bytes4) {
         require(msg.sender == _txContext_expectedCollection, "PW: Received NFT from unexpected collection");
         require(_txContext_caller != address(0), "PW: Purchase context not set"); // Should always be set if flow is correct
@@ -219,10 +209,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         IERC721(msg.sender).transferFrom(address(this), _txContext_caller, tokenId);
 
         emit NftReceivedAndForwarded(_txContext_localTokenId, msg.sender, tokenId, _txContext_caller);
-
-        // It's good practice to clear context variables if they are not needed anymore,
-        // though their values will be overwritten by the next confirmPurchase call.
-        // For this pattern, they are effectively cleared/reset at the start of confirmPurchase.
 
         return IERC721Receiver.onERC721Received.selector;
     }
@@ -239,23 +225,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         require(balance > 0, "PW: No SAND tokens to recover");
 
         SafeERC20.safeTransfer(sandToken, recipient, balance);
-    }
-
-    /**
-     * @notice Recovers an NFT that is stuck in this contract.
-     * @dev Only callable by the contract owner. This is for NFTs that were not processed
-     *      through the standard purchase flow or whose automated transfer failed.
-     * @param nftCollectionAddress Address of the NFT collection contract.
-     * @param tokenId The ID of the NFT to recover.
-     * @param recipient Address to receive the recovered NFT.
-     */
-    function recoverNft(address nftCollectionAddress, uint256 tokenId, address recipient) external onlyOwner {
-        require(nftCollectionAddress != address(0), "PW: Invalid NFT collection address for recovery");
-        // Token ID 0 can be valid for some ERC721 contracts.
-        // Consider checking ownerOf(tokenId) == address(this) if a more robust check is needed.
-        require(recipient != address(0), "PW: Invalid recipient address for NFT recovery");
-
-        IERC721(nftCollectionAddress).transferFrom(address(this), recipient, tokenId);
     }
 
     /**
