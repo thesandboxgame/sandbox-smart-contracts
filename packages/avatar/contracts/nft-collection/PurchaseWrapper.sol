@@ -131,7 +131,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
      * @param nftCollection Address of the target NFT Collection contract for minting.
      * @param amount The amount of `sandToken` to be transferred for the purchase.
      * @param waveIndex The wave index for minting on the NFT Collection.
-     * @param tokenAmount The number of NFTs to mint.
      * @param signatureId The signature ID for verification by the NFT Collection.
      * @param randomTempTokenId A unique temporary ID chosen by the caller to identify this purchase.
      *                          This ID will be associated with the minted NFT.
@@ -143,7 +142,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         address nftCollection,
         uint256 amount,
         uint256 waveIndex,
-        uint256 tokenAmount,
         uint256 signatureId,
         uint256 randomTempTokenId,
         bytes calldata signature
@@ -170,7 +168,7 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         bytes memory data = abi.encodeWithSelector(
             waveMintSelector,
             address(this), // NFTs will be minted to this contract first
-            tokenAmount,
+            1, // the current implementation and external party only support 1 NFT per purchase
             waveIndex,
             signatureId,
             signature
@@ -234,11 +232,6 @@ contract PurchaseWrapper is Ownable, IERC721Receiver {
         IERC721(msg.sender).transferFrom(address(this), _txContext_caller, tokenId);
 
         emit NftReceivedAndForwarded(_txContext_localTokenId, msg.sender, tokenId, _txContext_caller);
-
-        // reset context to prevent reuse / re-entrancy
-        _txContext_caller = address(0);
-        _txContext_expectedCollection = address(0);
-        _txContext_localTokenId = 0;
 
         return IERC721Receiver.onERC721Received.selector;
     }
