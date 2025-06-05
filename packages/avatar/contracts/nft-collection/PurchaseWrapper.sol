@@ -38,13 +38,15 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     /**
      * @notice Mapping from a local temporary token ID to the details of the purchase.
      * @dev This `localTokenId` is provided by the caller during `confirmPurchase` and is used
-     * to uniquely identify a purchase transaction and later to reference the minted NFT
-     * in the wrapper's transfer functions.
+     *      to uniquely identify a purchase transaction and later to reference the minted NFT
+     *      in the wrapper's transfer functions.
      */
     mapping(uint256 localTokenId => PurchaseInfo) private _purchaseInfo;
 
-    // Transaction context variables: these are set by confirmPurchase and read by onERC721Received
-    // within the same transaction. They effectively act as parameters passed through an external call.
+    /**
+     * @notice Transaction context variable: it is set by confirmPurchase and read by onERC721Received
+     *         within the same transaction. It effectively acts as a parameter passed through an external call.
+     */
     uint256 private _txContext_localTokenId;
 
     /**
@@ -129,15 +131,11 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
         _txContext_localTokenId = randomTempTokenId;
 
-        // Store initial purchase info. nftTokenId and nftCollection will be set in onERC721Received.
         _purchaseInfo[randomTempTokenId].caller = sender;
         _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
 
-        // Transfer sand tokens from sender to this contract
         SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);
 
-        // Prepare the data for calling waveMint on the NFT Collection
-        // Function selector for waveMint(address,uint256,uint256,uint256,bytes)
         bytes4 waveMintSelector = bytes4(keccak256("waveMint(address,uint256,uint256,uint256,bytes)"));
 
         bytes memory data = abi.encodeWithSelector(
@@ -149,11 +147,9 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             signature
         );
 
-        // Call approveAndCall on the payment token to initiate the mint
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returnData) = address(sandToken).call(
             abi.encodeWithSelector(
-                // Selector for approveAndCall(address,uint256,bytes)
                 bytes4(keccak256("approveAndCall(address,uint256,bytes)")),
                 nftCollection,
                 sandAmount,
@@ -162,7 +158,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         );
 
         if (!success) {
-            // Clear partial purchase info if it was only sender dependent before this point.
             _purchaseInfo[randomTempTokenId].caller = address(0);
             revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
