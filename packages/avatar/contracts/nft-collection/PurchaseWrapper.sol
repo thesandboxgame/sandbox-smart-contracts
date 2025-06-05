@@ -82,6 +82,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
     error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
     error PurchaseWrapper__CallerNotAuthorized(address caller);
+    error PurchaseWrapper__InvalidState();
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -121,15 +122,18 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external nonReentrant returns (bytes memory) {
-        if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
+        if (!hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
             revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
         }
         if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
         if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
-        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0)
+        if (_purchaseInfo[randomTempTokenId].nftCollection != address(0))
             revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
 
-        _txContext_localTokenId = randomTempTokenId;
+        if (_txContext_localTokenId > 0) {
+            revert PurchaseWrapper__InvalidState();
+        }
+        _txContext_localTokenId = randomTempTokenId + 1;
 
         _purchaseInfo[randomTempTokenId].caller = sender;
         _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
@@ -156,9 +160,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
                 data
             )
         );
-
-        if (!success) {
-            _purchaseInfo[randomTempTokenId].caller = address(0);
+        if (!success || _txContext_localTokenId > 0) {
             revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
 
@@ -175,19 +177,20 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      *      `confirmPurchase` to identify the purchase and original sender. It then stores the
      *      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers
      *      the NFT to the `_txContext_originalSender`.
-     * @param operator The address which called the `safeTransferFrom` function (unused).
-     * @param from The address which previously owned the token (unused, typically address(0) for mint).
      * @param tokenId The ID of the token being transferred to this contract.
-     * @param data Additional data with no specified format (unused).
      * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
      */
     function onERC721Received(
-        address operator,
-        address from,
+        address,
+        address,
         uint256 tokenId,
-        bytes calldata data
+        bytes calldata
     ) external override returns (bytes4) {
-        PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];
+        if (_txContext_localTokenId == 0) {
+            revert PurchaseWrapper__InvalidState();
+        }
+        PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId - 1];
+        _txContext_localTokenId = 0;
 
         if (msg.sender != info.nftCollection)
             revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(info.nftCollection, msg.sender);
@@ -223,12 +226,11 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         address from,
         address to,
         uint256 localTokenId
-    ) external onlyRole(AUTHORIZED_CALLER_ROLE) {
+    ) external nonReentrant onlyRole(AUTHORIZED_CALLER_ROLE) {
         if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
         if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
-        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
         if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
         if (info.caller != from) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
 
