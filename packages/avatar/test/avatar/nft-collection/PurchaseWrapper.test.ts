@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 import {NFTCollection, PurchaseWrapper} from '../../../typechain-types';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
-describe.only('PurchaseWrapper', function () {
+describe('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     const nftCollectionFixture = await setupNFTCollectionContract();
     const PurchaseWrapperFactory = await ethers.getContractFactory(
@@ -18,8 +18,6 @@ describe.only('PurchaseWrapper', function () {
       await nftCollectionFixture.collectionContract.getAddress();
     const authorizedCallerAddress =
       await nftCollectionFixture.randomWallet.getAddress();
-
-    console.log('Authorized caller address:', authorizedCallerAddress);
 
     const purchaseWrapper = await PurchaseWrapperFactory.connect(
       nftCollectionFixture.deployer
@@ -107,7 +105,6 @@ describe.only('PurchaseWrapper', function () {
         purchaseWrapperAddress,
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
-        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
@@ -189,7 +186,6 @@ describe.only('PurchaseWrapper', function () {
         purchaseWrapper,
         purchaseWrapperAddress,
         randomWallet: userA,
-        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const sandPrice = ethers.parseEther('100');
@@ -233,7 +229,6 @@ describe.only('PurchaseWrapper', function () {
         purchaseWrapper,
         purchaseWrapperAddress,
         randomWallet: userA,
-        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const sandPrice = ethers.parseEther('100');
