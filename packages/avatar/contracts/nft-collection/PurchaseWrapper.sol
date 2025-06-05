@@ -82,6 +82,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
     error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
     error PurchaseWrapper__CallerNotAuthorized(address caller);
+    error PurchaseWrapper__RandomTempTokenIdCannotBeZero();
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -121,9 +122,10 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external nonReentrant returns (bytes memory) {
-        if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
-            revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
+        if (!hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
+            revert PurchaseWrapper__CallerNotAuthorized(sender);
         }
+        if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
         if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
         if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
         if (_purchaseInfo[randomTempTokenId].nftTokenId != 0)
@@ -219,11 +221,10 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param to The new address to receive the NFT.
      * @param localTokenId The local temporary token ID.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 localTokenId
-    ) external onlyRole(AUTHORIZED_CALLER_ROLE) {
+    function safeTransferFrom(address from, address to, uint256 localTokenId) external {
+        if (!hasRole(AUTHORIZED_CALLER_ROLE, from)) {
+            revert PurchaseWrapper__CallerNotAuthorized(from);
+        }
         if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
