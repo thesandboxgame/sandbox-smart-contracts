@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 import {NFTCollection, PurchaseWrapper} from '../../../typechain-types';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
-describe('PurchaseWrapper', function () {
+describe.only('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     const nftCollectionFixture = await setupNFTCollectionContract();
     const PurchaseWrapperFactory = await ethers.getContractFactory(
@@ -16,10 +16,14 @@ describe('PurchaseWrapper', function () {
     const deployerAddress = await nftCollectionFixture.deployer.getAddress();
     const collectionContractAddress =
       await nftCollectionFixture.collectionContract.getAddress();
+    const authorizedCallerAddress =
+      await nftCollectionFixture.randomWallet.getAddress();
+
+    console.log('Authorized caller address:', authorizedCallerAddress);
 
     const purchaseWrapper = await PurchaseWrapperFactory.connect(
       nftCollectionFixture.deployer
-    ).deploy(deployerAddress, sandContractAddress); // Pass initialOwner
+    ).deploy(deployerAddress, sandContractAddress, authorizedCallerAddress); // Pass admin, sandToken, and authorizedCaller
 
     return {
       ...nftCollectionFixture,
@@ -39,13 +43,28 @@ describe('PurchaseWrapper', function () {
   }
 
   describe('Deployment', function () {
-    it('should set the right owner', async function () {
+    it('should set the right admin', async function () {
       const {purchaseWrapper, deployer} = await loadFixture(
         setupPurchaseWrapperFixture
       );
-      expect(await purchaseWrapper.owner()).to.equal(
-        await deployer.getAddress()
+      const DEFAULT_ADMIN_ROLE = ethers.ZeroHash; // DEFAULT_ADMIN_ROLE is 0x00...00
+      expect(
+        await purchaseWrapper.hasRole(
+          DEFAULT_ADMIN_ROLE,
+          await deployer.getAddress()
+        )
+      ).to.be.true;
+    });
+
+    it('should set the right authorized caller', async function () {
+      const {purchaseWrapper, randomWallet: userA} = await loadFixture(
+        setupPurchaseWrapperFixture
       );
+      const userAAddress = await userA.getAddress();
+      const authorizedCallerRole =
+        await purchaseWrapper.AUTHORIZED_CALLER_ROLE();
+      expect(await purchaseWrapper.hasRole(authorizedCallerRole, userAAddress))
+        .to.be.true;
     });
 
     it('should set the right SAND token address', async function () {
@@ -66,7 +85,8 @@ describe('PurchaseWrapper', function () {
       await expect(
         PurchaseWrapperFactory.connect(deployer).deploy(
           deployerAddress,
-          ZeroAddress
+          ZeroAddress,
+          deployerAddress
         )
       ).to.be.revertedWithCustomError(
         PurchaseWrapperFactory,
@@ -87,13 +107,12 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAddress,
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
+        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
 
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 222;
       const randomTempTokenId = 12345;
@@ -101,42 +120,32 @@ describe('PurchaseWrapper', function () {
       await nftCollection.setupWave(
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
-        unitPrice
+        sandPrice
       );
-      await sandContract.donateTo(userAAddress, totalPrice);
-      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(totalPrice);
+      await sandContract.donateTo(userAAddress, sandPrice);
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress, // Mint to purchase wrapper
-        tokenAmount,
+        1,
         waveIndex,
         signatureId
       );
 
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice);
+        .approve(purchaseWrapperAddress, sandPrice);
 
       const confirmPurchaseTx = purchaseWrapper
-        .connect(userA) // User A calls confirmPurchase
+        .connect(userA) // Deployer calls confirmPurchase (has AUTHORIZED_CALLER_ROLE)
         .confirmPurchase(
           userAAddress, // sender is userA, who will receive the NFT
           collectionContractAddress,
-          totalPrice,
+          sandPrice,
           waveIndex,
-          tokenAmount,
           signatureId,
           randomTempTokenId,
           signature
-        );
-
-      await expect(confirmPurchaseTx)
-        .to.emit(purchaseWrapper, 'PurchaseConfirmed')
-        .withArgs(
-          userAAddress,
-          collectionContractAddress,
-          randomTempTokenId,
-          totalPrice
         );
 
       const receipt = await (await confirmPurchaseTx).wait();
@@ -146,28 +155,27 @@ describe('PurchaseWrapper', function () {
       for (const log of receipt.logs) {
         try {
           const parsedLog = purchaseWrapper.interface.parseLog(log);
-          if (parsedLog && parsedLog.name === 'NftReceivedAndForwarded') {
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
             mintedTokenId = parsedLog.args.nftTokenId;
-            expect(parsedLog.args.localTokenId).to.equal(randomTempTokenId);
+            expect(parsedLog.args.originalSender).to.equal(userAAddress);
             expect(parsedLog.args.nftCollection).to.equal(
               collectionContractAddress
             );
-            expect(parsedLog.args.originalSender).to.equal(userAAddress);
+            expect(parsedLog.args.localTokenId).to.equal(randomTempTokenId);
             break;
           }
         } catch (e) {
           // Likely a log from another contract
         }
       }
+
       expect(mintedTokenId).to.not.be.undefined;
       if (mintedTokenId === undefined)
         throw new Error('Minted token ID not found');
 
       expect(await nftCollection.ownerOf(mintedTokenId)).to.be.eq(userAAddress);
-      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(
-        tokenAmount
-      );
-      expect(await nftCollection.totalSupply()).to.be.eq(tokenAmount);
+      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(1);
+      expect(await nftCollection.totalSupply()).to.be.eq(1);
 
       expect(await sandContract.balanceOf(userAAddress)).to.be.eq(0);
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
@@ -181,24 +189,23 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper,
         purchaseWrapperAddress,
         randomWallet: userA,
+        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 1;
       const randomTempTokenId = 1;
       const userAAddress = await userA.getAddress();
 
-      await sandContract.donateTo(userAAddress, totalPrice);
+      await sandContract.donateTo(userAAddress, sandPrice);
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice);
+        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
-        tokenAmount,
+        1,
         waveIndex,
         signatureId
       );
@@ -207,9 +214,8 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           ZeroAddress, // sender
           collectionContractAddress,
-          totalPrice,
+          sandPrice,
           waveIndex,
-          tokenAmount,
           signatureId,
           randomTempTokenId,
           signature
@@ -227,24 +233,23 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper,
         purchaseWrapperAddress,
         randomWallet: userA,
+        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 1;
       const randomTempTokenId = 1;
       const userAAddress = await userA.getAddress();
 
-      await sandContract.donateTo(userAAddress, totalPrice);
+      await sandContract.donateTo(userAAddress, sandPrice);
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice);
+        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
-        tokenAmount,
+        1,
         waveIndex,
         signatureId
       );
@@ -253,9 +258,8 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           userAAddress,
           ZeroAddress, // nftCollection
-          totalPrice,
+          sandPrice,
           waveIndex,
-          tokenAmount,
           signatureId,
           randomTempTokenId,
           signature
@@ -277,12 +281,11 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAddress,
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
+        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 1;
       const randomTempTokenId = 123; // Will be used twice
@@ -290,16 +293,16 @@ describe('PurchaseWrapper', function () {
       await nftCollection.setupWave(
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
-        unitPrice
+        sandPrice
       );
-      await sandContract.donateTo(userAAddress, totalPrice * BigInt(2)); // Enough for two
+      await sandContract.donateTo(userAAddress, sandPrice * BigInt(2)); // Enough for two
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice * BigInt(2));
+        .approve(purchaseWrapperAddress, sandPrice * BigInt(2));
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
-        tokenAmount,
+        1,
         waveIndex,
         signatureId
       );
@@ -308,9 +311,8 @@ describe('PurchaseWrapper', function () {
       await purchaseWrapper.connect(userA).confirmPurchase(
         userAAddress,
         collectionContractAddress,
-        totalPrice,
+        sandPrice,
         waveIndex,
-        tokenAmount,
         signatureId,
         randomTempTokenId, // Use the ID
         signature
@@ -319,7 +321,7 @@ describe('PurchaseWrapper', function () {
       // Second purchase attempt with the same local token ID
       const signature2 = await waveMintSign(
         purchaseWrapperAddress,
-        tokenAmount,
+        1,
         waveIndex,
         signatureId + 1
       ); // new sig ID
@@ -327,9 +329,8 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           userAAddress,
           collectionContractAddress,
-          totalPrice,
+          sandPrice,
           waveIndex,
-          tokenAmount,
           signatureId + 1,
           randomTempTokenId, // Reuse the ID
           signature2
@@ -349,21 +350,20 @@ describe('PurchaseWrapper', function () {
         randomWallet: userA,
         purchaseWrapper,
         purchaseWrapperAddress,
+        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 123;
       const randomTempTokenId = 789;
 
-      await sandContract.donateTo(userAAddress, totalPrice);
-      expect(await sandContract.balanceOf(userAAddress)).to.equal(totalPrice);
+      await sandContract.donateTo(userAAddress, sandPrice);
+      expect(await sandContract.balanceOf(userAAddress)).to.equal(sandPrice);
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice);
+        .approve(purchaseWrapperAddress, sandPrice);
 
       const invalidSignature = '0xdeadbeef';
 
@@ -375,9 +375,8 @@ describe('PurchaseWrapper', function () {
           .confirmPurchase(
             userAAddress,
             collectionContractAddress,
-            totalPrice,
+            sandPrice,
             waveIndex,
-            tokenAmount,
             signatureId,
             randomTempTokenId,
             invalidSignature
@@ -391,6 +390,52 @@ describe('PurchaseWrapper', function () {
         balanceBefore
       );
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.equal(0);
+    });
+
+    it('should revert if called by non-authorized caller', async function () {
+      const {
+        collectionContractAddress,
+        waveMintSign,
+        sandContract,
+        purchaseWrapper,
+        purchaseWrapperAddress,
+        randomWallet: userA,
+        deployer,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      const sandPrice = ethers.parseEther('100');
+      const waveIndex = 0;
+      const signatureId = 1;
+      const randomTempTokenId = 1;
+      const userAAddress = await userA.getAddress();
+
+      await sandContract.donateTo(userAAddress, sandPrice);
+      await sandContract
+        .connect(userA)
+        .approve(purchaseWrapperAddress, sandPrice);
+
+      const signature = await waveMintSign(
+        purchaseWrapperAddress,
+        1,
+        waveIndex,
+        signatureId
+      );
+
+      await expect(
+        purchaseWrapper.connect(deployer).confirmPurchase(
+          // deployer doesn't have AUTHORIZED_CALLER_ROLE
+          userAAddress,
+          collectionContractAddress,
+          sandPrice,
+          waveIndex,
+          signatureId,
+          randomTempTokenId,
+          signature
+        )
+      ).to.be.revertedWithCustomError(
+        purchaseWrapper,
+        'PurchaseWrapper__CallerNotAuthorized'
+      );
     });
   });
 
@@ -431,26 +476,24 @@ describe('PurchaseWrapper', function () {
       purchaseWrapperAsUserB = purchaseWrapper.connect(userB);
       nftCollection = collectionContract;
 
-      const tokenAmount = 1;
-      const unitPrice = ethers.parseEther('100');
-      const totalPrice = unitPrice * BigInt(tokenAmount);
+      const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
       const signatureId = 333;
 
       await collectionContractAsOwner.setupWave(
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
-        unitPrice
+        sandPrice
       );
 
-      await sandContract.donateTo(userAAddress, totalPrice);
+      await sandContract.donateTo(userAAddress, sandPrice);
       await sandContract
         .connect(userA)
-        .approve(purchaseWrapperAddress, totalPrice);
+        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
-        tokenAmount,
+        1,
         waveIndex,
         signatureId
       );
@@ -460,9 +503,8 @@ describe('PurchaseWrapper', function () {
         .confirmPurchase(
           userAAddress,
           collectionContractAddress,
-          totalPrice,
+          sandPrice,
           waveIndex,
-          tokenAmount,
           signatureId,
           randomTempTokenId,
           signature
@@ -472,7 +514,7 @@ describe('PurchaseWrapper', function () {
       for (const log of receipt.logs) {
         try {
           const parsedLog = purchaseWrapper.interface.parseLog(log);
-          if (parsedLog && parsedLog.name === 'NftReceivedAndForwarded') {
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
             mintedTokenId = parsedLog.args.nftTokenId;
             break;
           }
@@ -544,22 +586,6 @@ describe('PurchaseWrapper', function () {
         )
         .withArgs(userBAddress, userAAddress);
     });
-
-    it('should revert if caller (msg.sender) is not the "from" address', async function () {
-      // User B (not owner of token) tries to initiate a transfer FROM user A
-      await expect(
-        purchaseWrapperAsUserB.safeTransferFrom(
-          userAAddress,
-          userBAddress,
-          randomTempTokenId
-        )
-      )
-        .to.be.revertedWithCustomError(
-          purchaseWrapperAsUserB,
-          'PurchaseWrapper__CallerMustBeFromAddress'
-        )
-        .withArgs(userBAddress, userAAddress);
-    });
   });
 
   describe('recoverSand', function () {
@@ -603,7 +629,7 @@ describe('PurchaseWrapper', function () {
       );
     });
 
-    it('should revert recoverSand if called by non-owner', async function () {
+    it('should revert recoverSand if called by non-admin', async function () {
       const {purchaseWrapperAsUserA, randomWallet} = await loadFixture(
         setupPurchaseWrapperFixture
       );
@@ -611,7 +637,7 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsUserA.recoverSand(await randomWallet.getAddress())
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsUserA,
-        'OwnableUnauthorizedAccount'
+        'AccessControlUnauthorizedAccount'
       );
     });
 

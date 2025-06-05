@@ -15,11 +15,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   console.log('Deployer address:', deployer);
 
+  const TRANSAK_WALLET = '0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef'; // AMOY
+
   await deployments.deploy('PurchaseWrapper', {
     from: deployer,
     contract:
       '@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper',
-    args: [sandAdmin, sandContract.address],
+    args: [sandAdmin, sandContract.address, TRANSAK_WALLET],
     log: true,
     skipIfAlreadyDeployed: true,
   });
