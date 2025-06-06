@@ -119,7 +119,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param randomTempTokenId A unique temporary ID chosen by the caller to identify this purchase.
      *                          This ID will be associated with the minted NFT.
      * @param signature The signature data for verification by the NFT Collection.
-     * @return bytes The return data from the `approveAndCall` to the `sandToken`, typically the result of the NFT minting call.
      */
     function confirmPurchase(
         address sender,
@@ -129,7 +128,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 signatureId,
         uint256 randomTempTokenId,
         bytes calldata signature
-    ) external nonReentrant returns (bytes memory) {
+    ) external nonReentrant {
         if (msg.sender == address(sandToken) && !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
             revert PurchaseWrapper__CallerNotAuthorized(sender);
         } else if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
@@ -161,7 +160,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         );
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returnData) = address(sandToken).call(
+        (bool success, ) = address(sandToken).call(
             abi.encodeWithSelector(
                 bytes4(keccak256("approveAndCall(address,uint256,bytes)")),
                 nftCollection,
@@ -177,7 +176,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         IERC721(nftCollection).transferFrom(address(this), sender, _purchaseInfo[randomTempTokenId].nftTokenId);
 
         emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, _purchaseInfo[randomTempTokenId].nftTokenId);
-        return returnData;
     }
 
     /**
@@ -187,18 +185,10 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      *      `confirmPurchase` to identify the purchase and original sender. It then stores the
      *      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers
      *      the NFT to the `_txContext_originalSender`.
-     * @param operator The address which called the `safeTransferFrom` function (unused).
-     * @param from The address which previously owned the token (unused, typically address(0) for mint).
      * @param tokenId The ID of the token being transferred to this contract.
-     * @param data Additional data with no specified format (unused).
      * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
      */
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external override returns (bytes4) {
+    function onERC721Received(address, address, uint256 tokenId, bytes calldata) external override returns (bytes4) {
         if (!_isInConfirmPurchase) revert PurchaseWrapper__NotInConfirmPurchase();
         PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];
 
@@ -255,6 +245,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         if (info.caller != from) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
 
         IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
+
         emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
     }
 }
