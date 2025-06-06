@@ -50,6 +50,12 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     uint256 private _txContext_localTokenId;
 
     /**
+     * @notice A variable to track if the contract is in the confirmPurchase function.
+     *         It is set to true in confirmPurchase and reset to false in onERC721Received.
+     */
+    bool private _isInConfirmPurchase;
+
+    /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
      * @param originalSender The address that initiated the purchase.
      * @param nftCollection The address of the NFT collection.
@@ -84,6 +90,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapper__CallerNotAuthorized(address caller);
     error PurchaseWrapper__SenderIsNotSandToken();
     error PurchaseWrapper__RandomTempTokenIdCannotBeZero();
+    error PurchaseWrapper__NotInConfirmPurchase();
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -135,6 +142,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
 
         _txContext_localTokenId = randomTempTokenId;
+        _isInConfirmPurchase = true;
 
         _purchaseInfo[randomTempTokenId].caller = sender;
         _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
@@ -163,7 +171,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         );
 
         if (!success) {
-            _purchaseInfo[randomTempTokenId].caller = address(0);
             revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
 
@@ -192,12 +199,14 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
+        if (!_isInConfirmPurchase) revert PurchaseWrapper__NotInConfirmPurchase();
         PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];
 
         if (msg.sender != info.nftCollection)
             revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(info.nftCollection, msg.sender);
 
         info.nftTokenId = tokenId;
+        _isInConfirmPurchase = false;
 
         return IERC721Receiver.onERC721Received.selector;
     }
