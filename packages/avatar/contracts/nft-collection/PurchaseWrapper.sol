@@ -212,6 +212,15 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
+     * @notice Retrieves the purchase information for a given local token ID.
+     * @param localTokenId The local temporary token ID of the purchase.
+     * @return A `PurchaseInfo` struct containing the details of the purchase.
+     */
+    function getPurchaseInfo(uint256 localTokenId) external view returns (PurchaseInfo memory) {
+        return _purchaseInfo[localTokenId];
+    }
+
+    /**
      * @notice Recovers SAND tokens (or other ERC20 specified in `sandToken`)
      *         that were accidentally sent or accumulated in this contract.
      * @dev Only callable by the contract owner.
