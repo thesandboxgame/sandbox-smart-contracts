@@ -276,7 +276,6 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAddress,
         waveMaxTokensOverall,
         waveMaxTokensPerWallet,
-        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
@@ -345,7 +344,6 @@ describe('PurchaseWrapper', function () {
         randomWallet: userA,
         purchaseWrapper,
         purchaseWrapperAddress,
-        deployer,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
@@ -437,7 +435,6 @@ describe('PurchaseWrapper', function () {
   describe('safeTransferFrom(address from, address to, uint256 localTokenId)', function () {
     let userAAddress: string;
     let userBAddress: string;
-    let purchaseWrapperAsUserB: PurchaseWrapper;
     let nftCollection: NFTCollection;
     let purchaseWrapperAsUserA: PurchaseWrapper;
     let mintedTokenId: bigint;
@@ -468,7 +465,6 @@ describe('PurchaseWrapper', function () {
         .setApprovalForAll(purchaseWrapperAddress, true);
 
       purchaseWrapperAsUserA = purchaseWrapper.connect(userA);
-      purchaseWrapperAsUserB = purchaseWrapper.connect(userB);
       nftCollection = collectionContract;
 
       const sandPrice = ethers.parseEther('100');
