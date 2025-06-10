@@ -3,7 +3,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DEPLOY_TAGS} from '../../hardhat.config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, getNamedAccounts, network} = hre;
   const {deployer, sandAdmin} = await getNamedAccounts();
 
   // Get the PolygonSand contract address
@@ -15,13 +15,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   console.log('Deployer address:', deployer);
 
-  const TRANSAK_WALLET = '0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef'; // AMOY
+  let transakWallet: string;
+  if (network.name === 'amoy') {
+    transakWallet = '0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef'; // AMOY
+  } else if (network.name === 'matic') {
+    // TODO: add matic address
+    transakWallet = '0x...';
+  } else {
+    throw new Error(
+      `Network ${network.name} is not supported for this deployment.`
+    );
+  }
 
   await deployments.deploy('PurchaseWrapper', {
     from: deployer,
     contract:
       '@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper',
-    args: [sandAdmin, sandContract.address, TRANSAK_WALLET],
+    args: [sandAdmin, sandContract.address, transakWallet],
     log: true,
     skipIfAlreadyDeployed: true,
   });

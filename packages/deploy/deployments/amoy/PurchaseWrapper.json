@@ -1,0 +1,1076 @@
+{
+  "address": "0x8DB0C39d018094220252F1C5175Bda3CE5573451",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_admin",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_sandToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_authorizedCaller",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccessControlBadConfirmation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "neededRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AccessControlUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        }
+      ],
+      "name": "AddressEmptyCode",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "AddressInsufficientBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "FailedInnerCall",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "PurchaseWrapper__CallerNotAuthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "expected",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "actual",
+          "type": "address"
+        }
+      ],
+      "name": "PurchaseWrapper__FromAddressIsNotOriginalRecipient",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__InvalidRecipientAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PurchaseWrapper__LocalTokenIdAlreadyInUse",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__NftCollectionAddressCannotBeZero",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PurchaseWrapper__NftCollectionNotRecorded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PurchaseWrapper__NftNotYetMintedOrRecorded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__NftPurchaseFailedViaApproveAndCall",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__NoSandTokensToRecover",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__NotInConfirmPurchase",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__RandomTempTokenIdCannotBeZero",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "expected",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "actual",
+          "type": "address"
+        }
+      ],
+      "name": "PurchaseWrapper__ReceivedNftFromUnexpectedCollection",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__SandTokenAddressCannotBeZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__SenderAddressCannotBeZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__SenderIsNotSandToken",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseWrapper__TransferToZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nftTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "NftTransferredViaWrapper",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "originalSender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "nftCollection",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nftTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PurchaseConfirmed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AUTHORIZED_CALLER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nftCollection",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "sandAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "waveIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "signatureId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "randomTempTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "confirmPurchase",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPurchaseInfo",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "nftCollection",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nftTokenId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct PurchaseWrapper.PurchaseInfo",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "recoverSand",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "callerConfirmation",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "localTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sandToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x82298d0cbf5ba887ba532df7e1f2ea2ab7790fc5a9fed0321614069b2d76ecfe",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0x8DB0C39d018094220252F1C5175Bda3CE5573451",
+    "transactionIndex": 0,
+    "gasUsed": "1175749",
+    "logsBloom": "0x00000004000000000000000000000000000000000000000000000020000000000002000000008400000000000000000000008000000000000000000000400000000080000000000000000000000000800000000040000000000100001000000008000000020000000002021000000800000000000000000080000000000000000000000000000000000000000000200000000000000000000000000000200000200000000000000000000000000000000000000000000000001000000000004000000000000000000001000000000000000000000000000100108000000020000000000000000000000000000000008000080000000000400000000000100000",
+    "blockHash": "0x80a4ca759b71febe641f916d74742bd5a1406076bde92af2e253c6771533ee3f",
+    "transactionHash": "0x82298d0cbf5ba887ba532df7e1f2ea2ab7790fc5a9fed0321614069b2d76ecfe",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 22713013,
+        "transactionHash": "0x82298d0cbf5ba887ba532df7e1f2ea2ab7790fc5a9fed0321614069b2d76ecfe",
+        "address": "0x8DB0C39d018094220252F1C5175Bda3CE5573451",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x00000000000000000000000049c4d4c94829b9c44052c5f5cb164fc612181165",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x80a4ca759b71febe641f916d74742bd5a1406076bde92af2e253c6771533ee3f"
+      },
+      {
+        "transactionIndex": 0,
+        "blockNumber": 22713013,
+        "transactionHash": "0x82298d0cbf5ba887ba532df7e1f2ea2ab7790fc5a9fed0321614069b2d76ecfe",
+        "address": "0x8DB0C39d018094220252F1C5175Bda3CE5573451",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0xf12fb6eaf1f045883c82d7d192627f7a36a50ce00c45e305919895908135a8a8",
+          "0x000000000000000000000000cb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02"
+        ],
+        "data": "0x",
+        "logIndex": 1,
+        "blockHash": "0x80a4ca759b71febe641f916d74742bd5a1406076bde92af2e253c6771533ee3f"
+      },
+      {
+        "transactionIndex": 0,
+        "blockNumber": 22713013,
+        "transactionHash": "0x82298d0cbf5ba887ba532df7e1f2ea2ab7790fc5a9fed0321614069b2d76ecfe",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x0000000000000000000000004ad84f7014b7b44f723f284a85b1662337971439"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000000cb8dd2d43e993e000000000000000000000000000000000000000000000001ac9fbbbc7348f78b0000000000000000000000000000000000000000000007f1bbde2f829efda3d9000000000000000000000000000000000000000000000001abd42de99f0a5e4d0000000000000000000000000000000000000000000007f1bca9bd55733c3d17",
+        "logIndex": 2,
+        "blockHash": "0x80a4ca759b71febe641f916d74742bd5a1406076bde92af2e253c6771533ee3f"
+      }
+    ],
+    "blockNumber": 22713013,
+    "cumulativeGasUsed": "1175749",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x49c4D4C94829B9c44052C5f5Cb164Fc612181165",
+    "0xD20fbd836e80DabFb777E6AaBbe52e96c07eCD1B",
+    "0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "7f1a126ed3d0508c5edef84fec4e5930",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.26+commit.8a97fa7a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_admin\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_sandToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_authorizedCaller\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressInsufficientBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedInnerCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"}],\"name\":\"PurchaseWrapper__CallerNotAuthorized\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"expected\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"actual\",\"type\":\"address\"}],\"name\":\"PurchaseWrapper__FromAddressIsNotOriginalRecipient\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__InvalidRecipientAddress\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"PurchaseWrapper__LocalTokenIdAlreadyInUse\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__NftCollectionAddressCannotBeZero\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"PurchaseWrapper__NftCollectionNotRecorded\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"PurchaseWrapper__NftNotYetMintedOrRecorded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__NftPurchaseFailedViaApproveAndCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__NoSandTokensToRecover\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__NotInConfirmPurchase\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__RandomTempTokenIdCannotBeZero\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"expected\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"actual\",\"type\":\"address\"}],\"name\":\"PurchaseWrapper__ReceivedNftFromUnexpectedCollection\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__SandTokenAddressCannotBeZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__SenderAddressCannotBeZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__SenderIsNotSandToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PurchaseWrapper__TransferToZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"nftTokenId\",\"type\":\"uint256\"}],\"name\":\"NftTransferredViaWrapper\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"originalSender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"nftCollection\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"nftTokenId\",\"type\":\"uint256\"}],\"name\":\"PurchaseConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"AUTHORIZED_CALLER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"nftCollection\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"sandAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"waveIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"signatureId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"randomTempTokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"confirmPurchase\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"getPurchaseInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"nftCollection\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nftTokenId\",\"type\":\"uint256\"}],\"internalType\":\"struct PurchaseWrapper.PurchaseInfo\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"recoverSand\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"localTokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sandToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"The Sandbox\",\"custom:security-contact\":\"contact-blockchain@sandbox.game\",\"details\":\"Implements IERC721Receiver to handle NFT receipts. Uses Ownable for admin functions.\",\"errors\":{\"AccessControlBadConfirmation()\":[{\"details\":\"The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\"}],\"AccessControlUnauthorizedAccount(address,bytes32)\":[{\"details\":\"The `account` is missing a role.\"}],\"AddressEmptyCode(address)\":[{\"details\":\"There's no code at `target` (it is not a contract).\"}],\"AddressInsufficientBalance(address)\":[{\"details\":\"The ETH balance of the account is not enough to perform the operation.\"}],\"FailedInnerCall()\":[{\"details\":\"A call to an address target failed. The target may have reverted.\"}],\"ReentrancyGuardReentrantCall()\":[{\"details\":\"Unauthorized reentrant call.\"}],\"SafeERC20FailedOperation(address)\":[{\"details\":\"An operation with an ERC20 token failed.\"}]},\"events\":{\"NftTransferredViaWrapper(uint256,address,address,uint256)\":{\"params\":{\"from\":\"The address from which the NFT is transferred.\",\"localTokenId\":\"The local token ID representing the NFT.\",\"nftTokenId\":\"The actual ID of the transferred NFT.\",\"to\":\"The address to which the NFT is transferred.\"}},\"PurchaseConfirmed(address,address,uint256,uint256)\":{\"params\":{\"localTokenId\":\"The temporary local token ID for this purchase.\",\"nftCollection\":\"The address of the NFT collection.\",\"nftTokenId\":\"The actual ID of the minted NFT.\",\"originalSender\":\"The address that initiated the purchase.\"}},\"RoleAdminChanged(bytes32,bytes32,bytes32)\":{\"details\":\"Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this.\"},\"RoleGranted(bytes32,address,address)\":{\"details\":\"Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {AccessControl-_setupRole}.\"},\"RoleRevoked(bytes32,address,address)\":{\"details\":\"Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)\"}},\"kind\":\"dev\",\"methods\":{\"confirmPurchase(address,address,uint256,uint256,uint256,uint256,bytes)\":{\"details\":\"The `randomTempTokenId` must be unique for each purchase attempt and is used to track      the purchase through to NFT delivery. This function sets transaction-scoped context      variables (`_txContext_...`) that are used by `onERC721Received`.\",\"params\":{\"nftCollection\":\"Address of the target NFT Collection contract for minting.\",\"randomTempTokenId\":\"A unique temporary ID chosen by the caller to identify this purchase.                          This ID will be associated with the minted NFT.\",\"sandAmount\":\"The amount of `sandToken` to be transferred for the purchase.\",\"sender\":\"The original EOA initiating the purchase and who will receive the NFT.\",\"signature\":\"The signature data for verification by the NFT Collection.\",\"signatureId\":\"The signature ID for verification by the NFT Collection.\",\"waveIndex\":\"The wave index for minting on the NFT Collection.\"}},\"constructor\":{\"params\":{\"_admin\":\"The initial owner of this contract.\",\"_sandToken\":\"Address of the Sand (ERC20) token contract.\"}},\"getPurchaseInfo(uint256)\":{\"params\":{\"localTokenId\":\"The local temporary token ID of the purchase.\"},\"returns\":{\"_0\":\"A `PurchaseInfo` struct containing the details of the purchase.\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"onERC721Received(address,address,uint256,bytes)\":{\"details\":\"This function uses the transaction-scoped context variables (`_txContext_...`) set by      `confirmPurchase` to identify the purchase and original sender. It then stores the      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers      the NFT to the `_txContext_originalSender`.\",\"params\":{\"tokenId\":\"The ID of the token being transferred to this contract.\"},\"returns\":{\"_0\":\"bytes4 The selector `bytes4(keccak256(\\\"onERC721Received(address,address,uint256,bytes)\\\"))`.\"}},\"recoverSand(address)\":{\"details\":\"Only callable by the contract owner.\",\"params\":{\"recipient\":\"Address to receive the recovered ERC20 tokens.\"}},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event.\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.\"},\"safeTransferFrom(address,address,uint256)\":{\"details\":\"Similar to `transferFrom` but uses `safeTransferFrom` for the actual NFT transfer.      The `msg.sender` must be the `from` address.\",\"params\":{\"from\":\"The current owner of the NFT.\",\"localTokenId\":\"The local temporary token ID.\",\"to\":\"The new address to receive the NFT.\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"stateVariables\":{\"_purchaseInfo\":{\"details\":\"This `localTokenId` is provided by the caller during `confirmPurchase` and is used      to uniquely identify a purchase transaction and later to reference the minted NFT      in the wrapper's transfer functions.\"}},\"title\":\"PurchaseWrapper\",\"version\":1},\"userdoc\":{\"events\":{\"NftTransferredViaWrapper(uint256,address,address,uint256)\":{\"notice\":\"Emitted when an NFT is transferred using the wrapper's transfer functions.\"},\"PurchaseConfirmed(address,address,uint256,uint256)\":{\"notice\":\"Emitted when an NFT purchase is confirmed and the minting process is initiated.\"}},\"kind\":\"user\",\"methods\":{\"confirmPurchase(address,address,uint256,uint256,uint256,uint256,bytes)\":{\"notice\":\"Confirms a purchase request, takes payment, and initiates the NFT minting process         by calling `approveAndCall` on the `sandToken` contract, which in turn calls         the `waveMint` (or similar) function on the `nftCollection` contract.\"},\"constructor\":{\"notice\":\"Constructor to set the SAND token contract address.\"},\"getPurchaseInfo(uint256)\":{\"notice\":\"Retrieves the purchase information for a given local token ID.\"},\"onERC721Received(address,address,uint256,bytes)\":{\"notice\":\"Handles the receipt of an ERC721 token, expected to be called by an NFT collection         contract after a successful mint initiated by `confirmPurchase`.\"},\"recoverSand(address)\":{\"notice\":\"Recovers SAND tokens (or other ERC20 specified in `sandToken`)         that were accidentally sent or accumulated in this contract.\"},\"safeTransferFrom(address,address,uint256)\":{\"notice\":\"Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom`.\"},\"sandToken()\":{\"notice\":\"Address of the SAND token used for purchases.\"}},\"notice\":\"Contract that facilitates NFT purchases using SAND.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol\":\"PurchaseWrapper\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/AccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"./IAccessControl.sol\\\";\\nimport {Context} from \\\"../utils/Context.sol\\\";\\nimport {ERC165} from \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```solidity\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```solidity\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\\n * to enforce additional security measures for this role.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping(address account => bool) hasRole;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 role => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role);\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\\n        return _roles[role].hasRole[account];\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\\n     */\\n    function _checkRole(bytes32 role) internal view virtual {\\n        _checkRole(role, _msgSender());\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\\n     * is missing `role`.\\n     */\\n    function _checkRole(bytes32 role, address account) internal view virtual {\\n        if (!hasRole(role, account)) {\\n            revert AccessControlUnauthorizedAccount(account, role);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\\n        if (callerConfirmation != _msgSender()) {\\n            revert AccessControlBadConfirmation();\\n        }\\n\\n        _revokeRole(role, callerConfirmation);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (!hasRole(role, account)) {\\n            _roles[role].hasRole[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Attempts to revoke `role` to `account` and returns a boolean indicating if `role` was revoked.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (hasRole(role, account)) {\\n            _roles[role].hasRole[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xa0e92d42942f4f57c5be50568dac11e9d00c93efcb458026e18d2d9b9b2e7308\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/IAccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControl {\\n    /**\\n     * @dev The `account` is missing a role.\\n     */\\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\\n\\n    /**\\n     * @dev The caller of a function is not the expected one.\\n     *\\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\\n     */\\n    error AccessControlBadConfirmation();\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {AccessControl-_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) external;\\n}\\n\",\"keccak256\":\"0xb6b36edd6a2999fd243ff226d6cbf84bd71af2432bbd0dfe19392996a1d9cb41\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xc6a8ff0ea489379b61faa647490411b80102578440ab9d84e9a957cc12164e70\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/extensions/IERC20Permit.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in\\n * https://eips.ethereum.org/EIPS/eip-2612[EIP-2612].\\n *\\n * Adds the {permit} method, which can be used to change an account's ERC20 allowance (see {IERC20-allowance}) by\\n * presenting a message signed by the account. By not relying on {IERC20-approve}, the token holder account doesn't\\n * need to send a transaction, and thus is not required to hold Ether at all.\\n *\\n * ==== Security Considerations\\n *\\n * There are two important considerations concerning the use of `permit`. The first is that a valid permit signature\\n * expresses an allowance, and it should not be assumed to convey additional meaning. In particular, it should not be\\n * considered as an intention to spend the allowance in any specific way. The second is that because permits have\\n * built-in replay protection and can be submitted by anyone, they can be frontrun. A protocol that uses permits should\\n * take this into consideration and allow a `permit` call to fail. Combining these two aspects, a pattern that may be\\n * generally recommended is:\\n *\\n * ```solidity\\n * function doThingWithPermit(..., uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {\\n *     try token.permit(msg.sender, address(this), value, deadline, v, r, s) {} catch {}\\n *     doThing(..., value);\\n * }\\n *\\n * function doThing(..., uint256 value) public {\\n *     token.safeTransferFrom(msg.sender, address(this), value);\\n *     ...\\n * }\\n * ```\\n *\\n * Observe that: 1) `msg.sender` is used as the owner, leaving no ambiguity as to the signer intent, and 2) the use of\\n * `try/catch` allows the permit to fail and makes the code tolerant to frontrunning. (See also\\n * {SafeERC20-safeTransferFrom}).\\n *\\n * Additionally, note that smart contract wallets (such as Argent or Safe) are not able to produce permit signatures, so\\n * contracts should have entry points that don't rely on permit.\\n */\\ninterface IERC20Permit {\\n    /**\\n     * @dev Sets `value` as the allowance of `spender` over ``owner``'s tokens,\\n     * given ``owner``'s signed approval.\\n     *\\n     * IMPORTANT: The same issues {IERC20-approve} has related to transaction\\n     * ordering also apply here.\\n     *\\n     * Emits an {Approval} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `spender` cannot be the zero address.\\n     * - `deadline` must be a timestamp in the future.\\n     * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`\\n     * over the EIP712-formatted function arguments.\\n     * - the signature must use ``owner``'s current nonce (see {nonces}).\\n     *\\n     * For more information on the signature format, see the\\n     * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP\\n     * section].\\n     *\\n     * CAUTION: See Security Considerations above.\\n     */\\n    function permit(\\n        address owner,\\n        address spender,\\n        uint256 value,\\n        uint256 deadline,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) external;\\n\\n    /**\\n     * @dev Returns the current nonce for `owner`. This value must be\\n     * included whenever a signature is generated for {permit}.\\n     *\\n     * Every successful call to {permit} increases ``owner``'s nonce by one. This\\n     * prevents a signature from being used multiple times.\\n     */\\n    function nonces(address owner) external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the domain separator used in the encoding of the signature for {permit}, as defined by {EIP712}.\\n     */\\n    // solhint-disable-next-line func-name-mixedcase\\n    function DOMAIN_SEPARATOR() external view returns (bytes32);\\n}\\n\",\"keccak256\":\"0x6008dabfe393240d73d7dd7688033f72740d570aa422254d29a7dce8568f3aff\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/utils/SafeERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC20} from \\\"../IERC20.sol\\\";\\nimport {IERC20Permit} from \\\"../extensions/IERC20Permit.sol\\\";\\nimport {Address} from \\\"../../../utils/Address.sol\\\";\\n\\n/**\\n * @title SafeERC20\\n * @dev Wrappers around ERC20 operations that throw on failure (when the token\\n * contract returns false). Tokens that return no value (and instead revert or\\n * throw on failure) are also supported, non-reverting calls are assumed to be\\n * successful.\\n * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,\\n * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.\\n */\\nlibrary SafeERC20 {\\n    using Address for address;\\n\\n    /**\\n     * @dev An operation with an ERC20 token failed.\\n     */\\n    error SafeERC20FailedOperation(address token);\\n\\n    /**\\n     * @dev Indicates a failed `decreaseAllowance` request.\\n     */\\n    error SafeERC20FailedDecreaseAllowance(address spender, uint256 currentAllowance, uint256 requestedDecrease);\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransfer(IERC20 token, address to, uint256 value) internal {\\n        _callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));\\n    }\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from `from` to `to`, spending the approval given by `from` to the\\n     * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {\\n        _callOptionalReturn(token, abi.encodeCall(token.transferFrom, (from, to, value)));\\n    }\\n\\n    /**\\n     * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     */\\n    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {\\n        uint256 oldAllowance = token.allowance(address(this), spender);\\n        forceApprove(token, spender, oldAllowance + value);\\n    }\\n\\n    /**\\n     * @dev Decrease the calling contract's allowance toward `spender` by `requestedDecrease`. If `token` returns no\\n     * value, non-reverting calls are assumed to be successful.\\n     */\\n    function safeDecreaseAllowance(IERC20 token, address spender, uint256 requestedDecrease) internal {\\n        unchecked {\\n            uint256 currentAllowance = token.allowance(address(this), spender);\\n            if (currentAllowance < requestedDecrease) {\\n                revert SafeERC20FailedDecreaseAllowance(spender, currentAllowance, requestedDecrease);\\n            }\\n            forceApprove(token, spender, currentAllowance - requestedDecrease);\\n        }\\n    }\\n\\n    /**\\n     * @dev Set the calling contract's allowance toward `spender` to `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful. Meant to be used with tokens that require the approval\\n     * to be set to zero before setting it to a non-zero value, such as USDT.\\n     */\\n    function forceApprove(IERC20 token, address spender, uint256 value) internal {\\n        bytes memory approvalCall = abi.encodeCall(token.approve, (spender, value));\\n\\n        if (!_callOptionalReturnBool(token, approvalCall)) {\\n            _callOptionalReturn(token, abi.encodeCall(token.approve, (spender, 0)));\\n            _callOptionalReturn(token, approvalCall);\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement\\n     * on the return value: the return value is optional (but if data is returned, it must not be false).\\n     * @param token The token targeted by the call.\\n     * @param data The call data (encoded using abi.encode or one of its variants).\\n     */\\n    function _callOptionalReturn(IERC20 token, bytes memory data) private {\\n        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since\\n        // we're implementing it ourselves. We use {Address-functionCall} to perform this call, which verifies that\\n        // the target address contains contract code and also asserts for success in the low-level call.\\n\\n        bytes memory returndata = address(token).functionCall(data);\\n        if (returndata.length != 0 && !abi.decode(returndata, (bool))) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement\\n     * on the return value: the return value is optional (but if data is returned, it must not be false).\\n     * @param token The token targeted by the call.\\n     * @param data The call data (encoded using abi.encode or one of its variants).\\n     *\\n     * This is a variant of {_callOptionalReturn} that silents catches all reverts and returns a bool instead.\\n     */\\n    function _callOptionalReturnBool(IERC20 token, bytes memory data) private returns (bool) {\\n        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since\\n        // we're implementing it ourselves. We cannot use {Address-functionCall} here since this should return false\\n        // and not revert is the subcall reverts.\\n\\n        (bool success, bytes memory returndata) = address(token).call(data);\\n        return success && (returndata.length == 0 || abi.decode(returndata, (bool))) && address(token).code.length > 0;\\n    }\\n}\\n\",\"keccak256\":\"0x37bb49513c49c87c4642a891b13b63571bc87013dde806617aa1efb54605f386\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC721 compliant contract.\\n */\\ninterface IERC721 is IERC165 {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or\\n     *   {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721\\n     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\\n     * understand this adds an external call which potentially creates a reentrancy vulnerability.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the address zero.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x5ef46daa3b58ef2702279d514780316efaa952915ee1aa3396f041ee2982b0b4\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/IERC721Receiver.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @title ERC721 token receiver interface\\n * @dev Interface for any contract that wants to support safeTransfers\\n * from ERC721 asset contracts.\\n */\\ninterface IERC721Receiver {\\n    /**\\n     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}\\n     * by `operator` from `from`, this function is called.\\n     *\\n     * It must return its Solidity selector to confirm the token transfer.\\n     * If any other value is returned or the interface is not implemented by the recipient, the transfer will be\\n     * reverted.\\n     *\\n     * The selector can be obtained in Solidity with `IERC721Receiver.onERC721Received.selector`.\\n     */\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0x7f7a26306c79a65fb8b3b6c757cd74660c532cd8a02e165488e30027dd34ca49\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Address.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/Address.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary Address {\\n    /**\\n     * @dev The ETH balance of the account is not enough to perform the operation.\\n     */\\n    error AddressInsufficientBalance(address account);\\n\\n    /**\\n     * @dev There's no code at `target` (it is not a contract).\\n     */\\n    error AddressEmptyCode(address target);\\n\\n    /**\\n     * @dev A call to an address target failed. The target may have reverted.\\n     */\\n    error FailedInnerCall();\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.8.20/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        if (address(this).balance < amount) {\\n            revert AddressInsufficientBalance(address(this));\\n        }\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        if (!success) {\\n            revert FailedInnerCall();\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason or custom error, it is bubbled\\n     * up by this function (like regular Solidity function calls). However, if\\n     * the call reverted with no returned reason, this function reverts with a\\n     * {FailedInnerCall} error.\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     */\\n    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {\\n        if (address(this).balance < value) {\\n            revert AddressInsufficientBalance(address(this));\\n        }\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResultFromTarget(target, success, returndata);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResultFromTarget(target, success, returndata);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a delegate call.\\n     */\\n    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {\\n        (bool success, bytes memory returndata) = target.delegatecall(data);\\n        return verifyCallResultFromTarget(target, success, returndata);\\n    }\\n\\n    /**\\n     * @dev Tool to verify that a low level call to smart-contract was successful, and reverts if the target\\n     * was not a contract or bubbling up the revert reason (falling back to {FailedInnerCall}) in case of an\\n     * unsuccessful call.\\n     */\\n    function verifyCallResultFromTarget(\\n        address target,\\n        bool success,\\n        bytes memory returndata\\n    ) internal view returns (bytes memory) {\\n        if (!success) {\\n            _revert(returndata);\\n        } else {\\n            // only check if target is a contract if the call was successful and the return data is empty\\n            // otherwise we already know that it was a contract\\n            if (returndata.length == 0 && target.code.length == 0) {\\n                revert AddressEmptyCode(target);\\n            }\\n            return returndata;\\n        }\\n    }\\n\\n    /**\\n     * @dev Tool to verify that a low level call was successful, and reverts if it wasn't, either by bubbling the\\n     * revert reason or with a default {FailedInnerCall} error.\\n     */\\n    function verifyCallResult(bool success, bytes memory returndata) internal pure returns (bytes memory) {\\n        if (!success) {\\n            _revert(returndata);\\n        } else {\\n            return returndata;\\n        }\\n    }\\n\\n    /**\\n     * @dev Reverts with returndata if present. Otherwise reverts with {FailedInnerCall}.\\n     */\\n    function _revert(bytes memory returndata) private pure {\\n        // Look for revert reason and bubble it up if present\\n        if (returndata.length > 0) {\\n            // The easiest way to bubble the revert reason is using memory via assembly\\n            /// @solidity memory-safe-assembly\\n            assembly {\\n                let returndata_size := mload(returndata)\\n                revert(add(32, returndata), returndata_size)\\n            }\\n        } else {\\n            revert FailedInnerCall();\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xaf28a975a78550e45f65e559a3ad6a5ad43b9b8a37366999abd1b7084eb70721\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/ReentrancyGuard.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/ReentrancyGuard.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Contract module that helps prevent reentrant calls to a function.\\n *\\n * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\\n * available, which can be applied to functions to make sure there are no nested\\n * (reentrant) calls to them.\\n *\\n * Note that because there is a single `nonReentrant` guard, functions marked as\\n * `nonReentrant` may not call one another. This can be worked around by making\\n * those functions `private`, and then adding `external` `nonReentrant` entry\\n * points to them.\\n *\\n * TIP: If you would like to learn more about reentrancy and alternative ways\\n * to protect against it, check out our blog post\\n * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].\\n */\\nabstract contract ReentrancyGuard {\\n    // Booleans are more expensive than uint256 or any type that takes up a full\\n    // word because each write operation emits an extra SLOAD to first read the\\n    // slot's contents, replace the bits taken up by the boolean, and then write\\n    // back. This is the compiler's defense against contract upgrades and\\n    // pointer aliasing, and it cannot be disabled.\\n\\n    // The values being non-zero value makes deployment a bit more expensive,\\n    // but in exchange the refund on every call to nonReentrant will be lower in\\n    // amount. Since refunds are capped to a percentage of the total\\n    // transaction's gas, it is best to keep them low in cases like this one, to\\n    // increase the likelihood of the full refund coming into effect.\\n    uint256 private constant NOT_ENTERED = 1;\\n    uint256 private constant ENTERED = 2;\\n\\n    uint256 private _status;\\n\\n    /**\\n     * @dev Unauthorized reentrant call.\\n     */\\n    error ReentrancyGuardReentrantCall();\\n\\n    constructor() {\\n        _status = NOT_ENTERED;\\n    }\\n\\n    /**\\n     * @dev Prevents a contract from calling itself, directly or indirectly.\\n     * Calling a `nonReentrant` function from another `nonReentrant`\\n     * function is not supported. It is possible to prevent this from happening\\n     * by making the `nonReentrant` function external, and making it call a\\n     * `private` function that does the actual work.\\n     */\\n    modifier nonReentrant() {\\n        _nonReentrantBefore();\\n        _;\\n        _nonReentrantAfter();\\n    }\\n\\n    function _nonReentrantBefore() private {\\n        // On the first call to nonReentrant, _status will be NOT_ENTERED\\n        if (_status == ENTERED) {\\n            revert ReentrancyGuardReentrantCall();\\n        }\\n\\n        // Any calls to nonReentrant after this point will fail\\n        _status = ENTERED;\\n    }\\n\\n    function _nonReentrantAfter() private {\\n        // By storing the original value once again, a refund is triggered (see\\n        // https://eips.ethereum.org/EIPS/eip-2200)\\n        _status = NOT_ENTERED;\\n    }\\n\\n    /**\\n     * @dev Returns true if the reentrancy guard is currently set to \\\"entered\\\", which indicates there is a\\n     * `nonReentrant` function in the call stack.\\n     */\\n    function _reentrancyGuardEntered() internal view returns (bool) {\\n        return _status == ENTERED;\\n    }\\n}\\n\",\"keccak256\":\"0xf980daa263b661ab8ddee7d4fd833c7da7e7995e2c359ff1f17e67e4112f2236\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0x9e8778b14317ba9e256c30a76fd6c32b960af621987f56069e1e819c77c6a133\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"license\":\"MIT\"},\"@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.26;\\n\\nimport {IERC721} from \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\nimport {IERC721Receiver} from \\\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\\\";\\nimport {IERC20} from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport {SafeERC20} from \\\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\\\";\\nimport {AccessControl} from \\\"@openzeppelin/contracts/access/AccessControl.sol\\\";\\nimport {ReentrancyGuard} from \\\"@openzeppelin/contracts/utils/ReentrancyGuard.sol\\\";\\n\\n/**\\n * @title PurchaseWrapper\\n * @author The Sandbox\\n * @notice Contract that facilitates NFT purchases using SAND.\\n * @custom:security-contact contact-blockchain@sandbox.game\\n * @dev Implements IERC721Receiver to handle NFT receipts. Uses Ownable for admin functions.\\n */\\ncontract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {\\n    /**\\n     * @dev Stores information about a purchase linked to a local temporary token ID.\\n     * @param caller The EOA who called the `confirmPurchase` function.\\n     * @param nftCollection The address of the NFT collection contract from which the NFT was/will be minted.\\n     * @param nftTokenId The actual token ID of the minted NFT. It is 0 until the NFT is minted and received by this contract.\\n     */\\n    struct PurchaseInfo {\\n        address caller;\\n        address nftCollection;\\n        uint256 nftTokenId;\\n    }\\n\\n    bytes32 public constant AUTHORIZED_CALLER_ROLE = keccak256(\\\"AUTHORIZED_CALLER_ROLE\\\");\\n\\n    /**\\n     * @notice Address of the SAND token used for purchases.\\n     */\\n    IERC20 public sandToken;\\n\\n    /**\\n     * @notice Mapping from a local temporary token ID to the details of the purchase.\\n     * @dev This `localTokenId` is provided by the caller during `confirmPurchase` and is used\\n     *      to uniquely identify a purchase transaction and later to reference the minted NFT\\n     *      in the wrapper's transfer functions.\\n     */\\n    mapping(uint256 localTokenId => PurchaseInfo) private _purchaseInfo;\\n\\n    /**\\n     * @notice Transaction context variable: it is set by confirmPurchase and read by onERC721Received\\n     *         within the same transaction. It effectively acts as a parameter passed through an external call.\\n     */\\n    uint256 private _txContext_localTokenId;\\n\\n    /**\\n     * @notice A variable to track if the contract is in the confirmPurchase function.\\n     *         It is set to true in confirmPurchase and reset to false in onERC721Received.\\n     */\\n    bool private _isInConfirmPurchase;\\n\\n    /**\\n     * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.\\n     * @param originalSender The address that initiated the purchase.\\n     * @param nftCollection The address of the NFT collection.\\n     * @param localTokenId The temporary local token ID for this purchase.\\n     * @param nftTokenId The actual ID of the minted NFT.\\n     */\\n    event PurchaseConfirmed(address originalSender, address nftCollection, uint256 localTokenId, uint256 nftTokenId);\\n\\n    /**\\n     * @notice Emitted when an NFT is transferred using the wrapper's transfer functions.\\n     * @param localTokenId The local token ID representing the NFT.\\n     * @param from The address from which the NFT is transferred.\\n     * @param to The address to which the NFT is transferred.\\n     * @param nftTokenId The actual ID of the transferred NFT.\\n     */\\n    event NftTransferredViaWrapper(uint256 localTokenId, address from, address to, uint256 nftTokenId);\\n\\n    // Custom Errors\\n    error PurchaseWrapper__SandTokenAddressCannotBeZero();\\n    error PurchaseWrapper__SenderAddressCannotBeZero();\\n    error PurchaseWrapper__NftCollectionAddressCannotBeZero();\\n    error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);\\n    error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();\\n    error PurchaseWrapper__ReceivedNftFromUnexpectedCollection(address expected, address actual);\\n    error PurchaseWrapper__InvalidRecipientAddress();\\n    error PurchaseWrapper__NoSandTokensToRecover();\\n    error PurchaseWrapper__TransferToZeroAddress();\\n    error PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);\\n    error PurchaseWrapper__NftNotYetMintedOrRecorded(uint256 localTokenId);\\n    error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);\\n    error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);\\n    error PurchaseWrapper__CallerNotAuthorized(address caller);\\n    error PurchaseWrapper__SenderIsNotSandToken();\\n    error PurchaseWrapper__RandomTempTokenIdCannotBeZero();\\n    error PurchaseWrapper__NotInConfirmPurchase();\\n\\n    /**\\n     * @notice Constructor to set the SAND token contract address.\\n     * @param _admin The initial owner of this contract.\\n     * @param _sandToken Address of the Sand (ERC20) token contract.\\n     */\\n    constructor(address _admin, address _sandToken, address _authorizedCaller) {\\n        if (_sandToken == address(0)) revert PurchaseWrapper__SandTokenAddressCannotBeZero();\\n        sandToken = IERC20(_sandToken);\\n        _grantRole(DEFAULT_ADMIN_ROLE, _admin);\\n        _grantRole(AUTHORIZED_CALLER_ROLE, _authorizedCaller);\\n    }\\n\\n    /**\\n     * @notice Confirms a purchase request, takes payment, and initiates the NFT minting process\\n     *         by calling `approveAndCall` on the `sandToken` contract, which in turn calls\\n     *         the `waveMint` (or similar) function on the `nftCollection` contract.\\n     * @dev The `randomTempTokenId` must be unique for each purchase attempt and is used to track\\n     *      the purchase through to NFT delivery. This function sets transaction-scoped context\\n     *      variables (`_txContext_...`) that are used by `onERC721Received`.\\n     * @param sender The original EOA initiating the purchase and who will receive the NFT.\\n     * @param nftCollection Address of the target NFT Collection contract for minting.\\n     * @param sandAmount The amount of `sandToken` to be transferred for the purchase.\\n     * @param waveIndex The wave index for minting on the NFT Collection.\\n     * @param signatureId The signature ID for verification by the NFT Collection.\\n     * @param randomTempTokenId A unique temporary ID chosen by the caller to identify this purchase.\\n     *                          This ID will be associated with the minted NFT.\\n     * @param signature The signature data for verification by the NFT Collection.\\n     */\\n    function confirmPurchase(\\n        address sender,\\n        address nftCollection,\\n        uint256 sandAmount,\\n        uint256 waveIndex,\\n        uint256 signatureId,\\n        uint256 randomTempTokenId,\\n        bytes calldata signature\\n    ) external nonReentrant {\\n        if (msg.sender == address(sandToken) && !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {\\n            revert PurchaseWrapper__CallerNotAuthorized(sender);\\n        } else if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {\\n            revert PurchaseWrapper__CallerNotAuthorized(msg.sender);\\n        }\\n        if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();\\n        if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();\\n        if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();\\n        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0)\\n            revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);\\n\\n        _txContext_localTokenId = randomTempTokenId;\\n        _isInConfirmPurchase = true;\\n\\n        _purchaseInfo[randomTempTokenId].caller = sender;\\n        _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;\\n\\n        SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);\\n\\n        bytes4 waveMintSelector = bytes4(keccak256(\\\"waveMint(address,uint256,uint256,uint256,bytes)\\\"));\\n\\n        bytes memory data = abi.encodeWithSelector(\\n            waveMintSelector,\\n            address(this), // NFTs will be minted to this contract first\\n            1,\\n            waveIndex,\\n            signatureId,\\n            signature\\n        );\\n\\n        // solhint-disable-next-line avoid-low-level-calls\\n        (bool success, ) = address(sandToken).call(\\n            abi.encodeWithSelector(\\n                bytes4(keccak256(\\\"approveAndCall(address,uint256,bytes)\\\")),\\n                nftCollection,\\n                sandAmount,\\n                data\\n            )\\n        );\\n\\n        if (!success) {\\n            revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();\\n        }\\n\\n        IERC721(nftCollection).transferFrom(address(this), sender, _purchaseInfo[randomTempTokenId].nftTokenId);\\n\\n        emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, _purchaseInfo[randomTempTokenId].nftTokenId);\\n    }\\n\\n    /**\\n     * @notice Handles the receipt of an ERC721 token, expected to be called by an NFT collection\\n     *         contract after a successful mint initiated by `confirmPurchase`.\\n     * @dev This function uses the transaction-scoped context variables (`_txContext_...`) set by\\n     *      `confirmPurchase` to identify the purchase and original sender. It then stores the\\n     *      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers\\n     *      the NFT to the `_txContext_originalSender`.\\n     * @param tokenId The ID of the token being transferred to this contract.\\n     * @return bytes4 The selector `bytes4(keccak256(\\\"onERC721Received(address,address,uint256,bytes)\\\"))`.\\n     */\\n    function onERC721Received(address, address, uint256 tokenId, bytes calldata) external override returns (bytes4) {\\n        if (!_isInConfirmPurchase) revert PurchaseWrapper__NotInConfirmPurchase();\\n        PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];\\n\\n        if (msg.sender != info.nftCollection)\\n            revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(info.nftCollection, msg.sender);\\n\\n        info.nftTokenId = tokenId;\\n        _isInConfirmPurchase = false;\\n\\n        return IERC721Receiver.onERC721Received.selector;\\n    }\\n\\n    /**\\n     * @notice Retrieves the purchase information for a given local token ID.\\n     * @param localTokenId The local temporary token ID of the purchase.\\n     * @return A `PurchaseInfo` struct containing the details of the purchase.\\n     */\\n    function getPurchaseInfo(uint256 localTokenId) external view returns (PurchaseInfo memory) {\\n        return _purchaseInfo[localTokenId];\\n    }\\n\\n    /**\\n     * @notice Recovers SAND tokens (or other ERC20 specified in `sandToken`)\\n     *         that were accidentally sent or accumulated in this contract.\\n     * @dev Only callable by the contract owner.\\n     * @param recipient Address to receive the recovered ERC20 tokens.\\n     */\\n    function recoverSand(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {\\n        if (recipient == address(0)) revert PurchaseWrapper__InvalidRecipientAddress();\\n        uint256 balance = sandToken.balanceOf(address(this));\\n        if (balance == 0) revert PurchaseWrapper__NoSandTokensToRecover();\\n\\n        SafeERC20.safeTransfer(sandToken, recipient, balance);\\n    }\\n\\n    /**\\n     * @notice Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom`.\\n     * @dev Similar to `transferFrom` but uses `safeTransferFrom` for the actual NFT transfer.\\n     *      The `msg.sender` must be the `from` address.\\n     * @param from The current owner of the NFT.\\n     * @param to The new address to receive the NFT.\\n     * @param localTokenId The local temporary token ID.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 localTokenId) external {\\n        if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {\\n            revert PurchaseWrapper__CallerNotAuthorized(msg.sender);\\n        }\\n        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();\\n        PurchaseInfo storage info = _purchaseInfo[localTokenId];\\n\\n        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);\\n        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);\\n        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);\\n        if (info.caller != from) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);\\n\\n        IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);\\n\\n        emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);\\n    }\\n}\\n\",\"keccak256\":\"0x5f098a1fb29c2b25e714320b7d013ec601cc81304d0a00ac389bf25a5b769331\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161144338038061144383398101604081905261002f9161017c565b600180556001600160a01b03821661005a57604051636525355d60e01b815260040160405180910390fd5b600280546001600160a01b0319166001600160a01b0384161790556100806000846100b4565b506100ab7ff12fb6eaf1f045883c82d7d192627f7a36a50ce00c45e305919895908135a8a8826100b4565b505050506101bf565b6000828152602081815260408083206001600160a01b038516845290915281205460ff16610156576000838152602081815260408083206001600160a01b03861684529091529020805460ff1916600117905561010e3390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a450600161015a565b5060005b92915050565b80516001600160a01b038116811461017757600080fd5b919050565b60008060006060848603121561019157600080fd5b61019a84610160565b92506101a860208501610160565b91506101b660408501610160565b90509250925092565b611275806101ce6000396000f3fe608060405234801561001057600080fd5b50600436106100ea5760003560e01c806366e1560c1161008c578063a217fddf11610066578063a217fddf14610295578063d547741f1461029d578063e7e524bb146102b0578063f573388e146102c357600080fd5b806366e1560c14610244578063818a304b1461025757806391d148541461028257600080fd5b80632f2ff15d116100c85780632f2ff15d1461017457806336568abe1461018957806342842e0e1461019c57806358875049146101af57600080fd5b806301ffc9a7146100ef578063150b7a0214610117578063248a9ca314610143575b600080fd5b6101026100fd366004610edf565b6102d8565b60405190151581526020015b60405180910390f35b61012a610125366004610f6e565b61030f565b6040516001600160e01b0319909116815260200161010e565b610166610151366004610fdd565b60009081526020819052604090206001015490565b60405190815260200161010e565b610187610182366004610ff6565b6103b1565b005b610187610197366004610ff6565b6103dc565b6101876101aa366004611022565b610414565b6102146101bd366004610fdd565b60408051606080820183526000808352602080840182905292840181905293845260038252928290208251938401835280546001600160a01b03908116855260018201541691840191909152600201549082015290565b6040805182516001600160a01b03908116825260208085015190911690820152918101519082015260600161010e565b61018761025236600461105f565b610614565b60025461026a906001600160a01b031681565b6040516001600160a01b03909116815260200161010e565b610102610290366004610ff6565b6106ed565b610166600081565b6101876102ab366004610ff6565b610716565b6101876102be36600461107a565b61073b565b61016660008051602061122083398151915281565b60006001600160e01b03198216637965db0b60e01b148061030957506301ffc9a760e01b6001600160e01b03198316145b92915050565b60055460009060ff1661033557604051638df8addf60e01b815260040160405180910390fd5b600454600090815260036020526040902060018101546001600160a01b0316331461038f5760018101546040516337ae9ffd60e01b81526001600160a01b0390911660048201523360248201526044015b60405180910390fd5b600201849055506005805460ff19169055630a85bd0160e11b95945050505050565b6000828152602081905260409020600101546103cc81610b3c565b6103d68383610b49565b50505050565b6001600160a01b03811633146104055760405163334bd91960e11b815260040160405180910390fd5b61040f8282610bdb565b505050565b61042c600080516020611220833981519152336106ed565b61044b57604051630a2ed88960e31b8152336004820152602401610386565b6001600160a01b038216610472576040516378bd39b560e01b815260040160405180910390fd5b600081815260036020526040902080546001600160a01b03166104ab57604051630317ce5960e41b815260048101839052602401610386565b80600201546000036104d35760405163144b31f360e01b815260048101839052602401610386565b60018101546001600160a01b03166105015760405163a395b86160e01b815260048101839052602401610386565b80546001600160a01b038581169116146105445780546040516311ff4f7360e11b81526001600160a01b0380871660048301529091166024820152604401610386565b60018101546002820154604051632142170760e11b81526001600160a01b038781166004830152868116602483015260448201929092529116906342842e0e90606401600060405180830381600087803b1580156105a157600080fd5b505af11580156105b5573d6000803e3d6000fd5b505050506002810154604080518481526001600160a01b0387811660208301528616818301526060810192909252517f8bc02676f507d67b3f04dc51f7d4f4143058e46f919bdbc0a13ef2cdd3b4ceae9181900360800190a150505050565b600061061f81610b3c565b6001600160a01b03821661064657604051631b932d3360e11b815260040160405180910390fd5b6002546040516370a0823160e01b81523060048201526000916001600160a01b0316906370a0823190602401602060405180830381865afa15801561068f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106b39190611105565b9050806000036106d65760405163f9a4db5d60e01b815260040160405180910390fd5b60025461040f906001600160a01b03168483610c46565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b60008281526020819052604090206001015461073181610b3c565b6103d68383610bdb565b610743610ca5565b6002546001600160a01b0316331480156107725750610770600080516020611220833981519152896106ed565b155b1561079b57604051630a2ed88960e31b81526001600160a01b0389166004820152602401610386565b6107b3600080516020611220833981519152336106ed565b6107d257604051630a2ed88960e31b8152336004820152602401610386565b826000036107f35760405163022d2ed160e41b815260040160405180910390fd5b6001600160a01b03881661081a5760405163778bf84360e01b815260040160405180910390fd5b6001600160a01b03871661084157604051632cf9713760e11b815260040160405180910390fd5b600083815260036020526040902060020154156108745760405163043e84b160e31b815260048101849052602401610386565b60048390556005805460ff19166001908117909155600084815260036020526040902080546001600160a01b03808c166001600160a01b03199283161783559190920180548a83169316929092179091556002546108d59116893089610ccf565b60007f26b3af647ad734a02816068f498fe06b7f55b1a1a4a4e2a86b321f99e916045b9050600081306001898988886040516024016109199695949392919061111e565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199094169390931790925260025491519092506000916001600160a01b0316907fcae9ca5133009d821214ac8231b3d170f22d822ee165adb631578070b6316fc990610994908d908d908790602401611198565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199094169390931790925290516109d291906111e1565b6000604051808303816000865af19150503d8060008114610a0f576040519150601f19603f3d011682016040523d82523d6000602084013e610a14565b606091505b5050905080610a3657604051639f256ee760e01b815260040160405180910390fd5b600086815260036020526040908190206002015490516323b872dd60e01b81523060048201526001600160a01b038d811660248301526044820192909252908b16906323b872dd90606401600060405180830381600087803b158015610a9b57600080fd5b505af1158015610aaf573d6000803e3d6000fd5b505050600087815260036020526040908190206002015490517ff398f99f7ce820e5b296b9b0268ea3419fa937a85bc2b57b9068e21753449f669250610b1e918e918e918b916001600160a01b0394851681529290931660208301526040820152606081019190915260800190565b60405180910390a1505050610b3260018055565b5050505050505050565b610b468133610d08565b50565b6000610b5583836106ed565b610bd3576000838152602081815260408083206001600160a01b03861684529091529020805460ff19166001179055610b8b3390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a4506001610309565b506000610309565b6000610be783836106ed565b15610bd3576000838152602081815260408083206001600160a01b0386168085529252808320805460ff1916905551339286917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a4506001610309565b6040516001600160a01b0383811660248301526044820183905261040f91859182169063a9059cbb906064015b604051602081830303815290604052915060e01b6020820180516001600160e01b038381831617835250505050610d45565b600260015403610cc857604051633ee5aeb560e01b815260040160405180910390fd5b6002600155565b6040516001600160a01b0384811660248301528381166044830152606482018390526103d69186918216906323b872dd90608401610c73565b610d1282826106ed565b610d415760405163e2517d3f60e01b81526001600160a01b038216600482015260248101839052604401610386565b5050565b6000610d5a6001600160a01b03841683610da8565b90508051600014158015610d7f575080806020019051810190610d7d91906111fd565b155b1561040f57604051635274afe760e01b81526001600160a01b0384166004820152602401610386565b6060610db683836000610dbd565b9392505050565b606081471015610de25760405163cd78605960e01b8152306004820152602401610386565b600080856001600160a01b03168486604051610dfe91906111e1565b60006040518083038185875af1925050503d8060008114610e3b576040519150601f19603f3d011682016040523d82523d6000602084013e610e40565b606091505b5091509150610e50868383610e5a565b9695505050505050565b606082610e6f57610e6a82610eb6565b610db6565b8151158015610e8657506001600160a01b0384163b155b15610eaf57604051639996b31560e01b81526001600160a01b0385166004820152602401610386565b5080610db6565b805115610ec65780518082602001fd5b604051630a12f52160e11b815260040160405180910390fd5b600060208284031215610ef157600080fd5b81356001600160e01b031981168114610db657600080fd5b80356001600160a01b0381168114610f2057600080fd5b919050565b60008083601f840112610f3757600080fd5b50813567ffffffffffffffff811115610f4f57600080fd5b602083019150836020828501011115610f6757600080fd5b9250929050565b600080600080600060808688031215610f8657600080fd5b610f8f86610f09565b9450610f9d60208701610f09565b935060408601359250606086013567ffffffffffffffff811115610fc057600080fd5b610fcc88828901610f25565b969995985093965092949392505050565b600060208284031215610fef57600080fd5b5035919050565b6000806040838503121561100957600080fd5b8235915061101960208401610f09565b90509250929050565b60008060006060848603121561103757600080fd5b61104084610f09565b925061104e60208501610f09565b929592945050506040919091013590565b60006020828403121561107157600080fd5b610db682610f09565b60008060008060008060008060e0898b03121561109657600080fd5b61109f89610f09565b97506110ad60208a01610f09565b965060408901359550606089013594506080890135935060a0890135925060c089013567ffffffffffffffff8111156110e557600080fd5b6110f18b828c01610f25565b999c989b5096995094979396929594505050565b60006020828403121561111757600080fd5b5051919050565b60018060a01b038716815260ff8616602082015284604082015283606082015260a060808201528160a0820152818360c0830137600081830160c090810191909152601f909201601f1916010195945050505050565b60005b8381101561118f578181015183820152602001611177565b50506000910152565b60018060a01b038416815282602082015260606040820152600082518060608401526111cb816080850160208701611174565b601f01601f191691909101608001949350505050565b600082516111f3818460208701611174565b9190910192915050565b60006020828403121561120f57600080fd5b81518015158114610db657600080fdfef12fb6eaf1f045883c82d7d192627f7a36a50ce00c45e305919895908135a8a8a26469706673582212208e9e1226b2539b3057cd298a7ec5cabafc703570463a8761b5abac88a5f7f12e64736f6c634300081a0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100ea5760003560e01c806366e1560c1161008c578063a217fddf11610066578063a217fddf14610295578063d547741f1461029d578063e7e524bb146102b0578063f573388e146102c357600080fd5b806366e1560c14610244578063818a304b1461025757806391d148541461028257600080fd5b80632f2ff15d116100c85780632f2ff15d1461017457806336568abe1461018957806342842e0e1461019c57806358875049146101af57600080fd5b806301ffc9a7146100ef578063150b7a0214610117578063248a9ca314610143575b600080fd5b6101026100fd366004610edf565b6102d8565b60405190151581526020015b60405180910390f35b61012a610125366004610f6e565b61030f565b6040516001600160e01b0319909116815260200161010e565b610166610151366004610fdd565b60009081526020819052604090206001015490565b60405190815260200161010e565b610187610182366004610ff6565b6103b1565b005b610187610197366004610ff6565b6103dc565b6101876101aa366004611022565b610414565b6102146101bd366004610fdd565b60408051606080820183526000808352602080840182905292840181905293845260038252928290208251938401835280546001600160a01b03908116855260018201541691840191909152600201549082015290565b6040805182516001600160a01b03908116825260208085015190911690820152918101519082015260600161010e565b61018761025236600461105f565b610614565b60025461026a906001600160a01b031681565b6040516001600160a01b03909116815260200161010e565b610102610290366004610ff6565b6106ed565b610166600081565b6101876102ab366004610ff6565b610716565b6101876102be36600461107a565b61073b565b61016660008051602061122083398151915281565b60006001600160e01b03198216637965db0b60e01b148061030957506301ffc9a760e01b6001600160e01b03198316145b92915050565b60055460009060ff1661033557604051638df8addf60e01b815260040160405180910390fd5b600454600090815260036020526040902060018101546001600160a01b0316331461038f5760018101546040516337ae9ffd60e01b81526001600160a01b0390911660048201523360248201526044015b60405180910390fd5b600201849055506005805460ff19169055630a85bd0160e11b95945050505050565b6000828152602081905260409020600101546103cc81610b3c565b6103d68383610b49565b50505050565b6001600160a01b03811633146104055760405163334bd91960e11b815260040160405180910390fd5b61040f8282610bdb565b505050565b61042c600080516020611220833981519152336106ed565b61044b57604051630a2ed88960e31b8152336004820152602401610386565b6001600160a01b038216610472576040516378bd39b560e01b815260040160405180910390fd5b600081815260036020526040902080546001600160a01b03166104ab57604051630317ce5960e41b815260048101839052602401610386565b80600201546000036104d35760405163144b31f360e01b815260048101839052602401610386565b60018101546001600160a01b03166105015760405163a395b86160e01b815260048101839052602401610386565b80546001600160a01b038581169116146105445780546040516311ff4f7360e11b81526001600160a01b0380871660048301529091166024820152604401610386565b60018101546002820154604051632142170760e11b81526001600160a01b038781166004830152868116602483015260448201929092529116906342842e0e90606401600060405180830381600087803b1580156105a157600080fd5b505af11580156105b5573d6000803e3d6000fd5b505050506002810154604080518481526001600160a01b0387811660208301528616818301526060810192909252517f8bc02676f507d67b3f04dc51f7d4f4143058e46f919bdbc0a13ef2cdd3b4ceae9181900360800190a150505050565b600061061f81610b3c565b6001600160a01b03821661064657604051631b932d3360e11b815260040160405180910390fd5b6002546040516370a0823160e01b81523060048201526000916001600160a01b0316906370a0823190602401602060405180830381865afa15801561068f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106b39190611105565b9050806000036106d65760405163f9a4db5d60e01b815260040160405180910390fd5b60025461040f906001600160a01b03168483610c46565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b60008281526020819052604090206001015461073181610b3c565b6103d68383610bdb565b610743610ca5565b6002546001600160a01b0316331480156107725750610770600080516020611220833981519152896106ed565b155b1561079b57604051630a2ed88960e31b81526001600160a01b0389166004820152602401610386565b6107b3600080516020611220833981519152336106ed565b6107d257604051630a2ed88960e31b8152336004820152602401610386565b826000036107f35760405163022d2ed160e41b815260040160405180910390fd5b6001600160a01b03881661081a5760405163778bf84360e01b815260040160405180910390fd5b6001600160a01b03871661084157604051632cf9713760e11b815260040160405180910390fd5b600083815260036020526040902060020154156108745760405163043e84b160e31b815260048101849052602401610386565b60048390556005805460ff19166001908117909155600084815260036020526040902080546001600160a01b03808c166001600160a01b03199283161783559190920180548a83169316929092179091556002546108d59116893089610ccf565b60007f26b3af647ad734a02816068f498fe06b7f55b1a1a4a4e2a86b321f99e916045b9050600081306001898988886040516024016109199695949392919061111e565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199094169390931790925260025491519092506000916001600160a01b0316907fcae9ca5133009d821214ac8231b3d170f22d822ee165adb631578070b6316fc990610994908d908d908790602401611198565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199094169390931790925290516109d291906111e1565b6000604051808303816000865af19150503d8060008114610a0f576040519150601f19603f3d011682016040523d82523d6000602084013e610a14565b606091505b5050905080610a3657604051639f256ee760e01b815260040160405180910390fd5b600086815260036020526040908190206002015490516323b872dd60e01b81523060048201526001600160a01b038d811660248301526044820192909252908b16906323b872dd90606401600060405180830381600087803b158015610a9b57600080fd5b505af1158015610aaf573d6000803e3d6000fd5b505050600087815260036020526040908190206002015490517ff398f99f7ce820e5b296b9b0268ea3419fa937a85bc2b57b9068e21753449f669250610b1e918e918e918b916001600160a01b0394851681529290931660208301526040820152606081019190915260800190565b60405180910390a1505050610b3260018055565b5050505050505050565b610b468133610d08565b50565b6000610b5583836106ed565b610bd3576000838152602081815260408083206001600160a01b03861684529091529020805460ff19166001179055610b8b3390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a4506001610309565b506000610309565b6000610be783836106ed565b15610bd3576000838152602081815260408083206001600160a01b0386168085529252808320805460ff1916905551339286917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a4506001610309565b6040516001600160a01b0383811660248301526044820183905261040f91859182169063a9059cbb906064015b604051602081830303815290604052915060e01b6020820180516001600160e01b038381831617835250505050610d45565b600260015403610cc857604051633ee5aeb560e01b815260040160405180910390fd5b6002600155565b6040516001600160a01b0384811660248301528381166044830152606482018390526103d69186918216906323b872dd90608401610c73565b610d1282826106ed565b610d415760405163e2517d3f60e01b81526001600160a01b038216600482015260248101839052604401610386565b5050565b6000610d5a6001600160a01b03841683610da8565b90508051600014158015610d7f575080806020019051810190610d7d91906111fd565b155b1561040f57604051635274afe760e01b81526001600160a01b0384166004820152602401610386565b6060610db683836000610dbd565b9392505050565b606081471015610de25760405163cd78605960e01b8152306004820152602401610386565b600080856001600160a01b03168486604051610dfe91906111e1565b60006040518083038185875af1925050503d8060008114610e3b576040519150601f19603f3d011682016040523d82523d6000602084013e610e40565b606091505b5091509150610e50868383610e5a565b9695505050505050565b606082610e6f57610e6a82610eb6565b610db6565b8151158015610e8657506001600160a01b0384163b155b15610eaf57604051639996b31560e01b81526001600160a01b0385166004820152602401610386565b5080610db6565b805115610ec65780518082602001fd5b604051630a12f52160e11b815260040160405180910390fd5b600060208284031215610ef157600080fd5b81356001600160e01b031981168114610db657600080fd5b80356001600160a01b0381168114610f2057600080fd5b919050565b60008083601f840112610f3757600080fd5b50813567ffffffffffffffff811115610f4f57600080fd5b602083019150836020828501011115610f6757600080fd5b9250929050565b600080600080600060808688031215610f8657600080fd5b610f8f86610f09565b9450610f9d60208701610f09565b935060408601359250606086013567ffffffffffffffff811115610fc057600080fd5b610fcc88828901610f25565b969995985093965092949392505050565b600060208284031215610fef57600080fd5b5035919050565b6000806040838503121561100957600080fd5b8235915061101960208401610f09565b90509250929050565b60008060006060848603121561103757600080fd5b61104084610f09565b925061104e60208501610f09565b929592945050506040919091013590565b60006020828403121561107157600080fd5b610db682610f09565b60008060008060008060008060e0898b03121561109657600080fd5b61109f89610f09565b97506110ad60208a01610f09565b965060408901359550606089013594506080890135935060a0890135925060c089013567ffffffffffffffff8111156110e557600080fd5b6110f18b828c01610f25565b999c989b5096995094979396929594505050565b60006020828403121561111757600080fd5b5051919050565b60018060a01b038716815260ff8616602082015284604082015283606082015260a060808201528160a0820152818360c0830137600081830160c090810191909152601f909201601f1916010195945050505050565b60005b8381101561118f578181015183820152602001611177565b50506000910152565b60018060a01b038416815282602082015260606040820152600082518060608401526111cb816080850160208701611174565b601f01601f191691909101608001949350505050565b600082516111f3818460208701611174565b9190910192915050565b60006020828403121561120f57600080fd5b81518015158114610db657600080fdfef12fb6eaf1f045883c82d7d192627f7a36a50ce00c45e305919895908135a8a8a26469706673582212208e9e1226b2539b3057cd298a7ec5cabafc703570463a8761b5abac88a5f7f12e64736f6c634300081a0033",
+  "devdoc": {
+    "author": "The Sandbox",
+    "custom:security-contact": "contact-blockchain@sandbox.game",
+    "details": "Implements IERC721Receiver to handle NFT receipts. Uses Ownable for admin functions.",
+    "errors": {
+      "AccessControlBadConfirmation()": [
+        {
+          "details": "The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}."
+        }
+      ],
+      "AccessControlUnauthorizedAccount(address,bytes32)": [
+        {
+          "details": "The `account` is missing a role."
+        }
+      ],
+      "AddressEmptyCode(address)": [
+        {
+          "details": "There's no code at `target` (it is not a contract)."
+        }
+      ],
+      "AddressInsufficientBalance(address)": [
+        {
+          "details": "The ETH balance of the account is not enough to perform the operation."
+        }
+      ],
+      "FailedInnerCall()": [
+        {
+          "details": "A call to an address target failed. The target may have reverted."
+        }
+      ],
+      "ReentrancyGuardReentrantCall()": [
+        {
+          "details": "Unauthorized reentrant call."
+        }
+      ],
+      "SafeERC20FailedOperation(address)": [
+        {
+          "details": "An operation with an ERC20 token failed."
+        }
+      ]
+    },
+    "events": {
+      "NftTransferredViaWrapper(uint256,address,address,uint256)": {
+        "params": {
+          "from": "The address from which the NFT is transferred.",
+          "localTokenId": "The local token ID representing the NFT.",
+          "nftTokenId": "The actual ID of the transferred NFT.",
+          "to": "The address to which the NFT is transferred."
+        }
+      },
+      "PurchaseConfirmed(address,address,uint256,uint256)": {
+        "params": {
+          "localTokenId": "The temporary local token ID for this purchase.",
+          "nftCollection": "The address of the NFT collection.",
+          "nftTokenId": "The actual ID of the minted NFT.",
+          "originalSender": "The address that initiated the purchase."
+        }
+      },
+      "RoleAdminChanged(bytes32,bytes32,bytes32)": {
+        "details": "Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this."
+      },
+      "RoleGranted(bytes32,address,address)": {
+        "details": "Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {AccessControl-_setupRole}."
+      },
+      "RoleRevoked(bytes32,address,address)": {
+        "details": "Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)"
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "confirmPurchase(address,address,uint256,uint256,uint256,uint256,bytes)": {
+        "details": "The `randomTempTokenId` must be unique for each purchase attempt and is used to track      the purchase through to NFT delivery. This function sets transaction-scoped context      variables (`_txContext_...`) that are used by `onERC721Received`.",
+        "params": {
+          "nftCollection": "Address of the target NFT Collection contract for minting.",
+          "randomTempTokenId": "A unique temporary ID chosen by the caller to identify this purchase.                          This ID will be associated with the minted NFT.",
+          "sandAmount": "The amount of `sandToken` to be transferred for the purchase.",
+          "sender": "The original EOA initiating the purchase and who will receive the NFT.",
+          "signature": "The signature data for verification by the NFT Collection.",
+          "signatureId": "The signature ID for verification by the NFT Collection.",
+          "waveIndex": "The wave index for minting on the NFT Collection."
+        }
+      },
+      "constructor": {
+        "params": {
+          "_admin": "The initial owner of this contract.",
+          "_sandToken": "Address of the Sand (ERC20) token contract."
+        }
+      },
+      "getPurchaseInfo(uint256)": {
+        "params": {
+          "localTokenId": "The local temporary token ID of the purchase."
+        },
+        "returns": {
+          "_0": "A `PurchaseInfo` struct containing the details of the purchase."
+        }
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "onERC721Received(address,address,uint256,bytes)": {
+        "details": "This function uses the transaction-scoped context variables (`_txContext_...`) set by      `confirmPurchase` to identify the purchase and original sender. It then stores the      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers      the NFT to the `_txContext_originalSender`.",
+        "params": {
+          "tokenId": "The ID of the token being transferred to this contract."
+        },
+        "returns": {
+          "_0": "bytes4 The selector `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`."
+        }
+      },
+      "recoverSand(address)": {
+        "details": "Only callable by the contract owner.",
+        "params": {
+          "recipient": "Address to receive the recovered ERC20 tokens."
+        }
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event."
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event."
+      },
+      "safeTransferFrom(address,address,uint256)": {
+        "details": "Similar to `transferFrom` but uses `safeTransferFrom` for the actual NFT transfer.      The `msg.sender` must be the `from` address.",
+        "params": {
+          "from": "The current owner of the NFT.",
+          "localTokenId": "The local temporary token ID.",
+          "to": "The new address to receive the NFT."
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "stateVariables": {
+      "_purchaseInfo": {
+        "details": "This `localTokenId` is provided by the caller during `confirmPurchase` and is used      to uniquely identify a purchase transaction and later to reference the minted NFT      in the wrapper's transfer functions."
+      }
+    },
+    "title": "PurchaseWrapper",
+    "version": 1
+  },
+  "userdoc": {
+    "events": {
+      "NftTransferredViaWrapper(uint256,address,address,uint256)": {
+        "notice": "Emitted when an NFT is transferred using the wrapper's transfer functions."
+      },
+      "PurchaseConfirmed(address,address,uint256,uint256)": {
+        "notice": "Emitted when an NFT purchase is confirmed and the minting process is initiated."
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "confirmPurchase(address,address,uint256,uint256,uint256,uint256,bytes)": {
+        "notice": "Confirms a purchase request, takes payment, and initiates the NFT minting process         by calling `approveAndCall` on the `sandToken` contract, which in turn calls         the `waveMint` (or similar) function on the `nftCollection` contract."
+      },
+      "constructor": {
+        "notice": "Constructor to set the SAND token contract address."
+      },
+      "getPurchaseInfo(uint256)": {
+        "notice": "Retrieves the purchase information for a given local token ID."
+      },
+      "onERC721Received(address,address,uint256,bytes)": {
+        "notice": "Handles the receipt of an ERC721 token, expected to be called by an NFT collection         contract after a successful mint initiated by `confirmPurchase`."
+      },
+      "recoverSand(address)": {
+        "notice": "Recovers SAND tokens (or other ERC20 specified in `sandToken`)         that were accidentally sent or accumulated in this contract."
+      },
+      "safeTransferFrom(address,address,uint256)": {
+        "notice": "Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom`."
+      },
+      "sandToken()": {
+        "notice": "Address of the SAND token used for purchases."
+      }
+    },
+    "notice": "Contract that facilitates NFT purchases using SAND.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 26,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)21_storage)"
+      },
+      {
+        "astId": 1211,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "_status",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1343,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "sandToken",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_contract(IERC20)456"
+      },
+      {
+        "astId": 1349,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "_purchaseInfo",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_uint256,t_struct(PurchaseInfo)1334_storage)"
+      },
+      {
+        "astId": 1352,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "_txContext_localTokenId",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1355,
+        "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+        "label": "_isInConfirmPurchase",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_bool"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(IERC20)456": {
+        "encoding": "inplace",
+        "label": "contract IERC20",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)21_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)21_storage"
+      },
+      "t_mapping(t_uint256,t_struct(PurchaseInfo)1334_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => struct PurchaseWrapper.PurchaseInfo)",
+        "numberOfBytes": "32",
+        "value": "t_struct(PurchaseInfo)1334_storage"
+      },
+      "t_struct(PurchaseInfo)1334_storage": {
+        "encoding": "inplace",
+        "label": "struct PurchaseWrapper.PurchaseInfo",
+        "members": [
+          {
+            "astId": 1329,
+            "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+            "label": "caller",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 1331,
+            "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+            "label": "nftCollection",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 1333,
+            "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+            "label": "nftTokenId",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(RoleData)21_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControl.RoleData",
+        "members": [
+          {
+            "astId": 18,
+            "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+            "label": "hasRole",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 20,
+            "contract": "@sandbox-smart-contracts/avatar/contracts/nft-collection/PurchaseWrapper.sol:PurchaseWrapper",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
