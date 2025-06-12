@@ -47,7 +47,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @notice Transaction context variable: it is set by confirmPurchase and read by onERC721Received
      *         within the same transaction. It effectively acts as a parameter passed through an external call.
      */
-    uint256 private _txContext_localTokenId;
+    uint256 private _txContextLocalTokenId;
 
     /**
      * @notice A variable to track if the contract is in the confirmPurchase function.
@@ -129,22 +129,9 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external nonReentrant {
-        if (msg.sender == address(sandToken)) {
-            if (!hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
-                revert PurchaseWrapper__CallerNotAuthorized(sender);
-            }
-        } else {
-            if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
-                revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
-            }
-        }
-        if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
-        if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
-        if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
-        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0)
-            revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
+        _validateAndAuthorizePurchase(sender, nftCollection, randomTempTokenId);
 
-        _txContext_localTokenId = randomTempTokenId;
+        _txContextLocalTokenId = randomTempTokenId;
         _isInConfirmPurchase = true;
 
         _purchaseInfo[randomTempTokenId].caller = sender;
@@ -152,6 +139,38 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
         SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);
 
+        _initiateMintViaApproveAndCall(nftCollection, sandAmount, waveIndex, signatureId, signature);
+
+        IERC721(nftCollection).transferFrom(address(this), sender, _purchaseInfo[randomTempTokenId].nftTokenId);
+
+        emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, _purchaseInfo[randomTempTokenId].nftTokenId);
+    }
+
+    function _validateAndAuthorizePurchase(
+        address sender,
+        address nftCollection,
+        uint256 randomTempTokenId
+    ) private view {
+        address caller = msg.sender == address(sandToken) ? sender : msg.sender;
+        if (!hasRole(AUTHORIZED_CALLER_ROLE, caller)) {
+            revert PurchaseWrapper__CallerNotAuthorized(caller);
+        }
+
+        if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
+        if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
+        if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
+        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
+            revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
+        }
+    }
+
+    function _initiateMintViaApproveAndCall(
+        address nftCollection,
+        uint256 sandAmount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
+    ) private {
         bytes4 waveMintSelector = bytes4(keccak256("waveMint(address,uint256,uint256,uint256,bytes)"));
 
         bytes memory data = abi.encodeWithSelector(
@@ -176,10 +195,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         if (!success) {
             revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
-
-        IERC721(nftCollection).transferFrom(address(this), sender, _purchaseInfo[randomTempTokenId].nftTokenId);
-
-        emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, _purchaseInfo[randomTempTokenId].nftTokenId);
     }
 
     /**
@@ -194,7 +209,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      */
     function onERC721Received(address, address, uint256 tokenId, bytes calldata) external override returns (bytes4) {
         if (!_isInConfirmPurchase) revert PurchaseWrapper__NotInConfirmPurchase();
-        PurchaseInfo storage info = _purchaseInfo[_txContext_localTokenId];
+        PurchaseInfo storage info = _purchaseInfo[_txContextLocalTokenId];
 
         if (msg.sender != info.nftCollection)
             revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(info.nftCollection, msg.sender);
