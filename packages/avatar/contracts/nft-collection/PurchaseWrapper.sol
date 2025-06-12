@@ -129,10 +129,14 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external nonReentrant {
-        if (msg.sender == address(sandToken) && !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
-            revert PurchaseWrapper__CallerNotAuthorized(sender);
-        } else if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
-            revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
+        if (msg.sender == address(sandToken)) {
+            if (!hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
+                revert PurchaseWrapper__CallerNotAuthorized(sender);
+            }
+        } else {
+            if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
+                revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
+            }
         }
         if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
         if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
