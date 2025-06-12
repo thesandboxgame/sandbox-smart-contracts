@@ -88,6 +88,14 @@ contract NFTCollection is
          * @notice Flag controlling token burn functionality.
          */
         bool isBurnEnabled;
+        /**
+         * @notice Address that can transfer tokens on behalf of agent-controlled wallets.
+         */
+        address purchaseAgent;
+        /**
+         * @notice Mapping of wallets that are controlled by the purchase agent.
+         */
+        mapping(address => bool) isAgentControlled;
     }
 
     // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
@@ -486,6 +494,37 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Sets the purchase agent address.
+     * @param _purchaseAgent The address of the purchase agent.
+     * @dev Only callable by owner.
+     */
+    function setPurchaseAgent(address _purchaseAgent) external onlyOwner {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        emit PurchaseAgentSet(_msgSender(), _purchaseAgent);
+        $.purchaseAgent = _purchaseAgent;
+    }
+
+    /**
+     * @notice Sets wallets as agent-controlled by the purchase agent.
+     * @param wallets The wallet addresses.
+     * @param agentControlledFlags Flags indicating if wallets are agent-controlled.
+     * @dev Only callable by owner.
+     */
+    function setBatchAgentControlled(
+        address[] calldata wallets,
+        bool[] calldata agentControlledFlags
+    ) external onlyOwner {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (wallets.length != agentControlledFlags.length) {
+            revert InvalidBatchData();
+        }
+        for (uint256 i; i < wallets.length; i++) {
+            $.isAgentControlled[wallets[i]] = agentControlledFlags[i];
+            emit AgentControlledSet(_msgSender(), wallets[i], agentControlledFlags[i]);
+        }
+    }
+
+    /**
      * @notice Safely transfers multiple tokens between addresses.
      * @param from Source address.
      * @param to Destination address.
@@ -825,6 +864,25 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Returns the purchase agent address.
+     * @return Address that can transfer tokens on behalf of agent-controlled wallets.
+     */
+    function purchaseAgent() external view returns (address) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.purchaseAgent;
+    }
+
+    /**
+     * @notice Returns if a wallet is controlled by the purchase agent.
+     * @param wallet The address to check.
+     * @return True if the wallet is controlled by the purchase agent.
+     */
+    function isAgentControlled(address wallet) external view returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        return $.isAgentControlled[wallet];
+    }
+
+    /**
      * @notice Checks interface support using ERC165.
      * @param interfaceId Interface identifier to check.
      * @return True if interface is supported.
@@ -834,6 +892,24 @@ contract NFTCollection is
         bytes4 interfaceId
     ) public view virtual override(ERC2981Upgradeable, ERC721Upgradeable) returns (bool) {
         return interfaceId == bytes4(0x49064906) || super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev See {ERC721-_isAuthorized}.
+     *
+     * Overridden to allow the `purchaseAgent` to transfer tokens from `isAgentControlled` wallets.
+     */
+    function _isAuthorized(
+        address owner,
+        address spender,
+        uint256 tokenId
+    ) internal view virtual override(ERC721Upgradeable) returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        // The purchaseAgent can spend tokens from agent-controlled wallets.
+        if ($.purchaseAgent != address(0) && spender == $.purchaseAgent && $.isAgentControlled[owner]) {
+            return true;
+        }
+        return super._isAuthorized(owner, spender, tokenId);
     }
 
     /**
