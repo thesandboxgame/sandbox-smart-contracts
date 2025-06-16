@@ -1,20 +1,21 @@
 import {SignerWithAddress} from '@nomicfoundation/hardhat-ethers/signers';
 import {loadFixture} from '@nomicfoundation/hardhat-network-helpers';
 import {expect} from 'chai';
+import {NFTCollection} from '../../../typechain-types';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
 type NFTCollectionFixture = {
-  collectionContract: any;
-  collectionContractAsOwner: any;
-  collectionContractAsRandomWallet: any;
+  collectionContract: NFTCollection;
+  collectionContractAsOwner: NFTCollection;
+  collectionContractAsRandomWallet: NFTCollection;
   randomWallet: SignerWithAddress;
   randomWallet2: SignerWithAddress;
   collectionOwner: SignerWithAddress;
   deployer: SignerWithAddress;
-  mint: (amount: number, wallet?: SignerWithAddress) => Promise<any[]>;
+  mint: (amount: number, wallet?: SignerWithAddress) => Promise<number[]>;
 };
 
-describe.only('NFTCollection purchaseAgent', function () {
+describe('NFTCollection purchaseAgent', function () {
   let fixtures: NFTCollectionFixture;
 
   beforeEach(async function () {
@@ -104,7 +105,7 @@ describe.only('NFTCollection purchaseAgent', function () {
   describe('Transfer Logic', function () {
     let purchaseAgent: SignerWithAddress;
     let tokenOwner: SignerWithAddress;
-    let tokenId: any;
+    let tokenId: number;
 
     beforeEach(async function () {
       const {
@@ -138,7 +139,7 @@ describe.only('NFTCollection purchaseAgent', function () {
       const contractAsPurchaseAgent = collectionContract.connect(purchaseAgent);
 
       await expect(
-        contractAsPurchaseAgent.safeTransferFrom(
+        contractAsPurchaseAgent['safeTransferFrom(address,address,uint256)'](
           tokenOwner.address,
           deployer.address,
           tokenId
