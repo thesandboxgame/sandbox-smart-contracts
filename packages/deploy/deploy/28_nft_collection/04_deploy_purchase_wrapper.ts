@@ -16,15 +16,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Deployer address:', deployer);
 
   let transakWallet: string;
-  if (network.name === 'amoy') {
+  if (network.name === 'amoy' || network.name === 'hardhat') {
     transakWallet = '0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef'; // AMOY
-  } else if (network.name === 'matic') {
-    // TODO: add matic address
-    transakWallet = '0x...';
   } else {
-    throw new Error(
-      `Network ${network.name} is not supported for this deployment.`
-    );
+    transakWallet = '0x...';
   }
 
   await deployments.deploy('PurchaseWrapper', {
