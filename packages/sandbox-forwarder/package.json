@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Meta-transaction forwarder contract for The Sandbox",
   "private": true,
+  "scripts": {
+   
+  },
   "dependencies": {
     "@openzeppelin/contracts": "5.2.0"
   },

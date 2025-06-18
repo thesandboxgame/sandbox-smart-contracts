@@ -2,7 +2,6 @@ import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DEPLOY_NETWORKS} from '../../hardhat.config';
-import {getAddressOrNull} from '../../utils/hardhatDeployUtils';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -26,22 +25,20 @@ const func: DeployFunction = async function (
     throw new Error('Cannot find EID for network');
   }
 
-  const OFTSandBase = await getAddressOrNull(
-    hre,
-    DEPLOY_NETWORKS.BASE_MAINNET,
-    'OFTSand'
-  );
-  const OFTSandBsc = await getAddressOrNull(
-    hre,
-    DEPLOY_NETWORKS.BSC_MAINNET,
-    'OFTSand'
-  );
+  const hreBase = hre.companionNetworks[DEPLOY_NETWORKS.BASE_MAINNET];
+  const deploymentsBase = hreBase.deployments;
+  const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
+
+  const hreBsc = hre.companionNetworks[DEPLOY_NETWORKS.BSC_MAINNET];
+  const deploymentsBsc = hreBsc.deployments;
+  const OFTSandBsc = await deploymentsBsc.getOrNull('OFTSand');
+
   if (OFTSandBase && OFTSandBsc) {
     const isPeerForBase = await read(
       'OFTAdapterForSand',
       'isPeer',
       eidBase,
-      ethers.zeroPadValue(OFTSandBase, 32)
+      ethers.zeroPadValue(OFTSandBase.address, 32)
     );
     if (!isPeerForBase) {
       // setting OFTSand(base) as peer to OFTAdapterForSand using eidBase
@@ -50,7 +47,7 @@ const func: DeployFunction = async function (
         {from: deployer, log: true},
         'setPeer',
         eidBase,
-        ethers.zeroPadValue(OFTSandBase, 32)
+        ethers.zeroPadValue(OFTSandBase.address, 32)
       );
     }
 
@@ -58,7 +55,7 @@ const func: DeployFunction = async function (
       'OFTAdapterForSand',
       'isPeer',
       eidBsc,
-      ethers.zeroPadValue(OFTSandBsc, 32)
+      ethers.zeroPadValue(OFTSandBsc.address, 32)
     );
     if (!isPeerForBsc) {
       // setting OFTSand(bsc) as peer to OFTAdapterForSand using eidBsc
@@ -67,7 +64,7 @@ const func: DeployFunction = async function (
         {from: deployer, log: true},
         'setPeer',
         eidBsc,
-        ethers.zeroPadValue(OFTSandBsc, 32)
+        ethers.zeroPadValue(OFTSandBsc.address, 32)
       );
     }
   }

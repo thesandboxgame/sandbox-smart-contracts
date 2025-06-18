@@ -2,7 +2,6 @@ import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DEPLOY_NETWORKS} from '../../hardhat.config';
-import {getAddressOrNull} from '../../utils/hardhatDeployUtils';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -26,23 +25,22 @@ const func: DeployFunction = async function (
     throw new Error('Cannot find EID for network');
   }
 
-  const OFTAdapterForSand = await getAddressOrNull(
-    hre,
-    DEPLOY_NETWORKS.ETH_MAINNET,
+  const hreEthereum = hre.companionNetworks[DEPLOY_NETWORKS.ETH_MAINNET];
+  const deploymentsEthereum = hreEthereum.deployments;
+  const OFTAdapterForSand = await deploymentsEthereum.getOrNull(
     'OFTAdapterForSand'
   );
-  const OFTSandBase = await getAddressOrNull(
-    hre,
-    DEPLOY_NETWORKS.BASE_MAINNET,
-    'OFTSand'
-  );
+
+  const hreBase = hre.companionNetworks[DEPLOY_NETWORKS.BASE_MAINNET];
+  const deploymentsBase = hreBase.deployments;
+  const OFTSandBase = await deploymentsBase.getOrNull('OFTSand');
 
   if (OFTAdapterForSand && OFTSandBase) {
     const isPeerForEthereum = await read(
       'OFTSand',
       'isPeer',
       eidEthereum,
-      ethers.zeroPadValue(OFTAdapterForSand, 32)
+      ethers.zeroPadValue(OFTAdapterForSand.address, 32)
     );
     if (!isPeerForEthereum) {
       // setting OFTAdapterForSand as peer to  OFTSand(bsc) using eidEthereum
@@ -51,7 +49,7 @@ const func: DeployFunction = async function (
         {from: deployer, log: true},
         'setPeer',
         eidEthereum,
-        ethers.zeroPadValue(OFTAdapterForSand, 32)
+        ethers.zeroPadValue(OFTAdapterForSand.address, 32)
       );
     }
 
@@ -59,7 +57,7 @@ const func: DeployFunction = async function (
       'OFTSand',
       'isPeer',
       eidBase,
-      ethers.zeroPadValue(OFTSandBase, 32)
+      ethers.zeroPadValue(OFTSandBase.address, 32)
     );
     if (!isPeerForBase) {
       // setting OFTSand(base) as peer to  OFTSand(bsc) using eidBase
@@ -68,7 +66,7 @@ const func: DeployFunction = async function (
         {from: deployer, log: true},
         'setPeer',
         eidBase,
-        ethers.zeroPadValue(OFTSandBase, 32)
+        ethers.zeroPadValue(OFTSandBase.address, 32)
       );
     }
   }
