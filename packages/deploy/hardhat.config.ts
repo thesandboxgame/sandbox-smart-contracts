@@ -95,6 +95,7 @@ const importedPackages = {
   '@sandbox-smart-contracts/sandbox-forwarder': [
     'contracts/SandboxForwarder.sol',
   ],
+  '@sandbox-smart-contracts/game-passes': ['contracts/GamePasses.sol'],
 };
 
 const namedAccounts = {
@@ -380,11 +381,6 @@ const networks = {
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
     deploy: ['deploy_mocks/', 'deploy/'],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
-      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
-      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.HARDHAT,
-    },
     blockGasLimit:
       parseInt(process.env.HARDHAT_BLOCK_GAS_LIMIT || '0') || 30000000,
   },
@@ -395,9 +391,6 @@ const networks = {
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
     // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
-    companionNetworks: {
-      [DEPLOY_NETWORKS.MUMBAI]: DEPLOY_NETWORKS.MUMBAI,
-    },
   },
   [DEPLOY_NETWORKS.ETH_SEPOLIA]: {
     tags: [
@@ -405,19 +398,9 @@ const networks = {
       DEPLOY_TAGS.L1_PROD,
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.AMOY]: DEPLOY_NETWORKS.AMOY,
-      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
-      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
-    },
   },
   [DEPLOY_NETWORKS.ETH_MAINNET]: {
     tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.POLYGON]: DEPLOY_NETWORKS.POLYGON,
-      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_MAINNET,
-      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
-    },
   },
   [DEPLOY_NETWORKS.BSC_TESTNET]: {
     tags: [
@@ -425,17 +408,9 @@ const networks = {
       DEPLOY_TAGS.L1_TEST,
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
-      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_SEPOLIA,
-    },
   },
   [DEPLOY_NETWORKS.BSC_MAINNET]: {
     tags: [DEPLOY_TAGS.L1, DEPLOY_TAGS.L1_PROD],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
-      [DEPLOY_NETWORKS.BASE_MAINNET]: DEPLOY_NETWORKS.BASE_MAINNET,
-    },
   },
   [DEPLOY_NETWORKS.MUMBAI]: {
     tags: [
@@ -443,9 +418,6 @@ const networks = {
       DEPLOY_TAGS.L2_TEST,
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_GOERLI]: DEPLOY_NETWORKS.ETH_GOERLI,
-    },
   },
   [DEPLOY_NETWORKS.AMOY]: {
     tags: [
@@ -453,15 +425,9 @@ const networks = {
       DEPLOY_TAGS.L2_TEST,
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_SEPOLIA]: DEPLOY_NETWORKS.ETH_SEPOLIA,
-    },
   },
   [DEPLOY_NETWORKS.POLYGON]: {
     tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_PROD],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
-    },
   },
   [DEPLOY_NETWORKS.BASE_SEPOLIA]: {
     tags: [
@@ -469,17 +435,9 @@ const networks = {
       DEPLOY_TAGS.L2_TEST,
       DEPLOY_TAGS.GENERATE_RANDOM_SECRET,
     ],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_SEPOLIA,
-      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_TESTNET,
-    },
   },
   [DEPLOY_NETWORKS.BASE_MAINNET]: {
     tags: [DEPLOY_TAGS.L2, DEPLOY_TAGS.L2_PROD],
-    companionNetworks: {
-      [DEPLOY_NETWORKS.ETH_MAINNET]: DEPLOY_NETWORKS.ETH_MAINNET,
-      [DEPLOY_NETWORKS.BSC_MAINNET]: DEPLOY_NETWORKS.BSC_MAINNET,
-    },
   },
 };
 
