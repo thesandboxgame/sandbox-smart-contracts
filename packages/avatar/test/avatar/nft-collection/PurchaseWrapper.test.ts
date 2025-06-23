@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 import {NFTCollection, PurchaseWrapper} from '../../../typechain-types';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
-describe('PurchaseWrapper', function () {
+describe.only('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     const nftCollectionFixture = await setupNFTCollectionContract();
     const PurchaseWrapperFactory = await ethers.getContractFactory(
@@ -138,7 +138,6 @@ describe('PurchaseWrapper', function () {
         .confirmPurchase(
           userAAddress, // sender is userA, who will receive the NFT
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
@@ -210,7 +209,6 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           ZeroAddress, // sender
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
@@ -253,7 +251,6 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           userAAddress,
           ZeroAddress, // nftCollection
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
@@ -305,7 +302,6 @@ describe('PurchaseWrapper', function () {
       await purchaseWrapper.connect(userA).confirmPurchase(
         userAAddress,
         collectionContractAddress,
-        sandPrice,
         waveIndex,
         signatureId,
         randomTempTokenId, // Use the ID
@@ -323,7 +319,6 @@ describe('PurchaseWrapper', function () {
         purchaseWrapper.connect(userA).confirmPurchase(
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId + 1,
           randomTempTokenId, // Reuse the ID
@@ -344,6 +339,9 @@ describe('PurchaseWrapper', function () {
         randomWallet: userA,
         purchaseWrapper,
         purchaseWrapperAddress,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        collectionContractAsOwner: nftCollection,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
@@ -358,6 +356,12 @@ describe('PurchaseWrapper', function () {
         .connect(userA)
         .approve(purchaseWrapperAddress, sandPrice);
 
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+
       const invalidSignature = '0xdeadbeef';
 
       const balanceBefore = await sandContract.balanceOf(userAAddress);
@@ -368,7 +372,6 @@ describe('PurchaseWrapper', function () {
           .confirmPurchase(
             userAAddress,
             collectionContractAddress,
-            sandPrice,
             waveIndex,
             signatureId,
             randomTempTokenId,
@@ -419,7 +422,6 @@ describe('PurchaseWrapper', function () {
           // deployer doesn't have AUTHORIZED_CALLER_ROLE
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
@@ -494,7 +496,6 @@ describe('PurchaseWrapper', function () {
         .confirmPurchase(
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
