@@ -177,6 +177,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             )
         );
 
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory result) = address(sandToken).call(
             abi.encodeCall(ISandboxSand.approveAndCall, (nftCollection, sandAmount, data))
         );
