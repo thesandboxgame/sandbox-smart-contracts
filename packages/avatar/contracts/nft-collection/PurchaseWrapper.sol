@@ -76,7 +76,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
     // Custom Errors
     error PurchaseWrapper__SandTokenAddressCannotBeZero();
-    error PurchaseWrapper__SenderAddressCannotBeZero();
     error PurchaseWrapper__NftCollectionAddressCannotBeZero();
     error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);
     error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
@@ -152,13 +151,11 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         address nftCollection,
         uint256 randomTempTokenId
     ) private view {
-        address caller = msg.sender == address(sandToken) ? sender : msg.sender;
-        if (!hasRole(AUTHORIZED_CALLER_ROLE, caller)) {
-            revert PurchaseWrapper__CallerNotAuthorized(caller);
+        if (msg.sender != address(sandToken) || !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
+            revert PurchaseWrapper__CallerNotAuthorized(sender);
         }
 
         if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
-        if (sender == address(0)) revert PurchaseWrapper__SenderAddressCannotBeZero();
         if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
         if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
             revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
