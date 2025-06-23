@@ -7,6 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {INFTCollection} from "./INFTCollection.sol";
 
 /**
  * @title PurchaseWrapper
@@ -113,7 +114,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      *      variables (`_txContext_...`) that are used by `onERC721Received`.
      * @param sender The original EOA initiating the purchase and who will receive the NFT.
      * @param nftCollection Address of the target NFT Collection contract for minting.
-     * @param sandAmount The amount of `sandToken` to be transferred for the purchase.
      * @param waveIndex The wave index for minting on the NFT Collection.
      * @param signatureId The signature ID for verification by the NFT Collection.
      * @param randomTempTokenId A unique temporary ID chosen by the caller to identify this purchase.
@@ -123,13 +123,14 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     function confirmPurchase(
         address sender,
         address nftCollection,
-        uint256 sandAmount,
         uint256 waveIndex,
         uint256 signatureId,
         uint256 randomTempTokenId,
         bytes calldata signature
     ) external nonReentrant {
         _validateAndAuthorizePurchase(sender, nftCollection, randomTempTokenId);
+
+        uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
         _txContextLocalTokenId = randomTempTokenId;
         _isInConfirmPurchase = true;

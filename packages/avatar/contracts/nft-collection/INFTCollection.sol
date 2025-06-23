@@ -333,4 +333,11 @@ interface INFTCollection {
      * @param isAgentControlled true if the wallet is agent-controlled
      */
     event AgentControlledSet(address indexed operator, address indexed wallet, bool isAgentControlled);
+
+    /**
+     * @notice Returns the token price for a specific wave.
+     * @param waveIndex Wave configuration index.
+     * @return Price per token in the wave's payment token.
+     */
+    function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256);
 }
