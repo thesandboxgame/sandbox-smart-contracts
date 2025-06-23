@@ -178,6 +178,134 @@ describe('PurchaseWrapper', function () {
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
     });
 
+    it('should allow user A to mint two tokens in a row successfully', async function () {
+      const {
+        collectionContractAsOwner: nftCollection,
+        collectionContractAddress,
+        waveMintSign,
+        sandContract,
+        randomWallet: userA,
+        purchaseWrapper,
+        purchaseWrapperAddress,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      const userAAddress = await userA.getAddress();
+      const sandPrice = ethers.parseEther('100');
+      const waveIndex = 0;
+
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+      // Donate for 2 tokens
+      await sandContract.donateTo(userAAddress, sandPrice * BigInt(2));
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(
+        sandPrice * BigInt(2)
+      );
+
+      // --- First Purchase ---
+      const signatureId1 = 444;
+      const randomTempTokenId1 = 54321;
+      const signature1 = await waveMintSign(
+        purchaseWrapperAddress,
+        1,
+        waveIndex,
+        signatureId1
+      );
+      const data1 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId1,
+          randomTempTokenId1,
+          signature1,
+        ]
+      );
+      const tx1 = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data1);
+      const receipt1 = await tx1.wait();
+      if (!receipt1) throw new Error('Transaction receipt not found');
+
+      let mintedTokenId1: bigint | undefined;
+      for (const log of receipt1.logs) {
+        try {
+          const parsedLog = purchaseWrapper.interface.parseLog(log);
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
+            mintedTokenId1 = parsedLog.args.nftTokenId;
+            break;
+          }
+        } catch (e) {
+          // Likely a log from another contract
+        }
+      }
+      expect(mintedTokenId1).to.not.be.undefined;
+      if (mintedTokenId1 === undefined)
+        throw new Error('Minted token ID not found for first purchase');
+      expect(await nftCollection.ownerOf(mintedTokenId1)).to.be.eq(
+        userAAddress
+      );
+      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(1);
+      expect(await nftCollection.totalSupply()).to.be.eq(1);
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(sandPrice);
+
+      // --- Second Purchase ---
+      const signatureId2 = 555;
+      const randomTempTokenId2 = 65432;
+      const signature2 = await waveMintSign(
+        purchaseWrapperAddress,
+        1,
+        waveIndex,
+        signatureId2
+      );
+      const data2 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId2,
+          randomTempTokenId2,
+          signature2,
+        ]
+      );
+      const tx2 = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data2);
+      const receipt2 = await tx2.wait();
+      if (!receipt2) throw new Error('Transaction receipt not found');
+
+      let mintedTokenId2: bigint | undefined;
+      for (const log of receipt2.logs) {
+        try {
+          const parsedLog = purchaseWrapper.interface.parseLog(log);
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
+            mintedTokenId2 = parsedLog.args.nftTokenId;
+            break;
+          }
+        } catch (e) {
+          // Likely a log from another contract
+        }
+      }
+      expect(mintedTokenId2).to.not.be.undefined;
+      if (mintedTokenId2 === undefined)
+        throw new Error('Minted token ID not found for second purchase');
+
+      expect(await nftCollection.ownerOf(mintedTokenId2)).to.be.eq(
+        userAAddress
+      );
+      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(2);
+      expect(await nftCollection.totalSupply()).to.be.eq(2);
+
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(0);
+      expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
+    });
+
     it('should revert if sender address is zero', async function () {
       // cannot happen due to the FIRST_PARAM check in Sand
     });

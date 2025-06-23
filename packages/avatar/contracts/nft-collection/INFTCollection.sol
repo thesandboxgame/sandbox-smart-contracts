@@ -355,5 +355,5 @@ interface INFTCollection {
         uint256 waveIndex,
         uint256 signatureId,
         bytes calldata signature
-    ) external;
+    ) external returns (uint256[] memory);
 }
