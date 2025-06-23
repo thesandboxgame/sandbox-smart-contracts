@@ -8,13 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {INFTCollection} from "./INFTCollection.sol";
-
-/**
- * @dev Minimal interface for the SAND token contract.
- */
-interface ISandboxSand {
-    function approveAndCall(address spender, uint256 amount, bytes calldata data) external;
-}
+import {ISandboxSand} from "./ISandboxSand.sol";
 
 /**
  * @title PurchaseWrapper
