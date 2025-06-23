@@ -10,6 +10,13 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {INFTCollection} from "./INFTCollection.sol";
 
 /**
+ * @dev Minimal interface for the SAND token contract.
+ */
+interface ISandboxSand {
+    function approveAndCall(address spender, uint256 amount, bytes calldata data) external;
+}
+
+/**
  * @title PurchaseWrapper
  * @author The Sandbox
  * @notice Contract that facilitates NFT purchases using SAND.
@@ -172,25 +179,20 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 signatureId,
         bytes calldata signature
     ) private {
-        bytes4 waveMintSelector = bytes4(keccak256("waveMint(address,uint256,uint256,uint256,bytes)"));
-
-        bytes memory data = abi.encodeWithSelector(
-            waveMintSelector,
-            address(this), // NFTs will be minted to this contract first
-            1,
-            waveIndex,
-            signatureId,
-            signature
+        bytes memory data = abi.encodeCall(
+            INFTCollection.waveMint,
+            (
+                address(this), // NFTs will be minted to this contract first
+                1,
+                waveIndex,
+                signatureId,
+                signature
+            )
         );
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = address(sandToken).call(
-            abi.encodeWithSelector(
-                bytes4(keccak256("approveAndCall(address,uint256,bytes)")),
-                nftCollection,
-                sandAmount,
-                data
-            )
+            abi.encodeCall(ISandboxSand.approveAndCall, (nftCollection, sandAmount, data))
         );
 
         if (!success) {
