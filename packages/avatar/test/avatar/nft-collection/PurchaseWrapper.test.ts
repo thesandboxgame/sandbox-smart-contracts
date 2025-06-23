@@ -129,22 +129,23 @@ describe.only('PurchaseWrapper', function () {
         signatureId
       );
 
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
-
-      const confirmPurchaseTx = purchaseWrapper
-        .connect(userA) // Deployer calls confirmPurchase (has AUTHORIZED_CALLER_ROLE)
-        .confirmPurchase(
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress, // sender is userA, who will receive the NFT
           collectionContractAddress,
           waveIndex,
           signatureId,
           randomTempTokenId,
-          signature
-        );
+          signature,
+        ]
+      );
 
-      const receipt = await (await confirmPurchaseTx).wait();
+      const confirmPurchaseTx = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data);
+
+      const receipt = await confirmPurchaseTx.wait();
       if (!receipt) throw new Error('Transaction receipt not found');
 
       let mintedTokenId: bigint | undefined;
@@ -178,46 +179,7 @@ describe.only('PurchaseWrapper', function () {
     });
 
     it('should revert if sender address is zero', async function () {
-      const {
-        collectionContractAddress,
-        waveMintSign,
-        sandContract,
-        purchaseWrapper,
-        purchaseWrapperAddress,
-        randomWallet: userA,
-      } = await loadFixture(setupPurchaseWrapperFixture);
-
-      const sandPrice = ethers.parseEther('100');
-      const waveIndex = 0;
-      const signatureId = 1;
-      const randomTempTokenId = 1;
-      const userAAddress = await userA.getAddress();
-
-      await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
-
-      const signature = await waveMintSign(
-        purchaseWrapperAddress,
-        1,
-        waveIndex,
-        signatureId
-      );
-
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
-          ZeroAddress, // sender
-          collectionContractAddress,
-          waveIndex,
-          signatureId,
-          randomTempTokenId,
-          signature
-        )
-      ).to.be.revertedWithCustomError(
-        purchaseWrapper,
-        'PurchaseWrapper__SenderAddressCannotBeZero'
-      );
+      // cannot happen due to the FIRST_PARAM check in Sand
     });
 
     it('should revert if NFT Collection address is zero', async function () {
@@ -236,9 +198,6 @@ describe.only('PurchaseWrapper', function () {
       const userAAddress = await userA.getAddress();
 
       await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
@@ -247,15 +206,22 @@ describe.only('PurchaseWrapper', function () {
         signatureId
       );
 
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
           ZeroAddress, // nftCollection
           waveIndex,
           signatureId,
           randomTempTokenId,
-          signature
-        )
+          signature,
+        ]
+      );
+
+      await expect(
+        sandContract
+          .connect(userA)
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
         'PurchaseWrapper__NftCollectionAddressCannotBeZero'
@@ -287,11 +253,8 @@ describe.only('PurchaseWrapper', function () {
         sandPrice
       );
       await sandContract.donateTo(userAAddress, sandPrice * BigInt(2)); // Enough for two
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice * BigInt(2));
 
-      const signature = await waveMintSign(
+      const signature1 = await waveMintSign(
         purchaseWrapperAddress,
         1,
         waveIndex,
@@ -299,14 +262,20 @@ describe.only('PurchaseWrapper', function () {
       );
 
       // First purchase
-      await purchaseWrapper.connect(userA).confirmPurchase(
-        userAAddress,
-        collectionContractAddress,
-        waveIndex,
-        signatureId,
-        randomTempTokenId, // Use the ID
-        signature
+      const data1 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId, // Use the ID
+          signature1,
+        ]
       );
+      await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data1);
 
       // Second purchase attempt with the same local token ID
       const signature2 = await waveMintSign(
@@ -315,15 +284,22 @@ describe.only('PurchaseWrapper', function () {
         waveIndex,
         signatureId + 1
       ); // new sig ID
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
+
+      const data2 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
           collectionContractAddress,
           waveIndex,
           signatureId + 1,
           randomTempTokenId, // Reuse the ID
-          signature2
-        )
+          signature2,
+        ]
+      );
+      await expect(
+        sandContract
+          .connect(userA)
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data2)
       )
         .to.be.revertedWithCustomError(
           purchaseWrapper,
@@ -366,17 +342,22 @@ describe.only('PurchaseWrapper', function () {
 
       const balanceBefore = await sandContract.balanceOf(userAAddress);
 
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId,
+          invalidSignature,
+        ]
+      );
+
       await expect(
-        purchaseWrapper
+        sandContract
           .connect(userA)
-          .confirmPurchase(
-            userAAddress,
-            collectionContractAddress,
-            waveIndex,
-            signatureId,
-            randomTempTokenId,
-            invalidSignature
-          )
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
         'PurchaseWrapper__NftPurchaseFailedViaApproveAndCall'
@@ -480,9 +461,6 @@ describe.only('PurchaseWrapper', function () {
       );
 
       await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
@@ -491,16 +469,21 @@ describe.only('PurchaseWrapper', function () {
         signatureId
       );
 
-      const tx = await purchaseWrapper
-        .connect(userA)
-        .confirmPurchase(
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
           collectionContractAddress,
           waveIndex,
           signatureId,
           randomTempTokenId,
-          signature
-        );
+          signature,
+        ]
+      );
+      const tx = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data);
+
       const receipt = await tx.wait();
       if (!receipt) throw new Error('Transaction receipt not found for setup');
       for (const log of receipt.logs) {
