@@ -240,7 +240,7 @@ contract NFTCollection is
         uint256 waveIndex,
         uint256 signatureId,
         bytes calldata signature
-    ) external whenNotPaused nonReentrant {
+    ) external whenNotPaused nonReentrant returns (uint256[] memory) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         if ($.waveData.length == 0) {
             revert ContractNotConfigured();
@@ -250,7 +250,7 @@ contract NFTCollection is
         }
         _checkAndSetWaveMintSignature(wallet, waveIndex, signatureId, signature);
         WaveData storage waveData = _getWaveData(waveIndex);
-        _doMint(waveData, wallet, amount, waveIndex);
+        return _doMint(waveData, wallet, amount, waveIndex);
     }
 
     /**
@@ -920,7 +920,12 @@ contract NFTCollection is
      * @param waveIndex Wave configuration index.
      * @dev Handles payment processing and token minting.
      */
-    function _doMint(WaveData storage waveData, address wallet, uint256 amount, uint256 waveIndex) internal {
+    function _doMint(
+        WaveData storage waveData,
+        address wallet,
+        uint256 amount,
+        uint256 waveIndex
+    ) internal returns (uint256[] memory) {
         NFTCollectionStorage storage $ = _getNFTCollectionStorage();
         MintDenialReason reason = _isMintDenied($, waveData, wallet, amount);
         if (reason != MintDenialReason.None) {
@@ -935,12 +940,15 @@ contract NFTCollection is
         waveData.waveTotalMinted += amount;
         $.totalSupply += amount;
         $.mintedCount[wallet] += amount;
+        uint256[] memory tokenIds = new uint256[](amount);
         for (uint256 i; i < amount; i++) {
             // @dev _safeMint already checks the destination _wallet
             // @dev start with tokenId = 1
-            _safeMint(wallet, _totalSupply + i + 1);
-            emit WaveMint(_totalSupply + i + 1, wallet, waveIndex);
+            tokenIds[i] = _totalSupply + i + 1;
+            _safeMint(wallet, tokenIds[i]);
+            emit WaveMint(tokenIds[i], wallet, waveIndex);
         }
+        return tokenIds;
     }
 
     /**

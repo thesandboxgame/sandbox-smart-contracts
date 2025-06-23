@@ -49,18 +49,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     mapping(uint256 localTokenId => PurchaseInfo) private _purchaseInfo;
 
     /**
-     * @notice Transaction context variable: it is set by confirmPurchase and read by onERC721Received
-     *         within the same transaction. It effectively acts as a parameter passed through an external call.
-     */
-    uint256 private _txContextLocalTokenId;
-
-    /**
-     * @notice A variable to track if the contract is in the confirmPurchase function.
-     *         It is set to true in confirmPurchase and reset to false in onERC721Received.
-     */
-    bool private _isInConfirmPurchase;
-
-    /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
      * @param originalSender The address that initiated the purchase.
      * @param nftCollection The address of the NFT collection.
@@ -135,19 +123,24 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
         uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
-        _txContextLocalTokenId = randomTempTokenId;
-        _isInConfirmPurchase = true;
-
         _purchaseInfo[randomTempTokenId].caller = sender;
         _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
 
         SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);
 
-        _initiateMintViaApproveAndCall(nftCollection, sandAmount, waveIndex, signatureId, signature);
+        uint256 nftTokenId = _initiateMintViaApproveAndCall(
+            nftCollection,
+            sandAmount,
+            waveIndex,
+            signatureId,
+            signature
+        );
 
-        IERC721(nftCollection).transferFrom(address(this), sender, _purchaseInfo[randomTempTokenId].nftTokenId);
+        _purchaseInfo[randomTempTokenId].nftTokenId = nftTokenId;
 
-        emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, _purchaseInfo[randomTempTokenId].nftTokenId);
+        IERC721(nftCollection).transferFrom(address(this), sender, nftTokenId);
+
+        emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, nftTokenId);
     }
 
     function _validateAndAuthorizePurchase(
@@ -172,7 +165,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 waveIndex,
         uint256 signatureId,
         bytes calldata signature
-    ) private {
+    ) private returns (uint256) {
         bytes memory data = abi.encodeCall(
             INFTCollection.waveMint,
             (
@@ -184,36 +177,45 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             )
         );
 
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, ) = address(sandToken).call(
+        (bool success, bytes memory result) = address(sandToken).call(
             abi.encodeCall(ISandboxSand.approveAndCall, (nftCollection, sandAmount, data))
         );
 
         if (!success) {
             revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
         }
+        uint256[] memory tokenIds = new uint256[](1);
+        // The return data from `approveAndCall` is a `bytes` type, which means the actual return data from `waveMint` (an abi-encoded uint256[])
+        // is itself abi-encoded. We need to go deeper.
+        // `result` raw data layout:
+        // - 0x00: offset to bytes data (0x20)
+        // - 0x20: length of bytes data (e.g., 96 for a single uint256 in an array)
+        // - 0x40: start of the `waveMint` return data
+        //   - 0x40: offset to array data (0x20)
+        //   - 0x60: array length (1)
+        //   - 0x80: the token ID
+        if (result.length < 160) {
+            revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
+        }
+        bytes32 tokenIdWord;
+        assembly {
+            // We read the word at offset 0x80 in the raw return data.
+            // The `result` variable is a memory pointer, and its data starts at an offset of 0x20.
+            // So we read from result + 0x20 (start of data) + 0x80 (offset to tokenId) = result + 0xa0
+            tokenIdWord := mload(add(result, 0xa0))
+        }
+        tokenIds[0] = uint256(tokenIdWord);
+        return tokenIds[0];
     }
 
     /**
      * @notice Handles the receipt of an ERC721 token, expected to be called by an NFT collection
      *         contract after a successful mint initiated by `confirmPurchase`.
-     * @dev This function uses the transaction-scoped context variables (`_txContext_...`) set by
-     *      `confirmPurchase` to identify the purchase and original sender. It then stores the
-     *      actual `tokenId` and `nftCollection` in the `_purchaseInfo` mapping and transfers
-     *      the NFT to the `_txContext_originalSender`.
-     * @param tokenId The ID of the token being transferred to this contract.
+     * @dev This function is a simple pass-through to conform to the IERC721Receiver interface.
+     *      The core logic has been moved into `confirmPurchase`.
      * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
      */
-    function onERC721Received(address, address, uint256 tokenId, bytes calldata) external override returns (bytes4) {
-        if (!_isInConfirmPurchase) revert PurchaseWrapper__NotInConfirmPurchase();
-        PurchaseInfo storage info = _purchaseInfo[_txContextLocalTokenId];
-
-        if (msg.sender != info.nftCollection)
-            revert PurchaseWrapper__ReceivedNftFromUnexpectedCollection(info.nftCollection, msg.sender);
-
-        info.nftTokenId = tokenId;
-        _isInConfirmPurchase = false;
-
+    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 
