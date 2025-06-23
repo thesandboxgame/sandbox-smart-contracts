@@ -29,6 +29,9 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 nftTokenId;
     }
 
+    /**
+     * @notice The role that is authorized to call this contract's functions.
+     */
     bytes32 public constant AUTHORIZED_CALLER_ROLE = keccak256("AUTHORIZED_CALLER_ROLE");
 
     /**
