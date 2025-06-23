@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 import {NFTCollection, PurchaseWrapper} from '../../../typechain-types';
 import {setupNFTCollectionContract} from './NFTCollection.fixtures';
 
-describe.only('PurchaseWrapper', function () {
+describe('PurchaseWrapper', function () {
   async function setupPurchaseWrapperFixture() {
     const nftCollectionFixture = await setupNFTCollectionContract();
     const PurchaseWrapperFactory = await ethers.getContractFactory(
