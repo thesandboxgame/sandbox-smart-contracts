@@ -340,4 +340,20 @@ interface INFTCollection {
      * @return Price per token in the wave's payment token.
      */
     function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256);
+
+    /**
+     * @notice Mints a token for a specific wave.
+     * @param to The address to mint the token to.
+     * @param amount The amount of tokens to mint.
+     * @param waveIndex The wave index.
+     * @param signatureId The signature ID.
+     * @param signature The signature.
+     */
+    function waveMint(
+        address to,
+        uint256 amount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
+    ) external;
 }
