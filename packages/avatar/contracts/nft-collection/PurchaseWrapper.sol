@@ -55,7 +55,12 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param localTokenId The temporary local token ID for this purchase.
      * @param nftTokenId The actual ID of the minted NFT.
      */
-    event PurchaseConfirmed(address originalSender, address nftCollection, uint256 localTokenId, uint256 nftTokenId);
+    event PurchaseConfirmed(
+        address indexed originalSender,
+        address indexed nftCollection,
+        uint256 localTokenId,
+        uint256 indexed nftTokenId
+    );
 
     /**
      * @notice Emitted when an NFT is transferred using the wrapper's transfer functions.
@@ -64,7 +69,12 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param to The address to which the NFT is transferred.
      * @param nftTokenId The actual ID of the transferred NFT.
      */
-    event NftTransferredViaWrapper(uint256 localTokenId, address from, address to, uint256 nftTokenId);
+    event NftTransferredViaWrapper(
+        uint256 localTokenId,
+        address indexed from,
+        address indexed to,
+        uint256 indexed nftTokenId
+    );
 
     // Custom Errors
     error PurchaseWrapperSandTokenAddressCannotBeZero();
