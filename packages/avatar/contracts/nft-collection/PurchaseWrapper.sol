@@ -81,7 +81,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapperNftCollectionAddressCannotBeZero();
     error PurchaseWrapperLocalTokenIdAlreadyInUse(uint256 localTokenId);
     error PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
-    error PurchaseWrapperReceivedNftFromUnexpectedCollection(address expected, address actual);
     error PurchaseWrapperInvalidRecipientAddress();
     error PurchaseWrapperNoSandTokensToRecover();
     error PurchaseWrapperTransferToZeroAddress();
@@ -90,9 +89,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapperNftCollectionNotRecorded(uint256 localTokenId);
     error PurchaseWrapperFromAddressIsNotOriginalRecipient(address expected, address actual);
     error PurchaseWrapperCallerNotAuthorized(address caller);
-    error PurchaseWrapperSenderIsNotSandToken();
     error PurchaseWrapperRandomTempTokenIdCannotBeZero();
-    error PurchaseWrapperNotInConfirmPurchase();
 
     /**
      * @notice Constructor to set the SAND token contract address.
