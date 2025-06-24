@@ -88,7 +88,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         PurchaseWrapperFactory,
-        'PurchaseWrapper__SandTokenAddressCannotBeZero'
+        'PurchaseWrapperSandTokenAddressCannotBeZero'
       );
     });
   });
@@ -352,7 +352,7 @@ describe('PurchaseWrapper', function () {
           .approveAndCall(purchaseWrapperAddress, sandPrice, data)
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
-        'PurchaseWrapper__NftCollectionAddressCannotBeZero'
+        'PurchaseWrapperNftCollectionAddressCannotBeZero'
       );
     });
 
@@ -431,7 +431,7 @@ describe('PurchaseWrapper', function () {
       )
         .to.be.revertedWithCustomError(
           purchaseWrapper,
-          'PurchaseWrapper__LocalTokenIdAlreadyInUse'
+          'PurchaseWrapperLocalTokenIdAlreadyInUse'
         )
         .withArgs(randomTempTokenId);
     });
@@ -488,7 +488,7 @@ describe('PurchaseWrapper', function () {
           .approveAndCall(purchaseWrapperAddress, sandPrice, data)
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
-        'PurchaseWrapper__NftPurchaseFailedViaApproveAndCall'
+        'PurchaseWrapperNftPurchaseFailedViaApproveAndCall'
       );
 
       expect(await sandContract.balanceOf(userAAddress)).to.equal(
@@ -538,7 +538,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
-        'PurchaseWrapper__CallerNotAuthorized'
+        'PurchaseWrapperCallerNotAuthorized'
       );
     });
   });
@@ -654,7 +654,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsUserA,
-        'PurchaseWrapper__TransferToZeroAddress'
+        'PurchaseWrapperTransferToZeroAddress'
       );
     });
 
@@ -669,7 +669,7 @@ describe('PurchaseWrapper', function () {
       )
         .to.be.revertedWithCustomError(
           purchaseWrapperAsUserA,
-          'PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted'
+          'PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted'
         )
         .withArgs(invalidLocalTokenId);
     });
@@ -685,7 +685,7 @@ describe('PurchaseWrapper', function () {
       )
         .to.be.revertedWithCustomError(
           purchaseWrapperAsUserA,
-          'PurchaseWrapper__FromAddressIsNotOriginalRecipient'
+          'PurchaseWrapperFromAddressIsNotOriginalRecipient'
         )
         .withArgs(userBAddress, userAAddress);
     });
@@ -752,7 +752,7 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsDeployer.recoverSand(ZeroAddress)
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsDeployer,
-        'PurchaseWrapper__InvalidRecipientAddress'
+        'PurchaseWrapperInvalidRecipientAddress'
       );
     });
 
@@ -768,7 +768,7 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsDeployer.recoverSand(await randomWallet.getAddress())
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsDeployer,
-        'PurchaseWrapper__NoSandTokensToRecover'
+        'PurchaseWrapperNoSandTokensToRecover'
       );
     });
   });
