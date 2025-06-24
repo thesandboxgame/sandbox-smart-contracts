@@ -138,7 +138,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         SafeERC20.safeTransferFrom(sandTokenCached, sender, address(this), sandAmount);
 
         uint256 nftTokenId = _initiateMintViaApproveAndCall(
-            sandTokenCached,
             nftCollection,
             sandAmount,
             waveIndex,
@@ -214,7 +213,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     function _initiateMintViaApproveAndCall(
-        IERC20 sandToken,
         address nftCollection,
         uint256 sandAmount,
         uint256 waveIndex,
