@@ -46,7 +46,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      *      to uniquely identify a purchase transaction and later to reference the minted NFT
      *      in the wrapper's transfer functions.
      */
-    mapping(uint256 localTokenId => PurchaseInfo) private _purchaseInfo;
+    mapping(uint256 localTokenId => PurchaseInfo purchaseInfo) private _purchaseInfo;
 
     /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.

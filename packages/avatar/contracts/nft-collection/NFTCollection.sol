@@ -95,7 +95,7 @@ contract NFTCollection is
         /**
          * @notice Mapping of wallets that are controlled by the purchase agent.
          */
-        mapping(address => bool) isAgentControlled;
+        mapping(address wallet => bool isAgentControlled) isAgentControlled;
     }
 
     // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
