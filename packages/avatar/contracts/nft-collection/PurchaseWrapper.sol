@@ -133,12 +133,15 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
         uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
-        _purchaseInfo[randomTempTokenId].caller = sender;
-        _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
+        PurchaseInfo storage info = _purchaseInfo[randomTempTokenId];
+        info.caller = sender;
+        info.nftCollection = nftCollection;
 
-        SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);
+        IERC20 sandTokenCached = sandToken;
+        SafeERC20.safeTransferFrom(sandTokenCached, sender, address(this), sandAmount);
 
         uint256 nftTokenId = _initiateMintViaApproveAndCall(
+            sandTokenCached,
             nftCollection,
             sandAmount,
             waveIndex,
@@ -146,7 +149,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             signature
         );
 
-        _purchaseInfo[randomTempTokenId].nftTokenId = nftTokenId;
+        info.nftTokenId = nftTokenId;
 
         IERC721(nftCollection).transferFrom(address(this), sender, nftTokenId);
 
@@ -166,7 +169,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             revert PurchaseWrapperCallerNotAuthorized(msg.sender);
         }
         if (to == address(0)) revert PurchaseWrapperTransferToZeroAddress();
-        PurchaseInfo storage info = _purchaseInfo[localTokenId];
+        PurchaseInfo memory info = _purchaseInfo[localTokenId];
 
         if (info.caller == address(0)) revert PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
         if (info.nftTokenId == 0) revert PurchaseWrapperNftNotYetMintedOrRecorded(localTokenId);
@@ -186,10 +189,11 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      */
     function recoverSand(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (recipient == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
-        uint256 balance = sandToken.balanceOf(address(this));
+        IERC20 sandTokenCached = sandToken;
+        uint256 balance = sandTokenCached.balanceOf(address(this));
         if (balance == 0) revert PurchaseWrapperNoSandTokensToRecover();
 
-        SafeERC20.safeTransfer(sandToken, recipient, balance);
+        SafeERC20.safeTransfer(sandTokenCached, recipient, balance);
     }
 
     /**
@@ -213,6 +217,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     function _initiateMintViaApproveAndCall(
+        IERC20 sandToken,
         address nftCollection,
         uint256 sandAmount,
         uint256 waveIndex,
