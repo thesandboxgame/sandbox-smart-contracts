@@ -67,22 +67,22 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     event NftTransferredViaWrapper(uint256 localTokenId, address from, address to, uint256 nftTokenId);
 
     // Custom Errors
-    error PurchaseWrapper__SandTokenAddressCannotBeZero();
-    error PurchaseWrapper__NftCollectionAddressCannotBeZero();
-    error PurchaseWrapper__LocalTokenIdAlreadyInUse(uint256 localTokenId);
-    error PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
-    error PurchaseWrapper__ReceivedNftFromUnexpectedCollection(address expected, address actual);
-    error PurchaseWrapper__InvalidRecipientAddress();
-    error PurchaseWrapper__NoSandTokensToRecover();
-    error PurchaseWrapper__TransferToZeroAddress();
-    error PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);
-    error PurchaseWrapper__NftNotYetMintedOrRecorded(uint256 localTokenId);
-    error PurchaseWrapper__NftCollectionNotRecorded(uint256 localTokenId);
-    error PurchaseWrapper__FromAddressIsNotOriginalRecipient(address expected, address actual);
-    error PurchaseWrapper__CallerNotAuthorized(address caller);
-    error PurchaseWrapper__SenderIsNotSandToken();
-    error PurchaseWrapper__RandomTempTokenIdCannotBeZero();
-    error PurchaseWrapper__NotInConfirmPurchase();
+    error PurchaseWrapperSandTokenAddressCannotBeZero();
+    error PurchaseWrapperNftCollectionAddressCannotBeZero();
+    error PurchaseWrapperLocalTokenIdAlreadyInUse(uint256 localTokenId);
+    error PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
+    error PurchaseWrapperReceivedNftFromUnexpectedCollection(address expected, address actual);
+    error PurchaseWrapperInvalidRecipientAddress();
+    error PurchaseWrapperNoSandTokensToRecover();
+    error PurchaseWrapperTransferToZeroAddress();
+    error PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted(uint256 localTokenId);
+    error PurchaseWrapperNftNotYetMintedOrRecorded(uint256 localTokenId);
+    error PurchaseWrapperNftCollectionNotRecorded(uint256 localTokenId);
+    error PurchaseWrapperFromAddressIsNotOriginalRecipient(address expected, address actual);
+    error PurchaseWrapperCallerNotAuthorized(address caller);
+    error PurchaseWrapperSenderIsNotSandToken();
+    error PurchaseWrapperRandomTempTokenIdCannotBeZero();
+    error PurchaseWrapperNotInConfirmPurchase();
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -90,7 +90,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param _sandToken Address of the Sand (ERC20) token contract.
      */
     constructor(address _admin, address _sandToken, address _authorizedCaller) {
-        if (_sandToken == address(0)) revert PurchaseWrapper__SandTokenAddressCannotBeZero();
+        if (_sandToken == address(0)) revert PurchaseWrapperSandTokenAddressCannotBeZero();
         sandToken = IERC20(_sandToken);
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(AUTHORIZED_CALLER_ROLE, _authorizedCaller);
@@ -149,13 +149,13 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         uint256 randomTempTokenId
     ) private view {
         if (msg.sender != address(sandToken) || !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
-            revert PurchaseWrapper__CallerNotAuthorized(sender);
+            revert PurchaseWrapperCallerNotAuthorized(sender);
         }
 
-        if (randomTempTokenId == 0) revert PurchaseWrapper__RandomTempTokenIdCannotBeZero();
-        if (nftCollection == address(0)) revert PurchaseWrapper__NftCollectionAddressCannotBeZero();
+        if (randomTempTokenId == 0) revert PurchaseWrapperRandomTempTokenIdCannotBeZero();
+        if (nftCollection == address(0)) revert PurchaseWrapperNftCollectionAddressCannotBeZero();
         if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
-            revert PurchaseWrapper__LocalTokenIdAlreadyInUse(randomTempTokenId);
+            revert PurchaseWrapperLocalTokenIdAlreadyInUse(randomTempTokenId);
         }
     }
 
@@ -183,7 +183,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         );
 
         if (!success) {
-            revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
+            revert PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
         }
         uint256[] memory tokenIds = new uint256[](1);
         // The return data from `approveAndCall` is a `bytes` type, which means the actual return data from `waveMint` (an abi-encoded uint256[])
@@ -196,7 +196,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         //   - 0x60: array length (1)
         //   - 0x80: the token ID
         if (result.length < 160) {
-            revert PurchaseWrapper__NftPurchaseFailedViaApproveAndCall();
+            revert PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
         }
         bytes32 tokenIdWord;
         assembly {
@@ -236,9 +236,9 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param recipient Address to receive the recovered ERC20 tokens.
      */
     function recoverSand(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (recipient == address(0)) revert PurchaseWrapper__InvalidRecipientAddress();
+        if (recipient == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
         uint256 balance = sandToken.balanceOf(address(this));
-        if (balance == 0) revert PurchaseWrapper__NoSandTokensToRecover();
+        if (balance == 0) revert PurchaseWrapperNoSandTokensToRecover();
 
         SafeERC20.safeTransfer(sandToken, recipient, balance);
     }
@@ -253,15 +253,15 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      */
     function safeTransferFrom(address from, address to, uint256 localTokenId) external {
         if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
-            revert PurchaseWrapper__CallerNotAuthorized(msg.sender);
+            revert PurchaseWrapperCallerNotAuthorized(msg.sender);
         }
-        if (to == address(0)) revert PurchaseWrapper__TransferToZeroAddress();
+        if (to == address(0)) revert PurchaseWrapperTransferToZeroAddress();
         PurchaseInfo storage info = _purchaseInfo[localTokenId];
 
-        if (info.caller == address(0)) revert PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
-        if (info.nftTokenId == 0) revert PurchaseWrapper__NftNotYetMintedOrRecorded(localTokenId);
-        if (info.nftCollection == address(0)) revert PurchaseWrapper__NftCollectionNotRecorded(localTokenId);
-        if (info.caller != from) revert PurchaseWrapper__FromAddressIsNotOriginalRecipient(from, info.caller);
+        if (info.caller == address(0)) revert PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
+        if (info.nftTokenId == 0) revert PurchaseWrapperNftNotYetMintedOrRecorded(localTokenId);
+        if (info.nftCollection == address(0)) revert PurchaseWrapperNftCollectionNotRecorded(localTokenId);
+        if (info.caller != from) revert PurchaseWrapperFromAddressIsNotOriginalRecipient(from, info.caller);
 
         IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
 
