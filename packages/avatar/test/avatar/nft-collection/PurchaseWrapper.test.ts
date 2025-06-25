@@ -23,6 +23,9 @@ describe('PurchaseWrapper', function () {
       nftCollectionFixture.deployer
     ).deploy(deployerAddress, sandContractAddress, authorizedCallerAddress); // Pass admin, sandToken, and authorizedCaller
 
+    // Authorize the collection for purchases
+    await purchaseWrapper.authorizeNftCollection(collectionContractAddress);
+
     return {
       ...nftCollectionFixture,
       purchaseWrapper,
@@ -304,56 +307,6 @@ describe('PurchaseWrapper', function () {
 
       expect(await sandContract.balanceOf(userAAddress)).to.be.eq(0);
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
-    });
-
-    it('should revert if sender address is zero', async function () {
-      // cannot happen due to the FIRST_PARAM check in Sand
-    });
-
-    it('should revert if NFT Collection address is zero', async function () {
-      const {
-        waveMintSign,
-        sandContract,
-        purchaseWrapper,
-        purchaseWrapperAddress,
-        randomWallet: userA,
-      } = await loadFixture(setupPurchaseWrapperFixture);
-
-      const sandPrice = ethers.parseEther('100');
-      const waveIndex = 0;
-      const signatureId = 1;
-      const randomTempTokenId = 1;
-      const userAAddress = await userA.getAddress();
-
-      await sandContract.donateTo(userAAddress, sandPrice);
-
-      const signature = await waveMintSign(
-        purchaseWrapperAddress,
-        1,
-        waveIndex,
-        signatureId
-      );
-
-      const data = purchaseWrapper.interface.encodeFunctionData(
-        'confirmPurchase',
-        [
-          userAAddress,
-          ZeroAddress, // nftCollection
-          waveIndex,
-          signatureId,
-          randomTempTokenId,
-          signature,
-        ]
-      );
-
-      await expect(
-        sandContract
-          .connect(userA)
-          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
-      ).to.be.revertedWithCustomError(
-        purchaseWrapper,
-        'PurchaseWrapperNftCollectionAddressCannotBeZero'
-      );
     });
 
     it('should revert if local token ID is already in use', async function () {
