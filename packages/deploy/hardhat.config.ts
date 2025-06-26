@@ -186,6 +186,11 @@ const namedAccounts = {
     polygon: '0x1b47567CBE36e63293A7A2018F79687f942aB24C',
   },
 
+  commonEIP173Owner: {
+    mainnet: '0x96Ef976b5aE04E4a1295081122DF48039719FfF1',
+    polygon: '0x96Ef976b5aE04E4a1295081122DF48039719FfF1',
+  },
+
   landSaleBeneficiary: {
     default: 'sandSaleBeneficiary',
     mainnet: 'treasury',
