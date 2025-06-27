@@ -115,7 +115,7 @@ const func: DeployFunction = async function (hre) {
     }
     const landSales = await getLandSales(
       sale.name,
-      hre.network.name,
+      process.env.HARDHAT_FORK ?? hre.network.name,
       hre.network.live
     );
     const skipSector = sale.skipSector || {};
