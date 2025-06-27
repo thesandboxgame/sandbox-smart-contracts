@@ -51,6 +51,12 @@ export async function skipUnlessTest(
   return !isTest(hre);
 }
 
+export async function skipUnlessMainnet(
+  hre: HardhatRuntimeEnvironment
+): Promise<boolean> {
+  return isTestNetwork(hre);
+}
+
 export async function skipUnlessL1(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
