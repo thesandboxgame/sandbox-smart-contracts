@@ -8,7 +8,7 @@ import {
   writeProofs,
 } from '../../land-sale-artifacts/getLandSales';
 import {
-  skipUnlessMainnet,
+  skipUnlessMainnetOrFork,
   skipUnlessTest,
 } from '../../land-sale-artifacts/network';
 
@@ -46,7 +46,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_38', skip: async () => true},
   {name: 'LandPreSale_39', skip: async () => true},
   {name: 'LandPreSale_40', skip: async () => true},
-  {name: 'LandPreSale_41', skip: skipUnlessMainnet}, // this land sale doesn't have a testnet deployment
+  {name: 'LandPreSale_41', skip: skipUnlessMainnetOrFork}, // this land sale doesn't have a testnet deployment
 ];
 
 const func: DeployFunction = async function (hre) {
