@@ -24,7 +24,10 @@ describe('PurchaseWrapper', function () {
     ).deploy(deployerAddress, sandContractAddress, authorizedCallerAddress); // Pass admin, sandToken, and authorizedCaller
 
     // Authorize the collection for purchases
-    await purchaseWrapper.authorizeNftCollection(collectionContractAddress);
+    await purchaseWrapper.setNftCollectionAuthorization(
+      collectionContractAddress,
+      true
+    );
 
     return {
       ...nftCollectionFixture,
@@ -723,6 +726,146 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsDeployer,
         'PurchaseWrapperNoSandTokensToRecover'
       );
+    });
+  });
+
+  describe('setNftCollectionAuthorization', function () {
+    it('should allow admin to authorize a collection', async function () {
+      const {
+        purchaseWrapperAsDeployer,
+        collectionContractAddress,
+        purchaseWrapper,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      // It's authorized in the fixture, so we de-authorize it first.
+      await purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+        collectionContractAddress,
+        false
+      );
+
+      // Let's re-authorize and check for the event.
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          collectionContractAddress,
+          true
+        )
+      )
+        .to.emit(purchaseWrapper, 'NftCollectionAuthorized')
+        .withArgs(collectionContractAddress, true);
+    });
+
+    it('should allow admin to de-authorize a collection', async function () {
+      const {
+        purchaseWrapperAsDeployer,
+        collectionContractAddress,
+        purchaseWrapper,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      // It is authorized in the fixture.
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          collectionContractAddress,
+          false
+        )
+      )
+        .to.emit(purchaseWrapper, 'NftCollectionAuthorized')
+        .withArgs(collectionContractAddress, false);
+    });
+
+    it('should revert if a non-admin tries to authorize a collection', async function () {
+      const {purchaseWrapperAsUserA, collectionContractAddress} =
+        await loadFixture(setupPurchaseWrapperFixture);
+
+      await expect(
+        purchaseWrapperAsUserA.setNftCollectionAuthorization(
+          collectionContractAddress,
+          true
+        )
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsUserA,
+        'AccessControlUnauthorizedAccount'
+      );
+    });
+
+    it('should revert if the collection address is the zero address', async function () {
+      const {purchaseWrapperAsDeployer} = await loadFixture(
+        setupPurchaseWrapperFixture
+      );
+
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          ZeroAddress,
+          true
+        )
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsDeployer,
+        'PurchaseWrapperNftCollectionAddressCannotBeZero'
+      );
+    });
+
+    it('should prevent purchase from a de-authorized collection', async function () {
+      const {
+        collectionContractAsOwner: nftCollection,
+        collectionContractAddress,
+        waveMintSign,
+        sandContract,
+        randomWallet: userA,
+        purchaseWrapper,
+        purchaseWrapperAddress,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        purchaseWrapperAsDeployer,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      const userAAddress = await userA.getAddress();
+
+      const sandPrice = ethers.parseEther('100');
+      const waveIndex = 0;
+      const signatureId = 222;
+      const randomTempTokenId = 12345;
+
+      // De-authorize the collection
+      await purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+        collectionContractAddress,
+        false
+      );
+
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+      await sandContract.donateTo(userAAddress, sandPrice);
+
+      const signature = await waveMintSign(
+        purchaseWrapperAddress, // Mint to purchase wrapper
+        1,
+        waveIndex,
+        signatureId
+      );
+
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress, // sender is userA, who will receive the NFT
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId,
+          signature,
+        ]
+      );
+
+      await expect(
+        sandContract
+          .connect(userA)
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapper,
+          'PurchaseWrapperNftCollectionNotAuthorized'
+        )
+        .withArgs(collectionContractAddress);
     });
   });
 });

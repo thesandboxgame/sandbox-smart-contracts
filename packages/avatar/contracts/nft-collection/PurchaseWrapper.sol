@@ -56,7 +56,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     /**
      * @notice Emitted when an NFT collection is authorized.
      */
-    event NftCollectionAuthorized(address indexed nftCollection);
+    event NftCollectionAuthorized(address indexed nftCollection, bool isAuthorized);
 
     /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
@@ -204,14 +204,18 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
-     * @notice Authorizes an NFT collection to be used with this contract.
+     * @notice Sets the authorization status for an NFT collection to be used with this contract.
      * @dev Only callable by the contract owner.
      * @param nftCollection The address of the NFT collection to authorize.
+     * @param isAuthorized Whether the NFT collection is authorized.
      */
-    function authorizeNftCollection(address nftCollection) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setNftCollectionAuthorization(
+        address nftCollection,
+        bool isAuthorized
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (nftCollection == address(0)) revert PurchaseWrapperNftCollectionAddressCannotBeZero();
-        _authorizedNftCollections[nftCollection] = true;
-        emit NftCollectionAuthorized(nftCollection);
+        _authorizedNftCollections[nftCollection] = isAuthorized;
+        emit NftCollectionAuthorized(nftCollection, isAuthorized);
     }
 
     /**
