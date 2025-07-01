@@ -7,15 +7,15 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read, catchUnknownSigner} = deployments;
-  const {sandAdmin, commonRoyaltyReceiver} = await getNamedAccounts();
+  const {sandAdmin, commonEIP173Owner} = await getNamedAccounts();
   const owner = await read('PolygonLand', 'owner');
-  if (owner != commonRoyaltyReceiver) {
+  if (owner != commonEIP173Owner) {
     await catchUnknownSigner(
       execute(
         'PolygonLand',
         {from: sandAdmin, log: true},
         'transferOwnership',
-        commonRoyaltyReceiver
+        commonEIP173Owner
       )
     );
   }
