@@ -518,7 +518,7 @@ contract NFTCollection is
         if (wallets.length != agentControlledFlags.length) {
             revert InvalidBatchData();
         }
-        for (uint256 i; i < wallets.length; i++) {
+        for (uint256 i; i < wallets.length; ++i) {
             $.isAgentControlled[wallets[i]] = agentControlledFlags[i];
             emit AgentControlledSet(_msgSender(), wallets[i], agentControlledFlags[i]);
         }
