@@ -49,6 +49,16 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     mapping(uint256 localTokenId => PurchaseInfo purchaseInfo) private _purchaseInfo;
 
     /**
+     * @notice Mapping from an NFT collection address to a boolean indicating if it is authorized.
+     */
+    mapping(address nftCollection => bool isAuthorized) private _authorizedNftCollections;
+
+    /**
+     * @notice Emitted when an NFT collection is authorized.
+     */
+    event NftCollectionAuthorized(address indexed nftCollection, bool isAuthorized);
+
+    /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
      * @param originalSender The address that initiated the purchase.
      * @param nftCollection The address of the NFT collection.
@@ -81,7 +91,6 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapperNftCollectionAddressCannotBeZero();
     error PurchaseWrapperLocalTokenIdAlreadyInUse(uint256 localTokenId);
     error PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
-    error PurchaseWrapperReceivedNftFromUnexpectedCollection(address expected, address actual);
     error PurchaseWrapperInvalidRecipientAddress();
     error PurchaseWrapperNoSandTokensToRecover();
     error PurchaseWrapperTransferToZeroAddress();
@@ -90,9 +99,8 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapperNftCollectionNotRecorded(uint256 localTokenId);
     error PurchaseWrapperFromAddressIsNotOriginalRecipient(address expected, address actual);
     error PurchaseWrapperCallerNotAuthorized(address caller);
-    error PurchaseWrapperSenderIsNotSandToken();
     error PurchaseWrapperRandomTempTokenIdCannotBeZero();
-    error PurchaseWrapperNotInConfirmPurchase();
+    error PurchaseWrapperNftCollectionNotAuthorized(address nftCollection);
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -196,6 +204,21 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
+     * @notice Sets the authorization status for an NFT collection to be used with this contract.
+     * @dev Only callable by the contract owner.
+     * @param nftCollection The address of the NFT collection to authorize.
+     * @param isAuthorized Whether the NFT collection is authorized.
+     */
+    function setNftCollectionAuthorization(
+        address nftCollection,
+        bool isAuthorized
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (nftCollection == address(0)) revert PurchaseWrapperNftCollectionAddressCannotBeZero();
+        _authorizedNftCollections[nftCollection] = isAuthorized;
+        emit NftCollectionAuthorized(nftCollection, isAuthorized);
+    }
+
+    /**
      * @notice Retrieves the purchase information for a given local token ID.
      * @param localTokenId The local temporary token ID of the purchase.
      * @return A `PurchaseInfo` struct containing the details of the purchase.
@@ -273,9 +296,11 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         if (msg.sender != address(sandToken) || !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
             revert PurchaseWrapperCallerNotAuthorized(sender);
         }
+        if (!_authorizedNftCollections[nftCollection]) {
+            revert PurchaseWrapperNftCollectionNotAuthorized(nftCollection);
+        }
 
         if (randomTempTokenId == 0) revert PurchaseWrapperRandomTempTokenIdCannotBeZero();
-        if (nftCollection == address(0)) revert PurchaseWrapperNftCollectionAddressCannotBeZero();
         if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
             revert PurchaseWrapperLocalTokenIdAlreadyInUse(randomTempTokenId);
         }
