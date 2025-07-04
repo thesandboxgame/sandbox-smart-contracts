@@ -316,9 +316,14 @@ export async function getLandSaleFiles(
       '0x4467363716526536535425451427798982881775318563547751090997863683';
   } else {
     secret = loadSecret(secretPath);
-    if (!secret && !hre.network.tags.generate_random_secret)
-      throw new Error(`LandPreSale secret not found.`);
-    else secret = generateSecret(secretPath);
+    if (secret) {
+      console.warn(`WARN: Reusing secret from ${secretPath}`);
+    } else {
+      if (!hre.network.tags.generate_random_secret) {
+        throw new Error(`LandPreSale secret not found.`);
+      }
+      secret = generateSecret(secretPath);
+    }
   }
   const sectors = (await import(sectorPath)).default;
   const bundles = await loadBundles(bundlesPaths);

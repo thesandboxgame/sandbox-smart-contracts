@@ -51,6 +51,13 @@ export async function skipUnlessTest(
   return !isTest(hre);
 }
 
+export async function skipUnlessMainnetOrFork(
+  hre: HardhatRuntimeEnvironment
+): Promise<boolean> {
+  // run if running on a real network (!hardhat) or hardhat in a fork
+  return !(!isTestNetwork(hre) || isFork());
+}
+
 export async function skipUnlessL1(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
