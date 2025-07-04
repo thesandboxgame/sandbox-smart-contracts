@@ -335,13 +335,6 @@ interface INFTCollection {
     event AgentControlledSet(address indexed operator, address indexed wallet, bool isAgentControlled);
 
     /**
-     * @notice Returns the token price for a specific wave.
-     * @param waveIndex Wave configuration index.
-     * @return Price per token in the wave's payment token.
-     */
-    function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256);
-
-    /**
      * @notice Mints a token for a specific wave.
      * @param to The address to mint the token to.
      * @param amount The amount of tokens to mint.
@@ -356,4 +349,11 @@ interface INFTCollection {
         uint256 signatureId,
         bytes calldata signature
     ) external returns (uint256[] memory);
+
+    /**
+     * @notice Returns the token price for a specific wave.
+     * @param waveIndex Wave configuration index.
+     * @return Price per token in the wave's payment token.
+     */
+    function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256);
 }
