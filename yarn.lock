@@ -3251,8 +3251,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sandbox-smart-contracts/land-shadow@workspace:packages/land-shadow"
   dependencies:
-    "@ethersproject/abi": ^5.7.0
-    "@ethersproject/providers": ^5.7.2
     "@layerzerolabs/lz-evm-messagelib-v2": ^2.3.11
     "@layerzerolabs/lz-evm-oapp-v2": ^2.3.8
     "@layerzerolabs/lz-evm-protocol-v2": ^2.3.8
@@ -3266,10 +3264,7 @@ __metadata:
     "@nomicfoundation/hardhat-verify": ^2.0.2
     "@nomiclabs/hardhat-etherscan": ^3.1.7
     "@openzeppelin/contracts": 5.0.2
-    "@openzeppelin/contracts-upgradeable": 5.0.2
-    "@openzeppelin/hardhat-upgrades": ^3.0.2
     "@release-it/keep-a-changelog": ^5.0.0
-    "@sandbox-smart-contracts/dependency-metatx": 1.0.1
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
@@ -3292,7 +3287,6 @@ __metadata:
     release-it: ^17.0.3
     solhint: ^4.0.0
     solhint-plugin-prettier: ^0.1.0
-    solidity-bytes-utils: ^0.8.2
     solidity-coverage: ^0.8.5
     ts-node: ^10.9.2
     typechain: ^8.3.2
