@@ -1,0 +1,91 @@
+{
+  "name": "@sandbox-smart-contracts/land-shadow",
+  "version": "0.0.1",
+  "description": "LAND shadow smart contract",
+  "files": [
+    "contracts",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"contracts/**/*.sol\"",
+    "format": "prettier --check \"**/*.{ts,js,sol,md}\"",
+    "format:fix": "prettier --write \"**/*.{ts,js,sol,md}\"",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage --testfiles 'test/*.ts''test/*.js'",
+    "hardhat": "hardhat",
+    "compile": "hardhat compile",
+    "size": "hardhat size-contracts",
+    "layout": "hardhat clean && hardhat compile && hardhat check",
+    "release": "release-it"
+  },
+  "mocha": {
+    "require": "hardhat/register",
+    "timeout": 40000,
+    "_": [
+      "test/**/*.ts"
+    ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: @sandbox-smart-contracts/oft-sand release v${version}",
+      "tagAnnotation": "@sandbox-smart-contracts/oft-sand release v${version}",
+      "tagName": "@sandbox-smart-contracts/oft-sand@v${version}"
+    },
+    "plugins": {
+      "@release-it/keep-a-changelog": {}
+    },
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@layerzerolabs/lz-evm-messagelib-v2": "^2.3.11",
+    "@layerzerolabs/lz-evm-oapp-v2": "^2.3.8",
+    "@layerzerolabs/lz-evm-protocol-v2": "^2.3.8",
+    "@layerzerolabs/lz-v2-utilities": "^2.3.11",
+    "@layerzerolabs/oapp-evm": "^0.3.2",
+    "@layerzerolabs/test-devtools-evm-hardhat": "^0.2.3",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/contracts": "5.0.2",
+    "@release-it/keep-a-changelog": "^5.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.4",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "chai": "^4.3.10",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-mocha": "^10.2.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "ethers": "^6.9.0",
+    "hardhat": "^2.19.2",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat-storage-layout": "^0.1.7",
+    "prettier": "^3.1.1",
+    "prettier-plugin-solidity": "^1.2.0",
+    "release-it": "^17.0.3",
+    "solhint": "^4.0.0",
+    "solhint-plugin-prettier": "^0.1.0",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "5.3.3"
+  }
+}
