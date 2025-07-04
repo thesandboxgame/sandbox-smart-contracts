@@ -23,6 +23,12 @@ describe('PurchaseWrapper', function () {
       nftCollectionFixture.deployer
     ).deploy(deployerAddress, sandContractAddress, authorizedCallerAddress); // Pass admin, sandToken, and authorizedCaller
 
+    // Authorize the collection for purchases
+    await purchaseWrapper.setNftCollectionAuthorization(
+      collectionContractAddress,
+      true
+    );
+
     return {
       ...nftCollectionFixture,
       purchaseWrapper,
@@ -88,7 +94,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         PurchaseWrapperFactory,
-        'PurchaseWrapper__SandTokenAddressCannotBeZero'
+        'PurchaseWrapperSandTokenAddressCannotBeZero'
       );
     });
   });
@@ -129,23 +135,23 @@ describe('PurchaseWrapper', function () {
         signatureId
       );
 
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
-
-      const confirmPurchaseTx = purchaseWrapper
-        .connect(userA) // Deployer calls confirmPurchase (has AUTHORIZED_CALLER_ROLE)
-        .confirmPurchase(
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress, // sender is userA, who will receive the NFT
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
-          signature
-        );
+          signature,
+        ]
+      );
 
-      const receipt = await (await confirmPurchaseTx).wait();
+      const confirmPurchaseTx = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data);
+
+      const receipt = await confirmPurchaseTx.wait();
       if (!receipt) throw new Error('Transaction receipt not found');
 
       let mintedTokenId: bigint | undefined;
@@ -178,91 +184,132 @@ describe('PurchaseWrapper', function () {
       expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
     });
 
-    it('should revert if sender address is zero', async function () {
+    it('should allow user A to mint two tokens in a row successfully', async function () {
       const {
+        collectionContractAsOwner: nftCollection,
         collectionContractAddress,
         waveMintSign,
         sandContract,
+        randomWallet: userA,
         purchaseWrapper,
         purchaseWrapperAddress,
-        randomWallet: userA,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
+      const userAAddress = await userA.getAddress();
       const sandPrice = ethers.parseEther('100');
       const waveIndex = 0;
-      const signatureId = 1;
-      const randomTempTokenId = 1;
-      const userAAddress = await userA.getAddress();
 
-      await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+      // Donate for 2 tokens
+      await sandContract.donateTo(userAAddress, sandPrice * BigInt(2));
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(
+        sandPrice * BigInt(2)
+      );
 
-      const signature = await waveMintSign(
+      // --- First Purchase ---
+      const signatureId1 = 444;
+      const randomTempTokenId1 = 54321;
+      const signature1 = await waveMintSign(
         purchaseWrapperAddress,
         1,
         waveIndex,
-        signatureId
+        signatureId1
       );
-
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
-          ZeroAddress, // sender
-          collectionContractAddress,
-          sandPrice,
-          waveIndex,
-          signatureId,
-          randomTempTokenId,
-          signature
-        )
-      ).to.be.revertedWithCustomError(
-        purchaseWrapper,
-        'PurchaseWrapper__SenderAddressCannotBeZero'
-      );
-    });
-
-    it('should revert if NFT Collection address is zero', async function () {
-      const {
-        waveMintSign,
-        sandContract,
-        purchaseWrapper,
-        purchaseWrapperAddress,
-        randomWallet: userA,
-      } = await loadFixture(setupPurchaseWrapperFixture);
-
-      const sandPrice = ethers.parseEther('100');
-      const waveIndex = 0;
-      const signatureId = 1;
-      const randomTempTokenId = 1;
-      const userAAddress = await userA.getAddress();
-
-      await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
-
-      const signature = await waveMintSign(
-        purchaseWrapperAddress,
-        1,
-        waveIndex,
-        signatureId
-      );
-
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
+      const data1 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
-          ZeroAddress, // nftCollection
-          sandPrice,
+          collectionContractAddress,
           waveIndex,
-          signatureId,
-          randomTempTokenId,
-          signature
-        )
-      ).to.be.revertedWithCustomError(
-        purchaseWrapper,
-        'PurchaseWrapper__NftCollectionAddressCannotBeZero'
+          signatureId1,
+          randomTempTokenId1,
+          signature1,
+        ]
       );
+      const tx1 = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data1);
+      const receipt1 = await tx1.wait();
+      if (!receipt1) throw new Error('Transaction receipt not found');
+
+      let mintedTokenId1: bigint | undefined;
+      for (const log of receipt1.logs) {
+        try {
+          const parsedLog = purchaseWrapper.interface.parseLog(log);
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
+            mintedTokenId1 = parsedLog.args.nftTokenId;
+            break;
+          }
+        } catch (e) {
+          // Likely a log from another contract
+        }
+      }
+      expect(mintedTokenId1).to.not.be.undefined;
+      if (mintedTokenId1 === undefined)
+        throw new Error('Minted token ID not found for first purchase');
+      expect(await nftCollection.ownerOf(mintedTokenId1)).to.be.eq(
+        userAAddress
+      );
+      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(1);
+      expect(await nftCollection.totalSupply()).to.be.eq(1);
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(sandPrice);
+
+      // --- Second Purchase ---
+      const signatureId2 = 555;
+      const randomTempTokenId2 = 65432;
+      const signature2 = await waveMintSign(
+        purchaseWrapperAddress,
+        1,
+        waveIndex,
+        signatureId2
+      );
+      const data2 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId2,
+          randomTempTokenId2,
+          signature2,
+        ]
+      );
+      const tx2 = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data2);
+      const receipt2 = await tx2.wait();
+      if (!receipt2) throw new Error('Transaction receipt not found');
+
+      let mintedTokenId2: bigint | undefined;
+      for (const log of receipt2.logs) {
+        try {
+          const parsedLog = purchaseWrapper.interface.parseLog(log);
+          if (parsedLog && parsedLog.name === 'PurchaseConfirmed') {
+            mintedTokenId2 = parsedLog.args.nftTokenId;
+            break;
+          }
+        } catch (e) {
+          // Likely a log from another contract
+        }
+      }
+      expect(mintedTokenId2).to.not.be.undefined;
+      if (mintedTokenId2 === undefined)
+        throw new Error('Minted token ID not found for second purchase');
+
+      expect(await nftCollection.ownerOf(mintedTokenId2)).to.be.eq(
+        userAAddress
+      );
+      expect(await nftCollection.waveTotalMinted(waveIndex)).to.be.eq(2);
+      expect(await nftCollection.totalSupply()).to.be.eq(2);
+
+      expect(await sandContract.balanceOf(userAAddress)).to.be.eq(0);
+      expect(await sandContract.balanceOf(purchaseWrapperAddress)).to.be.eq(0);
     });
 
     it('should revert if local token ID is already in use', async function () {
@@ -290,11 +337,8 @@ describe('PurchaseWrapper', function () {
         sandPrice
       );
       await sandContract.donateTo(userAAddress, sandPrice * BigInt(2)); // Enough for two
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice * BigInt(2));
 
-      const signature = await waveMintSign(
+      const signature1 = await waveMintSign(
         purchaseWrapperAddress,
         1,
         waveIndex,
@@ -302,15 +346,20 @@ describe('PurchaseWrapper', function () {
       );
 
       // First purchase
-      await purchaseWrapper.connect(userA).confirmPurchase(
-        userAAddress,
-        collectionContractAddress,
-        sandPrice,
-        waveIndex,
-        signatureId,
-        randomTempTokenId, // Use the ID
-        signature
+      const data1 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId, // Use the ID
+          signature1,
+        ]
       );
+      await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data1);
 
       // Second purchase attempt with the same local token ID
       const signature2 = await waveMintSign(
@@ -319,20 +368,26 @@ describe('PurchaseWrapper', function () {
         waveIndex,
         signatureId + 1
       ); // new sig ID
-      await expect(
-        purchaseWrapper.connect(userA).confirmPurchase(
+
+      const data2 = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId + 1,
           randomTempTokenId, // Reuse the ID
-          signature2
-        )
+          signature2,
+        ]
+      );
+      await expect(
+        sandContract
+          .connect(userA)
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data2)
       )
         .to.be.revertedWithCustomError(
           purchaseWrapper,
-          'PurchaseWrapper__LocalTokenIdAlreadyInUse'
+          'PurchaseWrapperLocalTokenIdAlreadyInUse'
         )
         .withArgs(randomTempTokenId);
     });
@@ -344,6 +399,9 @@ describe('PurchaseWrapper', function () {
         randomWallet: userA,
         purchaseWrapper,
         purchaseWrapperAddress,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        collectionContractAsOwner: nftCollection,
       } = await loadFixture(setupPurchaseWrapperFixture);
 
       const userAAddress = await userA.getAddress();
@@ -358,25 +416,35 @@ describe('PurchaseWrapper', function () {
         .connect(userA)
         .approve(purchaseWrapperAddress, sandPrice);
 
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+
       const invalidSignature = '0xdeadbeef';
 
       const balanceBefore = await sandContract.balanceOf(userAAddress);
 
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress,
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId,
+          invalidSignature,
+        ]
+      );
+
       await expect(
-        purchaseWrapper
+        sandContract
           .connect(userA)
-          .confirmPurchase(
-            userAAddress,
-            collectionContractAddress,
-            sandPrice,
-            waveIndex,
-            signatureId,
-            randomTempTokenId,
-            invalidSignature
-          )
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
-        'PurchaseWrapper__NftPurchaseFailedViaApproveAndCall'
+        'PurchaseWrapperNftPurchaseFailedViaApproveAndCall'
       );
 
       expect(await sandContract.balanceOf(userAAddress)).to.equal(
@@ -419,7 +487,6 @@ describe('PurchaseWrapper', function () {
           // deployer doesn't have AUTHORIZED_CALLER_ROLE
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
@@ -427,7 +494,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         purchaseWrapper,
-        'PurchaseWrapper__CallerNotAuthorized'
+        'PurchaseWrapperCallerNotAuthorized'
       );
     });
   });
@@ -478,9 +545,6 @@ describe('PurchaseWrapper', function () {
       );
 
       await sandContract.donateTo(userAAddress, sandPrice);
-      await sandContract
-        .connect(userA)
-        .approve(purchaseWrapperAddress, sandPrice);
 
       const signature = await waveMintSign(
         purchaseWrapperAddress,
@@ -489,17 +553,21 @@ describe('PurchaseWrapper', function () {
         signatureId
       );
 
-      const tx = await purchaseWrapper
-        .connect(userA)
-        .confirmPurchase(
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
           userAAddress,
           collectionContractAddress,
-          sandPrice,
           waveIndex,
           signatureId,
           randomTempTokenId,
-          signature
-        );
+          signature,
+        ]
+      );
+      const tx = await sandContract
+        .connect(userA)
+        .approveAndCall(purchaseWrapperAddress, sandPrice, data);
+
       const receipt = await tx.wait();
       if (!receipt) throw new Error('Transaction receipt not found for setup');
       for (const log of receipt.logs) {
@@ -542,7 +610,7 @@ describe('PurchaseWrapper', function () {
         )
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsUserA,
-        'PurchaseWrapper__TransferToZeroAddress'
+        'PurchaseWrapperTransferToZeroAddress'
       );
     });
 
@@ -557,7 +625,7 @@ describe('PurchaseWrapper', function () {
       )
         .to.be.revertedWithCustomError(
           purchaseWrapperAsUserA,
-          'PurchaseWrapper__InvalidLocalTokenIdOrPurchaseNotCompleted'
+          'PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted'
         )
         .withArgs(invalidLocalTokenId);
     });
@@ -573,7 +641,7 @@ describe('PurchaseWrapper', function () {
       )
         .to.be.revertedWithCustomError(
           purchaseWrapperAsUserA,
-          'PurchaseWrapper__FromAddressIsNotOriginalRecipient'
+          'PurchaseWrapperFromAddressIsNotOriginalRecipient'
         )
         .withArgs(userBAddress, userAAddress);
     });
@@ -640,7 +708,7 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsDeployer.recoverSand(ZeroAddress)
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsDeployer,
-        'PurchaseWrapper__InvalidRecipientAddress'
+        'PurchaseWrapperInvalidRecipientAddress'
       );
     });
 
@@ -656,8 +724,148 @@ describe('PurchaseWrapper', function () {
         purchaseWrapperAsDeployer.recoverSand(await randomWallet.getAddress())
       ).to.be.revertedWithCustomError(
         purchaseWrapperAsDeployer,
-        'PurchaseWrapper__NoSandTokensToRecover'
+        'PurchaseWrapperNoSandTokensToRecover'
       );
+    });
+  });
+
+  describe('setNftCollectionAuthorization', function () {
+    it('should allow admin to authorize a collection', async function () {
+      const {
+        purchaseWrapperAsDeployer,
+        collectionContractAddress,
+        purchaseWrapper,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      // It's authorized in the fixture, so we de-authorize it first.
+      await purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+        collectionContractAddress,
+        false
+      );
+
+      // Let's re-authorize and check for the event.
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          collectionContractAddress,
+          true
+        )
+      )
+        .to.emit(purchaseWrapper, 'NftCollectionAuthorized')
+        .withArgs(collectionContractAddress, true);
+    });
+
+    it('should allow admin to de-authorize a collection', async function () {
+      const {
+        purchaseWrapperAsDeployer,
+        collectionContractAddress,
+        purchaseWrapper,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      // It is authorized in the fixture.
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          collectionContractAddress,
+          false
+        )
+      )
+        .to.emit(purchaseWrapper, 'NftCollectionAuthorized')
+        .withArgs(collectionContractAddress, false);
+    });
+
+    it('should revert if a non-admin tries to authorize a collection', async function () {
+      const {purchaseWrapperAsUserA, collectionContractAddress} =
+        await loadFixture(setupPurchaseWrapperFixture);
+
+      await expect(
+        purchaseWrapperAsUserA.setNftCollectionAuthorization(
+          collectionContractAddress,
+          true
+        )
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsUserA,
+        'AccessControlUnauthorizedAccount'
+      );
+    });
+
+    it('should revert if the collection address is the zero address', async function () {
+      const {purchaseWrapperAsDeployer} = await loadFixture(
+        setupPurchaseWrapperFixture
+      );
+
+      await expect(
+        purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+          ZeroAddress,
+          true
+        )
+      ).to.be.revertedWithCustomError(
+        purchaseWrapperAsDeployer,
+        'PurchaseWrapperNftCollectionAddressCannotBeZero'
+      );
+    });
+
+    it('should prevent purchase from a de-authorized collection', async function () {
+      const {
+        collectionContractAsOwner: nftCollection,
+        collectionContractAddress,
+        waveMintSign,
+        sandContract,
+        randomWallet: userA,
+        purchaseWrapper,
+        purchaseWrapperAddress,
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        purchaseWrapperAsDeployer,
+      } = await loadFixture(setupPurchaseWrapperFixture);
+
+      const userAAddress = await userA.getAddress();
+
+      const sandPrice = ethers.parseEther('100');
+      const waveIndex = 0;
+      const signatureId = 222;
+      const randomTempTokenId = 12345;
+
+      // De-authorize the collection
+      await purchaseWrapperAsDeployer.setNftCollectionAuthorization(
+        collectionContractAddress,
+        false
+      );
+
+      await nftCollection.setupWave(
+        waveMaxTokensOverall,
+        waveMaxTokensPerWallet,
+        sandPrice
+      );
+      await sandContract.donateTo(userAAddress, sandPrice);
+
+      const signature = await waveMintSign(
+        purchaseWrapperAddress, // Mint to purchase wrapper
+        1,
+        waveIndex,
+        signatureId
+      );
+
+      const data = purchaseWrapper.interface.encodeFunctionData(
+        'confirmPurchase',
+        [
+          userAAddress, // sender is userA, who will receive the NFT
+          collectionContractAddress,
+          waveIndex,
+          signatureId,
+          randomTempTokenId,
+          signature,
+        ]
+      );
+
+      await expect(
+        sandContract
+          .connect(userA)
+          .approveAndCall(purchaseWrapperAddress, sandPrice, data)
+      )
+        .to.be.revertedWithCustomError(
+          purchaseWrapper,
+          'PurchaseWrapperNftCollectionNotAuthorized'
+        )
+        .withArgs(collectionContractAddress);
     });
   });
 });
