@@ -95,7 +95,7 @@ contract NFTCollection is
         /**
          * @notice Mapping of wallets that are controlled by the purchase agent.
          */
-        mapping(address => bool) isAgentControlled;
+        mapping(address wallet => bool isAgentControlled) isAgentControlled;
     }
 
     // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
@@ -518,7 +518,7 @@ contract NFTCollection is
         if (wallets.length != agentControlledFlags.length) {
             revert InvalidBatchData();
         }
-        for (uint256 i; i < wallets.length; i++) {
+        for (uint256 i; i < wallets.length; ++i) {
             $.isAgentControlled[wallets[i]] = agentControlledFlags[i];
             emit AgentControlledSet(_msgSender(), wallets[i], agentControlledFlags[i]);
         }
