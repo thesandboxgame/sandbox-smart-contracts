@@ -95,7 +95,7 @@ contract NFTCollection is
         /**
          * @notice Mapping of wallets that are controlled by the purchase agent.
          */
-        mapping(address => bool) isAgentControlled;
+        mapping(address wallet => bool isAgentControlled) isAgentControlled;
     }
 
     // keccak256(abi.encode(uint256(keccak256("thesandbox.storage.avatar.nft-collection.NFTCollection")) - 1)) & ~bytes32(uint256(0xff));
@@ -518,7 +518,7 @@ contract NFTCollection is
         if (wallets.length != agentControlledFlags.length) {
             revert InvalidBatchData();
         }
-        for (uint256 i; i < wallets.length; i++) {
+        for (uint256 i; i < wallets.length; ++i) {
             $.isAgentControlled[wallets[i]] = agentControlledFlags[i];
             emit AgentControlledSet(_msgSender(), wallets[i], agentControlledFlags[i]);
         }
@@ -627,64 +627,6 @@ contract NFTCollection is
         /// @dev ERC2981Upgradeable don't emit and don't give access to the old value
         emit TokenRoyaltyReset(_msgSender(), tokenId);
         _resetTokenRoyalty(tokenId);
-    }
-
-    /**
-     * @notice Sets approval for an operator to manage caller's tokens.
-     * @param operator Address to grant approval to.
-     * @param approved True to approve, false to revoke.
-     * @dev Overrides ERC721 implementation to add operator filtering.
-     */
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAll(operator, approved);
-    }
-
-    /**
-     * @notice Approves an operator to transfer a specific token.
-     * @param operator Address to grant approval to.
-     * @param tokenId ID of token to approve.
-     * @dev Overrides ERC721 implementation to add operator filtering.
-     */
-    function approve(
-        address operator,
-        uint256 tokenId
-    ) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
-        super.approve(operator, tokenId);
-    }
-
-    /**
-     * @notice Transfers a token between addresses.
-     * @param from Source address.
-     * @param to Destination address.
-     * @param tokenId ID of token to transfer.
-     * @dev Overrides ERC721 implementation to add operator filtering.
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public override whenNotPaused onlyAllowedOperator(from) {
-        super.transferFrom(from, to, tokenId);
-    }
-
-    /**
-     * @notice Safely transfers a token between addresses.
-     * @param from Source address.
-     * @param to Destination address.
-     * @param tokenId ID of token to transfer.
-     * @param data Additional data for receiver callback.
-     * @dev Overrides ERC721 implementation to add operator filtering.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) public override whenNotPaused onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     /**
@@ -883,6 +825,64 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Sets approval for an operator to manage caller's tokens.
+     * @param operator Address to grant approval to.
+     * @param approved True to approve, false to revoke.
+     * @dev Overrides ERC721 implementation to add operator filtering.
+     */
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    /**
+     * @notice Approves an operator to transfer a specific token.
+     * @param operator Address to grant approval to.
+     * @param tokenId ID of token to approve.
+     * @dev Overrides ERC721 implementation to add operator filtering.
+     */
+    function approve(
+        address operator,
+        uint256 tokenId
+    ) public override whenNotPaused onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, tokenId);
+    }
+
+    /**
+     * @notice Transfers a token between addresses.
+     * @param from Source address.
+     * @param to Destination address.
+     * @param tokenId ID of token to transfer.
+     * @dev Overrides ERC721 implementation to add operator filtering.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override whenNotPaused onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    /**
+     * @notice Safely transfers a token between addresses.
+     * @param from Source address.
+     * @param to Destination address.
+     * @param tokenId ID of token to transfer.
+     * @param data Additional data for receiver callback.
+     * @dev Overrides ERC721 implementation to add operator filtering.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public override whenNotPaused onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /**
      * @notice Checks interface support using ERC165.
      * @param interfaceId Interface identifier to check.
      * @return True if interface is supported.
@@ -892,24 +892,6 @@ contract NFTCollection is
         bytes4 interfaceId
     ) public view virtual override(ERC2981Upgradeable, ERC721Upgradeable) returns (bool) {
         return interfaceId == bytes4(0x49064906) || super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @dev See {ERC721-_isAuthorized}.
-     *
-     * Overridden to allow the `purchaseAgent` to transfer tokens from `isAgentControlled` wallets.
-     */
-    function _isAuthorized(
-        address owner,
-        address spender,
-        uint256 tokenId
-    ) internal view virtual override(ERC721Upgradeable) returns (bool) {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        // The purchaseAgent can spend tokens from agent-controlled wallets.
-        if ($.purchaseAgent != address(0) && spender == $.purchaseAgent && $.isAgentControlled[owner]) {
-            return true;
-        }
-        return super._isAuthorized(owner, spender, tokenId);
     }
 
     /**
@@ -949,6 +931,127 @@ contract NFTCollection is
             emit WaveMint(tokenIds[i], wallet, waveIndex);
         }
         return tokenIds;
+    }
+
+    /**
+     * @notice Updates the treasury address.
+     * @param _treasury New treasury address.
+     * @dev Validates address is non-zero and emits update event.
+     */
+    function _setTreasury(address _treasury) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_treasury == address(0)) {
+            revert InvalidTreasury(_treasury);
+        }
+        emit TreasurySet(_msgSender(), $.mintTreasury, _treasury);
+        $.mintTreasury = _treasury;
+    }
+
+    /**
+     * @notice Updates the allowed minting token.
+     * @param _minterToken New ERC20 token for minting payments.
+     * @dev Validates contract address and emits update event.
+     */
+    function _setAllowedExecuteMint(IERC20Metadata _minterToken) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (!_isContract(address(_minterToken))) {
+            revert InvalidAllowedToExecuteMint(_minterToken);
+        }
+        emit AllowedExecuteMintSet(_msgSender(), $.allowedToExecuteMint, _minterToken);
+        $.allowedToExecuteMint = _minterToken;
+    }
+
+    /**
+     * @notice Updates the maximum supply cap.
+     * @param _maxSupply New maximum token supply.
+     * @dev Validates against current supply and emits update event.
+     */
+    function _setMaxSupply(uint256 _maxSupply) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_maxSupply == 0) {
+            revert LowMaxSupply(0, $.totalSupply);
+        }
+        if (_maxSupply < $.totalSupply) {
+            revert LowMaxSupply(_maxSupply, $.totalSupply);
+        }
+        emit MaxSupplySet(_msgSender(), $.maxSupply, _maxSupply);
+        $.maxSupply = _maxSupply;
+    }
+
+    /**
+     * @notice Updates the maximum tokens per wallet.
+     * @param _maxTokensPerWallet New maximum tokens per wallet.
+     * @dev Validates against maxSupply and emits update event.
+     */
+    function _setMaxTokensPerWallet(uint256 _maxTokensPerWallet) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_maxTokensPerWallet == 0 || _maxTokensPerWallet > $.maxSupply) {
+            revert InvalidMaxTokensPerWallet(_maxTokensPerWallet, $.maxSupply);
+        }
+        emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
+        $.maxTokensPerWallet = _maxTokensPerWallet;
+    }
+
+    /**
+     * @notice Burns a token with validation checks.
+     * @param tokenId Token ID to burn.
+     * @dev Verifies burn is enabled and caller is authorized.
+     */
+    function _burnWithCheck(uint256 tokenId) internal virtual {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (!$.isBurnEnabled) {
+            revert ExpectedBurn();
+        }
+        address sender = _msgSender();
+        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+        // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+        address previousOwner = _update(address(0), tokenId, sender);
+        emit TokenBurned(sender, tokenId, previousOwner);
+    }
+
+    /**
+     * @notice Updates token personalization traits.
+     * @param tokenId Token ID to update.
+     * @param personalizationMask New trait configuration.
+     * @dev No input validation - calling functions must perform checks.
+     */
+    function _updateTokenTraits(uint256 tokenId, uint256 personalizationMask) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        $.personalizationTraits[tokenId] = personalizationMask;
+        emit Personalized(_msgSender(), tokenId, personalizationMask);
+        emit MetadataUpdate(tokenId);
+    }
+
+    /**
+     * @notice Updates the base token URI.
+     * @param baseURI New base URI for token metadata.
+     * @dev Validates URI length and emits update event.
+     */
+    function _setBaseURI(string calldata baseURI) internal {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (bytes(baseURI).length == 0) {
+            revert InvalidBaseTokenURI(baseURI);
+        }
+        emit BaseURISet(_msgSender(), $.baseTokenURI, baseURI);
+        $.baseTokenURI = baseURI;
+    }
+
+    /**
+     * @dev See {ERC721-_isAuthorized}.
+     *
+     * Overridden to allow the `purchaseAgent` to transfer tokens from `isAgentControlled` wallets.
+     */
+    function _isAuthorized(
+        address owner,
+        address spender,
+        uint256 tokenId
+    ) internal view virtual override(ERC721Upgradeable) returns (bool) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        // The purchaseAgent can spend tokens from agent-controlled wallets.
+        if ($.purchaseAgent != address(0) && spender == $.purchaseAgent && $.isAgentControlled[owner]) {
+            return true;
+        }
+        return super._isAuthorized(owner, spender, tokenId);
     }
 
     /**
@@ -1051,19 +1154,6 @@ contract NFTCollection is
     }
 
     /**
-     * @notice Updates token personalization traits.
-     * @param tokenId Token ID to update.
-     * @param personalizationMask New trait configuration.
-     * @dev No input validation - calling functions must perform checks.
-     */
-    function _updateTokenTraits(uint256 tokenId, uint256 personalizationMask) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        $.personalizationTraits[tokenId] = personalizationMask;
-        emit Personalized(_msgSender(), tokenId, personalizationMask);
-        emit MetadataUpdate(tokenId);
-    }
-
-    /**
      * @notice Checks if an address is a contract.
      * @param account Address to check.
      * @return True if the address contains code.
@@ -1074,96 +1164,6 @@ contract NFTCollection is
         // for contracts in construction, since the code is only stored at the end
         // of the constructor execution.
         return account.code.length > 0;
-    }
-
-    /**
-     * @notice Updates the base token URI.
-     * @param baseURI New base URI for token metadata.
-     * @dev Validates URI length and emits update event.
-     */
-    function _setBaseURI(string calldata baseURI) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (bytes(baseURI).length == 0) {
-            revert InvalidBaseTokenURI(baseURI);
-        }
-        emit BaseURISet(_msgSender(), $.baseTokenURI, baseURI);
-        $.baseTokenURI = baseURI;
-    }
-
-    /**
-     * @notice Updates the treasury address.
-     * @param _treasury New treasury address.
-     * @dev Validates address is non-zero and emits update event.
-     */
-    function _setTreasury(address _treasury) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (_treasury == address(0)) {
-            revert InvalidTreasury(_treasury);
-        }
-        emit TreasurySet(_msgSender(), $.mintTreasury, _treasury);
-        $.mintTreasury = _treasury;
-    }
-
-    /**
-     * @notice Updates the allowed minting token.
-     * @param _minterToken New ERC20 token for minting payments.
-     * @dev Validates contract address and emits update event.
-     */
-    function _setAllowedExecuteMint(IERC20Metadata _minterToken) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (!_isContract(address(_minterToken))) {
-            revert InvalidAllowedToExecuteMint(_minterToken);
-        }
-        emit AllowedExecuteMintSet(_msgSender(), $.allowedToExecuteMint, _minterToken);
-        $.allowedToExecuteMint = _minterToken;
-    }
-
-    /**
-     * @notice Updates the maximum supply cap.
-     * @param _maxSupply New maximum token supply.
-     * @dev Validates against current supply and emits update event.
-     */
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (_maxSupply == 0) {
-            revert LowMaxSupply(0, $.totalSupply);
-        }
-        if (_maxSupply < $.totalSupply) {
-            revert LowMaxSupply(_maxSupply, $.totalSupply);
-        }
-        emit MaxSupplySet(_msgSender(), $.maxSupply, _maxSupply);
-        $.maxSupply = _maxSupply;
-    }
-
-    /**
-     * @notice Updates the maximum tokens per wallet.
-     * @param _maxTokensPerWallet New maximum tokens per wallet.
-     * @dev Validates against maxSupply and emits update event.
-     */
-    function _setMaxTokensPerWallet(uint256 _maxTokensPerWallet) internal {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (_maxTokensPerWallet == 0 || _maxTokensPerWallet > $.maxSupply) {
-            revert InvalidMaxTokensPerWallet(_maxTokensPerWallet, $.maxSupply);
-        }
-        emit MaxTokensPerWalletSet(_msgSender(), $.maxTokensPerWallet, _maxTokensPerWallet);
-        $.maxTokensPerWallet = _maxTokensPerWallet;
-    }
-
-    /**
-     * @notice Burns a token with validation checks.
-     * @param tokenId Token ID to burn.
-     * @dev Verifies burn is enabled and caller is authorized.
-     */
-    function _burnWithCheck(uint256 tokenId) internal virtual {
-        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
-        if (!$.isBurnEnabled) {
-            revert ExpectedBurn();
-        }
-        address sender = _msgSender();
-        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
-        // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
-        address previousOwner = _update(address(0), tokenId, sender);
-        emit TokenBurned(sender, tokenId, previousOwner);
     }
 
     /**

@@ -46,7 +46,17 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      *      to uniquely identify a purchase transaction and later to reference the minted NFT
      *      in the wrapper's transfer functions.
      */
-    mapping(uint256 localTokenId => PurchaseInfo) private _purchaseInfo;
+    mapping(uint256 localTokenId => PurchaseInfo purchaseInfo) private _purchaseInfo;
+
+    /**
+     * @notice Mapping from an NFT collection address to a boolean indicating if it is authorized.
+     */
+    mapping(address nftCollection => bool isAuthorized) private _authorizedNftCollections;
+
+    /**
+     * @notice Emitted when an NFT collection is authorized.
+     */
+    event NftCollectionAuthorized(address indexed nftCollection, bool isAuthorized);
 
     /**
      * @notice Emitted when an NFT purchase is confirmed and the minting process is initiated.
@@ -55,7 +65,12 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param localTokenId The temporary local token ID for this purchase.
      * @param nftTokenId The actual ID of the minted NFT.
      */
-    event PurchaseConfirmed(address originalSender, address nftCollection, uint256 localTokenId, uint256 nftTokenId);
+    event PurchaseConfirmed(
+        address indexed originalSender,
+        address indexed nftCollection,
+        uint256 localTokenId,
+        uint256 indexed nftTokenId
+    );
 
     /**
      * @notice Emitted when an NFT is transferred using the wrapper's transfer functions.
@@ -64,14 +79,18 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      * @param to The address to which the NFT is transferred.
      * @param nftTokenId The actual ID of the transferred NFT.
      */
-    event NftTransferredViaWrapper(uint256 localTokenId, address from, address to, uint256 nftTokenId);
+    event NftTransferredViaWrapper(
+        uint256 localTokenId,
+        address indexed from,
+        address indexed to,
+        uint256 indexed nftTokenId
+    );
 
     // Custom Errors
     error PurchaseWrapperSandTokenAddressCannotBeZero();
     error PurchaseWrapperNftCollectionAddressCannotBeZero();
     error PurchaseWrapperLocalTokenIdAlreadyInUse(uint256 localTokenId);
     error PurchaseWrapperNftPurchaseFailedViaApproveAndCall();
-    error PurchaseWrapperReceivedNftFromUnexpectedCollection(address expected, address actual);
     error PurchaseWrapperInvalidRecipientAddress();
     error PurchaseWrapperNoSandTokensToRecover();
     error PurchaseWrapperTransferToZeroAddress();
@@ -80,9 +99,8 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     error PurchaseWrapperNftCollectionNotRecorded(uint256 localTokenId);
     error PurchaseWrapperFromAddressIsNotOriginalRecipient(address expected, address actual);
     error PurchaseWrapperCallerNotAuthorized(address caller);
-    error PurchaseWrapperSenderIsNotSandToken();
     error PurchaseWrapperRandomTempTokenIdCannotBeZero();
-    error PurchaseWrapperNotInConfirmPurchase();
+    error PurchaseWrapperNftCollectionNotAuthorized(address nftCollection);
 
     /**
      * @notice Constructor to set the SAND token contract address.
@@ -123,10 +141,12 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
 
         uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
-        _purchaseInfo[randomTempTokenId].caller = sender;
-        _purchaseInfo[randomTempTokenId].nftCollection = nftCollection;
+        PurchaseInfo storage info = _purchaseInfo[randomTempTokenId];
+        info.caller = sender;
+        info.nftCollection = nftCollection;
 
-        SafeERC20.safeTransferFrom(sandToken, sender, address(this), sandAmount);
+        IERC20 sandTokenCached = sandToken;
+        SafeERC20.safeTransferFrom(sandTokenCached, sender, address(this), sandAmount);
 
         uint256 nftTokenId = _initiateMintViaApproveAndCall(
             nftCollection,
@@ -136,27 +156,86 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
             signature
         );
 
-        _purchaseInfo[randomTempTokenId].nftTokenId = nftTokenId;
+        info.nftTokenId = nftTokenId;
 
         IERC721(nftCollection).transferFrom(address(this), sender, nftTokenId);
 
         emit PurchaseConfirmed(sender, nftCollection, randomTempTokenId, nftTokenId);
     }
 
-    function _validateAndAuthorizePurchase(
-        address sender,
-        address nftCollection,
-        uint256 randomTempTokenId
-    ) private view {
-        if (msg.sender != address(sandToken) || !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
-            revert PurchaseWrapperCallerNotAuthorized(sender);
+    /**
+     * @notice Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom`.
+     * @dev Similar to `transferFrom` but uses `safeTransferFrom` for the actual NFT transfer.
+     *      The `msg.sender` must be the `from` address.
+     * @param from The current owner of the NFT.
+     * @param to The new address to receive the NFT.
+     * @param localTokenId The local temporary token ID.
+     */
+    function safeTransferFrom(address from, address to, uint256 localTokenId) external {
+        if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
+            revert PurchaseWrapperCallerNotAuthorized(msg.sender);
         }
+        if (to == address(0)) revert PurchaseWrapperTransferToZeroAddress();
+        PurchaseInfo memory info = _purchaseInfo[localTokenId];
 
-        if (randomTempTokenId == 0) revert PurchaseWrapperRandomTempTokenIdCannotBeZero();
+        if (info.caller == address(0)) revert PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
+        if (info.nftTokenId == 0) revert PurchaseWrapperNftNotYetMintedOrRecorded(localTokenId);
+        if (info.nftCollection == address(0)) revert PurchaseWrapperNftCollectionNotRecorded(localTokenId);
+        if (info.caller != from) revert PurchaseWrapperFromAddressIsNotOriginalRecipient(from, info.caller);
+
+        IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
+
+        emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
+    }
+
+    /**
+     * @notice Recovers SAND tokens (or other ERC20 specified in `sandToken`)
+     *         that were accidentally sent or accumulated in this contract.
+     * @dev Only callable by the contract owner.
+     * @param recipient Address to receive the recovered ERC20 tokens.
+     */
+    function recoverSand(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (recipient == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
+        IERC20 sandTokenCached = sandToken;
+        uint256 balance = sandTokenCached.balanceOf(address(this));
+        if (balance == 0) revert PurchaseWrapperNoSandTokensToRecover();
+
+        SafeERC20.safeTransfer(sandTokenCached, recipient, balance);
+    }
+
+    /**
+     * @notice Sets the authorization status for an NFT collection to be used with this contract.
+     * @dev Only callable by the contract owner.
+     * @param nftCollection The address of the NFT collection to authorize.
+     * @param isAuthorized Whether the NFT collection is authorized.
+     */
+    function setNftCollectionAuthorization(
+        address nftCollection,
+        bool isAuthorized
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (nftCollection == address(0)) revert PurchaseWrapperNftCollectionAddressCannotBeZero();
-        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
-            revert PurchaseWrapperLocalTokenIdAlreadyInUse(randomTempTokenId);
-        }
+        _authorizedNftCollections[nftCollection] = isAuthorized;
+        emit NftCollectionAuthorized(nftCollection, isAuthorized);
+    }
+
+    /**
+     * @notice Retrieves the purchase information for a given local token ID.
+     * @param localTokenId The local temporary token ID of the purchase.
+     * @return A `PurchaseInfo` struct containing the details of the purchase.
+     */
+    function getPurchaseInfo(uint256 localTokenId) external view returns (PurchaseInfo memory) {
+        return _purchaseInfo[localTokenId];
+    }
+
+    /**
+     * @notice Handles the receipt of an ERC721 token, expected to be called by an NFT collection
+     *         contract after a successful mint initiated by `confirmPurchase`.
+     * @dev This function is a simple pass-through to conform to the IERC721Receiver interface.
+     *      The core logic has been moved into `confirmPurchase`.
+     * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+     */
+    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
     }
 
     function _initiateMintViaApproveAndCall(
@@ -209,62 +288,21 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         return tokenIds[0];
     }
 
-    /**
-     * @notice Handles the receipt of an ERC721 token, expected to be called by an NFT collection
-     *         contract after a successful mint initiated by `confirmPurchase`.
-     * @dev This function is a simple pass-through to conform to the IERC721Receiver interface.
-     *      The core logic has been moved into `confirmPurchase`.
-     * @return bytes4 The selector `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-     */
-    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
-        return IERC721Receiver.onERC721Received.selector;
-    }
-
-    /**
-     * @notice Retrieves the purchase information for a given local token ID.
-     * @param localTokenId The local temporary token ID of the purchase.
-     * @return A `PurchaseInfo` struct containing the details of the purchase.
-     */
-    function getPurchaseInfo(uint256 localTokenId) external view returns (PurchaseInfo memory) {
-        return _purchaseInfo[localTokenId];
-    }
-
-    /**
-     * @notice Recovers SAND tokens (or other ERC20 specified in `sandToken`)
-     *         that were accidentally sent or accumulated in this contract.
-     * @dev Only callable by the contract owner.
-     * @param recipient Address to receive the recovered ERC20 tokens.
-     */
-    function recoverSand(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (recipient == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
-        uint256 balance = sandToken.balanceOf(address(this));
-        if (balance == 0) revert PurchaseWrapperNoSandTokensToRecover();
-
-        SafeERC20.safeTransfer(sandToken, recipient, balance);
-    }
-
-    /**
-     * @notice Safely transfers an NFT associated with a `localTokenId` using `safeTransferFrom`.
-     * @dev Similar to `transferFrom` but uses `safeTransferFrom` for the actual NFT transfer.
-     *      The `msg.sender` must be the `from` address.
-     * @param from The current owner of the NFT.
-     * @param to The new address to receive the NFT.
-     * @param localTokenId The local temporary token ID.
-     */
-    function safeTransferFrom(address from, address to, uint256 localTokenId) external {
-        if (!hasRole(AUTHORIZED_CALLER_ROLE, msg.sender)) {
-            revert PurchaseWrapperCallerNotAuthorized(msg.sender);
+    function _validateAndAuthorizePurchase(
+        address sender,
+        address nftCollection,
+        uint256 randomTempTokenId
+    ) private view {
+        if (msg.sender != address(sandToken) || !hasRole(AUTHORIZED_CALLER_ROLE, sender)) {
+            revert PurchaseWrapperCallerNotAuthorized(sender);
         }
-        if (to == address(0)) revert PurchaseWrapperTransferToZeroAddress();
-        PurchaseInfo storage info = _purchaseInfo[localTokenId];
+        if (!_authorizedNftCollections[nftCollection]) {
+            revert PurchaseWrapperNftCollectionNotAuthorized(nftCollection);
+        }
 
-        if (info.caller == address(0)) revert PurchaseWrapperInvalidLocalTokenIdOrPurchaseNotCompleted(localTokenId);
-        if (info.nftTokenId == 0) revert PurchaseWrapperNftNotYetMintedOrRecorded(localTokenId);
-        if (info.nftCollection == address(0)) revert PurchaseWrapperNftCollectionNotRecorded(localTokenId);
-        if (info.caller != from) revert PurchaseWrapperFromAddressIsNotOriginalRecipient(from, info.caller);
-
-        IERC721(info.nftCollection).safeTransferFrom(from, to, info.nftTokenId);
-
-        emit NftTransferredViaWrapper(localTokenId, from, to, info.nftTokenId);
+        if (randomTempTokenId == 0) revert PurchaseWrapperRandomTempTokenIdCannotBeZero();
+        if (_purchaseInfo[randomTempTokenId].nftTokenId != 0) {
+            revert PurchaseWrapperLocalTokenIdAlreadyInUse(randomTempTokenId);
+        }
     }
 }
