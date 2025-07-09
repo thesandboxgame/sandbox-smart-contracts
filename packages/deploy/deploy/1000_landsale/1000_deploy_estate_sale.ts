@@ -7,7 +7,10 @@ import {
   setAsLandMinter,
   writeProofs,
 } from '../../land-sale-artifacts/getLandSales';
-import {skipUnlessTest} from '../../land-sale-artifacts/network';
+import {
+  skipUnlessMainnetOrFork,
+  skipUnlessTest,
+} from '../../land-sale-artifacts/network';
 
 type SaleDeployment = {
   name: string;
@@ -42,7 +45,8 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_37', skip: async () => true},
   {name: 'LandPreSale_38', skip: async () => true},
   {name: 'LandPreSale_39', skip: async () => true},
-  {name: 'LandPreSale_40', skip: async () => false},
+  {name: 'LandPreSale_40', skip: async () => true},
+  {name: 'LandPreSale_41', skip: skipUnlessMainnetOrFork}, // this land sale doesn't have a testnet deployment
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -114,7 +118,7 @@ const func: DeployFunction = async function (hre) {
     }
     const landSales = await getLandSales(
       sale.name,
-      hre.network.name,
+      process.env.HARDHAT_FORK ?? hre.network.name,
       hre.network.live
     );
     const skipSector = sale.skipSector || {};
