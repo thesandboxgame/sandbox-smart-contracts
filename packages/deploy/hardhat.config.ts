@@ -16,6 +16,7 @@ import {
 // Package name : solidity source code path
 const importedPackages = {
   '@sandbox-smart-contracts/avatar': [
+    'contracts/nft-collection/PurchaseWrapper.sol',
     'contracts/nft-collection/NFTCollection.sol',
     'contracts/avatar/AvatarCollection.sol',
     'contracts/avatar/AvatarCollectionV2.sol',
