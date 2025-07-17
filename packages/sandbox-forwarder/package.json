@@ -4,7 +4,7 @@
   "description": "Meta-transaction forwarder contract for The Sandbox",
   "private": true,
   "dependencies": {
-    "@openzeppelin/contracts": "5.2.0"
+    "@openzeppelin/contracts": "5.4.0"
   },
   "keywords": [
     "ethereum",
