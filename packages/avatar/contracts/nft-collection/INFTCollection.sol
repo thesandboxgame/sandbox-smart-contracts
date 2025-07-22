@@ -12,10 +12,9 @@ import {IERC20Metadata} from "@openzeppelin/contracts-5.0.2/token/ERC20/extensio
  * @notice Events emitted and Error raised by the NFTCollection
  */
 interface INFTCollection {
-
     /**
      * @notice minting can be denied because of the following reasons
-    **/
+     **/
     enum MintDenialReason {
         None,
         NotConfigured,
@@ -215,7 +214,7 @@ interface INFTCollection {
     event MaxTokensPerWalletSet(address indexed operator, uint256 oldMaxTokensPerWallet, uint256 newMaxTokensPerWallet);
 
     /**
-      * @notice event emitted when a token was burned
+     * @notice event emitted when a token was burned
      * @param operator the sender of the transaction
      * @param tokenId the id of the token that was burned
      * @param burner the owner that burned the token
@@ -319,4 +318,42 @@ interface INFTCollection {
      * @notice The operation failed because burning is disabled.
      */
     error ExpectedBurn();
+
+    /**
+     * @notice Event emitted when the purchase agent is set
+     * @param operator the sender of the transaction
+     * @param purchaseAgent the address of the purchase agent
+     */
+    event PurchaseAgentSet(address indexed operator, address indexed purchaseAgent);
+
+    /**
+     * @notice Event emitted when a wallet is marked as agent-controlled
+     * @param operator the sender of the transaction
+     * @param wallet the wallet address
+     * @param isAgentControlled true if the wallet is agent-controlled
+     */
+    event AgentControlledSet(address indexed operator, address indexed wallet, bool isAgentControlled);
+
+    /**
+     * @notice Mints a token for a specific wave.
+     * @param to The address to mint the token to.
+     * @param amount The amount of tokens to mint.
+     * @param waveIndex The wave index.
+     * @param signatureId The signature ID.
+     * @param signature The signature.
+     */
+    function waveMint(
+        address to,
+        uint256 amount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
+    ) external returns (uint256[] memory);
+
+    /**
+     * @notice Returns the token price for a specific wave.
+     * @param waveIndex Wave configuration index.
+     * @return Price per token in the wave's payment token.
+     */
+    function waveSingleTokenPrice(uint256 waveIndex) external view returns (uint256);
 }
