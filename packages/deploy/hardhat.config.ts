@@ -102,16 +102,15 @@ const importedPackages = {
 const namedAccounts = {
   deployer: {
     default: 1,
-    mainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
-    polygon: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
-    goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
-    sepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
-    bscTestnet: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
-    mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
-    amoy: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
-    baseSepolia: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
-    base: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
-    bscMainnet: '0xCba49d154b4Bb9a9aD7F5Dad396CB9a0a3a62ABc',
+    mainnet: '0x7E513e4E3Fecf9274f6962E2be97c2BDa846a6cb',
+    polygon: '0x7E513e4E3Fecf9274f6962E2be97c2BDa846a6cb',
+    goerli: '0x8BCEf891e6c50dF1340DF562b8f0368b35F461bd',
+    sepolia: '0x8BCEf891e6c50dF1340DF562b8f0368b35F461bd',
+    bscTestnet: '0x8BCEf891e6c50dF1340DF562b8f0368b35F461bd',
+    amoy: '0x8BCEf891e6c50dF1340DF562b8f0368b35F461bd',
+    baseSepolia: '0x8BCEf891e6c50dF1340DF562b8f0368b35F461bd',
+    base: '0x7E513e4E3Fecf9274f6962E2be97c2BDa846a6cb',
+    bscMainnet: '0x7E513e4E3Fecf9274f6962E2be97c2BDa846a6cb',
   }, // deploy contracts and make sure they are set up correctly
 
   sandAdmin: {
