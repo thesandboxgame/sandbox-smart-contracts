@@ -131,6 +131,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      */
     function confirmPurchase(
         address sender,
+        address finalReceiver,
         address nftCollection,
         uint256 waveIndex,
         uint256 signatureId,
@@ -149,6 +150,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         SafeERC20.safeTransferFrom(sandTokenCached, sender, address(this), sandAmount);
 
         uint256 nftTokenId = _initiateMintViaApproveAndCall(
+            finalReceiver,
             nftCollection,
             sandAmount,
             waveIndex,
@@ -239,6 +241,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     function _initiateMintViaApproveAndCall(
+        address finalReceiver,
         address nftCollection,
         uint256 sandAmount,
         uint256 waveIndex,
@@ -246,9 +249,10 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         bytes calldata signature
     ) private returns (uint256) {
         bytes memory data = abi.encodeCall(
-            INFTCollection.waveMint,
+            INFTCollection.wrappedWaveMint,
             (
                 address(this), // NFTs will be minted to this contract first
+                finalReceiver,
                 1,
                 waveIndex,
                 signatureId,

@@ -254,6 +254,56 @@ contract NFTCollection is
     }
 
     /**
+     * @notice Mints tokens for a destination wallet using a specific wave configuration.
+     * @dev Can only be called by the purchaseAgent. The purchaseAgent pays for the mint.
+     * @param caller Address that is calling the function and will receive the minted tokens.
+     * @param destinationWallet Address used to track the minted tokens.
+     * @param amount Number of tokens to mint.
+     * @param waveIndex Index of the wave configuration to use.
+     * @param signatureId Unique identifier for the minting signature.
+     * @param signature Cryptographic signature authorizing the mint.
+     */
+    function wrappedWaveMint(
+        address caller,
+        address destinationWallet,
+        uint256 amount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
+    ) external whenNotPaused nonReentrant returns (uint256[] memory) {
+        NFTCollectionStorage storage $ = _getNFTCollectionStorage();
+        if (_msgSender() != address($.allowedToExecuteMint) || caller != $.purchaseAgent) {
+            revert NotPurchaseAgent(_msgSender());
+        }
+        if ($.waveData.length == 0) {
+            revert ContractNotConfigured();
+        }
+        _checkAndSetWaveMintSignature(caller, waveIndex, signatureId, signature);
+        WaveData storage waveData = _getWaveData(waveIndex);
+
+        MintDenialReason reason = _isMintDenied($, waveData, destinationWallet, amount);
+        if (reason != MintDenialReason.None) {
+            revert CannotMint(reason, destinationWallet, amount, waveIndex);
+        }
+        uint256 _price = waveData.waveSingleTokenPrice * amount;
+        if (_price > 0) {
+            SafeERC20.safeTransferFrom($.allowedToExecuteMint, caller, $.mintTreasury, _price);
+        }
+        uint256 _totalSupply = $.totalSupply;
+        waveData.waveOwnerToClaimedCounts[destinationWallet] += amount;
+        waveData.waveTotalMinted += amount;
+        $.totalSupply += amount;
+        $.mintedCount[destinationWallet] += amount;
+        uint256[] memory tokenIds = new uint256[](amount);
+        for (uint256 i; i < amount; i++) {
+            tokenIds[i] = _totalSupply + i + 1;
+            _safeMint(caller, tokenIds[i]);
+            emit WaveMint(tokenIds[i], caller, waveIndex);
+        }
+        return tokenIds;
+    }
+
+    /**
      * @notice Deactivates a minting wave by setting its maximum tokens to zero.
      * @param waveIndex Index of the wave to cancel.
      * @dev Cannot cancel the most recent wave to prevent disruption of mint function.
