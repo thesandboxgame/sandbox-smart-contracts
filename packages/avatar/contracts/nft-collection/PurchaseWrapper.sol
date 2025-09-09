@@ -139,6 +139,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         bytes calldata signature
     ) external nonReentrant {
         _validateAndAuthorizePurchase(sender, nftCollection, randomTempTokenId);
+        if (finalReceiver == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
 
         uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
