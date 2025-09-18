@@ -222,6 +222,24 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
+     * @notice Sets the authorization status for multiple NFT collections to be used with this contract.
+     * @dev Only callable by the contract owner.
+     * @param nftCollections The addresses of the NFT collections to authorize.
+     * @param isAuthorized Whether the NFT collections are authorized.
+     */
+    function batchSetNftCollectionAuthorization(
+        address[] calldata nftCollections,
+        bool[] calldata isAuthorized
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (nftCollections.length != isAuthorized.length) revert PurchaseWrapperInvalidBatchData();
+        for (uint256 i = 0; i < nftCollections.length; i++) {
+            _authorizedNftCollections[nftCollections[i]] = isAuthorized[i];
+            emit NftCollectionAuthorized(nftCollections[i], isAuthorized[i]);
+        }
+        }
+    }
+
+    /**
      * @notice Retrieves the purchase information for a given local token ID.
      * @param localTokenId The local temporary token ID of the purchase.
      * @return A `PurchaseInfo` struct containing the details of the purchase.
