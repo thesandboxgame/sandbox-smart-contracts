@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (network.name === 'amoy' || network.name === 'hardhat') {
     transakWallet = '0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef'; // AMOY
   } else {
-    transakWallet = '0x...';
+    transakWallet = '0x4A598B7eC77b1562AD0dF7dc64a162695cE4c78A';
   }
 
   await deployments.deploy('PurchaseWrapper', {

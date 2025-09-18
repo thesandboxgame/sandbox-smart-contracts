@@ -320,6 +320,12 @@ interface INFTCollection {
     error ExpectedBurn();
 
     /**
+     * @notice The operation failed because the caller is not the purchase agent.
+     * @param sender The address of the caller.
+     */
+    error NotPurchaseAgent(address sender);
+
+    /**
      * @notice Event emitted when the purchase agent is set
      * @param operator the sender of the transaction
      * @param purchaseAgent the address of the purchase agent
@@ -344,6 +350,24 @@ interface INFTCollection {
      */
     function waveMint(
         address to,
+        uint256 amount,
+        uint256 waveIndex,
+        uint256 signatureId,
+        bytes calldata signature
+    ) external returns (uint256[] memory);
+
+    /**
+     * @notice Mints a token for a specific wave to a destination wallet.
+     * @dev Can only be called by the purchaseAgent.
+     * @param destinationWallet The address to mint the token to.
+     * @param amount The amount of tokens to mint.
+     * @param waveIndex The wave index.
+     * @param signatureId The signature ID.
+     * @param signature The signature.
+     */
+    function wrappedWaveMint(
+        address caller,
+        address destinationWallet,
         uint256 amount,
         uint256 waveIndex,
         uint256 signatureId,

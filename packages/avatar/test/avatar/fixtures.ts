@@ -1,7 +1,7 @@
-import {ethers} from 'hardhat';
-import {Wallet, parseUnits, keccak256, AbiCoder, toUtf8Bytes} from 'ethers';
 import {HardhatEthersSigner} from '@nomicfoundation/hardhat-ethers/signers';
 import {setBalance} from '@nomicfoundation/hardhat-network-helpers';
+import {AbiCoder, Wallet, keccak256, parseUnits, toUtf8Bytes} from 'ethers';
+import {ethers} from 'hardhat';
 
 export async function deployFakeSandContract(
   sandAdminWallet: Wallet | HardhatEthersSigner,
@@ -46,6 +46,7 @@ export async function getTestingAccounts() {
     defaultOperatorFiltererRegistry,
     defaultOperatorFiltererSubscription,
     trustedForwarder,
+    randomWallet3,
   ] = await ethers.getSigners();
   return {
     deployer,
@@ -59,6 +60,7 @@ export async function getTestingAccounts() {
     defaultOperatorFiltererRegistry,
     defaultOperatorFiltererSubscription,
     trustedForwarder,
+    randomWallet3,
   };
 }
 

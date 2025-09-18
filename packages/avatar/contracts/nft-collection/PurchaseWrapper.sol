@@ -131,6 +131,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
      */
     function confirmPurchase(
         address sender,
+        address finalReceiver,
         address nftCollection,
         uint256 waveIndex,
         uint256 signatureId,
@@ -138,6 +139,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         bytes calldata signature
     ) external nonReentrant {
         _validateAndAuthorizePurchase(sender, nftCollection, randomTempTokenId);
+        if (finalReceiver == address(0)) revert PurchaseWrapperInvalidRecipientAddress();
 
         uint256 sandAmount = INFTCollection(nftCollection).waveSingleTokenPrice(waveIndex);
 
@@ -149,6 +151,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         SafeERC20.safeTransferFrom(sandTokenCached, sender, address(this), sandAmount);
 
         uint256 nftTokenId = _initiateMintViaApproveAndCall(
+            finalReceiver,
             nftCollection,
             sandAmount,
             waveIndex,
@@ -219,6 +222,24 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
+     * @notice Sets the authorization status for multiple NFT collections to be used with this contract.
+     * @dev Only callable by the contract owner.
+     * @param nftCollections The addresses of the NFT collections to authorize.
+     * @param isAuthorized Whether the NFT collections are authorized.
+     */
+    function batchSetNftCollectionAuthorization(
+        address[] calldata nftCollections,
+        bool[] calldata isAuthorized
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (nftCollections.length != isAuthorized.length) revert PurchaseWrapperInvalidBatchData();
+        for (uint256 i = 0; i < nftCollections.length; i++) {
+            _authorizedNftCollections[nftCollections[i]] = isAuthorized[i];
+            emit NftCollectionAuthorized(nftCollections[i], isAuthorized[i]);
+        }
+        }
+    }
+
+    /**
      * @notice Retrieves the purchase information for a given local token ID.
      * @param localTokenId The local temporary token ID of the purchase.
      * @return A `PurchaseInfo` struct containing the details of the purchase.
@@ -239,6 +260,7 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
     }
 
     function _initiateMintViaApproveAndCall(
+        address finalReceiver,
         address nftCollection,
         uint256 sandAmount,
         uint256 waveIndex,
@@ -246,9 +268,10 @@ contract PurchaseWrapper is AccessControl, IERC721Receiver, ReentrancyGuard {
         bytes calldata signature
     ) private returns (uint256) {
         bytes memory data = abi.encodeCall(
-            INFTCollection.waveMint,
+            INFTCollection.wrappedWaveMint,
             (
                 address(this), // NFTs will be minted to this contract first
+                finalReceiver,
                 1,
                 waveIndex,
                 signatureId,
