@@ -73,3 +73,4 @@ pip3 install -r requirements.txt
 ### Bug bounties
 
 Submit a bug at [Immunefi](https://immunefi.com/bounty/thesandbox/) to help secure our smart contracts!
+<br>## Welcome to ASSET NFTs<br>Sandbox's ASSETs are gaming NFTs - new contributors, start your first LAND with the Estate mint tutorial. Tip: Use SAND for marketplace! <br>
