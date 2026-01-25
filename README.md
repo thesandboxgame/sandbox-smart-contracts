@@ -3,7 +3,7 @@
 <h1 align="center">The Sandbox Smart Contracts</h1>
 
 <a href="https://github.com/thesandboxgame/sandbox-smart-contracts/actions"><img alt="Build Status" src="https://github.com/thesandboxgame/sandbox-smart-contracts/actions/workflows/main.yml/badge.svg"/></a>
-![Node Version](https://img.shields.io/badge/node-18.x-green)
+[![Node Version](https://img.shields.io/badge/node-18.x-green)](https://nodejs.org/en/download/releases/)
 [![Discord](https://img.shields.io/discord/497312527093334036.svg?label=Discord&logo=discord)](https://discord.com/invite/thesandboxgame)
 
 [The Sandbox](https://sandbox.game) is a user-generated content (UGC) gaming platform, that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
@@ -12,7 +12,7 @@ This mono-repo contains The Sandbox smart contracts, underpinning The Sandbox me
 
 ## Learn more
 
-- [Website](www.sandbox.game)
+- [Website](https://sandbox.game)
 - [Discord](https://discord.com/invite/thesandboxgame)
 - [Telegram](https://t.me/sandboxgame)
 - [Medium](https://medium.com/sandbox-game)
