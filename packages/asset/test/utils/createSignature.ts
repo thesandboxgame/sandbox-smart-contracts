@@ -178,6 +178,7 @@ const createMockDigest = async (creator: string) => {
 
 const createLazyMintSignature = async (
   mintData: LazyMintData,
+  matchedOrdersHash: string,
   contract: Contract,
   signer: SignerWithAddress
 ) => {
@@ -210,6 +211,7 @@ const createLazyMintSignature = async (
         {name: 'metadataHash', type: 'string'},
         {name: 'maxSupply', type: 'uint256'},
         {name: 'expirationTime', type: 'uint256'},
+        {name: 'matchedOrdersHash', type: 'bytes32'},
       ],
     },
     domain: {
@@ -230,6 +232,7 @@ const createLazyMintSignature = async (
       metadataHash,
       maxSupply,
       expirationTime,
+      matchedOrdersHash,
     },
   };
 
@@ -243,6 +246,7 @@ const createLazyMintSignature = async (
 
 const createLazyMintMultipleAssetsSignature = async (
   mintData: LazyMintBatchData,
+  matchedOrdersHash: string,
   contract: Contract,
   signer: SignerWithAddress
 ) => {
@@ -272,6 +276,7 @@ const createLazyMintMultipleAssetsSignature = async (
         {name: 'metadataHashes', type: 'string[]'},
         {name: 'maxSupplies', type: 'uint256[]'},
         {name: 'expirationTime', type: 'uint256'},
+        {name: 'matchedOrdersHash', type: 'bytes32'},
       ],
     },
     domain: {
@@ -291,6 +296,7 @@ const createLazyMintMultipleAssetsSignature = async (
       metadataHashes,
       maxSupplies,
       expirationTime,
+      matchedOrdersHash,
     },
   };
 

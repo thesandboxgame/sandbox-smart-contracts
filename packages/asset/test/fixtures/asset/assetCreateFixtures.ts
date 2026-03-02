@@ -398,9 +398,36 @@ export async function runCreateTestSetup() {
     return signature;
   };
 
-  const generateLazyMintSignature = async (mintData: LazyMintData) => {
+  const hashMatchedOrders = (matchedOrders: unknown[]): string => {
+    const fragment =
+      AssetCreateContract.interface.getFunction('lazyCreateAsset');
+    const param = fragment.inputs[3];
+    const encoded = ethers.utils.defaultAbiCoder.encode(
+      [param],
+      [matchedOrders]
+    );
+    return ethers.utils.keccak256(encoded);
+  };
+
+  const hashMatchedOrdersArray = (matchedOrdersArray: unknown[]): string => {
+    const fragment = AssetCreateContract.interface.getFunction(
+      'lazyCreateMultipleAssets'
+    );
+    const param = fragment.inputs[3];
+    const encoded = ethers.utils.defaultAbiCoder.encode(
+      [param],
+      [matchedOrdersArray]
+    );
+    return ethers.utils.keccak256(encoded);
+  };
+
+  const generateLazyMintSignature = async (
+    mintData: LazyMintData,
+    matchedOrders: unknown[] = []
+  ) => {
     const signature = await createLazyMintSignature(
       mintData,
+      hashMatchedOrders(matchedOrders),
       AssetCreateContract,
       backendAuthWallet
     );
@@ -408,10 +435,12 @@ export async function runCreateTestSetup() {
   };
 
   const generateLazyMintMultipleAssetsSignature = async (
-    mintData: LazyMintBatchData
+    mintData: LazyMintBatchData,
+    matchedOrdersArray: unknown[] = []
   ) => {
     const signature = await createLazyMintMultipleAssetsSignature(
       mintData,
+      hashMatchedOrdersArray(matchedOrdersArray),
       AssetCreateContract,
       backendAuthWallet
     );
@@ -512,6 +541,8 @@ export async function runCreateTestSetup() {
     MockERC20Contract,
     MockAssetCreateContract,
     sampleExchangeOrderData,
+    hashMatchedOrders,
+    hashMatchedOrdersArray,
     mintCatalyst,
     mintSingleAsset,
     approveAndCall,

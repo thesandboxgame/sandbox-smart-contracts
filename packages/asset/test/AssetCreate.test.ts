@@ -2244,7 +2244,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           creator: creator.address,
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
-        const signature = await generateLazyMintSignature(mintData);
+        const signature = await generateLazyMintSignature(
+          mintData,
+          sampleExchangeOrderData
+        );
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -2254,7 +2257,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user.address,
           signature,
           Object.values(mintData),
-          // empty match orders data
           sampleExchangeOrderData,
         ]);
 
@@ -2296,7 +2298,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
-        const signature = await generateLazyMintSignature(mintData);
+        const signature = await generateLazyMintSignature(
+          mintData,
+          sampleExchangeOrderData
+        );
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -2306,7 +2311,6 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user.address,
           signature,
           Object.values(mintData),
-          // empty match orders data
           sampleExchangeOrderData,
         ]);
 
@@ -2351,7 +2355,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
-        const signature = await generateLazyMintSignature(mintData);
+        const signature = await generateLazyMintSignature(
+          mintData,
+          sampleExchangeOrderData
+        );
 
         await approveSandForExchange(user, parseEther('10'));
 
@@ -3061,7 +3068,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
-        const signature = await generateLazyMintSignature(mintData);
+        const signature = await generateLazyMintSignature(
+          mintData,
+          sampleExchangeOrderData
+        );
 
         const approveAmount = sandPrice.mul(amount);
         await approveSandForAssetCreate(user, approveAmount);
@@ -3611,8 +3621,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
+        const matchedOrdersArray = [sampleExchangeOrderData];
         const signature = await generateLazyMintMultipleAssetsSignature(
-          mintData
+          mintData,
+          matchedOrdersArray
         );
 
         const approveAmount = assets.reduce(
@@ -3625,7 +3637,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           user.address,
           signature,
           Object.values(mintData),
-          [sampleExchangeOrderData]
+          matchedOrdersArray
         );
 
         for (const asset of assets) {
@@ -4737,8 +4749,13 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
+        const matchedOrdersArray = [
+          sampleExchangeOrderData,
+          sampleExchangeOrderData,
+        ];
         const signature = await generateLazyMintMultipleAssetsSignature(
-          mintData
+          mintData,
+          matchedOrdersArray
         );
 
         const approveAmount = assets.reduce(
@@ -4752,7 +4769,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             user.address,
             signature,
             Object.values(mintData),
-            [sampleExchangeOrderData, sampleExchangeOrderData]
+            matchedOrdersArray
           )
         ).to.be.revertedWith('ERC20: insufficient allowance');
       });
@@ -4804,8 +4821,13 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
+        const matchedOrdersArray = [
+          sampleExchangeOrderData,
+          sampleExchangeOrderData,
+        ];
         const signature = await generateLazyMintMultipleAssetsSignature(
-          mintData
+          mintData,
+          matchedOrdersArray
         );
 
         const approveAmount = assets.reduce(
@@ -4827,7 +4849,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             user.address,
             signature,
             Object.values(mintData),
-            [sampleExchangeOrderData, sampleExchangeOrderData]
+            matchedOrdersArray
           )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
@@ -4872,8 +4894,10 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
           expirationTime: (await getCurrentBlockTimestamp()) + 1000,
         };
 
+        const matchedOrdersArray = [sampleExchangeOrderData];
         const signature = await generateLazyMintMultipleAssetsSignature(
-          mintData
+          mintData,
+          matchedOrdersArray
         );
 
         const approveAmount = assets.reduce(
@@ -4895,7 +4919,7 @@ describe('AssetCreate (/packages/asset/contracts/AssetCreate.sol)', function () 
             user.address,
             signature,
             Object.values(mintData),
-            [sampleExchangeOrderData]
+            matchedOrdersArray
           )
         ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
       });
